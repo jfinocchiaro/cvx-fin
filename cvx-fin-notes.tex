@@ -1,0 +1,107 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{mathtools, amsmath, amssymb, graphicx, verbatim}
+%\usepackage[thmmarks, thref, amsthm]{ntheorem}
+\usepackage{color}
+\usepackage{wrapfig}
+\usepackage{subcaption}
+\usepackage[colorinlistoftodos,textsize=tiny]{todonotes} % need xargs for below
+%\usepackage{accents}
+\usepackage{bbm}
+
+\newcommand{\Comments}{0}
+\newcommand{\mynote}[2]{\ifnum\Comments=1\textcolor{#1}{#2}\fi}
+\newcommand{\mytodo}[2]{\ifnum\Comments=1%
+  \todo[linecolor=#1!80!black,backgroundcolor=#1,bordercolor=#1!80!black]{#2}\fi}
+\newcommand{\raf}[1]{\mynote{green}{[RF: #1]}}
+\newcommand{\raft}[1]{\mytodo{green!20!white}{RF: #1}}
+\newcommand{\jessie}[1]{\mynote{purple}{[JF: #1]}}
+\newcommand{\jessiet}[1]{\mytodo{purple!20!white}{JF: #1}}
+\ifnum\Comments=1               % fix margins for todonotes
+  \setlength{\marginparwidth}{1in}
+\fi
+
+
+\newcommand{\reals}{\mathbb{R}}
+\newcommand{\posreals}{\reals_{>0}}%{\reals_{++}}
+\newcommand{\dz}{\frac{d}{dz}}
+\newcommand{\dx}{\frac{d}{dx}}
+\newcommand{\dr}{\frac{d}{dr}}
+\newcommand{\du}{\frac{d}{du}}
+
+%m upper and lower bounds
+\newcommand{\mup}{\overline{m}}
+\newcommand{\mlow}{\underline{m}}
+
+
+% alphabetical order, by convention
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\I}{\mathcal{I}}
+\renewcommand{\P}{\mathcal{P}}
+\newcommand{\R}{\mathcal{R}}
+\newcommand{\Y}{\mathcal{Y}}
+\renewcommand{\P}{\mathcal{P}}
+
+\newcommand{\inter}[1]{\mathring{#1}}%\mathrm{int}(#1)}
+%\newcommand{\expectedv}[3]{\overline{#1}(#2,#3)}
+\newcommand{\expectedv}[3]{\E_{Y\sim{#3}} {#1}(#2,Y)}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\arginf}{arg\,inf}
+\DeclareMathOperator*{\sgn}{sgn}
+
+%\newtheorem{theorem}{Theorem}
+%\newtheorem{lemma}{Lemma}
+%\newtheorem{proposition}{Proposition}
+\newtheorem{claim}{Claim}
+%\newtheorem{definition}{Definition}
+%\newtheorem{corollary}{Corollary}
+\newtheorem{condition}{Condition}
+\newtheorem{case}{Case}
+%\theorempostwork{\setcounter{case}{0}}
+
+%%% Seriously COLT, seriously??
+% \let\oldciteyear\citeyear
+% \renewcommand{\citeyear}[1]{(\oldciteyear{#1})}
+
+
+\title{Finite Property Convex Elicitation Notes}
+
+\begin{document}
+
+\maketitle
+
+\section{1-d case}
+
+Theorem 3 of Lambert's new version says that a finite property has a strictly order-sensitive score if and only if the reports are ordered and the border between adjacent reports in a hyperplane.
+
+I believe we can add: ``, if and only if the finite property is indirectly convex elicitable via loss $L : \reals \times \Y \to \reals$ which is piecewise linear, i.e.,\ $L(r,y)$ is piecewise linear in $r$ for each $y$.''
+
+Proof sketch: Since $L$ is piecewise linear, we can take $\R = \{r_1,...,r_m\}$ to be the set of all nondifferentiable points of $L(\cdot,y)$ for some $y$.
+After some thought, it's clear that $\R$ contains all interesting minimizers: $\E_p L(r,Y)$ always attains a minimum at one of these points (assuming it attains one at all).
+Now let $a_i(y)$ be the left derivative of $L(r_i,y)$ and $a_{m+1}(y)$ the right derivative of $L(r_m,y)$.
+(So $a_i(y)$ is the ``$i$th slope'' of $L(\cdot,y)$.)
+If you think about it a bit, the subgradient $\partial L(r_i,y)$ is just the interval $[a_i(y), a_{i+1}(y)]$.
+
+Now the condition for $r_i$ to be optimal is simply
+\begin{equation*}\label{eq:1}
+0 \in \partial \E_p L(r_i,Y) = \sum_y p(y) [a_i(y), a_{i+1}(y)] = \left[\sum_y p(y) a_i(y), \sum_y p(y) a_{i+1}(y)\right]~.
+\end{equation*}
+Rewriting in vector notation, thinking of $p,a_i \in \reals^\Y$, we have
+\begin{equation*}\label{eq:1}
+\Gamma_{r_i} = \{ p \in \Delta_\Y : p\cdot a_i \leq 0 \leq p\cdot a_{i+1} \}~.
+\end{equation*}
+Thus, for all $i$ the intersection $\Gamma_{r_i} \cap \Gamma_{r_{i+1}} = \{ p \in \Delta_\Y : p\cdot a_{i+1} = 0\}$ which is a hyperplane.
+
+For the converse... I actually didn't do it out, but I'm 99\% confident it will work, maybe as a corollary of the continuous version of this statement.
+But this first direction was the most salient for now...
+
+I also don't think lifting the piecewise linear restriction matters.
+
+\end{document}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
