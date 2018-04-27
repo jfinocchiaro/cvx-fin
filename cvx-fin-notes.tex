@@ -1,6 +1,6 @@
 \documentclass[12pt]{article}
 \usepackage[utf8]{inputenc}
-\usepackage{mathtools, amsmath, amssymb, graphicx, verbatim}
+\usepackage{mathtools, amsmath, amsthm, amssymb, graphicx, verbatim}
 %\usepackage[thmmarks, thref, amsthm]{ntheorem}
 \usepackage{color}
 \usepackage{wrapfig}
@@ -9,7 +9,7 @@
 %\usepackage{accents}
 \usepackage{bbm}
 
-\newcommand{\Comments}{0}
+\newcommand{\Comments}{1}
 \newcommand{\mynote}[2]{\ifnum\Comments=1\textcolor{#1}{#2}\fi}
 \newcommand{\mytodo}[2]{\ifnum\Comments=1%
   \todo[linecolor=#1!80!black,backgroundcolor=#1,bordercolor=#1!80!black]{#2}\fi}
@@ -24,15 +24,6 @@
 
 \newcommand{\reals}{\mathbb{R}}
 \newcommand{\posreals}{\reals_{>0}}%{\reals_{++}}
-\newcommand{\dz}{\frac{d}{dz}}
-\newcommand{\dx}{\frac{d}{dx}}
-\newcommand{\dr}{\frac{d}{dr}}
-\newcommand{\du}{\frac{d}{du}}
-
-%m upper and lower bounds
-\newcommand{\mup}{\overline{m}}
-\newcommand{\mlow}{\underline{m}}
-
 
 % alphabetical order, by convention
 \newcommand{\E}{\mathbb{E}}
@@ -40,46 +31,140 @@
 \newcommand{\I}{\mathcal{I}}
 \renewcommand{\P}{\mathcal{P}}
 \newcommand{\R}{\mathcal{R}}
+\newcommand{\X}{\mathcal{X}}
 \newcommand{\Y}{\mathcal{Y}}
 \renewcommand{\P}{\mathcal{P}}
+
 
 \newcommand{\inter}[1]{\mathring{#1}}%\mathrm{int}(#1)}
 %\newcommand{\expectedv}[3]{\overline{#1}(#2,#3)}
 \newcommand{\expectedv}[3]{\E_{Y\sim{#3}} {#1}(#2,Y)}
+\newcommand{\toto}{\rightrightarrows}
+\newcommand{\trim}{\mathrm{trim}}
 
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator*{\arginf}{arg\,inf}
 \DeclareMathOperator*{\sgn}{sgn}
 
-%\newtheorem{theorem}{Theorem}
-%\newtheorem{lemma}{Lemma}
-%\newtheorem{proposition}{Proposition}
-\newtheorem{claim}{Claim}
-%\newtheorem{definition}{Definition}
-%\newtheorem{corollary}{Corollary}
-\newtheorem{condition}{Condition}
-\newtheorem{case}{Case}
-%\theorempostwork{\setcounter{case}{0}}
-
-%%% Seriously COLT, seriously??
-% \let\oldciteyear\citeyear
-% \renewcommand{\citeyear}[1]{(\oldciteyear{#1})}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{corollary}{Corollary}
 
 
 \title{Finite Property Convex Elicitation Notes}
+\author{Raf + \ldots}
 
 \begin{document}
 
 \maketitle
 
-\section{1-d case}
+\section{Notation and Definitions}
 
+Let $\Y$ be a finite outcome space, with $n:=|\Y|$, and $\Delta(\Y)$ be the set of probability distributions over $\Y$.
+A \emph{property} is a set-valued function $\Gamma: \P \toto \R$, which assigns a subset of the possible reports $\R$ to each probability distribution in a convex set $\P \subseteq \Delta(\Y)$.
+(Here $\Gamma: \P \toto \R$ is shorthand for $\Gamma: \P \to 2^\R$, the power set of $\R$.)
+We will often consider $\P \subset \reals^n$, meaning we identify each distribution with the corresponding vector of probabilities, for some fixed ordering of the outcomes $\{y_1,\ldots,y_n\} = \Y$.
+
+A propertiy is \emph{elicitable} if it can be expressed as the minimizer of expected loss for some loss function.
+When this loss function is convex, we say the property is \emph{convex elicitable}.
+\begin{definition}
+  \label{def:elicits}
+  A loss function $L: \R \times \Y \to \reals$ \emph{elicits} a property $\Gamma$ if for all $p \in \P$,
+  \begin{equation}
+    \label{eq:elicits}
+    \Gamma(p) = \argmin_{r\in\R} \E_{Y \sim p} L(r, Y)~.
+  \end{equation}
+  In this case, we say $\Gamma$ is \emph{elicitable}.
+  We define $\Gamma_L:p\mapsto \argmin_{r\in\R} \E_{Y \sim p} L(r, Y)$ to be the unique property elicited by $L$.
+  If $L(\cdot,y)$ is convex for every $y \in \Y$, we say $\Gamma$ is \emph{convex elicitable}.
+\end{definition}
+
+In what follows, we will often write $L(r) := (L(r,y_1),\ldots,L(r,y_n)) \in \reals^\Y \equiv \reals^n$, so that $L : \R \to \reals^\Y$.
+The elicitation condition in eq.~\eqref{eq:elicits} then becomes, for all $p\in\P\subset \reals^n$,
+\begin{equation}
+  \label{eq:elicits-vectorized}
+  \Gamma(p) = \argmin_{r\in\R} \; p \cdot L(r)~.
+\end{equation}
+
+We define the \emph{level set} of a property at report value $r\in\R$ to be the set $\Gamma_r := \{p\in\P : r \in \Gamma(p)\}$.
+
+\begin{definition}
+  Let $r,r'\in\R$.
+  We say report $r$ is \emph{dominated by $r'$} if $\Gamma_r \subsetneq \Gamma_{r'}$, and \emph{equivalent to $r'$} if $\Gamma_r = \Gamma_{r'}$.
+  A report is \emph{redundant} if it is dominated by or equivalent to another report.
+  A property $\Gamma$ is \emph{non-redundant} if there are no redundant reports.
+\end{definition}
+
+A property is \emph{finite} if $\R$ is finite.
+A finite property is \emph{ordered} if there is an ordering $\R = \{r_1,\ldots,r_k\}$ such that the intersection of consecutive level sets forms a hyperplane.
+\raf{Still not sure what the right definition is for non-finite $\R$... and it would be nice to have a more natural version for finite $\R$!}
+In other words, for all $i \in \{1,\ldots,k-1\}$ there is some $a_i\in\reals^n$ such that $\Gamma_{r_i}\cap\Gamma_{r_{i+1}} = \{p\in\P : a_i\cdot p = 0\}$.
+
+A property is \emph{degenerate} if $\Gamma(p) = \emptyset$ for some $p\in\P$, and \emph{non-degenerate} otherwise.
+
+\begin{lemma}\label{lem:trim}
+  Let $L:\R\to\reals^\Y$ elicit a non-degenerate $\Gamma$.
+  There is a unique non-degenerate non-redundant property $\Gamma'$, up to relabeling of the reports, such that for some $\R'\subseteq\R$ and all $p\in\P$ we have $\Gamma'(p) = \Gamma(p)\cap\R'$.
+  Moreover, the loss $L|_{\R'}$ elicits $\Gamma'$.
+\end{lemma}
+\begin{proof}
+  Let $\R_1$ be the set of dominated reports of $\Gamma$, and define $\R_2 = \R\setminus\R_1$
+  For all $r \in \R_2$, let $[r]$ be the set of equivalent reports to $r$, including $r$ itself.
+  Then we let $\R_2' = \{[r] : r\in\R_2\}$ and $\R' = \varphi(\R_2') \subseteq \R$ where $\varphi$ selects an arbitrary representative of each equivalence class.
+  \raf{I think I just used the axiom of choice... but for this paper, $\R'$ will be finite, so only a finite number of equivalence classes.}
+  Let $\Gamma' = \varphi \circ \Gamma$; clearly $\Gamma'$ is unique up to the choice of relabeling $\varphi$.
+
+  The non-redundancy of $\Gamma'$ follows immediately from our construction: $\Gamma'$ has no dominated reports, and each report is equivalent only to itself.
+  For non-degeneracy, note that a property is non-degenerate if and only if its level sets union to all of $\P$ (every distribution is in some level set).
+  By our construction, for all $r\in\R$ there is some $r'\in\R'$ such that $\Gamma_{r} \subseteq \Gamma_{r'}$, either because $r'$ dominates $r$ or the two are equivalent and $r' = \varphi([r])$.
+  Thus, as $\Gamma$ was non-degenerate, we have $\P = \cup_{r\in\R} \Gamma_r = \cup_{r'\in\R'} \Gamma_{r'}$, giving non-degeneracy of $\Gamma'$.
+
+\raf{TODO: finish proof that $L'$ elicits $\Gamma'$.  $\Gamma' \supseteq \Gamma \cap \R'$ is easy.}
+  Finally, let $L' = L|_{\R'}$.
+  We have $r' \in \Gamma(p) \implies r' \in \argmin_{r\in\R} p\cdot L(r)$ $ \argmin_{r\in\R'} p\cdot L'(r') $
+\end{proof}
+Note that non-degeneracy is necessary to make Lemma~\ref{lem:trim} interesting, as otherwise $\Gamma' : p \mapsto \emptyset$ would always suffice.
+
+
+\begin{definition}\label{def:trim}
+  We define $\trim(\Gamma)$ to be the unique $\Gamma'$ in Lemma~\ref{lem:trim}, up to relabeling of the reports.
+\end{definition}
+
+\begin{definition}
+  We say $L:\R'\times\Y\to\reals$ \emph{essentially elicits} a property $\Gamma : \P \toto \R$ if there exists some injective embdedding $\varphi:\R\to\R'$ such that for all $p\in\P,r\in\R$ we have $r \in \Gamma(p) \iff \varphi(r) \in \Gamma_L(p)$.
+  Such a property is \emph{essentially elicitable} and if $L$ is convex, \emph{essentially convex elicitable}.
+\end{definition}
+Note that in particular, $L$ essentialy elicits $\trim(\Gamma_L)$.
+
+We will most often use this definition as follows.
+Given a finite property $\Gamma : \P \toto \{1,\ldots,k\}$, we will seek some convex loss function $L : \reals^d \to \reals^\Y$ and a set of points $\X=\{x_1,\ldots,x_k\} \subset \reals^d$ such that the map $\varphi:i\mapsto x_i$ exhibits the essential elicitability of $\Gamma$.
+In particular, using the set-valued link function $\psi:A\mapsto \varphi^{-1}(A\cap\X)$, we will have $\Gamma = \psi \circ \Gamma_L$, so $\Gamma$ is indirectly convex elicitable.
+
+\section{Finite 1-d case}
+
+\raf{OLD; ignore for now}
 Theorem 3 of Lambert's new version says that a finite property has a strictly order-sensitive score if and only if the reports are ordered and the border between adjacent reports in a hyperplane.
-
 I believe we can add: ``, if and only if the finite property is indirectly convex elicitable via loss $L : \reals \times \Y \to \reals$ which is piecewise linear, i.e.,\ $L(r,y)$ is piecewise linear in $r$ for each $y$.''
 
-Proof sketch: Since $L$ is piecewise linear, we can take $\R = \{r_1,...,r_m\}$ to be the set of all nondifferentiable points of $L(\cdot,y)$ for some $y$.
+\raf{I think this is even easier than what I tried to show below.}
+\begin{proposition}
+  A finite property is essentially convex elicitable in $1$ dimension if and only if it is ordered.
+  Moreover, this remains true when restricting to piecewise linear loss functions.
+\end{proposition}
+
+\raf{I think what I tried to show below was the following; might only be true up to some technicalities.}
+\begin{proposition}
+  Let $L : \reals \times \Y \to \reals$ be finite-piecewise-linear and convex.
+  Then $L$ essentially elicits some finite ordered property $\Gamma$.
+  Moreover, $\trim(\Gamma_L)$ is finite and ordered.
+\end{proposition}
+\begin{proof}
+\raf{GOT HERE.}
+
+Since $L$ is piecewise linear, we can take $\R = \{r_1,...,r_m\}$ to be the set of all nondifferentiable points of $L(\cdot,y)$ for some $y$.
 After some thought, it's clear that $\R$ contains all interesting minimizers: $\E_p L(r,Y)$ always attains a minimum at one of these points (assuming it attains one at all).
 Now let $a_i(y)$ be the left derivative of $L(r_i,y)$ and $a_{m+1}(y)$ the right derivative of $L(r_m,y)$.
 (So $a_i(y)$ is the ``$i$th slope'' of $L(\cdot,y)$.)
@@ -97,11 +182,13 @@ Thus, for all $i$ the intersection $\Gamma_{r_i} \cap \Gamma_{r_{i+1}} = \{ p \i
 
 For the converse... I actually didn't do it out, but I'm 99\% confident it will work, maybe as a corollary of the continuous version of this statement.
 But this first direction was the most salient for now...
+\end{proof}
 
-I also don't think lifting the piecewise linear restriction matters.
 
-\jessie{Notes partially for myself, but also with some questions I'm not sure of.  Feel free to correct}
+
 \section{2-d case}
+\jessie{Notes partially for myself, but also with some questions I'm not sure of.  Feel free to correct}
+
 We want some (invertible) representation $\phi: \reals^2 \to \reals$ so that $\forall p \in \P$, $\Gamma(p) = \phi([ x_1, x_2 ])$.
 
 We want $\Gamma(p) = \phi(x) = \argmin_r \E_p L(r, Y)$
