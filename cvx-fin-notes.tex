@@ -1,4 +1,4 @@
-\documentclass[12pt]{article}
+\documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{mathtools, amsmath, amsthm, amssymb, graphicx, verbatim}
 %\usepackage[thmmarks, thref, amsthm]{ntheorem}
@@ -8,6 +8,7 @@
 \usepackage[colorinlistoftodos,textsize=tiny]{todonotes} % need xargs for below
 %\usepackage{accents}
 \usepackage{bbm}
+\usepackage{xspace}
 
 \newcommand{\Comments}{1}
 \newcommand{\mynote}[2]{\ifnum\Comments=1\textcolor{#1}{#2}\fi}
@@ -41,6 +42,7 @@
 \newcommand{\expectedv}[3]{\E_{Y\sim{#3}} {#1}(#2,Y)}
 \newcommand{\toto}{\rightrightarrows}
 \newcommand{\trim}{\mathrm{trim}}
+\newcommand{\fplc}{finite-piecewise-linear and convex\xspace} %xspace for use in text
 
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
@@ -93,22 +95,41 @@ We define the \emph{level set} of a property at report value $r\in\R$ to be the 
 
 \begin{definition}
   Let $r,r'\in\R$.
-  We say report $r$ is \emph{dominated by $r'$} if $\Gamma_r \subsetneq \Gamma_{r'}$, and \emph{equivalent to $r'$} if $\Gamma_r = \Gamma_{r'}$.
+  We say report $r$ is \emph{dominated by $r'$} if $\Gamma_r \subsetneq \Gamma_{r'}$, \emph{equivalent to $r'$} if $\Gamma_r = \Gamma_{r'}$, and \emph{weakly dominated by $r'$} if it is either dominated or equivalent.
   A report is \emph{redundant} if it is dominated by or equivalent to another report.
   A property $\Gamma$ is \emph{non-redundant} if there are no redundant reports.
 \end{definition}
 
+\begin{definition}
 A property is \emph{finite} if $\R$ is finite.
-\jessie{If $\R$ is finite or $\Y$?  The set of minimizers will be finite, but don't we want $\R$ to be an interval/convex?}
-A finite property is \emph{ordered} if there is an ordering $\R = \{r_1,\ldots,r_k\}$ such that the intersection of consecutive level sets forms a hyperplane.
-\raf{Still not sure what the right definition is for non-finite $\R$... and it would be nice to have a more natural version for finite $\R$!}
-In other words, for all $i \in \{1,\ldots,k-1\}$ there is some $a_i\in\reals^n$ such that $\Gamma_{r_i}\cap\Gamma_{r_{i+1}} = \{p\in\P : a_i\cdot p = 0\}$.
+\jessiet{If $\R$ is finite or $\Y$?  The set of minimizers will be finite, but don't we want $\R$ to be an interval/convex?}\raft{As written.}
+\end{definition}
 
-A property is \emph{degenerate} if $\Gamma(p) = \emptyset$ for some $p\in\P$, and \emph{non-degenerate} otherwise.
+\begin{definition}
+  A finite property is \emph{orderable} if there is an ordering $\R = \{r_1,\ldots,r_k\}$ such that the intersection of consecutive level sets forms a hyperplane.
+  \raf{Still not sure what the right definition is for non-finite $\R$... and it would be nice to have a more natural version for finite $\R$!}
+  \raf{Also, once we figure out what the 2d version is, we should call this $d$-orientable, as in manifolds, so orderable would become $1$-orientable.}
+  In other words, for all $i \in \{1,\ldots,k-1\}$ there is some $a_i\in\reals^n$ such that $\Gamma_{r_i}\cap\Gamma_{r_{i+1}} = \{p\in\P : a_i\cdot p = 0\}$.
+\end{definition}
+
+\begin{definition}
+  A property is \emph{degenerate} if $\Gamma(p) = \emptyset$ for some $p\in\P$, and \emph{non-degenerate} otherwise.
+\end{definition}
+
+\begin{definition}
+  We will use the following notation:
+  $\Gamma' = \Gamma \cap \R'$ is the property $\Gamma' : p \mapsto \Gamma(p)\cap\R'$.
+  $L|_{\R'}: \R' \to \reals^\Y$ is the loss $\L|_{\R'} : r' \mapsto L(r')$.
+\end{definition}
+
+\begin{lemma}\label{lem:restrict-reports}
+  Let $\R'\subseteq\R$ be report spaces, where $L:\R\to\reals^\Y$ elicits $\Gamma$, and $L|_{\R'}$ elicits $\Gamma'$.
+  Then for all $r'\in\R'$, we have $\Gamma_{r'} \subseteq \Gamma'_{r'}$.  
+\end{lemma}
 
 \begin{lemma}\label{lem:trim}
   Let $L:\R\to\reals^\Y$ elicit a non-degenerate $\Gamma$.
-  There is a unique non-degenerate non-redundant property $\Gamma'$, up to relabeling of the reports, such that for some $\R'\subseteq\R$ and all $p\in\P$ we have $\Gamma'(p) = \Gamma(p)\cap\R'$.
+  There is a unique non-degenerate non-redundant property $\Gamma'$, up to relabeling of the reports, such that $\Gamma' = \Gamma\cap\R'$ for some $\R'\subseteq\R$ .
   Moreover, the loss $L|_{\R'}$ elicits $\Gamma'$.
 \end{lemma}
 \begin{proof}
@@ -124,67 +145,144 @@ A property is \emph{degenerate} if $\Gamma(p) = \emptyset$ for some $p\in\P$, an
   Thus, as $\Gamma$ was non-degenerate, we have $\P = \cup_{r\in\R} \Gamma_r = \cup_{r'\in\R'} \Gamma_{r'}$, giving non-degeneracy of $\Gamma'$.
 
 \raf{TODO: finish proof that $L'$ elicits $\Gamma'$.  $\Gamma' \supseteq \Gamma \cap \R'$ is easy.}
-  Finally, let $L' = L|_{\R'}$.
-  \jessie{What is this notation?}
+  Finally, let $L' = L|_{\R'}$, that is, $L':\R'\to\reals^\Y$, $L:r'\mapsto L(r')$.
+  \jessiet{What is this notation?}\raft{Restricted to; clarified now I hope.}
   We have $r' \in \Gamma(p) \implies r' \in \argmin_{r\in\R} p\cdot~L(r)$ $ \argmin_{r\in\R'} p\cdot~L'(r') $
 \end{proof}
 Note that non-degeneracy is necessary to make Lemma~\ref{lem:trim} interesting, as otherwise $\Gamma' : p \mapsto \emptyset$ would always suffice.
 
 
 \begin{definition}\label{def:trim}
-  We define $\trim(\Gamma)$ \jessie{What is trim?} to be the unique $\Gamma'$ in Lemma~\ref{lem:trim}, up to relabeling of the reports.
+  We define $\trim(\Gamma)$ to be the unique $\Gamma'$ in Lemma~\ref{lem:trim}, up to relabeling of the reports.
 \end{definition}
 
 \begin{definition}
-  We say $L:\R'\times\Y\to\reals$ \emph{essentially elicits} a property $\Gamma : \P \toto \R$ if there exists some injective embdedding $\varphi:\R\to\R'$ such that for all $p\in\P,r\in\R$ we have $r \in \Gamma(p) \iff \varphi(r) \in \Gamma_L(p)$.
+  We say $L:\R'\to\reals^\Y$ \emph{essentially elicits} a property $\Gamma : \P \toto \R$ if there exists some injective embdedding $\varphi:\R\to\R'$ such that for all $p\in\P,r\in\R$ we have $r \in \Gamma(p) \iff \varphi(r) \in \Gamma_L(p)$.
   Such a property is \emph{essentially elicitable} and if $L$ is convex, \emph{essentially convex elicitable}.
 \end{definition}
 Note that in particular, $L$ essentially elicits $\trim(\Gamma_L)$.
 
 We will most often use this definition as follows.
 Given a finite property $\Gamma : \P \toto \{1,\ldots,k\}$, we will seek some convex loss function $L : \reals^d \to \reals^\Y$ and a set of points $\X=\{x_1,\ldots,x_k\} \subset \reals^d$ such that the map $\varphi:i\mapsto x_i$ exhibits the essential elicitability of $\Gamma$.
-In particular, using the set-valued link function $\psi:A\mapsto \varphi^{-1}(A\cap\X)$, we will have $\Gamma = \psi \circ \Gamma_L$, so $\Gamma$ is indirectly convex elicitable.
+In particular, using the set-valued link function $\psi:A\mapsto \varphi^{-1}(A\cap\X)$, we will have $\Gamma = \psi \circ \Gamma_L$, so that $\Gamma$ will be indirectly convex elicitable.
+
+\begin{definition}
+  Let $\Gamma:\P\toto\R$ and $\Gamma':\P\toto\R'$.
+  We write $\Gamma \equiv \Gamma'$ if there is some bijection $\varphi:\R\to\R'$ such that $\Gamma_r = \Gamma'_{\varphi(r)}$ for all $r\in\R$.
+\end{definition}
+That is, $\Gamma\equiv\Gamma'$ if the two properties are the same up to relabeling the reports.
+
+\begin{lemma}
+  Let $L$ be a convex loss function.
+  Then $\Gamma_L$ is non-degenerate if and only if $L(\cdot,y)$ is bounded from below for all $y\in\Y$.
+\end{lemma}
+
+\begin{definition}
+  We say a loss $L$ is \emph{finite-piecewise-linear and convex (FPLC)} if for all $y\in\Y$, the function $L(\cdot)_y$ is a piecewise-linear function with finitely many pieces, and is bounded from below.
+\end{definition}
 
 \section{Finite 1-d case}
 
-\raf{OLD; ignore for now}
-Theorem 3 of Lambert's new version says that a finite property has a strictly order-sensitive score if and only if the reports are ordered and the border between adjacent reports in a hyperplane.
-I believe we can add: ``, if and only if the finite property is indirectly convex elicitable via loss $L : \reals \times \Y \to \reals$ which is piecewise linear, i.e.,\ $L(r,y)$ is piecewise linear in $r$ for each $y$.''
+From Lambert 2018, Theorem 3, a finite property has a strictly order-sensitive score if and only if it is orderable...
 
-\raf{I think this is even easier than what I tried to show below.}
-\begin{proposition}
-  A finite property is essentially convex elicitable in $1$ dimension if and only if it is ordered.
-  Moreover, this remains true when restricting to piecewise linear loss functions.
+\begin{lemma}\label{lem:fplc-directional-deriv}
+  Let $L$ be FPLC, and let $r\in\reals$ be a point of differentiability of $L$.
+  Let $d^-(r)_y$ and $d^+(r)_y$ denote the left and right derivative, respectively, of $L(\cdot)_y$ at $r$, so that $d^-(r),d^+(r)\in\reals^\Y$.
+  Then for any open interval $(a,b)$ containing $r$ where $L$ is differentiable, we have
+$d^+(a) = d^-(r) = d^+(r) = d^-(b)$.
+\end{lemma}
+
+\begin{lemma}\label{lem:simple-intervals}
+  Let $a<a'$ and $b\leq b'$ such that either $a< 0 < b$ or $b' < 0 < a'$.
+  Then there exists $\alpha \in (0,1)$ such that $0 \in \alpha [b,b'] + (1-\alpha) [a,a']$.
+\end{lemma}
+\begin{proof}
+  Suppose $a < 0 < b$.
+  Let $w = (a + \min(a',0))/2 < 0$ and take $\alpha = w/(w-b) \in (0,1)$.
+  Then $\alpha b + (1-\alpha) w = wb/(w-b) - bw/(w-b) = 0$.
+  As $a < w < a'$, the result follows:
+  \begin{align*}
+    & \alpha b + (1-\alpha) a < \alpha b + (1-\alpha) w = 0~,
+    \\
+    & \alpha b' + (1-\alpha) a' > \alpha b + (1-\alpha) w = 0~.
+  \end{align*}
+  Similarly, if $b' < 0 < a'$, we take $w = (\max(a,0)+a')/2 > 0$, and same construction holds.
+\end{proof}
+
+\begin{proposition}\label{prop:fplc-trim-char}
+  Let $L : \reals \to \reals^\Y$ be FPLC and let $\R$ be the finite set of its nondifferentiable points.
+  Then $\trim(\Gamma_L) \equiv \Gamma_L\cap\R'$ where $\underline r$ is the smallest $r\in\R$ such that $d^+(r)_y > 0$ for some $y\in\Y$, $\overline r$ is the largest such that $d^-(r)_y < 0$ for some $y\in\Y$, and $\R' = \R \cap [\underline r, \overline r]$.
 \end{proposition}
+\begin{proof}
+  Since $L$ is FPLC, for each $y\in\Y$ we can take $\R_y$ to be the finite set of nondifferentiable points of $L(\cdot)_y$, and then $\R = \cup_{y\in\Y} \R_y$.
+  As $L$ is bounded from below, we must have $d^-(\min \R)_y \leq 0$ and $d^+(\max \R)_y \geq 0$ for all $y\in\Y$.
+  Thus, $\underline r$ and $\overline r$ are well-defined.
+
+  A fact we will use throughout is that $r\in\reals$ is an element of $\Gamma_L(p)$, if and only if,
+  \begin{equation}
+    \label{eq:1d-optimality}
+    0 \in \partial \; p \cdot L(r) = [p \cdot d^-(r), p \cdot d^+(r)]~,
+  \end{equation}
+  where $\partial$ denotes the subdifferential with respect to $r$.
+
+  First, we argue that reports outside $[\underline r, \overline r]$ are weakly dominated.
+  Let $r < \underline r$ and let $r'$ be the smallest value in $[r,\underline r]\cap \R$, i.e.,\ the next largest nondifferentiable point, which exists as $L$ is FPLC.
+  If $r \in \Gamma_L(p)$, then we must have $d^+(r)\cdot p = 0$, as $d^+(r)\cdot p > 0$ would contradict the definition of $\underline r$.
+  Then by Lemma~\ref{lem:fplc-directional-deriv}, as $L$ is differentiable on $(r,r')$, we have $0 = d^+(r)\cdot p = d^-(r')\cdot p$.
+  Now, if $r' < \underline r$, we again have $d^+(r')\cdot p = 0$, and so on by induction (recall that $\R$ is finite) until we conclude $d^-(\underline r) = 0$, meaning $\underline r \in \Gamma_L(p)$ as well.
+  Similarly, all reports $r > \overline r$ are weakly dominated by $\overline r$.
+
+  We next show that all reports at differentiable points of $L$ are weakly dominated.
+  We have already consider points outside of $[\underline r, \overline r]$; in that interval, nondifferentiable points satisfy $r' < r < r''$ where $r',r''\in\R$ and $L$ is differentiable on $(r',r'')$.
+  If $r\in\Gamma_L(p)$, then from eq.~\eqref{eq:1d-optimality} we have $d^-(r)\cdot p = 0 = d^+(r) \cdot p$, and by Lemma~\ref{lem:fplc-directional-deriv}, we must also have $d^+(r')\cdot p = 0$ and $d^-(r'')\cdot p = 0$, giving $r',r'' \in \Gamma_L(p)$ as well.
+
+  % Finally, we show that for every $r\in \R'$, there exists some $p\in\P$ such that $\Gamma_L(p)\cap\R' = \{r\}$.
+  % For $r = \underline r$, let $\underline y$ exhibiting $d^+(\underline r)_{\underline y} > 0$.
+  % Note that $d^-(\underline r)_{\underline y} \leq 0$ by definition of $\underline r$ (see the argument above).
+  % Thus, letting $p = \delta_{\underline y}$ be the point distribution on $\underline y$, we then have $\underline r \in \Gamma_L(p)$.
+  % As $d^-(r)_{\underline y} > 0$ for $r > \underline r$, we must have $\Gamma_L(p)\cap\R' = \{\underline r\}$.
+  % \raft{Note: this is the only place in the argument where I needed to intersect with $\R'$.  The reason: losses like the hinge loss can have... }
+  % Similarly for $\overline r$ and the outcome $\overline y$.
+  % Now take $r \in (\underline r,\overline r) \cap \R$ and let $y$ be the outcome such that $L(\cdot)_y$ is nondifferentiable at $r$; in particular, $d^-(r)_y < d^+(r)_y$.
+
+  Finally, we show that for every $r\in \R'$, there exists some $p\in\P$ such that $\Gamma_L(p) = \{r\}$.
+  Let $\underline y$ exhibit $d^+(\underline r)_{\underline y} > 0$, and $\overline y$ exhibit $d^-(\overline r)_{\overline y} < 0$, and note that $d^-(\underline r)_{\underline y} \leq 0$ and $d^+(\overline r)_{\overline y} \geq 0$ by the argument above.
+  We observe that if $r > \underline r$, then $0 < d^-(r)_{\underline y} \leq d^+(r)_{\underline y}$ by definition of $\underline r$ (and monotonicity of $d^+,d^-$).
+  Similarly, if $r < \overline r$, then $d^-(r)_{\overline y} \leq d^+(r)_{\overline y} < 0$.
+
+  Now for $r = \underline r$, we have $d^-(r)_{\underline y} \leq 0 < d^+(r)_{\underline y}$ and $d^-(r)_{\overline y} \leq d^+(r)_{\overline y} < 0$, and Lemma~\ref{lem:simple-intervals} gives $\alpha \in (0,1)$ such that $p = \alpha \delta_{\underline y} + (1-\alpha) \delta_{\overline y}$ gives $\Gamma_L(p) = \{\underline r\}$.
+  Similarly, Lemma~\ref{lem:simple-intervals} gives an $\alpha$ such that $\Gamma_L(p) = \{\overline r\}$, where $p = \alpha \delta_{\overline y} + (1-\alpha) \delta_{\underline y}$.
+  Finally, take $r \in \R' \cap (\underline r, \overline r)$ and let $y$ be the outcome such that $L(\cdot)_y$ is nondifferentiable at $r$; in particular, $d^-(r)_y < d^+(r)_y$.
+  If $d^-(r)_y < 0 < d^+(r)_y$ we simply take $p = \delta_y$ and are done.
+  Otherwise, consider the case $d^-(r)_y < d^+(r)_y \leq 0$, and as $r > \underline r$, recall that $0 < d^-(r)_{\underline y} \leq d^+(r)_{\underline y}$.
+  Lemma~\ref{lem:simple-intervals} again gives $\alpha \in (0,1)$ such that $\Gamma_L(p) = \{r\}$ where $p = \alpha \delta_{y} + (1-\alpha) \delta_{\underline y}$.
+  In the other case, we choose $p = \alpha \delta_{y} + (1-\alpha) \delta_{\overline y}$, with $\alpha$ again given by Lemma~\ref{lem:simple-intervals}.
+  
+  Putting everything together, we see that no report in $\R'$ is weakly dominated, and every report in $\reals\setminus\R'$ is weakly dominated by some report in $\R'$.
+  We conclude that $\trim(\Gamma_L) \equiv \Gamma_L \cap \R'$.
+\end{proof}
 
 \raf{I think what I tried to show below was the following; might only be true up to some technicalities.}
 \begin{proposition}
-  Let $L : \reals \times \Y \to \reals$ be finite-piecewise-linear and convex.
-  Then $L$ essentially elicits some finite ordered property $\Gamma$.
-  Moreover, $\trim(\Gamma_L)$ is finite and ordered.
+  Every FPLC $L : \reals \to \reals^\Y$ essentially elicits a finite orderable property.
 \end{proposition}
 \begin{proof}
-\raf{GOT HERE.}
-
-Since $L$ is piecewise linear, we can take $\R = \{r_1,...,r_m\}$ to be the set of all nondifferentiable points of $L(\cdot,y)$ for some $y$.
-After some thought, it's clear that $\R$ contains all interesting minimizers: $\E_p L(r,Y)$ always attains a minimum at one of these points (assuming it attains one at all).
-Now let $a_i(y)$ be the left derivative of $L(r_i,y)$ and $a_{m+1}(y)$ the right derivative of $L(r_m,y)$.
-(So $a_i(y)$ is the ``$i$th slope'' of $L(\cdot,y)$.)
-If you think about it a bit, the subgradient $\partial L(r_i,y)$ is just the interval $[a_i(y), a_{i+1}(y)]$.
-
-Now the condition for $r_i$ to be optimal is simply
-\begin{equation*}\label{eq:1}
-0 \in \partial \E_p L(r_i,Y) = \sum_y p(y) [a_i(y), a_{i+1}(y)] = \left[\sum_y p(y) a_i(y), \sum_y p(y) a_{i+1}(y)\right]~.
-\end{equation*}
-Rewriting in vector notation, thinking of $p,a_i \in \reals^\Y$, we have
-\begin{equation*}\label{eq:1}
-\Gamma_{r_i} = \{ p \in \Delta_\Y : p\cdot a_i \leq 0 \leq p\cdot a_{i+1} \}~.
-\end{equation*}
-Thus, for all $i$ the intersection $\Gamma_{r_i} \cap \Gamma_{r_{i+1}} = \{ p \in \Delta_\Y : p\cdot a_{i+1} = 0\}$ which is a hyperplane.
-
-For the converse... I actually didn't do it out, but I'm 99\% confident it will work, maybe as a corollary of the continuous version of this statement.
-But this first direction was the most salient for now...
+  From Proposition~\ref{prop:fplc-trim-char}, it suffices to show that $\Gamma_L\cap\R'$ is orderable.
+  \raf{I need to reference some other stuff above about $\trim(\Gamma_L)$.}
+  Let $\R' = \{r_1,\ldots,r_m\}$ with $r_1 < \cdots < r_m$.
+  Recalling the optimality condition for $r_i \in \Gamma_L(p)$ in eq.~\eqref{eq:1d-optimality}, we see that
+  \begin{equation*}\label{eq:fplc-level-set}
+    \Gamma_{r_i} = \{ p \in \Delta_\Y : p\cdot d^-(r_i) \leq 0 \leq p\cdot d^+(r_{i}) \}~.
+  \end{equation*}
+  Thus, observing that $d^+(r_i) = d^-(r_{i+1})$ from Lemma~\ref{lem:fplc-directional-deriv}, for all $i$ the intersection $\Gamma_{r_i} \cap \Gamma_{r_{i+1}} = \{ p \in \Delta_\Y : p\cdot d^+(r_i) = 0\}$ is a hyperplane.
 \end{proof}
+
+
+\raf{I think this is even easier than what I tried to show below.}
+\begin{proposition}
+  A finite property is essentially convex elicitable in $1$ dimension if and only if it is orderable.
+  Moreover, this remains true when restricting to piecewise linear loss functions.
+\end{proposition}
 
 
 
