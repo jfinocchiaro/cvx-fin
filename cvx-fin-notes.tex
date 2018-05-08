@@ -43,6 +43,7 @@
 \newcommand{\toto}{\rightrightarrows}
 \newcommand{\trim}{\mathrm{trim}}
 \newcommand{\fplc}{finite-piecewise-linear and convex\xspace} %xspace for use in text
+\newcommand{\conv}{\mathrm{conv}}
 
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
@@ -54,6 +55,7 @@
 \newtheorem{proposition}{Proposition}
 \newtheorem{definition}{Definition}
 \newtheorem{corollary}{Corollary}
+\newtheorem{conjecture}{Conjecture}
 
 
 \title{Finite Property Convex Elicitation Notes}
@@ -174,11 +176,11 @@ That is, $\Gamma\equiv\Gamma'$ if the two properties are the same up to relabeli
 \begin{lemma}
   Let $L$ be a convex loss function.
   Then $\Gamma_L$ is non-degenerate if and only if $L(\cdot,y)$ is bounded from below for all $y\in\Y$.
+  \raf{Not true; take $L(r,y) = e^r$}
 \end{lemma}
 
 \begin{definition}
-  We say a loss $L$ is \emph{finite-piecewise-linear and convex (FPLC)} if for all $y\in\Y$, the function $L(\cdot)_y$ is a piecewise-linear function with finitely many pieces, and is bounded from below.
-\jessie{Is bounded from below sufficient?  Couldn't you have FPL that looks like a roughly sketched 4th degree polynomial (two minima)-- bounded from below, but not convex.}
+  We say a loss $L:\reals^d \to \reals^\Y$ is \emph{finite-piecewise-linear and convex (FPLC)} if for all $y\in\Y$, the function $L(\cdot)_y$ is a piecewise-linear function with finitely many pieces, convex, and bounded from below.
 \end{definition}
 
 \section{One dimension}
@@ -186,7 +188,7 @@ That is, $\Gamma\equiv\Gamma'$ if the two properties are the same up to relabeli
 From Lambert 2018, Theorem 3, a finite property has a strictly order-sensitive score if and only if it is orderable...
 
 \begin{lemma}\label{lem:fplc-directional-deriv}
-  Let $L$ be FPLC, and let $r\in\reals$ be a point of differentiability of $L$.
+  Let $L:\reals^d \to \reals^\Y$ be FPLC, and let $r\in\reals$ be a point of differentiability of $L$.
   Let $d^-(r)_y$ and $d^+(r)_y$ denote the left and right derivative, respectively, of $L(\cdot)_y$ at $r$, so that $d^-(r),d^+(r)\in\reals^\Y$.
   Then for any open interval $(a,b)$ containing $r$ where $L$ is differentiable, we have
 $d^+(a) = d^-(r) = d^+(r) = d^-(b)$.
@@ -194,7 +196,7 @@ $d^+(a) = d^-(r) = d^+(r) = d^-(b)$.
 
 \begin{lemma}\label{lem:simple-intervals}
   Let $a<a'$ and $b\leq b'$ such that either $a< 0 < b$ or $b' < 0 < a'$.
-  Then there exists $\alpha \in (0,1)$ such that $0 \in \alpha [b,b'] + (1-\alpha) [a,a']$.
+  Then there exists $\alpha \in (0,1)$ such that $\alpha b + (1-\alpha) a < 0 < \alpha b' + (1-\alpha) a'$.
 \end{lemma}
 \begin{proof}
   Suppose $a < 0 < b$.
@@ -295,6 +297,19 @@ $d^+(a) = d^-(r) = d^+(r) = d^-(b)$.
   Math.
 \end{proof}
 
+\begin{definition}
+  Let $f:\reals^d\to\reals$ be FPLC.
+  A \emph{vertex} of $f$ is a vertex of the corresponding convex polytope.
+\end{definition}
+
+\begin{lemma}\label{lem:vertiex-subgrad}
+  Let $f:\reals^d\to\reals$ be FPLC.
+  For every non-vertex $x$ of $f$, there is a vertex $v$ such that $\partial f(x) \subseteq \partial f(v)$.
+\end{lemma}
+\begin{proof}
+  \raf{I'm thinking of a proof in two parts.  1. lemma from convex polytopes saying that you can always get to a vertex while staying within the current face; 2. all points in a face but no other face (so the relative interior) share the same subgradient set, and at the relative boundary, a superset of that set.}
+\end{proof}
+
 \begin{proposition}\label{cor:fplc-finite}
   Every FPLC $L : \reals^d \to \reals^\Y$ essentially elicits a finite property.
 \end{proposition}
@@ -308,10 +323,22 @@ $d^+(a) = d^-(r) = d^+(r) = d^-(b)$.
   \raf{Now we just need to show that every point *not* on a vertex is weakly dominated by a vertex.}
 \end{proof}
 
-\raf{I further conjecture that there is a convex subset $C$ of $\reals^d$ such that $\R' = \R\cap C$ gives $\trim(\Gamma_L) = \Gamma_L\cap \R'$, just like in the 1-d case.  If that's true, it would be really helpful in figuring out what the constraints are in the simplex between neighbering reports!}
+\raf{If true, this will be helpful in figuring out what the constraints are in the simplex between neighbering reports!}
 
-\raf{Note to self: (1) focus on distributions of full support to characterize the minimizers, (2) try to directly generalize 1d ``extreme'' points to the boundary of $C$.}
+Note that the definition of $\R'$ is a generalization of its definition as $[\underline r, \overline r]$ in Proposition~\ref{prop:fplc-trim-char}.
+\begin{conjecture}
+  Let $L:\reals^d \to\reals^\Y$ be FPLC, and $\R$ the vertices of $\sum_{y\in\Y} L(\cdot)_y$.
+  Then $\trim(\Gamma_L) \equiv \Gamma_L\cap \R'$ where $\R' = \conv \{ \argmin_{r\in\reals^d} L(r)_y \cap \R : y\in\Y\}$.
+\end{conjecture}
 
+\begin{conjecture}
+  Let $L:\reals^d \to\reals^\Y$ be FPLC, and $\R$ the vertices of $f(\cdot) = \sum_{y\in\Y} L(\cdot)_y$.
+  Then for all $p\in\inter\Delta(\Y)$, the convex hull of $\Gamma_L(p)\cap\R$ is a face of the polytope corresponding to $f$.
+\end{conjecture}
+\begin{proof}
+  \raf{Sketch:}
+  The polytope of $f$ is the same as that of $p\cdot L(\cdot)$, since $p$ has full support.  As $p\cdot L$ must be flat between all of $\Gamma_L(p)$, those vertices are on the same face.  Moreover, all vertices on the minimal face containing $\Gamma_L(p)$ are optimal.
+\end{proof}
 
 \section{Jessie's notes}
 \raf{... have got it growing oats?}
