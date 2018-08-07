@@ -27,6 +27,7 @@
 \newcommand{\posreals}{\reals_{>0}}%{\reals_{++}}
 
 % alphabetical order, by convention
+\newcommand{\D}{\mathcal{D}}
 \newcommand{\E}{\mathbb{E}}
 \newcommand{\F}{\mathcal{F}}
 \newcommand{\I}{\mathcal{I}}
@@ -34,7 +35,6 @@
 \newcommand{\R}{\mathcal{R}}
 \newcommand{\X}{\mathcal{X}}
 \newcommand{\Y}{\mathcal{Y}}
-\renewcommand{\P}{\mathcal{P}}
 
 
 \newcommand{\inter}[1]{\mathring{#1}}%\mathrm{int}(#1)}
@@ -44,6 +44,7 @@
 \newcommand{\trim}{\mathrm{trim}}
 \newcommand{\fplc}{finite-piecewise-linear and convex\xspace} %xspace for use in text
 \newcommand{\conv}{\mathrm{conv}}
+\newcommand{\ones}{\mathbbm{1}}
 
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
@@ -339,6 +340,62 @@ Note that the definition of $\R'$ is a generalization of its definition as $[\un
   \raf{Sketch:}
   The polytope of $f$ is the same as that of $p\cdot L(\cdot)$, since $p$ has full support.  As $p\cdot L$ must be flat between all of $\Gamma_L(p)$, those vertices are on the same face.  Moreover, all vertices on the minimal face containing $\Gamma_L(p)$ are optimal.
 \end{proof}
+
+
+\section{Duality}
+
+\begin{theorem}
+  Every elicitable property is essentially elicited by a $|\Y|$-dimensional convex loss function (i.e.,\ is $|\Y|$-embeddable).
+\end{theorem}
+\begin{proof}
+  To work exclusively with convex functions, we will consider a score for $\Gamma$ and then a convex loss.
+  Let $\Gamma:\Delta(\Y)\toto\R$ be the given elicitable property, with $\R$ arbitrary, elicited by $S:\R\times\Y\to\reals$.
+  Let $G : \Delta(\Y) \to \reals$ be the convex expected score function given by $G(p) = \max_{r\in\R} \E_p S(r,Y)$.
+  Let $C : \reals^\Y \to \reals \cup \{\infty\}$ be the convex conjugate of $G$, so $C = G^*$.
+  By \raf{results with Ian} we know that for some $\D \subseteq \partial G(\Delta(\Y)) \subseteq \reals^\Y$ we have some bijection $\varphi : \R \to \D$ such that $\Gamma(p) = \varphi^{-1}(\D \cap \partial G(p))$.
+  \raft{In other words, $\Gamma$ is a relabeling of subgradients of $G$}
+  Thus, we can write
+  \begin{equation}
+    \label{eq:1}
+    r \in \Gamma(p) \iff \varphi(r) \in \partial G(p) \iff p \in \partial C(\varphi(r))~,
+  \end{equation}
+  where the final equivalence follows from convex duality.
+  \raft{Of course, we need to be careful here; this only holds if $G$ is proper and lower semi-continuous, but those should both hold for us.}
+
+  Now define $L(\hat r,y) = C(\hat r) - \hat r \cdot \ones_y$ on the report space $\hat \R = \conv(\D)$;
+  we will show that $L$ essentially elicits $\Gamma$.
+  As $L$ is convex, we may write the optimality condition as
+  \begin{equation}
+    \label{eq:2}
+    \hat r \in \Gamma_L(p) \iff \hat r \in \argmax_{\hat r'} \E_pL(\hat r',Y) \iff 0 \in \partial \E_pL(\hat r,Y)~,
+  \end{equation}
+  where of course the subgradient $\partial$ is with respect to $\hat r$.
+  Plugging in our definition of $L$, we have
+  \begin{align*}
+    0 \in \partial \E_pL(\hat r,Y)
+    & \iff 0 \in \partial \E_p \left(C(\hat r) - \hat r \cdot \ones_Y\right)
+    \\
+    & \iff 0 \in \partial \left(C(\hat r) - \hat r \cdot p\right)
+    \\
+    & \iff 0 \in \partial C(\hat r) - \{p\}
+    \\
+    & \iff p \in \partial C(\hat r)~.
+  \end{align*}
+  Putting this together with eq.~\eqref{eq:1}, we have for any $\hat r \in \D$ that
+  \begin{equation}
+    \label{eq:3}
+    \hat r \in \Gamma_L(p) \iff p \in \partial C(\hat r) \iff \varphi^{-1}(\hat r) \in \Gamma(p)~,
+  \end{equation}
+  which implies that $L$ essentially elicits $\Gamma$ for this $\varphi$.
+  (The trivially induced map $\varphi:\R\to\hat\R$ is injective as $\varphi:\R\to\D$ was a bijection.)
+  \raf{If we assume $\Gamma$ is non-redundant, I believe we also have $\Gamma = \trim(\Gamma_L)$ using $\D$ is the report set.}
+\end{proof}
+
+
+
+
+
+\newpage\newpage
 
 \section{Jessie's notes}
 \raf{... have got it growing oats?}
