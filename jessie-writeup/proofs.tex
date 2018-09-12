@@ -1,0 +1,249 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{mathtools, amsmath, amsthm, amssymb, graphicx, mathrsfs, verbatim}
+%\usepackage[thmmarks, thref, amsthm]{ntheorem}
+\usepackage{color}
+\usepackage{wrapfig}
+\usepackage{subcaption}
+\usepackage[colorinlistoftodos,textsize=tiny]{todonotes} % need xargs for below
+%\usepackage{accents}
+\usepackage{bbm}
+\usepackage{xspace}
+\usepackage[margin=1.25in]{geometry}
+
+\newcommand{\Comments}{1}
+\newcommand{\mynote}[2]{\ifnum\Comments=1\textcolor{#1}{#2}\fi}
+\newcommand{\mytodo}[2]{\ifnum\Comments=1%
+  \todo[linecolor=#1!80!black,backgroundcolor=#1,bordercolor=#1!80!black]{#2}\fi}
+\newcommand{\raf}[1]{\mynote{green}{[RF: #1]}}
+\newcommand{\raft}[1]{\mytodo{green!20!white}{RF: #1}}
+\newcommand{\jessie}[1]{\mynote{purple}{[JF: #1]}}
+\newcommand{\jessiet}[1]{\mytodo{purple!20!white}{JF: #1}}
+\ifnum\Comments=1               % fix margins for todonotes
+  \setlength{\marginparwidth}{1in}
+\fi
+
+
+\newcommand{\reals}{\mathbb{R}}
+\newcommand{\posreals}{\reals_{>0}}%{\reals_{++}}
+
+% alphabetical order, by convention
+\newcommand{\D}{\mathcal{D}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\I}{\mathcal{I}}
+\renewcommand{\P}{\mathcal{P}}
+\newcommand{\R}{\mathcal{R}}
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\Y}{\mathcal{Y}}
+
+
+\newcommand{\inter}[1]{\mathring{#1}}%\mathrm{int}(#1)}
+\newcommand{\cl}[1]{\text{cl}}
+%\newcommand{\expectedv}[3]{\overline{#1}(#2,#3)}
+\newcommand{\expectedv}[3]{\E_{Y\sim{#3}} {#1}(#2,Y)}
+\newcommand{\toto}{\rightrightarrows}
+\newcommand{\trim}{\mathrm{trim}}
+\newcommand{\fplc}{finite-piecewise-linear and convex\xspace} %xspace for use in text
+\newcommand{\conv}{\mathrm{conv}}
+\newcommand{\ones}{\mathbbm{1}}
+\newcommand{\im}{\text{im}}
+\newcommand{\strip}{\text{strip}}
+
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\arginf}{arg\,inf}
+\DeclareMathOperator*{\sgn}{sgn}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{conjecture}{Conjecture}
+
+
+
+
+\begin{document}
+
+\section{Notation and Definitions}
+
+Let $\Y$ be a finite outcome space, with $n:=|\Y|$, and $\Delta(\Y)$ be the set of probability distributions over $\Y$.
+
+We define the \emph{level set} of a property at report value $r\in\R$ to be the set $\Gamma_r := \{p\in\P : r \in \Gamma(p)\}$.
+Additionally, we can consider an unlabeled level set $\theta$ as this same set of distributions, but not associated with the report $r$.
+
+The set $\Theta \subseteq 2^{\Delta(\Y)}$ is an unlabeled property, and finite if $|\Theta| < \infty$.
+Observe that $\Theta$ is a set of level sets that divide the simplex, and not a function.
+
+\begin{definition}
+Let $\Gamma$ be a labeled property.
+Define $\text{strip}(\Gamma) := \{ \Gamma_r : r \in \R \}$.
+Informally, strip removes labels from the property.
+\end{definition}
+
+We will use the following notation: $\Gamma' = \Gamma \cap \R'$ is the property $\Gamma' : p \to \Gamma(p) \cap \R'$.
+
+\begin{definition}
+  Consider two labeled properties $\Gamma'$ and $\Gamma$.
+  We say $\Gamma' < \Gamma : \Delta(\Y) \to \R$ if you get $\Gamma'$ by removing reports from $\Gamma$.
+  (i.e. $\Gamma' = \R' \cap \Gamma$ for some $\R' \subset R$)
+\end{definition}
+
+\begin{definition}
+A property $\Gamma$ is \emph{finite} if $\im(\Gamma)$ is a finite set.
+%\jessie{Take 2:}  A property $\Gamma$ is \emph{finite} if there are only finitely many full-dimensional level sets.
+\end{definition}
+
+%\begin{definition}
+%$trim(\Gamma_L)$ is the property elicited by the loss $L|_{\R'}$, where $\R' = \{r \in \R : \Gamma_r^\circ \neq \emptyset \}$. 
+%\end{definition}
+%\jessie{This definition has nothing to do with $\Gamma$ but $\Gamma \cap \R$ doesn't typecheck to me... and the previous definition doesn't specifcy $\R'$}
+
+
+Notes before starting:
+\begin{itemize}
+\item (Assuming the metric space is $(\P = \Delta(\Y), \rho)$, where $\rho$ is Euclidean distance, although I don't think the choice of metric matters?)
+\item The interior of a level set $X$ is defined as $\inter{X} = \{p \in X: x > 0,  \forall q \in B(x,p), \argmin_rE_p L(r,Y) = \argmin_r E_q L(r,Y)\}$
+\item A level set is \emph{full-dimensional} if dim(affine hull($\Gamma_r$)) is equal to dim($\P$). \jessie{I think...}
+\item A full-dimensional level set has non-empty interior. \jessie{To prove if we want to venture down that route... didn't want to jump the gun on that one.}
+\end{itemize}
+
+\section{Conjectures}
+% \begin{conjecture}\label{conj:closed-level-sets}
+%   For any $r\in\R$, the level set $\Gamma_r = \{ p \in \Delta(\Y) : \Gamma(p) = r \}$ is closed.
+%   i.e. $\Gamma_r = \text{cl} (\Gamma_r)$.
+% \end{conjecture}
+
+\begin{conjecture}\label{conj:intersect-lev-sets}
+  Let the property $\Gamma$ have a finite set $\Theta$ of full-dimensional level sets, so that for all $\theta \in \Theta$,  there is a unique optimal report $r_\theta$ for all $p \in \inter{\theta}$.
+  Consider $\R' := \{ r_\theta\}_{\theta \in \Theta}$.
+  Then for every $r \in \R$ such that $\inter{\Gamma_r} = \emptyset$, there exist a finite set $R \in \mathscr{P}(\R')$ so that $\Gamma_r = \bigcap_{r' \in R} \Gamma_{r'}$.
+\jessie{Note that here, $\Theta$ is just a set of FULL-DIM level sets, should this notation change?}
+\end{conjecture}
+
+
+\section{Formal Statements and modifications needed to prove}
+
+
+\begin{lemma}
+  Let $L: \R \to \reals^\Y$ elicit a nondegenerate property $\Gamma$.
+There exists a unique unlabeled property $\Theta$ so that \jessie{there exists-- instead of ``for all''?} for all nonredundant $\Gamma' < \Gamma$, we have $\strip(\Gamma') = \Theta := \text{trim}(\Gamma)$.
+\jessie{Need to rephrase as is.  For example, right now, Mode restricted to 1 report (over 3 outcomes) $<$ Mode over 3 reports/outcomes}
+\end{lemma}
+
+\begin{proof}
+\jessie{If we want to keep the lemma statement as is, we can redefine the $<$ operator.} 
+% \jessie{To show: 2.  $\Theta$ is unique. 1. $\Theta = \strip(\Gamma')$ for some $\Gamma' < \Gamma$.}
+%  Consider the unlabeled property $\Sigma := \strip(\Gamma)$.
+%  For every level set $\sigma \in \Sigma$, there is a unique optimal report $r_\sigma$ so that $\Gamma(p) = \{r_\sigma\}$ for all $p \in \inter{\sigma}$.\jessie{Using assumptions we don't have in the statement.}
+%  Let us construct the restricted report set $\R = \{r_\sigma \}_{\inter{\sigma} \neq \emptyset}$.
+%  Using $\R'$, we construct the property $\Gamma' = \Gamma \cap \R'$
+%  We claim that $\Theta = \strip(\Gamma') \cup \{ \bigcap_{r\in R} \Gamma_{r} : R \in \mathscr{P}(\R') \}$.
+ 
+\end{proof}
+
+\subsection{Main statement}
+
+Let $\Gamma$ be a finite, non-redundant convex elicitable property.
+
+\begin{enumerate}
+\item The property $\Gamma$ has a finite set $\Theta$ of full-dimensonal level sets, and for all $\theta \in \Theta$, there exists an $r_\theta \in \R$ such that $\Gamma(p) = \{r_\theta\}$ for all $p \in \inter{\theta}$.
+\item $\text{strip}(\Gamma)$ is finite.
+\end{enumerate}
+
+\begin{proposition}\label{prop:optimal-reports-per-level-set}
+1 $\iff$ 2
+\end{proposition}
+
+
+
+Notes:
+In order to prove this, we need to assume the property is non-redundant.
+
+
+\begin{proof}
+Let $L$ be the loss function eliciting the property $\Gamma$.
+
+$1 \implies 2$. 
+% \emph{Assumptions used: non-redundancy}
+
+
+Consider $\strip(\Gamma) = \{\Gamma_r : r \in \R \}$.
+Let us construct the finite set $\R' = \{r_\theta \}_{\theta \in \Theta}$.
+Clearly, $\R' \subseteq \R$.
+
+We can rewrite $\strip(\Gamma) = \{\Gamma_{r'} : r' \in \R' \} \cup \{\Gamma_{r} : r \in \R \setminus \R' \}$.
+As the first set is finite, we just need to show $\{\Gamma_{r} : r \in \R \setminus \R' \}$ is finite in order to show $\strip(\Gamma)$ is finite.
+
+Let us consider some $r\in\R \setminus \R'$.
+The level set $\Gamma_r = \{p : \Gamma(p) = r\}$ by definition.
+As $r \not\in \R'$, the interior is empty; that is, $\inter{\Gamma_r} = \emptyset$.
+% For any $p \in \Gamma_r$, then, there is some $q \in B(\epsilon, p)$ such that $\E_q L(r', Y) < \E_q L(r,y)$ for some $r' \in \R'$.
+% As $r = \argmin_{\tilde{r}} \E_p L(\tilde{r}, Y)$, then we observe $\E_p L(r, Y) = \E_p L(r', Y) = \min_{\tilde{r}}\E_p L(\tilde{r}, Y)$ for $p \in \Gamma_r$. 
+% Thus, $\Gamma_r \subseteq \Gamma_{r'}$.
+By Conjecture \ref{conj:intersect-lev-sets}, there exist a set of finite reports $R \in \mathscr{P}(\R')$ such that $\bigcap_{r'\in R} \Gamma_{r'} = \Gamma_r$.
+As there are only finitely many combinations of reports $R$ in the finite set $\R'$, then the set $\{ \Gamma_r : r \in \R \} = \{ \Gamma_{r_1} \cap \Gamma_{r_2} : r_1, r_2 \in \R' \}$ is finite.
+
+
+The union of a two finite sets is then finite, so $\strip(\Gamma) = \{ \Gamma_{r'} : r' \in \R' \} \cup \{ \Gamma_r : r \in \R \setminus \R' \}$ is finite.
+
+
+
+% Since $\Gamma$ is finite, we know it only has finitely many FDLS, and since $\Gamma$ is convex, these level sets are convex.
+% On the interior of these level sets, we know there is a unique optimal report.
+% As $\R' = \bigcup_{\Gamma_r \text{is FDLS}}r$, $\R'$ is finite as the finite union of finite sets is finite.
+% By Lemma 2 from original writeup, or new definition of trim, we know that $L|_\R$ elicits trim($\Gamma$).
+% As the new report set is finite, there many only be a finite number of minimizing reports.
+
+% Consider the full-dimensional level sets of $\Gamma$: as $\R' \subseteq \R$, then when $L$ is restricted to $\R'$, for any $r \in \R$, there must be some $r' \in \R'$ such that $\Gamma_{r} \subseteq \Gamma_{r'}$, as if .
+
+
+
+%Since $\Gamma$ is a finite property, there are a finite number of (non-empty) level sets.
+%As there is only one optimal report per (interior of) level set, there are a finite of minimizing reports.
+%Let this finite set be $\tilde{\R}$, and observe $\tilde{R}$ is finite.
+%By definition, $\tilde{\R} \subseteq \R$.
+%As $\im(\Gamma') = \im(\Gamma) \cap \R = \tilde{\R} \cap \R'$ \footnote{Needs showing}, then the finite intersection of a finite set and another set is finite, so $\im(\Gamma')$ is finite.
+
+
+\bigskip
+$2 \implies 1$.  
+\emph{Assumptions used: Non-redundancy, nondegeneracy of $\Gamma$}
+
+Let $\Theta := \strip(\Gamma)$ be a finite set.
+By construction, $\Theta$ is a set of level sets defining the property $\Gamma$.
+As $\Theta$ is finite, $\Gamma$ then only has finitely many level sets, and therefore, finitely many \emph{full-dimensional} level sets.
+For any full-dimensional level set $\theta \in \Theta$, as $\Gamma$ is non-degenerate (i.e. $\forall p \in \Delta(\Y), \Gamma(p) \neq \emptyset$), there is some report $r_\theta$ so that $r_\theta \in \Gamma(p)$ for all $p \in \theta$.
+Therefore, we are left to show that $r_\theta$ is the unique value of the property $\Gamma(p)$ for all $p \in \inter{\theta}$.
+
+For contradiction, suppose there was some $s \in \R$ such that $E_p L(s,Y) = \E_p L(r_\theta, Y)$ for some $p \in \inter{\theta}$.
+%\jessie{(Note that if $E_p L(s,Y) < \E_p L(r_\theta, Y)$, then $r_\theta \not\in \Gamma(p)$, so we reduce to an equality.)}
+
+As $p \in \inter{\theta}$, we then know $\E_q L(r_\theta, Y) \leq \E_q L(s,Y)$ for all $q \in B(\epsilon, p)$.
+Therefore, $\Gamma_s \subseteq \inter{\Gamma_{r_\theta}} \subseteq \Gamma_{r_\theta}$.
+As there are no dominated reports (by non-redundancy of $\Gamma$), this implies $\Gamma_s = \Gamma_{r_\theta}$.
+Therefore, we can see that $r_\theta = s$, since otherwise we would contradict nonredundancy of $\Gamma$.
+As $r_\theta = s$, we can then say $r_\theta$ is the unique property value on $\inter{\theta}$.
+Therefore, $\Gamma(p) = \{r_\theta\}$ for all $p \in \inter{\theta}$.
+
+As the full-dimensional level sets in $\Theta$ are finite and the optimal report is unique on the interior of level sets, $2 \implies 1$.
+
+\end{proof}
+
+\section{Thoughts and conjectures after everything is said and done}
+
+\begin{enumerate}
+\item  The properties studied here are locally constant
+\item  The Scoring Rule/Bayes Risk associated with a locally constant property is a finite piecewise concave function.
+\end{enumerate}
+
+
+\end{document}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
+
