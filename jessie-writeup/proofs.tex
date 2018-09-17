@@ -11,6 +11,9 @@
 \usepackage{xspace}
 \usepackage[margin=1.25in]{geometry}
 
+\usepackage[colorlinks=true,breaklinks=true,bookmarks=true,urlcolor=blue,
+     citecolor=blue,linkcolor=blue,bookmarksopen=false,draft=false]{hyperref}
+
 \newcommand{\Comments}{1}
 \newcommand{\mynote}[2]{\ifnum\Comments=1\textcolor{#1}{#2}\fi}
 \newcommand{\mytodo}[2]{\ifnum\Comments=1%
@@ -86,26 +89,30 @@ Informally, strip removes labels from the property.
 \end{definition}
 
 \begin{notation}
-We will use the following notation: $\Gamma' = \Gamma \cap \R'$ is the property $\Gamma' : p \to \Gamma(p) \cap \R'$.  
+We will use the following notation: $\Gamma' = \Gamma \cap \R'$ is the property $\Gamma' : p \mapsto \Gamma(p) \cap \R'$.  
 \end{notation}
 
 
 \begin{notation}
-  Consider two labeled properties $\Gamma'$ and $\Gamma$.
-  We say $\Gamma' < \Gamma : \Delta(\Y) \to \R$ if you get $\Gamma'$ by removing reports from $\Gamma$.
+  Consider two labeled properties $\Gamma' : \Delta(\Y) \toto \R$ and $\Gamma : \Delta(\Y) \toto \R$.
+  We say $\Gamma' < \Gamma$ if you get $\Gamma'$ by removing reports from $\Gamma$.
   (i.e. $\Gamma' = \R' \cap \Gamma$ for some $\R' \subset \R$)
 \end{notation}
 
 \begin{definition}
-A property $\Gamma$ is \emph{finite} if $\im(\Gamma)$ is a finite set.
+A property $\Gamma$ is \emph{finite} if $\im(\Gamma) := \{r\in\Gamma(p) : p\in\Delta(\Y)\} = \bigcup_{p\in\Delta(\Y)} \Gamma(p)$ is a finite set.
 %\jessie{Take 2:}  A property $\Gamma$ is \emph{finite} if there are only finitely many full-dimensional level sets.
 \end{definition}
 
 \begin{lemma}\label{conj:closed-level-sets}
+  Let $\Gamma$ be elicitable.
   For any $r\in\R$, the level set $\Gamma_r = \{ p \in \Delta(\Y) : \Gamma(p) = r \}$ is closed.
 \end{lemma}
-\begin{proof}
-  \emph{Sketch:  } Since property values are the subgradient sets of the overarching Scoring Rule and subgradient sets are closed, the level sets of $\Gamma$ are closed.
+\begin{proof}[Proof sketch]
+  Let $L$ elicit $\Gamma$.
+  The function $G(p) = -\min_{r\in\R} \E_p L(r,Y) = -\E_p L(\Gamma(p),Y)$ (taking any $r\in\Gamma(p)$ in case of ties) is convex.
+  There exists $\D \subseteq \partial G$ and some bijection $\varphi : \R \to \D$ with $\Gamma(p) = \varphi^{-1}(\D\cap \partial G_p)$.
+  Thus, $\Gamma_r = \{p : r\in\Gamma(p)\} = \{p : \varphi(r) \in \D\cap\partial G_p\} = \{p : \varphi(r) \in \partial G_p\}$, which is closed by convex analysis -- use \url{https://arxiv.org/pdf/1211.3043.pdf}.
 \end{proof}
 
 %\begin{definition}
@@ -170,11 +177,11 @@ Therefore, for all nonredundant, non-degenerate properties $\Gamma' < \Gamma$, w
 
 \subsection{Main statement}
 
-Let $\Gamma$ be a finite, non-redundant convex elicitable property.
+Let $\Gamma$ be a finite, non-degenerate convex elicitable property.
 
 \begin{enumerate}
 \item The property $\Gamma$ has a finite set $\Theta$ of full-dimensonal level sets, and for all $\theta \in \Theta$, there exists an $r_\theta \in \R$ such that $\Gamma(p) = \{r_\theta\}$ for all $p \in \inter{\theta}$.
-\item $\text{strip}(\Gamma)$ is finite.
+\item $\text{trim}(\Gamma)$ is finite.  \raf{was strip}
 \end{enumerate}
 
 \begin{proposition}\label{prop:optimal-reports-per-level-set}
@@ -208,7 +215,7 @@ As $r \not\in \R'$, the interior is empty; that is, $\inter{\Gamma_r} = \emptyse
 % As $r = \argmin_{\tilde{r}} \E_p L(\tilde{r}, Y)$, then we observe $\E_p L(r, Y) = \E_p L(r', Y) = \min_{\tilde{r}}\E_p L(\tilde{r}, Y)$ for $p \in \Gamma_r$. 
 % Thus, $\Gamma_r \subseteq \Gamma_{r'}$.
 By Conjecture \ref{conj:intersect-lev-sets}, there exist a set of finite reports $R \in 2^{\R'}$ such that $\bigcap_{r'\in R} \Gamma_{r'} = \Gamma_r$.
-As the set $\R'$ is finite, then the power set $2^{\R'}$ is finite. t
+As the set $\R'$ is finite, then the power set $2^{\R'}$ is finite.
 Thus, the set $\{ \Gamma_r : r \in \R \setminus \R' \} =  \{ \bigcap_{r_1 \in R} \Gamma_{r_1} : R \in 2^{\R'} \}$ is finite.
 
 
@@ -240,8 +247,8 @@ $2 \implies 1$.
 Let $\Theta := \strip(\Gamma)$ be a finite set.
 By construction, $\Theta$ is a set of level sets defining the property $\Gamma$.
 As $\Theta$ is finite, $\Gamma$ then only has finitely many level sets, and therefore, finitely many \emph{full-dimensional} level sets.
-For any full-dimensional level set $\theta \in \Theta$, as $\Gamma$ is non-degenerate (i.e. $\forall p \in \Delta(\Y), \Gamma(p) \neq \emptyset$), there is some report $r_\theta$ so that $r_\theta \in \Gamma(p)$ for all $p \in \theta$.
-Therefore, we are left to show that $r_\theta$ is the unique value of the property $\Gamma(p)$ for all $p \in \inter{\theta}$.
+Consider a full-dimensional level set $\theta = \Gamma_r \in \Theta$.
+We wish to show that $r_\theta$ is the unique value of the property $\Gamma(p)$ for all $p \in \inter{\theta}$.
 
 For contradiction, suppose there was some $s \in \R$ such that $\E_p L(s,Y) = \E_p L(r_\theta, Y)$ for some $p \in \inter{\theta}$.
 
