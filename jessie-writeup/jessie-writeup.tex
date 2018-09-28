@@ -74,6 +74,7 @@
 
 \section{Notation and Definitions}
 
+
 Let $\Y$ be a finite outcome space, with $n:=|\Y|$, and $\Delta(\Y)$ be the set of probability distributions over $\Y$.
 
 We define the \emph{level set} of a property at report value $r\in\R$ to be the set $\Gamma_r := \{p\in\P : r \in \Gamma(p)\}$.
@@ -82,16 +83,17 @@ Additionally, we can consider an unlabeled level set $\theta$ as this same set o
 The set $\Theta \subseteq 2^{\Delta(\Y)}$ is an unlabeled property, and finite if $|\Theta| < \infty$.
 Observe that $\Theta$ is a set of level sets that divide the simplex, and not a function.
 
+
 \begin{definition}
 Let $\Gamma$ be a labeled property.
 Define $\text{strip}(\Gamma) := \{ \Gamma_r : r \in \R \}$.
 Informally, strip removes labels from the property.
+\jessie{Strip includes the boundaries of level sets / lower dimensional level sets.}
 \end{definition}
 
 \begin{notation}
 We will use the following notation: $\Gamma' = \Gamma \cap \R'$ is the property $\Gamma' : p \mapsto \Gamma(p) \cap \R'$.  
 \end{notation}
-
 
 \begin{notation}
   Consider two labeled properties $\Gamma' : \Delta(\Y) \toto \R$ and $\Gamma : \Delta(\Y) \toto \R$.
@@ -101,45 +103,198 @@ We will use the following notation: $\Gamma' = \Gamma \cap \R'$ is the property 
 
 \begin{definition}
 A property $\Gamma$ is \emph{finite} if $\im(\Gamma) := \{r\in\Gamma(p) : p\in\Delta(\Y)\} = \bigcup_{p\in\Delta(\Y)} \Gamma(p)$ is a finite set.
-%\jessie{Take 2:}  A property $\Gamma$ is \emph{finite} if there are only finitely many full-dimensional level sets.
 \end{definition}
 
-\begin{lemma}\label{conj:closed-level-sets}
-  Let $\Gamma$ be elicitable.
-  For any $r\in\R$, the level set $\Gamma_r = \{ p \in \Delta(\Y) : \Gamma(p) = r \}$ is closed.
-\end{lemma}
-\begin{proof}[Proof sketch]
-  Let $L$ elicit $\Gamma$.
-  The function $G(p) = -\min_{r\in\R} \E_p L(r,Y) = -\E_p L(\Gamma(p),Y)$ (taking any $r\in\Gamma(p)$ in case of ties) is convex.
-  There exists $\D \subseteq \partial G$ and some bijection $\varphi : \R \to \D$ with $\Gamma(p) = \varphi^{-1}(\D\cap \partial G_p)$.
-  Thus, $\Gamma_r = \{p : r\in\Gamma(p)\} = \{p : \varphi(r) \in \D\cap\partial G_p\} = \{p : \varphi(r) \in \partial G_p\}$, which is closed by convex analysis -- use \url{https://arxiv.org/pdf/1211.3043.pdf}.
-	See [Raf/Ian, above (Cor 3.11) with their Thm 3.5 and Rockefellar 24.4]  
-\end{proof}
+\begin{definition}\label{def:unlabeled-nonredundant}
+  An unlabeled property $\Theta$ is \emph{nonredundant} if for any full dimensional $\theta_1, \theta_2 \in \Theta$ we observe $\theta_1 \cap \theta_2 = \emptyset$ almost everywhere.
+\end{definition}
 
 
-Notes before starting:
+
+Other notes before starting:
 \begin{itemize}
 \item (Assuming the metric space is $(\Delta(\Y), \rho)$, where $\rho$ is Euclidean distance, although I don't think the choice of metric matters?).
 We just use this looking at interiors of level sets.
+\item The measure $\mu$ is arbitrary, but why not use Lebesgue measure on $\Delta(\Y) \subset \reals^{|\Delta(\Y)|-1}$
 \item The interior of a level set $X$ is defined as $\inter{X} = \{p \in X: \epsilon > 0,  \forall q \in B(\epsilon,p), \argmin_rE_p L(r,Y) = \argmin_r E_q L(r,Y)\}$
+\item Define the boundary $bd(X) := cl(X) \setminus \inter{X}$.
 \item A level set is \emph{full-dimensional} if dim(affine hull($\Gamma_r$)) is equal to dim($\Delta(\Y)$). 
 \item A full-dimensional level set has non-empty interior.
 \end{itemize}
 
-\section{Conjecture turned Lemma}
+\section{Conjectures (to prove)}
 
+\begin{conjecture}\label{conj:gam-prime-exists}
+	Let $\Gamma$ be a nondegenerate elicitable property \jessie{with a finite set of level sets.}
+	There exists a nondegenerate, nonredundant property $\Gamma'$ such that $\Gamma' \leq \Gamma$ and $\trim(\Gamma) = \strip(\Gamma')$.  
+\end{conjecture}
+\begin{proof}
+\emph{Assumptions used: Finite level sets.}
+
+	To start, construct $\R' \subseteq \R := \{ r \in \R : \inter{\Gamma_r} \neq \emptyset \}$.
+	Clearly, $\R'$ is finite.
+	Define the property $\Gamma' = \Gamma\cap \R'$.
+	We want to show that the constructed $\Gamma'$ is nondegenerate and nonredundant.
+	As $\Gamma$ is nondegenerate, there is some report $r \in \R$ such that $r \in \Gamma(p)$.
+	If $p \in \inter{\Gamma}_r$, then by construction of $\R'$, we see $r \in \R'$.
+	
+	Thus, we just need concern ourselves with $p \not \in \inter{\Gamma_r}$.
+	As $\Gamma$ is nondegenerate, there are then $n$ level sets $\{\Gamma_{r_i}\}_{i=1}^n, \in \R$ in the $\epsilon$-ball around $p$.
+	We claim some $r_i$ is in $\R'$.
+	Since there are only a finite set of level sets, at least one in the $\epsilon$-ball centered on $p$ is full dimensional.
+	Therefore, there is some $r_i \in \R'$ so that $p \in cl(\Gamma_{r_i})$, and as level sets are closed by Lemma~\ref{lem:closed-level-sets}, we then observe $p \in \Gamma_{r_i}$.
+	Therefore $\Gamma'$ is nondegenerate.
+	
+	Now to show $\Gamma'$ is nonredundant.
+	For contradiction, suppose $\Gamma'$ is redundant.
+	Then there are $r_1, r_2 \in \R'$ with $r_1 \neq r_2$ so that either $\Gamma'_{r_1} \subsetneq \Gamma'_{r_2}$ or $\Gamma'_{r_1} = \Gamma'_{r_2}$.
+	
+	First, suppose $\Gamma'_{r_1} = \Gamma'_{r_2}$
+	Since we can think as the property values as labelings of the subgradient sets (denoted by $\partial$) of the the concave Bayes Risk $G(p)$.
+	\jessie{Need source?}
+	As $G$ is concave, it is differentiable almost everywhere, which means that for everywhere but a $\mu$-null set, $|\partial G(p)| = 1$.
+	Then $\Gamma'(p) = \partial G(p) \implies |\Gamma'(p)| = 1$ almost everywhere, which-- along with the fact that the level sets $\Gamma'_{r_1}$ and $\Gamma'_{r_2}$ are full dimensional (and therefore have positive measure since they are convex), contradicts the claim $r_1 \neq r_2$.
+	Thus we conclude there aren't reports $r_1, r_2 \in \R'$ so that $r_1 \neq r_2$ and $\Gamma'_{r_1} = \Gamma'_{r_2}$.
+	
+%	By construction of $\R'$, we know both $\Gamma'_{r_1}$ and  $\Gamma'_{r_2}$ are full dimensional.
+%	If $\Gamma'_{r_1} = \Gamma'_{r_2} = \Gamma'_{r_1} \cap \Gamma'_{r_2}$ are full dimensional, this contradicts something?
+	
+	Otherwise suppose $\Gamma'_{r_1} \subsetneq \Gamma'_{r_2}$.
+	As $\Gamma'_{r_1}$ is full-dimensional, so is $\Gamma'_{r_1} \cap \Gamma'_{r_2} = \Gamma'_{r_1}$.
+	Again, since we know that $|\Gamma'(p)| = 1$ almost everywhere, and as the intersection of the two level sets is full-dimensional, this again contradicts the differentiability of $G$ almost everywhere, since the intersection of the level sets has positive measure in the simplex.
+	Therefore, $\Gamma'$ is nonredundant.
+
+		
+	Finally, by definition of $\trim(\Gamma)$, we conclude $\Gamma'$ is a nondegenerate, nonredundant property such that $\trim(\Gamma) = \strip(\Gamma')$.
+	
+\end{proof}
+
+
+\begin{conjecture}\label{conj:trim-full-dim}
+	Every level set of $\Theta := \trim(\Gamma)$ is full-dimensional  
+\end{conjecture}
+
+\begin{proof}[Proof Sketch]
+	\emph{Uses: Conjecture~\ref{conj:gam-prime-exists}.  Claim: $\strip(\Gamma')$ is nonredundant.}
+	
+	In order to understand $\trim(\Gamma)$ is, we use the $\Gamma' \leq \Gamma$ constructed in Conjecture~\ref{conj:gam-prime-exists}, and let $\R'$ be the set such that $\Gamma' = \Gamma\cap \R'$.
+	First, we see $\Theta = \strip(\Gamma')$ is nonredundant in the unlabeled sense as $\Gamma'$ is nonredundant in the labeled set from Conjecture~\ref{conj:nonredundant-defs-equivalent}, since we know $\Gamma'$ is nonredundant-- and well-defined from Conjecture~\ref{conj:gam-prime-exists}.
+	\jessie{To show.}
+	
+	
+	
+	For contradiction:
+	Let $\theta \in \Theta$ not full-dim and non-redundant (whatever that means for an unlabeled property-- see definition \ref{def:unlabeled-nonredundant} section for proposed definition).
+	
+	We now show that every level set $\theta \in \Theta = \strip(\Gamma') = \trim(\Gamma)$ is full dimensional.
+	
+	We proceed in 2 cases for a level set $\theta \in \Theta$:
+	\begin{enumerate}
+		\item For all $\theta' \in \Theta$, $\theta \cap \theta' = \emptyset$.
+		We know the level set $\theta$ is closed by Lemma~\ref{lem:closed-level-sets}
+		By definition of $\R'$, there is some $p \in \inter{\theta}$ so that for $r_\theta = \Gamma'(p)$, there is a ball $B(\epsilon, p)$ centered around $p$ so that for every $q \in B(\epsilon, p)$, $r_\theta \in \Gamma'(q)$.
+%		(In fact, as $\Theta$ is nonredundant, we claim $r_\theta = \Gamma'(q)$. \jessie{Need to show?})
+		Therefore, the level set $\Gamma_{r_\theta} = \theta$ is full dimensional as it has nonempty interior.
+		
+		Intuitively, this can be seen since the interior of $\theta$ is nonempty by nondegeneracy of $\Gamma'$.
+		
+		\bigskip
+		\hrule
+		Other notes from meeting:\\
+		Use closure and nondegeneracy
+		
+		Look at subset topology? ($\tau_{\R'} := \{\R' \cap U : U \in \tau \}$.)
+		
+		\hrule
+		\item Exists $\theta' \in \Theta$, $\theta \cap \theta' \neq \emptyset$.
+		
+		By nonredundancy of $\Gamma'$, we then observe nonredundancy of $\Theta$, we know that $\mu(\theta \cap \theta') = 0$.
+		We want to show that $\theta$ is full dimensional.
+		\jessie{TODO}
+		
+		\bigskip
+		\hrule
+		Other notes from meeting:\\
+		Look at expected loss/score of $\Gamma'$.
+		\hrule
+	\end{enumerate}
+	
+	Therefore, we have a contradiction and conclude $\theta \in \trim(\Gamma)$ is full dimensional. 
+\end{proof}
+
+\begin{conjecture}\label{conj:nonredundant-defs-equivalent}
+	An elicitable property with finite level sets $\Gamma$ is nonredundant (in the labeled definition) $\iff$ $\strip(\Gamma)$ is nonredundant (in the unlabeled definition.)
+\end{conjecture}
+\begin{proof}
+	We show both directions.\\
+	\begin{enumerate}
+		\item [$\implies$]
+		Let the property $\Gamma:\P \to \R$ be nonredundant.
+		Then for any two reports $r, r' \in \R$ with $r \neq r'$, the level sets $\theta := \Gamma_r \not \subseteq \Gamma_{r'}$ and $\theta' := \Gamma_{r'} \not \subseteq \Gamma_r$.
+		In what follows, $G : \P \to \R$ is the Bayes Risk, or optimal report given a distribution $p$.
+		Each report $r$ corresponds to a labeling of the subgradient sets of $G$.
+		
+		\jessie{Doesn't really use the assumption at all... uses concavity of Bayes Risk.}
+		
+		For notation, we write the set $S := \{p \in \P : |\partial(G(p))| > 1\}$
+		
+		Then consider the set $\theta \cap \theta'$.
+		
+
+%		Suppose for contradiction that $\inter{(\theta \cap \theta')} \neq \emptyset$.
+%		Then there is some $s \in \inter{(\theta \cap \theta')}$ so that $p \in B(\epsilon, s) \implies p \in \inter{(\theta \cap \theta')}$.
+%		As the ball $B(\epsilon s)$ is convex with nonempty interior, it has positive measure, and by monotonicity of a measure, we say $0 < \mu(B(\epsilon, s)) \leq \mu(\inter{(\theta \cap \theta')})$.
+		
+		Since the property $\Gamma$ is elicitable, the Bayes Risk is strictly convex-- meaning it is differentiable almost everywhere, thus $\mu(S) = 0$.
+		
+		Since we assume $r \neq r'$, we observe that $(\theta\cap\theta') \subseteq S$.
+		By monotonicity of $\Gamma$, since $(\theta\cap\theta') \subseteq S$, we know $\mu(\theta \cap \theta') \leq \mu(S) = 0$.
+		
+%		This, however, contradicts the positive measure of the interior.
+%		Therefore, it must be the case that the interior has Lebesgue measure $0$.
+
+		Since $0 \leq \mu(\theta \cap \theta') \leq \mu(S) = 0$, we observe the unlabeled definition of nonredundancy.
+		
+		
+		\item[$\impliedby$] 
+		Say that for any two full dimensional level sets $\theta, \theta' \in \Theta := \strip(\Gamma)$ that $\mu(\theta \cap \theta') = 0$.
+		Then there are reports $r, r' \in \R$ such that $\theta = \Gamma_r$ and $\theta' = \Gamma_{r'}$.
+		As $\mu(\Gamma_r \cap \Gamma_{r'}) = 0 \implies$ the interior of $\Gamma_r \cap \Gamma_{r'}$ is empty.
+		Therefore, the intersection of the two level sets is not full dimensional.
+		
+		As $\theta, \theta'$ are both full dimensional, than their intersection not being full dimensional implies they only share optimal reports on the boundary. \jessie{To cite?}
+		
+		Therefore, we can see that $\theta \not \subseteq \theta'$ as $\theta \neq \theta' \cap \theta$, nor are they equal as their intersection is lower dimensional.
+		
+		Therefore, $\strip(\Gamma)$ is nonredundant $\implies \Gamma$ is nonredundant.
+	\end{enumerate}
+	
+\end{proof}
+
+
+\section{Lemmas}
+
+\begin{lemma}\label{lem:closed-level-sets}
+	Let $\Gamma$ be elicitable.
+	For any $r\in\R$, the level set $\Gamma_r = \{ p \in \Delta(\Y) : \Gamma(p) = r \}$ is closed.
+\end{lemma}
+\begin{proof}[Proof sketch]
+	Let $L$ elicit $\Gamma$.
+	The function $G(p) = -\min_{r\in\R} \E_p L(r,Y) = -\E_p L(\Gamma(p),Y)$ (taking any $r\in\Gamma(p)$ in case of ties) is convex.
+	There exists $\D \subseteq \partial G$ and some bijection $\varphi : \R \to \D$ with $\Gamma(p) = \varphi^{-1}(\D\cap \partial G_p)$.
+	Thus, $\Gamma_r = \{p : r\in\Gamma(p)\} = \{p : \varphi(r) \in \D\cap\partial G_p\} = \{p : \varphi(r) \in \partial G_p\}$, which is closed by convex analysis -- use \url{https://arxiv.org/pdf/1211.3043.pdf}.
+	See [Raf/Ian, above (Cor 3.11) with their Thm 3.5 and Rockefellar 24.4]  
+\end{proof}
 
 \begin{lemma}\label{lem:intersect-lev-sets}
   Let the elicitable property $\Gamma$ have a finite set $\Theta$ of full-dimensional level sets, so that for all $\theta \in \Theta$,  there is a unique optimal report $r_\theta$ for all $p \in \inter{\theta}$.
   Consider the finite set $\R' := \{ r_\theta\}_{\theta \in \Theta}$.
   Then for every $r \in \R$, there exists a finite set $R \subseteq \R'$ so that $\Gamma_r = \bigcap_{r' \in R} \Gamma_{r'}$.
 \end{lemma}
-\jessie{To show: can find set $R$ s.t. $\Gamma_r = \bigcap_{r' \in R} \Gamma_{r'}$, and $R$ is finite.}
+%\jessie{To show: can find set $R$ s.t. $\Gamma_r = \bigcap_{r' \in R} \Gamma_{r'}$, and $R$ is finite.}
 \begin{proof}
-  \emph{Facts used: Level sets are closed, non-degeneracy of level sets}\\
+  \emph{Facts used: Level sets are closed (Lemma \ref{lem:closed-level-sets}), non-degeneracy of $\Gamma$.}\\
 
-\hrule
-\bigskip
   Note:    As $\Gamma$ is non-degenerate, we know for all $p \in \P$ that $|\Gamma(p)| \geq 1$.
   For any $p \in \P$, if $|\Gamma(p)| = 1$, then $\Gamma(p) = r \in \R'$, so we can choose $S := \{r\} \subseteq \R'$ so that $\Gamma_r = \cap_{r \in S} \Gamma_r$.
   
@@ -158,7 +313,7 @@ If $q \in \Gamma_r$, then for every $r_i \in S_r$, there is some $p \in \inter{\
 Since $q$ is $\epsilon$-close to $p$, then we observe $q \in cl(\Gamma_{r_i})$.
 \jessie{A bit hand-wavvy}
 
-As level sets are closed (by Lemma \ref{conj:closed-level-sets}), $\Gamma_{r_i} = cl(\Gamma_{r_i})$, so $q \in \Gamma_{r_i}$.
+As level sets are closed (by Lemma \ref{lem:closed-level-sets}), $\Gamma_{r_i} = cl(\Gamma_{r_i})$, so $q \in \Gamma_{r_i}$.
 %Thus as $q \in \Gamma_r \implies q \in \Gamma_{r_i}$ for all $r_i \in S_r$, $q \in \Gamma_r \implies q \in \cap_{r_i \in S} \Gamma_{r_i}$.
 Thus as $q \in \Gamma_r \implies q \in \Gamma_{r_i}$ for all $r_i \in S_r$, we observe $\Gamma_r \subseteq \cap_{r_i \in S}\Gamma_{r_i}$.
 
@@ -178,47 +333,44 @@ Therefore, by constructing the finite set $S_r$, we observe there is a finite se
 \end{proof}
 
 
-\section{Formal Statements and modifications needed to prove}
-
-
 \begin{lemma}\label{lem:define-trim}
-  Let $L: \R \to \reals^\Y$ elicit a nondegenerate property $\Gamma$.
-There exists an unlabeled property $\Theta$ so that for all nondegenerate, nonredundant $\Gamma' \leq \Gamma$, we have $\strip(\Gamma') = \Theta := \text{trim}(\Gamma)$.
+	Let $L: \R \to \reals^\Y$ elicit a nondegenerate property $\Gamma$.
+	There exists an unlabeled property $\Theta$ so that for all nondegenerate, nonredundant $\Gamma' \leq \Gamma$, we have $\strip(\Gamma') = \Theta := \text{trim}(\Gamma)$.
 \end{lemma}
 
 \begin{proof}
-
-Consider the nonredundant, nondegenerate properties $\Gamma' \leq \Gamma$.
-As $\strip$ is well-defined, clearly $\Theta := \strip(\Gamma)$ is a well-defined set of level sets (property).
-
-We can define a nondegenerate $\Gamma' = \Gamma \cap \R'$ for some $\R' \subseteq \R$.
-Then we can write $\Theta' := \strip(\Gamma') = \{\Gamma_r : r \in \R' \}$.
-Our hope is to show $\Theta = \Theta'$.
-
-As $\R' \subseteq \R$, it is easy to see  $\Theta' \subseteq \Theta$, and therefore it is just left to show $\Theta \subseteq \Theta'$.
-
-Consider $\theta \in \Theta$.
-Then there is some $r \in \R$ such that $r\in\Gamma(p)\cap \R \implies r \in \Gamma(p)$ for all $p \in \theta$.
-
-We now want to show that there is some $r' \in \R'$ such that $r' \in \Gamma(p)$ for all $p \in \theta$.
-As $\Gamma'$ is nondegenerate, there exists some $r' \in \R'$ so that $r' \in \Gamma'(p) = \Gamma(p) \cap \R'$ for some $p \in \inter{\theta}$.
-Therefore, $\Gamma'_{r'} \subseteq \theta$.
-As $\Gamma'$ is elicitable, its level sets are convex, as is $\theta$.
-As no full-dimensional level set is the subset of another, it must either be the case that $\Gamma'_{r'}$ is not full dimensional or $\Gamma'_{r'} = \theta$.
-As we consider $r' \in \Gamma'(p)$ for some $p \in \inter{\theta}$, we know the first is not true, so it must be the case that $\Gamma'_{r'} = \theta$.
-Therefore, $r' \in \Gamma(p)$ for all $p \in \theta$.
-
-Therefore, $\theta \in \Theta'$,
-Since $\theta \in \Theta \implies \theta \in \Theta'$, we know $\Theta \subseteq \Theta'$.
-
-As $\Theta' \subseteq \Theta$, we conclude $\Theta = \Theta'$.
-
-Therefore, for all nonredundant, non-degenerate properties $\Gamma' \leq \Gamma$, we observe an unlabeled property $\trim(\Gamma) := \Theta = \strip(\Gamma')$.
-
+	
+	Consider the nonredundant, nondegenerate properties $\Gamma' \leq \Gamma$.
+	As $\strip$ is well-defined, clearly $\Theta := \strip(\Gamma)$ is a well-defined set of level sets (property).
+	
+	We can define a nondegenerate $\Gamma' = \Gamma \cap \R'$ for some $\R' \subseteq \R$.
+	Then we can write $\Theta' := \strip(\Gamma') = \{\Gamma_r : r \in \R' \}$.
+	Our hope is to show $\Theta = \Theta'$.
+	
+	As $\R' \subseteq \R$, it is easy to see  $\Theta' \subseteq \Theta$, and therefore it is just left to show $\Theta \subseteq \Theta'$.
+	
+	Consider $\theta \in \Theta$.
+	Then there is some $r \in \R$ such that $r\in\Gamma(p)\cap \R \implies r \in \Gamma(p)$ for all $p \in \theta$.
+	
+	We now want to show that there is some $r' \in \R'$ such that $r' \in \Gamma(p)$ for all $p \in \theta$.
+	As $\Gamma'$ is nondegenerate, there exists some $r' \in \R'$ so that $r' \in \Gamma'(p) = \Gamma(p) \cap \R'$ for some $p \in \inter{\theta}$.
+	Therefore, $\Gamma'_{r'} \subseteq \theta$.
+	As $\Gamma'$ is elicitable, its level sets are convex, as is $\theta$.
+	As no full-dimensional level set is the subset of another, it must either be the case that $\Gamma'_{r'}$ is not full dimensional or $\Gamma'_{r'} = \theta$.
+	As we consider $r' \in \Gamma'(p)$ for some $p \in \inter{\theta}$, we know the first is not true, so it must be the case that $\Gamma'_{r'} = \theta$.
+	Therefore, $r' \in \Gamma(p)$ for all $p \in \theta$.
+	
+	Therefore, $\theta \in \Theta'$,
+	Since $\theta \in \Theta \implies \theta \in \Theta'$, we know $\Theta \subseteq \Theta'$.
+	
+	As $\Theta' \subseteq \Theta$, we conclude $\Theta = \Theta'$.
+	
+	Therefore, for all nonredundant, non-degenerate properties $\Gamma' \leq \Gamma$, we observe an unlabeled property $\trim(\Gamma) := \Theta = \strip(\Gamma')$.
+	
 \end{proof}
 
 
-\subsection{Main statement}
+\section{Main statement}
 
 Let $\Gamma$ be a finite, non-degenerate convex elicitable property.
 
@@ -236,95 +388,104 @@ Let $\Gamma$ be a finite, non-degenerate convex elicitable property.
 Notes:
 In order to prove this, we need to assume the property is non-redundant.
 
-As $\Gamma \leq \Gamma$, then by Lemma \ref{lem:define-trim}, $\trim(\Gamma) = \strip(\Gamma)$.
-
 
 \begin{proof}
 Let $L$ be the loss function eliciting the property $\Gamma$.
 
-$1 \implies 2$. 
-% \emph{Assumptions used: non-redundancy}
-
-
-Consider $\strip(\Gamma) = \{\Gamma_r : r \in \R \}$.
-Let us construct the finite set $\R' = \{r_\theta \}_{\theta \in \Theta}$.
+\begin{enumerate}
+\item [$1 \implies 2$]
+Consider the finite set $\R' := \{r_\theta\}_{\theta \in \Theta}$.
 Clearly, $\R' \subseteq \R$.
+We construct the property $\Gamma' := \Gamma \cap \R'$ so that $\Gamma' \leq \Gamma$.
+If we can show $\Gamma'$ is nondegenerate and nonredundant, we can then show $\strip(\Gamma')$ is finite, which is $\trim(\Gamma)$ by definition.
 
-We can rewrite $\strip(\Gamma) = \{\Gamma_{r'} : r' \in \R' \} \cup \{\Gamma_{r} : r \in \R \setminus \R' \}$.
-As the first set is finite, we just need to show $\{\Gamma_{r} : r \in \R \setminus \R' \}$ is finite in order to show $\strip(\Gamma)$ is finite.
+Since there is an optimal report $r_\theta \in \Gamma'(p)$ for every $p \in \inter{\theta}$ and level sets are closed, there is then an optimal report $r_\theta \in \Gamma'(p)$ for every $p \in \theta$.
+Therefore, $\Gamma'$ is nondegenerate.
 
-Let us consider some $r\in\R \setminus \R'$.
-The level set $\Gamma_r = \{p : \Gamma(p) = r\}$ by definition.
-As $r \not\in \R'$, the interior is empty; that is, $\inter{\Gamma_r} = \emptyset$.
-% For any $p \in \Gamma_r$, then, there is some $q \in B(\epsilon, p)$ such that $\E_q L(r', Y) < \E_q L(r,y)$ for some $r' \in \R'$.
-% As $r = \argmin_{\tilde{r}} \E_p L(\tilde{r}, Y)$, then we observe $\E_p L(r, Y) = \E_p L(r', Y) = \min_{\tilde{r}}\E_p L(\tilde{r}, Y)$ for $p \in \Gamma_r$. 
-% Thus, $\Gamma_r \subseteq \Gamma_{r'}$.
-By Conjecture \ref{lem:intersect-lev-sets}, there exist a set of finite reports $R \subseteq \R'$ such that $\bigcap_{r'\in R} \Gamma_{r'} = \Gamma_r$.
-As the set $\R'$ is finite, then the power set $2^{\R'}$ is finite.
-Thus, the set $\{ \Gamma_r : r \in \R \setminus \R' \} =  \{ \bigcap_{r_1 \in R} \Gamma_{r_1} : R \subseteq \R' \}$ is finite.
-
-
-The union of a two finite sets is then finite, so $\trim(\Gamma) = \strip(\Gamma) = \{ \Gamma_{r'} : r' \in \R' \} \cup \{ \Gamma_r : r \in \R \setminus \R' \}$ is finite.
+To see $\Gamma'$ is nonredundant, consider the assumption of uniqueness of the optimal report on the interior of each level set.
+Thus, a report could only be redundant on the boundary of a level set.
+As $\R'$ is constructed to only contained optimal reports for full dimensional level sets, any $r$ such that $\Gamma_r$ is not full dimensional is not an element of $\R'$.
+For any $r, r' \in \R'$ with $r \neq r'$, we can see that $\Gamma_r \neq \Gamma_{r'}$ as both level sets are full dimensional and  on the (nonempty) interior of each level set, the respective report us uniquely optimal by assumption.
+To see (WLOG) $\Gamma_{r'} \not \subset \Gamma_r$, consider that since $\Gamma_r$ and $\Gamma_{r'}$ are full-dimensional, $\Gamma_{r'} \subseteq \Gamma_r \implies \Gamma_r \cap \Gamma_{r'} = \Gamma_{r'}$ is full dimensional, and we would observe $ r \in \Gamma(p)$ for all $p \in \inter{\Gamma_{r'}}$, contradicting unique optimality of the report $r'$ on the interior. 
+We conclude $\Gamma'$ is nonredundant.
 
 
-
-% Since $\Gamma$ is finite, we know it only has finitely many FDLS, and since $\Gamma$ is convex, these level sets are convex.
-% On the interior of these level sets, we know there is a unique optimal report.
-% As $\R' = \bigcup_{\Gamma_r \text{is FDLS}}r$, $\R'$ is finite as the finite union of finite sets is finite.
-% By Lemma 2 from original writeup, or new definition of trim, we know that $L|_\R$ elicits trim($\Gamma$).
-% As the new report set is finite, there many only be a finite number of minimizing reports.
-
-% Consider the full-dimensional level sets of $\Gamma$: as $\R' \subseteq \R$, then when $L$ is restricted to $\R'$, for any $r \in \R$, there must be some $r' \in \R'$ such that $\Gamma_{r} \subseteq \Gamma_{r'}$, as if .
+Consider $\strip(\Gamma') = \{\Gamma_r : r \in \R' \}$.
+As $\R'$ is finite, so is $\strip(\Gamma')$.
+Since $\Gamma'$ is a  nondegenerate, nonredundant property such that $\Gamma' \leq \Gamma$, we invoke the definition of trim to say $\trim(\Gamma) = \strip(\Gamma')$, so as $\strip(\Gamma')$ is finite, we conclude $\trim(\Gamma)$ is finite.
 
 
+%We can rewrite $\strip(\Gamma) = \{\Gamma_{r'} : r' \in \R' \} \cup \{\Gamma_{r} : r \in \R \setminus \R' \}$.
+%As the first set is finite, we just need to show $\{\Gamma_{r} : r \in \R \setminus \R' \}$ is finite in order to show $\strip(\Gamma)$ is finite.
+%
+%Let us consider some $r\in\R \setminus \R'$.
+%The level set $\Gamma_r = \{p : \Gamma(p) = r\}$ by definition.
+%As $r \not\in \R'$, the interior is empty; that is, $\inter{\Gamma_r} = \emptyset$.
+%% For any $p \in \Gamma_r$, then, there is some $q \in B(\epsilon, p)$ such that $\E_q L(r', Y) < \E_q L(r,y)$ for some $r' \in \R'$.
+%% As $r = \argmin_{\tilde{r}} \E_p L(\tilde{r}, Y)$, then we observe $\E_p L(r, Y) = \E_p L(r', Y) = \min_{\tilde{r}}\E_p L(\tilde{r}, Y)$ for $p \in \Gamma_r$. 
+%% Thus, $\Gamma_r \subseteq \Gamma_{r'}$.
+%By Conjecture \ref{lem:intersect-lev-sets}, there exist a set of finite reports $R \subseteq \R'$ such that $\bigcap_{r'\in R} \Gamma_{r'} = \Gamma_r$.
+%As the set $\R'$ is finite, then the power set $2^{\R'}$ is finite.
+%Thus, the set $\{ \Gamma_r : r \in \R \setminus \R' \} =  \{ \bigcap_{r_1 \in R} \Gamma_{r_1} : R \subseteq \R' \}$ is finite.
+%
+%
+%The union of a two finite sets is then finite, so $\trim(\Gamma) \subseteq \strip(\Gamma) = \{ \Gamma_{r'} : r' \in \R' \} \cup \{ \Gamma_r : r \in \R \setminus \R' \}$ is finite.
 
-%Since $\Gamma$ is a finite property, there are a finite number of (non-empty) level sets.
-%As there is only one optimal report per (interior of) level set, there are a finite of minimizing reports.
-%Let this finite set be $\tilde{\R}$, and observe $\tilde{R}$ is finite.
-%By definition, $\tilde{\R} \subseteq \R$.
-%As $\im(\Gamma') = \im(\Gamma) \cap \R = \tilde{\R} \cap \R'$ \footnote{Needs showing}, then the finite intersection of a finite set and another set is finite, so $\im(\Gamma')$ is finite.
 
 
-\bigskip
-$2 \implies 1$.  
+\item[$2 \implies 1$]  
 \emph{Assumptions used: Nondegeneracy, elicitability of $\Gamma$}
 
 Let $\Theta := \trim(\Gamma)$ be a finite set.
-By construction, $\Theta$ is a set of level sets defining the property $\Gamma$.
-As $\Theta$ is finite, $\Gamma$ then only has finitely many level sets, and therefore, finitely many \emph{full-dimensional} level sets.
-We construct the set $\R' := \{r \in \R : \{r\} = \argmin_r \E_p L(r,Y) \text{ for } p \in \inter{\theta}; \theta \in \Theta \}$.
-Consider a full-dimensional level set $\theta = \Gamma_r \in \Theta$ for some $r \in \R'$.
-As $\Theta$ is finite, we just want to show that there is a unique optimal report on the interior of each $\theta \in \Theta$.
-As $\trim(\Gamma) = \strip(\Gamma')$ for the constructed $\Gamma'$, we just need to show $\Gamma'$ is nondegenerate, as uniqueness of the optimal report on each interior follows from the construction of $\R'$.
+By Conjecture~\ref{conj:gam-prime-exists}, there is then a nonredundant, nondegenerate property $\Gamma'$ such that $\strip(\Gamma') = \trim(\Gamma)$.
+Let $\R' \subseteq \R$ be the finite set used to define the property $\Gamma'$.
 
-Suppose there was a distribution $p \in \inter{\theta}$ for some $\theta \in \Theta$ such that $\Gamma'(p) = \emptyset$.
-Then $\Gamma(p)$ is set-valued, since $\Gamma$ is nondegenerate, and every $r \in \Gamma(p) \not\in \R'$.
-Suppose there were some $r_1, r_2 \in \R$ (this generalizes) so that $r_1, r_2 \not \in \R'$ but $\{r_1, r_2\} = \Gamma(p)$ for some $p \in \inter{\theta}$.
-Then (WLOG) $\Gamma_{r_1} = \theta$ and we know $\Gamma_{r_2} \subseteq \Gamma_{r_1} = \theta$.
-As $r_1 \not\in \R$, for every $p \in \inter{\theta}$ we know $r_1$ must not be the unique minimizer.
-If $\Gamma_{r_2} \subseteq \Gamma_{r_1}$, then the property $\tilde \Gamma := \Gamma \cap (\R' \cup \{r_1\})$ is nonempty at the distribution $p$ in question and $\strip(\Gamma') = \strip(\tilde \Gamma)$.
+As $\Theta$ is finite and $\trim(\Gamma)$ is the set of full dimensional level sets of $\Gamma$, the finite number of full-dimensional level sets follows from the assumption and definitions combined.
+
+Consider a level set $\theta\in \Theta$.
+There is a report $r \in \R'$ so that $\Gamma'(p) = \{r\}$ for all $p \in \inter{\theta}$-- this follows from nonredundancy of $\Gamma'$.
+
+Therefore if the function $\trim(\Gamma)$ is well-defined and finite, then the labeled property $\Gamma$ has a finite set of full-dimensional level sets and for every $\theta \in \Theta$, there is a unique optimal report for every distribution $p \in \inter{\theta}$.
 
 
-If these possible empty values of $\Gamma'$ at multiple distributions, the same argument need only be applied finitely many times, so there is a nondegenerate $\tilde \Gamma$ such that $\strip(\tilde \Gamma) = \trim(\Gamma)$ has a unique optimal report on the interior of each level set.
-
-
-Thus, 2$\implies$ 1.
-
-\jessie{Ran out of time, but not satisfied with this completely.}
-
-
-%For contradiction, suppose there was some $s \in \R$ such that $\E_p L(s,Y) = \E_p L(r_\theta, Y)$ for some $p \in \inter{\theta}$.
+%Let $\Theta := \trim(\Gamma)$ be a finite set.
+%By construction, $\Theta$ is a set of full dimensional level sets defining the property $\Gamma$.
+%Thus, $\Gamma$ then only has finitely many \emph{full-dimensional} level sets.
+%Then there is a finite set $\R' \subseteq \R$ defined by the property $\Gamma' \leq \Gamma$ where $\strip(\Gamma') = \trim(\Gamma)$.\jessie{Make sure I can claim this.}
 %
-%As $p \in \inter{\theta}$, we then know $\E_q L(r_\theta, Y) \leq \E_q L(s,Y)$ for all $q \in B(\epsilon, p)$.
-%Therefore, $\Gamma_s \subseteq \inter{\Gamma_{r_\theta}} \subseteq \Gamma_{r_\theta}$.
-%As there are no dominated reports (by non-redundancy of $\Gamma$), this implies $\Gamma_s = \Gamma_{r_\theta}$.
-%Therefore, we can see that $r_\theta = s$, since otherwise we would contradict non-redundancy of $\Gamma$.
-%As $r_\theta = s$, we can then say $r_\theta$ is the unique property value on $\inter{\theta}$.
-%Therefore, $\Gamma(p) = \{r_\theta\}$ for all $p \in \inter{\theta}$.
+%Consider a level set $\theta \in \Theta$.
+%We want to show there is a unique $r \in \R'$ such that $\Gamma(p) = \{r\}$ for all $p \in \inter{\theta}$.
 %
-%As the full-dimensional level sets in $\Theta$ are finite and the optimal report is unique on the interior of level sets, $2 \implies 1$.
+%Take the finite set $\R' \subseteq \R$ such that the nondegenerate, nonredundant property $\Gamma' \leq \Gamma$.
+%Fix some level set $\theta \in \Theta$.
+%For any $p \in \inter{\theta}$, there is then a report $r \in \R'$ such that  $r \in \Gamma(p)$ by nondegeneracy of $\Gamma'$.
+%We then want to show $r$ is unique.
+%
+%For contradiction, consider some $r' \in \R'$ such that $r \neq r'$.
+%As $\trim(\Gamma) = \strip(\Gamma')$ contains only full dimensional level sets, then $\Gamma_r$ and $\Gamma_{r'}$ are both full dimensional, as is their intersection $\Gamma_r \cap \Gamma_{r'}$.
+%Since we define $\Gamma'$ in a manner so that for all $r \in \R' \implies \Gamma_r = \Gamma'_r$, we then say $\Gamma_r \cap \Gamma_{r'} = \Gamma'_r \cap \Gamma'_{r'}$, which contradicts the nonredundancy of $\Gamma'$.
+%Therefore we observe a contradiction, and conclude $r = r'$.
+%Therefore, if $\trim(\Gamma)$ is finite, then the property $\Gamma$ has a finite set (namely, $\trim(\Gamma)$) of full dimensional level sets so that for every $\theta \in \Theta$, there is a unique optimal report $r$ for every $p \in \inter{\theta}$.
+
+
+\end{enumerate} 
 
 \end{proof}
+
+\section{To Do after meeting 9.24.18}
+
+
+
+look at Rockefellar- algebraic interior
+Appendix of complexity paper- the Bayes Risk must be strictly concave.
+
+
+Order of To-Dos -- ordered by dependency
+\begin{enumerate}
+\item Show there exists a nondeg, nonred $\Gamma' \leq \Gamma$ that $\trim(\Gamma) = \strip(\Gamma')$. (Conjecture~\ref{conj:gam-prime-exists}) -- Done
+\item Show every level set of the trim is Full Dimensional (Conjecture~\ref{conj:trim-full-dim}).
+\item Proof of $2 \implies 1$-- Done-ish.
+\end{enumerate}
 
 \end{document}
 %%% Local Variables:
