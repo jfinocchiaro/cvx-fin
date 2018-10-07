@@ -1,0 +1,194 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{mathtools, amsmath, amsthm, amssymb, graphicx, verbatim}
+%\usepackage[thmmarks, thref, amsthm]{ntheorem}
+\usepackage{color}
+\usepackage{wrapfig}
+\usepackage{subcaption}
+\usepackage[colorinlistoftodos,textsize=tiny]{todonotes} % need xargs for below
+%\usepackage{accents}
+\usepackage{bbm}
+\usepackage{xspace}
+
+\newcommand{\Comments}{1}
+\newcommand{\mynote}[2]{\ifnum\Comments=1\textcolor{#1}{#2}\fi}
+\newcommand{\mytodo}[2]{\ifnum\Comments=1%
+  \todo[linecolor=#1!80!black,backgroundcolor=#1,bordercolor=#1!80!black]{#2}\fi}
+\newcommand{\raf}[1]{\mynote{green}{[RF: #1]}}
+\newcommand{\raft}[1]{\mytodo{green!20!white}{RF: #1}}
+\newcommand{\jessie}[1]{\mynote{purple}{[JF: #1]}}
+\newcommand{\jessiet}[1]{\mytodo{purple!20!white}{JF: #1}}
+\ifnum\Comments=1               % fix margins for todonotes
+  \setlength{\marginparwidth}{1in}
+\fi
+
+
+\newcommand{\reals}{\mathbb{R}}
+\newcommand{\posreals}{\reals_{>0}}%{\reals_{++}}
+
+% alphabetical order, by convention
+\newcommand{\D}{\mathcal{D}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\I}{\mathcal{I}}
+\renewcommand{\P}{\mathcal{P}}
+\newcommand{\R}{\mathcal{R}}
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\Y}{\mathcal{Y}}
+
+
+\newcommand{\inter}[1]{\mathring{#1}}%\mathrm{int}(#1)}
+%\newcommand{\expectedv}[3]{\overline{#1}(#2,#3)}
+\newcommand{\expectedv}[3]{\E_{Y\sim{#3}} {#1}(#2,Y)}
+\newcommand{\toto}{\rightrightarrows}
+\newcommand{\trim}{\mathrm{trim}}
+\newcommand{\strip}{\mathrm{strip}}
+\newcommand{\fplc}{finite-piecewise-linear and convex\xspace} %xspace for use in text
+\newcommand{\FPLC}{\mathrm{FPLC}}
+\newcommand{\conv}{\mathrm{conv}}
+\newcommand{\elic}{\mathrm{elic}}
+\newcommand{\ones}{\mathbbm{1}}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\arginf}{arg\,inf}
+\DeclareMathOperator*{\sgn}{sgn}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{example}{Example}
+
+
+\title{Elicitation Complexity via Convex Piecewise Linear Loss Functions}
+\author{Jessie, Raf, Bo}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+Big questions right now in the field:
+\begin{itemize}
+\item Characterize convex-elicitable properties
+\item Bound convex elicitation complexity
+\item Understand the role of smoothness and strict convexity: are non-smooth non-strict convex losses strictly more powerful?
+\end{itemize}
+
+This paper: progress toward all three by studying properties ``directly'' elicited by FPLC losses.
+
+\section{Setting}
+
+\raf{Standard defs: property, elicit, ...}
+
+Previous papers on general indirect elicitation have largely ignored set-valued properties.
+How to define?
+The crux: what should the link be?
+
+\begin{definition}
+  Let properties $\Gamma:\P\toto\R$ and $\Gamma':\P\toto\R'$ be given.
+  The function $f:\R'\to\R$ is a \emph{selective link function} if (i) $r'\in\Gamma'(p) \implies f(r') \in \Gamma(p)$, and (ii) $f(\Gamma'(p)) = \Gamma(p)$.
+  The function $f:\R'\toto\R$ is an \emph{exhaustive link function} if $r'\in\Gamma'(p) \iff f(r') = \Gamma(p)$.
+  \raf{I think I got these right, but definitely need to check}
+\end{definition}
+
+The intuition: selective links map optimal reports to an optimal report, whereas exhaustive links map optimal reports to the \emph{full set} of optimal reports.
+
+\begin{example}
+  Hinge loss and logistic loss.
+  Link $f = \sgn$ is selective for hinge but exhaustive for logistic.
+\end{example}
+
+\begin{definition}
+  Elicitation complexity of $\Gamma:\toto\R$... \raf{this is a guess...} min dimension of $\Gamma'\in\mathcal{C}\cap\mathcal{E}$ with either a selective or exhaustive link to $\Gamma$.
+\end{definition}
+
+\section{Embedded Properties}
+
+\begin{definition}
+  Let $\gamma:\P\toto\R$.
+  We say a property $\Gamma:\P\toto\reals^d$ \emph{embeds $\gamma$} if \raf{we need to settle on this:} there is a subset $\R'\subseteq\reals^d$ and bijection $\varphi:\R'\to\R$ such that $r'\in\Gamma(p) \iff \varphi(r') \in \gamma(p)$.
+\end{definition}
+\raf{Note: the above definition is general and not specific to FPLC, finite propertes, etc.}
+
+\raf{What can we say about the link function $f:\reals^d\to\R$ in the above case?  Do we need the following proposition to construct a selective link?  Perhaps the definition of embedding should be all about the link...}
+
+\begin{proposition}
+  Let $\Gamma:\P\toto\reals^d$ be elicitable.
+  The following are equivalent:
+  \begin{enumerate}
+  \item $\Gamma$ is an embedding of a finite elicitable property.
+  \item $\Gamma$ has finitely many full-dimensional level sets which union to $\P$.
+  \item $\Gamma$ has finitely many full-dimensional level sets which union to $\P$, and a report in each level set such that...
+  \item $\strip(\Gamma)$ is finite.
+  \item $\trim(\Gamma)$ is finite.
+  \item $\trim(\Gamma)$ is finite and elicitable.
+  \end{enumerate}
+\end{proposition}
+\begin{proof}
+  \raf{Much of the proof in Jessie-notes}
+\end{proof}
+
+
+\section{Piecewise-Linear Convex Lossos}
+
+\begin{proposition}
+  Let $L$ be FPLC.
+  Then $\Gamma_L$ embeds a elicitable finite property.
+\end{proposition}
+\begin{proof}
+  \raf{In cvx-fin-notes}
+\end{proof}
+
+As every finite property is embedded by an FPLC loss, it remains only to ask how many dimensions are required.
+This motivates the definition of $d$-FPLC-embeddable.
+
+\begin{definition}
+  Property $\gamma:\P\toto\R$ is $d$-FPLC-embeddable if there is some FPLC loss $L:\reals^d\times\Y\to\reals$ such that $\Gamma_L$ embeds $\gamma$.
+\end{definition}
+
+\begin{example}
+  \raf{Some examples...}
+\end{example}
+
+\section{Embedding Dimension}
+
+\begin{proposition}
+  Let $\gamma:\Delta(\Y)\toto\R$ be a elicitable finite property for $n=|\Y|$.
+  Then $\gamma$ is $(n-1)$-FPLC-embeddable.
+\end{proposition}
+\begin{proof}
+  \raf{In cvx-fin-notes}  
+\end{proof}
+
+\raf{Do we also have $d$-embeddable $\implies$ $d$-FPLC-embeddable if $\gamma$ is finite?  That seems harder to show; maybe it was on our list once.}
+
+\begin{proposition}
+  Let $\gamma:\Delta(\Y)\toto\R$ be a finite property. \raf{Do we need elicitable?}
+  Then $\gamma$ is $1$-FPLC-embeddable if and only if $\gamma$ is oriented.
+\end{proposition}
+\begin{proof}
+  \raf{In cvx-fin-notes}
+\end{proof}
+
+\begin{theorem}
+  Let $\gamma:\Delta(\Y)\toto\R$ be an elicitable finite property.
+  Then $\gamma$ is $d$-FPLC-embeddable if and only if [[AWESOME CHARACTERIZATION]].
+\end{theorem}
+\begin{proof}
+  [[AWESOME PROOF]]
+\end{proof}
+
+Implications for complexity: certainly $\gamma$ is $d$-FPLC-embeddable $\implies$ $\elic_\FPLC(\gamma) \leq d$.
+\raf{If $\gamma$ is elicitable, I think this is an $\iff$, right?}
+If $\gamma$ is finite but not elicitable, it will not be FPLC-embeddable for any dimension, but could still have finite FPLC elicitation complexity.
+E.g.\ 
+
+\end{document}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
