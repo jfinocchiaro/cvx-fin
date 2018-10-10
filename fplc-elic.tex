@@ -33,6 +33,7 @@
 \newcommand{\I}{\mathcal{I}}
 \renewcommand{\P}{\mathcal{P}}
 \newcommand{\R}{\mathcal{R}}
+\newcommand{\V}{\mathcal{V}}
 \newcommand{\X}{\mathcal{X}}
 \newcommand{\Y}{\mathcal{Y}}
 
@@ -89,10 +90,9 @@ How to define?
 The crux: what should the link be?
 
 \begin{definition}
-  Let properties $\Gamma:\P\toto\R$ and $\Gamma':\P\toto\R'$ be given.
-  The function $f:\R'\to\R$ is a \emph{selective link function} if (i) $r'\in\Gamma'(p) \implies f(r') \in \Gamma(p)$, and (ii) $f(\Gamma'(p)) = \Gamma(p)$.
-  The function $f:\R'\toto\R$ is an \emph{exhaustive link function} if $r'\in\Gamma'(p) \iff f(r') = \Gamma(p)$.
-  \raf{I think I got these right, but definitely need to check}
+  Let properties $\gamma:\P\toto\R$ and $\Gamma:\P\toto\V$ be given.
+  The function $f:\V\to\R$ is a \emph{selective link function} if (i) $v\in\Gamma(p) \implies f(v) \in \gamma(p)$, and (ii) $f(\Gamma(p)) = \gamma(p)$.
+  The function $f:\V\toto\R$ is an \emph{exhaustive link function} if $v\in\Gamma(p) \iff f(v) = \gamma(p)$.
 \end{definition}
 
 The intuition: selective links map optimal reports to an optimal report, whereas exhaustive links map optimal reports to the \emph{full set} of optimal reports.
@@ -102,27 +102,36 @@ The intuition: selective links map optimal reports to an optimal report, whereas
   Link $f = \sgn$ is selective for hinge but exhaustive for logistic.
 \end{example}
 
+\raf{If we want to state this general definition for posterity; won't be needed.}
 \begin{definition}
-  Elicitation complexity of $\Gamma:\P\toto\R$... \raf{this is a guess...} min dimension of $\Gamma'\in\mathcal{C}\cap\mathcal{E}$ with either a selective or exhaustive link to $\Gamma$.
+  Elicitation complexity of $\gamma:\P\toto\R$... min dimension of $\Gamma\in\mathcal{C}\cap\mathcal{E}$ with either a selective or exhaustive link to $\gamma$.
   \raf{Maybe break into ``selective'' and ``exhaustive'' versions?}
 \end{definition}
 
 \section{Embedded Properties}
 
 \begin{definition}
-  Let $\Gamma:\P\toto\R$.
-  We say a property $\Gamma':\P\toto\R'$ \emph{embeds $\gamma$} if \raf{we need to settle on this:} there is an injection $\varphi:\R\to\R'$ such that $r\in\Gamma(p) \iff \varphi(r) \in \Gamma'(p)$.
+  Let $\gamma:\P\toto\R$.
+  We say a property $\Gamma:\P\toto\reals^d$ \emph{embeds $\gamma$} if there is an injection $\varphi:\R\to\reals^d$ such that $r\in\gamma(p) \iff \varphi(r) \in \Gamma(p)$.
+  \raft{Note: definition is general and not specific to FPLC, finite propertes, etc.}
 \end{definition}
-\raf{Note: the above definition is general and not specific to FPLC, finite propertes, etc.}
+
+\begin{lemma}
+  \label{lem:embed-lev-set-subset}
+  If elicitable $\Gamma:\P\toto\reals^d$ embeds non-degenerate $\gamma:\P\toto\R$, then for all $v\in\reals^d$, we have $\Gamma_v \subseteq \gamma_r$ for some $r\in\R$.
+\end{lemma}
 
 \begin{proposition}
-  If elicitable $\Gamma':\P\toto\R'$ embeds non-degenerate $\Gamma:\P\toto\R$, there is a selective link $f:\R'\to\R$ from $\Gamma'$ to $\Gamma$.
+  If elicitable $\Gamma:\P\toto\reals^d$ embeds non-degenerate $\gamma:\P\toto\R$, there is a selective link $f:\reals^d\to\R$ from $\Gamma$ to $\gamma$.
 \end{proposition}
 \begin{proof}
-  Define $F:\R'\toto\R$ as follows: $F(r') = \bigcap\{\Gamma(p) : r'\in\Gamma'(p)\} = \bigcap\{\Gamma(p) : p \in\Gamma'_{r'}\}$.
-  That is, $F$ encodes all reports of $\Gamma$ which could be correct when $r'$ is chosen from $\Gamma'$.
-  \raf{Show $F(r') \neq \emptyset$ for all $r'$... we'll definitely need non-degeneracy here, and I think elicitability of $\Gamma'$ too.}
-  We simply define $f$ to be any single-valued function such that $f(r') \in F(r')$ which satisfies $f(\varphi(r)) = r$ for all $r\in\R$.
+  Let $\V = \bigcap\{ \Gamma(p) : p\in\P\} \subseteq \reals^d$ be the image of $\Gamma$.
+  Define $F:\V\toto\R$ as follows: $F(v) = \bigcap\{\gamma(p) : v\in\Gamma(p)\} = \bigcap\{\gamma(p) : p \in\Gamma_v\}$.
+  That is, $F$ encodes all reports of $\gamma$ which could be correct when $v$ is chosen from $\Gamma$.
+  Now let $v\in\V$, and let $r\in\R$ be given by Lemma~\ref{lem:embed-lev-set-subset}, so that $\Gamma_v \subseteq \gamma_r$.
+  Then $p\in\Gamma_v \implies r\in\gamma(p)$, so we have $r \in F(v)$, and in particular, $F(v)\neq\emptyset$.
+  (The latter would be vacuous if there were no $p\in\Gamma_v$, but we have assumed so by definition of $\V$.)
+  We simply define $f:\reals^d$ to be any single-valued function such that $f(\varphi(r)) = r$ for all $r\in\R$, $f(v) \in F(v)$ whenever $v\in\V$, and $f(v) \in \R$ arbitrary when $v\notin\V$.
   (This is a consistent choice by definition of $\varphi$.)
 
   It remains to show that $f$ is a selective link.
@@ -132,8 +141,6 @@ The intuition: selective links map optimal reports to an optimal report, whereas
   Thus, $f(\Gamma'(p)) \supseteq \{f(\varphi(r)) : r \in \Gamma(p)\} = \Gamma(p)$.
   By (i), this must be an equality.
 \end{proof}
-
-\raf{What can we say about the link function $f:\reals^d\to\R$ in the above case?  Do we need the following proposition to construct a selective link?  Perhaps the definition of embedding should be all about the link...}
 
 \begin{proposition}
   Let $\Gamma:\P\toto\reals^d$ be elicitable.
