@@ -1,0 +1,321 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{mathtools, amsmath, amsthm, amssymb, graphicx, mathrsfs, verbatim}
+%\usepackage[thmmarks, thref, amsthm]{ntheorem}
+\usepackage{color}
+\usepackage{wrapfig}
+\usepackage{subcaption}
+\usepackage[colorinlistoftodos,textsize=tiny]{todonotes} % need xargs for below
+%\usepackage{accents}
+\usepackage{bbm}
+\usepackage{xspace}
+\usepackage[margin=1.25in]{geometry}
+
+\usepackage[colorlinks=true,breaklinks=true,bookmarks=true,urlcolor=blue,
+     citecolor=blue,linkcolor=blue,bookmarksopen=false,draft=false]{hyperref}
+
+\newcommand{\Comments}{1}
+\newcommand{\mynote}[2]{\ifnum\Comments=1\textcolor{#1}{#2}\fi}
+\newcommand{\mytodo}[2]{\ifnum\Comments=1%
+  \todo[linecolor=#1!80!black,backgroundcolor=#1,bordercolor=#1!80!black]{#2}\fi}
+\newcommand{\raf}[1]{\mynote{green}{[RF: #1]}}
+\newcommand{\raft}[1]{\mytodo{green!20!white}{RF: #1}}
+\newcommand{\jessie}[1]{\mynote{purple}{[JF: #1]}}
+\newcommand{\jessiet}[1]{\mytodo{purple!20!white}{JF: #1}}
+\newcommand{\btw}[1]{\mytodo{gray!20!white}{BTW: #1}}
+\ifnum\Comments=1               % fix margins for todonotes
+  \setlength{\marginparwidth}{1in}
+\fi
+
+
+\newcommand{\reals}{\mathbb{R}}
+\newcommand{\posreals}{\reals_{>0}}%{\reals_{++}}
+
+% alphabetical order, by convention
+\newcommand{\D}{\mathcal{D}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\I}{\mathcal{I}}
+\renewcommand{\P}{\mathcal{P}}
+\newcommand{\R}{\mathcal{R}}
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\Y}{\mathcal{Y}}
+
+
+\newcommand{\inter}[1]{\mathring{#1}}%\mathrm{int}(#1)}
+\newcommand{\cl}[1]{\text{cl}(#1)}
+%\newcommand{\expectedv}[3]{\overline{#1}(#2,#3)}
+\newcommand{\expectedv}[3]{\E_{Y\sim{#3}} {#1}(#2,Y)}
+\newcommand{\toto}{\rightrightarrows}
+\newcommand{\trim}{\mathrm{trim}}
+\newcommand{\fplc}{finite-piecewise-linear and convex\xspace} %xspace for use in text
+\newcommand{\conv}{\mathrm{conv}}
+\newcommand{\ones}{\mathbbm{1}}
+\newcommand{\aff}{\text{aff}}
+\newcommand{\im}{\text{im}}
+\newcommand{\strip}{\mathrm{strip}}
+\newcommand{\card}{\textbf{card}}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\arginf}{arg\,inf}
+\DeclareMathOperator*{\sgn}{sgn}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{notation}{Notation}
+
+
+
+
+\begin{document}
+
+\section{Notation and Definitions}
+
+
+A set $\Theta \subseteq 2^{\R}$ is an unlabeled property, and finite if $|\Theta| < \infty$.
+Note that $\R$ finite implies $\Theta$ is finite.
+Observe that $\Theta$ is a set of level sets, and not a function.
+
+
+\begin{definition}
+Let $\Gamma:\P\toto\R$.
+Define $\text{strip}(\Gamma) := \{ \Gamma_r : r \in \R \}$.
+\end{definition}
+Informally, strip removes labels from the property.
+\btw{Note: Strip includes the boundaries of level sets / lower dimensional level sets.}
+
+\begin{notation}
+Let $\gamma: \P \toto\R'$ and $\Gamma: \P \toto\R$.
+We say $\gamma \preceq \Gamma$ if for all $p \in \P$, we observe $\gamma(p) = \Gamma(p) \cap \R'$.
+\end{notation}
+
+\begin{definition}
+	\jessie{Not sure we need this, but I feel like it might be useful in the future for showing uniqueness up to a relabeling.}
+	Let $\gamma$ and $\zeta$ be set-valued properties.
+	We say $\gamma~\approx~\zeta$ if $\strip(\gamma)~=~\strip(\zeta)$.
+\end{definition}
+
+Observe that for every set of properties $\gamma: \P \toto \R'$ and $\zeta: \P \toto \R$ such that $\gamma \approx \zeta$, there is a bijection $\phi:\R' \to \R$ so that $\phi(\gamma(p)) = \zeta(p)$ \footnote{Here, we slightly abuse notation and, given the finite set $S$, write $\phi(S) := \{\phi(x) : x \in S \}$.	($\phi$ is real valued, but we might be taking $\phi$ on every element of a set.)} for all $p \in \P$.
+
+
+
+\begin{definition}
+	The elicitable property $\Gamma:\P\toto \R$ is an \emph{embedding} of $\gamma: \P \toto \R'$ if there exists a property $\zeta : \P \toto \R$ so that $\zeta \preceq \Gamma$ and $\gamma \approx \zeta$.
+\end{definition}
+
+
+\begin{definition}
+A property $\Gamma: \P \to \R$ is \emph{finite} if $\im(\Gamma) := \{r\in\Gamma(p) : p\in\P, r \in \R \} = \bigcup_{p\in\P} \Gamma(p)$ is a finite set.
+\end{definition}
+
+
+\begin{definition}
+	A convex level set $\theta$ is \emph{full-dimensional} if it has nonempty interior.
+\end{definition}
+
+
+
+\section{Conjectures and Lemmas on the way}
+
+\begin{conjecture}\label{conj:gam-prime-exists}
+	Let $\Gamma:\P \toto \reals^d$ be a nondegenerate elicitable property with a finite set of full-dimensional level sets $\Theta$ so that $\bigcup_{\theta \in \Theta}\theta = \P$.
+	There exists a nondegenerate, nonredundant property $\gamma: \P \toto \R$ such that $\gamma \preceq \Gamma$. 
+\end{conjecture}
+\begin{proof}
+\emph{Assumptions used: Finite level sets}
+
+	
+	Construct the finite set $\R' = \{r \in \Gamma(p) : p \in \inter{\theta} \}_{\theta \in \Theta}$. \jessie{(HOLE)- Check this is how we want to state the construction of $\R'$.}
+	(If $\R'$ is not finite, choose just one $r \in \R$ so that $\theta = \Gamma_r$.)
+	Defining the property $\gamma : p \mapsto \Gamma(p) \cap \R'$, we see that $\gamma \preceq \Gamma$.
+	We want to show that the constructed $\gamma$ is nondegenerate and nonredundant.
+	As $\Gamma$ is nondegenerate, there is some report $r \in \reals^d$ such that $r \in \Gamma(p)$.
+	For every $p \in \P$, there is some level set $\theta$ so that $p \in \cl{\theta}$, and since level sets of elicitable properties are closed (see Lemma~\ref{lem:closed-level-sets}), and therefore $p \in \theta$.
+	Thus there is some report $r \in \R'$ so that $r \in \gamma(p)$, so $\gamma$ is nondegenerate.
+
+	\jessie{This next paragraph is definitely incomplete (HOLE)}
+	If $\gamma$ is redundant, then remove any redundant reports from $\R'$.
+	Any level set with a redundant report must either (a.) equal to another level set or (b.) a proper subset of another level set. 
+	However, in our preliminary step of removing redundant reports in $\reals^d$ in defining $\R$, we know that (a.) does not happen.
+	To see that (b.) does not happen, consider that a level set of an elicitable property is a proper subset 
+	\jessie{End the hole here}
+	
+	Therefore, there will be at least one $r \in \R'$ per distribution, and since level sets are closed, $\gamma$ will still be nondegenerate.
+	Therefore, our constructed $\gamma$ is nondegenerate, nonredundant, and $\gamma \preceq \Gamma$.
+	
+\end{proof}
+
+
+\begin{lemma}\label{lem:define-trim}
+	Let $\Gamma$  be a nondegenerate, elicitable property with a finite set of level sets $\Theta$ so that $\bigcup_{\theta \in \Theta} \theta = \P$.
+	There exists an unlabeled property $\Theta$ so that for all nondegenerate, nonredundant $\gamma \preceq \Gamma$, we have $\strip(\gamma) = \Theta := \trim(\Gamma)$.
+\end{lemma}
+
+\begin{proof}
+	Let $\gamma: \P \toto \R'$, and $\Gamma: \P \toto \reals^d$.
+	For contradiction, suppose there was some other nondegenerate, nonredundant $\zeta: \P \toto \R$ so that $\zeta \preceq \Gamma$.
+	For any $\zeta \approx \gamma$, we know $\strip(\zeta) = \strip(\gamma)$.
+	If $\zeta \not \approx \gamma$, there is no bijection from $\R$ to $\R'$, so then $\card(\R') \neq \card(\R)$.
+	If $\card(\R') > \card(\R)$, then we either contradict nondegeneracy of $\zeta$ or nonredundancy of $\gamma$ and contradict nondegeneracy of $\gamma$ or nonredundancy of $\zeta$ with the other direction of inequality.
+	Thus, we must have $\gamma \approx \zeta$, and conclude $\strip(\gamma)$ is unique.
+	
+\end{proof}
+
+
+
+
+\begin{conjecture}\label{conj:trim-full-dim}
+	Consider a nondegenerate, elicitable property $\Gamma$ with finitely many level sets.
+	Every $\theta \in \Theta := \trim(\Gamma)$ is full-dimensional  
+\end{conjecture}
+
+\begin{proof}[Proof Sketch]
+	\emph{Uses: Conjecture~\ref{conj:gam-prime-exists}.}
+	
+	We define $\trim(\Gamma)$ in terms of the property $\gamma: \P \toto \R'$ such that $\gamma \preceq \Gamma$ and $\R'$ is as constructed in Conjecture~\ref{conj:gam-prime-exists}.
+	For each $\theta \in \trim(\Gamma) = \strip(\gamma)$, there must be a report $r \in \R'$ such that $\theta = \gamma_r = \Gamma_{r}$.
+	By construction, $r \in \R' \implies \inter{\gamma_r} = \inter{\theta} \neq \emptyset$.
+	Since $\theta$ is convex (as level sets of elicitable properties are) and has nonempty interior, then $\theta$ is full dimensional. 
+	
+\end{proof}
+
+
+\begin{conjecture}\label{conj:lev-sets-subsets}
+	Let the property $\Gamma: \P \toto \reals^d$ be convex elicitable and the nondegenerate, nonredundant property $\gamma: \P \toto \R$ so that $\gamma \preceq \Gamma$.
+	Then the level sets of $\Gamma$ are subsets of the level sets of $\gamma$.
+	%\jessie{Statement needs to be changed so instead of assuming embedding, just want $\gamma \preceq \Gamma$.}
+\end{conjecture}
+
+\begin{proof}
+	It is sufficient to show $\theta \in \strip(\Gamma) \implies \theta \in \strip(\gamma)$.
+	For every $r \in \reals^d$, there is some $r' \in \R$ so that $ p \in \theta = \Gamma_r = \{ p \in \P : r \in \Gamma(p) \} \subseteq \Gamma_{r'} \implies p \in \Gamma_{r'}$ in two cases.
+	
+	First, if $r \not \in \R$, it is a redundant report, so its level set is a subset or equal to another level set for a report in $\R$.
+	In the second case, for $r' \in \R$, we know $p \in \Gamma_{r'} \implies p \in \{ p \in \P : r' \in \Gamma(p) \cap \R \} = \{ p \in \P : r' \in \gamma(p) \} = \gamma_{r'}$. 
+\end{proof}
+
+
+
+
+\section{Defining Embeddability}
+
+
+\begin{proposition}\label{prop:optimal-reports-per-level-set}
+  Let $\Gamma:\P\toto\reals^d$ be a non-degenerate (convex) elicitable property.
+
+  The following are equivalent:
+  \begin{enumerate}
+  \item There is a nondegenerate, finite property $\gamma:\P\toto\R'$ and $\R \subseteq \reals^d$ such that there is an injection $\varphi:\R'\to\reals^d$ such that $r\in\gamma(p) \iff \varphi(r) \in \Gamma(p)$. (i.e. $\Gamma$ embeds finite $\gamma$).  
+  \item There is a finite set of full dimensional level sets $\Theta$ of $\Gamma$ that union to $\P$.
+  \item $\strip(\Gamma)$ is finite.
+  \item $\trim(\Gamma)$ is finite.
+  \item $\trim(\Gamma)$ is finite and elicitable.
+
+  
+  \end{enumerate}
+\end{proposition}
+
+\begin{proof}
+We proceed in a cycle to show $4 \implies 1 \implies 5 \implies 2 \implies 3 \implies 4$.
+
+\begin{enumerate}
+
+
+\item[$4 \implies 1$] 
+Since $\Gamma$ has a finite set of full-dimensional level sets comprising $\trim(\Gamma)$ that union to $\P$ (by nondegeneracy of $\Gamma$), we can apply Conjecture~\ref{conj:gam-prime-exists} to observe there is a nondegenerate, nonredundant $\gamma \preceq \Gamma$, and we trivially know that $\gamma \approx \gamma$, so we conclude the property $\gamma$ constructed in Conjecture~\ref{conj:gam-prime-exists} is embedded by $\Gamma$.
+
+
+
+\item [$1 \implies 5$]
+Since there is a nondegenerate, nonredundant property $\zeta \preceq \Gamma$ and $\strip(\zeta) = \trim(\Gamma)$ by the definition of an embedding and assumption that $\zeta$ is finite, we know $\trim(\Gamma)$ is finite.
+Additionally, we know that $L|_{\R'}$ elicits $\trim(\Gamma)$ from \emph{cvx-fin-notes.tex}.
+
+\item [$5 \implies 2$]
+Since $\Gamma$ is nondegenerate and every $\theta \in \trim(\Gamma)$ is full dimensional (Conjecture~\ref{conj:trim-full-dim}), it is clear that the union of the (full-dimensional) level sets of $\trim(\Gamma)$ union to $\P$ by nondegneracy of $\Gamma$.
+
+
+\item [$2 \implies 3$]
+	We know there is a nonredundant, nondegenerate property $\gamma : \P \toto \R$ so that $\gamma \preceq \Gamma$ and therefore $\strip(\gamma) = \trim(\Gamma) = \Theta$ by Conjecture~\ref{conj:gam-prime-exists} and the definition of trim (Lemma~\ref{lem:define-trim}).
+	We then want to show $\strip(\Gamma) = \strip(\gamma) \bigcup S$, where $S$ is some finite set.
+	Consider the level set $\Gamma_{r'}$ for $r' \in \reals^d$.
+	If $r' \in \R$, then $\Gamma_{r'} \in \strip(\gamma)$.
+	If $r' \not \in \R$, then there is a report $r \in \R$ so that the level set $\Gamma_{r'} \subseteq \Gamma_r = \gamma_r$ by Conjecture~\ref{conj:lev-sets-subsets}, and we know that $\Gamma_{r'}$ has empty interior by the construction of $\R$ and nonredundancy of $\gamma$.
+	\jessie{(HOLE) - Why is this true?}
+
+			
+	We know this only happens at lower dimensional level sets $\theta$ since the optimal report is unique on the interior of level sets as $\gamma$ is nonredundant.
+	That is, for all level sets $\theta$ and $p \in \inter \theta, |\partial G(p)| = 1$.
+	Since $\theta$ is not full dimensional and there is only a finite set of full dimensional level sets at union to $\P$, we know there is a finite set of full dimensional level sets $\{\theta_i\}_{i=1}^m$ in the $\epsilon$-ball around each $p \in \theta$ so that for any $p_i \in \inter{\theta_i}$, we observe $\partial G(p_i) \neq \partial G(p_j)$ for all $i \neq j$ and there is a bijection $\varphi$ so that $\varphi(\partial G(p_i)) = \gamma(p_i) = \{r_i\}$ for all $1 \leq i \leq m$.
+	Additionally, as level sets are closed, we claim $p \in \gamma_{r_i} \implies p \in \Gamma_{r_i}$ for all $1 \leq i \leq m$.
+	Therefore, $p \in \theta \implies p \in \bigcap_{r' \in \{r_i\}_{i=1}^m} \gamma_{r'}\implies p \in \bigcap_{r' \in \{r_i\}_{i=1}^m} \Gamma_{r'}$ by closure of level sets for some $\{r_i\}_{i=1}^m \subseteq \R'$.
+	As $\R'$ is finite, so is the power set $2^{\R'}$, so the set $S = \{\Gamma_r : r \in \reals^d \setminus \R \}$ is finite.
+	Therefore $\strip(\Gamma) = \strip(\gamma) \bigcup S$ is finite. 
+		
+
+\item [$3 \implies 4$]
+Since $\trim(\Gamma) \subseteq \strip(\Gamma)$, then the strip being finite implies the trim is finite.
+
+
+\end{enumerate} 
+
+\end{proof}
+
+
+
+\section{Lemmas that probably aren't necessary to show in a paper, but for the sake of convincing myself}
+
+\begin{lemma}\label{lem:closed-level-sets}
+	Let $\Gamma$ be elicitable.
+	For any $r\in\R$, the level set $\Gamma_r = \{ p \in \Delta(\Y) : \Gamma(p) = r \}$ is closed.
+\end{lemma}
+\begin{proof}[Proof sketch]
+	Let $L$ elicit $\Gamma$.
+	The function $G(p) = -\min_{r\in\R} \E_p L(r,Y) = -\E_p L(\Gamma(p),Y)$ (taking any $r\in\Gamma(p)$ in case of ties) is convex.
+	There exists $\D \subseteq \partial G$ and some bijection $\varphi : \R \to \D$ with $\Gamma(p) = \varphi^{-1}(\D\cap \partial G_p)$.
+	Thus, $\Gamma_r = \{p : r\in\Gamma(p)\} = \{p : \varphi(r) \in \D\cap\partial G_p\} = \{p : \varphi(r) \in \partial G_p\}$, which is closed by convex analysis.
+	See [Raf/Ian\footnote{\url{https://arxiv.org/pdf/1211.3043.pdf}} (Cor 3.11), with their Thm 3.5 and Rockefellar Thm 24.4]  
+\end{proof}
+
+
+\begin{definition}\label{def:unlabeled-nonredundant}
+	An unlabeled property $\Theta$ is \emph{nonredundant} if for there are no full dimensional level sets $\theta_1, \theta_2 \in \Theta$ so that $\theta_1 \subseteq \theta_2$.
+\end{definition}
+
+
+\begin{lemma}\label{lem:nonempty-inter-iff-aff-ind}
+	Let $\theta$ be a [closed] convex level set.
+	$\theta$ is full dimensional $\iff$ there are distributions $p_1, p_2, \ldots, p_n \in \theta$ so that $p_1, p_2, \ldots, p_n$ are affinely independent.
+\end{lemma}
+\begin{proof}
+	Recall that $n := |\Delta(\Y)|$, so we say the simplex is $n$-dimensional.
+	\begin{enumerate}
+		\item [$\implies$]
+		Assume the level set $\theta$ is full dimensional.
+		Then there exists a $p \in \inter{\theta}$ and for every $q \in B(\epsilon, p)$, we know that $q \in \theta$.
+		Take $q_i = p + \epsilon e_i$\footnote{$e_i$ is the vector with $1$ in the $i^{th}$ component, and is $0$ elsewhere} in each of the $n$ dimensions, and since $\theta$ is full dimensional and closed, we know each $q_i \in\theta$.
+		As $\{e_i\}_{i=1}^n$ is affinely independent (it forms the standard basis for $\reals^n$), so then is $\{q_i\}_{i=1}^n$ as we are invariant to additive and multiplicative shifts.		
+		
+		\item [$\impliedby$]
+		Let the set of distributions $Q := \{q_i\}_{i=1}^n$ be affinely independent, where each $q_i \in \theta$.
+		Since the set $\theta$ is convex, then the convex hull $\conv(Q) \subseteq \theta$.
+		It is sufficient to show $\conv(Q)$ is full dimensional.
+		Let $q_1, q_2 \in Q$ so that $q_1 \neq q_2$.
+		As $p = \sum_{i=1}^n \frac{1}{n}q_i \in \conv(Q)$, as is every $q \in B(\epsilon, p)$ since they are also convex combinations of elements of $Q$, we can see $\emptyset \neq \inter{\conv(Q)} \subseteq \inter{\theta}$, so we conclude $\theta$ is full-dimensional.
+	\end{enumerate}
+\end{proof}
+
+
+
+
+
+\end{document}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
+
