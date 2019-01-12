@@ -1,6 +1,11 @@
 \documentclass[12pt]{article}
 \usepackage{amsmath,amsthm,amsfonts,amssymb}
 
+\newtheorem{theorem}{Theorem}
+\newtheorem{claim}{Claim}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
 \DeclareMathOperator*{\argmin}{\textrm{argmin}}
 \DeclareMathOperator*{\argmax}{\textrm{argmax}}
 \DeclareMathOperator*{\E}{\mathbb{E}}
@@ -9,35 +14,40 @@
 
 \begin{document}
 
-We have an elicitable finite property on $n$ outcomes.
-Can there be a $d$-embedding?
+\begin{definition}
+  Given a polytope $\{p \in \Delta_n : B p \geq \vec{0}\}$ where $B \in \reals^{k \times n}$, a \emph{$d$-representation} is a collection of $k$ unit vectors in $\reals^d$ satisfying the following.
+  Forming the matrix $V \in \reals^{k \times d}$ whose rows are the unit vectors, we must have for each $y$ that the polytope $\{ w : Vw \leq B_y \}$ is nonempty for each $y$ (where $B_y$ is the $y$th column).
+\end{definition}
 
-Imagine so and let $\ell_y: \reals^d \to \reals$ be the $y$th loss function.
-Write $\ell_y(r;p) = \sum_y p_y \ell_y(r)$ for the expected loss under report $r$.
+\begin{theorem}
+  If an elicitable finite property is $d$-embeddable, then each of its level sets has a $d$-representation.
+\end{theorem}
+\begin{proof}
+  Let $\ell_y: \reals^d \to \reals$ be the $y$th loss function.
+  Write $\ell(r;p) = \sum_y p_y \ell_y(r)$ for the expected loss under report $r$.
+  In particular, take $r$ to be the embedding point for a given level set.
+  In this case, $r$ is optimal for belief $p$ if and only if $0 \in \partial \ell(r;p)$ where the subgradients are taken with respect to $r$ only.
+  Therefore, the level set is exactly those $p$ such that $0 \in \partial \ell(r;p)$.
+  We now construct these constraints from the loss functions.
 
-A point $r$ is optimal for $p$ if and only if $0 \in \partial \ell_y(r;p)$ where the subgradients are taken with respect to $r$, fixing $p$.
-The subgradient set of a weighted sum is the weighted Minkowski sum of the subgradient sets:
-  \[ \partial \ell_y(r;p) = \sum_y p_y \partial \ell_y(r) \]
-In other words, $0 \in \partial \ell_y(r;p) \iff \exists \{w_y \in \partial \ell_y(r) \} \text{~s.t.~} \sum_y p_y w_y = 0$.
-Interestingly, for this $r$, for all full-support $p$ the Minkowski combination has the same combinatorial shape.
+  Because $\ell_y$ is a polyhedral convex function, its subgradient set $\partial \ell_y(r)$ is a polytope and can be described as follows.
+  For any vector $v \in \reals^d$, the \emph{face exposed by $v$} is the set $F_{vy} = \argmax_{w \in \partial \ell_y(r)} \langle v, w \rangle$ with corresponding maximum value $b_{vy} = \langle v, w \rangle$ where $w \in F_{vy}$.
+  Observe that for the polytope $\alpha \partial \ell_y(r)$ for positive $\alpha$, the vector $v$ exposes the face $\alpha F_{vy}$ with maximum value $\alpha b_{vy}$.
 
-Now, $\partial \ell_y(r;p)$ is a polytope and can be described via linear inequalities as follows.
-Take any unit vector $v \in \reals^d$; the \emph{faces exposed} by $v$ for each $y$ are the sets $F_{vy} = \argmax_{w \in \partial \ell_y(r)} \langle v, w \rangle$ and they have corresponding maximum values $f_{vy} = \langle v,w \rangle$ for any $w \in F_{vy}$.
+  Now, the subgradient set of a weighted sum is the weighted Minkowski sum of the subgradient sets:
+    \[ \partial \ell(r;p) = \sum_y p_y \partial \ell_y(r) \]
+  It follows that $\partial \ell(r;p)$ is the set of points $w$ satisfying that for all $v$, $\langle v,w \rangle \leq \sum_y p_y b_{vy}$.
+  In particular therefore, $0 \in \partial \ell(r;p)$ if and only if $p$ is in the level set if and only if $0 \leq \sum_y p_y b_{vy}$ for all $v$.
+  It is a polytope, so we can collect a finite set of $k$ vectors $v_1,\dots,v_k$ and form a matrix $B$ where $B_{iy} = b_{v_iy}$, and the level set is $\{p : B p \geq 0 \}$.
+  Collecting $v_1,\dots,v_k$ as the rows of a matrix $V$, it is a $d$-representation of the level set, since the polytopes are nonempty, in particular:
+    \[ \partial \ell_y(r) \subseteq \{ w : \langle v_i, w \rangle \leq f_{vy} ~ (\forall i) \}. \]
+\end{proof}
 
-So the polytope $\partial \ell_y(r;p)$ is the set of points $w$ satisfying that for all $v$, $\langle v, w \rangle \leq \sum_y p_y f_{vy}$.
-This can be reduced to a finite number of inequalities because each unique inequality is given by a selection of faces of the polytopes $\partial \ell_y(r)$ for each $y$.
-Further, it can actually be reduced to vectors that uniquely give an inequality (if multiple $v$ give the same inequality, then all of them can be eliminated) because these describe the facets of the polytope rather than lower-dimensional faces.
-
-\paragraph{Summary.}
-If the property embeds in $d$ dimensions, then for each $r$ we have a polytope described by $\{f_{vy} : v,y\}$ for a finite set of $v$.
-We have that $r$ is optimal for $p$ if and only if $\vec{0}$ is in this polytope, in other words, if for all $v$, $0 \leq \sum_y p_y f_{vy}$.
-Let $F_r$ be the matrix where each row is the tuple of $f_{v1}, \dots, f_{vn}$, but for convenience negate all entries; then $r$ is optimal for $p$ if and only if $F_r p \leq \vec{0}$.
-In particular, the set of $p$ for which $r$ is optimal is exactly this polytope.
-
-Okay, meanwhile, for any level set of the property $S$, it is a cell in the power diagram, i.e. a polytope described by some set of linear inequalities $Bp \leq \vec{0}$ for $B \in \reals^n \times \reals^k$.
-
-\paragraph{Putting this to use.}
-If $r$ is an embedding point for a level set, then $r$ is optimal if and only if $p$ is in the level set, so the polytopes $F_r p \leq \vec{0}$ and $Bp \leq \vec{0}$ must be identical.
-
+We use this to prove lower bounds as follows:
+\begin{enumerate}
+  \item A level set is given to us as $\{ p : Bp \geq \vec{0}\}$ for a matrix $B \in \reals^{k \times n}$.
+  \item We show there is no set of $k$ vectors $v_1,\dots,v_k$ that can form a $d$-representation.
+  \item In particular, we show that however you pick $v_1,\dots,v_k$, for one of the outcomes $y$, the polytope $\{w : Vw \leq (B_{1y},\dots,B_{ky}) \}$ is empty (infeasible).
+\end{enumerate}
 
 \end{document}
