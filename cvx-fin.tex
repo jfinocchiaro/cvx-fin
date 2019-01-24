@@ -47,6 +47,7 @@
 %\newcommand{\expectedv}[3]{\overline{#1}(#2,#3)}
 \newcommand{\expectedv}[3]{\E_{Y\sim{#3}} {#1}(#2,Y)}
 \newcommand{\toto}{\rightrightarrows}
+\newcommand{\strip}{\mathrm{strip}}
 \newcommand{\trim}{\mathrm{trim}}
 \newcommand{\fplc}{finite-piecewise-linear and convex\xspace} %xspace for use in text
 \newcommand{\conv}{\mathrm{conv}}
@@ -83,6 +84,23 @@
 \end{abstract}
 
 \section{Setting and Background}
+
+\subsection{Notation}
+\begin{itemize}
+	\item $\Y$ is the finite outcome space, and $n := |\Y|$.
+	\item $\simplex$ is the set of distributions over $\Y$.
+	\item For an outcome $y$, we denote $p_y$ as the probability of outcome $y$ being observed in nature.
+	\item If $\gamma = \prop{\ell}$, then $\gamma:\simplex \toto \R$ is the property elicited by the loss $\ell: \R \to \reals^\Y$.
+	\item $d$ is the dimension of the embedding space
+	\item $L:\reals^d \to \reals^\Y$ is a loss taking a report $u \in \reals^d$ and mapping the loss over each outcome in $\Y$.
+	\item $\Gamma: \simplex \toto \reals^d$ is the set-valued property mapping a probability distribution to a report $u \in \reals^d$.
+	\item $\Gamma_u = \{ p \in \simplex : u \in \Gamma(p) \}$
+	\item $\psi$ is the link function (see below)
+	\item $\varphi:\R \to \reals^d$ is the embedding function
+	\item $\trim(\Gamma)$ and $\strip(\Gamma)$
+	\item $\eliccvx$, $\elicembed$, and $\elicpoly$
+	\item $V$ and $B(P)$ as we get ready for later.
+\end{itemize}
 
 \subsection{Properties and Losses}
 \begin{definition}
@@ -143,9 +161,41 @@ $\eliccvx$ and $\elicpoly$; forward reference $\elicembed$
   \raf{I think we want to say $\Gamma$ embeds $\gamma$, and then a loss $L$ embeds $\gamma$ if $\prop{L}$ embeds $\gamma$.}
 \end{definition}
 
-\begin{proposition}
-  \raf{equivalence of possible definitions}
+\begin{definition}\label{def:strip-and-trim}
+	\jessie{strip, trim}
+	For $\Gamma:\simplex \toto \R'$, define $\strip(\Gamma) = \{\Gamma_r : r \in \R' \}$.
+	If $\Gamma$ has a finite set of full-dimensional level sets that union to $\simplex$, there is a finite property $\gamma:\simplex \toto \R$ such that $\strip(\gamma) := \trim(\Gamma)$.
+	\jessie{Fix without over-explaining.}
+\end{definition}
+
+\begin{proposition}\label{prop:optimal-reports-per-level-set}
+	Let $\Gamma:\simplex\toto\reals^d$ be a non-degenerate (convex) elicitable property.
+	
+	The following are equivalent:
+	\begin{enumerate}
+		\item There is a nondegenerate, finite property $\gamma:\simplex\toto\R$ such that there is an injection $\varphi:\R\to\reals^d$ such that $r\in\gamma(p) \iff \varphi(r) \in \Gamma(p)$. (i.e. $\Gamma$ embeds a finite $\gamma$).  
+		\item $\trim(\Gamma)$ is finite.     
+		\item There is a finite set of full-dimensional level sets $\Theta$ of $\Gamma$ that union to $\simplex$.
+		
+	\end{enumerate}
 \end{proposition}
+
+\begin{proof}
+	We proceed in a cycle to show $1 \implies 2 \implies 3 \implies 1 $.
+	\begin{enumerate}
+		\item [$1 \implies 2$]
+		We know $\strip(\gamma) = \trim(\Gamma)$ (since $\varphi$ is an injection, and there is some intermediate property $\Gamma'$ such that $\Gamma' \preceq \Gamma$ and with a bijection $\phi:\Gamma'(p) \mapsto \gamma(p)$, so $\strip(\Gamma') = \strip(\gamma)$.) 
+		As $\gamma$ is finite, so is $\strip(\gamma)$ since strip is generated from the (finite) report set.
+		
+		\item [$2 \implies 3$]
+		Since $\Gamma$ is nondegenerate and every $\theta \in \trim(\Gamma)$ is full dimensional, it is clear that the union of the level sets of $\trim(\Gamma)$ union to $\simplex$ by nondegneracy of $\Gamma$.
+		
+		\item[$3 \implies 1$]
+		Construct $\R := \{[u] \in \Gamma(p) : p \in \inter{\theta} \}_{\theta \in \Theta}$.
+		The property $\gamma: p \mapsto \Gamma(p) \cap\R$ is then finite as $\R$ is finite.
+		Taking $\varphi$ to be the identity, $\Gamma$ embeds this finite $\gamma$.
+	\end{enumerate} 
+\end{proof}
 
 \begin{proposition}
   If $\Gamma$ embeds $\gamma$, then there is a link function $\psi$ between $\Gamma$ and $\gamma$.
@@ -229,7 +279,7 @@ We can summarize the above in the following theorem.
 
 \raf{The full characterization; optimality and monotonicity:}
 \begin{theorem}
-  A finite property $\Gamma:\R\toto\simplex$ is $d$-embeddable if and only if there exists an embedding $\varphi: \R \to \reals^d$ and polytopes $T(r,y) \subseteq \reals^d$ for all $r\in\R, y\in\Y$, such that the following two conditions hold:
+  A finite property $\Gamma:\simplex\toto\R$ is $d$-embeddable if and only if there exists an embedding $\varphi: \R \to \reals^d$ and polytopes $T(r,y) \subseteq \reals^d$ for all $r\in\R, y\in\Y$, such that the following two conditions hold:
   \begin{enumerate}
   \item For all $r\in\R, p\in\simplex$, we have $r\in \Gamma(p) \iff 0 \in \sum_{y\in\Y} p_y T(r,y)$, where summation is the Minkowski sum.
   \item For all $y\in\Y$ there exists some convex function $L_y$ such that for all $r\in\R$ we have $T(r,y) = \partial L_y(\varphi(r))$.
