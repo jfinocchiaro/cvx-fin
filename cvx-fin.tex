@@ -27,6 +27,7 @@
 \newcommand{\posreals}{\reals_{>0}}%{\reals_{++}}
 
 \newcommand{\prop}[1]{\Gamma[#1]}
+\newcommand{\eliccts}{\mathrm{elic}_\mathrm{cts}}
 \newcommand{\eliccvx}{\mathrm{elic}_\mathrm{cvx}}
 \newcommand{\elicpoly}{\mathrm{elic}_\mathrm{pcvx}}
 \newcommand{\elicembed}{\mathrm{elic}_\mathrm{embed}}
@@ -182,12 +183,8 @@ $\eliccvx$ and $\elicpoly$; forward reference $\elicembed$
 \end{definition}
 \raf{Explain why this is a useful concept in general, and for convex elic}  
 
-\begin{proposition}\label{prop:optimal-reports-per-level-set}
-  \raft{Jessie: I think this should be fine for the paper.  We may want strip and trim for the proof, in the appendix, in which case we can define them there...}
-  Let $\Gamma:\simplex\toto\reals^d$ be a non-degenerate (convex) elicitable property.
-  \raf{Do we really need $\Gamma$ to be convex elicitable?}
-  \jessie{Not a requirement... I threw it in parentheses since we typically think of $\Gamma$ as elicited by a convex surrogate, but it isn't used in the proof.}
-  
+\begin{proposition}\label{prop:embed-trim}
+  Let $\Gamma:\simplex\toto\reals^d$ be an elicitable property.
   The following are equivalent:
   \begin{enumerate}
   \item $\Gamma$ embeds a finite elicitable property $\gamma:\simplex \toto \R$.
@@ -235,23 +232,22 @@ $\eliccvx$ and $\elicpoly$; forward reference $\elicembed$
 % 	\end{enumerate} 
 % \end{proof}
 
-\begin{proposition}
-  If $\Gamma$ embeds $\gamma$, then there is a link function $\psi$ between $\Gamma$ and $\gamma$.
-  Moreover, if $L$ elicits $\Gamma$ and $L$ is polyhedral, $\psi$ can be taken to be separated.
+\begin{proposition}\label{prop:embed-link}
+  If $\Gamma$ embeds a finite property $\gamma$, then it has a calibrated link $\psi$ to $\gamma$.
+  Moreover, if a polyhedral loss $L$ elicits $\Gamma$, $\psi$ can be taken to be separated with respect to $L$.
 \end{proposition}
 \begin{proof}
+Let $\varphi$ be the embedding function.
+Then the function $\psi(u) := \varphi^{-1}(r)$ is a link between $\Gamma$ and $\gamma$.
+\raf{I think you mean $\varphi^{-1}(u)$, but that is only defined on $\varphi(\R)$ (the embedded points).  Use Proposition~\ref{prop:embed-trim}, specifically trim.}
+Since, for all $p \in\simplex$, we know $\varphi(r) \in \Gamma(p) \implies \varphi^{-1}(\varphi(r)) = r \in \gamma(p)$, we can observe that $\psi$ is a calibrated link.
 
-
-%Let $\varphi$ be the embedding function.
-%Then the function $\psi(u) := \varphi^{-1}(r)$ is a link between $\Gamma$ and $\gamma$.
-%Since, for all $p \in\simplex$, we know $\varphi(r) \in \Gamma(p) \implies \varphi^{-1}(\varphi(r)) = r \in \gamma(p)$, we can observe that $\psi$ is a calibrated link.
-%
-%For the second part, in order for $\psi$ to be separated, for each embedded point $u \in \reals^d$ and every $v \in B(\epsilon, u)$, we must observe $\psi(v) = \psi(u)$.
-%If the loss $L$ is polyhedral, then we can construct a $\psi$ so that the above holds.
-%If no such $\psi$ existed, then for some $p$ such that $u \in \arginf_{z \in \R} \E_p L(z,Y)$, we know there is a $\delta > 0$ such that $\E_p L(v,Y) - \E_p L(u,Y) < \delta$ by continuity of $L$.
-%Additionally, if $\psi$ was not selective, then we know $\psi(v) = \psi(w)$ for some embedded point $w \neq u$.
-%Since the losses of $u$ and $v$ are not bounded about away from each other and $\psi(v) = \psi(w)$, then the loss $L$ must be constant on $\conv(\{u,v,w\})$, otherwise we would either contradict elicitability of $\Gamma$ or the construction of the calibrated link $\psi$.
-%Therefore, we can reassign $\psi(v) = \psi(u)$ for any $v\in B(\epsilon, u)$, and such a link additionally separated.
+For the second part, in order for $\psi$ to be separated, for each embedded point $u \in \reals^d$ and every $v \in B(\epsilon, u)$, we must observe $\psi(v) = \psi(u)$.
+If the loss $L$ is polyhedral, then we can construct a $\psi$ so that the above holds.
+If no such $\psi$ existed, then for some $p$ such that $u \in \arginf_{z \in \R} \E_p L(z,Y)$, we know there is a $\delta > 0$ such that $\E_p L(v,Y) - \E_p L(u,Y) < \delta$ by continuity of $L$.
+Additionally, if $\psi$ was not selective, then we know $\psi(v) = \psi(w)$ for some embedded point $w \neq u$.
+Since the losses of $u$ and $v$ are not bounded about away from each other and $\psi(v) = \psi(w)$, then the loss $L$ must be constant on $\conv(\{u,v,w\})$, otherwise we would either contradict elicitability of $\Gamma$ or the construction of the calibrated link $\psi$.
+Therefore, we can reassign $\psi(v) = \psi(u)$ for any $v\in B(\epsilon, u)$, and such a link additionally separated.
 \end{proof}
 
 \begin{theorem}
@@ -271,88 +267,31 @@ $\eliccvx$ and $\elicpoly$; forward reference $\elicembed$
   That is, the cells of $\Gamma'$ are all contained in cells of $\Gamma$.
 \end{definition}
 
-\begin{theorem}
+\begin{theorem}\label{thm:polyhedral-embed}
   Every polyhedral loss embeds a finite elicitable property.
-
-  $+$
-  
-  A polyhedral loss indirectly elicits a finite elicitable property $\gamma$ if and only if it embeds a property which refines $\gamma$.
+  Moreover, a polyhedral loss indirectly elicits a finite elicitable property $\gamma$ if and only if it embeds a property which refines $\gamma$.
 \end{theorem}
 
-\raf{But wait, what about dimension?}
+\raf{Transition: wait, what about dimension?}
 
 \section{Embedding Dimension}
 
 \begin{definition}
-  The \emph{embedding dimension} of a finite property $\gamma$, written $\elicembed(\gamma)$, is the minimum $d\leq 0$ \jessie{$d \geq 1?$} such that $\gamma$ is $d$-embeddable.
+  The \emph{embedding dimension} of a finite property $\gamma$, written $\elicembed(\gamma)$, is the minimum $d\geq 0$ \jessiet{$d \geq 1?$}\raft{Technically constant properties $\gamma(p) = \{c\} \forall p$ would have complexity 0.  Not terribly interesting... but it would also feel weird to call that complexity $1$.  Hmm.} such that $\gamma$ is $d$-embeddable.
 \end{definition}
 
 \subsection{Dimension 1: real-valued losses}
-
-\raf{Note: move monotone and lemmas to appendix}
-
-\begin{definition}
-  A property $\Gamma:\simplex\to\R$ is \emph{monotone} if there are maps $a:\R\to\reals^\Y$, $b:\R\to\reals^\Y$ and a total ordering $<$ of $\R$ such that the following two conditions hold.
-  \begin{enumerate}
-  \item For all $r\in\R$, we have $\Gamma_r = \{p\in\simplex : a(r) \cdot p \leq 0 \leq b(r) \cdot p\}$.
-  \item For all $r < r'$, we have $a(r) \leq b(r) \leq a(r') \leq b(r')$ (component-wise).
-  % \item For all $r,r'\in\R$ and $p\in\Gamma_{r'}\setminus\Gamma_r$, we have $b(r) \cdot p < 0 \implies r' > r$ and $a(r) \cdot p > 0 \implies r' < r$.
-  \end{enumerate}
-\end{definition}
 
 \raf{From Lambert et al. (2009) -- or maybe this is only in his unpublished paper; need to check}
 \begin{definition}
   A finite property $\gamma:\simplex\toto\R$ is \emph{orderable} if there is an enumeration $\R = \{r_1,\ldots,r_k\}$ such that for all $i\in\{1,\ldots,k-1\}$, the intersection $\gamma_{r_i} \cap \gamma_{r_{i+1}}$ is a hyperplane intersected with $\simplex$.
 \end{definition}
 
-\begin{lemma}\label{lem:orderable-monotone}
-  A finite property is orderable if and only if it is monotone.
-\end{lemma}
-\begin{proof}
-  Let $\gamma:\simplex\toto\R$ be finite and orderable.
-  For $1 \leq i < k$, let $v_i\in\reals^\Y$ such that $\gamma_{r_i} \cap \gamma_{r_{i+1}} = \{p\in\simplex : v_i\cdot p = 0\}$.
-  As we assume $\gamma$ is non-redundant, we have $p^1 \in \inter\gamma_{r_1}$.
-  Without loss of generality, we take the $v_i$ above so that $v_i \cdot p^1 > 0$ for all $i$.
-  Now let $b(1) = v_1$ and $a(1) = -\max_y |b(1)_y|\ones$.
-  \raf{Really not sure if that is the right start.}
-  By our assumptions, $p \in \gamma_1 \iff b(1) \cdot p \geq 0$.
-  \raf{Show how to make them monotone... I remember doing this for the continuous convex paper...}
+Lambert et al. shows that a finite property has a \emph{order-sensitive} loss, meaning one assigning higher loss to ``farther'' reports (with respect to a given order), if and only if it is orderable.
+We will see that, in fact, a finite property is 1-embeddable if and only if it is orderable.
+First, the forward direction.
 
-  Conversely, suppose $\gamma:\simplex\toto\R$ be finite and monotone.
-  Then we can use the total ordering of $\R$ to write $\R = \{r_1,\ldots,r_k\}$ such that $r_i < r_{i+1}$ for all $i \in \{1,\ldots,k-1\}$.
-  We now have $\gamma_{r_i} \cap \gamma_{r_{i+1}} = \{p\in\simplex : a(r_{i+1}) \cdot p \leq 0 \leq b(r_i) \cdot p\}$.
-  If this intersection is empty, then there must be some $p$ with $b(r_i) \cdot p < 0$ and $a(r_{i+1}) \cdot p > 0$; by monotonicity, no earlier or later reports can be in $\gamma(p)$, so we see that $\gamma(p) = \emptyset$, a contradiction.
-  Thus the intersection is nonempty, and as we also know $b(r_i) \leq a(r_{i+1})$ we conclude $b(r_i) = a(r_{i+1})$, and the intersection is the hyperplane defined by $b(r_i) = a(r_{i+1})$.
-\end{proof}
-
-\begin{lemma}\label{lem:prop-L-monotone}
-  For any convex loss $L : \reals \to \reals^\Y$, $\prop{L}$ is monotone.
-\end{lemma}
-\begin{proof}
-  Let $a,b$ be defined by $a(r)_y = \partial_- L(r)_y$ and $b(r) = \partial_+ L(r)_y$, that is, the left and right derivatives of $L(\cdot)_y$ at $r$, respectively.
-  Then $\partial L(r)_y = [a(r)_y,b(r)_y]$.
-  We now have $r \in \prop{L}(p) \iff 0 \in \partial p\cdot L(r) \iff a(r)\cdot p \leq 0 \leq b(r) \cdot p$, showing the first condition.
-  The second condition follows as the subgradients of $L$ are monotone functions.
-  \raf{More detail and some Rockafellar cites}
-\end{proof}
-
-\begin{proposition}\label{prop:indirect-orderable}
-  If convex $L : \reals \to \reals^\Y$ indirectly elicits a finite elicitable property $\gamma$, then $\gamma$ is orderable.
-\end{proposition}
-\begin{proof}
-  Let $\gamma:\simplex\toto\R$.
-  From Lemma~\ref{lem:prop-L-monotone}, $\prop{L}$ is monotone.
-  Let $\psi:\reals\to\R$ be the calibrated link from $\prop{L}$ to $\gamma$.
-
-  \raf{FROM IPAD NOTES}
-\end{proof}
-
-\raf{Now follows from the previous and polyhedral $\implies$ embeds}
-\begin{corollary}\label{cor:embed-orderable}
-  Every polyhedral $L : \reals \to \reals^\Y$ embeds an orderable property.
-\end{corollary}
-
-\begin{proposition}
+\begin{proposition}\label{prop:orderable-embed}
   Every orderable property $\gamma$ is 1-embeddable.
 \end{proposition}
 \begin{proof}
@@ -361,13 +300,28 @@ $\eliccvx$ and $\elicpoly$; forward reference $\elicembed$
   We now define $\varphi(r_i) = i \in \reals$, and $L$... \raf{integrate?  this should be simple... want $\partial L(i)_y = [a(r_i)_y,b(r_i)_y]$.}
 \end{proof}
 
-We can summarize the above in the following theorem.
-\raf{TFAE}
+The converse of Proposition~\ref{prop:orderable-embed} is a corollary of the following result, together with Theorem~\ref{thm:polyhedral-embed} (polyhedral losses embed a finite elicitable property) and Proposition~\ref{prop:embed-link} (embeddings give rise to calibrated links).
+For a proof, see Appendix~\ref{app:dimension-1}.
+\begin{proposition}\label{prop:indirect-orderable}
+  If convex $L : \reals \to \reals^\Y$ indirectly elicits a finite elicitable property $\gamma$, then $\gamma$ is orderable.
+\end{proposition}
+
+\begin{corollary}\label{cor:embed-orderable}
+  Every polyhedral $L : \reals \to \reals^\Y$ embeds an orderable property.
+\end{corollary}
+
+
+Combining these above observations with a few others, we arrive at the following result, proven in Appendix~\ref{app:dimension-1}, which states that several elicitation complexity classes collapse in dimension 1.
 \begin{theorem}
   Let $\gamma$ be a finite elicitable property.
-  Then $\gamma$ is 1-embeddable if and only if it is orderable.
-  In particular, if $\eliccvx(\gamma)=1$, then $\elicpoly(\gamma) = \elicembed(\gamma)=1$.
-  \raf{add $elic$ for continuous non-loc-const properties}
+  The following are equivalent.
+  \begin{enumerate}
+  \item $\gamma$ is orderable.
+  \item $\elicembed(\gamma)=1$. ($\gamma$ is 1-embeddable.)
+  \item $\elicpoly(\gamma)=1$. ($\gamma$ is indirectly elicitable via a polyhedral loss $L:\reals\to\reals^\Y$.)
+  \item $\eliccvx(\gamma)=1$. ($\gamma$ is indirectly elicitable via a convex loss $L:\reals\to\reals^\Y$.)
+  \item $\eliccts(\gamma)=1$. ($\gamma$ is indirectly elicitable via a real-valued continuous non-locally-constant property.)
+  \end{enumerate}
 \end{theorem}
 
 \subsection{General dimensions}
@@ -421,6 +375,59 @@ Let $\mathrm{elic}_{embed}$ denote the elicitation complexity with respect to em
 
 \subsection*{Acknowledgements}
 We thank Peter Bartlett for several discussions early on, which led to a proof of \raf{1-d reduction} among other insights.
+
+\appendix
+
+\section{Dimension 1}\label{app:dimension-1}
+
+\begin{definition}
+  A property $\Gamma:\simplex\to\R$ is \emph{monotone} if there are maps $a:\R\to\reals^\Y$, $b:\R\to\reals^\Y$ and a total ordering $<$ of $\R$ such that the following two conditions hold.
+  \begin{enumerate}
+  \item For all $r\in\R$, we have $\Gamma_r = \{p\in\simplex : a(r) \cdot p \leq 0 \leq b(r) \cdot p\}$.
+  \item For all $r < r'$, we have $a(r) \leq b(r) \leq a(r') \leq b(r')$ (component-wise).
+  % \item For all $r,r'\in\R$ and $p\in\Gamma_{r'}\setminus\Gamma_r$, we have $b(r) \cdot p < 0 \implies r' > r$ and $a(r) \cdot p > 0 \implies r' < r$.
+  \end{enumerate}
+\end{definition}
+
+\begin{lemma}\label{lem:orderable-monotone}
+  A finite property is orderable if and only if it is monotone.
+\end{lemma}
+\begin{proof}
+  Let $\gamma:\simplex\toto\R$ be finite and orderable.
+  For $1 \leq i < k$, let $v_i\in\reals^\Y$ such that $\gamma_{r_i} \cap \gamma_{r_{i+1}} = \{p\in\simplex : v_i\cdot p = 0\}$.
+  As we assume $\gamma$ is non-redundant, we have $p^1 \in \inter\gamma_{r_1}$.
+  Without loss of generality, we take the $v_i$ above so that $v_i \cdot p^1 > 0$ for all $i$.
+  Now let $b(1) = v_1$ and $a(1) = -\max_y |b(1)_y|\ones$.
+  \raf{Really not sure if that is the right start.}
+  By our assumptions, $p \in \gamma_1 \iff b(1) \cdot p \geq 0$.
+  \raf{Show how to make them monotone... I remember doing this for the continuous convex paper...}
+
+  Conversely, suppose $\gamma:\simplex\toto\R$ be finite and monotone.
+  Then we can use the total ordering of $\R$ to write $\R = \{r_1,\ldots,r_k\}$ such that $r_i < r_{i+1}$ for all $i \in \{1,\ldots,k-1\}$.
+  We now have $\gamma_{r_i} \cap \gamma_{r_{i+1}} = \{p\in\simplex : a(r_{i+1}) \cdot p \leq 0 \leq b(r_i) \cdot p\}$.
+  If this intersection is empty, then there must be some $p$ with $b(r_i) \cdot p < 0$ and $a(r_{i+1}) \cdot p > 0$; by monotonicity, no earlier or later reports can be in $\gamma(p)$, so we see that $\gamma(p) = \emptyset$, a contradiction.
+  Thus the intersection is nonempty, and as we also know $b(r_i) \leq a(r_{i+1})$ we conclude $b(r_i) = a(r_{i+1})$, and the intersection is the hyperplane defined by $b(r_i) = a(r_{i+1})$.
+\end{proof}
+
+\begin{lemma}\label{lem:prop-L-monotone}
+  For any convex loss $L : \reals \to \reals^\Y$, $\prop{L}$ is monotone.
+\end{lemma}
+\begin{proof}
+  Let $a,b$ be defined by $a(r)_y = \partial_- L(r)_y$ and $b(r) = \partial_+ L(r)_y$, that is, the left and right derivatives of $L(\cdot)_y$ at $r$, respectively.
+  Then $\partial L(r)_y = [a(r)_y,b(r)_y]$.
+  We now have $r \in \prop{L}(p) \iff 0 \in \partial p\cdot L(r) \iff a(r)\cdot p \leq 0 \leq b(r) \cdot p$, showing the first condition.
+  The second condition follows as the subgradients of $L$ are monotone functions.
+  \raf{More detail and some Rockafellar cites}
+\end{proof}
+
+We now prove Proposition~\ref{prop:indirect-orderable}, which states the following: if convex $L : \reals \to \reals^\Y$ indirectly elicits a finite elicitable property $\gamma$, then $\gamma$ is orderable.
+\begin{proof}[of Proposition~\ref{prop:indirect-orderable}]
+  Let $\gamma:\simplex\toto\R$.
+  From Lemma~\ref{lem:prop-L-monotone}, $\prop{L}$ is monotone.
+  Let $\psi:\reals\to\R$ be the calibrated link from $\prop{L}$ to $\gamma$.
+
+  \raf{FROM IPAD NOTES}
+\end{proof}
 
 \end{document}
 %%% Local Variables:
