@@ -358,11 +358,60 @@ Combining these above observations with a few others, we arrive at the following
   \end{enumerate}
 \end{theorem}
 
+\bo{Added the below blurb}
+This characterization decomposes embeddability into \emph{local} and \emph{global} necessary and sufficient conditions.
+The local conditions at each embedding point turn out to imply very strong restrictions on the structure of possible polyhedral losses, regardless of any other structure in the property or where the embedding points are placed.
+Meanwhile, the global condition says that, once each local embedding point's demands are satisfied, we must be able to place them all in $\reals^d$ in a coherent manner that simultaneously respects all of their requirements.
+
+\bo{I think we should write separately the result that the expected loss function only has vertices above the embedding points (um, sort of - WLOG?). I think we've known it for so long we forgot that it's a really interesting and also a necessary and sufficient condition. Does it also imply that each individual loss function's vertices can only be at embedding points?}
+
 \subsection{Useful necessary conditions}
 
+Each embedding point's optimality condition turns out to imply limitations on \emph{each} of the $n$ loss functions.
+This can be enough to rule out embeddability only by considering a single level set, as we develop next.
+
+Recall that a \emph{halfspace-representation (H-rep)} of a closed polyhedral set $S$ in $d$ dimensions is a pair $(V,b)$ with $V \in \reals^{k \times d}$ and $b \in \reals^k$ such that $S = \{ w : Vw \leq b \}$.
+We say an H-rep is \emph{tight} if for all $i=1,\dots,k$, there exists $w \in S$ such that $\langle V_i , w \rangle = b_i$.
+
+\begin{definition}
+  Given a polytope $\{p \in \Delta_{\Y} : Bp \geq 0\}$ for $B \in \reals^{k \times n}$, a \emph{$d$-construction} of it is a $V \in \reals^{k \times d}$, each row a unit vector, such that, for each column $B_i$ of $B$, the pair $(V,B_i)$ is a tight halfspace representation.
+\end{definition}
+
 \begin{corollary}
-  \raf{Optimality: Bo's polytope stuff}
+  If a property is $d$-embeddable, then each of its level sets has a $d$-construction.
+  \bo{Is it possible that some uniqueness of the construction is also true?}
 \end{corollary}
+\begin{proof}
+  Suppose the level set is represented as $\Gamma_r = \{p : Bp \geq 0\}$ with $B \in \reals^{k \times n}$ for the minimum $k$ (i.e. the number of facets of the polytope).
+  Let $u \in \reals^d$ be its embedding point.
+  The convex expected loss is minimized at $u$ if and only if it has the zero vector as a subgradient at $u$, i.e.
+    \[ p \in \Gamma_r \qquad \iff \qquad 0 \in \partial \langle L(u), p \rangle . \]
+  Subgradient sets satisfy the following two properties: $\partial(f_1 + f_2) = \partial f_1 + \partial f_2$ where the right side is the Minkowski sum of the subgradient sets (i.e. the set of sums of all pairs); and $\partial(\alpha f_1) = \alpha \partial f_1$.
+  So
+    \[ \partial \langle p , L(u) \rangle = \sum_{y \in \Y} p_y \partial L(u)_y \]
+  where the right side is a Minkowski sum of subgradient sets.
+  We now consider the halfspaces defining this set.
+  Define the $y$th support function as $H_y(v) = \max_{w \in \partial L(u)_y} \langle w, v \rangle$ to obtain that $w \in \partial \langle p, L(u) \rangle$ if and only if, for all unit vectors $v$,
+   \[ \langle v, w \rangle \leq \sum_{y \in \Y} p_y H_y(v) . \]
+  In particular, the embedding point is optimal for $p$ if and only if this is satisfied for $w=0$.
+  So, letting $B_i$ be the $i$th column of $B$, we have
+    \[ \Gamma_r = \{p : \sum_y p_y B_y \geq 0\} = \{p : \sum_y p_y H_y(v) \geq 0 ~ (\forall v, \|v\|=1)\} . \]
+  \bo{This is the part I'm still not perfectly happy with}
+  These sets are equal and full-dimensional (as the property is finite and non-redundant and $B$ is minimal).
+  So there exist $k$ unit vectors $v_1,\dots,v_k \in \reals^d$ such that $H_y(v_i) = B_{iy}$.
+  Collected as rows of $V$, we obtain that each $(V,B_y)$ is a tight halfspace representation, as it contains $\partial L(u)_y$ and $H_y(v_i) = B_{iy}$, meaning there exists $w \in \partial L(u)_y$ such that $\langle w, v_i \rangle = B_{iy}$.
+\end{proof}
+This provides the following recipe for both constructing losses and proving lower bounds.
+First, take any level set and represent it as $\{p : Bp \geq 0\}$.
+Now if $B$ has $k$ columns, search for a collection of $k$ unit vectors in $\reals^d$.
+For any candidate $V$ (whose rows are the unit vectors), a computer program can automatically verify whether the representations $\{(V,B_y)\}_{y \in \Y}$ are tight.
+In particular, if any $(V,B_y)$ is infeasible (i.e. there does not exist any $w$ satisfying all constraints $\langle v_i, w \rangle \leq B_{iy}$), then $V$ is not a $d$-construction.
+If $(V,B_y)$ is feasible but some constraints are redundant, i.e. it is not tight, then again we do not have a $d$-construction.
+
+A lower bound can be proven by showing, for any level set, that no collection of $k$ unit vectors can form a $d$-construction.
+
+If a $d$-construction $V$ is found, one also obtains that the subgradient sets $\partial L(u)_y$ must ``span'' the respective polytopes $\{w : Vw \leq B_y\}$, i.e. must be contained within them and must make each constraint tight.
+Repeating this process for each level set and associated embedding point gives a relatively tight picture of what any possible loss must look like.
 
 \begin{corollary}
   \raf{Monotonicity: WMON}
