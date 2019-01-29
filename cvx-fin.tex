@@ -303,12 +303,12 @@ Taking the $\trim$ thus allows us to remove labels so that we can relate the opt
 
 \subsection{Dimension 1: real-valued losses}
 
-\raf{From Lambert et al. (2009) -- or maybe this is only in his unpublished paper; need to check}
+The following is a minor modification of a similar definition of~\citet{lambert2018elicitation}.
 \begin{definition}
   A finite property $\gamma:\simplex\toto\R$ is \emph{orderable} if there is an enumeration $\R = \{r_1,\ldots,r_k\}$ such that for all $i\in\{1,\ldots,k-1\}$, the intersection $\gamma_{r_i} \cap \gamma_{r_{i+1}}$ is a hyperplane intersected with $\simplex$.
 \end{definition}
 
-Lambert et al. shows that a finite property has a \emph{order-sensitive} loss, meaning one assigning higher loss to ``farther'' reports (with respect to a given order), if and only if it is orderable.
+\citet{lambert2018elicitation} shows that a finite property has a \emph{order-sensitive} loss, meaning one assigning higher loss to ``farther'' reports (with respect to a given order), if and only if it is orderable.
 We will see that, in fact, a finite property is 1-embeddable if and only if it is orderable.
 First, the forward direction.
 
@@ -317,10 +317,33 @@ First, the forward direction.
 \end{proposition}
 \begin{proof}
   Let $\R = \{r_1,\ldots,r_k\}$ be the report space for $\gamma$.
-  From Lemma~\ref{lem:prop-L-monotone}, and its proof, we have $a:\R\to\reals^\Y, b\to\reals^\Y$ such that $\gamma_r = \{p\in\simplex : a(r) \cdot p \leq 0 \leq b(r) \cdot p\}$ for all $r\in\R$, and for all $i \in \{1,\ldots,k-1\}$, we have $a(r_i) \leq b(r_i) = a(r_{i+1}) \leq b(r_{i+1})$.
-  We now define $\varphi(r_i) = i \in \reals$, and $L$... \raf{integrate?  this should be simple... want $\partial L(i)_y = [a(r_i)_y,b(r_i)_y]$.}
+  From Lemma~\ref{lem:prop-L-monotone}, we have functions $a:\R\to\reals^\Y, b:\R\to\reals^\Y$ satisfying the following: (i) $\gamma_{r_i} = \{p\in\simplex : a(r_i) \cdot p \leq 0 \leq b(r_i) \cdot p\}$ for all $i\in\{1,\ldots,k\}$, and (ii) $a(r_i) \leq b(r_i) = a(r_{i+1}) \leq b(r_{i+1})$ for all $i \in \{1,\ldots,k-1\}$.
+  We now define $\varphi(r_i) = i \in \reals$, and define $L$ as follows:
+  \begin{equation*}
+    L(u)_y =
+    \begin{cases}
+      a(r_1) u & u < 1 \\
+      c_i + b(r_i) u & u \in [i,i+1), i\in\{1,\ldots,k\} \\
+      c_k + b(r_k) u & u \geq k+1
+    \end{cases}~,
+  \end{equation*}
+  where the $c_i$ are chosen to make $L(u)_y$ continuous, namely, $c_i = \sum_{j=1}^{i} a(r_j)_y$.
+  (Recall that $b(r_i) = a(r_{i+1})$.)
+  By the condition (ii) above, $L(\cdot)_y$ is convex for all $y\in\Y$, and moreover, its subgradients at $\varphi(\R) = \{1,\ldots,k\}$ are given by
+  $\partial L(i)_y = [a(r_i)_y,b(r_i)_y]$.
+  By condition (i), for all $i\in\{1,\ldots,k\}$ and $p\in\simplex$ we now have
+  \begin{align*}
+    i \in \prop{L}(p)
+    &\iff 0 \in \partial (p \cdot L(i)) \\
+    &\iff 0 \in \sum_{y\in\Y} p_y \partial L(i)_y \\
+    &\iff 0 \in \sum_{y\in\Y} p_y [a(r_i)_y,b(r_i)_y] \\
+    &\iff a(r_i) \cdot p \leq 0 \leq b(r_i) \cdot p \\
+    &\iff r_i \in \gamma(p)~,
+  \end{align*}
+  where the sums are Minkowski sums.
 \end{proof}
 
+\raf{Hmm, this is not really the converse.  The converse would be ``every 1-embeddable property is orderable'' but that's not really what we say...}
 The converse of Proposition~\ref{prop:orderable-embed} is a corollary of the following result, together with Theorem~\ref{thm:polyhedral-embed} (polyhedral losses embed a finite elicitable property) and Proposition~\ref{prop:embed-link} (embeddings give rise to calibrated links).
 For a proof, see Appendix~\ref{app:dimension-1}.
 \begin{proposition}\label{prop:indirect-orderable}
@@ -331,9 +354,9 @@ For a proof, see Appendix~\ref{app:dimension-1}.
   Every polyhedral $L : \reals \to \reals^\Y$ embeds an orderable property.
 \end{corollary}
 
-
-Combining these above observations with a few others, we arrive at the following result, proven in Appendix~\ref{app:dimension-1}, which states that several elicitation complexity classes collapse in dimension 1.
-\begin{theorem}
+We can summarize the results of this section, together with a connection to continuous real-valued properties, in the following theorem, which states that several elicitation complexity classes collapse in dimension 1.
+The proof is given in Appendix~\ref{app:dimension-1}, which only needs to show the equivalence of statements 1 and 5, as we have already established the equivalence of the first four statements: $1 \implies 2,3,4$ from Proposition~\ref{prop:orderable-embed}, as the proof gives a loss which is polyhedral (and convex), and Proposition~\ref{prop:indirect-orderable} shows $2,3,4 \implies 1$, as each of these cases would give a convex loss indirectly eliciting a finite elicitable property.
+\begin{theorem}\label{thm:1d-tfae}
   Let $\gamma$ be a finite elicitable property.
   The following are equivalent.
   \begin{enumerate}
@@ -482,7 +505,7 @@ We thank Peter Bartlett for several discussions early on, which led to a proof o
 
 \section{Dimension 1}\label{app:dimension-1}
 
-\begin{definition}
+\begin{definition}\label{def:monotone-prop}
   A property $\Gamma:\simplex\to\R$ is \emph{monotone} if there are maps $a:\R\to\reals^\Y$, $b:\R\to\reals^\Y$ and a total ordering $<$ of $\R$ such that the following two conditions hold.
   \begin{enumerate}
   \item For all $r\in\R$, we have $\Gamma_r = \{p\in\simplex : a(r) \cdot p \leq 0 \leq b(r) \cdot p\}$.
@@ -495,20 +518,44 @@ We thank Peter Bartlett for several discussions early on, which led to a proof o
   A finite property is orderable if and only if it is monotone.
 \end{lemma}
 \begin{proof}
-  Let $\gamma:\simplex\toto\R$ be finite and orderable.
-  For $1 \leq i < k$, let $v_i\in\reals^\Y$ such that $\gamma_{r_i} \cap \gamma_{r_{i+1}} = \{p\in\simplex : v_i\cdot p = 0\}$.
-  As we assume $\gamma$ is non-redundant, we have $p^1 \in \inter\gamma_{r_1}$.
-  Without loss of generality, we take the $v_i$ above so that $v_i \cdot p^1 > 0$ for all $i$.
-  Now let $b(1) = v_1$ and $a(1) = -\max_y |b(1)_y|\ones$.
-  \raf{Really not sure if that is the right start.}
-  By our assumptions, $p \in \gamma_1 \iff b(1) \cdot p \geq 0$.
-  \raf{Show how to make them monotone... I remember doing this for the continuous convex paper...}
-
-  Conversely, suppose $\gamma:\simplex\toto\R$ be finite and monotone.
+  Let $\gamma:\simplex\toto\R$ be finite and monotone.
   Then we can use the total ordering of $\R$ to write $\R = \{r_1,\ldots,r_k\}$ such that $r_i < r_{i+1}$ for all $i \in \{1,\ldots,k-1\}$.
   We now have $\gamma_{r_i} \cap \gamma_{r_{i+1}} = \{p\in\simplex : a(r_{i+1}) \cdot p \leq 0 \leq b(r_i) \cdot p\}$.
   If this intersection is empty, then there must be some $p$ with $b(r_i) \cdot p < 0$ and $a(r_{i+1}) \cdot p > 0$; by monotonicity, no earlier or later reports can be in $\gamma(p)$, so we see that $\gamma(p) = \emptyset$, a contradiction.
   Thus the intersection is nonempty, and as we also know $b(r_i) \leq a(r_{i+1})$ we conclude $b(r_i) = a(r_{i+1})$, and the intersection is the hyperplane defined by $b(r_i) = a(r_{i+1})$.
+
+  For the converse, let $\gamma:\simplex\toto\R$ be finite and orderable.
+  From~\cite[Theorem 4]{lambert2018elicitation}, we have positively-oriented normals $v_i\in\reals^\Y$ for all $i \in \{1,\ldots,k-1\}$ such that $\gamma_{r_i} \cap \gamma_{r_{i+1}} = \{p\in\simplex : v_i\cdot p = 0\}$, and moreover, for all $i \in \{2,\ldots,k-1\}$, we have $\gamma_{r_i} = \{p\in\simplex : v_{i-1} \cdot p \leq 0 \leq v_i \cdot p\}$, while $\gamma_{r_1} = \{p\in\simplex : 0 \leq v_1 \cdot p\}$ and $\gamma_{r_k} = \{p\in\simplex : v_{k-1} \cdot p \leq 0\}$.
+  From the positive orientation of the $v_i$, we have for all $p\in\simplex$ that $\sgn(v_i\cdot p)$ is monotone in $i$.
+  In particular, it must be that for all $y$, $\sgn((v_i)_y)$ is monotone in $i$, taking the distribution with all weight on outcome $y$.
+  % (Similarly, if $\gamma(\ones_y) = \{r_j,r_{j+1}\}$, then $(v_i)_y = v_i \cdot \ones_y < 0$ for $i < j$, $(v_j)_y = 0$, and $(v_i)_y > 0$ for $i > j$.)
+  \raf{This observation could use a better proof.}
+  
+  For all $i\in\{2,\ldots,k-1\}$, we wish to find $\alpha_i \geq 0$ such that $v_{i-1} \leq \alpha_i v_i$ (component-wise).
+  To this end, fix $i$ and let $v = v_{i-1}, w = v_{i}, \alpha=\alpha_i$.
+  By the above, there is no $y\in\Y$ with $v_y > 0 > w_y$, so the condition $v \leq \alpha w$ is equivalent to the following:
+  \begin{enumerate}
+  \item[(i)] For all $y$ with $v_y,w_y < 0$, $\alpha \leq v_y/w_y$.
+  \item[(ii)] For all $y$ with $v_y,w_y > 0$, $\alpha \geq v_y/w_y$.
+  \end{enumerate}
+  Defining $\Y^- = \{y\in\Y: v_i,w_y < 0\}, \Y^+ = \{y\in\Y: v_i,w_y > 0\}$, these conditions are in turn equivalent to $\min_{y\in\Y^-} v_y/w_y \geq \max_{y\in\Y^+} v_y/w_y$, with the usual conventions $\min \emptyset = \infty,\; \max \emptyset = -\infty$.
+  Suppose this inequality were not satisfied.
+  Then we would have $y \in \Y^-,y'\in\Y^+$ such that $0 < v_y/w_y < w_{y'}/v_y$, which would in turn imply $|v_y|/v_{y'} < |w_y| / w_{y'}$.
+  Letting $c = \tfrac 1 2 \left(|w_y| / w_{y'} + |v_y|/v_{y'}\right)$ and taking $p$ to be the distribution with weight $1/(1+c)$ on $y$ and $c/(1+c)$ on $y'$, we see that
+  \begin{align*}
+    v \cdot p &= \frac 1 {1+c} \left(v_y + \tfrac 1 2 (|w_y| / w_{y'} + |v_y|/v_{y'})v_{y'}\right) > \frac 1 {1+c} \left(v_y + (|v_y|/v_{y'})v_{y'}\right) = 0
+    \\
+    w \cdot p &= \frac 1 {1+c} \left(w_y + \tfrac 1 2 (|w_y| / w_{y'} + |v_y|/v_{y'})v_{y'}\right) < \frac 1 {1+c} \left(w_y + (|w_y|/w_{y'})w_{y'}\right) = 0~,
+  \end{align*}
+  thus violating the observation that $\sgn(v_i\cdot p)$ is monotone in $i$ (recall that $v = v_{i-1}, w = v_{i}$).
+
+  We can now construct the $a,b$ in Definition~\ref{def:monotone-prop}.
+  Letting $\alpha_i = \tfrac 1 2 \left(\min_{y\in\Y^-(i)} (v_{i-1})_y/(v_{i})_y + \max_{y\in\Y^+(i)} (v_{i-1})_y/(v_{i})_y\right)$, the preceding argument shows that $v_{i-1} \leq \alpha_i v_{i}$ for all $i \in \{2,\ldots,k-1\}$.
+  We now set $b(r_i) = a(r_{i+1}) = (\prod_{j=2}^i \alpha_j) v_i$ for $i\in\{1,\ldots,k-1\}$, as well as $a(r_1) = -\max_{y\in\Y} |(v_1)_y|\ones$ and $b(r_k) = \max_{y\in\Y} |a(r_k)_y|\ones$, where $\ones\in\reals^\Y$ denotes the all-ones vector.
+
+  The above establishes the second condition of monotone properties in Definition~\ref{def:monotone-prop}.
+  To see the first condition, note that we have already established it for $i\in\{2,\ldots,k-1\}$.
+  For $i=1,k$, we merely observe that $a(r_1) \cdot p \leq 0$ and $b(r_k) \cdot p \geq 0$ for all $p\in\simplex$.
 \end{proof}
 
 \begin{lemma}\label{lem:prop-L-monotone}
@@ -522,7 +569,10 @@ We thank Peter Bartlett for several discussions early on, which led to a proof o
   \raf{More detail and some Rockafellar cites}
 \end{proof}
 
-We now prove Proposition~\ref{prop:indirect-orderable}, which states the following: if convex $L : \reals \to \reals^\Y$ indirectly elicits a finite elicitable property $\gamma$, then $\gamma$ is orderable.
+\raf{NOTE: for both these results, it should just boil down to a few lines using the convexity and closure of $\gamma_r$ for all $r\in\R$, together with the guarantees of $\psi$.}
+
+We now prove the remaining results.
+%Proposition~\ref{prop:indirect-orderable}, which states the following: if convex $L : \reals \to \reals^\Y$ indirectly elicits a finite elicitable property $\gamma$, then $\gamma$ is orderable.
 \begin{proof}[of Proposition~\ref{prop:indirect-orderable}]
   Let $\gamma:\simplex\toto\R$.
   From Lemma~\ref{lem:prop-L-monotone}, $\prop{L}$ is monotone.
@@ -530,6 +580,11 @@ We now prove Proposition~\ref{prop:indirect-orderable}, which states the followi
 
   \raf{FROM IPAD NOTES}
 \end{proof}
+
+\begin{proof}[of Theorem~\ref{thm:1d-tfae}]
+  As remarked before the theorem statement, it remains only to show $1 \iff 5$.
+\end{proof}
+
 
 \section{Considering unlabeled properties}
   Note that $\Gamma$ is elicitable, which means that there is a convex score $G:\simplex \to \reals$ representing the Bayes Risk (i.e. $G(p)$ is the minimal expected loss over all reports at $p$.)
