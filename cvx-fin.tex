@@ -294,14 +294,11 @@ Taking the $\trim$ thus allows us to remove labels so that we can relate the opt
 \end{theorem}
 
 \raf{Transition: wait, what about dimension?}
-
-\section{Embedding Dimension}
-
 \begin{definition}
   The \emph{embedding dimension} of a finite property $\gamma$, written $\elicembed(\gamma)$, is the minimum $d\geq 0$ such that $\gamma$ is $d$-embeddable.
 \end{definition}
 
-\subsection{Dimension 1: real-valued losses}
+\section{Embeddings via Real-Valued Losses}
 
 The following is a minor modification of a similar definition of~\citet{lambert2018elicitation}.
 \begin{definition}
@@ -310,6 +307,8 @@ The following is a minor modification of a similar definition of~\citet{lambert2
 
 \citet{lambert2018elicitation} shows that a finite property has a \emph{order-sensitive} loss, meaning one assigning higher loss to ``farther'' reports (with respect to a given order), if and only if it is orderable.
 We will see that, in fact, a finite property is 1-embeddable if and only if it is orderable.
+Both the forward direction and its converse will make use of a related definition: we say a property is \emph{monotone} if, roughly speaking, it can be defined in terms of (possibly infinitely many) hyperplanes whose normal vectors have coefficients which are monotone in the report value.
+
 First, the forward direction.
 
 \begin{proposition}\label{prop:orderable-embed}
@@ -317,7 +316,7 @@ First, the forward direction.
 \end{proposition}
 \begin{proof}
   Let $\R = \{r_1,\ldots,r_k\}$ be the report space for $\gamma$.
-  From Lemma~\ref{lem:prop-L-monotone}, we have functions $a:\R\to\reals^\Y, b:\R\to\reals^\Y$ satisfying the following: (i) $\gamma_{r_i} = \{p\in\simplex : a(r_i) \cdot p \leq 0 \leq b(r_i) \cdot p\}$ for all $i\in\{1,\ldots,k\}$, and (ii) $a(r_i) \leq b(r_i) = a(r_{i+1}) \leq b(r_{i+1})$ for all $i \in \{1,\ldots,k-1\}$.
+  From Lemma~\ref{lem:prop-L-monotone}, stating that finite properties are orderable if and only if they are monotone, we have functions $a:\R\to\reals^\Y, b:\R\to\reals^\Y$ satisfying the following: (i) $\gamma_{r_i} = \{p\in\simplex : a(r_i) \cdot p \leq 0 \leq b(r_i) \cdot p\}$ for all $i\in\{1,\ldots,k\}$, and (ii) $a(r_i) \leq b(r_i) = a(r_{i+1}) \leq b(r_{i+1})$ for all $i \in \{1,\ldots,k-1\}$.
   We now define $\varphi(r_i) = i \in \reals$, and define $L$ as follows:
   \begin{equation*}
     L(u)_y =
@@ -343,18 +342,23 @@ First, the forward direction.
   where the sums are Minkowski sums.
 \end{proof}
 
-\raf{Hmm, this is not really the converse.  The converse would be ``every 1-embeddable property is orderable'' but that's not really what we say...}
-The converse of Proposition~\ref{prop:orderable-embed} is a corollary of the following result, together with Theorem~\ref{thm:polyhedral-embed} (polyhedral losses embed a finite elicitable property) and Proposition~\ref{prop:embed-link} (embeddings give rise to calibrated links).
-For a proof, see Appendix~\ref{app:dimension-1}.
+The converse of Proposition~\ref{prop:orderable-embed}, that every 1-embeddable property is orderable, follows from a much broader statement, given below as Proposition~\ref{prop:indirect-orderable}: finite elicitable properties which are indirectly elicited by 1-dimensional convex losses must be orderable.
+Together with Proposition~\ref{prop:embed-link}, which shows that embeddings give rise to calibrated links, we have in particular that 1-embeddable finite properties are orderable.
+
 \begin{proposition}\label{prop:indirect-orderable}
   If convex $L : \reals \to \reals^\Y$ indirectly elicits a finite elicitable property $\gamma$, then $\gamma$ is orderable.
 \end{proposition}
+
+The proof of Proposition~\ref{prop:indirect-orderable} follows from Lemma~\ref{lem:prop-L-monotone} in Appendix~\ref{app:dimension-1}, which states that the property elicited by any convex loss must be monotone in the sense above.
+(The normal vectors are constructed in terms of the subgradients of the loss, thus guaranteeing monotonicity of their coefficients.)
+
+As a corollary of Proposition~\ref{prop:indirect-orderable} and Theorem~\ref{thm:polyhedral-embed}, we now also see that polyhedral losses embed orderable properties.
 
 \begin{corollary}\label{cor:embed-orderable}
   Every polyhedral $L : \reals \to \reals^\Y$ embeds an orderable property.
 \end{corollary}
 
-We can summarize the results of this section, together with a connection to continuous real-valued properties, in the following theorem, which states that several elicitation complexity classes collapse in dimension 1.
+The central conclusion from this section is the following theorem, which states that several elicitation complexity classes coincide in dimension 1.
 The proof is given in Appendix~\ref{app:dimension-1}, which only needs to show the equivalence of statements 1 and 5, as we have already established the equivalence of the first four statements: $1 \implies 2,3,4$ from Proposition~\ref{prop:orderable-embed}, as the proof gives a loss which is polyhedral (and convex), and Proposition~\ref{prop:indirect-orderable} shows $2,3,4 \implies 1$, as each of these cases would give a convex loss indirectly eliciting a finite elicitable property.
 \begin{theorem}\label{thm:1d-tfae}
   Let $\gamma$ be a finite elicitable property.
@@ -368,25 +372,37 @@ The proof is given in Appendix~\ref{app:dimension-1}, which only needs to show t
   \end{enumerate}
 \end{theorem}
 
-\subsection{General dimensions}
+\raf{Note the relationship to Finocchiaro 2018, and that this is nearly a corollary, as that work almost shows $5\implies 4$, but it needs slightly more assumptions than we need.  Instead, we give a direct proof.}
 
-\raf{Use orderable to motivate}
+\section{Higher-Dimensional Embeddings}\label{sec:general-dimensions}
 
-\raf{The full characterization; optimality and monotonicity:}
+Orderability is a useful characterization of 1-embeddable properties, in the sense that the orderability of a property is easily tested.
+We seek a similar condition for higher dimensions.
+Toward this end, let us decompose orderability into two conditions which will lend themselves to generalization.
+A property $\gamma$ is orderable if and only if there exist closed intervals $[a(r)_y,b(r)_y] \subseteq \reals$ for all $r\in\R, y\in\Y$, such that the following two conditions hold:
+\begin{enumerate}
+\item (Optimality) For all $r\in\R, p\in\simplex$, we have $r\in \gamma(p) \iff a(r)\cdot p \leq 0 \leq b(r)\cdot p$.
+\item (Monotonicity) There exists an ordering $\R=\{r_1,\ldots,r_k\}$ such that for all $y\in\Y$, $i\in\{1,\ldots,k-1\}$, we have $b(r_i) = a(r_{i+1})$.
+\end{enumerate}
+Thinking of the intervals $[a(r)_y,b(r)_y]$ as subgradients of a convex function $L_y$, the first condition states that the report $r$ is optimal exactly when it should be, and the second states that the intervals are indeed subgradients of some convex function.
+
+Generalizing the above to higher dimensions, we obtain the following.
 \begin{theorem}
-  A finite property $\Gamma:\simplex\toto\R$ is $d$-embeddable if and only if there exists an embedding $\varphi: \R \to \reals^d$ and polytopes $T(r,y) \subseteq \reals^d$ for all $r\in\R, y\in\Y$, such that the following two conditions hold:
+  A finite property $\gamma:\simplex\toto\R$ is $d$-embeddable if and only if there exist polytopes $T(r,y) \subseteq \reals^d$ for all $r\in\R, y\in\Y$, such that the following two conditions hold:
   \begin{enumerate}
-  \item For all $r\in\R, p\in\simplex$, we have $r\in \Gamma(p) \iff 0 \in \sum_{y\in\Y} p_y T(r,y)$, where summation is the Minkowski sum.
-  \item For all $y\in\Y$ there exists some convex function $L_y$ such that for all $r\in\R$ we have $T(r,y) = \partial L_y(\varphi(r))$.
+  \item (Optimality) For all $r\in\R, p\in\simplex$, we have $r\in \gamma(p) \iff 0 \in \sum_{y\in\Y} p_y T(r,y)$, where summation is the Minkowski sum.
+  \item (Monotonicity) There exists an embedding $\varphi: \R \to \reals^d$ and set of convex functions $\{L_y:\reals^d\to\reals\}_{y\in\Y}$ such that for all $y\in\Y, r\in\R$ we have $T(r,y) = \partial L_y(\varphi(r))$.
   \end{enumerate}
 \end{theorem}
 
 \bo{Added the below blurb}
+\raf{I love it.  This would be a great place to discuss the relationship to FSD, which is ``even more local'' in the sense that it does not even look at a whole cell at once, just one piece of the boundary.  We can then say that the additional power is strong enough to give novel lower bounds where FSD remains silent.  (In particular, abstain looks 1d / orderable when zoomed in as far as FSD, but one can conclude it is not orderable using condition 1 alone.)}
 This characterization decomposes embeddability into \emph{local} and \emph{global} necessary and sufficient conditions.
 The local conditions at each embedding point turn out to imply very strong restrictions on the structure of possible polyhedral losses, regardless of any other structure in the property or where the embedding points are placed.
 Meanwhile, the global condition says that, once each local embedding point's demands are satisfied, we must be able to place them all in $\reals^d$ in a coherent manner that simultaneously respects all of their requirements.
 
 \bo{I think we should write separately the result that the expected loss function only has vertices above the embedding points (um, sort of - WLOG?). I think we've known it for so long we forgot that it's a really interesting and also a necessary and sufficient condition. Does it also imply that each individual loss function's vertices can only be at embedding points?}
+\raf{This is one of those statements that is probably true in some sense but we're not sure what sense.  There could be vertices that are just never optimal, and it's hard to know exactly how to rule them out.}
 
 \subsection{Useful necessary conditions}
 
