@@ -209,6 +209,7 @@ Taking the $\trim$ thus allows us to remove labels so that we can relate the opt
   The following are equivalent:
   \begin{enumerate}
   \item $\Gamma$ embeds a finite elicitable property $\gamma:\simplex \toto \R$.
+    \raf{I think we don't need elicitability of $\gamma$ for the TFAE, right?  If so, let's remove it here (just ``finite property'') and add it to the moreover (``, and $\gamma$ is elicitable.'')  The proof that $\trim(\Gamma)$ (with some labels) is elicitable I think is in my notes.}
   \item $\trim(\Gamma)$ is a finite set.
   \item There is a finite set of maximal level sets $\Theta$ of $\Gamma$ that union to $\simplex$.
   \end{enumerate}
@@ -293,7 +294,13 @@ Taking the $\trim$ thus allows us to remove labels so that we can relate the opt
   \item $\gamma$ is embeddable via a polyhedral loss.
   \end{enumerate}
 \end{theorem}
-\raf{Also mention here that \emph{every} non-redundant elicitable property is $(n-1)$-embeddable.}
+\begin{proof}
+  We trivially have $3\implies 2$, and by Proposition~\ref{prop:embed-trim} \raf{only if it's updated like I mentioned} we also have $2\implies 1$.
+  It thus suffices to show $1\implies 3$, which is the corollary of a stronger result given as Theorem \raf{fill in} in Appendix \raf{fill in}, stating that every non-redundant elicitable property, even if not finite, is embeddable in $d =n-1$ dimensions.
+  \raf{NOTE: still need to check the math on the conjugate for the general case, since the expected score function is not necessarily closed for general properties.  Not high priority.}
+  (Recall that $n = |\Y|$.)
+  The construction uses the convex conjugate of the expected score function for $\gamma$, which is polyhedral when $\gamma$ is finite.
+\end{proof}
 
 \begin{definition}
   Let $\Gamma:\simplex\toto\R$ and $\Gamma':\simplex\toto\R'$.
@@ -305,6 +312,10 @@ Taking the $\trim$ thus allows us to remove labels so that we can relate the opt
   Every polyhedral loss embeds a finite elicitable property.
   Moreover, a polyhedral loss indirectly elicits a finite elicitable property $\gamma$ if and only if it embeds a property which refines $\gamma$.
 \end{theorem}
+\begin{proof}
+  \raf{Turns out I don't have a proof.  Seems heavily related to the separated link stuff...}
+\end{proof}
+
 
 \raf{Transition: wait, what about dimension?}
 \begin{definition}
@@ -526,6 +537,7 @@ These questions have both theoretical interest and potential practical significa
 
 \subsection*{Acknowledgements}
 We thank Peter Bartlett for several discussions early on, which led to a proof of \raf{1-d reduction} among other insights.
+\raf{Almost forgot: should ack Arpit too of course!}
 
 \bibliography{diss}
 
@@ -600,18 +612,56 @@ We thank Peter Bartlett for several discussions early on, which led to a proof o
 
 \raf{NOTE: for both these results, it should just boil down to a few lines using the convexity and closure of $\gamma_r$ for all $r\in\R$, together with the guarantees of $\psi$.}
 
+\newcommand{\Pbar}{\overline P}
+\begin{lemma}\label{lem:pbar}
+  Let $\gamma:\simplex\toto\R$ be a finite elicitable property, and suppose there is a calibrated link $\psi$ from an elicitable $\Gamma$ to $\gamma$.
+  For each $r\in\R$, define $P_r = \bigcup_{u\in\psi^{-1}(r)} \Gamma_u \subseteq \simplex$, and let $\Pbar_r$ denote the closure of the convex hull of $P_r$.
+  Then $\gamma_r = \Pbar_r$ for all $r\in\R$.
+\end{lemma}
+\begin{proof}
+  As $P_r \subseteq \gamma_r$ by the definition of calibration, and $\gamma_r$ is closed and convex, we must have $\Pbar_r \subseteq \gamma_r$.
+  Furthermore, again by calibration of $\psi$, we must have $\bigcup_{r\in\R} P_r = \bigcup_{u\in\reals} \Gamma_u = \simplex$, and thus $\bigcup_{r\in\R} \Pbar_r = \simplex$ as well.
+
+  Suppose for a contradiction that $\gamma_r \neq \Pbar_r$ for some $r\in\R$.
+  As $\gamma_r$ has nonempty interior \raf{Would be nice to cite something for this}, we must have some $p\in\inter\gamma_r \setminus \Pbar_r$.
+  But as $\bigcup_{r'\in\R} \Pbar_{r'} = \simplex$, we then have some $r'\neq r$ with $p\in\Pbar_{r'} \subseteq \gamma_{r'}$, a contradiction.
+  \raf{Need a cite for this too.}
+  Hence, for all $r\in\R$ we have $\gamma_r = \Pbar_r$.
+\end{proof}
+
 We now prove the remaining results.
 %Proposition~\ref{prop:indirect-orderable}, which states the following: if convex $L : \reals \to \reals^\Y$ indirectly elicits a finite elicitable property $\gamma$, then $\gamma$ is orderable.
 \begin{proof}[of Proposition~\ref{prop:indirect-orderable}]
   Let $\gamma:\simplex\toto\R$.
-  From Lemma~\ref{lem:prop-L-monotone}, $\prop{L}$ is monotone.
-  Let $\psi:\reals\to\R$ be the calibrated link from $\prop{L}$ to $\gamma$.
+  From Lemma~\ref{lem:prop-L-monotone}, $\Gamma := \prop{L}$ is monotone.
+  Let $\psi:\reals\to\R$ be the calibrated link from $\Gamma$ to $\gamma$.
+  From Lemma~\ref{lem:pbar}, we have $\Pbar_r = \gamma_r$ for all $r\in\R$, where $\Pbar_r$ is the closure of the convex hull of $\bigcup_{u\in\psi^{-1}(r)} \Gamma_u$.
 
-  \raf{FROM IPAD NOTES}
+  As $\Gamma$ is monotone, we must have $a,b : \R\to\reals^\Y$ such that $\Pbar_r = \{p\in\simplex : a(r) \cdot p \leq 0 \leq b(r) \cdot p\}$.
+  (Take $a(r)_y = \inf_{u\in\psi^{-1}(r)} a(u)_y$ and $b(r)_y = \sup_{u\in\psi^{-1}(r)} b(u)_y$.)
+  Now taking $p_r\in\inter\gamma_r$ and picking $u_r \in \Gamma(p)$, we order $\R = \{r_1,\ldots,r_k\}$ so that $u_{r_i} < u_{r_{i+1}}$ for all $i\in\{1,\ldots,k-1\}$.
+  (The $u_{r_i}$ must all be distinct, as we chose $p_r$ so that $\gamma(p_r) = \{r\}$, so $\psi(u_{r_i}) = r_i$ for all $i$.)
+  
+  Let $i\in\{1,\ldots,k-1\}$.
+  By monotonicity of $\Gamma$, we must have $a(r_i) \leq b(r_i) \leq a(r_{i+1}) \leq b(r_{i+1})$.
+  As $\bigcup_{r\in\R} \Pbar_r = \bigcup_{r\in\R} \gamma_r = \simplex$, we must therefore have $b(r_i) = a(r_{i+1})$.
+  Finally, we conclude $\gamma_{r_i} \cap \gamma_{r_{i+1}} = \{p\in\simplex : b(r_i) \cdot p = 0\}$.
+  As these statements hold for all $i\in\{1,\ldots,k-1\}$, $\gamma$ is orderable.
 \end{proof}
 
 \begin{proof}[of Theorem~\ref{thm:1d-tfae}]
   As remarked before the theorem statement, it remains only to show $1 \iff 5$.
+  For the forward direction,
+  \raf{Construction: same as the polyhedral construction, but linear interpolation}
+  
+  For the converse, let $\Gamma:\simplex\to\reals$ be a continuous, non-locally-constant, elicitable property.
+  Then by~\cite{lambert2018elicitation,steinwart2014elicitation}, we have some $a(u)\in\reals^\Y$ for all $u\in\Gamma(\simplex)$ such that $\Gamma_u = \{p\in\simplex : a(u) \cdot p = 0\}$.
+
+  % From Lemma~\ref{lem:pbar}, we have $\Pbar_r = \gamma_r$ for all $r\in\R$, where $\Pbar_r$ is the closure of the convex hull of $\bigcup_{u\in\psi^{-1}(r)} \Gamma_u$.
+  By the continuity of $\Gamma$, for all $r\in\R$ we must have some open interval $I_r = (a_r,b_r)$ such that $\Gamma^{-1}(\inter\gamma_r) = I_r$.
+  % Moreover, we must have $\psi(I_r) = \{r\}$ by calibration of $\psi$.
+  \raf{I feel like we are so close here...}
+  
 \end{proof}
 
 
