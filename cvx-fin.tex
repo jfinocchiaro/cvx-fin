@@ -206,12 +206,35 @@ $\eliccvx$ and $\elicpoly$; forward reference $\elicembed$
   We define $\trim(\Gamma)$ as the set of maximal level sets of $\Gamma$.
   Formally, $\trim(\Gamma) = \{\Gamma_u : u \in \R'\} \setminus \{ \Gamma_u : \exists w \in \R' \text{ s.t. } \Gamma_u \subsetneq \Gamma_w \}$.
 \end{definition}
-  Take note that the unlabeled property $\trim(\Gamma)$ is nonredundant, meaning that for any $\theta \in \trim(\Gamma)$, there is no level set $\theta' \in \trim(\Gamma)$ such that $\theta \subset \theta'$.
+\raf{NOTE, maybe for later: we need to show that the union of trim is the simplex}
+
+Take note that the unlabeled property $\trim(\Gamma)$ is nonredundant, meaning that for any $\theta \in \trim(\Gamma)$, there is no level set $\theta' \in \trim(\Gamma)$ such that $\theta \subset \theta'$.
 
 \raf{Explain why this is a useful concept in general, and for convex elic}
-  Looking at the $\trim$ of a property allows us to relate the finite property of interest to the subtlely different surrogate property that we actually elicit when embedding the original property into $\reals^d$.
-  In the surrogate property, there is often an infinite set of ``hidden'' level sets corresponding to the reports in the convex hull of embedded points whose level sets have nonempty intersection.
-  Taking the $\trim$ thus allows us to remove labels so that we can relate the optimal sets of original reports and their embedded points, and then we remove the ``hidden'' level sets that are only optimal when we are indifferent between a subset of the embedded points.
+Looking at the $\trim$ of a property allows us to relate the finite property of interest to the subtlely different surrogate property that we actually elicit when embedding the original property into $\reals^d$.
+In the surrogate property, there is often an infinite set of ``hidden'' level sets corresponding to the reports in the convex hull of embedded points whose level sets have nonempty intersection.
+Taking the $\trim$ thus allows us to remove labels so that we can relate the optimal sets of original reports and their embedded points, and then we remove the ``hidden'' level sets that are only optimal when we are indifferent between a subset of the embedded points.
+
+\begin{lemma}\label{lem:finite-full-dim}
+  Let $\gamma$ be a finite (non-redundant) elicitable property.
+  Then the level sets $\gamma$ are full-dimensional in $\simplex$ (i.e.,\ of dimension $n-1$) and form a power diagram.
+\end{lemma}
+
+\begin{lemma}\label{lem:loss-restrict}
+  Let $L$ elicit $\Gamma:\simplex\toto\R_1$, and let $\R_2\subseteq\R_1$ such that $\Gamma(p) \cap \R_2 \neq \emptyset$ for all $p\in\simplex$.
+  Then $L|_{\R_2}$ ($L$ restricted to $\R_2$) elicits $\gamma:\simplex\toto\R_2$ defined by $\gamma(p) = \Gamma(p)\cap \R_2$.
+\end{lemma}
+\begin{proof}
+  Let $p\in\simplex$ be fixed throughout.
+  First let $r \in \gamma(p) = \Gamma(p) \cap \R_2$.
+  Then $r \in \Gamma(p) = \argmin_{u\in\R_1} p\cdot L(u)$, so as $r\in\R_2$ we have in particular $r \in \argmin_{u\in\R_2} p\cdot L(u)$.
+  For the other direction, suppose $r \in \argmin_{u\in\R_2} p\cdot L(u)$.
+  By our assumption, we must have some $r^* \in \Gamma(p) \cap \R_2$.
+  On the one hand, $r^*\in\Gamma(p) = \argmin_{u\in\R_1} p\cdot L(u)$.
+  On the other, as $r^* \in \R_2$, we certainly have $r^* \in \argmin_{u\in\R_2} p\cdot L(u)$.
+  But now we must have $p\cdot L(r) = p\cdot L(r^*)$, and thus $r \in \argmin_{u\in\R_1} p\cdot L(u) = \Gamma(p)$ as well.
+  We now see $r \in \Gamma(p) \cap \R_2$.
+\end{proof}
 
 \begin{proposition}\label{prop:embed-trim}
   Let $\Gamma:\simplex\toto\reals^d$ be an elicitable property.
@@ -219,22 +242,48 @@ $\eliccvx$ and $\elicpoly$; forward reference $\elicembed$
   \begin{enumerate}
   \item $\Gamma$ embeds a finite property $\gamma:\simplex \toto \R$.
     \raf{I think we don't need elicitability of $\gamma$ for the TFAE, right?  If so, let's remove it here (just ``finite property'') and add it to the moreover (``, and $\gamma$ is elicitable.'')  The proof that $\trim(\Gamma)$ (with some labels) is elicitable I think is in my notes.}\jessie{That sounds good to me, as long as $\Gamma$ is still elicitable.  Should ``nonredundant'' be added to the moreover as well?-- No, because you could have a redundant, finite property so that these are true.}
-  \item $\trim(\Gamma)$ is a finite set.
-  \item There is a finite set of full-dimensional level sets $\Theta$ of $\Gamma$ that union to $\simplex$.
+  \item $\trim(\Gamma)$ is a finite set, and $\cup\,\trim(\Gamma) = \simplex$.
+  \item There is a finite set of full-dimensional level sets $\Theta$ of $\Gamma$, and $\cup\,\Theta = \simplex$.
   \end{enumerate}
   Moreover, when any of the above hold, $\{\gamma_r : r\in\R\} = \trim(\Gamma) = \Theta$, and $\gamma$ is elicitable.
 \end{proposition}
 \begin{proof}
-  For $1 \implies 2,3$: given that $\Gamma$ embeds the finite property $\gamma$, we show that $\trim(\Gamma) = \{\Gamma_u : u \in \varphi(\R) \} = \{\gamma_r : r \in \R\}$.
-  By elicitability, each level set $\Gamma_u$ corresponds to a subgradient of the expected score function, call it $G(p) := -\langle p, L(\Gamma(p))\rangle$ for any choice from $\Gamma$.
-  We claim $G$ is polyhedral. $\gamma$ is finite (and by definition non-redundant), so each level set $\gamma_r = \Gamma_{\varphi(r)}$ is full-dimensional\bo{need to prove this separately in a lemma}.
-  So the corresponding subgradient is tangent to $G$ above a full-dimensional level set, and this is true for every $\gamma_r$.
-  Every $p$ is in one of these level sets and so is below some facet.
-  This implies that $G$ is polyhedral with facets exactly corresponding to $\{\gamma_r : r \in \R\} = \{\Gamma_u : u \in \varphi(\R)\}$.
-  Finally, for any $u \not\in \varphi(\R)$, we have\bo{need to cite a lemma statement, per discussion with Raf} that $\Gamma_u$ lies below some face of the epigraph of $G$, hence is contained in the set lying below some facet, which is one of the $\Gamma_{\varphi(r)}$.
-  So the maximal level sets of $\Gamma$ are exactly those lying below facets, which are exactly the level sets of $\gamma$.
-  This gives 2, and the fact that the level sets of $\gamma$ are full-dimensional and union to $\Delta_{\Y}$ gives 3.
-%  Clearly, $\trim(\Gamma) \supseteq \{\Gamma_u : u \in \varphi(\R)\}$ as we are simply restricting the number of level sets we are indexing over.
+  Let $L$ elicit $\Gamma$.
+
+  1 $\Rightarrow$ 2:
+  By the embedding condition, taking $\R_1 = \reals^d$ and $\R_2 = \varphi(\R)$ satisfies the conditions of Lemma~\ref{lem:loss-restrict}: for all $p\in\simplex$, as $\gamma(p) \neq \emptyset$ by definition, we have some $r\in\gamma(p)$ and thus some $\varphi(r) \in \Gamma(p)$.
+
+  %%% The below is basically the argument from the Lemma, for this specific case.
+  % We will first show $L'$ elicits $\gamma$, where $L':\R\to\reals^\Y_+$ is defined by $L'(r) = L(\varphi(r))$.
+  % From the definition of embedding, for all $p\in\simplex$ we have $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p) = \argmin_{u\in\reals^d} p\cdot L(u)$.
+  % Thus, $r\in\gamma(p)$ implies $r \in \argmin_{r'\in\R} p\cdot L(\varphi(r')) = \argmin_{r'\in\R} p\cdot L'(r')$.
+  % For the other direction, let $r \in \argmin_{r'\in\R} p\cdot L'(r')$, and let $r'\in\gamma(p)$ (where use $\gamma(p) \neq \emptyset$).
+  % By the above, we have $r'\in\argmin_{r'\in\R} p\cdot L'(r')$ as well, so we must have $p\cdot L'(r) = p\cdot L'(r')$, and therefore $p\cdot L(\varphi(r)) = p\cdot L(\varphi(r'))$.
+  % But we also have $\varphi(r') \in \argmin_{u\in\reals^d} p\cdot L(u)$, and therefore $\varphi(r) \in \argmin_{u\in\reals^d} p\cdot L(u) = \Gamma(p)$.
+  % By the definition of embedding, we now have $r \in \gamma(p)$, as was to be shown.
+
+  Let $G(p) := -\min_{u\in\reals^d} p\cdot L(u)$ be the negative Bayes risk of $L$, which is convex, and $G_{\R}$ that of $L|_{\varphi(\R)}$.
+  By the above, we actually have $G = G_\R$: the minimum is always achieved by some $\varphi(r) \in \varphi(\R)$.
+  As $\gamma$ is finite, $G$ is polyhedral.
+  Moreover, the projection of the epigraph of $G$ onto $\simplex$ forms a power diagram, with the facets projecting onto the level sets of $\gamma$ (the cells of the power diagram).
+  \raf{Could use some justification for the previous two sentences.}
+  As $L$ elicits $\Gamma$, for all $u\in\reals^d$, the hyperplane $p\mapsto p\cdot L(u)$ is a supporting hyperplane of the epigraph of $G$ at $(p,G(p))$ if and only if $u\in\Gamma(p)$.
+  This supporting hyperplane exposes some face $F$ of the epigraph of $G$, which must be contained in some facet $F'$.
+  Thus, the projection of $F$, which is $\Gamma_u$, must be contained in the projection of $F'$, which is a level set of $\gamma$.
+  We conclude that $\Gamma_u \subseteq \gamma_r$ for some $r\in\R$.
+  Hence, $\trim(\Gamma) = \{\gamma_r : r\in\R\}$, which is finite, and unions to $\simplex$.
+
+  % for all the given that $\Gamma$ embeds the finite property $\gamma$, we show that $\trim(\Gamma) = \{\Gamma_u : u \in \varphi(\R) \} = \{\gamma_r : r \in \R\}$.
+  % By elicitability, each level set $\Gamma_u$ corresponds to a subgradient of the expected score function, call it $G(p) := -\langle p, L(\Gamma(p))\rangle$ for any choice from $\Gamma$.
+  % We claim $G$ is polyhedral. $\gamma$ is finite (and by definition non-redundant), so each level set $\gamma_r = \Gamma_{\phi(r)}$ is full-dimensional\bo{need to prove this separately in a lemma}.
+  % So the corresponding subgradient is tangent to $G$ above a full-dimensional level set, and this is true for every $\gamma_r$.
+  % Every $p$ is in one of these level sets and so is below some facet.
+  % This implies that $G$ is polyhedral with facets exactly corresponding to $\{\gamma_r : r \in \R\} = \{\Gamma_u : u \in \varphi(\R)\}$.
+  % Finally, for any $u \not\in \varphi(\R)$, we have\bo{need to cite a lemma statement, per discussion with Raf} that $\Gamma_u$ lies below some face of the epigraph of $G$, hence is contained in the set lying below some facet, which is one of the $\Gamma_{\varphi(r)}$.
+  % So the maximal level sets of $\Gamma$ are exactly those lying below facets, which are exactly the level sets of $\gamma$.
+  % This gives 2, and the fact that the level sets of $\gamma$ are full-dimensional and union to $\Delta_{\Y}$ gives 3.
+
+  % Clearly, $\trim(\Gamma) \supseteq \{\Gamma_u : u \in \varphi(\R)\}$ as we are simply restricting the number of level sets we are indexing over.
 %  Now, consider some $\theta \in \trim(\Gamma)$ and the report $u$ so that $\theta = \Gamma_u$.
 %  If $u \in \varphi(\R)$, then clearly we are done.
 %  If $u \not\in \varphi(\R)$ but there is some report $w \in \varphi(\R)$ so that $\Gamma_u = \Gamma_w$, then we are again done since $\trim(\Gamma)$ is nonredundant.
@@ -250,10 +299,29 @@ $\eliccvx$ and $\elicpoly$; forward reference $\elicembed$
 %  Since $\Gamma$ is nondegenerate, for all $p \in \simplex$, there is a level set $\theta \in \trim(\Gamma)$ such that $p \in \theta$, since the level sets of elicitable properties are closed and convex, and only level sets that are not full-dimensional level sets are removed in taking $\trim(\Gamma)$.
 %  If, for some $p \in \simplex$, the level set $\Gamma_u$ corresponding to $p$ was removed, it would be because there is a level set corresponding to $w \in \reals^d$ such that $\Gamma_u \subset \Gamma_w$, but then $p \in \Gamma_w$.
 
-  For $3 \implies 1$, take the set $\R := \{u : \Gamma_u \in \Theta\}$.
-  (Take only one such report per level set.)
-  The set $\R$ is then finite, and taking $\varphi$ to be the identity, we observe that $\Gamma$ embeds $\gamma: p \mapsto \Gamma(p) \cap \R$.
-  %We can also see $\gamma = \prop{L|_{\R}}$, where $\Gamma = \prop{L}$.
+  2 $\Rightarrow$ 3: let $\R = \{u_1,\ldots,u_k\} \subseteq\reals^d$ be a set of distinct reports such that $\trim(\Gamma) = \{\Gamma_{u_1},\ldots,\Gamma_{u_k}\}$.
+  Now as $\cup\,\trim(\Gamma) = \simplex$, for any $p\in\simplex$, we have $p\in\Gamma_{u_i}$ for some $u_i\in\R$, and thus $\Gamma(p) \cap \R \neq \emptyset$.
+  We now satisfy the conditions of Lemma~\ref{lem:loss-restrict} with $\R_1 = \reals^d$ and $\R_2 = \R$.
+  The property $\gamma:p\mapsto\Gamma(p)\cap\R$ is non-redundant by the definition of $\trim$, finite, and elicitable.
+  Now from Lemma~\ref{lem:finite-full-dim}, the level sets $\Theta = \{\gamma_r:r\in\R\}$ are full-dimensional, and union to $\simplex$.
+  Statement 3 then follows from the fact that $\gamma_r = \Gamma_r$ for all $r\in\R$.
+
+  %%% Again, this is subsumed by the Lemma
+  % Let $\R = \{u_1,\ldots,u_k\}$; we show that $\gamma:\simplex\toto\R$, $\gamma(p) = \{u_i : p\in\Gamma_{u_i}\} = \Gamma(p) \cap \R$, is elicitable.
+  % Define $L':\R\to\reals^\Y_+$ by $L'(u_i) = L(u_i)$.
+  % Clearly, if $u_i \in \gamma(p)$, then $u_i \in \Gamma(p) = \argmin_{u\in\reals^d} p\cdot L(u)$, and thus $u_i \in \argmin_{u\in\R} p\cdot L'(u)$.
+  % For the other direction, suppose $u_i \in \argmin_{u\in\R} p\cdot L'(u)$.
+  % For any $u' \in \Gamma(p)$, by the definition of $\trim$, we have some $u_j\in\R$ for which $u_j\in\Gamma(p) = \argmin_{u\in\reals^d} p\cdot L(u)$ as well.
+  % But now we must have $p\cdot L(u_i) = p\cdot L(u_j)$, and thus $u_i \in \Gamma(p)$ as well.
+  % As $u_i\in\R$, we have $u_i \in \Gamma(p)\cap \R = \gamma(p)$, as desired.
+
+
+  \raf{Wow, kudos to you two for this proof.  Much simpler than I would have guessed!}
+
+  3 $\Rightarrow$ 1: let $\Theta = \{\theta_1,\ldots,\theta_k\}$.
+  For all $i\in\{1,\ldots,k\}$ let $u_i\in\reals^d$ such that $\Gamma_{u_i} = \theta_i$.
+  Now define $\gamma:\simplex\toto\{1,\ldots,k\}$ by $\gamma(p) = \{i : p\in\theta_i\}$, which is non-degenerate as $\cup\,\Theta = \simplex$.
+  By construction, we have $\gamma_i = \theta_i = \Gamma_{u_i}$ for all $i$, so letting $\varphi(i) = u_i$ we satisfy the definition of embedding, namely statement 1.
 \end{proof}
 
 \begin{proposition}\label{prop:embed-link}
@@ -316,7 +384,7 @@ $\eliccvx$ and $\elicpoly$; forward reference $\elicembed$
 \end{theorem}
 \begin{proof}
   \raf{This proof is kind of awesome.}
-  
+
   Let $L:\reals^d\to\reals_+$ be a polyhedral loss.
   For all $p$, let $P(p)$ be the epigraph of the convex function $u\mapsto p\cdot L(u)$.
   From Lemma~\ref{lem:polyhedral-pd-same}, we have that the power diagram induced by the projection of $P(p)$ onto $\reals^d$ is constant whenever $p\in\inter\simplex$.
@@ -692,7 +760,7 @@ We extend Aurenhammer's result to a weighted sum of convex functions, showing th
   Let $F$ be a facet of $P$, and $F'$ its projection down to $\reals^d$.
   It follows that $g|_{F'}$ is affine, and thus $g$ is differentiable on $\inter F'$ with constant derivative $d\in\reals^d$.
   Conversely, for any subgradient $d'$ of $g$, the set of points $\{x\in\reals^d : d'\in\partial g(x)\}$ is the projection of a face of $P$; we conclude that $F = \{(x,g(x))\in\reals^{d+1} : d\in\partial g(x)\}$ and $F' = \{x\in\reals^d : d\in\partial g(x)\}$.
-  
+
   Now let $f := \sum_{i=1}^k f_i$ with epigraph $P$, and $f' := \sum_{i=1}^k p_i f_i$ with epigraph $P'$.
   By \raf{Rockafellar}, $f,f'$ are polyhedral.
   We now show that $f$ is differentiable whenever $f'$ is differentiable:
