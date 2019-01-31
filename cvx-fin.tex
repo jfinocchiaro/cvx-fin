@@ -104,7 +104,7 @@
   information elicitation, proper scoring rules, surrogate loss functions
 \end{keywords}
 
-\section{Introduction}
+\section{Introduction}\label{sec:intro}
 
 \subsection{Notation}
 \begin{itemize}
@@ -133,43 +133,50 @@ The abstract set $\R$ is the \emph{report space}, $\ell(r)$ is a vector specifyi
 The expected loss of report $r$ when $y \sim p$ is written $\langle p, \ell(r) \rangle$.
 For example, the $0-1$ loss has $\R = \Y$ with $\ell(r)_y = \Ind[r \neq y]$.
 
-A \emph{property} formally captures the relationship between distributions $p$ and minimizers of expected loss.
+A \emph{property} formally captures the relationship between distributions $p$ and ``optimal'' reports, i.e. those minimizing expected loss.
 In this paper, we will use double arrow notation to mean a mapping to all nonempty subsets.
 So the notation $\gamma: \simplex \toto \R$ is shorthand for $\gamma: \simplex \to 2^{\R} \setminus \emptyset$.
 
-\begin{definition}
-  
+\begin{definition}[Property, level set]
+  A \emph{property} is a function $\gamma:\simplex\toto\R$ mapping each distribution $p$ to a nonempty subsets of ``correct'' reports.
+  A \emph{level set} $\gamma_r := \{p : r \in \gamma(p)\}$ is the set of distributions $p$ for which the report $r$ is correct.
+\end{definition}
+For example, the \emph{mode} on $n$ outcomes has $\gamma(p) = \{ y : p_y = \max_{y'} p_{y'}\}$.
+It is a finite property:
+
+\begin{definition}[Finite property, nonredundant]
+  We call $\gamma$ a \emph{finite} property is $\R$ is a finite set and call it \emph{nonredundant} if no level set is a superset of another.
+  For simplicity, when we say a property is finite, we also require it to be nonredundant.
 \end{definition}
 
-\subsection{Properties and Losses}
-\begin{definition}
-  A property $\Gamma:\simplex\toto\R$ is a nonempty, set-valued function mapping a probability distribution to the correct report values for the given distribution.
-
-  A \emph{level set} $\Gamma_r := \{p : r \in \Gamma(p)\}$ is the set of distributions $p$ for which the report $r$ is ``optimal''.
-
-\raf{Should bake non-degenerate into the definition: insist that $\Gamma(p) \neq \emptyset$ for all $p$.}
-
-  \raf{I think to avoid a TON of extra mentions of ``non-redundant'' we should take finite to mean finite and non-redundant}
-  We call $\Gamma$ a \emph{finite} property is $\R$ is finite, and \emph{nonredundant} if, for all $r$, there is no $u$ so that the level set $\Gamma_r \subseteq \Gamma_u$.
-  For simplicity, when we say a property is finite, we also take it to be nonredundant.
-\end{definition}
-
-\begin{definition}
-  \raf{I realized that (a) it is common to restrict losses to be non-negative, and (b) it solves some annoying issues where we have to say ``if $L$ is bounded below...'' nicely.  So unless any objections, let's say $L \geq 0$.}
-  
-  A loss $L:\R\to\reals^\Y_+$, elicits a property $\Gamma:\simplex \toto \R$ if, for all $p \in \simplex$ and $r \in \Gamma(p)$, we observe
+\begin{definition}[Elicits]
+  A loss $\ell:\R\to\reals^\Y_+$, \emph{elicits} a property $\gamma:\simplex \toto \R$ if for all $p \in \simplex$,
   \begin{equation}
-  \Gamma(p) = \argmin_{r \in \R} \E_{Y\sim p}[L(r,Y)]
+  \Gamma(p) = \argmin_{r \in \R} \E_{Y\sim p}[L(r,Y)].
   \end{equation}
   \jessie{Do we want regular elicitation vs essentially elicits...}
 \end{definition}
+For example, one can verify that $0-1$ loss elicits the mode.
+The terminology comes from the information elicitation literature, in which a report $r$ is elicited from some forecaster by scoring her with a loss on the observed outcome $y$; she tries to minimize expected loss.
 
-\begin{definition}
-  Polyhedral function, loss
+Typically in this paper, $\gamma$, $\R$, and $\ell$ will be used for a finite property, finite report space, and loss eliciting it, while $\Gamma$, $\R'$ and $L$ will be used for some other property, often with report space $\R' = \reals^d$.
+In this case, we prefer $r$ for a member of $\R$ and $u$ for members of $\reals^d$.
+
+In $\reals^d$, a \emph{polyhedral set} is the intersection of a finite number of halfspaces.
+A \emph{polytope} is a bounded polyhedral set.
+\begin{definition}[Polyhedral loss]
+  A \emph{polyhedral function} is a pointwise maximum over a finite set of affine functions.
+  In other words, it is a function whose epigraph (set of points lying above it) forms a polyhedral set.
+  $L: \reals^d \to \reals^{\Y}_+$ is a \emph{polyhedral loss} if $L(u)_y$ is a polyhedral function of $u$ for each $y$.
 \end{definition}
 
-\subsection{Link Functions}
 
+\subsection{Link Functions and Elicitation Complexity}
+Often, for computational or other reasons, one is interested in a property $\gamma$ such as the mode, but wishes to elicit it by minimizing some other ``surrogate'' loss $L$ over some other space such as $\reals^d$, then mapping the result back to $\R$ using a link function.
+We now formalize this procedure.
+\bo{Maybe mention that previous formalizations are for single-valued properties only if true? And if so, that they don't really apply to finite properties??}
+
+\bo{Didn't touch these}
 \begin{definition}
   Let properties $\gamma:\simplex\toto\R$ and $\Gamma:\simplex\toto\R'$ be given.
   A \emph{link function} is a map $\psi:\R'\to\R$.
@@ -198,8 +205,6 @@ It is also interesting to contrast the definitions above with the following.
   \end{cases}$
   would not be, even though it would be calibrated.}
 
-
-\subsection{Elicitation Complexity}
 
 \begin{definition}
   A loss \emph{indirectly elicits} a property $\gamma$ if it elicits a property with a calibrated link to $\gamma$.
