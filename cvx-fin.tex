@@ -476,7 +476,7 @@ We state this equivalence in two parts, the first focusing on the property, and 
 \end{proof}
 
 We now state a converse of Theorem~\ref{thm:finite-elicit-embed}: every polyhedral loss embeds a finite elicitable property.
-One way to look at this result in light of Proposition~\ref{prop:embed-trim} is that polyhedral losses ``directly'' elicit finite properties in a convex way.
+One way to look at this result in light of Proposition~\ref{prop:embed-trim} is that polyhedral losses ``directly'' elicit finite properties by embedding them into a space where the original loss is convex.
 Moreover, we show that indirect elicitation via polyhedral losses are heavily structured: if a polyhedral loss elicits a property $\gamma'$ with a link to $\gamma$, then both $\gamma'$ and $\gamma$ are finite and one ``refines'' the other in the sense below.
 In other words, the cells (level sets) of $\gamma'$ must be a finite subdivision of the cells of $\gamma$.
 This fact will become useful when we discuss the relationship between embedding dimension and elicitation complexity; see \raf{WHERE WE DISCUSS}.
@@ -525,14 +525,12 @@ In the previous section, we saw that every finite elicitable property is embedda
 We now turn to a more fine-grained question: given a finite elicitable property $\gamma$, how many dimensions $d$ are required to embed $\gamma$ in $\reals^d$?
 We call the minimum such $d$ the \emph{embedding dimension} of $\gamma$.
 \raft{Do we want to call this ``embedding complexity''?}
-
 We begin with $d=1$, or real-valued embeddings.
 As we will see, the notion of \emph{orderable} properties, defined below, will play a central role.
-\raf{role of orderable}
-\raf{...} relationships between the elicitation complexity by various classes of loss functions, including indirect elicitation via an embedding.
+In particular, a finite elicitable property is 1-embeddable if and only if it is orderable.
+We then go on to draw tight connections between orderability and other elicitation complexity notions, such as via general convex losses or continuous properties, yielding a thorough understanding of the real-valued case.
 
-
-The following is a minor modification of a similar definition of~\citet{lambert2018elicitation}.
+Let us first define what it means for a finite property to be orderable.
 \begin{definition}
   A finite property $\gamma:\simplex\toto\R$ is \emph{orderable} if there is an enumeration $\R = \{r_1,\ldots,r_k\}$ such that for all $i\in\{1,\ldots,k-1\}$, the intersection $\gamma_{r_i} \cap \gamma_{r_{i+1}}$ is a hyperplane intersected with $\simplex$.
 \end{definition}
@@ -582,7 +580,8 @@ Together with Proposition~\ref{prop:embed-link}, which shows that embeddings giv
 \end{proposition}
 
 The proof of Proposition~\ref{prop:indirect-orderable} follows from Lemma~\ref{lem:prop-L-monotone} in Appendix~\ref{app:dimension-1}, which states that the property elicited by any convex loss must be monotone in the sense above.
-(The normal vectors are constructed in terms of the subgradients of the loss, thus guaranteeing monotonicity of their coefficients.)
+(The functions $a,b$ are constructed in terms of the subgradients of the loss, thus guaranteeing monotonicity of their coefficients.)
+The result then follows from the equivalence of monotonicity and orderability for finite properties (Lemma~\ref{lem:orderable-monotone}).
 
 As a corollary of Proposition~\ref{prop:indirect-orderable} and Theorem~\ref{thm:polyhedral-embed}, we now also see that polyhedral losses embed orderable properties.
 
@@ -590,9 +589,11 @@ As a corollary of Proposition~\ref{prop:indirect-orderable} and Theorem~\ref{thm
   Every polyhedral $L : \reals \to \reals^\Y$ embeds an orderable property.
 \end{corollary}
 
-The central conclusion from this section is the following theorem, which states that several elicitation complexity classes coincide in dimension 1.
-The proof is given in Appendix~\ref{app:dimension-1}, which only needs to show the equivalence of statements 1 and 5, as we have already established the equivalence of the first four statements: $1 \implies 2,3,4$ from Proposition~\ref{prop:orderable-embed}, as the proof gives a loss which is polyhedral (and convex), and Proposition~\ref{prop:indirect-orderable} shows $2,3,4 \implies 1$, as each of these cases would give a convex loss indirectly eliciting a finite elicitable property.
-\raf{Note the relationship to~\cite{finocchiaro2018convex}, and that this is nearly a corollary, as that work almost shows $5\implies 4$, but it needs slightly more assumptions than we need.  Instead, we give a direct proof.}
+We now see that orderability characterizes 1-embeddable properties, and have started to see that the concept is central even when considering indirect elicitation.
+In particular, a conclusion of the previous two results is that if a finite elicitable property has elicitation complexity 1 with respect to convex or polyhedral losses, it must be orderable.
+This in turn implies that these elicitation complexity classes coincide in dimension 1.
+We now formalize this observation, and add one more complexity class: that of continuous real-valued non-locally-constant properties.
+
 \begin{theorem}\label{thm:1d-tfae}
   Let $\gamma$ be a finite elicitable property.
   The following are equivalent.
@@ -605,7 +606,24 @@ The proof is given in Appendix~\ref{app:dimension-1}, which only needs to show t
   \end{enumerate}
 \end{theorem}
 
-\raf{Conclusion and transition: mode and abstain for $n=3$ are not 1-embeddable!}
+The proof, given in Appendix~\ref{app:dimension-1}, only shows the equivalence 1 $\Leftrightarrow$ 5, as we have already established the equivalence of the first four statements: $1 \Rightarrow 2,3,4$ from Proposition~\ref{prop:orderable-embed}, as the proof gives a loss which is polyhedral (and convex), and Proposition~\ref{prop:indirect-orderable} shows $2,3,4 \Rightarrow 1$, as each of these cases would give a convex loss indirectly eliciting a finite elicitable property.
+Note that while~\citet{finocchiaro2018convex} gives a similar statement to $1\Leftrightarrow 5$, namely that continuous non-locally-constant real-valued properties are elicitable if and only if they are convex elicitable, their proof relies on several regularity conditions which we do not require; we instead give a direct proof.
+
+From Theorem~\ref{thm:1d-tfae}, we can already prove lower bounds on embedding dimension, as well as the other complexity classes mentioned.
+Here are two simple examples.
+\begin{corollary}
+  \raf{Let $\gamma$ be abstain for any $\alpha$, or $\mathrm{mode}$, and any $n\geq 3$.  Then
+    $\elicembed(\gamma)\geq 2$,
+    $\elicpoly(\gamma)\geq 2$,
+    $\eliccvx(\gamma)\geq 2$,
+    $\eliccts(\gamma)\geq 2$.}
+\end{corollary}
+\begin{proof}
+  % Every cell (level set) of an orderable property is adjacent to at most two other cells.
+  % This fails to hold for \raf{abstain} when $n\geq 3$ and the mode when $n\geq 4$.
+  % For the mode when $n=3$, we simply observe that the intersection of any two adjacent cells fails to be a hyperplane.
+  The cell adjacency graph of an orderable property must be a path, but for the mode it is the complete graph on $n$ nodes, and for \raf{abstain} a star graph on $n+1$ nodes, which are not paths when $n \geq 3$.
+\end{proof}
 
 \section{Higher-Dimensional Embeddings}\label{sec:general-dimensions}
 
@@ -853,17 +871,8 @@ Indeed, as required by our characterization, the subgradient sets of their loss 
   Abstain with $\alpha=1/2$ is $(\log_2 |\Y|)$-embeddable, but no lower.
 \end{conjecture}
 
-\section{Conclusion and Future Work}
-
-Let $\mathrm{elic}_{embed}$ denote the elicitation complexity with respect to embeddings, $\mathrm{elic}_{Pcvx}$ the complexity with respect to polyhedral convex losses, and $\mathrm{elic}_{cvx}$ the complexity with respect to arbitrary convex losses.
-
-\begin{conjecture}
-  $\mathrm{elic}_{embed}(\Gamma) = \mathrm{elic}_{Pcvx}(\Gamma) = \mathrm{elic}_{cvx}(\Gamma)$ for all finite, elicitable properties $\Gamma$.
-\end{conjecture}
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Conclusion and Directions}  \label{sec:conclusion}
+\section{Conclusion and Future Directions} \label{sec:conclusion}
 \paragraph{Summary.}
 This work is part of a broader research program to understand convex surrogates through the lens of property elicitation: the relationship between finite losses and convex surrogates, the link functions connecting them, and the properties they elicit.
 We seek a general theory that, given a property, can prescribe when and how to construct convex surrogate losses that elicit it, and specifically, determine the minimum dimension required.
@@ -890,9 +899,15 @@ We would also like to move toward a full understanding of the differences betwee
 For example, how does embedding dimension compare in general to convex elicitation diemsnion (the dimensionality $d$ required of \emph{any} convex surrogate loss)?
 These questions have both theoretical interest and potential practical significance.
 
-\subsection*{Acknowledgements}
-We thank Peter Bartlett for several discussions early on, which led to a proof of \raf{1-d reduction} among other insights.
-\raf{Almost forgot: should ack Arpit too of course!}
+\begin{conjecture}
+  $\mathrm{elic}_{embed}(\Gamma) = \mathrm{elic}_{Pcvx}(\Gamma) = \mathrm{elic}_{cvx}(\Gamma)$ for all finite, elicitable properties $\Gamma$.
+\end{conjecture}
+
+
+\raf{ACKNOWLEDGEMENTS (commented out for submission)}
+% \subsection*{Acknowledgements}
+% We thank Peter Bartlett for several discussions early on, which led to a proof of \raf{1-d reduction} among other insights.
+% \raf{Almost forgot: should ack Arpit too of course!}
 
 \bibliography{diss,extra}
 
