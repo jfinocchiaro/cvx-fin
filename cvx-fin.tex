@@ -259,9 +259,8 @@ A property of interest similar to the mode is the abstain($\alpha$) property, in
 
 \section{Polyhedral Losses and Embeddings}
 
-\raf{Glue needed...}
-For many problems in machine learning, researchers have naturally converged on some notion of learning a finite property by ``embedding'' the possible labels into points in $\reals^d$ and minimizing a consistent convex surrogate loss.
-Here, we formalize that notion of embedding and show some geometric and topological characteristics of such embeddable properties.
+For many problems in machine learning, researchers have naturally converged on some notion of learning a finite property by ``embedding'' the possible labels or predictions into $\reals^d$ and minimizing a consistent convex surrogate loss.
+Here, we formalize a notion of embedding which captures these techniques, and show some geometric and topological characteristics of embeddable properties.
 
 \begin{definition}
   A property $\Gamma : \simplex \toto \reals^d$ \emph{embeds} a property $\gamma : \simplex \toto \R$ if there exists some injective embdedding $\varphi:\R\to\reals^d$ such that for all $p\in\simplex,r\in\R$ we have $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p)$.
@@ -278,7 +277,7 @@ Here, we formalize that notion of embedding and show some geometric and topologi
   We define $\trim(\Gamma)$ as the set of maximal level sets of $\Gamma$.
   Formally, $\trim(\Gamma) = \{\Gamma_u : u \in \R'\} \setminus \{ \Gamma_u : \exists w \in \R' \text{ s.t. } \Gamma_u \subsetneq \Gamma_w \}$.
 \end{definition}
-\raf{NOTE, maybe for later: we need to show that the union of trim is the simplex}
+\raft{Note for later: should be able to show that the union of trim is the simplex.}
 
 Take note that the unlabeled property $\trim(\Gamma)$ is nonredundant, meaning that for any $\theta \in \trim(\Gamma)$, there is no level set $\theta' \in \trim(\Gamma)$ such that $\theta \subset \theta'$.
 
@@ -314,7 +313,6 @@ Taking the $\trim$ thus allows us to remove labels so that we can relate the opt
   The following are equivalent:
   \begin{enumerate}
   \item $\Gamma$ embeds a finite property $\gamma:\simplex \toto \R$.
-    \jessiet{Should ``nonredundant'' be added to the moreover as well?-- No, because you could have a redundant, finite property so that these are true.}\raft{Our definition of finite implies non-redundant; the proposition would not be true for redundant $\gamma$, since $\trim(\Gamma)\neq\gamma$.}
   \item $\trim(\Gamma)$ is a finite set, and $\cup\,\trim(\Gamma) = \simplex$.
   \item There is a finite set of full-dimensional level sets $\Theta$ of $\Gamma$, and $\cup\,\Theta = \simplex$.
   \end{enumerate}
@@ -328,8 +326,8 @@ Taking the $\trim$ thus allows us to remove labels so that we can relate the opt
   Let $G(p) := -\min_{u\in\reals^d} p\cdot L(u)$ be the negative Bayes risk of $L$, which is convex, and $G_{\R}$ that of $L|_{\varphi(\R)}$.
   By the above, we actually have $G = G_\R$: the minimum is always achieved by some $\varphi(r) \in \varphi(\R)$.
   As $\gamma$ is finite, $G$ is polyhedral.
-  Moreover, the projection of the epigraph of $G$ onto $\simplex$ forms a power diagram, with the facets projecting onto the level sets of $\gamma$ (the cells of the power diagram).
-  \raf{Could use some justification for the previous two sentences.}
+  Moreover, the projection of the epigraph of $G$ onto $\simplex$ forms a power diagram, with the facets projecting onto the level sets of $\gamma$, the cells of the power diagram.
+  (See Theorem~\ref{thm:aurenhammer}.)
   As $L$ elicits $\Gamma$, for all $u\in\reals^d$, the hyperplane $p\mapsto p\cdot L(u)$ is a supporting hyperplane of the epigraph of $G$ at $(p,G(p))$ if and only if $u\in\Gamma(p)$.
   This supporting hyperplane exposes some face $F$ of the epigraph of $G$, which must be contained in some facet $F'$.
   Thus, the projection of $F$, which is $\Gamma_u$, must be contained in the projection of $F'$, which is a level set of $\gamma$.
@@ -389,8 +387,6 @@ Taking the $\trim$ thus allows us to remove labels so that we can relate the opt
   % As $u_i\in\R$, we have $u_i \in \Gamma(p)\cap \R = \gamma(p)$, as desired.
 
 
-  \raf{Wow, kudos to you two for this proof.  Much simpler than I would have guessed!}
-
   3 $\Rightarrow$ 1: let $\Theta = \{\theta_1,\ldots,\theta_k\}$.
   For all $i\in\{1,\ldots,k\}$ let $u_i\in\reals^d$ such that $\Gamma_{u_i} = \theta_i$.
   Now define $\gamma:\simplex\toto\{1,\ldots,k\}$ by $\gamma(p) = \{i : p\in\theta_i\}$, which is non-degenerate as $\cup\,\Theta = \simplex$.
@@ -436,11 +432,14 @@ Taking the $\trim$ thus allows us to remove labels so that we can relate the opt
   \end{enumerate}
 \end{theorem}
 \begin{proof}
-  We trivially have $3\Rightarrow 2$, and by Proposition~\ref{prop:embed-trim} \raf{only if it's updated like I mentioned} we also have $2\Rightarrow 1$.
-  It thus suffices to show $1\Rightarrow 3$, which is a corollary of a stronger result given as Theorem \raf{fill in} in Appendix \raf{fill in}, stating that every non-redundant elicitable property, even if not finite, is embeddable in $d =n-1$ dimensions.
-  \raf{NOTE: still need to check the math on the conjugate for the general case, since the expected score function is not necessarily closed for general properties.  Not high priority.}
-  (Recall that $n = |\Y|$.)
-  The construction uses the convex conjugate of the expected score function for $\gamma$, which is polyhedral when $\gamma$ is finite.
+  We trivially have $3\Rightarrow 2$, and by Proposition~\ref{prop:embed-trim} we also have $2\Rightarrow 1$.
+  It thus suffices to show $1\Rightarrow 3$.
+  In fact, this direction is a corollary of a stronger result given as Theorem~\ref{thm:general-duality-embedding} in the appendix, which states as follows.
+  For any non-redundant property $\gamma'$, even if not finite, elicited by a loss with a Bayes risk which is a closed function, $\gamma'$ is embeddable in $d =n-1$ dimensions.
+  By Lemma~\ref{lem:finite-full-dim}, the (negative) Bayes risk $G$ of the given finite elicitable property $\gamma$ is polyhedral and therefore closed, so the theorem applies.
+  Moreover, the construction given in Theorem~\ref{thm:general-duality-embedding} defines the loss embedding $\gamma$ as $L(u) = C(u)\ones - u$ where $C=G^*$ is the convex conjugate of $G$, which is also polyhedral~\citet[Theorem 19.2]{rockafellar1997convex}.
+  (Here $\ones\in\reals^\Y$ denotes the all-ones vector.)
+  Thus $L$ is polyhedral.
 \end{proof}
 
 \begin{definition}
@@ -454,8 +453,6 @@ Taking the $\trim$ thus allows us to remove labels so that we can relate the opt
   Moreover, a polyhedral loss indirectly elicits a finite elicitable property $\gamma$ if and only if it embeds a property which refines $\gamma$.
 \end{theorem}
 \begin{proof}
-  \raf{This proof is kind of awesome.}
-
   Let $L:\reals^d\to\reals_+$ be a polyhedral loss.
   For all $p$, let $P(p)$ be the epigraph of the convex function $u\mapsto p\cdot L(u)$.
   From Lemma~\ref{lem:polyhedral-pd-same}, we have that the power diagram induced by the projection of $P(p)$ onto $\reals^d$ is constant whenever $p\in\inter\simplex$.
@@ -476,6 +473,7 @@ Taking the $\trim$ thus allows us to remove labels so that we can relate the opt
   Thus, taking $V = \bigcup_{\Y'\subseteq\Y} V_{\Y'}$, we have for all $p\in\simplex$ that $\Gamma(p) \cap V \neq \emptyset$.
   This implies that $\trim(\Gamma) \subseteq \{\Gamma_v : v\in V\}$, which is finite, so Proposition~\ref{prop:embed-trim} now gives the conclusion.
 
+  \raf{TODO}
   For the second part, \raf{just need to show that the link can only glue level sets together; this gets a little tricky with the boundaries of the cells, since you have choices, but }
   From Lemma~\ref{lem:pbar}
 \end{proof}
@@ -523,12 +521,12 @@ First, the forward direction.
   \begin{align*}
     i \in \prop{L}(p)
     &\iff 0 \in \partial (p \cdot L(i)) \\
-    &\iff 0 \in \sum_{y\in\Y} p_y \partial L(i)_y \\
+    % &\iff 0 \in \sum_{y\in\Y} p_y \partial L(i)_y \\
     &\iff 0 \in \sum_{y\in\Y} p_y [a(r_i)_y,b(r_i)_y] \\
     &\iff a(r_i) \cdot p \leq 0 \leq b(r_i) \cdot p \\
     &\iff r_i \in \gamma(p)~,
   \end{align*}
-  where the sums are Minkowski sums.
+  where the sum is a Minkowski sum.
 \end{proof}
 
 The converse of Proposition~\ref{prop:orderable-embed}, that every 1-embeddable property is orderable, follows from a much broader statement, given below as Proposition~\ref{prop:indirect-orderable}: finite elicitable properties which are indirectly elicited by 1-dimensional convex losses must be orderable.
@@ -941,16 +939,14 @@ We extend Aurenhammer's result to a weighted sum of convex functions, showing th
   The conclusion follows from the obversation that the above held for any strictly positive weights $p$, and $f$ was fixed.
 \end{proof}
 
-\raf{  By Lemma~\ref{lem:finite-full-dim}, $G$ is polyhedral and therefore closed, and by~\citet[Theorem 19.2]{rockafellar1997convex}, its convex conjugate $C : \reals^\Y \to \reals$ is also polyhedral and closed.
-}
-
-\begin{theorem}
-  Let $\gamma:\simplex\toto\R$ be a non-redundant elicitable property, elicited by a loss $L:\R\to\reals^\Y_+$ whose Bayes risk is a closed function.
+\begin{theorem}\label{thm:general-duality-embedding}
+  Let $\gamma:\simplex\toto\R$ be a non-redundant elicitable property, elicited by a loss whose Bayes risk is a closed function.
   Then $\gamma$ is $(n-1)$-embeddable, where $n=|\Y|$.
+  \raft{Low priority: what conditions on $L$ or $\gamma$ ensure that the Bayes risk is closed?}
 \end{theorem}
 \begin{proof}
-  Let $S:\R\to\reals^\Y$ be a scoring rule (negative loss) eliciting $\gamma$, and let $G:\simplex\to\reals$ be its expected score function (negative Bayes risk), given by $G(p) = \max_{r\in\R} p \cdot S(r)$.
-  Let $C:\reals^\Y\to\reals\cup\{\infty\}$ be the convex conjugate of $G$, given by $C(u) = \sup_{p\in\simplex} p\cdot u - G(p)$.  
+  $G:\simplex\to\reals$ be the negative Bayes risk of the loss $L_\gamma$ eliciting $\gamma$, given by $G(p) = -\min_{r\in\R} p \cdot L_\gamma(r)$.
+  Let $C:\reals^\Y\to\reals$ be the convex conjugate of $G$, given by $C(u) = \sup_{p\in\simplex} p\cdot u - G(p)$, which is finite on all of $\reals^\Y$ by~\citet[Corollary 13.3.1]{rockafellar1997convex} as $\dom\, G = \simplex$ is bounded.
   
   By~\citet[Theorem 2]{frongillo2014general} we know that for some $\D \subseteq \partial G(\simplex) \subseteq \reals^\Y$ we have a bijection $s : \R \to \D$ such that $\gamma(p) = s^{-1}(\D \cap \partial G(p))$.
   (In other words, $\gamma$ is a relabeling of subgradients of $G$.)
@@ -961,7 +957,7 @@ We extend Aurenhammer's result to a weighted sum of convex functions, showing th
   \end{equation}
   where the final equivalence follows from~\cite[Corollary 23.5.2]{rockafellar1997convex} as $G$ is a closed convex function.
 
-  Now define $L:\dom(C)\to\reals^\Y$ by $L(u) = C(u)\ones - u$ where $\ones\in\reals^\Y$ is the all-ones vector.
+  Now define $L:\reals^n\to\reals^\Y$ by $L(u) = C(u)\ones - u$, where $\ones\in\reals^\Y$ is the all-ones vector.
   We will show that $L$ embeds $\gamma$.
   As $L$ is convex, we may write the optimality condition as
   \begin{equation}
@@ -980,13 +976,25 @@ We extend Aurenhammer's result to a weighted sum of convex functions, showing th
     \\
     & \iff p \in \partial C(u)~.
   \end{align*}
-  Putting this together with eq.~\eqref{eq:1}, and recalling that $s$ is a bijection, we have for any $u \in \D$ and $p\in\simplex$ that
+  Together with eq.~\eqref{eq:1}, we now have for any $u \in \D$ and $p\in\simplex$ that
   \begin{equation}
     \label{eq:3}
-    u \in \prop{L}(p) \iff p \in \partial C(u) \iff s^{-1}(u) \in \gamma(p)~,
+    u \in \prop{L}(p) \iff p \in \partial C(u) \iff s^{-1}(u) \in \gamma(p)~.
   \end{equation}
-  which implies that $L$ embeds $\gamma$ with embedding function $\varphi:\R\to\reals^\Y$ given by $\varphi(r) = s(r)$.
-  \raf{TO CHECK: the finiteness of $C$}
+  Recalling that $s$ is a bijection, we conclude that $L$ embeds $\gamma$ with embedding function $\varphi:\R\to\reals^\Y$ given by $\varphi(r) = s(r)$.
+
+  We have now shown that $\gamma$ is $n$-embeddable.
+  To drop a dimension, first note that $C$ is linear in the $\ones$ direction: for all $u'\in\reals^\Y$, the directional derivative $C'(u';\ones) = \sup_{p\in\partial C(u')} p\cdot\ones = 1$ as $\partial C(u')\subseteq\simplex$ for all $u'$; thus
+  $C(u+\alpha\ones) = C(u) + \int_0^\alpha C'(u+\beta\ones;\ones) d\beta = C(u) + \alpha$.
+  This linearity translates to invariance of $L$ in the direction of $\ones$:
+  \begin{align*}
+    L(u + \alpha\ones) = C(u+\alpha\ones)\ones - (u + \alpha\ones) = C(u)\ones + \alpha\ones - u - \alpha\ones = L(u)~.
+  \end{align*}
+  We now have for any $u\in\D$,
+  \begin{align*}
+    s^{-1}(u) \in \gamma(p) \iff u \in \prop{L}(p) \iff u - u_n\ones \in \prop{L}(p)\cap\R_2~.
+  \end{align*}
+  Letting $L':\reals^{n-1}\to\reals^\Y$ given by $L'(u') = L((u',0))$, and evoking Lemma~\ref{lem:loss-restrict}, we conclude $\prop{L'}(p) = \prop{L}\cap\R_2$ and thus $L'$ embeds $\gamma$ as well, with the embedding $\varphi(r) = (s(r)_1 - s(r)_n, \ldots, s(r)_{n-1} - s(r)_n)$.
 \end{proof}
 
 \section{Dimension 1}\label{app:dimension-1}
@@ -1015,7 +1023,7 @@ We extend Aurenhammer's result to a weighted sum of convex functions, showing th
   From the positive orientation of the $v_i$, we have for all $p\in\simplex$ that $\sgn(v_i\cdot p)$ is monotone in $i$.
   In particular, it must be that for all $y$, $\sgn((v_i)_y)$ is monotone in $i$, taking the distribution with all weight on outcome $y$.
   % (Similarly, if $\gamma(\ones_y) = \{r_j,r_{j+1}\}$, then $(v_i)_y = v_i \cdot \ones_y < 0$ for $i < j$, $(v_j)_y = 0$, and $(v_i)_y > 0$ for $i > j$.)
-  \raf{This observation could use a better proof.}
+  \raft{This observation could use a better proof.}
 
   For all $i\in\{2,\ldots,k-1\}$, we wish to find $\alpha_i \geq 0$ such that $v_{i-1} \leq \alpha_i v_i$ (component-wise).
   To this end, fix $i$ and let $v = v_{i-1}, w = v_{i}, \alpha=\alpha_i$.
