@@ -205,7 +205,7 @@ We now formalize this procedure.
 \bo{Maybe mention that previous formalizations are for single-valued properties only if true? And if so, that they don't really apply to finite properties??}
 
 \bo{Didn't touch these}
-\begin{definition}
+\begin{definition}\label{def:links}
   Let properties $\gamma:\simplex\toto\R$ and $\Gamma:\simplex\toto\R'$ be given.
   A \emph{link function} is a map $\psi:\R'\to\R$.
   We say that a link $\psi$ is:
@@ -275,23 +275,20 @@ In the following sections, however, we will focus on the dimension $d$, and ask 
   The \emph{embedding dimension} of a finite property $\gamma$, written $\elicembed(\gamma)$, is the minimum $d\geq 0$ such that $\gamma$ is $d$-embeddable.
 \end{definition}
 
-When working with convex losses which are not strictly convex, one quickly encounters redundant properties: if $\inprod{p}{L(\cdot)}$ is minimized by a point $u\in\reals^d$ where $p\cdot L$ is flat, then there will be an uncountable set of reports $u'$ which also minimize the loss.
+When working with convex losses which are not strictly convex, one quickly encounters redundant properties: if $\inprod{p}{L(\cdot)}$ is minimized by a point where $p\cdot L$ is flat, then there will be an uncountable set of reports which also minimize the loss.
 As results in property elicitation typically assume non-redudant properties (e.g.~\cite{frongillo2014general,frongillo2015elicitation}) it is useful to consider a transformation which removes redundant level sets.
-This transformation is the trim operator presented below.
+We capture this transformation as the trim operator presented below.
 
 \begin{definition}\label{def:trim}
-  Let $\Gamma:\simplex \toto\R'$ be an elicitable property.
-  We define $\trim(\Gamma)$ as the set of maximal level sets of $\Gamma$.
-  Formally, $\trim(\Gamma) = \{\Gamma_u : u \in \R'\} \setminus \{ \Gamma_u : \exists w \in \R' \text{ s.t. } \Gamma_u \subsetneq \Gamma_w \}$.
+  Given an elicitable property $\Gamma:\simplex \toto\R$, we define $\trim(\Gamma) = \{\Gamma_u : u \in \R \text{ s.t. } \forall u'\in\R,u'\neq u,\, \Gamma_u \not\subseteq \Gamma_{u'}\}$ as the set of maximal level sets of $\Gamma$.
 \end{definition}
 \raft{Note for later: should be able to show that the union of trim is the simplex.}
 
 Take note that the unlabeled property $\trim(\Gamma)$ is non-redundant, meaning that for any $\theta \in \trim(\Gamma)$, there is no level set $\theta' \in \trim(\Gamma)$ such that $\theta \subset \theta'$.
 
-\raf{Explain why this is a useful concept in general, and for convex elic}
-Looking at the $\trim$ of a property allows us to relate the finite property of interest to the subtlely different surrogate property that we actually elicit when embedding the original property into $\reals^d$.
-In the surrogate property, there is often an infinite set of ``hidden'' level sets corresponding to the reports in the convex hull of embedded points whose level sets have nonempty intersection.
-Taking the $\trim$ thus allows us to remove labels so that we can relate the optimal sets of original reports and their embedded points, and then we remove the ``hidden'' level sets that are only optimal when we are indifferent between a subset of the embedded points.
+Before we state our first result, we will need to general lemmas about properties and their losses.
+The first follows from standard results relating finite properties to power diagrams (see Theorem~\ref{thm:aurenhammer} in the appendix), and its proof is omitted.
+The second is closely related to the trim operator: it states that if some subset of the reports are always represented among the minimizers of a loss, then one may remove all other reports and elicit the same property (with those other reports removed).
 
 \begin{lemma}\label{lem:finite-full-dim}
   Let $\gamma$ be a finite (non-redundant) property elicited by a loss $L$.
@@ -302,6 +299,7 @@ Taking the $\trim$ thus allows us to remove labels so that we can relate the opt
 \begin{lemma}\label{lem:loss-restrict}
   Let $L$ elicit $\Gamma:\simplex\toto\R_1$, and let $\R_2\subseteq\R_1$ such that $\Gamma(p) \cap \R_2 \neq \emptyset$ for all $p\in\simplex$.
   Then $L|_{\R_2}$ ($L$ restricted to $\R_2$) elicits $\gamma:\simplex\toto\R_2$ defined by $\gamma(p) = \Gamma(p)\cap \R_2$.
+  Moreover, the Bayes risks of $L$ and $L|_{\R_2}$ are the same.
 \end{lemma}
 \begin{proof}
   Let $p\in\simplex$ be fixed throughout.
@@ -313,7 +311,21 @@ Taking the $\trim$ thus allows us to remove labels so that we can relate the opt
   On the other, as $r^* \in \R_2$, we certainly have $r^* \in \argmin_{u\in\R_2} \inprod{p}{L(u)}$.
   But now we must have $\inprod{p}{L(r)} = \inprod{p}{L(r^*)}$, and thus $r \in \argmin_{u\in\R_1} \inprod{p}{L(u)} = \Gamma(p)$ as well.
   We now see $r \in \Gamma(p) \cap \R_2$.
+  Finally, the equality of the Bayes risks $\min_{u\in\R_1} \inprod{p}{L(u)} = \min_{u\in\R_2} \inprod{p}{L(u)}$ follows immediately by the above, as $\emptyset \neq \Gamma(p)\cap\R_2 \subseteq \Gamma(p)$ for all $p\in\simplex$.
 \end{proof}
+
+We now state our first result, which shows remarkable structure of embeddable properties, and the properties that embed them.
+First, we conclude that any embeddable property must be elicitable.
+We also conclude that if $\Gamma$ embeds $\gamma$, the level sets of $\Gamma$ must all be redundant relative to $\gamma$.
+In other words, $\Gamma$ is exactly the property $\gamma$, just with other reports filling in the gaps between the embedded reports of $\gamma$.
+(When working with convex losses, these extra reports are typically the convex hull of the embedded reports.)
+In this sense, we can regard embedding as a minor departure from direct elicitation: if a loss $L$ elicits $\Gamma$ which embeds $\gamma$, we can think of $L$ as essentially eliciting $\gamma$ itself.
+Finally, we have an important converse: if $\Gamma$ has finitely many full-dimensional level sets, or if $\trim(\Gamma)$ is finite, then $\Gamma$ must embed some finite elicitable property with those same level sets.
+\raft{Commented out what used to be before trim; not 100\% sure how to integrate.}
+% Looking at the $\trim$ of a property allows us to relate the finite property of interest to the subtlely different surrogate property that we actually elicit when embedding the original property into $\reals^d$.
+% In the surrogate property, there is often an infinite set of ``hidden'' level sets corresponding to the reports in the convex hull of embedded points whose level sets have nonempty intersection.
+% Taking the $\trim$ thus allows us to remove labels so that we can relate the optimal sets of original reports and their embedded points, and then we remove the ``hidden'' level sets that are only optimal when we are indifferent between a subset of the embedded points.
+
 
 \begin{proposition}\label{prop:embed-trim}
   Let $\Gamma:\simplex\toto\reals^d$ be an elicitable property.
@@ -331,7 +343,7 @@ Taking the $\trim$ thus allows us to remove labels so that we can relate the opt
   1 $\Rightarrow$ 2:
   By the embedding condition, taking $\R_1 = \reals^d$ and $\R_2 = \varphi(\R)$ satisfies the conditions of Lemma~\ref{lem:loss-restrict}: for all $p\in\simplex$, as $\gamma(p) \neq \emptyset$ by definition, we have some $r\in\gamma(p)$ and thus some $\varphi(r) \in \Gamma(p)$.
   Let $G(p) := -\min_{u\in\reals^d} \inprod{p}{L(u)}$ be the negative Bayes risk of $L$, which is convex, and $G_{\R}$ that of $L|_{\varphi(\R)}$.
-  By the above, we actually have $G = G_\R$: the minimum is always achieved by some $\varphi(r) \in \varphi(\R)$.
+  By the Lemma, we also have $G = G_\R$.
   As $\gamma$ is finite, $G$ is polyhedral.
   Moreover, the projection of the epigraph of $G$ onto $\simplex$ forms a power diagram, with the facets projecting onto the level sets of $\gamma$, the cells of the power diagram.
   (See Theorem~\ref{thm:aurenhammer}.)
@@ -400,36 +412,50 @@ Taking the $\trim$ thus allows us to remove labels so that we can relate the opt
   By construction, we have $\gamma_i = \theta_i = \Gamma_{u_i}$ for all $i$, so letting $\varphi(i) = u_i$ we satisfy the definition of embedding, namely statement 1.
 \end{proof}
 
+To be useful in applications, a loss which embeds a property must be accompanied by a calibrated link to that property.
+The definition of embedding makes part of the link clear: the link should map embedded reports back to the original reports, since they are equivalent in a strong sense.
+It is not a priori clear how to map the remaining reports, however.
+Fortunately, using the machinery developed in Proposition~\ref{prop:embed-trim}, we can easily construct a calibrated link on the remaining reports.
+
 \begin{proposition}\label{prop:embed-link}
   Let $L$ elicit $\Gamma:\simplex\toto\reals^d$ which embeds a finite property $\gamma$.
-  Then there is a calibrated link from $\Gamma$ to $\gamma$, which can be taken to be separated if $L$ is polyhedral.
+  Then there is a calibrated link from $\Gamma$ to $\gamma$. % which can be taken to be separated if $L$ is polyhedral.
 \end{proposition}
 \begin{proof}
   Let $\gamma:\simplex\toto\R$.
   Proposition~\ref{prop:embed-trim} gives us that $\trim(\Gamma) = \{\gamma_r : r\in\R\}$.
   We conclud that for any $u\in\reals^d$, there is some $r\in\R$ such that $\Gamma_u \subseteq \gamma_r$.
   The link $\psi : \reals^d \to \R$ which encodes these choices is calibrated.
-
-  Now assume $L$ is polyhedral.
-
-  \jessiet{Hole jere: $j$-faces of the function.}
-  For the second part of the statement, in order for $\psi$ to be separated, for $\epsilon > 0$, for each embedded point $u \in \reals^d$ and every $v \in B(\epsilon, u)$, we must observe $\psi(v) = \psi(u)$.
-  If the loss $L$ is polyhedral, we want to show that we can construct a $\psi$ so that the above holds.
-
-  First, consider that each of the embedded points in $u \in \varphi(\R)$ must have ball $B(\epsilon, u)$ centered on $u$ so that no other $w \in \varphi(\R)$ is in $B(\epsilon, u)$.
-  If this is not true, then \jessie{...?} \jessiet{I'm not sure how this messses with things, but I would think the level sets corresponding to the two points would differ on a set of zero measure, if at all, or both be in the $\arginf$of the loss...?}
-
-  Now for any $u \in \varphi(\R)$ and $v \in B(\epsilon, u)$, if $\psi(v)$ does not map to $\psi(u)$, then there must be some other $w \in \varphi(\R)$ so that $\psi(v) = \psi(w)$.
-  Since $L$ is polyhedral, we know that for $p \in \simplex$ such that $v \in \Gamma(p)$, then since $u$ and $v$ are sufficiently close, $\E_p L(w,Y) = \E_p L(v,Y) \leq \E_p L(u,Y)$.
-  However, if the inequality was strict, then we contradict the polyhedral structure of $L$, since $v$ is not an embedded point.
-  Therefore, $v \in \Gamma(p) \implies u \in \Gamma(p)$, and we can alter the link function so that $\psi(v) = \psi(u)$.
-%If no such $\psi$ existed, then for some $p$ such that $u \in \arginf_{z \in \R} \E_p L(z,Y)$, we know there is a $\delta > 0$ such that $\E_p L(v,Y) - \E_p L(u,Y) < \delta$ by continuity of $L$.
+  \raft{Commented out the separated stuff}
+  % Now assume $L$ is polyhedral.
+  % \jessiet{Hole jere: $j$-faces of the function.}
+  % For the second part of the statement, in order for $\psi$ to be separated, for $\epsilon > 0$, for each embedded point $u \in \reals^d$ and every $v \in B(\epsilon, u)$, we must observe $\psi(v) = \psi(u)$.
+  % If the loss $L$ is polyhedral, we want to show that we can construct a $\psi$ so that the above holds.
+  % 
+  % First, consider that each of the embedded points in $u \in \varphi(\R)$ must have ball $B(\epsilon, u)$ centered on $u$ so that no other $w \in \varphi(\R)$ is in $B(\epsilon, u)$.
+  % If this is not true, then \jessie{...?} \jessiet{I'm not sure how this messses with things, but I would think the level sets corresponding to the two points would differ on a set of zero measure, if at all, or both be in the $\arginf$of the loss...?}
+  % 
+  % Now for any $u \in \varphi(\R)$ and $v \in B(\epsilon, u)$, if $\psi(v)$ does not map to $\psi(u)$, then there must be some other $w \in \varphi(\R)$ so that $\psi(v) = \psi(w)$.
+  % Since $L$ is polyhedral, we know that for $p \in \simplex$ such that $v \in \Gamma(p)$, then since $u$ and $v$ are sufficiently close, $\E_p L(w,Y) = \E_p L(v,Y) \leq \E_p L(u,Y)$.
+  % However, if the inequality was strict, then we contradict the polyhedral structure of $L$, since $v$ is not an embedded point.
+  % Therefore, $v \in \Gamma(p) \implies u \in \Gamma(p)$, and we can alter the link function so that $\psi(v) = \psi(u)$.
+  %
+  %
+  % If no such $\psi$ existed, then for some $p$ such that $u \in \arginf_{z \in \R} \E_p L(z,Y)$, we know there is a $\delta > 0$ such that $\E_p L(v,Y) - \E_p L(u,Y) < \delta$ by continuity of $L$.
 %Additionally, if $\psi$ was not selective, then we know $\psi(v) = \psi(w)$ for some embedded point $w \neq u$.
 %Since the losses of $u$ and $v$ are not bounded about away from each other and $\psi(v) = \psi(w)$, then the loss $L$ must be constant on $\conv(\{u,v,w\})$, otherwise we would either contradict elicitability of $\Gamma$ or the construction of the calibrated link $\psi$.
 %Therefore, we can reassign $\psi(v) = \psi(u)$ for any $v\in B(\epsilon, u)$, and such a link additionally separated.
 \end{proof}
+In typical applications, one requires more of the link, namely that it should be separated (see Definition~\ref{def:links}).
+In most cases, devising a separated link is straightforward, for example with polyhedral losses using bullet 3 in Theorem~\ref{thm:finite-elicit-embed} below.
+Giving a construction that yields a separated link for all polyhedral losses is a challenging open question.
+\raft{Replace this paragraph with gloating about our result if we actually give this construction.}
 
-\begin{theorem}
+With a solid understanding of the structure of embeddings and embeddable properties, we now turn to the relationship between embeddings and polyhedral losses.
+We give a tight connection: every finite elicitable property is embedded by a polyhedral loss, and every polyhedral loss embeds a finite elicitable property.
+We state this equivalence in two parts, the first focusing on the property, and the second on the loss.
+
+\begin{theorem}\label{thm:finite-elicit-embed}
   Let $\gamma$ be a finite property.
   The following are equivalent.
   \begin{enumerate}
@@ -449,6 +475,12 @@ Taking the $\trim$ thus allows us to remove labels so that we can relate the opt
   Thus $L$ is polyhedral.
 \end{proof}
 
+We now state a converse of Theorem~\ref{thm:finite-elicit-embed}: every polyhedral loss embeds a finite elicitable property.
+One way to look at this result in light of Proposition~\ref{prop:embed-trim} is that polyhedral losses ``directly'' elicit finite properties in a convex way.
+Moreover, we show that indirect elicitation via polyhedral losses are heavily structured: if a polyhedral loss elicits a property $\gamma'$ with a link to $\gamma$, then both $\gamma'$ and $\gamma$ are finite and one ``refines'' the other in the sense below.
+In other words, the cells (level sets) of $\gamma'$ must be a finite subdivision of the cells of $\gamma$.
+This fact will become useful when we discuss the relationship between embedding dimension and elicitation complexity; see \raf{WHERE WE DISCUSS}.
+
 \begin{definition}
   Let $\Gamma:\simplex\toto\R$ and $\Gamma':\simplex\toto\R'$.
   Then $\Gamma'$ \emph{refines} $\Gamma$ if for all $r'\in\R'$ we have $\Gamma'_{r'} \subseteq \Gamma_r$ for some $r\in\R$.
@@ -457,7 +489,7 @@ Taking the $\trim$ thus allows us to remove labels so that we can relate the opt
 
 \begin{theorem}\label{thm:polyhedral-embed}
   Every polyhedral loss embeds a finite elicitable property.
-  Moreover, a polyhedral loss indirectly elicits a finite elicitable property $\gamma$ if and only if it embeds a property which refines $\gamma$.
+  Moreover, a polyhedral loss $L$ indirectly elicits a non-redundant elicitable property $\gamma$ if and only if $\gamma$ is finite and $L$ embeds a property which refines $\gamma$.
 \end{theorem}
 \begin{proof}
   Let $L:\reals^d\to\reals_+$ be a polyhedral loss.
@@ -481,13 +513,13 @@ Taking the $\trim$ thus allows us to remove labels so that we can relate the opt
   This implies that $\trim(\Gamma) \subseteq \{\Gamma_v : v\in V\}$, which is finite, so Proposition~\ref{prop:embed-trim} now gives the conclusion.
 
   \raft{I might be delusional, but this second part ended up being much slicker than I'd thought, by essentially chaining definitions and maps.  Please check!}
-  For the second part, let $\gamma':\simplex\toto\R'$ be the finite elicitable property embedded by $L$, with embedding $\varphi:\R'\to\reals^d$, and let $\psi$ be a calibrated link $\psi$ to a finite elicitable property $\gamma:\simplex\toto\R$.
+  For the second part, let $\gamma':\simplex\toto\R'$ be the finite elicitable property embedded by $L$, with embedding $\varphi:\R'\to\reals^d$, and let $\psi$ be a calibrated link $\psi$ to a non-redundant elicitable property $\gamma:\simplex\toto\R$.
   Then letting $\psi' = (\psi \circ \varphi):\R'\to\R$, we see that $\psi'$ is a calibrated link from $\gamma'$ to $\gamma$:
   for all $r'\in\R'$, we have $\gamma'_{r'} = \prop{L}_{\varphi(r')} \subseteq \gamma_{\psi(\varphi(r'))}$.
-  In particular, $\gamma$ refines $\gamma'$.
+  In particular, $\gamma'$ refines $\gamma$, and as $\gamma'$ is finite, $\gamma$ must be finite.
 \end{proof}
 
-\raf{Transition: wait, what about dimension?}
+\raf{Got here}
 It is well-known that not every property is directly elicitable.
 Similarly, we will see shortly that not every elicitable property is embeddable in one dimension.
 This leads to what we call embedding complexity: the minimum $d$ such that a property is $d$-embeddable.
