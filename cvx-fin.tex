@@ -27,6 +27,7 @@
 
 \newcommand{\reals}{\mathbb{R}}
 \newcommand{\posreals}{\reals_{>0}}%{\reals_{++}}
+\newcommand{\dom}{\mathrm{dom}}
 
 \newcommand{\prop}[1]{\Gamma[#1]}
 \newcommand{\eliccts}{\mathrm{elic}_\mathrm{cts}}
@@ -912,51 +913,52 @@ We extend Aurenhammer's result to a weighted sum of convex functions, showing th
   The conclusion follows from the obversation that the above held for any strictly positive weights $p$, and $f$ was fixed.
 \end{proof}
 
+\raf{  By Lemma~\ref{lem:finite-full-dim}, $G$ is polyhedral and therefore closed, and by~\citet[Theorem 19.2]{rockafellar1997convex}, its convex conjugate $C : \reals^\Y \to \reals$ is also polyhedral and closed.
+}
+
 \begin{theorem}
-  Let $\gamma:\simplex\toto\R$ be an elicitable finite property.
+  Let $\gamma:\simplex\toto\R$ be a non-redundant elicitable property, elicited by a loss $L:\R\to\reals^\Y_+$ whose Bayes risk is a closed function.
   Then $\gamma$ is $(n-1)$-embeddable, where $n=|\Y|$.
 \end{theorem}
 \begin{proof}
   Let $S:\R\to\reals^\Y$ be a scoring rule (negative loss) eliciting $\gamma$, and let $G:\simplex\to\reals$ be its expected score function (negative Bayes risk), given by $G(p) = \max_{r\in\R} p \cdot S(r)$.
-  By Lemma~\ref{lem:finite-full-dim}, $G$ is polyhedral and therefore closed, and by~\citet[Theorem 19.2]{rockafellar1997convex}, its convex conjugate $C : \reals^\Y \to \reals$ is also polyhedral and closed.
+  Let $C:\reals^\Y\to\reals\cup\{\infty\}$ be the convex conjugate of $G$, given by $C(u) = \sup_{p\in\simplex} p\cdot u - G(p)$.  
   
-  By \raf{results with Ian} we know that for some $\D \subseteq \partial G(\simplex) \subseteq \reals^\Y$ we have some bijection $\varphi : \R \to \D$ such that $\Gamma(p) = \varphi^{-1}(\D \cap \partial G(p))$.
-  \raft{In other words, $\Gamma$ is a relabeling of subgradients of $G$}
+  By~\citet[Theorem 2]{frongillo2014general} we know that for some $\D \subseteq \partial G(\simplex) \subseteq \reals^\Y$ we have a bijection $s : \R \to \D$ such that $\gamma(p) = s^{-1}(\D \cap \partial G(p))$.
+  (In other words, $\gamma$ is a relabeling of subgradients of $G$.)
   Thus, we can write
   \begin{equation}
     \label{eq:1}
-    r \in \Gamma(p) \iff \varphi(r) \in \partial G(p) \iff p \in \partial C(\varphi(r))~,
+    r \in \gamma(p) \iff s(r) \in \partial G(p) \iff p \in \partial C(s(r))~,
   \end{equation}
-  where the final equivalence follows from convex duality.
-  \raft{Of course, we need to be careful here; this only holds if $G$ is proper and lower semi-continuous, but those should both hold for us.}
+  where the final equivalence follows from~\cite[Corollary 23.5.2]{rockafellar1997convex} as $G$ is a closed convex function.
 
-  Now define $L(\hat r,y) = C(\hat r) - \hat r \cdot \ones_y$ on the report space $\hat \R = \conv(\D)$;
-  we will show that $L$ essentially elicits $\Gamma$.
+  Now define $L:\dom(C)\to\reals^\Y$ by $L(u) = C(u)\ones - u$ where $\ones\in\reals^\Y$ is the all-ones vector.
+  We will show that $L$ embeds $\gamma$.
   As $L$ is convex, we may write the optimality condition as
   \begin{equation}
     \label{eq:2}
-    \hat r \in \Gamma_L(p) \iff \hat r \in \argmax_{\hat r'} \E_pL(\hat r',Y) \iff 0 \in \partial \E_pL(\hat r,Y)~,
+    u \in \prop{L}(p) \iff u \in \argmin_{u'} p\cdot L(u') \iff 0 \in \partial p\cdot L(u)~,
   \end{equation}
-  where of course the subgradient $\partial$ is with respect to $\hat r$.
+  where the subgradient $\partial$ is with respect to $u$.
   Plugging in our definition of $L$, we have
   \begin{align*}
-    0 \in \partial \E_pL(\hat r,Y)
-    & \iff 0 \in \partial \E_p \left(C(\hat r) - \hat r \cdot \ones_Y\right)
+    0 \in \partial p\cdot L(u)
+    & \iff 0 \in \partial p\cdot\left(C(u)\ones - u\right)
     \\
-    & \iff 0 \in \partial \left(C(\hat r) - \hat r \cdot p\right)
+    % & \iff 0 \in \partial \left(C(u) - p\cdot u\right)
+    % \\
+    & \iff 0 \in \partial C(u) - \{p\}
     \\
-    & \iff 0 \in \partial C(\hat r) - \{p\}
-    \\
-    & \iff p \in \partial C(\hat r)~.
+    & \iff p \in \partial C(u)~.
   \end{align*}
-  Putting this together with eq.~\eqref{eq:1}, we have for any $\hat r \in \D$ that
+  Putting this together with eq.~\eqref{eq:1}, and recalling that $s$ is a bijection, we have for any $u \in \D$ and $p\in\simplex$ that
   \begin{equation}
     \label{eq:3}
-    \hat r \in \Gamma_L(p) \iff p \in \partial C(\hat r) \iff \varphi^{-1}(\hat r) \in \Gamma(p)~,
+    u \in \prop{L}(p) \iff p \in \partial C(u) \iff s^{-1}(u) \in \gamma(p)~,
   \end{equation}
-  which implies that $L$ essentially elicits $\Gamma$ for this $\varphi$.
-  (The trivially induced map $\varphi:\R\to\hat\R$ is injective as $\varphi:\R\to\D$ was a bijection.)
-  \raf{If we assume $\Gamma$ is non-redundant, I believe we also have $\Gamma = \trim(\Gamma_L)$ using $\D$ is the report set.}
+  which implies that $L$ embeds $\gamma$ with embedding function $\varphi:\R\to\reals^\Y$ given by $\varphi(r) = s(r)$.
+  \raf{TO CHECK: the finiteness of $C$}
 \end{proof}
 
 \section{Dimension 1}\label{app:dimension-1}
