@@ -111,6 +111,11 @@
 
 \section{Introduction}\label{sec:intro}
 
+\raf{MOVED FROM SEC 2; maybe incorporate?}
+Often, for computational or other reasons, one is interested in a property $\gamma$ such as the mode, but wishes to elicit it by minimizing some other ``surrogate'' loss $L$ over some other space such as $\reals^d$, then mapping the result back to $\R$ using a link function.
+We now formalize this procedure.
+
+
 Convex surrogate losses are a central building block in machine learning for classification and classification-like problems.
 A growing body of research is concerned with designing and analyzing convex surrogates for given loss functions, and more broadly, understanding when such surrogates can and cannot be found.\raf{cite}
 For example, recent work has developed tools to bound the required number of dimensions of the surrogate's hypothesis space.\raf{cite}
@@ -194,7 +199,8 @@ We write $p_y$ for the probability of outcome $y \in \Y$ drawn from $p \in \simp
 We write loss functions as $L:\R\to\reals^\Y_+$ which map a report (prediction) $r\in\R$ to the vector of loss values $L(r) = (L(r)_y)_{y\in\Y}$ for each possible outcome $y\in\Y$.
 Often $\R$ will be taken to be a finite set for the given discrete loss (in which case we will write $\ell$ not $L$), and $\reals^d$ for the surrogate.
 The expected loss of report $r$ when $y \sim p$ is written $\inprod{p}{L(r)}$.
-For example, 0-1 loss is a discrete loss with $\R = \Y$ given by $\ell(r)_y = \Ind[r \neq y]$.
+For example, 0-1 loss is a discrete loss with $\R = \Y = \{-1,1\}$ given by $\ell(r)_y = \Ind[r \neq y]$.
+Two important examples of surrogates for 0-1 loss, with $\R=\reals$, are hinge loss $L(u)_y = \max(0,1-yu)$ and logistic loss $L(u)_y = \log(1+\exp(-yu))$.
 
 To formalize and study the relationship between the given loss and its surrogate, we adopt terminology from the property elicitation literature, which elevates the \emph{property}, or map from distributions to optimal reports, as a central object to study in its own right.
 In the case of discrete losses, this map is multivalued, meaning a single distribution could map to multiple optimal reports.
@@ -215,36 +221,39 @@ To this end, we will use double arrow notation to mean a mapping to all nonempty
 Thus, $\Gamma(p)$ is the set of reports which should be optimal for a given distribution $p$, and $\Gamma_r$ is the set of distributions for which the report $r$ should be optimal.
 For example, the \emph{mode} is the property $\mode(p) = \argmax_{y\in\Y} p_y$, which is finite.
 The mode captures the set of optimal reports for 0-1 loss: for each distribution over the labels, one should report the most likely label.
-In this case we say 0-1 loss \emph{elicits} the mode, as we now formalize.
+In this case we say 0-1 loss \emph{elicits} the mode, as we formalize below.
+This terminology comes from the information elicitation literature~\citep{savage1971elicitation,osband1985information-eliciting,lambert2008eliciting}, in which a report $r$ is elicited from some forecaster by scoring her with a loss on the observed outcome $y$.
 
 \begin{definition}[Elicits]
-  A loss $\ell:\R\to\reals^\Y_+$, \emph{elicits} a property $\gamma:\simplex \toto \R$ if for all $p \in \simplex$,
+  A loss $L:\R\to\reals^\Y_+$, \emph{elicits} a property $\Gamma:\simplex \toto \R$ if
   \begin{equation}
-  \Gamma(p) = \argmin_{r \in \R} \inprod{p}{L(r)}~.
+    \forall p\in\simplex,\;\;\;\Gamma(p) = \argmin_{r \in \R} \inprod{p}{L(r)}~.
   \end{equation}
-  \bo{add $\gamma[\ell]$ notation}
+  As $\Gamma$ is uniquely defined by $L$, we write $\prop{L}$ to refer to the property elicited by a loss $L$.
 \end{definition}
-This terminology comes from the information elicitation literature, in which a report $r$ is elicited from some forecaster by scoring her with a loss on the observed outcome $y$; she tries to minimize expected loss.
 
-Typically in this paper, $\gamma$, $\R$, and $\ell$ will be used for a finite property, finite report space, and loss eliciting it, while $\Gamma$, $\R'$ and $L$ will be used for some other property, often with report space $\R' = \reals^d$.
-In this case, we prefer $r$ for a member of $\R$ and $u$ for members of $\reals^d$.
+For finite properties and discrete losses, we will use lowercase notation $\gamma$ and $\ell$, respectively, while $\Gamma$ and $L$ will be used for general properties.
+Often we will work with two properties simultaneously, a finite property $\gamma:\simplex\toto\R$, and its embedded version $\Gamma:\simplex\toto\reals^d$.
+In this case, we write the embedded reports as $u\in\reals^d$, reserving $r\in\R$ for the finite property.
 
-In $\reals^d$, a \emph{polyhedral set} is the intersection of a finite number of halfspaces.
+Most of the loss functions $L$ we consider will be piecewise linear and convex, or \emph{polyhedral}; we therefore will make use of the theory of convex polytopes.
+In $\reals^d$, a \emph{polyhedral set} or \emph{polyhedron} is the intersection of a finite number of halfspaces.
 A \emph{polytope} is a bounded polyhedral set.
-\begin{definition}[Polyhedral loss]
-  A \emph{polyhedral function} is a pointwise maximum over a finite set of affine functions.
-  In other words, it is a function whose epigraph (set of points lying above it) forms a polyhedral set.
-  $L: \reals^d \to \reals^{\Y}_+$ is a \emph{polyhedral loss} if $L(u)_y$ is a polyhedral function of $u$ for each $y$.
-\end{definition}
+A convex function $f:\reals^d\to\reals$ is \emph{polyhedral} if its epigraph is polyhedral, or equivalently, if it can be written as a pointwise maximum of a finite set of affine functions~\cite{rockafellar1997convex}.
 
+\begin{definition}[Polyhedral loss]
+  A loss $L: \reals^d \to \reals^{\Y}_+$ is a \emph{polyhedral} if $L(u)_y$ is a polyhedral (convex) function of $u$ for each $y\in\Y$.
+\end{definition}
+For example, note that hinge loss is polyhedral, as is the surrogate for abstain loss described in \S~\ref{sec:important-examples}.
 
 \subsection{Link Functions and Elicitation Complexity}\label{sec:link-elic}
-Often, for computational or other reasons, one is interested in a property $\gamma$ such as the mode, but wishes to elicit it by minimizing some other ``surrogate'' loss $L$ over some other space such as $\reals^d$, then mapping the result back to $\R$ using a link function.
-We now formalize this procedure.
+
+When designing a surrogate loss function, we require some sort of statistical consistency with the original loss, so that minimizing the surrogate is an effective alternative to directly minimizing the original loss.
+We formalize this consistency below in terms of the properties elicited by each loss.
+In particular, we seek a \emph{link} function, which maps optimal reports from the surrogate to the original reports, satisfying certain guarantees.
 \bo{Maybe mention that previous formalizations are for single-valued properties only if true? And if so, that they don't really apply to finite properties??}
 
-\bo{Didn't touch these}
-\begin{definition}\label{def:links}
+\begin{definition}[Calibrated Link]\label{def:links}
   Let properties $\gamma:\simplex\toto\R$ and $\Gamma:\simplex\toto\R'$ be given.
   A \emph{link function} is a map $\psi:\R'\to\R$.
   We say that a link $\psi$ is:
@@ -254,37 +263,42 @@ We now formalize this procedure.
   \begin{align*}
   \inf_{u \in \R'; \psi(u) \not \in \gamma(p)} \E_{Y\sim p}[L(u, Y)] > \inf_{u \in \R'}\E_{Y\sim p}[L(u, Y)]~.
   \end{align*}
-  \item \emph{Exhaustive} if for all $p\in\simplex$, $\gamma(p) = \psi(\Gamma(p)) := \{\psi(r') : r'\in\Gamma(p)\}$.
   \end{itemize}
 \end{definition}
 
-It is also interesting to contrast the definitions above with the following.
-\begin{definition}
-  A \emph{strong link} is a set-valued function $\psi:\R'\toto\R$ such that for all $p\in\simplex$ and $r'\in\R'$, we have $r'\in\Gamma(p) \implies \gamma(p) = \psi(r')$.
-\end{definition}
+Roughly speaking, a calibrated link requires that optimal surrogate reports map to optimal original reports, while a separated link adds the stronger guarantee that one cannot approach the optimal surrogate loss while making suboptimal original predictions.
+A classic example of a link which is both calibrated and separated is $\psi = \sgn$ when $\gamma=\mode$ and $L$ is either hinge loss or logistic loss.
+On the other hand, the link $\psi(u) =
+\begin{cases}
+  -1 & u \leq -1\\
+  1 & u > -1
+\end{cases}$
+would not be separated for hinge loss, but it would still be calibrated, as the reports $u\in(-1,1)$ are optimal for hinge loss only when $p=(1/2,1/2)$, in which case both $-1$ and $1$ are optimal for the mode (0-1 loss).
 
-\raf{We should note here that a discussion like this has not yet appeared in the property elicitation literature, since most papers address direct elicitation, where no link is needed, or single-valued properties in the case of indirect elicitation.  Cite examples for indirect: Frongillo--Kash (NIPS), Fissler--Ziegel (AoS), mode paper, others?}
+\raft{Aside about other link definitions commented out}
+% As a brief aside, it is interesting to contrast the definitions above with the following: a link is
+% \emph{exhaustive} if for all $p\in\simplex$, $\gamma(p) = \psi(\Gamma(p)) := \{\psi(r') : r'\in\Gamma(p)\}$.
+% A \emph{strong link} is a set-valued function $\psi:\R'\toto\R$ such that for all $p\in\simplex$ and $r'\in\R'$, we have $r'\in\Gamma(p) \implies \gamma(p) = \psi(r')$.
+% If sign is interpreted as set-valued (0 maps to $\{1,-1\}$, then it is strong for logistic.  If not, sign is not exhaustive for logistic.  Sign is exhaustive for hinge.}
 
-\raf{Discussion about these definitions using 0-1 loss, hinge, and logistic.  Namely: sign is calibrated for hinge and logistic.  If sign is interpreted as set-valued (0 maps to $\{1,-1\}$, then it is strong for logistic.  If not, sign is not exhaustive for logistic.  Sign is exhaustive for hinge.  It is also separated, but something like $\psi(u) =
-  \begin{cases}
-    -1 & u \leq -1\\
-    1 & u > -1
-  \end{cases}$
-  would not be, even though it would be calibrated.}
-
+It is often useful to express the relationship between $L$ and $\gamma$ above directly, which is the notion of \emph{indirect elicitation}.
 
 \begin{definition}
   A loss \emph{indirectly elicits} a property $\gamma$ if it elicits a property with a calibrated link to $\gamma$.
 \end{definition}
 
-\raf{Notation up for discussion}
-$\eliccvx$ and $\elicpoly$; forward reference $\elicembed$
+Often one is given a property $\gamma$ (typically via a discrete loss $\ell$) and one seeks a surrogate loss $L$ with certain attributes, such as convexity, smoothness, etc.
+In doing so, we may be interested in the minimum number of dimensions needed for such an indirect elicitation scheme; this is the notion of \emph{elicitation complexity}~\citep{lambert2008eliciting,fissler2016higher,frongillo2015elicitation}.
+The two notions of elicitation complexity we use most are as follows: let $\eliccvx(\gamma)$ be the minimum dimension $d$ such that $\gamma$ can be indirectly elicited by a convex loss function $L: \R'^d \to \reals^\Y_+$, and $\elicpoly(\gamma)$ the minimum such $d$ where $L$ is polyhedral.
+We will also discuss $\eliccts$, which is the complexity with respect to continuous, real-valued, non-locally-constant properties (\S~\ref{sec:1d}), and $\elicembed$, which is the minimum dimension for $\gamma$ to be embedded (Definition~\ref{def:embedding-dim}).
 
-We define the elicitation complexities of various classes of loss functions as follows: elic$_\C(\gamma)$ is the minimum dimension $d$ such that $\gamma$ can be indirectly elicited by a loss function $L: \R'^d \to \reals^\Y_+$ in the class $\C$.
-For example, if $\eliccvx(\gamma) \leq d$, then there is a \emph{convex} loss $L:\reals^d \to \reals^\Y_+$ that indirectly elicits $\gamma$.
-Similarly, if $\elicpoly(\gamma) \leq d$, then there is a \emph{polyhedral} loss $L:\reals^d \to \reals^\Y_+$ that indirectly elicits $\gamma$.
+As a brief aside, we note that previous definitions of elicitation complexity have used a more straightforward link function, as the properties considered were single-valued~\citep{lambert2008eliciting,fissler2016higher,frongillo2015elicitation}.
+In particular, if both $\gamma$ and $\Gamma$ are single-valued, these works simply require $\gamma = f \circ \Gamma$.
+When $\Gamma$ is set-valued, one still straightforwardly requires $\gamma(p) = f(u)$ for all $u \in \Gamma(p)$.
+The notion a calibrated link from Definition~\ref{def:links} is only required when both $\gamma$ and $\Gamma$ could be set-valued, as is the case in general for convex surrogates of finite properties.
 
-\subsection{Important Examples}
+
+\subsection{Important Examples}\label{sec:important-examples}
   Ranking and classification problems are well-known to the field of machine learning.
   The most studied classification problem is the elicitation of the mode.
   While the mode over $n$ outcomes is elicitable by 0-1 loss, it is known that eliciting the mode by a convex loss is much more difficult.
@@ -306,6 +320,7 @@ Similarly, if $\elicpoly(\gamma) \leq d$, then there is a \emph{polyhedral} loss
 
 
 \section{Polyhedral Losses and Embeddings}
+\label{sec:poly-loss-embed}
 
 For many problems in machine learning, researchers have naturally converged on some notion of learning a finite property by ``embedding'' the possible labels or predictions into $\reals^d$ and minimizing a consistent convex surrogate loss.
 Here, we formalize a notion of embedding which captures these techniques, and show some geometric and topological characteristics of embeddable properties.
@@ -318,7 +333,7 @@ Here, we formalize a notion of embedding which captures these techniques, and sh
 In this section, we focus on the structure of embeddable properties, and what a property embedding another must look like.
 In the following sections, however, we will focus on the dimension $d$, and ask questions about the minimum $d$ required to embed a property.
 
-\begin{definition}
+\begin{definition}\label{def:embedding-dim}
   We say $\gamma$ is \emph{$d$-embeddable}, or just \emph{embeddable}, if such an $L$ exists and is convex.
   The \emph{embedding dimension} of a finite property $\gamma$, written $\elicembed(\gamma)$, is the minimum $d\geq 0$ such that $\gamma$ is $d$-embeddable.
 \end{definition}
@@ -568,6 +583,7 @@ This fact will become useful when we discuss the relationship between embedding 
 \end{proof}
 
 \section{Embeddings via Real-Valued Losses}
+\label{sec:1d}
 
 In the previous section, we saw that every finite elicitable property is embeddable.
 We now turn to a more fine-grained question: given a finite elicitable property $\gamma$, how many dimensions $d$ are required to embed $\gamma$ in $\reals^d$?
