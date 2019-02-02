@@ -127,31 +127,36 @@ In higher dimensions, we give a characterization of embeddability in terms of co
 We conclude with several conjectures and directions for future work.
 
 \subsection{Related works}
-A brief history of the convex surrogate.
-\begin{itemize}
-  \item \cite{crammer2001algorithmic} is one of the first papers to present a convex surrogate for multiclass classification problems in the context of support vector machines.
-  They use the convex surrogate $L(\textbf{r},y) = (\max_{j\neq y} r_j - r_y + 1)_+$, where $\textbf{r}$ is a $n$-dimensional vector corresponding to the entire distribution, and $r_j$ is the $j^{th}$ component of \textbf{r}.
-  \item \cite{bartlett2006convexity} provides one of the most well-known formalizations of convex surrogates for properties on binary outcomes.
-  This paper evaluates the risk bounds of convex surrogates and shows the sufficiency of convex surrogates such as logistic loss to replace the 0-1 loss for ease of optimization. \jessie{This is based on what I remember.  Couldn't find the free version (off the campus network) but also didn't look hard at all, since I'm guessing one of you two already knows this paper better than I do.}
-  \item \cite{bartlett2008classification} studies the abstain property with $n=2$ and shows a variation of the hinge loss that is one convex surrogate that elicits the abstain property to two outcomes.
+%  \cite{crammer2001algorithmic} is one of the first papers to present a convex surrogate for multiclass classification problems in the context of support vector machines.
+%  They use the convex surrogate $L(\textbf{r},y) = (\max_{j\neq y} r_j - r_y + 1)_+$, where $\textbf{r}$ is a $n$-dimensional vector corresponding to the entire distribution, and $r_j$ is the $j^{th}$ component of \textbf{r}.
   
-  \item \cite{ramaswamy2018consistent} \jessie{Originally in 2014... new version in 2018.} is the first paper, to our knowledge to prove bounds on the elicitation complexity of the abstain property.
-  They shouw that the abstain property with $\alpha = 1/2$ can be elicited by a convex surrogate in $\ceil*{\log_2 n}$ dimensions.
-  However, it remains unknown if this bound is tight, although in Conjecture~\ref{conj:abstain-tight}, we conjecture that their bound is tight, at least from the perspective from embedding.
-  If true, then we will need new approaches in order to indirectly elicit the abstain property by a convex surrogate.
-  \item \cite{agarwal2015consistent} introduces the notion of a \emph{calibrated property}, which is very similar to our ``embedded property'' that we actually elicit by a convex surrogate in lieu of directly eliciting a finite (i.e. classification, ranking) property.
-  However, they do not think of properties as set-valued, leading to a less rigorous treatment and understanding of the link.
-  Most of their results focus on linear properties \jessie{is there a relationship between linear and orderable properties?}
-	
-  \item \cite{ramaswamy2016convex} discusses and formalizes the notion of \emph{convex calibration} dimension for finite properties.
+  \cite{bartlett2006convexity} provides one of the most well-known formalizations of convex surrogates for properties on binary outcomes.
+  This work evaluates the risk bounds of convex surrogates and shows the sufficiency of convex surrogates such as logistic loss to replace the 0-1 loss for ease of optimization, and has inspired a line of research in the design of consistent surrogate losses for binary classification problems.
+  \jessiet{This is based on what I remember.  Couldn't find the free version (off the campus network) but also didn't look hard at all, since I'm guessing one of you two already knows this paper better than I do.}
+  
+%  \cite{bartlett2008classification} studies the abstain property with $n=2$ and shows a variation of the hinge loss that is one convex surrogate that elicits the abstain property to two outcomes.
+  
+  \cite{ramaswamy2012classification} discuss and formalize the notion of \emph{convex calibration} dimension for finite properties.
   The concept they call convex calibration dimension is one notion of elicitation complexity discussion in this paper.
   Denoted here by $\eliccvx(\gamma)$, convex calibration refers to the minimum dimension $d$ such that the property $\gamma$ can be indirectly elicited by a convex loss $L:\reals^d \to \reals^\Y_+$.
-  In this paper, the authors introduce a new method of obtaining upper bounds on elicitation complexity called the \emph{Feasible Subspace Dimension}.
+  
+  Most of the preliminary work on the construction of convex surrogate losses focuses on learning the mode in a binary classification problem.
+  One of the first works, to our knowledge, that generalizes the construction of convex surrogates beyond the binary outcome setting comes from~\cite{ramaswamy2018consistent}-- originally appearing in 2014. 
+  Rather than focusing on the mode, this paper proves bounds on the elicitation complexity of the abstain property.
+  They provide a consistent surrogate that elicits abstain with $\alpha = 1/2$ in $\ceil*{\log_2 n}$ dimensions. \jessiet{I don't like how much I'm talking about elicitation without the context.}
+  It remains unknown if this bound is tight, although in Conjecture~\ref{conj:abstain-tight}, we conjecture that it is, at least from the perspective from ``embedding''.
+  If true, then we will need new approaches in order to indirectly elicit the abstain property by a convex surrogate for any dimension lower than $\ceil*{\log_2 n}$.
+  
+  \cite{agarwal2015consistent} introduces the notion of a \emph{calibrated property}, which is very similar to our \emph{surrogate property} that we elicit by a convex surrogate in lieu of directly eliciting a finite property.
+  However, they do not consider properties to be set-valued, leading to subtle differences in the property values for some distributions.
+  Additionally, most of their results focus on linear properties. \jessiet{is there a relationship between linear and orderable properties?  If not, we can probably remove this statement.}
+	
+  In~\cite{ramaswamy2016convex}, the authors introduce a new method of obtaining upper bounds on elicitation complexity called the \emph{Feasible Subspace Dimension}.
   This method uses local information about distributions in a property in order to find bounds on the convex elicitation complexity of a property.
-  This method can be applied to find a tight bound on $\eliccvx$(mode), but does not reveal a tight bound for the abstain property.
+  For example, Feasible Subspace Dimension can be used to find a tight bound on $\eliccvx$(mode), but does not reveal a tight bound for the abstain property discussed later.
   This suggests that the bound on $\eliccvx$(abstain) must be found using more \emph{global} information about the property.
   We discuss this in Section~\ref{sec:general-dimensions}, showing previously unknown necessary conditions for embedding finite properties.
-\end{itemize}
+
 
 \subsection{Notation}
 \begin{itemize}
@@ -274,22 +279,22 @@ For example, if $\eliccvx(\gamma) \leq d$, then there is a \emph{convex} loss $L
 Similarly, if $\elicpoly(\gamma) \leq d$, then there is a \emph{polyhedral} loss $L:\reals^d \to \reals^\Y_+$ that indirectly elicits $\gamma$.
 
 \subsection{Important Examples}
-Ranking and classification problems are well-known to the field of machine learning.
-The most studied classification problem is the elicitation of the mode.
-While the mode over $n$ outcomes is elicitable by 0-1 loss, it is known that eliciting the mode by a convex loss is much more difficult.
-In fact, the best convex surrogate that can be used to elicit the mode ``embeds'' the reports into $\reals^{n-1}$.
-Therefore, we say $\eliccvx($mode$) = n-1$.
+  Ranking and classification problems are well-known to the field of machine learning.
+  The most studied classification problem is the elicitation of the mode.
+  While the mode over $n$ outcomes is elicitable by 0-1 loss, it is known that eliciting the mode by a convex loss is much more difficult.
+  In fact, the best convex surrogate that can be used to elicit the mode ``embeds'' the reports into $\reals^{n-1}$.
+  Therefore, we say $\eliccvx($mode$) = n-1$.
 
-A property of interest similar to the mode is the $\abstain{\alpha}$ property.
-In this property in which one reports the most likely outcome if the probability of such an outcome is greater than $1-\alpha$, and otherwise ``abstains'' from reporting.
-That is, $\gamma(p) = \argmax_{r \in \R}p_r$ if $\max_{r \in \R} p_r \geq 1-\alpha$ and is ``abstain'' otherwise.
+  A property of interest similar to the mode is the $\abstain{\alpha}$ property.
+  In this property in which one reports the most likely outcome if the probability of such an outcome is greater than $1-\alpha$, and otherwise ``abstains'' from reporting.
+  That is, $\gamma(p) = \argmax_{r \in \R}p_r$ if $\max_{r \in \R} p_r \geq 1-\alpha$ and is ``abstain'' otherwise.
 
-
-The finite loss eliciting $\alpha$ can be written $\ell(r,y) = \begin{cases}
-0 & r = y\\
-\alpha & r = \text{abstain}\\
-1 & r \neq y, r \neq \text{abstain}\\
-\end{cases}$.
+  The finite loss eliciting $\alpha$ can be written 
+  $\ell(r,y) = \begin{cases}
+  0 & r = y\\
+  \alpha & r = \text{abstain}\\
+  1 & r \neq y, r \neq \text{abstain}\\
+  \end{cases}$.
 
 \cite{ramaswamy2018consistent} show that $\elicpoly(\abstain{1/2}) \leq \ceil{\log_2 n}$, although it is not known if this bound is tight.
 
