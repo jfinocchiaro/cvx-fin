@@ -181,35 +181,39 @@ Let $\Y$ be a finite outcome (label) space, and throughout let $n=|\Y|$.
 The set of probability distributions on $\Y$ is denoted $\simplex\subseteq\reals^{\Y}$, represented as vectors of probabilities.
 We write $p_y$ for the probability of outcome $y \in \Y$ drawn from $p \in \simplex$.
 
-We study the minimization of \emph{loss functions} of the form $\ell: \R \to \reals^{\Y}_+$.
-The abstract set $\R$ is the \emph{report space}, $\ell(r)$ is a vector specifying the loss of report $r$ on all outcomes, and $\ell(r)_y \in \reals_+$ is the loss of $r$ when outcome $y$ is observed.
-The expected loss of report $r$ when $y \sim p$ is written $\langle p, \ell(r) \rangle$.
-For example, the $0-1$ loss has $\R = \Y$ with $\ell(r)_y = \Ind[r \neq y]$.
+We write loss functions as $L:\R\to\reals^\Y_+$ which map a report (prediction) $r\in\R$ to the vector of loss values $L(r) = (L(r)_y)_{y\in\Y}$ for each possible outcome $y\in\Y$.
+Often $\R$ will be taken to be a finite set for the given discrete loss (in which case we will write $\ell$ not $L$), and $\reals^d$ for the surrogate.
+The expected loss of report $r$ when $y \sim p$ is written $\inprod{p}{L(r)}$.
+For example, 0-1 loss is a discrete loss with $\R = \Y$ given by $\ell(r)_y = \Ind[r \neq y]$.
 
-A \emph{property} formally captures the relationship between distributions $p$ and ``optimal'' reports, i.e. those minimizing expected loss.
-In this paper, we will use double arrow notation to mean a mapping to all nonempty subsets.
-So the notation $\gamma: \simplex \toto \R$ is shorthand for $\gamma: \simplex \to 2^{\R} \setminus \emptyset$.
+To formalize and study the relationship between the given loss and its surrogate, we adopt terminology from the property elicitation literature, which elevates the \emph{property}, or map from distributions to optimal reports, as a central object to study in its own right.
+In the case of discrete losses, this map is multivalued, meaning a single distribution could map to multiple optimal reports.
+(For example, when $p=(1/2,1/2)$, both $y=1$ and $y=-1$ optimize 0-1 loss.)
+To this end, we will use double arrow notation to mean a mapping to all nonempty subsets, so that $\gamma: \simplex \toto \R$ is shorthand for $\gamma: \simplex \to 2^{\R} \setminus \emptyset$.
 
-\begin{definition}[Property, level set]
-  A \emph{property} is a function $\gamma:\simplex\toto\R$ mapping each distribution $p$ to a nonempty subsets of ``correct'' reports.
-  A \emph{level set} $\gamma_r := \{p : r \in \gamma(p)\}$ is the set of distributions $p$ for which the report $r$ is correct.
+\begin{definition}[Property, level set]\label{def:property}
+  A \emph{property} is a function $\Gamma:\simplex\toto\R$.
+  The \emph{level set} of $\Gamma$ for report $r$ is the set $\Gamma_r := \{p : r \in \Gamma(p)\}$.
 \end{definition}
-For example, the \emph{mode} on $n$ outcomes has $\gamma(p) = \{ y : p_y = \max_{y'} p_{y'}\}$.
-It is a finite property:
 
 \begin{definition}[Finite property, non-redundant]
-  We call $\gamma$ a \emph{finite} property if $\R$ is a finite set and call it \emph{non-redundant} if no level set is a superset of another.
-  For simplicity, when we say a property is finite, we also require it to be non-redundant.
+  A property $\Gamma:\simplex\toto\R$ is \emph{redundant} if for some $r,r'\in\R$ we have $\Gamma_r \subseteq \Gamma_{r'}$, and \emph{non-redundant} otherwise.
+  $\Gamma$ is \emph{finite} if it is non-redundant and $\R$ is a finite.
+  We typically write finite properties in lower case, as $\gamma$.
 \end{definition}
+
+Thus, $\Gamma(p)$ is the set of reports which should be optimal for a given distribution $p$, and $\Gamma_r$ is the set of distributions for which the report $r$ should be optimal.
+For example, the \emph{mode} is the property $\mode(p) = \argmax_{y\in\Y} p_y$, which is finite.
+The mode captures the set of optimal reports for 0-1 loss: for each distribution over the labels, one should report the most likely label.
+In this case we say 0-1 loss \emph{elicits} the mode, as we now formalize.
 
 \begin{definition}[Elicits]
   A loss $\ell:\R\to\reals^\Y_+$, \emph{elicits} a property $\gamma:\simplex \toto \R$ if for all $p \in \simplex$,
   \begin{equation}
-  \Gamma(p) = \argmin_{r \in \R} \E_{Y\sim p}[L(r,Y)].
+  \Gamma(p) = \argmin_{r \in \R} \inprod{p}{L(r)}~.
   \end{equation}
 \end{definition}
-For example, one can verify that $0-1$ loss elicits the mode.
-The terminology comes from the information elicitation literature, in which a report $r$ is elicited from some forecaster by scoring her with a loss on the observed outcome $y$; she tries to minimize expected loss.
+This terminology comes from the information elicitation literature, in which a report $r$ is elicited from some forecaster by scoring her with a loss on the observed outcome $y$; she tries to minimize expected loss.
 
 Typically in this paper, $\gamma$, $\R$, and $\ell$ will be used for a finite property, finite report space, and loss eliciting it, while $\Gamma$, $\R'$ and $L$ will be used for some other property, often with report space $\R' = \reals^d$.
 In this case, we prefer $r$ for a member of $\R$ and $u$ for members of $\reals^d$.
@@ -223,7 +227,7 @@ A \emph{polytope} is a bounded polyhedral set.
 \end{definition}
 
 
-\subsection{Link Functions and Elicitation Complexity}
+\subsection{Link Functions and Elicitation Complexity}\label{sec:link-elic}
 Often, for computational or other reasons, one is interested in a property $\gamma$ such as the mode, but wishes to elicit it by minimizing some other ``surrogate'' loss $L$ over some other space such as $\reals^d$, then mapping the result back to $\R$ using a link function.
 We now formalize this procedure.
 \bo{Maybe mention that previous formalizations are for single-valued properties only if true? And if so, that they don't really apply to finite properties??}
