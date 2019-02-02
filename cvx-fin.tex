@@ -97,25 +97,33 @@
 \maketitle
 
 \begin{abstract}
-  \bo{TODO - iterate!}
-  Convex surrogates are sweet.
-  Given a loss for a classification-like problem, there are two natural approaches to design convex surrogates.
-  First, one may attempt to map each prediction to a low-dimensional vector, and try to find a convex loss in that space with the right calibration.
-  Second, one may simply try to find a surrogate within the class of piecewise-linear convex, or polyhedral, losses.
-  We show an equivalence between these two approaches, and \raf{more stuff}.
-  We show that every loss with a finite number of predictions has a convex surrogate in the above sense using one fewer dimension that the number of outcomes, and give a full characterization of the losses needing only $d$ dimensions for such a surrogate.
-  We then apply this characterization to show novel lower bounds for abstain loss, demonstrating the power of our techniques over \raf{check this} alternatives such as feasible subspace dimension.
+  We formalize and investigate two approaches to designing convex surrogate loss functions for problems such as classification or ranking.
+  First, one can attempt to ``embed'' each prediction (label, ranking, etc) as a point in $\reals^d$ and design a convex loss function on that space.
+  Second, one can use a piecewise-linear convex, or polyhedral loss.
+  We prove that these approaches are equivalent in power, giving several characterizations of each, and show that every loss with a finite number of possible labels has a surrogate of both forms.
+  Then, we investigate the dimensionality of the surrogate hypothesis space.
+  We give a complete characterization of the $1$-d case.
+  In higher dimensions, we give necessary conditions and a novel lower bound for abstain loss.
 \end{abstract}
+  
+%  Convex surrogates are sweet.
+%  Given a loss for a classification-like problem, there are two natural approaches to design convex surrogates.
+%  First, one may attempt to map each prediction to a low-dimensional vector, and try to find a convex loss in that space with the right calibration.
+%  Second, one may simply try to find a surrogate within the class of piecewise-linear convex, or polyhedral, losses.
+%  We show an equivalence between these two approaches, and \raf{more stuff}.
+%  We show that every loss with a finite number of predictions has a convex surrogate in the above sense using one fewer dimension that the number of outcomes, and give a full characterization of the losses needing only $d$ dimensions for such a surrogate.
+%  We then apply this characterization to show novel lower bounds for abstain loss, demonstrating the power of our techniques over \raf{check this} alternatives such as feasible subspace dimension.
+
 \begin{keywords}%
   information elicitation, proper scoring rules, surrogate loss functions
 \end{keywords}
 
 \section{Introduction}\label{sec:intro}
 
-\raf{MOVED FROM SEC 2; maybe incorporate?}
-Often, for computational or other reasons, one is interested in a property $\gamma$ such as the mode, but wishes to elicit it by minimizing some other ``surrogate'' loss $L$ over some other space such as $\reals^d$, then mapping the result back to $\R$ using a link function.
-We now formalize this procedure.
-
+%\raf{MOVED FROM SEC 2; maybe incorporate?}
+%Often, for computational or other reasons, one is interested in a property $\gamma$ such as the mode, but wishes to elicit it by minimizing some other ``surrogate'' loss $L$ over some other space such as $\reals^d$, then mapping the result back to $\R$ using a link function.
+%We now formalize this procedure.
+%
 
 Convex surrogate losses are a central building block in machine learning for classification and classification-like problems.
 A growing body of research is concerned with designing and analyzing convex surrogates for given loss functions, and more broadly, understanding when such surrogates can and cannot be found.\raf{cite}
@@ -125,7 +133,6 @@ Furthermore, the kinds of strategies available for constructing surrogates, and 
 
 We augment this literature by studying a particularly natural approach for finding convex surrogates, wherein one \emph{embeds} a discrete loss function into a real vector space so that it can be convexified.
 Special cases include hinge loss as a surrogate for 0-1 loss and the abstain surrogate mentioned above.~\cite{crammer2001algorithmic}\raft{cite}
-\bo{it felt like the following results were only a warmup instead of main results. Not sure how to change this, maybe a paragraph break helps.}
 
 Using tools from property elicitation, we show a tight relationship between such embeddings and the class of polyhedral (i.e.\ piecewise-linear convex) loss functions: whenever such an embedding is possible, the discrete loss can be convexified into a polyhedral loss, and moreover, every polyhedral loss function is the result of such an embedding of some discrete loss.
 
@@ -261,23 +268,16 @@ In particular, we seek a \emph{link} function, which maps optimal reports from t
 \begin{definition}[Calibrated Link]\label{def:links}
   Let properties $\gamma:\simplex\toto\R$ and $\Gamma:\simplex\toto\R'$ be given.
   A \emph{link function} is a map $\psi:\R'\to\R$.
-  We say that a link $\psi$ is:
-  \begin{itemize}
-  \item \emph{Calibrated} if for all $p\in\simplex$, $r'\in \Gamma(p) \implies \psi(r') \in \gamma(p)$; in other words, if for all $r'\in\R'$, $\Gamma_{r'} \subseteq \gamma_{\psi(r')}$;
-  \item \emph{Separated}, with respect to a loss $L$ eliciting $\Gamma$, if for all $p \in \simplex$,
+  We say that a link $\psi$ is
+  \emph{calibrated} if for all $p\in\simplex$, $r'\in \Gamma(p) \implies \psi(r') \in \gamma(p)$; in other words, if for all $r'\in\R'$, $\Gamma_{r'} \subseteq \gamma_{\psi(r')}$.
+  It is \emph{separated}, with respect to a loss $L$ eliciting $\Gamma$, if for all $p \in \simplex$,
   \begin{align*}
   \inf_{u \in \R'; \psi(u) \not \in \gamma(p)} \E_{Y\sim p}[L(u, Y)] > \inf_{u \in \R'}\E_{Y\sim p}[L(u, Y)]~.
   \end{align*}
-  \end{itemize}
 \end{definition}
-
 Roughly speaking, a calibrated link requires that optimal surrogate reports map to optimal original reports, while a separated link adds the stronger guarantee that one cannot approach the optimal surrogate loss while making suboptimal original predictions.
 A classic example of a link which is both calibrated and separated is $\psi = \sgn$ when $\gamma=\mode$ and $L$ is either hinge loss or logistic loss.
-On the other hand, the link $\psi(u) =
-\begin{cases}
-  -1 & u \leq -1\\
-  1 & u > -1
-\end{cases}$
+On the other hand, the link $\psi(u) =-1$ for $u \leq -1$ and $\psi(u) = 1$ for $u > -1$
 would not be separated for hinge loss, but it would still be calibrated, as the reports $u\in(-1,1)$ are optimal for hinge loss only when $p=(1/2,1/2)$, in which case both $-1$ and $1$ are optimal for the mode (0-1 loss).
 \raft{Aside about other link definitions commented out}
 % As a brief aside, it is interesting to contrast the definitions above with the following: a link is
@@ -293,7 +293,7 @@ It is often useful to express the relationship between $L$ and $\gamma$ without 
 
 Often one is given a property $\gamma$ (typically via a discrete loss $\ell$) and one seeks a surrogate loss $L$ with certain attributes, such as convexity, smoothness, etc.
 In doing so, we may be interested in the minimum number of dimensions needed for such an indirect elicitation scheme; this is the notion of \emph{elicitation complexity}~\citep{lambert2008eliciting,fissler2016higher,frongillo2015elicitation}.
-The two notions of elicitation complexity we use most are as follows: let $\eliccvx(\gamma)$ be the minimum dimension $d$ such that $\gamma$ can be indirectly elicited by a convex loss function $L: \R'^d \to \reals^\Y_+$, and $\elicpoly(\gamma)$ the minimum such $d$ where $L$ is polyhedral.
+The two notions of elicitation complexity we use most are as follows: let $\eliccvx(\gamma)$ be the minimum dimension $d$ such that $\gamma$ can be indirectly elicited by a convex loss function $L: \reals^d \to \reals^\Y_+$, and $\elicpoly(\gamma)$ the minimum such $d$ where $L$ is polyhedral.
 We will also discuss $\eliccts$, which is the complexity with respect to continuous, real-valued, non-locally-constant properties (\S~\ref{sec:1d}), and $\elicembed$, which is the minimum dimension for $\gamma$ to be embedded (Definition~\ref{def:embedding-dim}).
 
 As a brief aside, we note that previous definitions of elicitation complexity have used a more straightforward link function, as the properties considered were single-valued~\citep{lambert2008eliciting,fissler2016higher,frongillo2015elicitation}.
@@ -312,14 +312,8 @@ The notion of a calibrated link from Definition~\ref{def:links} is only required
   A property of interest similar to the mode is the $\abstain{\alpha}$ property.
   In this property in which one reports the most likely outcome if the probability of such an outcome is greater than $1-\alpha$, and otherwise ``abstains'' from reporting.
   That is, $\gamma(p) = \argmax_{r \in \R}p_r$ if $\max_{r \in \R} p_r \geq 1-\alpha$ and is ``abstain'' otherwise.
-
   The finite loss eliciting $\alpha$ can be written
-  $\ell(r,y) = \begin{cases}
-  0 & r = y\\
-  \alpha & r = \text{abstain}\\
-  1 & r \neq y, r \neq \text{abstain}\\
-  \end{cases}$.
-
+  $\ell(r,y) = 0$ if $r=y$, $\alpha$ if $r=\text{abstain}$, and $1$ otherwise.
 \cite{ramaswamy2018consistent} show that $\elicpoly(\abstain{1/2}) \leq \ceil{\log_2 n}$, although it is not known if this bound is tight.
 
 
@@ -418,7 +412,7 @@ Fortunately, using the machinery developed in Proposition~\ref{prop:embed-trim},
 \begin{proof}
   Let $\gamma:\simplex\toto\R$.
   Proposition~\ref{prop:embed-trim} gives us that $\trim(\Gamma) = \{\gamma_r : r\in\R\}$.
-  We conclud that for any $u\in\reals^d$, there is some $r\in\R$ such that $\Gamma_u \subseteq \gamma_r$.
+  We conclude that for any $u\in\reals^d$, there is some $r\in\R$ such that $\Gamma_u \subseteq \gamma_r$.
   The link $\psi : \reals^d \to \R$ which encodes these choices is calibrated.
   \raft{Commented out the separated stuff}
   % Now assume $L$ is polyhedral.
@@ -427,7 +421,7 @@ Fortunately, using the machinery developed in Proposition~\ref{prop:embed-trim},
   % If the loss $L$ is polyhedral, we want to show that we can construct a $\psi$ so that the above holds.
   %
   % First, consider that each of the embedded points in $u \in \varphi(\R)$ must have ball $B(\epsilon, u)$ centered on $u$ so that no other $w \in \varphi(\R)$ is in $B(\epsilon, u)$.
-  % If this is not true, then \jessie{...?} \jessiet{I'm not sure how this messses with things, but I would think the level sets corresponding to the two points would differ on a set of zero measure, if at all, or both be in the $\arginf$of the loss...?}
+  % If this is not true, then \jessie{...?} \jessiet{I'm not sure how this messes with things, but I would think the level sets corresponding to the two points would differ on a set of zero measure, if at all, or both be in the $\arginf$of the loss...?}
   %
   % Now for any $u \in \varphi(\R)$ and $v \in B(\epsilon, u)$, if $\psi(v)$ does not map to $\psi(u)$, then there must be some other $w \in \varphi(\R)$ so that $\psi(v) = \psi(w)$.
   % Since $L$ is polyhedral, we know that for $p \in \simplex$ such that $v \in \Gamma(p)$, then since $u$ and $v$ are sufficiently close, $\E_p L(w,Y) = \E_p L(v,Y) \leq \E_p L(u,Y)$.
@@ -786,7 +780,7 @@ Another direction is additional lower bound techniques, or further development o
 This paper also suggests an agenda of defining more nuanced classes of surrogate losses and studying their properties.
 For example, a tangential topic in this work was the characteristics of a ``good'' link function; formalizing and exploring this question is an exciting direction.
 We would also like to move toward a full understanding of the differences between these classes.
-For example, how does embedding dimension compare in general to convex elicitation diemsnion (the dimensionality $d$ required of \emph{any} convex surrogate loss)?
+For example, how does embedding dimension compare in general to convex elicitation dimension (the dimensionality $d$ required of \emph{any} convex surrogate loss)?
 These questions have both theoretical interest and potential practical significance.
 
 \begin{conjecture}
@@ -954,7 +948,7 @@ We extend Aurenhammer's result to a weighted sum of convex functions, showing th
   From the above observations, every facet of $P$ is determined by the derivative of $f$ at any point in the interior of its projection, and vice versa.
   Letting $x$ be such a point in the interior, we now see that the facet of $P'$ containing $(x,f'(x))$ has the same projection, namely $\{x'\in\reals^d : \nabla f(x) \in \partial f(x')\} = \{x'\in\reals^d : \nabla f'(x) \in \partial f'(x')\}$.
   Thus, the power diagrams induced by $f$ and $f'$ are the same.
-  The conclusion follows from the obversation that the above held for any strictly positive weights $p$, and $f$ was fixed.
+  The conclusion follows from the observation that the above held for any strictly positive weights $p$, and $f$ was fixed.
 \end{proof}
 
 \begin{proof}[Proof of Theorem~\ref{thm:polyhedral-embed}]
