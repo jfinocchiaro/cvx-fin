@@ -9,6 +9,7 @@
 %\usepackage{accents}
 \usepackage{bbm}
 \usepackage{xspace}
+\usepackage{tikzsymbols}
 \usepackage[margin=1.25in]{geometry}
 
 \usepackage[colorlinks=true,breaklinks=true,bookmarks=true,urlcolor=blue,
@@ -47,6 +48,7 @@
 \newcommand{\cl}[1]{\text{cl}(#1)}
 %\newcommand{\expectedv}[3]{\overline{#1}(#2,#3)}
 \newcommand{\expectedv}[3]{\E_{Y\sim{#3}} {#1}(#2,Y)}
+\newcommand{\inprod}[2]{\langle #1, #2 \rangle}
 \newcommand{\toto}{\rightrightarrows}
 \newcommand{\trim}{\mathrm{trim}}
 \newcommand{\fplc}{finite-piecewise-linear and convex\xspace} %xspace for use in text
@@ -221,6 +223,243 @@ The ``sawtooth'' approach, however, does not satisfy this necessary condition.
   Since this above is not $1$-embeddable, we conclude that abstain($\alpha > 1/2$) with $n \geq 6$ is not $2$-embeddable.
 \end{proof}
 
+
+\newpage
+\section{Post-submission thoughts}
+\subsection{The mode}
+\jessiet{For all the $\leq$ statements in here, there might be a reason they would have to be equalities, but I haven't been able to think it fully through/prove it, so they are in here as inequalities for now.}
+\begin{conjecture}
+	The normals constructing a tight H-rep for a cell for the mode must be linearly independent
+\end{conjecture}
+\begin{proof}
+  Consider the matrix describing the cell for outcome $n$...
+	
+  $B^{(n)} := \begin{pmatrix}
+  -1 & 0 & 0 & \ldots & 1 \\
+  0 & -1 & 0 & \ldots & 1 \\
+  0 & 0 & -1 & \ldots &  1\\
+  0 & 0 & \ldots &-1 &1\\
+  \end{pmatrix}$
+	
+
+  Now for each column $B_i^{(n)}$ of $B^{(n)}$, we must have a set of normals such that for each normal $j$, we must have $\inprod{V_j}{x} = B_{i,j}$ in order for the halfspace representation to be tight.
+  Let us write the polytope $T_i := \{x \in \reals^d : Vx \leq B_i \}$ as the feasible polytope for the H-rep of the property.
+  In order for $\{x \in T_n : \inprod{V_j}{x} = 1 \}$ to be nonempty for all $V_j$, we assert the normals $V_j$ must all be linearly independent.
+  
+	
+%	The first $n-1$ columns of $B^{(n)}$ form the standard basis in $\reals^{n-1}$.
+
+  To see this, first consider that if $V_2 = -V_1$ , then one of these constraints for the polytope $T_n$ is redundant.
+  Therefore these normals do not form a tight $H$-rep since for (WLOG) $V_2$, the halfspace represented by $\{x : \inprod{V_2}{x} \leq 1 \}$ is a (strict since none of the normals can be $0$) subset of the halfspace $\{x : \inprod{V_1}{x} \leq 1 \}$.
+	
+  To generalize this to linear independence of the normals, suppose $V_{\Laughey} = \sum_{i \neq \Laughey} \lambda_i V_i$ so that $V_{\Laughey}$ is a linear combination of other normals.
+%  
+  The tightness condition, for the columns being indexed by $i$ and rows indexed by $j$ is as follows:
+  For all $i \in \{1, 2, \ldots, n\}$ and $j \in \{1, 2, \ldots, k = n-1\}$ there must be an $x \in T_i$ so that 
+  \begin{align*}
+ \inprod{V_j}{x} = 
+  \begin{cases}
+  1 & i = n\\
+  -1& i = j\\
+  0 & i \neq j, i \neq n
+  \end{cases}
+  \end{align*}
+  
+  
+  Given the tightness constraints, if $V_{\Laughey}$ is a linear combination of $V_i$s, then $\inprod{V_{\Laughey}}{x} = \sum_{i\neq \Laughey} \inprod{\lambda_i V_i}{x} \leq 0 + 0 + \ldots + 0 + \lambda_n = \lambda_n$.
+  	
+  If $\lambda_n= -1$, we contradict the tightness of $T_n$ shown above. 
+  Otherwise, we contradict the tightness of $T_i$ since there is no constraint such that $\inprod{V_{\Laughey}}{x} = -1$ given the tightness of the other constraints. 
+  
+\end{proof}
+
+\begin{corollary}
+  The mode is not $(n-2)$ embeddable
+\end{corollary}
+\begin{proof}
+  In order to have a tight $H$-rep, we need normals that are linearly independent.
+  Since the normals must be linearly independent, it must be true that for $V \in \reals^{k \times d}$ that $k \leq d$.
+  However, since $k = n-1 \leq d$, we know that the embedding dimension must be at least $n-1$.
+\end{proof}
+
+\subsection{Abstain}
+Let's think about abstain for a second in a similar mindset.
+\begin{theorem}
+	The normals constructing a tight H-rep for the abstain(1/2) property on $n$ outcomes \jessie{must sum to $\vec{0}$ and} [[COOL CHARACTERIZATION]]
+\end{theorem}
+\begin{proof}
+  Consider the matrix $B^{(abs)} \in \reals^{k \times n}$ (where $k = n$) describing the abstain cell...
+	
+  $B^{(abs)} := \begin{pmatrix}
+  -1 & 1 & 1 & \ldots & 1\\
+  1 & -1 & 1 & \ldots & 1\\
+  1 & 1 & -1 & \ldots & 1\\
+  1 & 1 & \ldots & 1 & -1\\
+  \end{pmatrix}$
+	
+  The tightness constraint for the abstain cell is for all columns of $B^{(abs)}$, indexed by $i$, and rows of $V$, indexed by $j$, we know there must be an $x \in T_i$ such that 
+  \begin{align*}
+  \inprod{V_j}{x} = 
+  \begin{cases}
+  -1 & i = j\\
+  1& o/w\\
+  \end{cases}
+  \end{align*}
+	  
+  When a normal $V_{\Laughey}$ can be written as a linear combination of other normals $\sum_{j \neq \Laughey} \lambda_j V_j$, then we know $\inprod{V_{\Laughey}}{x} = \sum_{j \neq \Laughey} \inprod{V_j}{x}$.
+  Further, by the requirement that $x \in T_i$, we know that
+  \begin{align*}
+  	\inprod{V_{\Laughey}}{x} &= \sum_{j \neq \Laughey} \inprod{V_{\Laughey}}{x}\\
+  	&\leq \lambda_1 + \lambda_2 + \ldots + (-\lambda_i) + \lambda_{i+1} + \ldots + \lambda_n\\
+  \end{align*}
+	  
+  For $i = \Laughey$, we know that this tightness constraint is then $-1 \leq \sum_{j \neq i} \lambda_j$.
+  Therefore, there must be some $\lambda_\ell \leq -1$ for the tightness constraint to be satisfied.
+  However, when $i = \ell$, then we must have $V_\ell$ being able to be written as some linear combination of normals where $V_\ell = -\frac{\lambda_1}{\lambda_\ell} V_1 + \ldots + \frac{1}{\lambda_\ell} V_{\Laughey} + \ldots + (- \frac{\lambda_n}{\lambda_\ell}) V_n$.
+  Since $\lambda_\ell \leq -1$, we know that $\frac{1}{\lambda_\ell} =: \lambda^*_{\Laughey} \in (0, -1]$.
+  \end{proof}
+  
+  \begin{corollary}
+    The abstain(1/2) property is \jessie{$\lceil \log_2 n \rceil$ embeddable, but no less?}
+  \end{corollary}	
+  
+  \subsection{Generalizing abstain}
+  However, we know that we have to use the same set of normal for all $T_i$ for $i \in \{1,2, \ldots, n\}$.
+  Therefore, if we want to write any $V_j$ as a linear combination of other normals, we can use the structure of all $T_i$ to note the possible relationships between normals.
+  
+  For example, for $x \in T_1$, we know that by the tightness constraints
+  \begin{align*}
+  -1 = \inprod{V_1}{x} &= \inprod{\lambda_2 V_2}{x} + \inprod{\lambda_3 V_3}{x}\\ 
+  &= \lambda_2 \inprod{V_2}{x} + \lambda_3 \inprod{V_3}{x}\\
+  &\geq \lambda_2 + \lambda_3
+  \end{align*}
+  
+  Similarly for $x \in T_1$, we know
+  \begin{align*}
+  1 = \inprod{V_2}{x} &= \inprod{\lambda_1 V_1}{x} + \inprod{\lambda_3 V_3}{x}\\ 
+  &= \lambda_1 \inprod{V_1}{x} + \lambda_3 \inprod{V_3}{x}\\
+  &\geq -\lambda_1 + \lambda_3
+  \end{align*}
+  and so on for the tightness constraint on $V_3$ and $T_1$.
+  
+  Combining the inequalities, this yields
+  \[
+  \begin{bmatrix}
+      0 & 1 & 1      \\
+      -1 & 0 & 1 \\
+      -1 & 1 & 0      
+  \end{bmatrix}
+  \begin{bmatrix}
+      \lambda_1\\
+      \lambda_2\\
+      \lambda_3
+  \end{bmatrix}
+  \leq 
+  \begin{bmatrix}
+      -1\\
+      1 \\
+      1
+  \end{bmatrix} 
+  \]
+  
+  We can then repeat this process for $T_2$ and $T_3$ (since all three require the same set of normals) to observe
+  
+    \[
+    \begin{bmatrix}
+        0 & 1 & 1      \\
+        -1 & 0 & 1 \\
+        -1 & 1 & 0 \\ \hline
+        0 & -1 & 1\\
+        1 & 0 & 1\\
+        1 & -1 & 0\\ \hline
+        0 & 1 & -1\\
+        1 & 0 &-1 \\
+        1 & 1 & 0     
+    \end{bmatrix}
+    \begin{bmatrix}
+        \lambda_1\\
+        \lambda_2\\
+        \lambda_3
+    \end{bmatrix}
+    \leq 
+    \begin{bmatrix}
+        -1\\
+        1 \\
+        1 \\ \hline
+        1 \\
+        -1 \\
+        1\\ \hline
+        1\\
+        1\\
+        -1\\
+    \end{bmatrix} 
+    \]
+    
+    We then want to find a feasible solution for this polytope.
+    (It seems like $-\ones$ should be a feasible solution for all $n$, but I haven't proven it.)
+    
+    Since we know have a set of ``weights'' that show the relationship between normals, we want to consider that we then have $V_j = \sum_{\ell \neq j}\lambda_\ell V_\ell.$
+    Therefore, we can set up a system (using our feasible solution $\lambda = -\ones$) by stating $V_1 = -V_2 - V_3$, $V_2 = -V_1 - V_3$, etc.
+    
+    Therefore, we have the system
+    \[
+    \begin{bmatrix}
+        0 & -1 & -1\\
+        -1 & 0 & -1 \\
+        -1 & -1 & 0
+    \end{bmatrix}
+    \begin{bmatrix}
+        V_1\\
+        V_2\\
+        V_3
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        V_1\\
+        V_2 \\
+        V_3 
+    \end{bmatrix} 
+    \]
+    From here, we can find (any) eigenvector corresponding to the eigenvalue $1$, and imposes some structure on the normals.
+    
+    For example, we know that $-V_1 = V_2$ by taking the Hadamard product of the eigenvector (corresponding to eigenvalue $1$) and the normals $V$.
+    
+    Once we fix $V_1$ and $V_2$, we can then look at the rest of the normals composing $V$ through the same system equality and conclude that the sum of the rest of the normals should be $\vec{0}$.
+    Since $V_1 = -V_2$, their sum is also $\vec{0}$, and thus the sum of all the normals must be $\vec{0}$.
+    
+    However, a quick counterexample shows that this is not sufficient.
+    Consider the matrix $V = [(0,1), (1,0), (0,-1), (-1/2, \sqrt{3} / 2), (-1/2, -\sqrt{3} / 2)]$ whose polar is given in Figure~\ref{fig:sum-to-0-gen-pos-ce}.
+    
+	\begin{figure}
+	\centering
+	\includegraphics[width=0.7\linewidth]{./sum-to-0-gen-pos-ce}
+	\caption{Counterexample where the normals sum to $\vec{0}$ but the abstain property is not embeddable in $\reals^2$.}
+	\label{fig:sum-to-0-gen-pos-ce}
+	\end{figure}
+
+	The normals are in general position and sum to $\vec{0}$, but this arrangement cannot be used to embed abstain in $\reals^2$.
+	
+	Playing around with this example, $T_i$ is not empty for all $i$, but fails to form a tight H-rep because of the adjacency requirements, which follow from the total number of $a$-faces ($a \in \{0, 1, 2, \ldots, d-1\}$) of each $T_i$.
+	For example, here, two of the faces are lines, which have 4 faces in $\reals^2$, and therefore cannot make contact (i.e. have nonempty intersection with) all $T_i^j := T_i \cap \{x : \inprod{V_j}{x} = b_{i,j} \}$.
+	(I'm using some implicit assumption that each $T_i^j$ is a face of $T_i$, which I believe should be true, and I think is in An Introduction to Convex Polytopes\footnote{\url{https://www.fmf.uni-lj.si/~lavric/brondsted.pdf}})
+	
+	
+\subsection*{General geometric thoughts}
+Thoughts:
+\begin{itemize}
+\item Can we write $B$ and $V$ so that $T = V^\circ$ and each $b_i \preceq \ones$? (componentwise inequality)?
+\item There has to be some restriction on the normals stronger than them being in general position, but not as strong as them being affinely independent.
+\item The matrix $V = [(0,1), (1,0), (0,-1), (-1/2, \sqrt{3} / 2), (-1/2, -\sqrt{3} / 2)]$ shows that general position and summing to $\vec{0}$ is not sufficient for the abstain property.
+\item This polytope doesn't work because of something about its geometric structure.
+\end{itemize}
+
+\begin{definition}
+A matrix $V$ of normals is \emph{nonredundant} \jessiet{Maybe use a different term since nonredundancy is also used in reference to properties} if \jessie{\ldots}
+\end{definition}
+
+\begin{conjecture}
+The matrix $V \in \reals^{k \times d}$ forms a tight H-representation if and only if (a.) Each $T_i$ has at least $k$ faces, (b.) For all $j = \{1,2,\ldots, k\}$, the polytope $T_i^j$ is nonempty, and (c.) for all $i \in \{1,2,\ldots, n\}$ we have $|\{T_i^j\}_{j=1}^k| = k$.  That is, fixing any $T_i$, we observe $T_i^j$ is unique.
+\end{conjecture}
 
 \end{document}
 %%% Local Variables:
