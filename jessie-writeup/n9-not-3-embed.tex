@@ -266,7 +266,7 @@ The ``sawtooth'' approach, however, does not satisfy this necessary condition.
   \end{align*}
   
   
-  Given the tightness constraints, if $V_{\Laughey}$ is a linear combination of $V_i$s, then $\inprod{V_{\Laughey}}{x} = \sum_{i\neq \Laughey} \inprod{\lambda_i V_i}{x} \leq 0 + 0 + \ldots + 0 + \lambda_n = \lambda_n$.
+  Given the tightness constraints, if $V_{\Laughey}$ is a linear combination of $V_i$s, then $\inprod{V_{\Laughey}}{x} = \sum_{i\neq \Laughey} \inprod{\lambda_i V_i}{x} \geq 0 + 0 + \ldots + 0 + \lambda_n = \lambda_n$.
   	
   If $\lambda_n= -1$, we contradict the tightness of $T_n$ shown above. 
   Otherwise, we contradict the tightness of $T_i$ since there is no constraint such that $\inprod{V_{\Laughey}}{x} = -1$ given the tightness of the other constraints. 
@@ -396,7 +396,7 @@ Let's think about abstain for a second in a similar mindset.
     \]
     
     We then want to find a feasible solution for this polytope.
-    (It seems like $-\ones$ should be a feasible solution for all $n$, but I haven't proven it.)
+    (It seems like $-\ones$ should be a feasible solution for all $n$, but I haven't proven it.  It works for up to $n=7$ though?)
     
     Since we know have a set of ``weights'' that show the relationship between normals, we want to consider that we then have $V_j = \sum_{\ell \neq j}\lambda_\ell V_\ell.$
     Therefore, we can set up a system (using our feasible solution $\lambda = -\ones$) by stating $V_1 = -V_2 - V_3$, $V_2 = -V_1 - V_3$, etc.
@@ -420,9 +420,13 @@ Let's think about abstain for a second in a similar mindset.
         V_3 
     \end{bmatrix} 
     \]
-    From here, we can find (any) eigenvector corresponding to the eigenvalue $1$, and imposes some structure on the normals.
+    From here, we can find (any) eigenvector corresponding to the eigenvalue $1$, and impose some structure on the normals.
     
-    For example, we know that $-V_1 = V_2$ by taking the Hadamard product of the eigenvector (corresponding to eigenvalue $1$) and the normals $V$.
+    For example, we know that $-V_1 = V_2$ by taking the Hadamard product (denoted $\circ$) of the eigenvector (corresponding to eigenvalue $1$) and the normals $V$.
+    \jessie{Not sure if I was careful enough with this... not quite sure why I used the Hadamard product(ish).  Might be useful to chat through the reasoning.
+    For the eigenvalue $\Lambda_1 = 1$, the corresponding eigenvector is $\begin{bmatrix} -1 \\ 1 \\0 \end{bmatrix}$ and took the Hadamard product of this and $\begin{bmatrix} V_1 \\ V_2 \\V_3 \end{bmatrix}$, which is how I derived $-V_1 = V_2$, but I'm not sure if I cheated by doing this.}
+
+\bigskip
     
     Once we fix $V_1$ and $V_2$, we can then look at the rest of the normals composing $V$ through the same system equality and conclude that the sum of the rest of the normals should be $\vec{0}$.
     Since $V_1 = -V_2$, their sum is also $\vec{0}$, and thus the sum of all the normals must be $\vec{0}$.
@@ -432,7 +436,7 @@ Let's think about abstain for a second in a similar mindset.
     
 	\begin{figure}
 	\centering
-	\includegraphics[width=0.7\linewidth]{./sum-to-0-gen-pos-ce}
+	\includegraphics[width=0.6\linewidth]{./sum-to-0-gen-pos-ce}
 	\caption{Counterexample where the normals sum to $\vec{0}$ but the abstain property is not embeddable in $\reals^2$.}
 	\label{fig:sum-to-0-gen-pos-ce}
 	\end{figure}
@@ -440,26 +444,48 @@ Let's think about abstain for a second in a similar mindset.
 	The normals are in general position and sum to $\vec{0}$, but this arrangement cannot be used to embed abstain in $\reals^2$.
 	
 	Playing around with this example, $T_i$ is not empty for all $i$, but fails to form a tight H-rep because of the adjacency requirements, which follow from the total number of $a$-faces ($a \in \{0, 1, 2, \ldots, d-1\}$) of each $T_i$.
-	For example, here, two of the faces are lines, which have 4 faces in $\reals^2$, and therefore cannot make contact (i.e. have nonempty intersection with) all $T_i^j := T_i \cap \{x : \inprod{V_j}{x} = b_{i,j} \}$.
-	(I'm using some implicit assumption that each $T_i^j$ is a face of $T_i$, which I believe should be true, and I think is in An Introduction to Convex Polytopes\footnote{\url{https://www.fmf.uni-lj.si/~lavric/brondsted.pdf}})
+	For example, in the example where $T = V^\circ$ \jessie{Slightly abusing notation... this isn't quite what I want.} is shown in Figure~\ref{fig:sum-to-0-gen-pos-ce}, two of the faces $T_i$ are lines, which have 4 faces in $\reals^2$, and therefore cannot make contact (i.e. have nonempty intersection with) all $T_i^j := T_i \cap \{x : \inprod{V_j}{x} = b_{i,j} \}$.
+	(I'm using some implicit assumption that each $T_i^j$ is a face of $T_i$, which I believe should be true, and I think is in An Introduction to Convex Polytopes\footnote{\url{https://www.fmf.uni-lj.si/~lavric/brondsted.pdf}}.  Note that $T_i$ does not have to be a face of $T$, but $T_i^j$ is the definition of an exposed face of $T_i$, and for convex polytopes, every face is exposed.)
 	
 	
 \subsection*{General geometric thoughts}
 Thoughts:
 \begin{itemize}
-\item Can we write $B$ and $V$ so that $T = V^\circ$ and each $b_i \preceq \ones$? (componentwise inequality)?
+\item Can we write $B$ and $V$ so that $T = V^\circ$, or is the polar of something related?, and each $b_i \preceq \ones$? (componentwise inequality)
 \item There has to be some restriction on the normals stronger than them being in general position, but not as strong as them being affinely independent.
 \item The matrix $V = [(0,1), (1,0), (0,-1), (-1/2, \sqrt{3} / 2), (-1/2, -\sqrt{3} / 2)]$ shows that general position and summing to $\vec{0}$ is not sufficient for the abstain property.
 \item This polytope doesn't work because of something about its geometric structure.
 \end{itemize}
 
 \begin{definition}
-A matrix $V$ of normals is \emph{nonredundant} \jessiet{Maybe use a different term since nonredundancy is also used in reference to properties} if \jessie{\ldots}
+A normal $V_j$ is \emph{nonredundant} \jessiet{Maybe use a different term since nonredundancy is also used in reference to properties} if \jessie{proposed:} for all $\ell \neq j$, we have $\{x : \reals^d : \inprod{V_j}{x} \leq b_{i,j}\} \not  \subseteq \{x : \reals^d : \inprod{V_\ell}{x} \leq b_{i,\ell}\}$.
+Moreover, we say $V$ is nonredundant if all $V_j$ composing $V$ are nonredundant.
 \end{definition}
 
+\begin{corollary}
+	The normals forming any tight $H$-representation are nonredundant.
+	\jessie{Check this?}
+\end{corollary}
+
 \begin{conjecture}
-The matrix $V \in \reals^{k \times d}$ forms a tight H-representation if and only if (a.) Each $T_i$ has at least $k$ faces, (b.) For all $j = \{1,2,\ldots, k\}$, the polytope $T_i^j$ is nonempty, and (c.) for all $i \in \{1,2,\ldots, n\}$ we have $|\{T_i^j\}_{j=1}^k| = k$.  That is, fixing any $T_i$, we observe $T_i^j$ is unique.
+	The matrix $V \in \reals^{k \times d}$ forms a tight H-representation if \jessie{and only if} (a.) For all $j = \{1,2,\ldots, k\}$, the polytope $T_i^j$ is nonempty, and (b.) for all $i \in \{1,2,\ldots, n\}$ we have $|\{T_i^j\}_{j=1}^k| = k$.  That is, fixing any $T_i$, we observe $T_i^j$ is unique, and \jessie{(c.) each $T_i$ has at least $k$ faces}.
 \end{conjecture}
+\begin{proof}
+	
+	\begin{itemize}
+		\item [$\implies$]
+		Observe that $(a.)$ is a rephrasing of the tightness condition, and thus immediately follows.
+		
+		We can also see that $(b.)$ follows from the nonredundancy of $V$, as each halfspace described by a $V_j$ is unique, and therefore, so is each $T_i \cap \{x : \inprod{V_j}{x} \leq b_{i,j} \}$ since we simply restrict to the same convex polytope.
+		
+		$(c.)$ follows since each $T_i^j$ is an exposed face of the polytope $T_i$, by nonredundancy of $V$, the boundaries are also unique.
+		Combining with the tightness requirement that each $T_i^j$ is nonempty, we can then say each $T_i^j$ is a unique face of $T_i$, and therefore as $j \in \{1,2, \ldots, k\}$, we know that $T_i$ has at least $k$ faces.
+		
+		
+		
+		\item [$\impliedby$]
+	\end{itemize}
+\end{proof}
 
 \end{document}
 %%% Local Variables:
