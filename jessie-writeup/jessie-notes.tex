@@ -80,10 +80,10 @@
 \subsection{Starting with a loss}
 If we are given a loss $L$ and set of embedded reports (possible minimizers of the expected loss over $\P$), we know that $r \in \Gamma(p) \iff 0 \in \partial_r L(r, p)$.
 We can represent $\partial_r L(r,p)$ as a (closed) polytope given by by $\{x \in \reals^d : Ax \leq b \}$ for some $A$ and $b$.
+ 
+If, for some $r$ and $p$ and every loss $L$ embedding $\Gamma$, the polytope $\partial_r L(r,p)$ is full-dimensional in $\reals^d$, then we say $\Gamma$ is $d$-\emph{minimally}-embeddable.
 
-If $\Gamma$ is $d$-\emph{minimally}-embeddable, then for some $r$ and $p$, the polytope $\partial_r L(r,p)$ should be full-dimensional in $\reals^d$.
-
-\subsection{Thinking on the property}
+\subsection{Starting with the property}
 Each level set of a finite elicitable property can be described as a convex polytope, and we can give this cell as $\{p \in \simplex : B^ip \geq 0 \}$, so that the matrix $B^i$ describes cell $i$.
 Observe the subtle restriction that $p \in \simplex$.
 This imposes nonnegativity constraints and the restriction that $\sum_i y_i =1$.
@@ -91,31 +91,13 @@ This imposes nonnegativity constraints and the restriction that $\sum_i y_i =1$.
 To take care of nonnegativity constraints, we can build them into $B$.
 That is, each row of $B$ should describe a supporting hyperplane of the cell.
 
-To ensure that $\sum_i y_i = 1$, we can then also add two rows to $B$ and the vector of inequalities.
-That is, we can add $\ones^T p \leq 1$ and $-\ones^T p \leq -1$.
+To ensure that $\sum_i y_i = 1$, we can work in the affine space, so that the last distribution $p_n = 1 - \sum_{i=1}^{n-1} p_i$.
+Combined with the nonnegativity constraints, we observe our restriction to the simplex.
 
-So, if $B^* = \begin{Bmatrix}
-B \\
-\ones^T \\
--\ones^T
-\end{Bmatrix}$ 
-and $0^* = \begin{Bmatrix}
-\vec{0}\\
-1\\
--1
-\end{Bmatrix}$
-, then we can see that $\{p \in \simplex: Bp \geq \vec{0} \} = \{p \in \reals^n : B^* p \geq 0^*\}$.
-
-However, the equality constraints just restrict to a subset of the original cell (not restricted to the simplex), so we know that $\{p \in \reals^n : B^* p \geq 0^*\} \subseteq \{p \in \reals^n : B p \geq 0\}$, and focus on the matrix $B$ instead of $B^*$.
-
-\jessie{The difference between nonnegativity constraints and summing to $1$ is that we can construct an affine transformation to reduce dimension by $1$, guarantee the sum adds to $1$?}
-
-Consider that the dual of a polyhedron $C$ is another polyhedron $T$ where the vertices of $T$ are each associated with a facet of $C$.
-Since our cells $C^i$ are described by a set of linear inequalities, we know the (nonredundant) vectors describing these inequalities are associated with a facet of $C^i$, and are therefore also associated with a vertex of $T^i$.
-
-
-i.e. For each facet of $C$, there should be a vector $v_j \in \reals^n$ so that the facet is described by the halfspace $\{x : \inprod{v_j}{x} \leq b_{i,j} \}$ for each column of $B^i$ 
-Therefore, if the cell $C^i$ is described by $k$ halfspaces, then there should be at least $k$ vectors $v_j$
+Consider that, in most cases, the dual of a polyhedron $C$ is another polyhedron $T$ where the vertices of $T$ are each associated with a facet of $C$.
+Since our cells $C^i$ can be described by a set of linear inequalities(in halfspace representation), we know the [nonredundant] vectors describing these inequalities are associated with a facet of $C^i$, and are therefore also associated with a vertex of $T^i$.
+In essence, for each facet of $C$, there should be a vector $v_\ell \in \reals^n$ so that the facet is described by the halfspace $\{x : \inprod{v_\ell}{x} \leq B^i_{j,\ell} \}$ for each column $j$ of $B^i$ 
+Therefore, if the cell $C^i$ is described by $k$ halfspaces, then there should be at least $k$ vectors $v_\ell$ describing the dual polytope $T^i$.
 
 \jessie{Do we know anything about a lower bound on the number of normals needed?  Combining with structure of the properties might help us prove bounds.}
 
@@ -124,31 +106,38 @@ Not sure if this proof is obvious, but I haven't convinced myself the following 
 \begin{claim}
 For a finite elicitable property $\Gamma: \simplex\to\R$, the level set $\Gamma_r$ is a convex polytope in $\simplex$.
 \end{claim}
+\begin{proof}[Proof Sketch]
+\jessie{TODO}
+%Suppose there was a level set with some curve so that it did not have a halfspace representation.
+%Then there is a tangent halfspace to the level set such that the set difference of the two has positive Lebesgue measure.
+\end{proof}
 
-\section{Characterizing possible loss functions}
-If we can find a set of normals $V$ and $B^i$ matrices describing each cell $C^i$ of the property $\Gamma$ such that $T(\cdot, y) := \{x : \inprod{V}{x} \geq B_{i} \}$ is nonempty for each column $i$ of $B$, then the polytopes form subgradient sets of a possible loss function eliciting $\Gamma$.
-\jessie{Still unknown: does $V$ have to be the same across cells?}
+\section{Characterizing loss functions that embed $\Gamma$}
+If we can find a set of normals $V$ and $B^i$ matrices describing each cell $C^i$ of the property $\Gamma$ such that $T(\cdot, y) := \{x : \inprod{V}{x} \geq B^i_{j} \}$ is nonempty for each column $j$ of $B^i$, then the polytopes form subgradient sets of a possible loss function eliciting $\Gamma$.
+\jessie{Still unknown: is there always a construction so that $V$ is the same across cells?}
 
-However, the loss function eliciting $\Gamma$ is almost never unique; in fact, it is not the only loss \emph{embedding} $\Gamma$, either.
-The loss over reports in the convex hull of the embedded reports may be unique, but outside the convex hull, can take on infinitely many values, so long as it does not ``go below'' the minimum value of the embedded report.
-One question to ask here is, given a set of normals $V \in \reals^{k \times d}$, is there a set of matrices $\{B^i\}_{i=1}^{n}$ so that $T(r,y)$ is nonempty for all $r$and $y$?
+However, the loss function eliciting $\Gamma$ is (almost?) never unique; in fact, it is not the only loss \emph{embedding} $\Gamma$, either.
+The loss over reports in the convex hull of the embedded reports may be unique up to an additive shift, but outside the convex hull, can take on infinitely many values, so long as it does not take on a value below the minimum value of the embedded reports.
+One question to ask here is, given a set of normals $V \in \reals^{k \times d}$, is there a set of matrices $\{B^i\}_{i=1}^{m}$ over the reports so that $T(r,y)$ is nonempty for all $r$ and $y$?
+Additionally, we want $0 \in T(r,p) \iff r \in \Gamma(p)$, which subsumes part of the above condition if we focus on distributions $\delta_y$ for $y \in \Y$.
 
-\jessie{Another way to frame this is to fix the matrices $B$ and find such a set of normals $V$, but my hunch says that the first way might be easier for constructions, and this might be easier for bounds?}
+\jessie{Another way to frame this is to fix the matrices $B$ and find such a set of normals $V$, but my hunch says that the first way might be easier for constructions, and this might be easier for bounds?
+It's kind of a chicken or egg problem at the moment.}
 
 
 \section{Case study: abstain}
 \subsection{Constructing $B$ and $V$}
 Consider the cell $C$ describing a level set.
-For finite elicitable properties, we know $C$ is a convex polytope \jessie{See Claim 1}, and can thus be understood as either the convex hull as a finite set of distributions in $\simplex$, or as the intersection of a finite set of half spaces.
+For finite elicitable properties, we know $C$ is a convex polytope \jessie{See Claim 1... not actually sure of this, but if not, that's a whole other can of worms to open since we then can't use a halfspace representation}, and can thus be understood as either the convex hull as a finite set of distributions in $\simplex$, or as the intersection of a finite set of half spaces.
 
 First, we should note that the matrix $B$ can be written one of many ways.
 The only requirement of $B$ is that it describes the cell with nonnegativity constraints.
 It should be noted, however, that we can normalize $B$ so that the max element in each row is $1$.
-That way, we can look at the polar of the set $V$, and the set of subgradients should be a subset of $V^\circ$.
+That way, we can look at the polar of the set $V$, and the each of the subgradients should be a subset of $V^\circ$.
 
-\jessie{Options: Start with $V$ and reverse-engineer $B$ or start with any $B$ describing the cell and find a $V$ that describes it?}
+\jessie{One option: Start with $V$ and reverse-engineer $B$ or start with any $B$ describing the cell and find a $V$ that describes it.}
 
-For abstain(1/2) on 4 outcomes, consider the set of normals $V = \{(1,1), (-1,1), (-1,-1), (1,-1)\}$, \jessie{representing each of the embedded points?}.
+For abstain(1/2) on 4 outcomes, consider the set of normals $V = \{(1,1), (-1,1), (-1,-1), (1,-1)\}$, \jessie{representing each of the embedded points?  Is that just coincidence?}.
 The polar $V^\circ$ is then a diamond inscribed in the convex hull of the normals.
 \begin{figure}
 \begin{center}
@@ -171,7 +160,7 @@ The polar $V^\circ$ is then a diamond inscribed in the convex hull of the normal
 \end{center}
 \end{figure}
 
-For the abstain cell, we know that the matrix $B = \ones - 2I$ is unique up to scaling across rows. \jessie{I think... we haven't discussed or proved this.}
+For the abstain cell, we know that the matrix $B = \ones - 2I$ is unique up to scaling across rows. \jessie{I think...}
 The polytopes $T(abs, \cdot)$ are then given as in Figure~\ref{fig:abstain-T-report-abs}.
 \begin{figure}
 \begin{minipage}{0.24\linewidth}
@@ -231,16 +220,22 @@ B_2 =
 1 & -1 & -1 & -1 \\
 1 & 0 & 1 & 1 \\
 0 & 1 & 1 & 1 \\
-1 & 1 & 0 & 1 \\
+1 & 1 & 1 & 0 \\
 \end{bmatrix} 
 \]
 
 describe the cell properly (with nonnegativity constraints).
-However, these two constructions of the $B$ yield different polytopes $T(r_1, \cdot)$ for nearly all of the outcomes. (See Figures~\ref{fig:abstain-T-report-r1-B1} and \ref{fig:abstain-T-report-r1-B2}.)
-This begs the question of what a \emph{minimal} and \emph{maximal} set of such polytopes would look like.
-(For abstain(1/2) with $n=4$, I have a proof sketch that shows that the $B_1$ matrix gives the minimal set of polytopes where $0 \in T(r_1, p) \iff p \in \Gamma_{r_1}$.
-I can sketch that out at another time.)
+However, these two constructions of the $B$ yield different polytopes $T(r_1, \cdot)$ for nearly all of the outcomes. 
+For example, for the $V$ given above, $B_1$ yields empty polytopes for $y_2$ and $y_4$.
+(See Figures~\ref{fig:abstain-T-report-r1-raf} and \ref{fig:abstain-T-report-r1-B2}.)
+However, we know the construction given in Figure~\ref{fig:abstain-T-report-r1-raf} is perfectly valid, even though we have not build a $H-rep$ construction for the polytopes yet. 
 
+This begs the question of what a \emph{minimal} and \emph{maximal} set of such polytopes would look like.
+(For abstain(1/2) with $n=4$, I have a proof sketch that shows that the Figure~\ref{fig:abstain-T-report-r1-raf} is the minimal set of polytopes where $0 \in T(r_1, p) \iff p \in \Gamma_{r_1}$.
+I can sketch that out at another time.)
+\begin{proof}[Proof Sketch.]
+\jessie{TODO if decided it's valuable.}
+\end{proof}
 
 \begin{figure}
 \begin{minipage}{0.24\linewidth}
@@ -279,8 +274,8 @@ I can sketch that out at another time.)
 \fill (0,-1) circle[radius=2pt];
 \end{tikzpicture}
 \end{minipage}
-\caption{$T(r_1, \cdot)$ for each $y \in \Y$ using the $B_1$ matrix.}
-\label{fig:abstain-T-report-r1-B1}
+\caption{$T(r_1, \cdot)$ for each $y \in \Y$ using Raf's construction.  The given $V$ doesn't yield these subgradients, but there may be another $V$ such that this is also described by the $B_1$ matrix.  We just haven't found it yet.}
+\label{fig:abstain-T-report-r1-raf}
 \end{figure}
 
 
