@@ -1,8 +1,9 @@
 \documentclass[12pt]{article}
+\PassOptionsToPackage{numbers, compress}{natbib}
 \usepackage[preprint]{neurips_2019}
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
-\usepackage[implicit=false, bookmarks=false]{hyperref}       % hyperlinks
+\usepackage{hyperref}       % hyperlinks  %[implicit=false, bookmarks=false]
 \usepackage{url}            % simple URL typesetting
 \usepackage{booktabs}       % professional-quality tables
 \usepackage{amsfonts}       % blackboard math symbols
@@ -12,6 +13,10 @@
 \usepackage{mathtools, amsmath, amssymb, amsthm, graphicx, verbatim}
 %\usepackage[thmmarks, thref, amsthm]{ntheorem}
 \usepackage{color}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.2}
+\hypersetup{colorlinks,breaklinks,
+            linkcolor=darkblue,urlcolor=darkblue,
+            anchorcolor=darkblue,citecolor=darkblue}
 \usepackage{wrapfig}
 \usepackage{subcaption}
 \usepackage[colorinlistoftodos,textsize=tiny]{todonotes} % need xargs for below
@@ -91,8 +96,8 @@
 
 \title{Convex Surrogates via Polyhedral Losses}
 \author{%
- Jessica Finocchiaro \\
- \texttt{jefi8453@colorado.edu}\\
+ Jessica Finocchiaro\raf{Jessie?} \\
+ \texttt{jessica.finocchiaro@colorado.edu}\\
  CU Boulder
  \And
  Rafael Frongillo\\
@@ -112,8 +117,8 @@
   We formalize and investigate the natural approach of designing convex surrogate loss functions via embeddings, for problems such as classification or ranking which involve a finite number of possible predictions.
   Specifically, we consider surrogate losses given by embedding each prediction (label, ranking, etc) as a point in $\reals^d$, and convexifying the loss.
   We prove that this approach is equivalent to working with polyhedral (piecewise linear convex) losses, in several strong senses.
-  We then investigate the dimensionality of the surrogate hypothesis space required for such an embedding, giving a complete characterization of the $1$-d case, and several necessary conditions in higher dimensions.
-  We illustrate our results with new lower bounds for abstain loss.
+  We then investigate the dimensionality of the surrogate hypothesis space required for such an embedding, giving a complete characterization of the 1-dimensional case.
+  We illustrate our results with modest lower bounds for abstain loss, and conclude with future directions.
 \end{abstract}
   
 %  Convex surrogates are sweet.
@@ -237,15 +242,14 @@ To this end, we will use double arrow notation to mean a mapping to all nonempty
 
 \begin{definition}[Finite property, non-redundant]
   A property $\Gamma:\simplex\toto\R$ is \emph{redundant} if for some $r,r'\in\R$ we have $\Gamma_r \subseteq \Gamma_{r'}$, and \emph{non-redundant} otherwise.
-  $\Gamma$ is \emph{finite} if it is non-redundant and $\R$ is \jessiet{delete: a} a finite.
+  $\Gamma$ is \emph{finite} if it is non-redundant and $\R$ is a finite set.
   We typically write finite properties in lower case, as $\gamma$.
 \end{definition}
 
 Thus, $\Gamma(p)$ is the set of reports which should be optimal for a given distribution $p$, and $\Gamma_r$ is the set of distributions for which the report $r$ should be optimal.
-For example, the \emph{mode} is the property $\mode(p) = \argmax_{y\in\Y} p_y$, which is finite.
-The mode captures the set of optimal reports for 0-1 loss: for each distribution over the labels, one should report the most likely label.
+For example, the \emph{mode} is the finite property $\mode(p) = \argmax_{y\in\Y} p_y$, and captures the set of optimal reports for 0-1 loss: for each distribution over the labels, one should report the most likely label.
 In this case we say 0-1 loss \emph{elicits} the mode, as we formalize below.
-This terminology comes from the information elicitation \jessiet{information vs property... do we care?} literature~\citep{savage1971elicitation,osband1985information-eliciting,lambert2008eliciting}, in which a report $r$ is elicited from some forecaster by scoring her with a loss on the observed outcome $y$.
+This terminology comes from the information elicitation \jessiet{information vs property... do we care?}\raft{we could also say economics literature; not ``property'' though since that doesn't offer an explanation of the word ``elicits''} literature~\citep{savage1971elicitation,osband1985information-eliciting,lambert2008eliciting}, in which a report $r$ is elicited from some forecaster by scoring her with a loss on the observed outcome $y$.
 
 \begin{definition}[Elicits]
   A loss $L:\R\to\reals^\Y_+$, \emph{elicits} a property $\Gamma:\simplex \toto \R$ if
@@ -301,7 +305,7 @@ It is often useful to express the relationship between $L$ and $\gamma$ without 
   A loss \emph{indirectly elicits} a property $\gamma$ if it elicits a property with a calibrated link to $\gamma$.
 \end{definition}
 
-Often one is given a property $\gamma$ (typically via a discrete loss $\ell$) and \jessiet{delete: one} one seeks a surrogate loss $L$ with certain attributes, such as convexity, smoothness, etc.
+Often one is given a property $\gamma$ (typically via a discrete loss $\ell$) and seeks a surrogate loss $L$ with certain attributes, such as convexity, smoothness, etc.
 In doing so, we may be interested in the minimum number of dimensions needed for such an indirect elicitation scheme; this is the notion of \emph{elicitation complexity}~\citep{lambert2008eliciting,fissler2016higher,frongillo2015elicitation}.
 The two notions of elicitation complexity we use most are as follows: let $\eliccvx(\gamma)$ be the minimum dimension $d$ such that $\gamma$ can be indirectly elicited by a convex loss function $L: \reals^d \to \reals^\Y_+$, and $\elicpoly(\gamma)$ the minimum such $d$ where $L$ is polyhedral.
 We will also discuss $\eliccts$, which is the complexity with respect to continuous, real-valued, non-locally-constant properties (\S~\ref{sec:1d}), and $\elicembed$, which is the minimum dimension for $\gamma$ to be embedded (Definition~\ref{def:embedding-dim}).
@@ -336,7 +340,16 @@ Here, we formalize a notion of embedding which captures these techniques, and sh
 \begin{definition}
   A property $\Gamma : \simplex \toto \reals^d$ \emph{embeds} a property $\gamma : \simplex \toto \R$ if there exists some injective embdedding $\varphi:\R\to\reals^d$ such that for all $p\in\simplex,r\in\R$ we have $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p)$.
   Similarly, we say a loss $L:\reals^d\to\reals^\Y$ embeds $\gamma$ if $\prop{L}$ embeds $\gamma$.
+
+  Finally, a loss $L:\reals^d\to\reals^\Y$ \emph{embeds} a loss $\ell:\R\to\reals^\Y$ if $\prop{L}$ embeds $\prop{\ell}$ via $\varphi$ and for all $r\in\R$ we have $L(\varphi(r)) = \ell(r)$.
 \end{definition}
+
+\raf{We could potentially shortcut much of this.
+  \\[4pt]
+  A loss $L:\reals^d\to\reals^\Y$ \emph{embeds} a loss $\ell:\R\to\reals^\Y$ if there exists some injective embdedding $\varphi:\R\to\reals^d$ such that
+  (1) for all $r\in\R$ we have $L(\varphi(r)) = \ell(r)$, and (2) for all $p\in\simplex,r\in\R$ we have \[r \in \argmin_{r'\in\R} \inprod{p}{\ell(r')} \iff \varphi(r) \in \argmin_{u\in\reals^d} \inprod{p}{L(u)}\]
+  \\[4pt]
+Maybe even simplify further?  This could help us introduce the concept before we get into properties and elicitation at all.}
 
 In this section, we focus on the structure of embeddable properties, and what a property embedding another must look like.
 In the following sections, however, we will focus on the dimension $d$, and ask questions about the minimum $d$ required to embed a property.
@@ -453,8 +466,9 @@ Giving a construction that yields a separated link for all polyhedral losses is 
 
 With a solid understanding of the structure of embeddings and embeddable properties, we now turn to the relationship between embeddings and polyhedral losses.
 We give a tight connection: every finite elicitable property is embedded by a polyhedral loss, and every polyhedral loss embeds a finite elicitable property.
-We state this equivalence in two parts, the first focusing on the property, and the second on the loss.
+We state this equivalence in two theorems, the first focusing on the property, and the second on the loss.
 \jessiet{I'm guessing the statement changed after this was written, but three parts?}
+\raft{changed to ``theorems'' to be clearer}
 
 \begin{theorem}\label{thm:finite-elicit-embed}
   Let $\gamma$ be a finite property.
@@ -481,6 +495,7 @@ We now state a converse of Theorem~\ref{thm:finite-elicit-embed}: every polyhedr
 One way to look at this result in light of Proposition~\ref{prop:embed-trim} is that polyhedral losses ``directly'' elicit finite properties by embedding them into a space where the original loss is convex.
 Moreover, we show that indirect elicitation via polyhedral losses are heavily structured: if a polyhedral loss elicits a property $\gamma'$ with a link to $\gamma$, then both $\gamma'$ and $\gamma$ are finite and one ``refines'' the other in the sense below.
 \jessiet{Is $\gamma'$ actually finite by our definition, or is it ``finite-ish'', i.e. finite if we ignore a null set of distributions?}
+\raft{Good call, $\gamma'$ will not be finite... we'll have to revisit this whole section anyway though.}
 In other words, the cells (level sets) of $\gamma'$ must be a finite subdivision of the cells of $\gamma$.
 This fact will become useful when we discuss the relationship between embedding dimension and elicitation complexity.\raf{LATER: see [WHERE WE DISCUSS]}
 
@@ -727,6 +742,7 @@ These questions have both theoretical interest and potential practical significa
 \newpage
 \section{To Sort}
 \jessiet{Lol we should probably change the name of this}
+\raft{No kidding!  Was this really in the COLT submission??  Hilarious.}
 Several definitions from \citet{aurenhammer1987power}.
 \begin{definition}\label{def:cell-complex}
   A \emph{cell complex} in $\reals^d$ is a set $C$ of faces (of dimension $0,\ldots,d$) which (i) union to $\reals^d$, (ii) have pairwise disjoint relative interiors, and (iii) any nonempty intersection of faces $F,F'$ in $C$ is a face of $F$ and $F'$ and an element of $C$.
@@ -812,7 +828,7 @@ We extend Aurenhammer's result to a weighted sum of convex functions, showing th
   Let $\gamma:\simplex\toto\R$ be a non-redundant elicitable property, elicited by a loss whose Bayes risk is a closed function.
   Then $\gamma$ is $(n-1)$-embeddable, where $n=|\Y|$.
   \raft{Low priority: what conditions on $L$ or $\gamma$ ensure that the Bayes risk is closed?}
-  \jessiet{\url{https://en.wikipedia.org/wiki/Closed_convex_function} so the simplex $\simplex$  being closed should suggest the Bayes Risk and $G$ are closed.}
+  \jessiet{\url{https://en.wikipedia.org/wiki/Closed_convex_function} so the simplex $\simplex$  being closed should suggest the Bayes Risk and $G$ are closed.}\raft{It's more complicated than that though -- e.g. take a continuous convex function on the simplex and and then increase the values of the function arbitrarily on the poles of the simplex.  Still convex, but not closed (or continuous)}
 \end{theorem}
 \begin{proof}
   $G:\simplex\to\reals$ be the negative Bayes risk of the loss $L_\gamma$ eliciting $\gamma$, given by $G(p) = -\min_{r\in\R} \inprod{p}{L_\gamma(r)}$.
