@@ -1,6 +1,7 @@
 \documentclass[12pt]{article}
-\PassOptionsToPackage{numbers, compress}{natbib}
+\PassOptionsToPackage{numbers, compress, sort}{natbib}
 \usepackage[submission]{neurips_2019}
+
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
 \usepackage{hyperref}       % hyperlinks  %[implicit=false, bookmarks=false]
@@ -67,6 +68,7 @@
 \newcommand{\X}{\mathcal{X}}
 \newcommand{\Y}{\mathcal{Y}}
 
+\newcommand{\risk}[1]{\underline{#1}}
 \newcommand{\inprod}[2]{\langle #1, #2 \rangle}%\mathrm{int}(#1)}
 \newcommand{\inter}[1]{\mathring{#1}}%\mathrm{int}(#1)}
 %\newcommand{\expectedv}[3]{\overline{#1}(#2,#3)}
@@ -114,10 +116,10 @@
 \maketitle
 
 \begin{abstract}
-  We formalize and investigate the natural approach of designing convex surrogate loss functions via embeddings, for problems such as classification or ranking which involve a finite number of possible predictions.
-  Specifically, we consider surrogate losses given by embedding each prediction (label, ranking, etc) as a point in $\reals^d$, and ``convexifying'' the loss.
-  We prove that this approach is equivalent to working with polyhedral (piecewise linear convex) losses, in several strong senses.
-%  We then investigate the dimensionality of the surrogate hypothesis space required for such an embedding, giving a complete characterization of the 1-dimensional case.  \jessiet{Remove this from the abstract.}
+  We formalize and study the natural approach of designing convex surrogate loss functions via embeddings, for problems such as classification or ranking which involve a finite number of possible predictions.
+  Specifically, we consider surrogate losses given by embedding each prediction as a point in $\reals^d$, and convexifying the loss.
+  We prove that this approach is equivalent, in a strong sense, to working with polyhedral (piecewise linear convex) losses.
+  We then investigate the dimensionality of the surrogate hypothesis space required for such an embedding, giving a complete characterization of the 1-dimensional case.
   We illustrate our results with modest lower bounds for abstain loss, and conclude with future directions.
 \end{abstract}
   
@@ -141,23 +143,26 @@
 %
 
 Convex surrogate losses are a central building block in machine learning for classification and classification-like problems.
-A growing body of research is concerned with designing and analyzing convex surrogates for given loss functions, and more broadly, understanding when such surrogates can and cannot be found.\raf{cite}
-For example, recent work has developed tools to bound the required number of dimensions of the surrogate's hypothesis space. (\cite{frongillo2015elicitation,  ramaswamy2016convex}) \raf{cite}
-Yet in some cases these bounds are far from tight, such as for \emph{abstain loss} (classification with an abstain option)~(\cite{bartlett2008classification, yuan2010classification, ramaswamy2016convex, ramaswamy2018consistent})\raft{cite}.
+A growing body of work seeks to design and analyze convex surrogates for given loss functions, and more broadly, understand when such surrogates can and cannot be found.
+For example, recent work has developed tools to bound the required number of dimensions of the surrogate's hypothesis space~\cite{frongillo2015elicitation,  ramaswamy2016convex}.
+Yet in some cases these bounds are far from tight, such as for \emph{abstain loss} (classification with an abstain option)~\cite{bartlett2008classification, yuan2010classification, ramaswamy2016convex, ramaswamy2018consistent}.
 Furthermore, the kinds of strategies available for constructing surrogates, and their relative power, are not well-understood.
 
-We augment this literature by studying a particularly natural approach for finding convex surrogates, wherein one \emph{embeds} a discrete loss function into a real vector space so that it can be convexified.
-Special cases include hinge loss as a surrogate for 0-1 loss and the abstain surrogate mentioned above.~\cite{crammer2001algorithmic}\raft{cite}
+We augment this literature by studying a particularly natural approach for finding convex surrogates, wherein one ``convexifies'' a discrete loss.
+Specifically, we say a convex surrogate $L$ \emph{embeds} a discrete loss $\ell$ if there is an injective embedding from the discrete reports to a vector space such that (i) the original loss values are recovered, and (ii) a report is $\ell$-optimal if and only if the embedded report is $L$-optimal.
+If additionally there exists a ``separated'' link function which maps approximately $L$-optimal reports to $\ell$-optimal reports, this condition is known to produce $\ell$-calibrated surrogates~\cite{agarwal2015consistent}.
+Common examples which follow this general construction include hinge loss as a surrogate for 0-1 loss and the abstain surrogate mentioned above.
 
-Using tools from property elicitation, we show a tight relationship between such embeddings and the class of polyhedral (i.e.\ piecewise-linear convex) loss functions: whenever such an embedding is possible, the discrete loss can be convexified into a polyhedral loss, and moreover, every polyhedral loss function is the result of such an embedding of some discrete loss.
+Using tools from property elicitation, we show a tight relationship between such embeddings and the class of polyhedral (piecewise-linear convex) loss functions.
+In particular, by focusing on Bayes risks, we show that every discrete loss is embedded by some polyhedral loss, and every polyhedral loss function embeds some discrete loss.
+Moreover, we show that any polyhedral loss gives rise to a separated link function to the loss it embeds,\raft{TODO: prove this :-]}
+thus giving a very general framework to construct calibrated convex surrogates for arbitrary losses.
 
-We go on to study the \emph{embedding dimension}: the minimal dimension for a given loss to be so embedded.
-Our results give a complete characterization in the case of dimension 1 (real-valued surrogates):
-a discrete loss can be embedded in the real line if and only if it is order-sensitive, meaning there is an ordering of the predictions such that the loss increases as one moves away from the correct prediction.
-We show further that order-sensitivity characterizes a much broader condition: the existence of any real-valued convex surrogate.
-In other words, in one dimension the embedding approach to surrogate construction loses no generality.
-In higher dimensions, we give a characterization of embeddability in terms of convex polytopes, which yields tight bounds for abstain loss.
-We conclude with several conjectures and directions for future work.
+We go on to initiate a study of \emph{embedding dimension}: the minimal dimension for a given discrete loss to be so embedded.
+Our results give a complete characterization in the case of dimension 1, that is, real-valued surrogates.
+We find that a discrete loss can be embedded in the real line if and only if it is order-sensitive, meaning there is an ordering of the predictions such that the loss increases as one moves away from the correct prediction.
+We show further that order-sensitivity characterizes the existence of \emph{any} real-valued convex surrogate, implying that embeddings lose no generality.
+We conclude with preliminary results in higher dimensions and other future directions.
 
 \subsection{Related works}
 Convex surrogates have been formalized and investigated in a variety of past work such as \cite{crammer2001algorithmic,bartlett2006convexity,bartlett2008classification}, particularly in the context of 0-1 loss, distributions on just two outcomes, and support vector machines.
@@ -175,7 +180,7 @@ Convex surrogates have been formalized and investigated in a variety of past wor
 %  Denoted here by $\eliccvx(\gamma)$, convex calibration refers to the minimum dimension $d$ such that the property $\gamma$ can be indirectly elicited by a convex loss $L:\reals^d \to \reals^\Y_+$.
 %
 %  Most of the preliminary work on the construction of convex surrogate losses focuses on learning the mode in a binary classification problem.
-  One of the first works formally studying convex surrogates beyond binary outcomes is~\cite{ramaswamy2018consistent} (originally 2014), who give an embedding of the \emph{abstain loss} into very few dimensions.
+  One of the first works formally studying convex surrogates beyond binary outcomes is~\cite{ramaswamy2018consistent}, who give an embedding of the \emph{abstain loss} into very few dimensions.
 For the case of $\reals^2$, we will show that no embedding can do better.
 %  Rather than focusing on the mode, this paper proves bounds on the elicitation complexity of the abstain property.
 %  They provide a consistent surrogate that elicits abstain with $\alpha = 1/2$ in $\ceil*{\log_2 n}$ dimensions. \jessiet{I don't like how much I'm talking about elicitation without the context.}
@@ -186,7 +191,7 @@ For the case of $\reals^2$, we will show that no embedding can do better.
 %  However, they do not consider properties to be set-valued, leading to subtle differences in the property values for some distributions.
 %  Additionally, most of their results focus on linear properties. \jessiet{is there a relationship between linear and orderable properties?  If not, we can probably remove this statement.}
 %
-  \cite{agarwal2015consistent} and ~\cite{ramaswamy2016convex} study the existence of convex surrogates; the latter proves lower bounds on dimensionality of hypothesis spaces for e.g. 0-1 loss via their notion of feasible subspace dimension.
+  \cite{agarwal2015consistent} and ~\cite{ramaswamy2016convex} study the existence of convex surrogates; the latter proves lower bounds on dimensionality of hypothesis spaces for e.g.~0-1 loss via their notion of feasible subspace dimension.
   These works are generally not directly comparable to our results, as they do not consider the embedding method.
   However, we will mention relevant results inline.
 %  In~\cite{ramaswamy2016convex}, the authors introduce a new method of obtaining upper bounds on elicitation complexity called the \emph{Feasible Subspace Dimension}.
@@ -330,6 +335,32 @@ The notion of a calibrated link from Definition~\ref{def:links} is only required
   $\ell(r,y) = 0$ if $r=y$, $\alpha$ if $r=\text{abstain}$, and $1$ otherwise.
 \cite{ramaswamy2018consistent} show that $\elicpoly(\abstain{1/2}) \leq \ceil{\log_2 n}$, although it is not known if this bound is tight.
 
+\subsection{RAF NOTES}
+
+Meta point: what I seem to be finding when looking through the results is that we don't really need properties for anything.  Once we know that embedding is equivalent to matching Bayes risks, we can just work with them and forget the properties they elicit.  A noted exception may be the separated link piece, which is going to be a major contribution, so the overall story of using property elicitation as a tool would still be valid.
+
+\begin{itemize}
+\item Def: ``discrete loss'' should connote some regularity as well, just like we did with finite properties: every report should correspond to a full-dimensional cell.
+\item Prop: $L$ embeds discrete $\ell$ if and only if $\risk{L}=\risk{\ell}$.
+  \\
+  {\tiny Proof: use distributions on the interior of the cells; since the risk is differentiable there, the loss is uniquely defined, and thus the same, and the same throughout the cell.}
+\item Note: DKR (section 3.1) realized the importance of matching Bayes risks, but they could only give general results for strictly convex (concave I should say) risks, in part because they fixed the link function to be a generalization of $\sgn$.  In contrast, we focus exclusively on non-strictly-convex risks.
+\item Prop: $L$ embeds a discrete loss iff $\risk{L}$ is polyhedral.
+  \\
+  {\tiny Proof: just take the discrete reports to be the facets, and use the Bayes risk result.}
+\item Prop: If $L$ is polyhedral, then so is $\risk{L}$.
+  \\
+  {\tiny Proof: not sure if this is trivial or not, but it sure follows from what we know.}
+\item Cor: Every polyhedral loss embeds a discrete loss.
+\item Converse via DKR construction: every discrete $\ell$ is embeddable.
+    \\
+  {\tiny Proof: already have it.}
+\item Corollary: our current Theorem~\ref{thm:finite-elicit-embed}.
+\item Prop: ``separated'' link implies blah blah ERM.  (Modify Arpit--Shivani Theorem 3, since it's not quite general enough.)
+\item Theorem: If $L$ is polyhedral and embeds $\ell$, there is a separated link.  (TO PROVE)
+\item Note: This prop and theorem give an excellent reason to focus on embeddings, since other techniques do not necessarily give you separated links for free.  Since we know we get them for free, we can just study elicitation complexity and not worry about how fancy the link is (calibrated vs separated).
+\item Note: we should comment in the discussion section that we probably can show that *any* loss embedding $\ell$ must be polyhedral-ish, meaning polyhedral except for stuff that is never opetimal.  This theorem would then not need the ``polyhedral'' part.
+\end{itemize}
 
 \section{Polyhedral Losses and Embeddings}
 \label{sec:poly-loss-embed}
@@ -487,6 +518,7 @@ We state this equivalence in two theorems, the first focusing on the property, a
   For any non-redundant property $\gamma'$, even if not finite, elicited by a loss with a Bayes risk which is a closed function, $\gamma'$ is embeddable in $d =n-1$ dimensions.
   By Lemma~\ref{lem:finite-full-dim}, the (negative) Bayes risk $G$ of the given finite elicitable property $\gamma$ is polyhedral and therefore closed, so the theorem applies.
   Moreover, the construction given in Theorem~\ref{thm:general-duality-embedding} defines the loss embedding $\gamma$ as $L(u) = C(u)\ones - u$ where $C=G^*$ is the convex conjugate of $G$, which is also polyhedral~\citet[Theorem 19.2]{rockafellar1997convex}.
+  \raf{CITE DKR!}
   (Here $\ones\in\reals^\Y$ denotes the all-ones vector.)
   Thus $L$ is polyhedral.
 \end{proof}
