@@ -1,6 +1,6 @@
 \documentclass[12pt]{article}
 \PassOptionsToPackage{numbers, compress, sort}{natbib}
-\usepackage[submission]{neurips_2019}
+\usepackage{neurips_2019}
 
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
@@ -148,8 +148,8 @@ For example, recent work has developed tools to bound the required number of dim
 Yet in some cases these bounds are far from tight, such as for \emph{abstain loss} (classification with an abstain option)~\cite{bartlett2008classification, yuan2010classification, ramaswamy2016convex, ramaswamy2018consistent}.
 Furthermore, the kinds of strategies available for constructing surrogates, and their relative power, are not well-understood.
 
-We augment this literature by studying a particularly natural approach for finding convex surrogates, wherein one ``convexifies'' a discrete loss.
-Specifically, we say a convex surrogate $L$ \emph{embeds} a discrete loss $\ell$ if there is an injective embedding from the discrete reports to a vector space such that (i) the original loss values are recovered, and (ii) a report is $\ell$-optimal if and only if the embedded report is $L$-optimal.
+We augment this literature by studying a particularly natural approach for finding convex surrogates, wherein one ``embeds'' a discrete loss.
+Specifically, we say a convex surrogate $L$ embeds a discrete loss $\ell$ if there is an injective embedding from the discrete reports (predictions) to a vector space such that (i) the original loss values are recovered, and (ii) a report is $\ell$-optimal if and only if the embedded report is $L$-optimal.
 If additionally there exists a ``separated'' link function which maps approximately $L$-optimal reports to $\ell$-optimal reports, this condition is known to produce $\ell$-calibrated surrogates~\cite{agarwal2015consistent}.
 Common examples which follow this general construction include hinge loss as a surrogate for 0-1 loss and the abstain surrogate mentioned above.
 
@@ -217,6 +217,43 @@ For the case of $\reals^2$, we will show that no embedding can do better.
 %   \item $\eliccvx$, $\elicembed$, and $\elicpoly$
 %   \item $V$ and $B(P)$ as we get ready for later.
 % \end{itemize}
+
+  
+
+\section*{Raf's attempt at new Background}
+
+For discrete prediction problems like classification, due to hardness of directly optimizing a given discrete loss, many machine learning algorithms can be thought of as minimizing a surrogate loss function with better optimization qualities, e.g., convexity.
+Of course, to show that this surrogate loss successfully addresses the original problem, one needs to establish consistency, which depends crucially on the choice of link function that maps surrogate reports (predictions) to original reports.
+We thus begin with a sufficient condition for link functions, after introducing our notation.
+
+\subsection{Notation, losses, and links}
+
+Let $\Y$ be a finite outcome (label) space, and throughout let $n=|\Y|$.
+The set of probability distributions on $\Y$ is denoted $\simplex\subseteq\reals^{\Y}$, represented as vectors of probabilities.
+We write $p_y$ for the probability of outcome $y \in \Y$ drawn from $p \in \simplex$.
+
+We assume that a given discrete prediction problem, such as classification, is given in the form of a \emph{discrete loss} $\ell:\R\to\reals^\Y_+$, which maps a report (prediction) $r$ from a finite set $\R$ to the vector of loss values $\ell(r) = (\ell(r)_y)_{y\in\Y}$ for each possible outcome $y\in\Y$.
+We will assume throughout that the given discrete loss is \emph{non-redundant}, meaning every report is uniquely optimal (minimizes expected loss) for some distribution $p\in\Delta(\Y)$.
+Similarly, surrogate losses will be written $L:\reals^d\to\reals^\Y_+$.
+(A generic loss will also be written $L$.)
+We write expected loss of report $r$ when $Y \sim p$ as $\inprod{p}{L(r)}$.
+
+For example, 0-1 loss is a discrete loss with $\R = \Y = \{-1,1\}$ given by $\ell(r)_y = \Ind[r \neq y]$.
+Two important examples of surrogates for 0-1 loss, with $\R=\reals$, are hinge loss $L(u)_y = \max(0,1-yu)$ and logistic loss $L(u)_y = \log(1+\exp(-yu))$.
+
+To ensure consistency, we will seek ``separated'' link functions, which require that the excess loss of some report is bounded by (a constant times) the excess loss of the linked report.
+
+\begin{definition}[Separated Link]\label{def:links}
+  Let discrete loss $\ell:\R\to\reals^\Y_+$ and surrogate $L:\reals^d\to\reals^\Y_+$ be given.
+  A \emph{link function} is a map $\psi:\reals^d\to\R$.
+  We say that a link $\psi$ is \emph{$\delta$-separated} for some $\delta > 0$ if for all $p \in \simplex$ and $u\in\reals^d$, we have
+  \begin{align*}
+    \inprod{p}{L(u)} - \inf_{u' \in \reals^d} \inprod{p}{L(u')} \geq \delta\left(\inprod{p}{\ell(\psi(u))} - \min_{r \in \R} \inprod{p}{\ell(r)}\right)~.
+  \end{align*}
+\end{definition}
+
+We omit the details connecting this definition to consistency, and instead refer the reader to \raf{HARI} (See the proof of Theorems 8.1-8.3.).
+\raf{We could flesh this out if we want.  Might be worth it.  Their entire proof(s) establish $\delta$-separation, and then the line ``The Theorem simply follows from linearity of expectation.''}
 
 \section{Setting and Background}
 
