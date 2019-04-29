@@ -232,7 +232,7 @@ We thus begin with a sufficient condition for link functions, after introducing 
 Let $\Y$ be a finite outcome (label) space, and throughout let $n=|\Y|$.
 The set of probability distributions on $\Y$ is denoted $\simplex\subseteq\reals^{\Y}$, represented as vectors of probabilities.
 We write $p_y$ for the probability of outcome $y \in \Y$ drawn from $p \in \simplex$.
-\jessiet{Do we want }
+\jessiet{Do we want to go into the detail of thinking of $p_y$ as $p(Y = y | X = x)$ in finite data}
 
 \raf{Important TODO: we use $\reals^\Y$ sometimes and $\reals^\Y_+$ other times; ideally both $+$, but we need to see what we can prove...  I know this is a key detail for polyhedral losses, to ensure the inf is always attained.}
 \jessie{If the convex loss is bounded from below by $M$, we can say $\reals^\Y_+$ WLOG since $L$ elicits $\Gamma$ implies $(L +c)$ elicits $\Gamma$ for any constant $c$-- in particular, $M$.}
@@ -274,21 +274,21 @@ To ensure consistency, we will seek ``separated'' link functions, which require 
   \jessie{Where does $\delta$ being a constant come from?  In \citet{ramaswamy2018consistent} bottom of Section 2, $\xi$ is a monotonic, continuous function, not a constant.  We also have $\delta$ on the other side of the inequality that they have $\xi$ on, but I think that will be okay?}
 \end{definition}
 
-We omit the details connecting this definition to consistency, and instead refer the reader to \raf{HARI} (See the proof of Theorems 8.1-8.3.).
+We omit the details connecting this definition to consistency, and instead refer the reader to \raf{HARI \cite{ramaswamy2018consistent}} (See the proof of Theorems 8.1-8.3.).
 \raf{We could flesh this out if we want.  Might be worth it.  Their entire proof(s) establish $\delta$-separation, and then the line ``The Theorem simply follows from linearity of expectation.''}
 
 Several consistent convex surrogates in the literature can be thought of as ``embeddings'': map the discrete reports to a vector space, and find a convex loss which agrees with the original loss and has the same statistical behavior.
 We formalize this notion as follows.
 %
 \begin{definition}
-  A loss $L:\reals^d\to\reals^\Y$ \emph{embeds} a loss $\ell:\R\to\reals^\Y$ if there exists some injective embdedding $\varphi:\R\to\reals^d$ such that
+  A loss $L:\reals^d\to\reals^\Y$ \emph{embeds} a loss $\ell:\R\to\reals^\Y$ if there exists some injective embedding $\varphi:\R\to\reals^d$ such that
   (i) for all $r\in\R$ we have $L(\varphi(r)) = \ell(r)$, and (ii) for all $p\in\simplex,r\in\R$ we have
   \begin{equation}\label{eq:embed-loss}
     r \in \argmin_{r'\in\R} \inprod{p}{\ell(r')} \iff \varphi(r) \in \argmin_{u\in\reals^d} \inprod{p}{L(u)}~.
   \end{equation}
 \end{definition}
 %
-Note that embeddings do not automatically give rise to separated links; indeed, apart from mapping the embedded reports back from whence they came \raft{I know... just wanted to say that} via $\psi(\varphi(r)) = r$, how to map the remaning values is far from clear.
+Note that embeddings do not automatically give rise to separated links; indeed, apart from mapping the embedded reports back from whence they came \raft{I know... just wanted to say that} via $\psi(\varphi(r)) = r$, how to map the remaining values is far from clear.
 Constructing separated links from embeddings will therefore be a major focus in Section~\ref{sec:poly-loss-embed}.
 
 To illustrate the idea of embeddings, we now look in detail at two key examples.
@@ -358,6 +358,25 @@ We can now see that a surrogate $L:\reals^d\to\reals^\Y$ embeds $\ell:\R\to\real
   $\ell(r,y) = 0$ if $r=y$, $\alpha$ if $r=\text{abstain}$, and $1$ otherwise.
 \cite{ramaswamy2018consistent} show that $\elicpoly(\abstain{1/2}) \leq \ceil{\log_2 n}$, although it is not known if this bound is tight.
 
+\subsection{Jessie's lit review}
+\begin{itemize}
+	\item Structured prediction: Structured hinge loss.
+	``Direct loss minimization for structured prediction'' by McAllester et al. \url{https://papers.nips.cc/paper/4069-direct-loss-minimization-for-structured-prediction.pdf}
+	From my understanding, structured hinge isn't necessarily polyhedral, but seems like it can be, depending on the weight function and joint feature function (JFF).
+	In practice, my guess is that the JFF is rarely, if ever, linear, though.
+	
+	\item Abstain surrogate given by ``On Reject and Refine Options in Multicategory Classification'' from Zhang et al. 2017.
+	Seems to work in practice, but isn't statistically consistent. \url{https://www.tandfonline.com/doi/pdf/10.1080/01621459.2017.1282372?needAccess=true}
+	 
+	 \item Tsochantaridis et al. 2005 \url{http://www.jmlr.org/papers/volume6/tsochantaridis05a/tsochantaridis05a.pdf}
+	 On SVMs for structured prediction.
+	 In this paper, they call the JFF a \emph{Combined Feature Representation} of input $x$ and output $y$.
+	 Newer version: \url{http://www.yisongyue.com/publications/cacm2009_structsvm.pdf}
+	 
+	 \item To read in more detail: \url{http://proceedings.mlr.press/v19/gao11a/gao11a.pdf}
+	 \url{http://web.stanford.edu/~jduchi/projects/DuchiMaJo10.pdf}
+\end{itemize}
+
 \section*{RAF NOTES}
 
 Meta point: what I seem to be finding when looking through the results is that we don't really need properties for anything.  Once we know that embedding is equivalent to matching Bayes risks, we can just work with them and forget the properties they elicit.  A noted exception may be the separated link piece, which is going to be a major contribution, so the overall story of using property elicitation as a tool would still be valid.
@@ -416,13 +435,13 @@ In this section, we focus on the structure of embeddable properties, and what a 
 \raf{Cut embedding dimension stuff}
 
 When working with convex losses which are not strictly convex, one quickly encounters redundant properties: if $\inprod{p}{L(\cdot)}$ is minimized by a point where $p\cdot L$ is flat, then there will be an uncountable set of reports which also minimize the loss.
-As results in property elicitation typically assume non-redudant properties (e.g.~\cite{frongillo2014general,frongillo2015elicitation}) it is useful to consider a transformation which removes redundant level sets.
+As results in property elicitation typically assume non-redundant properties (e.g.~\cite{frongillo2014general,frongillo2015elicitation}) it is useful to consider a transformation which removes redundant level sets.
 We capture this transformation as the trim operator presented below.
 
 \begin{definition}\label{def:trim}
   Given an elicitable property $\Gamma:\simplex \toto\R$, we define $\trim(\Gamma) = \{\Gamma_u : u \in \R \text{ s.t. } \forall u'\in\R,u'\neq u,\, \Gamma_u \not\subseteq \Gamma_{u'}\}$ as the set of maximal level sets of $\Gamma$.
 \end{definition}
-\jessiet{What if $\Gamma_u = \Gamma_{u'}$?  Wouldn't we remove both copies of the level set as is?}
+\jessiet{What if $\Gamma_u = \Gamma_{u'}$?  Would we remove both copies of the level set as is?}
 \raft{Note for later: should be able to show that the union of trim is the simplex.}
 
 Take note that the unlabeled property $\trim(\Gamma)$ is non-redundant, meaning that for any $\theta \in \trim(\Gamma)$, there is no level set $\theta' \in \trim(\Gamma)$ such that $\theta \subset \theta'$.
@@ -597,7 +616,7 @@ would not be separated for hinge loss, but it would still be calibrated, as the 
 As a brief aside, we note that previous definitions of elicitation complexity have used a more straightforward link function, as the properties considered were single-valued~\citep{lambert2008eliciting,fissler2016higher,frongillo2015elicitation}.
 In particular, if both $\gamma$ and $\Gamma$ are single-valued, these works simply require $\gamma = \psi \circ \Gamma$.
 When $\Gamma$ is set-valued, one still straightforwardly requires $\gamma(p) = \psi(u)$ for all $u \in \Gamma(p)$.
-The notion of a calibrated link from Definition~\ref{def:links} is only required when both $\gamma$ and $\Gamma$ could be set-valued, as is the case in general for convex surrogates of finite properties.
+The notion of a calibrated link from Definition~\ref{def:links} \jessie{Only have separated links in there at the moment} is only required when both $\gamma$ and $\Gamma$ could be set-valued, as is the case in general for convex surrogates of finite properties.
 
 \raf{Embedding dimension moved here}
 
