@@ -155,11 +155,11 @@ Common examples which follow this general construction include hinge loss as a s
 
 Using tools from property elicitation, we show a tight relationship between such embeddings and the class of polyhedral (piecewise-linear convex) loss functions.
 In particular, by focusing on Bayes risks, we show that every discrete loss is embedded by some polyhedral loss, and every polyhedral loss function embeds some discrete loss.
-Moreover, we show that any polyhedral loss gives rise to a separated link function to the loss it embeds,\raft{TODO: prove this :-]}
+Moreover, we show that any polyhedral loss gives rise to a separated link function to the loss it embeds, \raft{TODO: prove this :-]}
 thus giving a very general framework to construct calibrated convex surrogates for arbitrary losses.
 
 We go on to initiate a study of \emph{embedding dimension}: the minimal dimension for a given discrete loss to be so embedded.
-Our results give a complete characterization in the case of dimension 1, that is, real-valued surrogates.
+Our results give a complete characterization in the case of dimension 1; that is, real-valued surrogates.
 We find that a discrete loss can be embedded in the real line if and only if it is order-sensitive, meaning there is an ordering of the predictions such that the loss increases as one moves away from the correct prediction.
 We show further that order-sensitivity characterizes the existence of \emph{any} real-valued convex surrogate, implying that embeddings lose no generality.
 We conclude with preliminary results in higher dimensions and other future directions.
@@ -181,7 +181,7 @@ Convex surrogates have been formalized and investigated in a variety of past wor
 %
 %  Most of the preliminary work on the construction of convex surrogate losses focuses on learning the mode in a binary classification problem.
   One of the first works formally studying convex surrogates beyond binary outcomes is~\cite{ramaswamy2018consistent}, who give an embedding of the \emph{abstain loss} into very few dimensions.
-For the case of $\reals^2$, we will show that no embedding can do better.
+For the case of $\reals^2$ \jessiet{$\reals^2$ or $n \in \{3, 4\}$?}, we will show that no embedding can do better.
 %  Rather than focusing on the mode, this paper proves bounds on the elicitation complexity of the abstain property.
 %  They provide a consistent surrogate that elicits abstain with $\alpha = 1/2$ in $\ceil*{\log_2 n}$ dimensions. \jessiet{I don't like how much I'm talking about elicitation without the context.}
 %  It remains unknown if this bound is tight, although in Conjecture~\ref{conj:abstain-tight}, we conjecture that it is, at least from the perspective from ``embedding''.
@@ -191,8 +191,8 @@ For the case of $\reals^2$, we will show that no embedding can do better.
 %  However, they do not consider properties to be set-valued, leading to subtle differences in the property values for some distributions.
 %  Additionally, most of their results focus on linear properties. \jessiet{is there a relationship between linear and orderable properties?  If not, we can probably remove this statement.}
 %
-  \cite{agarwal2015consistent} and ~\cite{ramaswamy2016convex} study the existence of convex surrogates; the latter proves lower bounds on dimensionality of hypothesis spaces for e.g.~0-1 loss via their notion of feasible subspace dimension.
-  These works are generally not directly comparable to our results, as they do not consider the embedding method.
+  \citet{agarwal2015consistent} and~\citet{ramaswamy2016convex} study the existence of convex surrogates; the latter proves lower bounds on dimensionality of hypothesis spaces for e.g.~0-1 loss via their notion of feasible subspace dimension.
+  These works are generally not directly comparable to our results, as they do not consider the embedding method. \jessiet{In what sense do they not consider embedding?  The formalism we present?  They intuitively embed into the reals, but I don't remember if they focus on polyhedral losses}
   However, we will mention relevant results inline.
 %  In~\cite{ramaswamy2016convex}, the authors introduce a new method of obtaining upper bounds on elicitation complexity called the \emph{Feasible Subspace Dimension}.
 %  This method uses local information about distributions in a property in order to find bounds on the convex elicitation complexity of a property.
@@ -232,8 +232,10 @@ We thus begin with a sufficient condition for link functions, after introducing 
 Let $\Y$ be a finite outcome (label) space, and throughout let $n=|\Y|$.
 The set of probability distributions on $\Y$ is denoted $\simplex\subseteq\reals^{\Y}$, represented as vectors of probabilities.
 We write $p_y$ for the probability of outcome $y \in \Y$ drawn from $p \in \simplex$.
+\jessiet{Do we want to go into the detail of thinking of $p_y$ as $p(Y = y | X = x)$ in finite data}
 
 \raf{Important TODO: we use $\reals^\Y$ sometimes and $\reals^\Y_+$ other times; ideally both $+$, but we need to see what we can prove...  I know this is a key detail for polyhedral losses, to ensure the inf is always attained.}
+\jessie{If the convex loss is bounded from below by $M$, we can say $\reals^\Y_+$ WLOG since $L$ elicits $\Gamma$ implies $(L +c)$ elicits $\Gamma$ for any constant $c$-- in particular, $M$.}
 
 We assume that a given discrete prediction problem, such as classification, is given in the form of a \emph{discrete loss} $\ell:\R\to\reals^\Y_+$, which maps a report (prediction) $r$ from a finite set $\R$ to the vector of loss values $\ell(r) = (\ell(r)_y)_{y\in\Y}$ for each possible outcome $y\in\Y$.
 We will assume throughout that the given discrete loss is \emph{non-redundant}, meaning every report is uniquely optimal (minimizes expected loss) for some distribution $p\in\Delta(\Y)$.
@@ -244,6 +246,7 @@ The \emph{Bayes risk} of a loss $L:\R\to\reals^\Y$ is the function $\risk{L}:\De
 
 For example, 0-1 loss is a discrete loss with $\R = \Y = \{1,2,\ldots,n\}$ given by $\ell(r)_y = \Ind[r \neq y]$, and has Bayes risk $\risk{\ell}(p) = \max_{y\in\Y} p_y$.
 Two important examples of surrogates for 0-1 loss, with $\R=\reals$, are hinge loss $L(u)_y = \max(0,1-yu)$ and logistic loss $L(u)_y = \log(1+\exp(-yu))$.
+\jessiet{Do we want to mention $r \to$ discrete reports and $u \to$ real reports?}
 
 Most of the surrogates $L$ we consider will be \emph{polyhedral}, meaning piecewise linear and convex; we therefore briefly recall the relevant definitions.
 In $\reals^d$, a \emph{polyhedral set} or \emph{polyhedron} is the intersection of a finite number of closed halfspaces.
@@ -268,23 +271,24 @@ To ensure consistency, we will seek ``separated'' link functions, which require 
     \inprod{p}{L(u)} - \inf_{u' \in \reals^d} \inprod{p}{L(u')} \geq \delta\left(\inprod{p}{\ell(\psi(u))} - \min_{r \in \R} \inprod{p}{\ell(r)}\right)~.
   \end{align*}
   A link is \emph{separated} if it is $\delta$-separated for some $\delta>0$.
+  \jessie{Where does $\delta$ being a constant come from?  In \citet{ramaswamy2018consistent} bottom of Section 2, $\xi$ is a monotonic, continuous function, not a constant.  We also have $\delta$ on the other side of the inequality that they have $\xi$ on, but I think that will be okay?}
 \end{definition}
 
-We omit the details connecting this definition to consistency, and instead refer the reader to \raf{HARI} (See the proof of Theorems 8.1-8.3.).
+We omit the details connecting this definition to consistency, and instead refer the reader to \raf{HARI \cite{ramaswamy2018consistent}} (See the proof of Theorems 8.1-8.3.).
 \raf{We could flesh this out if we want.  Might be worth it.  Their entire proof(s) establish $\delta$-separation, and then the line ``The Theorem simply follows from linearity of expectation.''}
 
 Several consistent convex surrogates in the literature can be thought of as ``embeddings'': map the discrete reports to a vector space, and find a convex loss which agrees with the original loss and has the same statistical behavior.
 We formalize this notion as follows.
 %
 \begin{definition}
-  A loss $L:\reals^d\to\reals^\Y$ \emph{embeds} a loss $\ell:\R\to\reals^\Y$ if there exists some injective embdedding $\varphi:\R\to\reals^d$ such that
+  A loss $L:\reals^d\to\reals^\Y$ \emph{embeds} a loss $\ell:\R\to\reals^\Y$ if there exists some injective embedding $\varphi:\R\to\reals^d$ such that
   (i) for all $r\in\R$ we have $L(\varphi(r)) = \ell(r)$, and (ii) for all $p\in\simplex,r\in\R$ we have
   \begin{equation}\label{eq:embed-loss}
     r \in \argmin_{r'\in\R} \inprod{p}{\ell(r')} \iff \varphi(r) \in \argmin_{u\in\reals^d} \inprod{p}{L(u)}~.
   \end{equation}
 \end{definition}
 %
-Note that embeddings do not automatically give rise to separated links; indeed, apart from mapping the embedded reports back from whence they came \raft{I know... just wanted to say that} via $\psi(\varphi(r)) = r$, how to map the remaning values is far from clear.
+Note that embeddings do not automatically give rise to separated links; indeed, apart from mapping the embedded reports back from whence they came \raft{I know... just wanted to say that} via $\psi(\varphi(r)) = r$, how to map the remaining values is far from clear.
 Constructing separated links from embeddings will therefore be a major focus in Section~\ref{sec:poly-loss-embed}.
 
 To illustrate the idea of embeddings, we now look in detail at two key examples.
@@ -354,6 +358,25 @@ We can now see that a surrogate $L:\reals^d\to\reals^\Y$ embeds $\ell:\R\to\real
   $\ell(r,y) = 0$ if $r=y$, $\alpha$ if $r=\text{abstain}$, and $1$ otherwise.
 \cite{ramaswamy2018consistent} show that $\elicpoly(\abstain{1/2}) \leq \ceil{\log_2 n}$, although it is not known if this bound is tight.
 
+\subsection{Jessie's lit review}
+\begin{itemize}
+	\item Structured prediction: Structured hinge loss.
+	``Direct loss minimization for structured prediction'' by McAllester et al. \url{https://papers.nips.cc/paper/4069-direct-loss-minimization-for-structured-prediction.pdf}
+	From my understanding, structured hinge isn't necessarily polyhedral, but seems like it can be, depending on the weight function and joint feature function (JFF).
+	In practice, my guess is that the JFF is rarely, if ever, linear, though.
+	
+	\item Abstain surrogate given by ``On Reject and Refine Options in Multicategory Classification'' from Zhang et al. 2017.
+	Seems to work in practice, but isn't statistically consistent. \url{https://www.tandfonline.com/doi/pdf/10.1080/01621459.2017.1282372?needAccess=true}
+	 
+	 \item Tsochantaridis et al. 2005 \url{http://www.jmlr.org/papers/volume6/tsochantaridis05a/tsochantaridis05a.pdf}
+	 On SVMs for structured prediction.
+	 In this paper, they call the JFF a \emph{Combined Feature Representation} of input $x$ and output $y$.
+	 Newer version: \url{http://www.yisongyue.com/publications/cacm2009_structsvm.pdf}
+	 
+	 \item To read in more detail: \url{http://proceedings.mlr.press/v19/gao11a/gao11a.pdf}
+	 \url{http://web.stanford.edu/~jduchi/projects/DuchiMaJo10.pdf}
+\end{itemize}
+
 \section*{RAF NOTES}
 
 Meta point: what I seem to be finding when looking through the results is that we don't really need properties for anything.  Once we know that embedding is equivalent to matching Bayes risks, we can just work with them and forget the properties they elicit.  A noted exception may be the separated link piece, which is going to be a major contribution, so the overall story of using property elicitation as a tool would still be valid.
@@ -412,13 +435,13 @@ In this section, we focus on the structure of embeddable properties, and what a 
 \raf{Cut embedding dimension stuff}
 
 When working with convex losses which are not strictly convex, one quickly encounters redundant properties: if $\inprod{p}{L(\cdot)}$ is minimized by a point where $p\cdot L$ is flat, then there will be an uncountable set of reports which also minimize the loss.
-As results in property elicitation typically assume non-redudant properties (e.g.~\cite{frongillo2014general,frongillo2015elicitation}) it is useful to consider a transformation which removes redundant level sets.
+As results in property elicitation typically assume non-redundant properties (e.g.~\cite{frongillo2014general,frongillo2015elicitation}) it is useful to consider a transformation which removes redundant level sets.
 We capture this transformation as the trim operator presented below.
 
 \begin{definition}\label{def:trim}
   Given an elicitable property $\Gamma:\simplex \toto\R$, we define $\trim(\Gamma) = \{\Gamma_u : u \in \R \text{ s.t. } \forall u'\in\R,u'\neq u,\, \Gamma_u \not\subseteq \Gamma_{u'}\}$ as the set of maximal level sets of $\Gamma$.
 \end{definition}
-\jessiet{What if $\Gamma_u = \Gamma_{u'}$?  Wouldn't we remove both copies of the level set as is?}
+\jessiet{What if $\Gamma_u = \Gamma_{u'}$?  Would we remove both copies of the level set as is?}
 \raft{Note for later: should be able to show that the union of trim is the simplex.}
 
 Take note that the unlabeled property $\trim(\Gamma)$ is non-redundant, meaning that for any $\theta \in \trim(\Gamma)$, there is no level set $\theta' \in \trim(\Gamma)$ such that $\theta \subset \theta'$.
@@ -593,7 +616,7 @@ would not be separated for hinge loss, but it would still be calibrated, as the 
 As a brief aside, we note that previous definitions of elicitation complexity have used a more straightforward link function, as the properties considered were single-valued~\citep{lambert2008eliciting,fissler2016higher,frongillo2015elicitation}.
 In particular, if both $\gamma$ and $\Gamma$ are single-valued, these works simply require $\gamma = \psi \circ \Gamma$.
 When $\Gamma$ is set-valued, one still straightforwardly requires $\gamma(p) = \psi(u)$ for all $u \in \Gamma(p)$.
-The notion of a calibrated link from Definition~\ref{def:links} is only required when both $\gamma$ and $\Gamma$ could be set-valued, as is the case in general for convex surrogates of finite properties.
+The notion of a calibrated link from Definition~\ref{def:links} \jessie{Only have separated links in there at the moment} is only required when both $\gamma$ and $\Gamma$ could be set-valued, as is the case in general for convex surrogates of finite properties.
 
 \raf{Embedding dimension moved here}
 
