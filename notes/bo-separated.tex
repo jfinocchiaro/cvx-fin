@@ -1,0 +1,163 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{mathtools, amsthm, amsmath, amssymb, graphicx, verbatim}
+%\usepackage[thmmarks, thref, amsthm]{ntheorem}
+\usepackage{color}
+\usepackage{wrapfig}
+\usepackage{subcaption}
+\usepackage[colorinlistoftodos,textsize=tiny]{todonotes} % need xargs for below
+%\usepackage{accents}
+\usepackage{bbm}
+\usepackage{xspace}
+
+\usetikzlibrary{calc}
+\newcommand{\Comments}{1}
+\newcommand{\mynote}[2]{\ifnum\Comments=1\textcolor{#1}{#2}\fi}
+\newcommand{\mytodo}[2]{\ifnum\Comments=1%
+  \todo[linecolor=#1!80!black,backgroundcolor=#1,bordercolor=#1!80!black]{#2}\fi}
+\newcommand{\raf}[1]{\mynote{green}{[RF: #1]}}
+\newcommand{\raft}[1]{\mytodo{green!20!white}{RF: #1}}
+\newcommand{\jessie}[1]{\mynote{purple}{[JF: #1]}}
+\newcommand{\jessiet}[1]{\mytodo{purple!20!white}{JF: #1}}
+\newcommand{\bo}[1]{\mynote{blue}{[Bo: #1]}}
+\newcommand{\botodo}[1]{\mytodo{blue!20!white}{[Bo: #1]}}
+\ifnum\Comments=1               % fix margins for todonotes
+  \setlength{\marginparwidth}{1in}
+\fi
+
+
+\newcommand{\reals}{\mathbb{R}}
+\newcommand{\posreals}{\reals_{>0}}%{\reals_{++}}
+\newcommand{\dom}{\mathrm{dom}}
+
+\newcommand{\prop}[1]{\Gamma[#1]}
+\newcommand{\eliccts}{\mathrm{elic}_\mathrm{cts}}
+\newcommand{\eliccvx}{\mathrm{elic}_\mathrm{cvx}}
+\newcommand{\elicpoly}{\mathrm{elic}_\mathrm{pcvx}}
+\newcommand{\elicembed}{\mathrm{elic}_\mathrm{embed}}
+
+\newcommand{\cell}{\mathrm{cell}}
+
+\newcommand{\abstain}[1]{\mathrm{abstain}_{#1}}
+\newcommand{\mode}{\mathrm{mode}}
+
+\newcommand{\simplex}{\Delta_\Y}
+
+% alphabetical order, by convention
+\newcommand{\C}{\mathcal{C}}
+\newcommand{\D}{\mathcal{D}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\I}{\mathcal{I}}
+\newcommand{\R}{\mathcal{R}}
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\Y}{\mathcal{Y}}
+
+\newcommand{\inprod}[2]{\langle #1, #2 \rangle}%\mathrm{int}(#1)}
+\newcommand{\inter}[1]{\mathring{#1}}%\mathrm{int}(#1)}
+%\newcommand{\expectedv}[3]{\overline{#1}(#2,#3)}
+\newcommand{\expectedv}[3]{\E_{Y\sim{#3}} {#1}(#2,Y)}
+\newcommand{\toto}{\rightrightarrows}
+\newcommand{\strip}{\mathrm{strip}}
+\newcommand{\trim}{\mathrm{trim}}
+\newcommand{\fplc}{finite-piecewise-linear and convex\xspace} %xspace for use in text
+\newcommand{\conv}{\mathrm{conv}}
+\newcommand{\ones}{\mathbbm{1}}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+
+\newcommand{\Ind}{\mathbf{1}}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\arginf}{arg\,inf}
+\DeclareMathOperator*{\sgn}{sgn}
+
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+
+Given a set $T$ and a point $u$, let $d(T,u) = \inf_{t \in T} \|t-u\|$.
+
+Let the ``thickening'' $B(T,\epsilon)$ be defined as
+  \[ B(T,\epsilon) = \{u \in \R' : d(T,u) \leq \epsilon \} . \]
+
+Let $\mathcal{S} \subseteq 2^{\R}$ be defined as $\mathcal{S} = \{\Gamma(p) : p \in \Delta_{\Y}\}$.
+In other words, for each $p$, we take the set of optimal reports $R = \Gamma(p) \subseteq \R$, and we add $R$ to $\S$.
+
+Given a fixed embedding, for each report $r \in \R$, let $u_r \in \R'$ denote its embedding point.
+Given a set $R \subseteq \R$, let $U_R = \{u_r : r \in \R\}$.
+
+\begin{lemma} \label{lemma:conv-R-no-contain}
+  Let $R \in \mathcal{S}$ and $r \not\in R$.
+  Then $u_r \not\in \conv(U_R)$.
+  Furthermore, we have $d(\conv(U_R), u_r) \geq \epsilon$ for some $\epsilon > 0$.
+\end{lemma}
+\begin{proof}
+  If $R \in \mathcal{S}$, then there exists $p$ for which all of $R$ is simultaneously optimal.
+  By definition of embedding, this means all of the points $U_R$ are optimal for the surrogate loss.
+  Since it is a convex loss, this implies that every point in $\conv(U_R)$ is optimal as well.
+  By definition of embedding, if $r$ is not optimal, then $u_r$ is not optimal, hence is not in $\conv(U_R)$.
+
+  Because $U_R$ is a finite set, $\conv(U_R)$ is a closed convex set, so $u_r \not\in U_R$ implies that it is separated by a distance of some $\epsilon > 0$.
+\end{proof}
+
+\begin{lemma} \label{lemma:conv-R-min-eps}
+  There is some $\epsilon > 0$ such that, for all $R \in \mathcal{S}$ and all $r \not\in R$, we have $d(\conv(U_R), u_r) > 2\epsilon$.
+\end{lemma}
+\begin{proof}
+  Follows from Lemma \ref{lemma:conv-R-no-contain} because $\R$ is a finite set. For example, apply the lemma for all possible $R,r$, take the minimum resulting $\epsilon$, and divide by three.
+\end{proof}
+
+\begin{lemma} \label{lemma:U-close-intersect}
+  Let $\epsilon$ be given by Lemma \ref{lemma:conv-R-min-eps}.
+  Suppose some $u$ satisfies $d(\conv(U_R),u) \leq \epsilon$ and $d(\conv(U_{R'}),u) \leq \epsilon$ for $R,R' \in \mathcal{S}$.
+  Then $R \cap R' \neq \emptyset$, i.e. they have some report in common.
+\end{lemma}
+\begin{proof}
+  We prove the contrapositive.
+  Suppose $R \cap R' = \emptyset$.
+  Suppose $d(\conv(U_r),u) \leq \epsilon$.
+  By Lemma \ref{lemma:conv-R-min-eps}, we have that for ...
+
+  \bo{Hmm -- need to rule out cases where they pass through each other, like the center of the squares in abstain loss R3.}
+\end{proof}
+
+\begin{theorem}
+  Let $L(u,y)$ be a surrogate loss for $\ell(r,y)$ for which there exists some calibrated link.
+  Suppose $L$ is a polyhedral loss.
+  Then there exists a calibrated, \emph{separated} link $\psi$ between these losses, meaning, for all $p$,
+    \[ \inf_{u \in \R' : \psi(u) \not\in \gamma(p)} L(u;p) > \inf_{u \in \R'} L(u;p) . \]
+\end{theorem}
+
+\begin{proof}
+Suppose $L$ is a polyhedral loss embedding $\ell$.
+For each $r \in \R$, let $u_r \in \R'$ be the corresponding embedding point.
+We construct $\psi$.
+
+Fix a small enough $\epsilon$ as promised by Lemma \ref{lemma:conv-R-min-eps}.
+
+We will label each point $u \in \R'$ with a set of legal mappings $r \in \R$.
+Let $\Psi: \R' \toto \R$ be this labeling.
+Begin by initializing $\Psi(u) = \R$ for all $u$, i.e. all mappings are legal.
+
+Now, we apply the following iterative procedure.
+For each $R \in \mathcal{S}$, consider the corresponding set $U_R = \{u_r : r \in R\}$.
+For every $u \in B\left(\conv(U_R), \epsilon\right)$, we set $\Psi(u) = \Psi(u) \cap R$.
+
+(Geometrically: in the case where $R=\{r\}$, we simply assign the epsilon-ball around $u_r$ to point to only $r$. In the case with multiple reports in $R$, we take the polyhedron with corners $U_R$ and ``thicken it'', then require that this thick shape map only to elements of $R$.)
+
+Now, we construct $\psi$ by making arbitrary legal choices, e.g. $\psi(u)$ is defined as the first element of $\R$ in $\Psi(u)$.
+
+We have to prove, first, that $\Psi(u)$ is nonempty for each $u$, and second, that $\psi$ is a separated, calibrated link.
+
+First: consider any $u \in \R'$.
+If $u$ is not in $B(\conv(U_R),\epsilon)$ for any $R \in \mathcal{S}$, then we have $\Psi(u) = \R$, so it is nonempty.
+Otherwise, it is the intersection of at least one set:
+  \[ \Psi(u) = \cap \left\{ R : d(\conv(U_R),u) \leq \epsilon \right\} . \]
+
+
+\end{proof}
+
+\end{document}
