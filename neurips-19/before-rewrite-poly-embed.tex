@@ -280,7 +280,7 @@ We omit the details connecting this definition to consistency, and instead refer
 Several consistent convex surrogates in the literature can be thought of as ``embeddings'': map the discrete reports to a vector space, and find a convex loss which agrees with the original loss and has the same statistical behavior.
 We formalize this notion as follows.
 %
-\begin{definition}\label{def:loss-embed}
+\begin{definition}
   A loss $L:\reals^d\to\reals^\Y$ \emph{embeds} a loss $\ell:\R\to\reals^\Y$ if there exists some injective embedding $\varphi:\R\to\reals^d$ such that
   (i) for all $r\in\R$ we have $L(\varphi(r)) = \ell(r)$, and (ii) for all $p\in\simplex,r\in\R$ we have
   \begin{equation}\label{eq:embed-loss}
@@ -359,86 +359,68 @@ We can now see that a surrogate $L:\reals^d\to\reals^\Y$ embeds $\ell:\R\to\real
 \cite{ramaswamy2018consistent} show that $\elicpoly(\abstain{1/2}) \leq \ceil{\log_2 n}$, although it is not known if this bound is tight.
 
 
-\section{Embeddings and Polyhedral Losses}
+\section*{RAF NOTES}
+
+Meta point: what I seem to be finding when looking through the results is that we don't really need properties for anything.  Once we know that embedding is equivalent to matching Bayes risks, we can just work with them and forget the properties they elicit.  A noted exception may be the separated link piece, which is going to be a major contribution, so the overall story of using property elicitation as a tool would still be valid.
+
+\begin{itemize}
+\item Prop: $L$ embeds discrete $\ell$ if and only if $\risk{L}=\risk{\ell}$.
+  \raft{Note: ``discrete loss'' now connotes some regularity as well, just like we did with finite properties: every report should correspond to a full-dimensional cell.}
+  \raft{Note: DKR (section 3.1) realized the importance of matching Bayes risks, but they could only give general results for strictly convex (concave I should say) risks, in part because they fixed the link function to be a generalization of $\sgn$.  In contrast, we focus exclusively on non-strictly-convex risks.}
+  \\
+  {\tiny Proof: use distributions on the interior of the cells; since the risk is differentiable there, the loss is uniquely defined, and thus the same, and the same throughout the cell.}
+\item Prop: $L$ embeds a discrete loss iff $\risk{L}$ is polyhedral.
+  \\
+  {\tiny Proof: just take the discrete reports to be the facets, and use the Bayes risk result.}
+\item Prop: If $L$ is polyhedral, then so is $\risk{L}$.
+  \\
+  {\tiny Proof: not sure if this is trivial or not, but it sure follows from what we know.}
+\item Cor: Every polyhedral loss embeds a discrete loss.
+\item Prop: Every discrete $\ell$ is embedded by a polyhedral loss.
+    \\
+  {\tiny Proof: already have it (DKR construction).}
+\item Cor: For a finite $\gamma$, elicitable iff embeddable iff embeddable via polyhedral loss (Theorem~\ref{thm:finite-elicit-embed}).
+\item \raf{What else do we want to say about properties?  Prop~\ref{prop:embed-trim}?}
+\end{itemize}
+
+New section(?)
+
+\begin{itemize}
+  
+\item Prop 1
+\item Prop: Separated link implies consistency.
+  \\
+  {\tiny Proof: Use Hari's Theorem 8.1-8.3.}
+\item Theorem: If $L$ is polyhedral and embeds $\ell$, there is a separated link.  (TO PROVE)
+  \raft{Note: we should comment in the discussion section that we probably can show that *any* loss embedding $\ell$ must be polyhedral-ish, meaning polyhedral except for stuff that is never optimal.  This theorem would then not need the ``polyhedral'' part.}
+\item Remark: This prop and theorem give an excellent reason to focus on embeddings, since other techniques do not necessarily give you separated links for free.  Since we know we get them for free, we can just focus on the property, and study elicitation complexity; we know if we have a link at all it can be taken to be separated.  \raf{Is this true?}
+\end{itemize}
+
+Finally, here's a proposal for how to restate the 1d stuff.
+
+\begin{itemize}
+\item Def: order-sensitive, orderable.
+\item Theorem (Lambert et al): $\ell$ order-sensitive iff $\prop{\ell}$ orderable.
+\item Theorem: $\ell$ 1-embeddable iff $\ell$ order-sensitive.  Moreover,   1-embeddable implies 1-embeddable via polyhedral loss.
+  % \item Prop: Every polyhedral $L:\reals\to\reals^\Y$ embeds an order-sensitive $\ell$.
+  
+\item Def: indirectly elicits (necessary but not sufficient for consistency).
+\item Prop: If convex $L:\reals\to\reals^\Y$ indirectly elicits finite $\gamma$, then $\gamma$ is orderable.
+\item Remark: TFAE for all the complexity classes (but don't define them rigorously).
+\item Remark: Also, note that we have ``indirectly elicitable $\implies$ exists separated link'', so elicitation complexity does capture consistency here.
+\item Cor: Abstain, mode, not embeddable / indirectly elicitable in 1d when $n\geq 3$.
+\end{itemize}
+
+
+\section{Polyhedral Losses and Embeddings}
 \label{sec:poly-loss-embed}
 
-In this section, we establish a tight relationship between the technique of embedding and the use of polyhedral (piecewise-linear convex) surrogate losses.
-Note that we have not yet shown consistency of such surrogates; this is the topic of the following section.
+For many problems in machine learning, researchers have naturally converged on some notion of learning a finite property by ``embedding'' the possible labels or predictions into $\reals^d$ and minimizing a consistent convex surrogate loss.
+Here, we formalize a notion of embedding which captures these techniques, and show some geometric and topological characteristics of embeddable properties.
+\raf{Moved definition earlier}
 
-To begin, we observe that our embedding condition in Definition~\ref{def:loss-embed} can be very succinctly rewritten: it is equivalent to matching Bayes risks.
-This useful result will drive many of our findings in this section.
-
-\begin{proposition}\label{prop:embed-bayes-risks}
-  A loss $L$ embeds discrete loss $\ell$ if and only if $\risk{L}=\risk{\ell}$.
-  % A loss $L:\reals^d\to\reals^\Y$ embeds discrete $\ell:\R\to\reals^Y$ if and only if $\risk{L}=\risk{\ell}$.
-\end{proposition}
-\begin{proof}
-  \raf{Use distributions on the interior of the cells; since the risk is differentiable there, the loss is uniquely defined, and thus the same, and the same throughout the cell.}
-\end{proof}
-
-\raft{Note: ``discrete loss'' now connotes some regularity as well, just like we did with finite properties: every report should correspond to a full-dimensional cell.}
-\raft{Note: DKR (section 3.1) realized the importance of matching Bayes risks, but they could only give general results for strictly convex (concave I should say) risks, in part because they fixed the link function to be a generalization of $\sgn$.  In contrast, we focus exclusively on non-strictly-convex risks.}
-
-From this more succinct embedding condition, we can in turn simplify the condition that a loss embeds \emph{some} discrete loss: it does if and only if its Bayes risk is polyhedral.
-(We say a concave function is polyhedral if its negation is a polyhedral convex function.)
-Note that Bayes risk, a function from distributions over $\Y$ to the reals, may be polyhedral even if the loss itself is not.
-
-\begin{proposition}\label{prop:embed-risk-poly}
-  A loss $L$ embeds a discrete loss if and only if $\risk{L}$ is polyhedral.
-\end{proposition}
-\begin{proof}
-  \raf{Just take the discrete reports to be the facets, and use the Bayes risk result.}
-\end{proof}
-
-Combining Proposition~\ref{prop:embed-risk-poly} with the straightforward result that polyhedral losses have polyhedral Bayes risks, we obtain the first direction of our equivalence: every polyhedral loss embeds some discrete loss.
-
-\begin{theorem}\label{thm:poly-embeds-discrete}
-  Every polyhedral loss $L$ embeds a discrete loss.
-\end{theorem}
-\begin{proof}
-  We merely show $L$ polyhedral $\implies$ $\risk{L}$ polyhedral, and apply Proposition~\ref{prop:embed-risk-poly}.
-  \raf{Not sure how trivial this is, but it's definitely true.  I suspect it has a very short proof.}
-\end{proof}
-
-We now turn to the reverse direction: is every discrete loss embedded by some polyhedral loss?
-Using a construction via convex conjugate duality, which has appeared several times in the literature\raft{CITE: DKR, frongillo-kash (WINE 2014), probably one of Bob's papers?, others?}, we see that the answer is yes, although the number of dimensions $d$ required could be as large as $n-1$.
-\raft{Should revisit this statement at the end; I have a feeling we'll want to kill ``$n$'' throughout the paper since we focus so much less on it, and the reader won't remember what $n$ is.}
-
-\begin{theorem}\label{thm:discrete-loss-poly-embeddable}
-  Every discrete loss $\ell$ is embedded by a polyhedral loss.
-\end{theorem}
-\begin{proof}
-  \raf{Already have the proof from Theorem~\ref{thm:general-duality-embedding}.  Should cite DKR and others...}
-\end{proof}
-
-We have seen a tight connection between embeddings and polyhedral losses\raf{... what else can we say here?  Why is this cool?}
-
-
-To conclude, we briefly point out the interesting implications of these results on the structure of embedded \emph{properties} themselves.
-In particular, the following corollary states an equivalence between finite elicitable properties, embeddable properties, and properties embedded by polyhedral losses.
-
-\begin{corollary}\label{cor:finite-elicit-embed}
-  Let $\gamma$ be a finite property.
-  The following are equivalent.
-  \begin{enumerate}\setlength{\itemsep}{0pt}
-  \item $\gamma$ is elicitable.
-  \item $\gamma$ is embeddable.
-  \item $\gamma$ is embeddable via a polyhedral loss.
-  \end{enumerate}
-\end{corollary}
-\begin{proof}
-  We trivially have $3\Rightarrow 2$.
-  The direction $1\Rightarrow 3$ follows from Theorem~\ref{thm:discrete-loss-poly-embeddable}, by taking any discrete loss which elicits $\gamma$.
-  Finally, to see $2\Rightarrow 1$,
-  \raf{This follows from Proposition~\ref{prop:embed-trim}, but we're stating this as a corollary... let's see if it follows more directly from the above.  If it doesn't (one complication: there is no discrete loss starting from $2$ or $3$!) we can rephrase it as a theorem / proposition.}
-\end{proof}
-
-
-\hrule
-\bigskip
-OLD STUFF
-\bigskip
-\hrule
+In this section, we focus on the structure of embeddable properties, and what a property embedding another must look like.
+\raf{Cut embedding dimension stuff}
 
 When working with convex losses which are not strictly convex, one quickly encounters redundant properties: if $\inprod{p}{L(\cdot)}$ is minimized by a point where $p\cdot L$ is flat, then there will be an uncountable set of reports which also minimize the loss.
 As results in property elicitation typically assume non-redundant properties (e.g.~\cite{frongillo2014general,frongillo2015elicitation}) it is useful to consider a transformation which removes redundant level sets.
@@ -463,6 +445,23 @@ The second is closely related to the trim operator: it states that if some subse
   In particular, the level sets $\gamma$ are full-dimensional in $\simplex$ (i.e.,\ of dimension $n-1$).
 \end{lemma}
 
+\begin{lemma}\label{lem:loss-restrict}
+  Let $L$ elicit $\Gamma:\simplex\toto\R_1$, and let $\R_2\subseteq\R_1$ such that $\Gamma(p) \cap \R_2 \neq \emptyset$ for all $p\in\simplex$.
+  Then $L|_{\R_2}$ ($L$ restricted to $\R_2$) elicits $\gamma:\simplex\toto\R_2$ defined by $\gamma(p) = \Gamma(p)\cap \R_2$.
+  Moreover, the Bayes risks of $L$ and $L|_{\R_2}$ are the same.
+\end{lemma}
+\begin{proof}
+  Let $p\in\simplex$ be fixed throughout.
+  First let $r \in \gamma(p) = \Gamma(p) \cap \R_2$.
+  Then $r \in \Gamma(p) = \argmin_{u\in\R_1} \inprod{p}{L(u)}$, so as $r\in\R_2$ we have in particular $r \in \argmin_{u\in\R_2} \inprod{p}{L(u)}$.
+  For the other direction, suppose $r \in \argmin_{u\in\R_2} \inprod{p}{L(u)}$.
+  By our assumption, we must have some $r^* \in \Gamma(p) \cap \R_2$.
+  On the one hand, $r^*\in\Gamma(p) = \argmin_{u\in\R_1} \inprod{p}{L(u)}$.
+  On the other, as $r^* \in \R_2$, we certainly have $r^* \in \argmin_{u\in\R_2} \inprod{p}{L(u)}$.
+  But now we must have $\inprod{p}{L(r)} = \inprod{p}{L(r^*)}$, and thus $r \in \argmin_{u\in\R_1} \inprod{p}{L(u)} = \Gamma(p)$ as well.
+  We now see $r \in \Gamma(p) \cap \R_2$.
+  Finally, the equality of the Bayes risks $\min_{u\in\R_1} \inprod{p}{L(u)} = \min_{u\in\R_2} \inprod{p}{L(u)}$ follows immediately by the above, as $\emptyset \neq \Gamma(p)\cap\R_2 \subseteq \Gamma(p)$ for all $p\in\simplex$.
+\end{proof}
 
 We now state our first result, which shows remarkable structure of embeddable properties, and the properties that embed them.
 First, we conclude that any embeddable property must be elicitable.
@@ -529,43 +528,59 @@ In most cases, devising a separated link is straightforward, for example with po
 Giving a construction that yields a separated link for all polyhedral losses is a challenging open question.
 \raft{Replace this paragraph with gloating about our result if we actually give this construction.}
 
+With a solid understanding of the structure of embeddings and embeddable properties, we now turn to the relationship between embeddings and polyhedral losses.
+We give a tight connection: every finite elicitable property is embedded by a polyhedral loss, and every polyhedral loss embeds a finite elicitable property.
+We state this equivalence in two theorems, the first focusing on the property, and the second on the loss.
+\jessiet{I'm guessing the statement changed after this was written, but three parts?}
+\raft{changed to ``theorems'' to be clearer}
 
-\section{Consistency via Separated Links}
-\label{sec:separated-links}
-
-\raf{MOVE SOME PROPERTIES STUFF HERE?  E.g. Prop~\ref{prop:embed-trim}.}
-
-\begin{proposition}
-  If $\psi$ is a separated link between losses $L$ and $\ell$, then \raf{how do we want to talk about consistency?}
-\end{proposition}
+\begin{theorem}\label{thm:finite-elicit-embed}
+  Let $\gamma$ be a finite property.
+  The following are equivalent.
+  \begin{enumerate}\setlength{\itemsep}{0pt}
+  \item $\gamma$ is elicitable.
+  \item $\gamma$ is embeddable.
+  \item $\gamma$ is embeddable via a polyhedral loss.
+  \end{enumerate}
+\end{theorem}
 \begin{proof}
-  \raf{Use Hari's theorems from their section 8.}
+  We trivially have $3\Rightarrow 2$, and by Proposition~\ref{prop:embed-trim} we also have $2\Rightarrow 1$.
+  It thus suffices to show $1\Rightarrow 3$.
+  In fact, this direction is a corollary of a stronger result given as Theorem~\ref{thm:general-duality-embedding} in the appendix, which states as follows.
+  \jessiet{Is the end of this sentence grammatically correct?}
+  For any non-redundant property $\gamma'$, even if not finite, elicited by a loss with a Bayes risk which is a closed function, $\gamma'$ is embeddable in $d =n-1$ dimensions.
+  By Lemma~\ref{lem:finite-full-dim}, the (negative) Bayes risk $G$ of the given finite elicitable property $\gamma$ is polyhedral and therefore closed, so the theorem applies.
+  Moreover, the construction given in Theorem~\ref{thm:general-duality-embedding} defines the loss embedding $\gamma$ as $L(u) = C(u)\ones - u$ where $C=G^*$ is the convex conjugate of $G$, which is also polyhedral~\citet[Theorem 19.2]{rockafellar1997convex}.
+  \raf{CITE DKR!}
+  (Here $\ones\in\reals^\Y$ denotes the all-ones vector.)
+  Thus $L$ is polyhedral.
 \end{proof}
 
-\begin{theorem}
-  Let $L$ be polyhedral loss, and $\ell$ the discrete loss it embeds from Theorem~\ref{thm:poly-embeds-discrete}.
-  Then there a separated link $\psi$ between $L$ and $\ell$.
-\end{theorem}
-\raft{Note: we should comment in the discussion section that we probably can show that *any* loss embedding $\ell$ must be polyhedral-ish, meaning polyhedral except for stuff that is never optimal.  This theorem would then not need the ``polyhedral'' part. This is related to the ``convex envelope conjucture'', that if $L$ embeds $\ell$ via $\varphi$, you can just take the loss $L'$ such that $L_y$ is the convex envelope of points $\{(\varphi(r),L(r)_y)\}_{r\in\R}$.}
+We now state a converse of Theorem~\ref{thm:finite-elicit-embed}: every polyhedral loss embeds a finite elicitable property.
+One way to look at this result in light of Proposition~\ref{prop:embed-trim} is that polyhedral losses ``directly'' elicit finite properties by embedding them into a space where the original loss is convex.
+Moreover, we show that indirect elicitation via polyhedral losses are heavily structured: if a polyhedral loss elicits a property $\gamma'$ with a link to $\gamma$, then both $\gamma'$ and $\gamma$ are finite and one ``refines'' the other in the sense below.
+\jessiet{Is $\gamma'$ actually finite by our definition, or is it ``finite-ish'', i.e. finite if we ignore a null set of distributions?}
+\raft{Good call, $\gamma'$ will not be finite... we'll have to revisit this whole section anyway though.}
+In other words, the cells (level sets) of $\gamma'$ must be a finite subdivision of the cells of $\gamma$.
+This fact will become useful when we discuss the relationship between embedding dimension and elicitation complexity.\raf{LATER: see [WHERE WE DISCUSS]}
 
-Remark: This prop and theorem give an excellent reason to focus on embeddings, since other techniques do not necessarily give you separated links for free.  Since we know we get them for free, we can just focus on the property, and study elicitation complexity; we know if we have a link at all it can be taken to be separated.  \raf{Is this true?}
+\jessiet{Any reason we go from $\gamma$ and $\gamma'$ to $\Gamma$ and $\Gamma'$ from paragraph to definition?}
+
+\begin{definition}
+  Let $\Gamma:\simplex\toto\R$ and $\Gamma':\simplex\toto\R'$.
+  Then $\Gamma'$ \emph{refines} $\Gamma$ if for all $r'\in\R'$ we have $\Gamma'_{r'} \subseteq \Gamma_r$ for some $r\in\R$.
+  That is, the cells of $\Gamma'$ are all contained in cells of $\Gamma$.
+\end{definition}
+
+\begin{theorem}\label{thm:polyhedral-embed}
+  Every polyhedral loss embeds a finite elicitable property.
+
+  \raf{I think we should save this result for the next paper; it's more about complexity, and only needed for the corresponding 1d result, which we can probably prove more directly.} 
+  Moreover, a polyhedral loss $L$ indirectly elicits a non-redundant elicitable property $\gamma$ if and only if $\gamma$ is finite and $L$ embeds a property which refines $\gamma$.
+\end{theorem}
 
 \section{Embeddings via Real-Valued Losses}
 \label{sec:1d}
-
-\begin{itemize}
-\item Def: order-sensitive, orderable.
-\item Theorem (Lambert et al): $\ell$ order-sensitive iff $\prop{\ell}$ orderable.
-\item Theorem: $\ell$ 1-embeddable iff $\ell$ order-sensitive.  Moreover,   1-embeddable implies 1-embeddable via polyhedral loss.
-  % \item Prop: Every polyhedral $L:\reals\to\reals^\Y$ embeds an order-sensitive $\ell$.
-  
-\item Def: indirectly elicits (necessary but not sufficient for consistency).
-\item Prop: If convex $L:\reals\to\reals^\Y$ indirectly elicits finite $\gamma$, then $\gamma$ is orderable.
-\item Remark: TFAE for all the complexity classes (but don't define them rigorously).
-\item Remark: Also, note that we have ``indirectly elicitable $\implies$ exists separated link'', so elicitation complexity does capture consistency here.
-\item Cor: Abstain, mode, not embeddable / indirectly elicitable in 1d when $n\geq 3$.
-\end{itemize}
-
 
 \subsection*{Elicitation complexity stuff moved here}
 
@@ -724,8 +739,7 @@ These questions have both theoretical interest and potential practical significa
 \raf{ACKNOWLEDGEMENTS (commented out for submission)}
 % \subsection*{Acknowledgements}
 % We thank Peter Bartlett for several discussions early on, which led to a proof of \raf{1-d reduction} among other insights.
-% Arpit
-% NSF grant
+% \raf{Almost forgot: should ack Arpit too of course!}
 \bibliographystyle{plainnat}
 \bibliography{diss,extra}
 
