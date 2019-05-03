@@ -271,7 +271,6 @@ To ensure consistency, we will seek ``separated'' link functions, which require 
     \inprod{p}{L(u)} - \inf_{u' \in \reals^d} \inprod{p}{L(u')} \geq \delta\left(\inprod{p}{\ell(\psi(u))} - \min_{r \in \R} \inprod{p}{\ell(r)}\right)~.
   \end{align*}
   A link is \emph{separated} if it is $\delta$-separated for some $\delta>0$.
-  \jessie{Where does $\delta$ being a constant come from?  In \citet{ramaswamy2018consistent} bottom of Section 2, $\xi$ is a monotonic, continuous function, not a constant.  We also have $\delta$ on the other side of the inequality that they have $\xi$ on, but I think that will be okay?}
 \end{definition}
 
 We omit the details connecting this definition to consistency, and instead refer the reader to \raf{HARI \cite{ramaswamy2018consistent}} (See the proof of Theorems 8.1-8.3.).
@@ -374,6 +373,21 @@ This useful result will drive many of our findings in this section.
 \end{proposition}
 \begin{proof}
   \raf{Use distributions on the interior of the cells; since the risk is differentiable there, the loss is uniquely defined, and thus the same, and the same throughout the cell.}
+  
+  First, suppose $L$ embeds $\ell$.
+  We want to show that for all $p \in \simplex$ that $\inf_u\in\reals^d L(u,p) = \min_{r \in \R} \ell(r, p)$.
+  Fix $p \in \simplex$.
+  Consider two cases: first suppose there exists a $u \in \reals^d$ so that $u \in \arginf_{u' \in \reals^d}L(u',p)$ and $u \in \varphi(\R)$.
+  Then 
+  \begin{align*}
+  \inf_u L(u,p) = \min_{r \in \R} L(\varphi(r), p) = \min_{r \in \R} \ell(r, p)
+  \end{align*}
+   first by the case assumption and then by the definition of embedding.
+  Now if such a $u$ does not exist, then $\inf_{u \in \reals^d}L(u,p) < \min_r L(\varphi(r), p) = \min_r \ell(r,p)$.
+  Therefore, $r \in \argmin_r' \ell(r', p) \varphi(r) \not \in \argmin_u L(u,p)$ which contradicts the assertion that $L$ embeds $\ell$, thus this case cannot happen.
+  
+  Now let us show that $\risk{L} = \risk{\ell} \implies L$ embeds $\ell$.
+  \jessie{Slightly stuck on the nuances at the moment.  Will come back to it.}
 \end{proof}
 
 \raft{Note at some point: matching risks is not necessary for \emph{consistency}, as evidenced by logistic loss for 0-1 loss.  Maybe we should just make the observation, earlier on, that \emph{embedding} is not necessary for consistency.}
@@ -388,6 +402,26 @@ Note that Bayes risk, a function from distributions over $\Y$ to the reals, may 
   A loss $L$ embeds a discrete loss if and only if $\risk{L}$ is polyhedral.
 \end{proposition}
 \begin{proof}
+  For the forward direction, suppose $L$ embeds a discrete loss $\ell$.
+  By Proposition~\ref{prop:embed-bayes-risks}, we know that $\risk{L} = \risk{\ell}$.
+  Since $\ell$ is discrete, we know that $\risk{\ell}$ is polyhedral. \jessie{Need to prove?}
+  Therefore, $\risk{L}$ is polyhedral.
+  
+  For the reverse implication, suppose $\risk{L}$ is polyhedral. 
+  For each facet $F$ of $\risk{L}$, consider the report $u = \arginf_{u'} L(u', p)$ for some $p \in \inter F$.
+  (Note that this $u$ will be unique regardless of the choice of $p\in \inter F$, since $\risk{L}$ is differentiable here.)
+  Since $\risk{L}$ has a finite set of facets, the set $\R = \{u\}$ \jessie{notate} is finite.
+  Now define the discrete loss $\ell(r,y) = L(r,y)$ for all $r \in \R$.
+  
+  To see that $L$ embeds this discrete $\ell$, consider the embedding function to be the identity for all $r \in \R$.
+  By Proposition~\ref{prop:embed-bayes-risks}, it is sufficient to show $\risk{L} = \risk{\ell}$.
+  For all $p \in \simplex$, we observe
+  \begin{align*}
+  	\risk{L} = \inf_{u \in \reals^d} L(u,p) = \min_{r \in \R} L(r,p) = \min_{r \in \R} \ell(r, p) = \risk{\ell}
+  \end{align*}
+  \jessie{Probably want to rigorously flesh out argument for the second equality.}
+  Thus, $L$ embeds the discrete $\ell$ as constructed.
+  
   \raf{Just take the discrete reports to be the facets, and use the Bayes risk result.}
 \end{proof}
 
@@ -399,6 +433,7 @@ Combining Proposition~\ref{prop:embed-risk-poly} with the straightforward result
 \begin{proof}
   We merely show $L$ polyhedral $\implies$ $\risk{L}$ polyhedral, and apply Proposition~\ref{prop:embed-risk-poly}.
   \raf{Not sure how trivial this is, but it's definitely true.  I suspect it has a very short proof.}
+  \jessie{$L$ polyhedral implies $L^* = -\risk{L}$ polyhedral (cite?) implies $\risk{L}$ polyhedral.}
 \end{proof}
 
 We now turn to the reverse direction: is every discrete loss embedded by some polyhedral loss?
@@ -502,8 +537,7 @@ Fortunately, using the machinery developed in Proposition~\ref{prop:embed-trim},
 \begin{proof}
   Let $\gamma:\simplex\toto\R$.
   Proposition~\ref{prop:embed-trim} gives us that $\trim(\Gamma) = \{\gamma_r : r\in\R\}$.
-  \jessiet{Delete: ``We conclude that ''}
-  We conclude that for any $u\in\reals^d$, there is some $r\in\R$ such that $\Gamma_u \subseteq \gamma_r$.
+  Then for any $u\in\reals^d$, there is some $r\in\R$ such that $\Gamma_u \subseteq \gamma_r$.
   The link $\psi : \reals^d \to \R$ which encodes these choices is calibrated.
   \raft{Commented out the separated stuff}
   % Now assume $L$ is polyhedral.
