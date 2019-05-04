@@ -80,13 +80,109 @@
 
 Given a set $T$ and a point $u$, let $d(T,u) = \inf_{t \in T} \|t-u\|$.
 
+Given two sets $T,T'$, let $d(T,T') = \inf_{t\in T, t' \in T'} \|t-t'\|$.
+
 Let the ``thickening'' $B(T,\epsilon)$ be defined as
   \[ B(T,\epsilon) = \{u \in \R' : d(T,u) \leq \epsilon \} . \]
 
-Let $\mathcal{S} \subseteq 2^{\R}$ be defined as $\mathcal{S} = \{\Gamma(p) : p \in \Delta_{\Y}\}$.
-In other words, for each $p$, we take the set of optimal reports $R = \Gamma(p) \subseteq \R$, and we add $R$ to $\S$.
+We are given an original loss $\ell$ with property $\gamma$ and finite report space $\R$; and a polyhedral embedding with loss $L$, property, $\Gamma$, and embedding points $\{u_r : r \in \R\}$.
 
-Given a fixed embedding, for each report $r \in \R$, let $u_r \in \R'$ denote its embedding point.
+For each report $r \in \R$, let $u_r$ denote its embedding point.
+
+Let $\mathcal{S} \subseteq 2^{\R}$ be defined as $\mathcal{S} = \{\gamma(p) : p \in \Delta_{\Y}\}$.
+In other words, for each $p$, we take the set of optimal reports $R = \gamma(p) \subseteq \R$, and we add $R$ to $\S$.
+
+Let $\mathcal{U} \subseteq 2^{\reals^d}$ be defined as $\mathcal{U} = \{\Gamma(p) : p \in \Delta_{\Y}\}$.
+
+\begin{lemma} \label{lemma:U-convex-closed}
+  Each element $U$ of $\mathcal{U}$ is a closed, convex set.
+\end{lemma}
+\begin{proof}
+  \bo{TODO - minimizers of polyhedral loss}
+\end{proof}
+
+\begin{lemma} \label{lemma:U-biject}
+  There is a bijection between $\mathcal{S}$ and $\mathcal{U}$ where $R \leftrightarrow U$ if and only if $\gamma(p) = R$ and $\Gamma(p) = U$ for some $p$.
+  In this case $U$ contains $u_r$ if and only if $r \in R$.
+\end{lemma}
+\begin{proof}
+  \bo{TODO!}
+\end{proof}
+
+\begin{lemma} \label{lemma:U-separated}
+  Let $\{U_j : j \in \mathcal{J}\} \subseteq \mathcal{U}$ be a subset of $\mathcal{U}$.
+  Then one and only one of the following is true:
+  \begin{enumerate}
+    \item The intersection of the family is nonempty, i.e. they all overlap at some point.
+    \item There exists $\epsilon > 0$ such that, for each member $U_j$, we have $d(U, \cap_{j' \neq j} U_{j'}) \geq \epsilon$.
+          In other words, each member is separated from the intersection of the others.
+  \end{enumerate}
+\end{lemma}
+\begin{proof}
+  \bo{TODO! This is the key one!}
+\end{proof}
+
+\begin{corollary} \label{cor:separated-small-enough}
+  There is an $\epsilon > 0$ such that, for all families $\{U_j : j \in \mathcal{J}\}$ that do not intersect at a point, each member is separated from the intersection of the others by more than $2\epsilon$.
+\end{corollary}
+\begin{proof}
+  Take the minimum $\epsilon$ promised by Lemma \ref{lemma:U-separated}, over all finite subsets of $\mathcal{U}$, and divide by $3$.
+\end{proof}
+
+\begin{lemma}
+  If a subset of $\mathcal{U}$ intersect at some point, then their corresponding $R$ sets all intersect.
+\end{lemma}
+
+\begin{theorem}
+  Let $L(u,y)$ be a surrogate loss for $\ell(r,y)$ for which there exists some calibrated link.
+  Suppose $L$ is a polyhedral loss.
+  Then there exists a calibrated, \emph{separated} link $\psi$ between these losses, meaning, for all $p$,
+    \[ \inf_{u \in \R' : \psi(u) \not\in \gamma(p)} L(u;p) > \inf_{u \in \R'} L(u;p) . \]
+\end{theorem}
+\begin{proof}
+We construct $\psi$.
+
+Fix a small enough $\epsilon$ as promised by Lemma \ref{lemma:U-separated}.
+
+We will label each point $u \in \R'$ with a set of legal mappings $r \in \R$.
+Let $\Psi: \R' \toto \R$ be this labeling.
+Begin by initializing $\Psi(u) = \R$ for all $u$, i.e. all mappings are legal.
+
+Now, we apply the following iterative procedure.
+For each $R \in \mathcal{S}$, consider the corresponding set $U \in \mathcal{U}$ (given by the bijection of Lemma \ref{lemma:U-separated}).
+For every $u \in B\left(U, \epsilon\right)$, we set $\Psi(u) = \Psi(u) \cap R$.
+
+%(Geometrically: in the case where $R=\{r\}$, we simply assign the epsilon-ball around $u_r$ to point to only $r$. In the case with multiple reports in $R$, we take the polyhedron with corners $U_R$ and ``thicken it'', then require that this thick shape map only to elements of $R$.)
+
+Now, we construct $\psi$ by making arbitrary legal choices, e.g. $\psi(u)$ is defined as the first element of $\R$ in $\Psi(u)$.
+
+We have to prove, first, that $\Psi(u)$ is nonempty for each $u$, and second, that $\psi$ is a separated, calibrated link.
+
+First: consider any $u \in \R'$.
+If $u$ is not in $B(U,\epsilon)$ for any $U \in \mathcal{U}$, then we have $\Psi(u) = \R$, so it is nonempty.
+Otherwise, let $\{U_j : j \in \mathcal{J}\}$ be the family that contain $u$.
+We have each $U_j \lefrightarrow R_j$ for some $R_j \subseteq \R$ and
+  \[ \Psi(u) = \cap_{j \in \mathcal{J}} R_j . \]
+Now, we claim that all $U_j$ intersect at some point.
+
+Finally, we must show that $\psi$ is a separated, calibrated link.
+\bo{TODO - should be the easy part!}
+\end{proof}
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\break
+
+{\large OLD STUFF -- MOVED HERE BY BO 2019-05-04 09:34 ET}
+
 Given a set $R \subseteq \R$, let $U_R = \{u_r : r \in \R\}$.
 
 \begin{lemma} \label{lemma:conv-R-no-contain}
