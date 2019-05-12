@@ -83,7 +83,7 @@ Given a set $T$ and a point $u$, let $d(T,u) = \inf_{t \in T} \|t-u\|$.
 
 Given two sets $T,T'$, let $d(T,T') = \inf_{t\in T, t' \in T'} \|t-t'\|$.
 
-\raf{I think we'll want open balls, so $< \epsilon$, just because we'll get better bounds that way (larger $\epsilon$ is better).}
+\raf{I think we'll want open balls, so $< \epsilon$, just because we'll get better bounds that way (larger $\epsilon$ is better).} \bo{sure, unless it matters whether the sets are closed}
 Let the ``thickening'' $B(T,\epsilon)$ be defined as
   \[ B(T,\epsilon) = \{u \in \R' : d(T,u) \leq \epsilon \} . \]
 
@@ -102,17 +102,19 @@ Let $\mathcal{U} \subseteq 2^{\reals^d}$ be defined as $\mathcal{U} = \{\Gamma(p
   \bo{TODO - minimizers of polyhedral loss}
 \end{proof}
 
-\begin{lemma} \label{lemma:U-biject}
-  There is a bijection between $\mathcal{S}$ and $\mathcal{U}$ where $R \leftrightarrow U$ if and only if $\gamma(p) = R$ and $\Gamma(p) = U$ for some $p$.
-  In this case $U$ contains $u_r$ if and only if $r \in R$.
+\begin{lemma} \label{lemma:U-surject}
+  $\mathcal{U}$ is a finite set and there is a surjection from $\mathcal{U}$ to $\mathcal{S}$ where $U \mapsto R$ if, for some $p$, we have $\gamma(p) = U$ and $\Gamma(p) = R$.
+  We write $R_U$ for the value of this map at $U$.
 \end{lemma}
 \begin{proof}
-  \bo{TODO!}
-  \raf{I'm not actually sure we have a bijection.  Actually, I know we don't: take hinge loss, where $\Gamma((0.9,0.1)) = \{1\}$ but $\Gamma((1,0)) = [1,\infty)$; both have $R = \{1\}$.  What we \emph{can} say is, $\mathcal{U}$ is finite, and there is a surjective map $h:\mathcal{U}\to\mathcal{S}$ where in fact $h(U) = \{r\in\R : u_r \in U\} \neq \emptyset$.  (And $u_r \in \Gamma(p) \iff r \in \gamma(p)$ of course, from embedding.)  Hopefully this is enough...}
+%  \bo{TODO!}
+%  \raf{I'm not actually sure we have a bijection.  Actually, I know we don't: take hinge loss, where $\Gamma((0.9,0.1)) = \{1\}$ but $\Gamma((1,0)) = [1,\infty)$; both have $R = \{1\}$.  What we \emph{can} say is, $\mathcal{U}$ is finite, and there is a surjective map $h:\mathcal{U}\to\mathcal{S}$ where in fact $h(U) = \{r\in\R : u_r \in U\} \neq \emptyset$.  (And $u_r \in \Gamma(p) \iff r \in \gamma(p)$ of course, from embedding.)  Hopefully this is enough...}
+  \bo{fixed, thanks!}
 \end{proof}
 
 \begin{lemma} \label{lemma:calibrated-pos}
   If a subset of $\mathcal{U}$ intersect, then their corresponding report sets intersect as well.
+n
 \end{lemma}
 \begin{proof}
   \bo{TODO, or, this is our proof that a calibrated link is possible!}
@@ -131,26 +133,18 @@ Let $\mathcal{U} \subseteq 2^{\reals^d}$ be defined as $\mathcal{U} = \{\Gamma(p
 %  This implies $u \not\in \cap_j B(U_j,\epsilon)$.
 %\end{proof}
 %
-\begin{lemma} \label{lemma:thick-int}
-  Let $\{U_j : j \in \mathcal{J}\}$ be a finite collection of closed, convex sets.
-  For any $\delta > 0$, there exists an $\epsilon > 0$ such that
-  \[ \cap_j B(U_j,\epsilon) \subseteq B\left(\cap_j U_j, \delta\right)  \]
-  where if $\cap_j U_j = \emptyset$, we interpret the right-hand side as $\emptyset$.
+\begin{lemma} \label{lemma:thick-nonempty}
+  Let $\{U_j : j \in \mathcal{J}\}$ be a finite collection of closed, convex sets with nonempty joint intersection.
+  Then for all $\delta > 0$, there exists  $\epsilon > 0$ such that $\cap_j B(U_j,\epsilon) = \subseteq B(\cap_j U_j, \delta)$.
 \end{lemma}
 \begin{proof}
-  \raf{Maybe cleaner to break into to two parts right off the bat: $\cap U_j$ is empty or not?}
   By induction on the size of the collection.
   If the size is $1$, set $\epsilon = \delta$.
-  If the size is larger than $1$, let $U_j$ be any member of the collection, let $U' = \cap_{j'\neq j} U_{j'}$, and let $C(\epsilon) = \cap_{j' \neq j} B(U_{j'},\epsilon)$.
-  There are two cases.
-  If $U_j \cap U' = \emptyset$, then we must show that $B(U_j,\epsilon) \cap C(\epsilon) = \emptyset$.
-  Because $U_j,U'$ are both closed and convex, they are separated by some nonzero distance. So for some $\gamma > 0$, we have $B(U_j,\gamma) \cap B(U',\gamma) = \emptyset$.
-  By inductive assumption, for all small enough $\epsilon$, $C(\epsilon) \subseteq B(U',\gamma)$, so we have $B(U_j,\gamma) \cap C(\epsilon) = \emptyset$.
-  Choosing a small enough $\epsilon$ that is also less than $\gamma$ completes this case.
-
-  The other case is that $U_j \cap U' = D$, some nonempty closed convex set.
-  Here we must show that $B(U_j,\epsilon) \cap C(\epsilon) \subseteq B(D, \delta)$.
-  Enclose $D$ in the intersection of a finite number of open halfspaces, which is enclosed in $B(D,\delta)$. \bo{I am claiming this is possible, but I didn't prove it yet...}
+  If the size is larger than $1$, let $U_j$ be any member of the collection, let $U' = \cap_{j'\neq j} U_{j'}$, and let $C(\epsilon) = \cap_{j'\neq j} B(U_{j'},\epsilon)$.
+  Let $D = U_j \cap U'$.
+  We must show that $B(U_j,\epsilon) \cap C(\epsilon) \subseteq B(D,\delta)$.
+  Enclose $D$ in the intersection of a finite number of open halfspaces, which is enclosed in $B(D,\delta)$. \bo{I am claiming this is possible, but I didn't prove it yet....}
+  For example, if $D$ is a point, then enclose it in a hypercube, which is enclosed in the ball $B(D\delta)$.
   We will prove that, for small enough $\epsilon$, $B(U_j,\epsilon) \cap C(\epsilon)$ is contained in this same intersection.
   This implies that it is contained in $B(D,\delta)$.
 
@@ -165,22 +159,77 @@ Let $\mathcal{U} \subseteq 2^{\reals^d}$ be defined as $\mathcal{U} = \{\Gamma(p
 
   We now take the minimum over these finitely many $\epsilon$'s (one per halfspace).
 \end{proof}
+
+\begin{lemma} \label{lemma:thick-empty}
+  Let $\{U_j : j \in \mathcal{J}\}$ be a finite collection of nonempty closed, convex sets with empty joint intersection.
+  Then for all $\delta > 0$, there exists  $\epsilon > 0$ such that $\cap_j B(U_j,\epsilon) = \emptyset$.
+\end{lemma}
+\begin{proof}
+  By induction on the size of the family.
+  Note that the family must have size at least two.
+  Let $U_j$ be any set in the family and let $U' = \cap_{j' \neq j} U_{j'}$.
+  There are two cases.
+  If $U'$ is empty, then it must be the intersection of at least two sets, so we must have at least three sets in the family.
+  Therefore, by inductive assumption, for small enough $\delta$ we have $\cap_{j' \neq j} B(U_{j'},\delta) = \emptyset$, which proves this case.
+
+  Now suppose $U'$ is nonempty, including the base case where the size of the family is two.
+  Because $U_j$ and $U'$ are non-intersecting closed convex sets, they are separated by some distance $\epsilon$.
+  By Lemma \ref{lemma:thick-nonempty}, for any $\epsilon > 0$, there exists $\delta > 0$ such that $\cap_{j'\neq j} B(U_{j'},\delta) \subseteq B(U', \epsilon/3)$.
+  We have $B(U_j, \epsilon/3) \cap B(U', \epsilon/3) = \emptyset$.
+\end{proof}
+
+%\begin{lemma} \label{lemma:thick-int}
+%  Let $\{U_j : j \in \mathcal{J}\}$ be a finite collection of closed, convex sets.
+%  For any $\delta > 0$, there exists an $\epsilon > 0$ such that
+%  \[ \cap_j B(U_j,\epsilon) \subseteq B\left(\cap_j U_j, \delta\right)  \]
+%  where if $\cap_j U_j = \emptyset$, we interpret the right-hand side as $\emptyset$.
+%\end{lemma}
+%\begin{proof}
+%  \raf{Maybe cleaner to break into to two parts right off the bat: $\cap U_j$ is empty or not?}
+%  By induction on the size of the collection.
+%  If the size is $1$, set $\epsilon = \delta$.
+%  If the size is larger than $1$, let $U_j$ be any member of the collection, let $U' = \cap_{j'\neq j} U_{j'}$, and let $C(\epsilon) = \cap_{j' \neq j} B(U_{j'},\epsilon)$.
+%  There are two cases.
+%  If $U_j \cap U' = \emptyset$, then we must show that $B(U_j,\epsilon) \cap C(\epsilon) = \emptyset$.
+%  Because $U_j,U'$ are both closed and convex, they are separated by some nonzero distance. So for some $\gamma > 0$, we have $B(U_j,\gamma) \cap B(U',\gamma) = \emptyset$.
+%  By inductive assumption, for all small enough $\epsilon$, $C(\epsilon) \subseteq B(U',\gamma)$, so we have $B(U_j,\gamma) \cap C(\epsilon) = \emptyset$.
+%  Choosing a small enough $\epsilon$ that is also less than $\gamma$ completes this case.
+%
+%  The other case is that $U_j \cap U' = D$, some nonempty closed convex set.
+%  Here we must show that $B(U_j,\epsilon) \cap C(\epsilon) \subseteq B(D, \delta)$.
+%  Enclose $D$ in the intersection of a finite number of open halfspaces, which is enclosed in $B(D,\delta)$. \bo{I am claiming this is possible, but I didn't prove it yet...}
+%  We will prove that, for small enough $\epsilon$, $B(U_j,\epsilon) \cap C(\epsilon)$ is contained in this same intersection.
+%  This implies that it is contained in $B(D,\delta)$.
+%
+%  For each halfspace, consider its complement $F$, a closed halfspace.
+%  We prove that $F \cap B(U_j,\epsilon) \cap C(\epsilon) = \emptyset$.
+%  Consider the intersections of $F$ with $U$ and $U'$, call them $G$ and $G'$.
+%  These are closed, convex sets that do not intersect (because $D$ in contained in the complement of $F$).
+%  So $G$ and $G'$ are separated by a nonzero distance, so $B(G,\gamma) \cap B(G',\gamma) = \emptyset$ for small enough $\gamma$.
+%  And $B(G,\gamma) = F \cap B(U_j,\gamma)$ while $B(G',\gamma) = F \cap B(U',\gamma)$.
+%  By inductive assumption, $C(\epsilon) \subseteq B(U',\gamma)$ for small enough $\epsilon$.
+%  So $F \cap B(U_j,\epsilon) \cap C(\epsilon) = \left(F \cap B(U_j,\epsilon)\right) \cap \left(F \cap C(\epsilon)\right) = \emptyset$ for a small enough $\epsilon$.
+%
+%  We now take the minimum over these finitely many $\epsilon$'s (one per halfspace).
+%\end{proof}
   
+
 \begin{corollary} \label{cor:thick-intersect}
   There exists a small enough $\epsilon > 0$ such that, for any subset $\{U_j : j \in \mathcal{J}\}$ of $\mathcal{U}$, if $\cap_j U_j = \emptyset$, then $\cap_j B(U_j,\epsilon) = \emptyset$.
 \end{corollary}
 \begin{proof}
-  For each subset, Lemma \ref{lemma:thick-int} gives an $\epsilon$.
+  For each subset, Lemma \ref{lemma:thick-empty} gives an $\epsilon$.
   We take the minimum over these finitely many choices.
 \end{proof}
 
 \begin{lemma} \label{lemma:distance-loss}
-  If $L$ is a polyhedral loss, there exists a constant $c$ such that:
-  For any $p$, if the set $U$ is optimal with expected loss $z$, and $d(U,u) \geq \delta$, then $L(u;p) > z + c\delta$.
+  If $L$ is a polyhedral loss, then for each $p$, there exists a constant $c$ such that:
+  if the set $U$ is optimal with expected loss $z$, and $d(U,u) \geq \delta$, then $L(u;p) > z + c\delta$.
 \end{lemma}
 \begin{proof}
-  \bo{TODO}
-  \raf{My first thought was ``This is a great lemma!'' but I don't think it's quite true.  Again think of hinge, and take $p\to 0.5$ from above; $U = \{1\}$ the whole time, but $L(-1,p) \to L(1,p)$, so no constant $c$ will work.  We will want a lemma like this, but I think we'll want to relate $\ell$ differences to $L$ differences, especially since that's the new definition of separated link anyway.  (Note that this more nuanced version holds for this hinge example: yes $L(-1,p)$ is getting closer to $L(1,p)$, but so is $\ell(-1,p)$ to $\ell(1,p)$.}
+  \bo{Changed the statement to something hopefully correct}
+%  \bo{TODO}
+%  \raf{My first thought was ``This is a great lemma!'' but I don't think it's quite true.  Again think of hinge, and take $p\to 0.5$ from above; $U = \{1\}$ the whole time, but $L(-1,p) \to L(1,p)$, so no constant $c$ will work.  We will want a lemma like this, but I think we'll want to relate $\ell$ differences to $L$ differences, especially since that's the new definition of separated link anyway.  (Note that this more nuanced version holds for this hinge example: yes $L(-1,p)$ is getting closer to $L(1,p)$, but so is $\ell(-1,p)$ to $\ell(1,p)$.}
 \end{proof}
 
 \begin{theorem}
@@ -197,12 +246,9 @@ Let $\mathcal{U} \subseteq 2^{\reals^d}$ be defined as $\mathcal{U} = \{\Gamma(p
   We will label each point $u \in \R'$ with a set of legal mappings $r \in \R$.
   Let $\Psi: \R' \toto \R$ be this labeling.
   Begin by initializing $\Psi(u) = \R$ for all $u$, i.e. all mappings are legal.
-  
-  Now, we apply the following iterative procedure.
-  For each $R \in \mathcal{S}$, consider the corresponding set $U \in \mathcal{U}$ (given by the bijection of Lemma \ref{lemma:U-biject}).
-  For every $u \in B\left(U, \epsilon\right)$, we set $\Psi(u) = \Psi(u) \cap R$.
-  
-  Now, we construct $\psi$ by making arbitrary legal choices, e.g. $\psi(u)$ is defined as the first element of $\R$ in $\Psi(u)$.
+  Then, we apply the following iterative procedure.
+  For each set $U \in \mathcal{U}$, for each $u \in B(U,\epsilon)$, we set $\Psi(u) = \Psi(u) \cap R_U$ where $R_U$ is given by Lemma \ref{lemma:U-surject}.
+  Then, construct $\psi$ by making arbitrary legal choices, e.g. $\psi(u)$ is defined as the first element of $\R$ in $\Psi(u)$.
   
   We have to prove, first, that $\Psi(u)$ is nonempty for each $u$, and second, that $\psi$ is a separated, calibrated link.
   
@@ -216,7 +262,7 @@ Let $\mathcal{U} \subseteq 2^{\reals^d}$ be defined as $\mathcal{U} = \{\Gamma(p
   It is calibrated because each $U$ maps under $\psi$ into the corresponding $R$ (since its entire thickening does).
   For separation, fix $p$. Now, suppose $U$ is optimal and $u$ is not.
   Now, if $u$ does not map to an optimal report, then it is not in $B(U,\epsilon)$.
-  So by Lemma \ref{lemma:distance-separated}, its expected loss is at least $c\epsilon$ larger than optimal for some $c$ depending only on $L$.
+  So by Lemma \ref{lemma:distance-loss}, its expected loss is at least $c\epsilon$ larger than optimal for some $c$ depending only on $L$ and $p$.
   This holds for all such $u$, so the link is separated.
 \end{proof}
 
