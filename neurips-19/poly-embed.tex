@@ -232,10 +232,10 @@ We thus begin with a sufficient condition for link functions, after introducing 
 Let $\Y$ be a finite outcome (label) space, and throughout let $n=|\Y|$.
 The set of probability distributions on $\Y$ is denoted $\simplex\subseteq\reals^{\Y}$, represented as vectors of probabilities.
 We write $p_y$ for the probability of outcome $y \in \Y$ drawn from $p \in \simplex$.
-\jessiet{Do we want to go into the detail of thinking of $p_y$ as $p(Y = y | X = x)$ in finite data}
+\jessiet{Do we want to go into the detail of thinking of $p_y$ as $p(Y|X)$ in finite data}
 
 \raf{Important TODO: we use $\reals^\Y$ sometimes and $\reals^\Y_+$ other times; ideally both $+$, but we need to see what we can prove...  I know this is a key detail for polyhedral losses, to ensure the inf is always attained.}
-\jessie{If the convex loss is bounded from below by $M$, we can say $\reals^\Y_+$ WLOG since $L$ elicits $\Gamma$ implies $(L +c)$ elicits $\Gamma$ for any constant $c$-- in particular, $M$.}
+\jessie{If the convex loss is bounded from below by $M$, we can say $\reals^\Y_+$ WLOG since $L$ elicits $\Gamma$ implies $(L +c)$ elicits $\Gamma$ for any constant $c$-- in particular, $M$.  We might also assume our discrete loss is nonnegative?}
 
 We assume that a given discrete prediction problem, such as classification, is given in the form of a \emph{discrete loss} $\ell:\R\to\reals^\Y_+$, which maps a report (prediction) $r$ from a finite set $\R$ to the vector of loss values $\ell(r) = (\ell(r)_y)_{y\in\Y}$ for each possible outcome $y\in\Y$.
 We will assume throughout that the given discrete loss is \emph{non-redundant}, meaning every report is uniquely optimal (minimizes expected loss) for some distribution $p\in\Delta(\Y)$.
@@ -375,7 +375,7 @@ This useful result will drive many of our findings in this section.
   \raf{Use distributions on the interior of the cells; since the risk is differentiable there, the loss is uniquely defined, and thus the same, and the same throughout the cell.}
   
   First, suppose $L$ embeds $\ell$.
-  We want to show that for all $p \in \simplex$ that $\inf_u\in\reals^d L(u,p) = \min_{r \in \R} \ell(r, p)$.
+  We want to show that for all $p \in \simplex$ that $\inf_{u\in\reals^d} L(u,p) = \min_{r \in \R} \ell(r, p)$.
   Fix $p \in \simplex$.
   Consider two cases: first suppose there exists a $u \in \reals^d$ so that $u \in \arginf_{u' \in \reals^d}L(u',p)$ and $u \in \varphi(\R)$.
   Then 
@@ -391,6 +391,7 @@ This useful result will drive many of our findings in this section.
   Let $F$ be the set of facets in $\risk{\ell}$.
   For each $f \in F$, there is some $p \in \inter{f}$ so that $\risk{L}(p) = \risk{\ell}(p)$ is differentiable, and so the loss $L$ must then be uniquely defined.
   \jessie{This is my interpretation of your note, but I don't see how this proves the existence of an embedding.  My inclination is to show there's the ``stripped'' loss that we embed ($\varphi(u) = u$) and for any bijection $\phi$, we can see that $\ell$ can be modified to $\ell^\phi$ so that $\risk{\ell} = \risk{\ell^\phi}$, and $L$ also embeds $\ell^\phi$ with $\varphi(r) = \phi(r)$.  Does that make sense?}
+  
 
 \end{proof}
 
@@ -725,10 +726,38 @@ Here are two simple examples.
   The cell adjacency graph of an orderable property must be a path, but for the mode it is the complete graph on $n$ nodes, and for $\abstain{\alpha}$ a star graph on $n+1$ nodes, which are not paths when $n \geq 3$.
 \end{proof}
 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Proving (in)consistency via embeddings}
+The above techniques allow us to evaluate and simplify some previous historical results.
+For example, Yang and Koyejo~\cite{yang2018consistency} prove the inconsistency of a family of surrogates for the top-$k$ classification problem.
+They then create a new surrogate loss that is consistent for the top-$k$ problem, although it should be noted that their surrogate is not convex.
+In particular, they evaluate two losses given by Lapin et al.~\cite{lapin2016loss, lapin2018analysis}, one of which is shown to be convex, but they leave its consistency as an open question.
+
+After our discussion of embeddings, it is worth noting that we now have a way of proving consistency: a surrogate $L$ is consistent with respect to a discrete loss $\ell$ if and only if $L$ embeds $\ell$.
+Therefore, we can then prove that the surrogates given by Lapin et al.~\cite{lapin2018analysis} are not consistent by showing the discrete loss that their loss embeds is not the discrete loss measuring top-$k$ error.
+
+In particular, we measure top-$k$ error by 
+\begin{align*}
+\ell_{top-k}(r,y) &= 
+\begin{cases}
+0 & r_y = 1 \text{ and } \|r \|_{\infty} \leq k\\
+1 & \text{otherwise}
+\end{cases}
+\end{align*}
+Where $r \in 2^n$ can be thought of as a binary vector representing set inclusion and $k \leq n$ is a constant.
+
+Now, for example, consider the surrogate given by Yang and Koyejo~\cite{yang2018consistency}, \jessie{... $\psi_1$ is worked out, but would rather have $\psi_2$.  Working on it.}
+
+\jessie{Lovasz hinge paper? ~\cite{yu2018lovasz}}
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion and Future Directions} \label{sec:conclusion}
 \paragraph{Summary.}
-This work is part of a broader research program to understand convex surrogates through the lens of property elicitation.% the relationship between finite losses and convex surrogates, the link functions connecting them, and the properties they elicit.
+This work is part of a broader research program to understand convex surrogates through the lens of property elicitation.  % the relationship between finite losses and convex surrogates, the link functions connecting them, and the properties they elicit.
 We seek a general theory that, given a property, can prescribe when and how to construct convex surrogate losses that elicit it, and specifically, determine the minimum dimension required.
 Even more broadly, one could replace ``convex'' by any notion of ``nice'' surrogate.
 
