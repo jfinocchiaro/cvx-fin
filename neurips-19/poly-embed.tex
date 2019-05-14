@@ -78,6 +78,7 @@
 \newcommand{\trim}{\mathrm{trim}}
 \newcommand{\fplc}{finite-piecewise-linear and convex\xspace} %xspace for use in text
 \newcommand{\conv}{\mathrm{conv}}
+\newcommand{\indopp}{\bar{\mathbbm{1}}}
 \newcommand{\ones}{\mathbbm{1}}
 \DeclarePairedDelimiter\ceil{\lceil}{\rceil}
 
@@ -739,16 +740,30 @@ After our discussion of embeddings, it is worth noting that we now have a way of
 Therefore, we can then prove that the surrogates given by Lapin et al.~\cite{lapin2018analysis} are not consistent by showing the discrete loss that their loss embeds is not the discrete loss measuring top-$k$ error.
 
 In particular, we measure top-$k$ error by 
-\begin{align*}
+\begin{align}
 \ell_{top-k}(r,y) &= 
 \begin{cases}
 0 & r_y = 1 \text{ and } \|r \|_{\infty} \leq k\\
 1 & \text{otherwise}
 \end{cases}
-\end{align*}
+\end{align}
 Where $r \in 2^n$ can be thought of as a binary vector representing set inclusion and $k \leq n$ is a constant.
 
-Now, for example, consider the surrogate given by Yang and Koyejo~\cite{yang2018consistency}, \jessie{... $\psi_1$ is worked out, but would rather have $\psi_2$.  Working on it.}
+Now, for example, consider the surrogate discussed by Lapin et al.~\cite{yang2018consistency}, and Yang and Koyejo~\cite{yang2018consistency}.
+Following the numbering of Yang and Koyejo, we call the surrogate $L_2(u,y) := \max\left( \frac{1}{k} \sum_{i=1}^k (u + \indopp(y))_{[i]} - u_y \right) $, where $\indopp(y) = \ones - e_y$.
+
+It can be verified that $\ell_2(r,y) = \begin{cases}
+\min\left(\frac{HD(r, e_y)}{k}, 1\right) & s_y = 1 \\
+1 + \min \left(\frac{HD(s, \vec{0})}{k}, 1\right) & s_y = 0
+\end{cases}$, where $HD(\cdot, \cdot)$ is the Hamming distance between two vectors.
+
+Since we can see that $\ell_2 \neq \ell_{top-k}$, we can then see that $L_2$ is not consistent with respect to $\ell_{top-k}$.
+Similarly, given $L_4(u,y) := \max\left(\frac{1}{k} \sum_{i=1}^k (1 + u_{\setminus y})_{[i]} - s_y, 0\right)$, we can actually see that $L_4$ also embeds $\ell_2$.
+We will double up on notation and call this discrete loss $\ell_4$ as well, for the sake of matching subscripts of discrete losses to the surrogates that embed them.
+
+So even though the surrogates $L_2$ and $L_4$ are convex, they are not consistent with respect to $\ell_{top-k}$.
+This begs the question: what is the relationship between consistency and convexity of a surrogate loss?
+Are there instances where only one can be achieved, but not both?
 
 \jessie{Lovasz hinge paper? ~\cite{yu2018lovasz}}
 
