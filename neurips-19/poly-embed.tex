@@ -264,6 +264,10 @@ For example, the hinge loss is polyhedral, whereas logistic loss is not.
 
 To ensure consistency, we will seek ``separated'' link functions, which require that the excess loss of some report is bounded by (a constant times) the excess loss of the linked report.
 
+\begin{definition}[Consistency]\label{def:consistency}
+We say that a surrogate $L(u)$ is \emph{consistent} with respect to a discrete loss $\ell(r)$ if, for all $p \in \simplex$, \jessie{....?}
+\end{definition}
+
 \begin{definition}[Separated Link]\label{def:links}
   Let discrete loss $\ell:\R\to\reals^\Y_+$ and surrogate $L:\reals^d\to\reals^\Y_+$ be given.
   A \emph{link function} is a map $\psi:\reals^d\to\R$.
@@ -292,8 +296,20 @@ We formalize this notion as follows.
 Note that embeddings do not automatically give rise to separated links; indeed, apart from mapping the embedded reports back from whence they came \raft{I know... just wanted to say that} via $\psi(\varphi(r)) = r$, how to map the remaining values is far from clear.
 Constructing separated links from embeddings will therefore be a major focus in Section~\ref{sec:poly-loss-embed}.
 
-To illustrate the idea of embeddings, we now look in detail at two key examples.
+
 \raf{How hinge and abstain fit in}
+\jessie{Added the paragraphs below.}
+To illustrate the idea of embeddings, we now look in detail at two key examples.
+First, consider a binary classification problem on the outcomes $\{-1, +1\}$.
+We know that both the hinge loss $L_{hinge}(u,y) := (1 - uy)_+$ and logistic loss $L_{logistic}(u,y) := \ln\left(1 + \exp(-uy)\right)$ are convex surrogates that are minimized in expectation by predicting the mode, as is 0-1 loss $\ell_{mode}(r,y) := \textbf{1}[r\neq y]$.
+However, we say that hinge loss embeds the mode, while logistic loss does not.
+\jessie{Come back to flesh this out if space?}
+
+In another example, we consider the abstain loss and an embedding given by Ramaswamy et al.~\cite{ramaswamy2018consistent} in Section~\ref{sec:examples}, but note that the link function they provide is not unique.
+Essentially, the discrete abstain$(1/2)$ loss is minimized in expectation by predicting the most likely outcome $\argmax_y p_y$, conditioned on $p_y \geq 1/2$.
+If the most likely outcome is not likely enough, the loss is minimized by ``abstaining'' from predicting; a situation one can imagine would be useful if a false positive is costly.
+\jessie{Are we adding discussion about the choice of link relative to the norm?} 
+
 
 \subsection{Property Elicitation}
 
@@ -381,7 +397,7 @@ This useful result will drive many of our findings in this section.
   
   %Jessie's first attempt at a proof
   First, suppose $L$ embeds $\ell$, and fix $p \in \simplex$.
-  We want to show that for all $p \in \simplex$ that $\inf_{u\in\reals^d} L(u,p) = \min_{r \in \R} \ell(r, p)$.
+  We want to show for all $p \in \simplex$ that $\inf_{u\in\reals^d} L(u,p) = \min_{r \in \R} \ell(r, p)$.
   Consider two cases: first suppose there exists a $u \in \reals^d$ so that $u \in \arginf_{u' \in \reals^d}L(u',p)$ and $u \in \varphi(\R)$.
   Then 
   \begin{align*}
@@ -396,7 +412,7 @@ This useful result will drive many of our findings in this section.
   For each facet $f \in \F$, we know by nonredundancy that there is some $p \in \inter{f}$ so that $\risk{L}$ is differentiable at $p$.
   Moreover, by Frongillo and Kash~\cite[Theorem 2?]{frongillo2014general} \jessie{Check ref} we know that both $\ell$ and $L$ have a unique minimizer at $p$, and since the subgradients of the risks are the same (by their equality), we know the minimizers of the losses are also the same, up to relabeling the reports via a bijection.
   Therefore, we can see that $L$ embeds $\ell$, as $L(\varphi(r),y) = \ell(r,y)$ for all $r\in\R$ and $y \in \Y$.
-  
+  \jessie{Incomplete...?}  
   
 %  Now let us show that $\risk{L} = \risk{\ell} \implies L$ embeds $\ell$.
 %  Let $F$ be the set of facets in $\risk{\ell}$.
@@ -426,7 +442,7 @@ Note that Bayes risk, a function from distributions over $\Y$ to the reals, may 
   
   For the reverse implication, suppose $\risk{L}$ is polyhedral. 
   For each facet $f \in F$ of $\risk{L}$, consider the report $u_f = \arginf_{u'} L(u', p)$ for some $p \in \inter f$.
-  (Note that this $u$ will be unique regardless of the choice of $p\in \inter f$, since $\risk{L}$ is differentiable here.)
+  (Note that $u_f$ will be unique and the same regardless of the choice of $p\in \inter f$, since $\risk{L}$ is differentiable here.)
   Since $\risk{L}$ has a finite set of facets, the set $\R = \{u_f\}_{f \in F}$ is finite.
   Now define the discrete loss $\ell:\R \to \Y$ by $\ell(r,y) = L(r,y)$.
   
@@ -437,7 +453,7 @@ Note that Bayes risk, a function from distributions over $\Y$ to the reals, may 
   	\risk{L}(p) = \inf_{u \in \reals^d} L(u,p) = \min_{r \in \R} L(r,p) = \min_{r \in \R} \ell(r, p) = \risk{\ell}(p)
   \end{align*}
   Note that the second equality holds because for every $p \in \simplex$, we know there is some $r \in \R$ such that $r \in \arginf_u L(u,p)$ by closure of subgradient sets, and thus the loss values are the same, regardless of if we restrict to $\R$ or stay in $\reals^d$.
-  Thus, $L$ embeds the discrete $\ell$ as constructed.
+  Thus, $L$ embeds the discrete $\ell$ as constructed by Proposition~\ref{prop:embed-bayes-risks}.
   
   \raf{Just take the discrete reports to be the facets, and use the Bayes risk result.}
 \end{proof}
@@ -453,7 +469,7 @@ Combining Proposition~\ref{prop:embed-risk-poly} with the straightforward result
   \jessie{$L(u,p)$ polyhedral in $\reals^d$ implies $L^*(0,p) = -\risk{L}(p)$ polyhedral in $\simplex$ implies $\risk{L}$ polyhedral.
   Now we can apply Proposition~\ref{prop:embed-risk-poly} to observe the result.}
   
-  \jessie{Can also show that $L$ embeds $L|_\R$ like the original paper and use a modification of COLT Lemma 11.}
+  \jessie{Can also show that $L$ embeds $L|_\R$ like the original paper and use COLT Lemma 11/Lemma~\ref{lem:finite-full-dim}.}
 \end{proof}
 
 We now turn to the reverse direction: is every discrete loss embedded by some polyhedral loss?
@@ -465,6 +481,7 @@ Using a construction via convex conjugate duality, which has appeared several ti
 \end{theorem}
 \begin{proof}
   \raf{Already have the proof from Theorem~\ref{thm:general-duality-embedding}.  Should cite DKR and others...}
+  \jessie{Might try tonight without properties?}
 \end{proof}
 
 We have seen a tight connection between embeddings and polyhedral losses\raf{... what else can we say here?  Why is this cool?}
@@ -744,7 +761,7 @@ Here are two simple examples.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Proving (in)consistency via embeddings}
+\section{Proving (in)consistency via embeddings}\label{sec:examples}
 The above techniques allow us to evaluate and simplify some previous results in the literature.
 \subsection{Top-$k$ loss}
 Yang and Koyejo~\cite{yang2018consistency} prove the inconsistency of a family of surrogates for the top-$k$ classification problem.
