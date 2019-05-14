@@ -1,0 +1,174 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{mathtools, amsthm, amsmath, amssymb, graphicx, verbatim}
+%\usepackage[thmmarks, thref, amsthm]{ntheorem}
+\usepackage{color}
+\usepackage{wrapfig}
+\usepackage{subcaption}
+\usepackage[colorinlistoftodos,textsize=tiny]{todonotes} % need xargs for below
+%\usepackage{accents}
+\usepackage{bbm}
+\usepackage{xspace}
+
+\usetikzlibrary{calc}
+\newcommand{\Comments}{1}
+\newcommand{\mynote}[2]{\ifnum\Comments=1\textcolor{#1}{#2}\fi}
+\newcommand{\mytodo}[2]{\ifnum\Comments=1%
+  \todo[linecolor=#1!80!black,backgroundcolor=#1,bordercolor=#1!80!black]{#2}\fi}
+\newcommand{\raf}[1]{\mynote{green}{[RF: #1]}}
+\newcommand{\raft}[1]{\mytodo{green!20!white}{RF: #1}}
+\newcommand{\jessie}[1]{\mynote{purple}{[JF: #1]}}
+\newcommand{\jessiet}[1]{\mytodo{purple!20!white}{JF: #1}}
+\newcommand{\bo}[1]{\mynote{blue}{[Bo: #1]}}
+\newcommand{\botodo}[1]{\mytodo{blue!20!white}{[Bo: #1]}}
+\ifnum\Comments=1               % fix margins for todonotes
+  \setlength{\marginparwidth}{1in}
+\fi
+
+
+\newcommand{\reals}{\mathbb{R}}
+\newcommand{\posreals}{\reals_{>0}}%{\reals_{++}}
+\newcommand{\dom}{\mathrm{dom}}
+
+\newcommand{\prop}[1]{\Gamma[#1]}
+\newcommand{\eliccts}{\mathrm{elic}_\mathrm{cts}}
+\newcommand{\eliccvx}{\mathrm{elic}_\mathrm{cvx}}
+\newcommand{\elicpoly}{\mathrm{elic}_\mathrm{pcvx}}
+\newcommand{\elicembed}{\mathrm{elic}_\mathrm{embed}}
+
+\newcommand{\cell}{\mathrm{cell}}
+
+\newcommand{\abstain}[1]{\mathrm{abstain}_{#1}}
+\newcommand{\mode}{\mathrm{mode}}
+
+\newcommand{\simplex}{\Delta_\Y}
+
+% alphabetical order, by convention
+\newcommand{\C}{\mathcal{C}}
+\newcommand{\D}{\mathcal{D}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\I}{\mathcal{I}}
+\newcommand{\R}{\mathcal{R}}
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\Y}{\mathcal{Y}}
+
+\newcommand{\inprod}[2]{\langle #1, #2 \rangle}%\mathrm{int}(#1)}
+\newcommand{\inter}[1]{\mathring{#1}}%\mathrm{int}(#1)}
+%\newcommand{\expectedv}[3]{\overline{#1}(#2,#3)}
+\newcommand{\expectedv}[3]{\E_{Y\sim{#3}} {#1}(#2,Y)}
+\newcommand{\toto}{\rightrightarrows}
+\newcommand{\strip}{\mathrm{strip}}
+\newcommand{\trim}{\mathrm{trim}}
+\newcommand{\fplc}{finite-piecewise-linear and convex\xspace} %xspace for use in text
+\newcommand{\conv}{\mathrm{conv}}
+\newcommand{\ones}{\mathbbm{1}}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+
+\newcommand{\Ind}{\mathbf{1}}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\arginf}{arg\,inf}
+\DeclareMathOperator*{\sgn}{sgn}
+
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+
+\begin{document}
+
+
+Let $N = \{1,\ldots,k\}$, $\Y = 2^N$, $U = \{-1,0,1\}^k$.
+
+For $S\subseteq N$, let $\ones_S \in \{0,1\}^k$ with $(\ones_S)_i = 1 \iff i\in S$.
+Let $\chi_S \in \{-1,1\}^k$ with $\chi_S = 2\ones_S - \ones$.
+
+We depart from our usual notation for clarity, so we have discrete loss $\ell : \Y \times \Y \to \reals$ and surrogate $L : \reals^k \times \Y \to \reals$.
+
+Given a set-valued function $f$, its \emph{Lov\'asz extension} $F:\reals^k\to\reals$ is given by
+$F(u) = \sum_{i=1}^k u_{j_i} (f(\{j_1,\ldots,j_i\}) - f(\{j_1,\ldots,j_{i-1}\})$ where for each $u$ the indices $j$ are 
+
+Again given $f$ the \emph{Lov\'asz hinge} is the loss $L:\reals^k\times\Y\to\reals$ given by $L(u,S) = F((\ones - u \odot \chi_S)_+)$, where $v (u \odot y)_i = u_iy_i$ is the Hadamard (element-wise) product and $((u)_+)_i = \max(u_i,0)$.
+\raf{Actually, this is just the definition for the increasing $f$ case -- still need to work out the other one, but I think it should work the same.}
+
+\begin{lemma}
+  \label{lem:bar-f}
+  For any set function $f$, define $\bar f := 2^{-k} \sum_{S\subseteq N} f(S)$.
+  Let $f$ be submodular and normalized.
+  Then $\bar f \geq f(N)/2$, and $f$ is modular if and only if $\bar f = f(N)/2$.
+\end{lemma}
+
+\begin{lemma}
+  \label{lem:lovasz-trim}
+  Let $\Gamma = \prop{L}$.
+  Then $\trim(\Gamma) \subseteq \{\Gamma_u : u \in U\}$.
+\end{lemma}
+\begin{proof}
+  \raf{Because $F$ is linear on the simplices... so every face has one of these points as a vertex.}
+\end{proof}
+
+\begin{lemma}
+  \label{lem:lovasz-u}
+  Let $u\in U$, so that $u = \ones_A - \ones_B$ where $A\cap B = \emptyset$.
+  Let $C = N \setminus (A\cup B)$.
+  Then $L(u,S) = f((A\triangle S)\setminus C) + f((A\triangle S)\cup C)$.
+\end{lemma}
+\begin{proof}
+  \raf{FB = Francis Bach's notes (URL commented out)}% \url{https://arxiv.org/pdf/1111.6453.pdf}
+  We have $L(u,S) = F((\ones - u\odot\chi_S)_+) = F(\ones - u\odot\chi_S)$ as $u\in U$.
+  Examining the cases for $x = \ones - u\odot\chi_S$, we have $x_i = 1$ if $i \in C$ (since then $u_i = 0$), $x_i = 2$ if $i \in S \triangle A \setminus C$, and $x_i = 0$ otherwise.
+%  (Or more directly, $x = \ones - (\ones_A - \ones_B)\odot(2\ones_S - \ones) = \ones - 2\ones_A\odot\ones_S + \ones_A + 2\ones_B\odot\ones_S - \ones_B$...
+  Thus, we have $x = 2\ones_{S \triangle A \setminus C} + \ones_C$.
+  Appealing to~\raf{FB Prop 3.1(h)}, we have the result.
+\end{proof}
+
+Let $\bar p$ be the uniform distribution on $\Y$.
+
+\begin{lemma}
+  \label{lem:2-bar-f}
+  For all $u\in U$, $L(u;\bar p) \geq f(N)$.
+  For all $u\in \{-1,1\}^k$, $L(u;\bar p) = 2\bar f$.
+\end{lemma}
+\begin{proof}
+  Let $u\in U$, and let $A,C\subseteq N$ be as in Lemma~\ref{lem:lovasz-u}.
+  Then letting $\overline C := N\setminus C$ for short, we have
+  \begin{align*}
+    L(u;\bar p)
+    &= 2^{-k} \sum_{S\subseteq N} f((A\triangle S)\setminus C) + f((A\triangle S)\cup C)
+    \\
+    &= 2^{-(k-|C|)} \sum_{T\subseteq N\setminus C} f(T) + f(T\cup C)
+    \\
+    &= \frac 1 2 \left( 2^{-(k-|C|)} \sum_{T\subseteq N\setminus C} f(T) + f((N\setminus C)\setminus T) + f(T\cup C) + f(((N\setminus C)\setminus T)\cup C)\right)
+    \\
+    &\geq \frac 1 2 \left( f(N\setminus C) + f(\emptyset) + f(N) + f(C) \right)
+    \\
+    &\geq \frac 1 2 \left( f(N) + f(N) \right)~,
+  \end{align*}
+  where we use submodularity in both inequalities.
+\end{proof}
+
+\begin{theorem}
+  Let $f$ be submodular, normalized, increasing, and satisfy $\{\emptyset\} = \argmin_{S\subseteq N} f(S)$.
+  Then the Lov\'asz hinge for $f$ is consistent if and only if $f$ is modular.
+  \raft{I am only dealing with the increasing case for now.  I'm quite confident the other case works too.}
+\end{theorem}
+\begin{proof}
+  Let $\bar p$ be the uniform distribution, and $\delta_S$ be point distribution on arbitrary $S\subseteq N$.
+  For sufficiently small $\epsilon$ \raf{FILL IN LATER}, let $p = (1-\epsilon) \bar p + \epsilon \delta_S$.
+  Then for all $u\in\{-1,1\}^k$ we have $L(u;p) = (1-\epsilon) 2 \bar f + \epsilon L(u,S) \geq (1-\epsilon)\bar f > L(0;p) = f(N)$.
+  Let $u \in \Gamma(p) \cap U$, which is nonempty by Lemma~\ref{lem:lovasz-trim}; by the above, we conclude $u\notin\{-1,1\}^k$.
+  Observe that $c = L(u;p) = \min_{u'\in\reals^k} L(u';p)$ is independent of the choice of $S$, by symmetry of $L$.
+  
+  Now let $T\subseteq N$ such that $\chi_T = \sgn(u)$, breaking ties at 0 arbitrarily.
+  If $T\neq S$, we are done, as $\{S\} = \argmin_{S'\subseteq N} \ell(S';p)$ by our assumption that $\emptyset$ minimizes $f$.
+  If $T=S$, observe that we can write $u = \ones_A - \ones_B$ where $A\cap B = \emptyset$ and $C = N \setminus (A\cup B) \neq \emptyset$.
+  Let $p' = (1-\epsilon) \bar p + \epsilon \delta_{S'}$ where $S' = S \triangle C$.
+  By Lemma~\ref{lem:lovasz-u}, we have
+  $L(u,S') = f((A\triangle S')\setminus C) + f((A\triangle S')\cup C) = f((A\triangle (S\triangle C))\setminus C) + f((A\triangle (S\triangle C))\cup C) = f((A\triangle S)\setminus C) + f((A\triangle S)\cup C) = L(u,S)$.
+  Thus, $L(u,p') = (1-\epsilon) L(u,\bar p) + \epsilon L(u,S') = (1-\epsilon) L(u,\bar p) + \epsilon L(u,S') = L(u,p) = c$, so $u$ is still optimal by our observation that $c$ is independent of the choice of $S$.
+  As $\chi_{S'} \neq \sgn(u)$, we are done.
+\end{proof}
+
+\end{document}
