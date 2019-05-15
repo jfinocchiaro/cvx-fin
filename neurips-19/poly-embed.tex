@@ -97,7 +97,8 @@
 \newtheorem{conjecture}{Conjecture}
 
 
-\title{Convex Surrogates via Polyhedral Losses}
+\title{Consistent Polyhedral Surrogates via Embedding}
+%\title{Convex Surrogates via Polyhedral Losses}
 \author{%
  Jessica Finocchiaro\raf{Jessie?} \\
  \texttt{jessica.finocchiaro@colorado.edu}\\
@@ -123,7 +124,7 @@
   We then investigate the dimensionality of the surrogate hypothesis space required for such an embedding, giving a complete characterization of the 1-dimensional case.
   We illustrate our results with modest lower bounds for abstain loss, and conclude with future directions.
 \end{abstract}
-  
+
 %  Convex surrogates are sweet.
 %  Given a loss for a classification-like problem, there are two natural approaches to design convex surrogates.
 %  First, one may attempt to map each prediction to a low-dimensional vector, and try to find a convex loss in that space with the right calibration.
@@ -219,7 +220,7 @@ For the case of $\reals^2$ \jessiet{$\reals^2$ or $n \in \{3, 4\}$?}, we will sh
 %   \item $V$ and $B(P)$ as we get ready for later.
 % \end{itemize}
 
-  
+
 
 \section{Setting}
 \label{sec:setting}
@@ -278,7 +279,7 @@ We say that a surrogate $L(u)$ is \emph{consistent} with respect to a discrete l
   A link is \emph{separated} if it is $\delta$-separated for some $\delta>0$.
 \end{definition}
 
-We omit the details connecting this definition to consistency, and instead refer the reader to Ramaswamy et al.~\cite{ramaswamy2018consistent}. 
+We omit the details connecting this definition to consistency, and instead refer the reader to Ramaswamy et al.~\cite{ramaswamy2018consistent}.
 (See the proof of Theorems 8.1-8.3.).
 \raf{We could flesh this out if we want.  Might be worth it.  Their entire proof(s) establish $\delta$-separation, and then the line ``The Theorem simply follows from linearity of expectation.''}
 
@@ -308,7 +309,7 @@ However, we say that hinge loss embeds the mode, while logistic loss does not.
 In another example, we consider the abstain loss and an embedding given by Ramaswamy et al.~\cite{ramaswamy2018consistent} in Section~\ref{sec:examples}, but note that the link function they provide is not unique.
 Essentially, the discrete abstain$(1/2)$ loss is minimized in expectation by predicting the most likely outcome $\argmax_y p_y$, conditioned on $p_y \geq 1/2$.
 If the most likely outcome is not likely enough, the loss is minimized by ``abstaining'' from predicting; a situation one can imagine would be useful if a false positive is costly.
-\jessie{Are we adding discussion about the choice of link relative to the norm?} 
+\jessie{Are we adding discussion about the choice of link relative to the norm?}
 
 
 \subsection{Property Elicitation}
@@ -392,33 +393,33 @@ This useful result will drive many of our findings in this section.
 \begin{proof}
   \raf{Use distributions on the interior of the cells; since the risk is differentiable there, the loss is uniquely defined, and thus the same, and the same throughout the cell.}
   \jessie{Stated in COLT Lemma 11 and Prop 12 (Lemma~\ref{lem:finite-full-dim} and Prop~\ref{prop:embed-trim} here), but I don't see us prove this in the original paper.}
-  
+
   \jessie{The forward implication is a corollary of COLT Lemma 11}
-  
+
   %Jessie's first attempt at a proof
   First, suppose $L$ embeds $\ell$, and fix $p \in \simplex$.
   We want to show for all $p \in \simplex$ that $\inf_{u\in\reals^d} L(u,p) = \min_{r \in \R} \ell(r, p)$.
   Consider two cases: first suppose there exists a $u \in \reals^d$ so that $u \in \arginf_{u' \in \reals^d}L(u',p)$ and $u \in \varphi(\R)$.
-  Then 
+  Then
   \begin{align*}
   \inf_u L(u,p) = \min_{r \in \R} L(\varphi(r), p) = \min_{r \in \R} \ell(r, p)
   \end{align*}
    first by the case assumption and then by the definition of embedding.
   Now in the second case, if such a $u$ does not exist, then $\inf_{u \in \reals^d}L(u,p) < \min_r L(\varphi(r), p) = \min_r \ell(r,p)$.
   Therefore, $r \in \argmin_r' \ell(r', p) \implies \varphi(r) \not \in \argmin_u L(u,p)$ which contradicts the assertion that $L$ embeds $\ell$.
-  
+
   \jessie{Not sure on this one, just FYI.  I think it's a corollary of COLT Prop 12, now Prop~\ref{prop:embed-trim}.}
   Now, to see that $\risk{\ell} = \risk{L} \implies L$ embeds $\ell$, consider $F$ to be the set of facets of the surface of $\risk{L}$.
   For each facet $f \in \F$, we know by nonredundancy that there is some $p \in \inter{f}$ so that $\risk{L}$ is differentiable at $p$.
   Moreover, by Frongillo and Kash~\cite[Theorem 2?]{frongillo2014general} \jessie{Check ref} we know that both $\ell$ and $L$ have a unique minimizer at $p$, and since the subgradients of the risks are the same (by their equality), we know the minimizers of the losses are also the same, up to relabeling the reports via a bijection.
   Therefore, we can see that $L$ embeds $\ell$, as $L(\varphi(r),y) = \ell(r,y)$ for all $r\in\R$ and $y \in \Y$.
-  \jessie{Incomplete...?}  
-  
+  \jessie{Incomplete...?}
+
 %  Now let us show that $\risk{L} = \risk{\ell} \implies L$ embeds $\ell$.
 %  Let $F$ be the set of facets in $\risk{\ell}$.
 %  For each $f \in F$, there is some $p \in \inter{f}$ so that $\risk{L}(p) = \risk{\ell}(p)$ is differentiable, and so the loss $L$ must then be uniquely defined.
 %  \jessie{This is my interpretation of your note, but I don't see how this proves the existence of an embedding.  My inclination is to show there's the ``stripped'' loss that we embed ($\varphi(u) = u$) and for any bijection $\phi$, we can see that $\ell$ can be modified to $\ell^\phi$ so that $\risk{\ell} = \risk{\ell^\phi}$, and $L$ also embeds $\ell^\phi$ with $\varphi(r) = \phi(r)$.  Does that make sense?}
-  
+
 
 \end{proof}
 
@@ -439,13 +440,13 @@ Note that Bayes risk, a function from distributions over $\Y$ to the reals, may 
   By Proposition~\ref{prop:embed-bayes-risks}, we know that $\risk{L} = \risk{\ell}$.
   Since $\ell$ is discrete, we know that $\risk{\ell}$ is polyhedral. \jessie{Need to prove? Stated as fact in proof of COLT Prop 12...}
   Therefore, $\risk{L}$ is polyhedral.
-  
-  For the reverse implication, suppose $\risk{L}$ is polyhedral. 
+
+  For the reverse implication, suppose $\risk{L}$ is polyhedral.
   For each facet $f \in F$ of $\risk{L}$, consider the report $u_f = \arginf_{u'} L(u', p)$ for some $p \in \inter f$.
   (Note that $u_f$ will be unique and the same regardless of the choice of $p\in \inter f$, since $\risk{L}$ is differentiable here.)
   Since $\risk{L}$ has a finite set of facets, the set $\R = \{u_f\}_{f \in F}$ is finite.
   Now define the discrete loss $\ell:\R \to \Y$ by $\ell(r,y) = L(r,y)$.
-  
+
   To see that $L$ embeds this discrete $\ell$, consider the embedding function to be the identity for all $r \in \R$.
   By Proposition~\ref{prop:embed-bayes-risks}, it is sufficient to show $\risk{L} = \risk{\ell}$.
   For all $p \in \simplex$, we observe
@@ -454,7 +455,7 @@ Note that Bayes risk, a function from distributions over $\Y$ to the reals, may 
   \end{align*}
   Note that the second equality holds because for every $p \in \simplex$, we know there is some $r \in \R$ such that $r \in \arginf_u L(u,p)$ by closure of subgradient sets, and thus the loss values are the same, regardless of if we restrict to $\R$ or stay in $\reals^d$.
   Thus, $L$ embeds the discrete $\ell$ as constructed by Proposition~\ref{prop:embed-bayes-risks}.
-  
+
   \raf{Just take the discrete reports to be the facets, and use the Bayes risk result.}
 \end{proof}
 
@@ -468,7 +469,7 @@ Combining Proposition~\ref{prop:embed-risk-poly} with the straightforward result
   \raf{Not sure how trivial this is, but it's definitely true.  I suspect it has a very short proof.}
   \jessie{$L(u,p)$ polyhedral in $\reals^d$ implies $L^*(0,p) = -\risk{L}(p)$ polyhedral in $\simplex$ implies $\risk{L}$ polyhedral.
   Now we can apply Proposition~\ref{prop:embed-risk-poly} to observe the result.}
-  
+
   \jessie{Can also show that $L$ embeds $L|_\R$ like the original paper and use COLT Lemma 11/Lemma~\ref{lem:finite-full-dim}.}
 \end{proof}
 
@@ -628,7 +629,7 @@ Remark: This prop and theorem give an excellent reason to focus on embeddings, s
 \item Theorem (Lambert et al): $\ell$ order-sensitive iff $\prop{\ell}$ orderable.
 \item Theorem: $\ell$ 1-embeddable iff $\ell$ order-sensitive.  Moreover,   1-embeddable implies 1-embeddable via polyhedral loss.
   % \item Prop: Every polyhedral $L:\reals\to\reals^\Y$ embeds an order-sensitive $\ell$.
-  
+
 \item Def: indirectly elicits (necessary but not sufficient for consistency).
 \item Prop: If convex $L:\reals\to\reals^\Y$ indirectly elicits finite $\gamma$, then $\gamma$ is orderable.
 \item Remark: TFAE for all the complexity classes (but don't define them rigorously).
@@ -761,7 +762,9 @@ Here are two simple examples.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Proving (in)consistency via embeddings}\label{sec:examples}
+\section{Proving (in)consistency via embeddings}
+\raf{Notes about the story, partially to myself, partially to Jessie: I think we want to emphasize the proofs of consistency and inconsistency (as the section title reflects), but we also want to illustrate our constructive approach to finding a link.  Basically, most of these examples (except abstain) have the link built in (usually as the sign function, though slightly different for top-k), and they just work around it.  For abstain, we can give alternate link functions, and hopefully show that the L1-based link has a better calibration function.  For the others, it may suggest that it's worth thinking ``outside the box'' (HAH, genious...) for embeddings which are not the hypercube.}
+
 The above techniques allow us to evaluate and simplify some previous results in the literature.
 \subsection{Top-$k$ loss}
 Yang and Koyejo~\cite{yang2018consistency} prove the inconsistency of a family of surrogates for the top-$k$ classification problem.
@@ -783,15 +786,16 @@ Yang and Koyejo~\cite{yang2018consistency} create a new surrogate loss that is c
 In particular, Yang and Koyejo evaluate two losses given by Lapin et al.~\cite{lapin2016loss, lapin2018analsis}, one of which is shown to be convex, but its consistency is left as an open question.
 
 After our discussion of embeddings, we now have a way of proving consistency: a surrogate $L$ is consistent with respect to a discrete loss $\ell$ \jessie{we still haven't defined consistency... here I'm going by Yang's consistency.  I suppose we still need a proof of this.} if and only if $L$ embeds $\ell$.
+\raf{Consistency: it's is about the expected loss over $(x,y)$ pairs, and showing that getting the best surrogate loss should mean getting the best original loss.  Take another look at Theorem 2.4 of the top-k paper.  Losses can certainly be consistent without embedding $\ell$ (even if polyhedral: you can link multiple embedded points to a single discrete report, e.g.\ a convex surrogate for ranking loss can link to the mode), so the ``iff'' is not right.  I think it's worth spending some time thinking about what exactly we need to show to prove inconsistency.  In particular, see if this reasoning checks out:  Suppose we find a distribution $p$ for which an optimal surrogate report is $r$ but $\psi(r)$ is not optimal for $\ell$.  Since we could have a conditional distribution of $p$ for every $x$, so the optimal hypothesis would just be the constant function $h(x) = r$, which achieves the optimal $L$-loss, and when linked, $\psi \circ h(x) = \psi(r)$, which does not achieve the optimal $\ell$-loss.}
 We can then prove that the surrogates given by Lapin et al.~\cite{lapin2018analysis} are not consistent in a more suffice manner; we do so by showing the discrete loss that their surrogate embeds is not equal to  $\ell_{top-k}$.
 
 Here, $r \in 2^n$ can be thought of as a binary 0-1 vector representing set inclusion and $k \leq n$ is a constant.
-There is some ambiguity on how $t_k(r)$ should be defined if $\|r \|_\infty > k$, so we shall say that $y \not \in t_k(r)$ in such instances. 
+There is some ambiguity on how $t_k(r)$ should be defined if $\|r \|_\infty > k$, so we shall say that $y \not \in t_k(r)$ in such instances.
 
 Now, for example, consider the surrogate discussed by Lapin et al.~\cite{yang2018consistency}, and Yang and Koyejo~\cite{yang2018consistency}.
 Following the numbering of Yang and Koyejo, we call the surrogate $L_2(u,y) := \max\left( \frac{1}{k} \sum_{i=1}^k (u + \indopp(y))_{[i]} - u_y \right) $, where $\indopp(y) = \ones - e_y$, and $(x)_{[i]}$ is the $i^{th}$ largest component of $x$.
 
-It can be verified that 
+It can be verified that
 $\ell_2(r,y) = \begin{cases}
 \min\left(\frac{HD(r, e_y)}{k}, 1\right) & r_y = 1 \\
 1 + \min \left(\frac{HD(s, \vec{0})}{k}, 1\right) & r_y = 0
@@ -807,7 +811,9 @@ This begs the question: what is the relationship between consistency and convexi
 Are there instances where only one can be achieved, but not both?
 
 \subsection{Lov\'asz Hinge}
-\jessie{Lovasz hinge paper? ~\cite{yu2018lovasz}}
+\jessie{Lovasz hinge paper~\cite{yu2018lovasz}}
+\raf{I'm tempted to do the following.  We give the abstain counter-example for $k=2$ (I've been using $k$ for the number of elements in the set constructions, but maybe $n$ is better; we can sync up notation later), and then characterize the $k=2$ case informally, showing that the only thing that works is when $f(\{1,2\}) = f(\{1\}) + f(\{2\})$.  Then we can say ``In fact, in full version of the paper, we show a much tighter result: essentially the only Lov\'asz hinge that is consistent is weighted Hamming loss'' or something to that effect.  This leaves room for us to send a journal version to JMLR (for which we'll need some new results), which seems like a good idea for a paper like this: We seem to have useful tools here, so why not let them marinate a bit in NeurIPS, collect feedback, and then publish a more polished/mature version.}
+
 
 \subsection{Abstain loss}
 Our final example of an embedded loss is given by Ramaswamy et al.~\cite{ramaswamy2018consistent}.
@@ -1094,7 +1100,7 @@ We extend Aurenhammer's result to a weighted sum of convex functions, showing th
     & \iff p \in \partial C(u)~.
   \end{align*}
   \jessiet{Not sure I see this- REVISIT.}
-  
+
   Together with eq.~\eqref{eq:1}, we now have for any $u \in \D$ and $p\in\simplex$ that
   \begin{equation}
     \label{eq:3}
@@ -1255,7 +1261,7 @@ We extend Aurenhammer's result to a weighted sum of convex functions, showing th
   \jessiet{How should $w$ be interpreted?}
   To this end, fix $i$ and let $v = v_{i-1}, w = v_{i}, \alpha=\alpha_i$.
   By the above, there is no $y\in\Y$ with $v_y > 0 > w_y$, so the condition $v \leq \alpha w$ is equivalent to the following:
-  
+
   \begin{enumerate}
   \item[(i)] For all $y$ with $v_y,w_y < 0$, $\alpha \leq v_y/w_y$.
   \item[(ii)] For all $y$ with $v_y,w_y > 0$, $\alpha \geq v_y/w_y$.
