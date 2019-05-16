@@ -267,7 +267,7 @@ For example, the hinge loss is polyhedral, whereas logistic loss is not.
 To ensure consistency, we will seek ``separated'' link functions, which require that the excess loss of some report is bounded by (a constant times) the excess loss of the linked report.
 
 \begin{definition}[Consistency]\label{def:consistency}
-We say that a surrogate $L(u)$ is \emph{consistent} with respect to a discrete loss $\ell(r)$ if, for all $p \in \simplex$, \jessie{....?}
+  A surrogate $L:\reals^d\to\reals^\Y_+$ and link $\psi:\reals^d\to\R$ is \emph{consistent} with a discrete loss $\ell:\R\to\reals^\Y_+$ if \raf{statement about distributions on $\X\times\Y$, limits of hypotheses, and Bayes opt hypotheses}
 \end{definition}
 
 \begin{definition}[Separated Link]\label{def:links}
@@ -280,11 +280,7 @@ We say that a surrogate $L(u)$ is \emph{consistent} with respect to a discrete l
   A link is \emph{separated} if it is $\delta$-separated for some $\delta>0$.
 \end{definition}
 
-We omit the details connecting this definition to consistency, and instead refer the reader to Ramaswamy et al.~\cite{ramaswamy2018consistent}.
-(See the proof of Theorems 8.1-8.3.).
-\raf{We could flesh this out if we want.  Might be worth it.  Their entire proof(s) establish $\delta$-separation, and then the line ``The Theorem simply follows from linearity of expectation.''}
-
-Several consistent convex surrogates in the literature can be thought of as ``embeddings'': map the discrete reports to a vector space, and find a convex loss which agrees with the original loss and has the same statistical behavior.
+Several consistent convex surrogates in the literature can be thought of as ``embeddings'', wherein one maps the discrete reports to a vector space, and finds a convex loss which agrees with the original loss and has the same statistical behavior.
 We formalize this notion as follows.
 %
 \begin{definition}\label{def:loss-embed}
@@ -295,22 +291,21 @@ We formalize this notion as follows.
   \end{equation}
 \end{definition}
 %
-Note that embeddings do not automatically give rise to separated links; indeed, apart from mapping the embedded reports back from whence they came \raft{I know... just wanted to say that} via $\psi(\varphi(r)) = r$, how to map the remaining values is far from clear.
+Note that it is not clear if embeddings give rise to separated links; indeed, apart from mapping the embedded reports back from whence they came \raft{I know... just wanted to say that} via $\psi(\varphi(r)) = r$, how to map the remaining values is far from clear.
 Constructing separated links from embeddings will therefore be a major focus in Section~\ref{sec:poly-loss-embed}.
 
 
-\raf{How hinge and abstain fit in}
+\raf{How hinge fits in}
 \jessie{Added the paragraphs below.}
 To illustrate the idea of embeddings, we now look in detail at two key examples.
 First, consider a binary classification problem on the outcomes $\{-1, +1\}$.
-We know that both the hinge loss $L_{hinge}(u,y) := (1 - uy)_+$ and logistic loss $L_{logistic}(u,y) := \ln\left(1 + \exp(-uy)\right)$ are convex surrogates that are minimized in expectation by predicting the mode, as is 0-1 loss $\ell_{mode}(r,y) := \textbf{1}[r\neq y]$.
+We know that both the hinge loss $L_{hinge}(u,y) := (1 - uy)_+$ and logistic loss $L_{logistic}(u,y) := \ln\left(1 + \exp(-uy)\right)$ are convex surrogates that are minimized in expectation by predicting the mode, as is 0-1 loss $\ell_{mode}(r,y) := \ones\{r\neq y\}$.
 However, we say that hinge loss embeds the mode, while logistic loss does not.
 \jessie{Come back to flesh this out if space?}
 
-In another example, we consider the abstain loss and an embedding given by Ramaswamy et al.~\cite{ramaswamy2018consistent} in Section~\ref{sec:examples}, but note that the link function they provide is not unique.
-Essentially, the discrete abstain$(1/2)$ loss is minimized in expectation by predicting the most likely outcome $\argmax_y p_y$, conditioned on $p_y \geq 1/2$.
-If the most likely outcome is not likely enough, the loss is minimized by ``abstaining'' from predicting; a situation one can imagine would be useful if a false positive is costly.
-\jessie{Are we adding discussion about the choice of link relative to the norm?}
+% In another example, we consider the abstain loss and an embedding given by Ramaswamy et al.~\cite{ramaswamy2018consistent} in Section~\ref{sec:examples}, but note that the link function they provide is not unique.
+% Essentially, the discrete abstain$(1/2)$ loss is minimized in expectation by predicting the most likely outcome $\argmax_y p_y$, conditioned on $p_y \geq 1/2$.
+% If the most likely outcome is not likely enough, the loss is minimized by ``abstaining'' from predicting; a situation one can imagine would be useful if a false positive is costly.
 
 
 \subsection{Property Elicitation}
@@ -360,22 +355,6 @@ First, we formalize the notion of embedding properties.
 \end{definition}
 We can now see that a surrogate $L:\reals^d\to\reals^\Y$ embeds $\ell:\R\to\reals^\Y$ if and only if $\prop{L}$ embeds $\prop{\ell}$ via $\varphi$ and for all $r\in\R$ we have $L(\varphi(r)) = \ell(r)$.
 
-
-\subsection{Important Examples}\label{sec:important-examples}
-\raf{Probably should move this up to where we introduce embeddings.}
-
-  Ranking and classification problems are well-known to the field of machine learning.
-  The most studied classification problem is the elicitation of the mode.
-  While the mode over $n$ outcomes is elicitable by 0-1 loss, it is known that eliciting the mode by a convex loss is much more difficult.
-  In fact, the best convex surrogate that can be used to elicit the mode ``embeds'' the reports into $\reals^{n-1}$.
-  Therefore, we say $\eliccvx($mode$) = n-1$.
-
-  A property of interest similar to the mode is the $\abstain{\alpha}$ property.
-  In this property in which one reports the most likely outcome if the probability of such an outcome is greater than $1-\alpha$, and otherwise ``abstains'' from reporting.
-  That is, $\gamma(p) = \argmax_{r \in \R}p_r$ if $\max_{r \in \R} p_r \geq 1-\alpha$ and is ``abstain'' otherwise.
-  The finite loss eliciting $\abstain{\alpha}$ can be written
-  $\ell(r,y) = 0$ if $r=y$, $\alpha$ if $r=\text{abstain}$, and $1$ otherwise.
-\cite{ramaswamy2018consistent} show that $\elicpoly(\abstain{1/2}) \leq \ceil{\log_2 n}$, although it is not known if this bound is tight.
 
 
 \section{Embeddings and Polyhedral Losses}
@@ -605,10 +584,15 @@ Giving a construction that yields a separated link for all polyhedral losses is 
 \section{Consistency via Separated Links}
 \label{sec:separated-links}
 
+We have now seen the tight relationship between polyhedral losses and embeddings; in particular, every polyhedral loss embeds some discrete loss.
+The embedding itself tells us how to map the embedded points back to the discrete reports (map $\varphi(r)$ to $r$), but it is not clear how to map the remaining reports to obtain a full link function, and whether such a link can lead to consistency.
+In this section, we show that separated link functions guarantee consistency, and give a construction to generate separated links for any polyhedral loss.
+We illustrate our construction in the following section.
+
 \raf{MOVE SOME PROPERTIES STUFF HERE?  E.g. Prop~\ref{prop:embed-trim}.}
 
 \begin{proposition}
-  If $\psi$ is a separated link between losses $L$ and $\ell$, then \raf{how do we want to talk about consistency?}
+  If $\psi$ is a separated link between losses $L$ and $\ell$, then $L$ and $\psi$ are consistenty with $\ell$.
 \end{proposition}
 \begin{proof}
   \raf{Use Hari's theorems from their section 8.}
@@ -625,11 +609,11 @@ Remark: This prop and theorem give an excellent reason to focus on embeddings, s
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Application to specific surrogates}\label{sec:examples}
+\section{Application to Specific Surrogates}\label{sec:examples}
 
 Our results give a framework to construct consistent surrogates and link functions, but they also provide a way to verify the consistency or inconsistency of given surrogates.
 Below, we illustrate the power of this framework with specific examples from the literature, as well as new examples.
-In some cases we simplify existing proofs, while in others our results we give new results, such as the inconsistency of the recently proposed Lov\'asz hinge.
+In some cases we simplify existing proofs, while in others we give new results, such as the inconsistency of the recently proposed Lov\'asz hinge.
 \raf{Notes to self: The top-k and hypercube/set examples (except abstain) have the link built in, e.g.\ as the sign function), and they just work around it.  Our results may suggest that it's worth thinking ``outside the box'' (HAH, genious...) and looking for embeddings which are not the hypercube.}
 
 \subsection{Consistency of abstain surrogate, with tighter link}
@@ -650,10 +634,12 @@ Here, the report $a$ corresponds to ``abstaining'' from voting if the outcome of
 The surrogate provided by Ramaswamy et al.~\cite{ramaswamy2018consistent} for $\alpha = 1/2$ embeds the $n$ outcomes into the $n$ vertices of the $\ceil{\log_2(n)}$-dimensional hypercube (vertices in $\{\pm 1\}^n$), and embeds the abstain point at the origin.
 They go on to show consistency and provide a \jessie{which type?} link function from their surrogate to $\ell_{abs_{1/2}}$.
 
-\subsection{Inconsistency of top-$k$ loss}
-Yang and Koyejo~\cite{yang2018consistency} prove the inconsistency of a family of surrogates for the top-$k$ classification problem.
+\subsection{Inconsistency of top-$k$ losses}
 
-The top $k$ classification problem takes as input a vector $r \in \R = \{r \in \{0,1\}^n \text{ such that } |r| = k\}$, and observes outcome $y \in [n]$
+Yang and Koyejo~\cite{yang2018consistency} prove the inconsistency of a family of polyhedral surrogates for the top-$k$ classification problem.
+To illustrate our framework, we show how to simplify their arguments using embeddings.
+
+The top $k$ classification problem takes as input a vector $r \in \R = \{r \in \{0,1\}^n \text{ such that } |r| = k\}$, \raf{mixing sets and indicators here, unless you mean $\|r\|_1$} and observes outcome $y \in [n]$
 
 We say the top-$k$ loss $\ell_{top-k}:\R \to \reals$ is
 \begin{align}
@@ -695,13 +681,41 @@ This begs the question: what is the relationship between consistency and convexi
 Are there instances where only one can be achieved, but not both?
 
 \subsection{Inconsistency of Lov\'asz hinge}
-\raf{NEW: no consistency results known previously}
+\label{sec:lovasz-hinge}
 
-\raf{Will not even define the hinge, just mention informal, and give the expression explicitly for the increasing k=2 case: max f(1)... whatever. (That way it can fit in a few paragraphs, and justifies the delegation of the full result to the full version.)}
+Many structured prediction settings can be thought of as making multiple predictions at once, with a loss function that jointly measures error based on the relationship between these predictions.\raf{CITE; can't remember which}
+In the case of $k$ binary predictions, these settings are typically formalized by taking the predictions and outcomes to be $\pm 1$ vectors, so $\R=\Y=\{-1,1\}^k$.
+One then defines a joint loss function, which is often merely a function of the set of mispredictions, meaning $\ell^g(r)_y = g(\{i \in [k] : r_i \neq y_i\})$ for some function $g:2^{[k]}\to\reals$.
+In an effort to provide a general convex surrogate for these settings when $g$ is a submodular function, Yu and Blaschko~\cite{yu2018lovasz} introduce the \emph{Lov\'asz hinge}, which leverages the well-known convex Lov\'asz extension of submodular functions.
+While the authors provide theoretical justification and experiments, consistency of the Lov\'asz hinge is left open, which we resolve negatively.
 
+Rather than formally define the Lov\'asz hinge, we defer the full analysis to the full version of the paper\raf{CITE -- arXiv}, and focus here on the $k=2$ case.
+For brevity, we write $g_\emptyset := g(\emptyset)$, $g_{1,2} := g(\{1,2\})$, etc.
+Assuming $g$ is normalized and increasing (meaning $g_{1,2} \geq \{g_1,g_2\} \geq g_\emptyset = 0$), the Lov\'asz hinge $L:\reals^k\to\reals^\Y_+$ is given by
+\begin{multline}
+  \label{eq:lovasz-hinge}  
+  L^g(u)_y = \max\Bigl\{(1-u_1y_1)_+ g_1 + (1-u_2y_2)_+ (g_{1,2}-g_1),\\[-4pt] (1-u_2y_2)_+ g_2 + (1-u_1y_1)_+ (g_{1,2}-g_2)\Bigr\}~,
+\end{multline}
+where $(x)_+ = \max\{x,0\}$.
+We will explore the range of values of $g$ for which $L^g$ is consistent, where the link function $\psi:\reals^2\to\{-1,1\}^2$ is fixed as $\psi(u)_i = \sgn(u_i)$, with ties broken arbitrarily.
 
-\jessie{Lovasz hinge paper~\cite{yu2018lovasz}}
-\raf{I'm tempted to do the following.  We give the abstain counter-example for $k=2$ (I've been using $k$ for the number of elements in the set constructions, but maybe $n$ is better; we can sync up notation later), and then characterize the $k=2$ case informally, showing that the only thing that works is when $f(\{1,2\}) = f(\{1\}) + f(\{2\})$.  Then we can say ``In fact, in full version of the paper, we show a much tighter result: essentially the only Lov\'asz hinge that is consistent is weighted Hamming loss'' or something to that effect.  This leaves room for us to send a journal version to JMLR (for which we'll need some new results), which seems like a good idea for a paper like this: We seem to have useful tools here, so why not let them marinate a bit in NeurIPS, collect feedback, and then publish a more polished/mature version.}
+Let us consider $g_\emptyset = 0$, $g_1 = g_2 = g_{1,2} = 1$, for which $\ell^g$ is merely 0-1 loss on $\Y$.
+For consistency, then, for any distribution $p\in\simplex$, we must have that whenever $u \in \argmin_{u'\in\reals^2} p\cdot L^g(u')$, then $\psi(u)$ must be the most likely outcome, in $\argmax_{y\in\Y} p(y)$.
+Simplifying eq.~\eqref{eq:lovasz-hinge}, however, we have
+\begin{equation}
+  \label{eq:lovasz-hinge-abstain}  
+  L^g(u)_y = \max\bigl\{(1-u_1y_1)_+,(1-u_2y_2)_+\bigr\} = \max\bigl\{1-u_1y_1,1-u_2y_2,0\bigr\}~,
+\end{equation}
+which is exactly the abstain surrogate\raf{eqref here}.
+We immediately conclude that $L^g$ cannot be consistent with $\ell^g$, as the origin will be the unique optimal report for $L^g$ under distributions with $p_y < 0.5$ for all $y$, and one can simply take a distribution which disagrees with the way ties are broken in $\psi$.
+For example, if we take $\sgn(0) = 1$, then under $p((1,1)) = p((1,-1)) = p((-1,1)) = 0.2$ and $p((-1,-1)) = 0.4$, we have $\{0\} = \argmin_{u\in\reals^2} p\cdot L^g(u)$, yet $\psi(0) = (1,1) \notin \{(-1,-1)\} = \argmin_{r\in\R} p\cdot\ell^g(r)$.
+
+In fact, this example is typical: one can show that $L^g$ is consistent if and only if $g_{1,2} = g_1 + g_2$.
+Moreover, in the linear case, which corresponds to $g$ being \emph{modular}, the Lov\'asz hinge reduces to weighted Hamming loss, which is known to be consistent.
+In the full version of the paper\raf{CITE again arXiv} we generalize this observation for all $k$: $L^g$ is consistent if and only if $g$ is modular.
+In other words, even for $k>2$, the only consistent Lov\'asz hinge is weighted Hamming loss.
+These results cast doubt on the effectiveness of the Lov\'asz hinge in practice.
+
 
 \subsection{New surrogates for cost-sensitive classification}
 \raf{DKR construction applied to this.}
