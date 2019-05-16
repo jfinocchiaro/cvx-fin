@@ -119,10 +119,11 @@
 \maketitle
 
 \begin{abstract}
-We formalize and study the natural approach of designing convex surrogate loss functions via embeddings for problems such as classification or ranking. In this approach, one embeds each of the finitely many predictions (e.g. classes) as a point in $\reals^d$, assigns the original loss values to these points, and convexifies the loss in between to obtain a surrogate.  
-We prove that this approach is equivalent, in a strong sense, to working with polyhedral (piecewise linear convex) losses.  
-Moreover, given any polyhedral loss $L$, we give a construction of a link function through which $L$ is a consistent surrogate for the loss it embeds.  
-We go on to illustrate the power of this embedding framework with succinct proofs of consistency or inconsistency of various polyhedral surrogates in the literature.
+  We formalize and study the natural approach of designing convex surrogate loss functions via embeddings, for problems such as classification or ranking which involve a finite number of possible predictions.
+  Specifically, we consider surrogate losses given by embedding each prediction as a point in $\reals^d$, and convexifying the loss.
+  We prove that this approach is equivalent, in a strong sense, to working with polyhedral (piecewise linear convex) losses.
+  We then investigate the dimensionality of the surrogate hypothesis space required for such an embedding, giving a complete characterization of the 1-dimensional case.
+  We illustrate our results with modest lower bounds for abstain loss, and conclude with future directions.
 \end{abstract}
 
 %  Convex surrogates are sweet.
@@ -234,7 +235,6 @@ We thus begin with a sufficient condition for link functions, after introducing 
 Let $\Y$ be a finite outcome (label) space, and throughout let $n=|\Y|$.
 The set of probability distributions on $\Y$ is denoted $\simplex\subseteq\reals^{\Y}$, represented as vectors of probabilities.
 We write $p_y$ for the probability of outcome $y \in \Y$ drawn from $p \in \simplex$.
-\jessie{Given labeled data of the form $(x,y)$, we abstract away the data input and consider the conditional probabilities $p(Y|X)$, and this is what we denote as $p_y$.}
 \jessiet{Do we want to go into the detail of thinking of $p_y$ as $p(Y|X)$ in finite data}
 
 \raf{Important TODO: we use $\reals^\Y$ sometimes and $\reals^\Y_+$ other times; ideally both $+$, but we need to see what we can prove...  I know this is a key detail for polyhedral losses, to ensure the inf is always attained.}
@@ -622,39 +622,172 @@ Giving a construction that yields a separated link for all polyhedral losses is 
 
 Remark: This prop and theorem give an excellent reason to focus on embeddings, since other techniques do not necessarily give you separated links for free.  Since we know we get them for free, we can just focus on the property, and study elicitation complexity; we know if we have a link at all it can be taken to be separated.  \raf{Is this true?}
 
+\section{Embeddings via Real-Valued Losses}
+\label{sec:1d}
+
+\begin{itemize}
+\item Def: order-sensitive, orderable.
+\item Theorem (Lambert et al): $\ell$ order-sensitive iff $\prop{\ell}$ orderable.
+\item Theorem: $\ell$ 1-embeddable iff $\ell$ order-sensitive.  Moreover,   1-embeddable implies 1-embeddable via polyhedral loss.
+  % \item Prop: Every polyhedral $L:\reals\to\reals^\Y$ embeds an order-sensitive $\ell$.
+
+\item Def: indirectly elicits (necessary but not sufficient for consistency).
+\item Prop: If convex $L:\reals\to\reals^\Y$ indirectly elicits finite $\gamma$, then $\gamma$ is orderable.
+\item Remark: TFAE for all the complexity classes (but don't define them rigorously).
+\item Remark: Also, note that we have ``indirectly elicitable $\implies$ exists separated link'', so elicitation complexity does capture consistency here.
+\item Cor: Abstain, mode, not embeddable / indirectly elicitable in 1d when $n\geq 3$.
+\end{itemize}
+
+
+\subsection*{Elicitation complexity stuff moved here}
+
+\raf{NOTE: I cut the definition of indirectly elicits.  I think we should defer this to our next paper which will need to define the complexity classes much more carefully}
+
+% It is often useful to express the relationship between $L$ and $\gamma$ without referring to $\Gamma=\prop{L}$, which is captured by \emph{indirect elicitation}.
+
+% \begin{definition}
+%   A loss \emph{indirectly elicits} a property $\gamma$ if it elicits a property with a separated link to $\gamma$.
+% \end{definition}
+
+
+Given a discrete loss $\ell$ eliciting a finite property $\gamma$, we seek a surrogate loss $L$ with certain attributes, such as convexity, smoothness, etc.
+In doing so, we may be interested in the minimum number of dimensions needed for such a surrogate; this is the notion of \emph{elicitation complexity}~\citep{lambert2008eliciting,fissler2016higher,frongillo2015elicitation}.
+The two notions of elicitation complexity we use most are as follows: let $\eliccvx(\gamma)$ be the minimum dimension $d$ such that $\gamma$ can be indirectly elicited by a convex loss function $L: \reals^d \to \reals^\Y_+$, and $\elicpoly(\gamma)$ the minimum such $d$ where $L$ is polyhedral.
+We will also discuss $\eliccts$, which is the complexity with respect to continuous, real-valued, non-locally-constant properties (\S~\ref{sec:1d}), and $\elicembed$, which is the minimum dimension for $\gamma$ to be embedded (Definition~\ref{def:embedding-dim}).
+
+\raf{Probably cut; save for later paper.  Should still make this a very brief comment combined with the next paragraph, which should also be condesed to one line for now.}
+Roughly speaking, a calibrated link requires that optimal surrogate reports map to optimal original reports, while a separated link adds the stronger guarantee that one cannot approach the optimal surrogate loss while making suboptimal original predictions.
+A classic example of a link which is both calibrated and separated is $\psi = \sgn$ when $\gamma=\mode$ and $L$ is either hinge loss or logistic loss.
+On the other hand, the link $\psi(u) =-1$ for $u \leq -1$ and $\psi(u) = 1$ for $u > -1$
+would not be separated for hinge loss, but it would still be calibrated, as the reports $u\in(-1,1)$ are optimal for hinge loss only when $p=(1/2,1/2)$, in which case both $-1$ and $1$ are optimal for the mode (0-1 loss).
+
+As a brief aside, we note that previous definitions of elicitation complexity have used a more straightforward link function, as the properties considered were single-valued~\citep{lambert2008eliciting,fissler2016higher,frongillo2015elicitation}.
+In particular, if both $\gamma$ and $\Gamma$ are single-valued, these works simply require $\gamma = \psi \circ \Gamma$.
+When $\Gamma$ is set-valued, one still straightforwardly requires $\gamma(p) = \psi(u)$ for all $u \in \Gamma(p)$.
+The notion of a calibrated link from Definition~\ref{def:links} \jessie{Only have separated links in there at the moment} is only required when both $\gamma$ and $\Gamma$ could be set-valued, as is the case in general for convex surrogates of finite properties.
+
+\raf{Embedding dimension moved here}
+
+In the following sections, however, we will focus on the dimension $d$, and ask questions about the minimum $d$ required to embed a property.
+
+\begin{definition}\label{def:embedding-dim}
+  We say $\gamma$ is \emph{$d$-embeddable}, or just \emph{embeddable}, if such an $L$ exists and is convex.
+  The \emph{embedding dimension} of a finite property $\gamma$, written $\elicembed(\gamma)$, is the minimum $d\geq 0$ such that $\gamma$ is $d$-embeddable.
+\end{definition}
+
+
+\subsection*{Back to regularly schemduled program}
+
+In the previous section, we saw that every finite elicitable property is embeddable.
+We now turn to a more fine-grained question: given a finite elicitable property $\gamma$, how many dimensions $d$ are required to embed $\gamma$ in $\reals^d$?
+We call the minimum such $d$ the \emph{embedding dimension} of $\gamma$.
+\raft{Do we want to call this ``embedding complexity''?}
+We begin with $d=1$, or real-valued embeddings.
+As we will see, the notion of \emph{orderable} properties, defined below, will play a central role.
+In particular, a finite elicitable property is 1-embeddable if and only if it is orderable.
+We then go on to draw tight connections between orderability and other elicitation complexity notions, such as via general convex losses or continuous properties, yielding a thorough understanding of the real-valued case.
+
+Let us first define what it means for a finite property to be orderable.
+\begin{definition}
+  A finite property $\gamma:\simplex\toto\R$ is \emph{orderable} if there is an enumeration $\R = \{r_1,\ldots,r_k\}$ such that for all $i\in\{1,\ldots,k-1\}$, the intersection $\gamma_{r_i} \cap \gamma_{r_{i+1}}$ is a hyperplane intersected with $\simplex$.
+\end{definition}
+
+\citet{lambert2018elicitation} shows that a finite property has a \emph{order-sensitive} loss, meaning one assigning higher loss to ``farther'' reports (with respect to a given order), if and only if it is orderable.
+We will see that, in fact, a finite property is 1-embeddable if and only if it is orderable.
+Both the forward direction and its converse will make use of a related definition: we say a property is \emph{monotone} if, roughly speaking, it can be defined in terms of (possibly infinitely many) hyperplanes whose normal vectors have coefficients which are monotone in the report value.
+
+First, the forward direction.
+
+\begin{proposition}\label{prop:orderable-embed}
+  Every orderable property $\gamma$ is 1-embeddable.
+\end{proposition}
+
+The converse of Proposition~\ref{prop:orderable-embed}, that every 1-embeddable property is orderable, follows from a much broader statement, given below as Proposition~\ref{prop:indirect-orderable}: finite elicitable properties which are indirectly elicited by 1-dimensional convex losses must be orderable.
+Together with Proposition~\ref{prop:embed-link}, which shows that embeddings give rise to calibrated links, we have in particular that 1-embeddable finite properties are orderable.
+
+\begin{proposition}\label{prop:indirect-orderable}
+  If convex $L : \reals \to \reals^\Y$ indirectly elicits a finite elicitable property $\gamma$, then $\gamma$ is orderable.
+\end{proposition}
+
+The proof of Proposition~\ref{prop:indirect-orderable} follows from Lemma~\ref{lem:prop-L-monotone} in Appendix~\ref{app:dimension-1}, which states that the property elicited by any convex loss must be monotone in the sense above.
+(The functions $a,b$ are constructed in terms of the subgradients of the loss, thus guaranteeing monotonicity of their coefficients.)
+The result then follows from the equivalence of monotonicity and orderability for finite properties (Lemma~\ref{lem:orderable-monotone}).
+
+As a corollary of Proposition~\ref{prop:indirect-orderable} and Theorem~\ref{thm:polyhedral-embed}, we now also see that polyhedral losses embed orderable properties.
+
+\begin{corollary}\label{cor:embed-orderable}
+  Every polyhedral $L : \reals \to \reals^\Y$ embeds an orderable property.
+\end{corollary}
+
+We now see that orderability characterizes 1-embeddable properties, and have started to see that the concept is central even when considering indirect elicitation.
+In particular, a conclusion of the previous two results is that if a finite elicitable property has elicitation complexity 1 with respect to convex or polyhedral losses, it must be orderable.
+This in turn implies that these elicitation complexity classes coincide in dimension 1.
+We now formalize this observation, and add one more complexity class: that of continuous real-valued non-locally-constant properties.
+
+\begin{theorem}\label{thm:1d-tfae}
+  Let $\gamma$ be a finite elicitable property.
+  The following are equivalent.
+  \begin{enumerate}\setlength{\itemsep}{0pt}
+  \item $\gamma$ is orderable.
+  \item $\elicembed(\gamma)=1$. ($\gamma$ is 1-embeddable.)
+  \item $\elicpoly(\gamma)=1$. ($\gamma$ is indirectly elicitable via a polyhedral loss $L:\reals\to\reals^\Y$.)
+  \item $\eliccvx(\gamma)=1$. ($\gamma$ is indirectly elicitable via a convex loss $L:\reals\to\reals^\Y$.)
+  \item $\eliccts(\gamma)=1$. ($\gamma$ is indirectly elicitable via a real-valued continuous non-locally-constant property.)
+  \end{enumerate}
+\end{theorem}
+
+The proof, given in Appendix~\ref{app:dimension-1}, only shows the equivalence 1 $\Leftrightarrow$ 5, as we have already established the equivalence of the first four statements: $1 \Rightarrow 2,3,4$ from Proposition~\ref{prop:orderable-embed}, as the proof gives a loss which is polyhedral (and convex), and Proposition~\ref{prop:indirect-orderable} shows $2,3,4 \Rightarrow 1$, as each of these cases would give a convex loss indirectly eliciting a finite elicitable property.
+Note that while~\citet{finocchiaro2018convex} gives a similar statement to $1\Leftrightarrow 5$, namely that continuous non-locally-constant real-valued properties are elicitable if and only if they are convex elicitable, their proof relies on several regularity conditions which we do not require; we instead give a direct proof.
+
+From Theorem~\ref{thm:1d-tfae}, we can already prove lower bounds on embedding dimension, as well as the other complexity classes mentioned.
+Here are two simple examples.
+\begin{corollary}
+  Let $n\geq 3$ and $\alpha\in(0,1)$.  Then the following are bounded below by 2:
+    $\elicembed(\abstain{\alpha})$,
+    $\elicpoly(\abstain{\alpha})$,
+    $\eliccvx(\abstain{\alpha})$,
+    $\eliccts(\abstain{\alpha})$,
+    $\elicembed(\mode)$,
+    $\elicpoly(\mode)$,
+    $\eliccvx(\mode)$,
+    $\eliccts(\mode)$.
+\end{corollary}
+\jessiet{Can we separate the abstain and mode by a new line so they kind of line up?  Or just write it a more elegant way than exhaustive?}
+\begin{proof}
+  % Every cell (level set) of an orderable property is adjacent to at most two other cells.
+  % This fails to hold for \raf{abstain} when $n\geq 3$ and the mode when $n\geq 4$.
+  % For the mode when $n=3$, we simply observe that the intersection of any two adjacent cells fails to be a hyperplane.
+  The cell adjacency graph of an orderable property must be a path, but for the mode it is the complete graph on $n$ nodes, and for $\abstain{\alpha}$ a star graph on $n+1$ nodes, which are not paths when $n \geq 3$.
+\end{proof}
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Application to specific surrogates}\label{sec:examples}
-
-We now turn to specific examples from the literature,
+\section{Proving (in)consistency via embeddings}
 \raf{Notes about the story, partially to myself, partially to Jessie: I think we want to emphasize the proofs of consistency and inconsistency (as the section title reflects), but we also want to illustrate our constructive approach to finding a link.  Basically, most of these examples (except abstain) have the link built in (usually as the sign function, though slightly different for top-k), and they just work around it.  For abstain, we can give alternate link functions, and hopefully show that the L1-based link has a better calibration function.  For the others, it may suggest that it's worth thinking ``outside the box'' (HAH, genious...) for embeddings which are not the hypercube.}
 
 The above techniques allow us to evaluate and simplify some previous results in the literature.
-
-\subsection{Consistency of abstain surrogate, and tighter link}
-
-\subsection{Inconsistency of top-$k$ loss}
+\subsection{Top-$k$ loss}
 Yang and Koyejo~\cite{yang2018consistency} prove the inconsistency of a family of surrogates for the top-$k$ classification problem.
 
-The top $k$ classification problem takes as input a vector $r \in \R = \{r \in \{0,1\}^n \text{ such that } |r| = k\}$, and observes outcome $y \in [n]$
+The top $k$ classification problem takes as input a vector $u \in \reals^n$, and observes outcome $y \in [n]$.
+The input is sorted in descending order, and the function $t_k(u)$ yields a set of outcomes associated to the first $k$ elements of this sorted input.
+For example, if $u = (4,1,2)$, then $t_k(u) = \{0,2\}$ for the first and third outcomes.
 
-We say the top-$k$ loss $\ell_{top-k}:\R \to \reals$ is
+We say the top-$k$ loss is
 \begin{align}
 \ell_{top-k}(u,y) = \begin{cases}
-0 & u_y = 1\\
+0 & y \in t_k(u)\\
 1 & \text{otherwise}
 \end{cases}
 \end{align}
 
 
 Yang and Koyejo~\cite{yang2018consistency} create a new surrogate loss that is consistent for the top-$k$ problem, although it should be noted that their surrogate is not convex.
-Additionally, Yang and Koyejo evaluate two losses given by Lapin et al.~\cite{lapin2016loss, lapin2018analysis}, one of which is shown to be convex, but its consistency is left as an open question.
+In particular, Yang and Koyejo evaluate two losses given by Lapin et al.~\cite{lapin2016loss, lapin2018analsis}, one of which is shown to be convex, but its consistency is left as an open question.
 
-After our discussion of embeddings, we now have a way of proving inconsistency: if a surrogate $L$ embeds a discrete loss $\ell$, then $L$ is consistent with respect $\ell$. \jessie{I suppose we still need a proof of this.} 
-Moreover, if for some other discrete loss $\ell' \neq \ell$, 
+After our discussion of embeddings, we now have a way of proving consistency: a surrogate $L$ is consistent with respect to a discrete loss $\ell$ \jessie{we still haven't defined consistency... here I'm going by Yang's consistency.  I suppose we still need a proof of this.} if and only if $L$ embeds $\ell$.
 \raf{Consistency: it's is about the expected loss over $(x,y)$ pairs, and showing that getting the best surrogate loss should mean getting the best original loss.  Take another look at Theorem 2.4 of the top-k paper.  Losses can certainly be consistent without embedding $\ell$ (even if polyhedral: you can link multiple embedded points to a single discrete report, e.g.\ a convex surrogate for ranking loss can link to the mode), so the ``iff'' is not right.  I think it's worth spending some time thinking about what exactly we need to show to prove inconsistency.  In particular, see if this reasoning checks out:  Suppose we find a distribution $p$ for which an optimal surrogate report is $r$ but $\psi(r)$ is not optimal for $\ell$.  Since we could have a conditional distribution of $p$ for every $x$, so the optimal hypothesis would just be the constant function $h(x) = r$, which achieves the optimal $L$-loss, and when linked, $\psi \circ h(x) = \psi(r)$, which does not achieve the optimal $\ell$-loss.}
-\jessie{I think what we want to say is the following: if $L$ embeds $\ell$, then $L$ is consistent with respect to $\ell$.  Moreover, if $\ell \neq \ell'$ and $L$ embeds $\ell$, then $L$ does not not embed $\ell'$.  Can we take this and say something about $L$ not being consistent wrt $\ell'$?}
 We can then prove that the surrogates given by Lapin et al.~\cite{lapin2018analysis} are not consistent in a more suffice manner; we do so by showing the discrete loss that their surrogate embeds is not equal to  $\ell_{top-k}$.
 
 Here, $r \in 2^n$ can be thought of as a binary 0-1 vector representing set inclusion and $k \leq n$ is a constant.
@@ -678,7 +811,7 @@ So even though the surrogates $L_2$ and $L_4$ are convex, they are not consisten
 This begs the question: what is the relationship between consistency and convexity of a surrogate loss?
 Are there instances where only one can be achieved, but not both?
 
-\subsection{Inconsistency of Lov\'asz hinge}
+\subsection{Lov\'asz Hinge}
 \jessie{Lovasz hinge paper~\cite{yu2018lovasz}}
 \raf{I'm tempted to do the following.  We give the abstain counter-example for $k=2$ (I've been using $k$ for the number of elements in the set constructions, but maybe $n$ is better; we can sync up notation later), and then characterize the $k=2$ case informally, showing that the only thing that works is when $f(\{1,2\}) = f(\{1\}) + f(\{2\})$.  Then we can say ``In fact, in full version of the paper, we show a much tighter result: essentially the only Lov\'asz hinge that is consistent is weighted Hamming loss'' or something to that effect.  This leaves room for us to send a journal version to JMLR (for which we'll need some new results), which seems like a good idea for a paper like this: We seem to have useful tools here, so why not let them marinate a bit in NeurIPS, collect feedback, and then publish a more polished/mature version.}
 
