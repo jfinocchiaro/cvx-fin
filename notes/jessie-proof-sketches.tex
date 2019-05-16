@@ -198,21 +198,23 @@ We can now see that a surrogate $L:\reals^d\to\reals^\Y$ embeds $\ell:\R\to\real
 \section{Embeddings and Polyhedral Losses}
 \label{sec:poly-loss-embed}
 
+Throughout this section, consider $F$ to be the facets of the projection of the surface of $\risk{L}$.
+For a facet $f$, we also consider $u_f = \argmin_u L(u, p)$ for any $p \in \inter{f}$.
+(We know that this $u_f$ is the same regardless of the choice of $p$ since $\risk{L}$ has a constant derivative on $\inter{f}$) \jessie{This implicitly assumes $\risk{L}$ is polyhedral, although this isn't stated in Prop 1.}
+
 \begin{proposition}\label{prop:embed-bayes-risks}
   A loss $L$ embeds discrete loss $\ell$ if and only if $\risk{L}=\risk{\ell}$.
   % A loss $L:\reals^d\to\reals^\Y$ embeds discrete $\ell:\R\to\reals^Y$ if and only if $\risk{L}=\risk{\ell}$.
 \end{proposition}
 \begin{proof}[Property version]
-  \jessie{Stated in COLT Lemma 11 and Prop 12 (Lemma~\ref{lem:finite-full-dim} and Prop~\ref{prop:embed-trim} here), but I don't see us prove this in the original paper.}
-  \jessie{The forward implication is a corollary of COLT Lemma 11}
-  First for the forward implication, suppose $L$ embeds the discrete loss $\ell$.
+  For the forward implication, suppose $L$ embeds the discrete loss $\ell$.
   Then $\Gamma := \prop{L}$ embeds the finite property $\gamma$ elicited by $\ell$.
-  Generating $\R := \{u_f\}_{f\in F}$ as is intuitive \jessie{fill in later}, we know that $\gamma$ is $\Gamma \cap \R$ up to a relabeling, and thus has the same Bayes Risk as $L|_\R$.
+
+  Generating $\R := \{u_f\}_{f\in F}$, we know that $\gamma = \phi(\Gamma \cap \R)$, where the two are the same up to relabeling \jessie{need more thorough argument on this?} and $\Gamma \cap \R$ is elicited by $L|_\R$ by \jessie{COLT Lemma 11}, and thus has the same Bayes Risk as $L|_\R$ by \jessie{cite FK General Truthfulness Theorem 2}.
   Applying \jessie{COLT Lemma 11}, we then observe that $\risk{L} = \risk{L|_\R} = \risk{\ell}$.
   
   For the reverse implication, see proof below.
   \jessie{I don't see a way that COLT results make this easier, since we don't talk about Bayes Risk that much.}
-  Consider 
 \end{proof}
 \hrulefill
 \begin{proof}[Non-property version]
@@ -229,10 +231,9 @@ We can now see that a surrogate $L:\reals^d\to\reals^\Y$ embeds $\ell:\R\to\real
   Now in the second case, if such a $u$ does not exist, then $\inf_{u \in \reals^d}L(u,p) < \min_r L(\varphi(r), p) = \min_r \ell(r,p)$.
   Therefore, $r \in \argmin_r' \ell(r', p) \implies \varphi(r) \not \in \argmin_u L(u,p)$ contradicts the assertion that $L$ embeds $\ell$.
 
-  Now, to see that $\risk{\ell} = \risk{L} \implies L$ embeds $\ell$, consider $F$ to be the set of facets of the surface of $\risk{L}$.
-  For each facet $f \in \F$, we know by nonredundancy that there is some $p \in \inter{f}$ so that $\risk{L}$ is differentiable at $p$.
+  Now, to see that $\risk{\ell} = \risk{L} \implies L$ embeds $\ell$, consider that for each facet $f \in F$, we know by nonredundancy that there is some $p \in \inter{f}$ so that $\risk{L}$ is differentiable at $p$.
   Moreover, by Frongillo and Kash~\cite[Theorem 2]{frongillo2014general} we know that both $\ell$ and $L$ have a unique minimizer at $p$, and since the subgradients of the risks are the same (by their equality), we know the minimizers of the losses are also the same, up to relabeling the reports via a bijection.
-  Therefore, we can see that $L$ embeds $\ell$, as $L(\varphi(r),y) = \ell(r,y)$ for all $r\in\R$ and $y \in \Y$, which is a sufficient condition for embedding.
+  Therefore, we can see that $L$ embeds $\ell$, as $L(\varphi(r)) = \ell(r)$ for all $r\in\R$, which is a sufficient condition for embedding.
 \end{proof}
 
 
@@ -254,7 +255,7 @@ Note that Bayes risk, a function from distributions over $\Y$ to the reals, may 
   \jessie{This direction is shorter below without properties.}
   
   Now suppose $\risk{L}$ is polyhedral, and $\Gamma := \prop{L}$.
-  For the set of facets $F$ of the surface of $\risk{L}$, construct $\R := \{u_f\}_{f \in F}$. 
+  For the set of facets $F$ projected from the surface of $\risk{L}$, construct $\R := \{u_f\}_{f \in F}$, with $u_f$ as described earlier. 
   By \jessie{COLT Lemma 11}, we know $\Gamma$ embeds $\gamma := \Gamma \cap \R$ elicited by the discrete loss $\ell := L|_\R$. 
   Thus, $L$ embeds $\ell$.
 \end{proof}
@@ -266,9 +267,8 @@ Note that Bayes risk, a function from distributions over $\Y$ to the reals, may 
   Therefore, $\risk{L}$ is polyhedral.
 
   For the reverse implication, suppose $\risk{L}$ is polyhedral.
-  For each facet $f \in F$ of $\risk{L}$, consider the report $u_f = \arginf_{u'} L(u', p)$ for some $p \in \inter f$.
-  (Note that $u_f$ will be unique and the same regardless of the choice of $p\in \inter f$, since $\risk{L}$ is differentiable here.)
-  Since $\risk{L}$ has a finite set of facets, the set $\R = \{u_f\}_{f \in F}$ is finite.
+  For each facet $f \in F$, consider the report $u_f$ as constructed above.
+  Since $F$ is finite, the set $\R = \{u_f\}_{f \in F}$ is finite.
   Now define the discrete loss $\ell:\R \to \Y$ by $\ell(r,y) = L(r,y)$.
 
   To see that $L$ embeds this discrete $\ell$, consider the embedding function to be the identity for all $r \in \R$.
@@ -291,19 +291,17 @@ Combining Proposition~\ref{prop:embed-risk-poly} with the straightforward result
 \begin{proof}[Non-property version]
   We merely show $L$ polyhedral $\implies$ $\risk{L}$ polyhedral, and apply Proposition~\ref{prop:embed-risk-poly}.
   \raf{Not sure how trivial this is, but it's definitely true.  I suspect it has a very short proof.}
-  \jessie{$L(u,p)$ polyhedral in $\reals^d$ implies $L^*(0,p) = -\risk{L}(p)$ polyhedral in $\simplex$ implies $\risk{L}$ polyhedral.
+  \jessie{$L(u,p)$ polyhedral in $\reals^d$ for all $p \in \simplex$ implies $L^*(0,p) = -\risk{L}(p)$ polyhedral in $\simplex$ implies $\risk{L}$ polyhedral.
   Now we can apply Proposition~\ref{prop:embed-risk-poly} to observe the result.}
-
-  \jessie{Can also show that $L$ embeds $L|_\R$ like the original paper and use COLT Lemma 11/Lemma~\ref{lem:finite-full-dim}.}
 \end{proof}
 \hrulefill
 \begin{proof}[Property version]
   We know $L$ polyhedral implies $\risk{L}$ is polyhedral. \jessie{Does the above argument not work?  If it does, the other proof is shorter anyways.}
-  As before, construct, $\R = \{u_f\}_{f \in F}$ for the uniquely optimal report associated with the interior of each facet of the loss surface on $\risk{L}$.
+  As before, construct, $\R = \{u_f\}_{f \in F}$, which is finite, as $F$ is finite. \jessie{We need the above statement to know that $F$ is finite, and therefore $\ell$ is discrete.}
   To see our result, we specifically show that $L$ embeds $L|_\R$.
   
   Given the loss $L$, consider $\Gamma := \prop{L}$.
-  We know that $\Gamma$ embeds $\gamma := \Gamma \cap \R$ via the identity embedding. \jessie{Cite}
+  Revisiting the definition, it is apparent that $\Gamma$ embeds $\gamma := \Gamma \cap \R$ via the identity.
   Moreover, $\ell := L|_\R$ elicits $\gamma$, and thus we can conclude that $L$ embeds the discrete loss $L|_\R$.
 \end{proof}
 
@@ -312,15 +310,15 @@ Combining Proposition~\ref{prop:embed-risk-poly} with the straightforward result
   Every discrete loss $\ell$ is embedded by a polyhedral loss.
 \end{theorem}
 \begin{proof}[Property version]
-  Consider $\gamma := \prop{\ell}$.
-  The result is a corollary of \jessie{COLT Theorem 35} Theorem~\ref{thm:general-duality-embedding}, where $L$ is as constructed in the proof.
+  Consider $\gamma := \prop{\ell}$, which is a finite property as $\dom(\ell)$ is finite.
+  The result is a corollary of \jessie{COLT Theorem 35} Theorem~\ref{thm:general-duality-embedding}, where the polyhedral loss $L$ is as constructed in the proof.
 \end{proof}
 \hrulefill
 \begin{proof}[Non-property version]
   \raf{Already have the proof from Theorem~\ref{thm:general-duality-embedding}.  Should cite DKR and others...}
   It is sufficient to show the existence of a polyhedral loss $L$ such that $\risk{\ell} = \risk{L}$.
   Consider that $\risk{\ell}$ is closed and concave, since the domain $\simplex$ is closed.
-  Now construct $L$ as in \cite[Proposition 3]{duchi2010multiclass}, where $H = \risk{\ell}$.
+  Now construct $L$ as in \jessie{DKR} Duchi et al.~\cite[Proposition 3]{duchi2010multiclass}, where $H = \risk{\ell}$.
   Then we know that $\risk{L} = \risk{\ell}$ by their result, and thus $L$ embeds $\ell$.
   Moreover, we can see that $L$ is polyhedral as it is a linear transformation of a polyhedral concave function $\risk{\ell}$.
 \end{proof}
@@ -337,9 +335,12 @@ Combining Proposition~\ref{prop:embed-risk-poly} with the straightforward result
 \end{corollary}
 \begin{proof}[Property version]
 	We just need to show that $2 \implies 1$.
-	Consider the finite property $\gamma$ embedded by \jessie{the discrete loss?} $\ell$.
-	Therefore, the property $\gamma' := \prop{\ell}$ .....
-	\jessie{I don't see a way this follows from any of the above, since none of the statements are about elicitation.}
+	Consider the finite property $\gamma$ embedded by the discrete loss $\ell$. \jessie{Need a proof that $\ell$ is discrete?}
+	By Theorem~\ref{thm:discrete-loss-poly-embeddable}, we know that there is a polyhedral loss $L$ that embeds $\ell$.
+	Therefore, $\Gamma := \prop{L}$ embeds $\gamma$.
+	Since $L$ elicits $\Gamma$, we can then see that $L|_\R$ elicits $\gamma$ by \jessie{COLT Lemma 11... hold up.  We need something else here.  This statement isn't quite true.}.
+	Thus, $\gamma$ is elicitable.
+	\jessie{This seems like a lot of running in circles, and it's not quite right.}
 \end{proof}
 \hrulefill
 \begin{proof}[Non-property version]
@@ -379,17 +380,6 @@ OLD STUFF
   Moreover, when any of the above hold, $\{\gamma_r : r\in\R\} = \trim(\Gamma) = \Theta$, and $\gamma$ is elicitable.
 \end{proposition}
 
-\begin{proposition}\label{prop:embed-link}
-  Let $L$ elicit $\Gamma:\simplex\toto\reals^d$ which embeds a finite property $\gamma$.
-  Then there is a calibrated link from $\Gamma$ to $\gamma$. % which can be taken to be separated if $L$ is polyhedral.
-\end{proposition}
-\begin{proof}
-  Let $\gamma:\simplex\toto\R$.
-  Proposition~\ref{prop:embed-trim} gives us that $\trim(\Gamma) = \{\gamma_r : r\in\R\}$.
-  Then for any $u\in\reals^d$, there is some $r\in\R$ such that $\Gamma_u \subseteq \gamma_r$.
-  The link $\psi : \reals^d \to \R$ which encodes these choices is calibrated.
-  \raft{Commented out the separated stuff}
-\end{proof}
 
 \bibliographystyle{plainnat}
 \bibliography{diss,extra}
