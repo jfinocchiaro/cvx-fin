@@ -65,6 +65,7 @@
 \newcommand{\F}{\mathcal{F}}
 \newcommand{\I}{\mathcal{I}}
 \newcommand{\R}{\mathcal{R}}
+\newcommand{\U}{\mathcal{U}}
 \newcommand{\X}{\mathcal{X}}
 \newcommand{\Y}{\mathcal{Y}}
 
@@ -119,9 +120,9 @@
 \maketitle
 
 \begin{abstract}
-We formalize and study the natural approach of designing convex surrogate loss functions via embeddings for problems such as classification or ranking. In this approach, one embeds each of the finitely many predictions (e.g. classes) as a point in $\reals^d$, assigns the original loss values to these points, and convexifies the loss in between to obtain a surrogate.  
-We prove that this approach is equivalent, in a strong sense, to working with polyhedral (piecewise linear convex) losses.  
-Moreover, given any polyhedral loss $L$, we give a construction of a link function through which $L$ is a consistent surrogate for the loss it embeds.  
+We formalize and study the natural approach of designing convex surrogate loss functions via embeddings for problems such as classification or ranking. In this approach, one embeds each of the finitely many predictions (e.g. classes) as a point in $\reals^d$, assigns the original loss values to these points, and convexifies the loss in between to obtain a surrogate.
+We prove that this approach is equivalent, in a strong sense, to working with polyhedral (piecewise linear convex) losses.
+Moreover, given any polyhedral loss $L$, we give a construction of a link function through which $L$ is a consistent surrogate for the loss it embeds.
 We go on to illustrate the power of this embedding framework with succinct proofs of consistency or inconsistency of various polyhedral surrogates in the literature.
 \end{abstract}
 
@@ -653,8 +654,8 @@ We say the top-$k$ loss $\ell_{top-k}:\R \to \reals$ is
 Yang and Koyejo~\cite{yang2018consistency} create a new surrogate loss that is consistent for the top-$k$ problem, although it should be noted that their surrogate is not convex.
 Additionally, Yang and Koyejo evaluate two losses given by Lapin et al.~\cite{lapin2016loss, lapin2018analysis}, one of which is shown to be convex, but its consistency is left as an open question.
 
-After our discussion of embeddings, we now have a way of proving inconsistency: if a surrogate $L$ embeds a discrete loss $\ell$, then $L$ is consistent with respect $\ell$. \jessie{I suppose we still need a proof of this.} 
-Moreover, if for some other discrete loss $\ell' \neq \ell$, 
+After our discussion of embeddings, we now have a way of proving inconsistency: if a surrogate $L$ embeds a discrete loss $\ell$, then $L$ is consistent with respect $\ell$. \jessie{I suppose we still need a proof of this.}
+Moreover, if for some other discrete loss $\ell' \neq \ell$,
 \raf{Consistency: it's is about the expected loss over $(x,y)$ pairs, and showing that getting the best surrogate loss should mean getting the best original loss.  Take another look at Theorem 2.4 of the top-k paper.  Losses can certainly be consistent without embedding $\ell$ (even if polyhedral: you can link multiple embedded points to a single discrete report, e.g.\ a convex surrogate for ranking loss can link to the mode), so the ``iff'' is not right.  I think it's worth spending some time thinking about what exactly we need to show to prove inconsistency.  In particular, see if this reasoning checks out:  Suppose we find a distribution $p$ for which an optimal surrogate report is $r$ but $\psi(r)$ is not optimal for $\ell$.  Since we could have a conditional distribution of $p$ for every $x$, so the optimal hypothesis would just be the constant function $h(x) = r$, which achieves the optimal $L$-loss, and when linked, $\psi \circ h(x) = \psi(r)$, which does not achieve the optimal $\ell$-loss.}
 \jessie{I think what we want to say is the following: if $L$ embeds $\ell$, then $L$ is consistent with respect to $\ell$.  Moreover, if $\ell \neq \ell'$ and $L$ embeds $\ell$, then $L$ does not not embed $\ell'$.  Can we take this and say something about $L$ not being consistent wrt $\ell'$?}
 We can then prove that the surrogates given by Lapin et al.~\cite{lapin2018analysis} are not consistent in a more suffice manner; we do so by showing the discrete loss that their surrogate embeds is not equal to  $\ell_{top-k}$.
@@ -693,7 +694,7 @@ Rather than formally define the Lov\'asz hinge, we defer the full analysis to th
 For brevity, we write $g_\emptyset := g(\emptyset)$, $g_{1,2} := g(\{1,2\})$, etc.
 Assuming $g$ is normalized and increasing (meaning $g_{1,2} \geq \{g_1,g_2\} \geq g_\emptyset = 0$), the Lov\'asz hinge $L:\reals^k\to\reals^\Y_+$ is given by
 \begin{multline}
-  \label{eq:lovasz-hinge}  
+  \label{eq:lovasz-hinge}
   L^g(u)_y = \max\Bigl\{(1-u_1y_1)_+ g_1 + (1-u_2y_2)_+ (g_{1,2}-g_1),\\[-4pt] (1-u_2y_2)_+ g_2 + (1-u_1y_1)_+ (g_{1,2}-g_2)\Bigr\}~,
 \end{multline}
 where $(x)_+ = \max\{x,0\}$.
@@ -703,7 +704,7 @@ Let us consider $g_\emptyset = 0$, $g_1 = g_2 = g_{1,2} = 1$, for which $\ell^g$
 For consistency, then, for any distribution $p\in\simplex$, we must have that whenever $u \in \argmin_{u'\in\reals^2} p\cdot L^g(u')$, then $\psi(u)$ must be the most likely outcome, in $\argmax_{y\in\Y} p(y)$.
 Simplifying eq.~\eqref{eq:lovasz-hinge}, however, we have
 \begin{equation}
-  \label{eq:lovasz-hinge-abstain}  
+  \label{eq:lovasz-hinge-abstain}
   L^g(u)_y = \max\bigl\{(1-u_1y_1)_+,(1-u_2y_2)_+\bigr\} = \max\bigl\{1-u_1y_1,1-u_2y_2,0\bigr\}~,
 \end{equation}
 which is exactly the abstain surrogate~\raf{eqref here}.
@@ -921,41 +922,50 @@ We extend Aurenhammer's result to a weighted sum of convex functions, showing th
   The conclusion follows from the observation that the above held for any strictly positive weights $p$, and $f$ was fixed.
 \end{proof}
 
+\jessie{Original statement here:}
 \begin{theorem}\label{thm:polyhedral-embed}
 	Every polyhedral loss embeds a finite elicitable property.
 	Moreover, a polyhedral loss $L$ indirectly elicits a non-redundant elicitable property $\gamma$ if and only if $\gamma$ is finite and $L$ embeds a property which refines $\gamma$.
 \end{theorem}
-\jessie{Cut the definition of refines, so maybe we just want the first part of this.}
-\begin{proof}[Proof of Theorem~\ref{thm:polyhedral-embed}]
-  Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss.
+
+\begin{lemma}
+  \label{lem:polyhedral-range-gamma}
+  Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss, and let $\Gamma := \prop{L}$.
+  Then the range of $\Gamma$, $\U = \Gamma(\simplex) = \{\Gamma(p) \subseteq \reals^d | p\in\simplex\}$, is a finite set of closed polyhedra.
+\end{lemma}
+\begin{proof}
   For all $p$, let $P(p)$ be the epigraph of the convex function $u\mapsto \inprod{p}{L(u)}$.
   From Lemma~\ref{lem:polyhedral-pd-same}, we have that the power diagram $D_\Y$ induced by the projection of $P(p)$ onto $\reals^d$ is the same for any $p\in\inter\simplex$.
   Let $\F_\Y$ be the set of faces of $D_\Y$, which by the above are the set of faces of $P(p)$ projected onto $\reals^d$ for any $p\in\inter\simplex$.
 
-  Now let $\Gamma := \Gamma[L]$.
   We claim for all $p\in\inter\simplex$, that $\Gamma(p) \in \F_\Y$.
   To see this, let $u \in \Gamma(p)$, and $u' = (u,\inprod{p}{L(u)}) \in P(p)$.
   The optimality of $u$ is equivalent to $u'$ being contained in the face $F$ of $P(p)$ exposed by the normal $(0,\ldots,0,-1)\in\reals^{d+1}$.
   Thus, $\Gamma(p) = \argmin_{u\in\reals^d} \inprod{p}{L(u)}$ is a projection of $F$ onto $\reals^d$, which is an element of $\F_\Y$.
-  
-  % Let $v'\in\reals^{d+1}$ be a vertex on such a face, and $v\in \F_\Y$ its projection onto $\reals^d$.
-  % Then $v$ is also optimal, and therefore $v\in\Gamma(p)$.
 
   Now consider $\Y'\subset \Y$, $\Y'\neq\emptyset$.
   Applying the above argument, we have a similar guarantee: a finite set $\F_{\Y'}$ such that $\Gamma(p) \in \F_{\Y'}$ for all $p$ with support exactly $\Y'$.
-  % (When $\Y' = \{y\}$ is a singleton, we simply take the faces of $D_{\{y\}}projected vertices of $L(\cdot)_y$.)
+  Taking $\F = \bigcup\{\F_{\Y'} | \Y'\subseteq\Y, \Y'\neq\emptyset\}$, we have for all $p\in\simplex$ that $\Gamma(p) \in \F$, giving $\U \subseteq \F$.
+  As $\F$ is finite, so is $\U$, and the elements of $\U$ are closed polyhedra as faces of $D_{\Y'}$ for some $\Y'\subseteq\Y$.
+\end{proof}
 
-  Thus, taking $\F = \bigcup\{\F_{\Y'} | \Y'\subseteq\Y, \Y'\neq\emptyset\}$, we have for all $p\in\simplex$ that $\Gamma(p) \in \F$.
-  This implies that $\trim(\Gamma) \subseteq \F$, which is finite, so Proposition~\ref{prop:embed-trim} now gives the conclusion.
-  \jessie{Do we need to show the preimage of $\Gamma$ is $\F$?}
-  \raf{I'm not sure what you mean.  I also realized that I proved the wrong thing -- and $\trim(\Gamma) \subseteq \F$ does not make any sense.  Will have to think about this more...}
-  
+\begin{proof}[Proof of Theorem~\ref{thm:polyhedral-embed}]
+  Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss, and $\Gamma = \prop{L}$.
+  By Lemma~\ref{lem:polyhedral-range-gamma}, $\U = \Gamma(\simplex)$ is finite.
+  For any $U \in \U$, let $\Gamma_U = \{p\in\simplex | \Gamma(p) = U\}$, which is nonempty by definition.
+  Observe that for any $p\in\simplex$ and $u\in\reals^d$, we have $p \in \Gamma_u \iff u \in \Gamma(p) \iff U = \Gamma(p) \land u \in U \iff p\in\Gamma_U \land u \in U$.
+  Thus, we have for all $u\in\reals^d$ that $\Gamma_u = \cup\{\Gamma_U | U\in\U,u\in U\}$.
+  \raf{Now trim is finite because the powerset of $\U$ is finite}
+
+
   \raf{I might be delusional, but this second part ended up being much slicker than I'd thought, by essentially chaining definitions and maps.  Please check!}
   For the second part, let $\gamma':\simplex\toto\R'$ be the finite elicitable property embedded by $L$, with embedding $\varphi:\R'\to\reals^d$, and let $\psi$ be a calibrated link to a non-redundant elicitable property $\gamma:\simplex\toto\R$.
   Then letting $\psi' = (\psi \circ \varphi):\R'\to\R$, we see that $\psi'$ is a calibrated link from $\gamma'$ to $\gamma$:
   for all $r'\in\R'$, we have $\gamma'_{r'} = \prop{L}_{\varphi(r')} \subseteq \gamma_{\psi(\varphi(r'))}$.
   In particular, $\gamma'$ refines $\gamma$, and as $\gamma'$ is finite, $\gamma$ must be finite.
 \end{proof}
+
+\raf{COOL THING TO POINT OUT: the prev two results show that when $L$ is polyhedral, then $\prop{L}$ has a finite range and so does its (multivalued map) inverse!}
 
 \begin{theorem}\label{thm:general-duality-embedding}
   Let $\gamma:\simplex\toto\R$ be a non-redundant elicitable property, elicited by a loss whose Bayes risk is a closed function.
