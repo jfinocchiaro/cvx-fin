@@ -212,27 +212,44 @@ For a facet $f$, we also consider $u_f = \argmin_r \ell(r, p)$ \raf{be careful: 
 \begin{proof}[Property version]
   \raf{Forward: you had the right idea that this is mainly Lemma 11.  But you have to step through the logic much more carefully, and be rigorous.  Keep in mind: you already have $\varphi$ from the embedding, and you know the loss values match.  It's true that you need to map $u$ values to $r$ values, but what you have doesn't make sense.}
     
-  For the forward implication, suppose $L$ embeds the discrete loss $\ell$.
-  Then $\Gamma := \prop{L}$ embeds the finite property $\gamma$ elicited by $\ell$.
+  \jessie{Redone.  Original version in comments below.}
+  For the forward implication, suppose $L$ embeds the discrete loss $\ell$ via the embedding $\varphi$.
+  Then $\Gamma := \prop{L}$ embeds the finite property $\gamma:\simplex \toto \R$ elicited by $\ell$.
+  Call $\R' := \varphi(\R)$.
+  For all $p \in \simplex$, we know that $\Gamma(p) = \varphi(\gamma(p))$.
+  We know $\gamma' := \Gamma(p) \cap \R'$ is nonempty for all $p \in \simplex$ since $\Gamma(p) = \varphi(\gamma(p)) \in \R'$.
+  By \jessie{COLT Lemma 11}, we know that $L|_{\R'}$ elicits $\gamma'$ and $\risk{L} = \risk{L|_{\R'}}$.
+  
+%  As $|\R| = |\R'|$, we know there is a bijection from one to the other defined by the embedding $\varphi$ on a restricted domain.
+  By embedding, the loss values $L(\varphi(r)) = \ell(r)$ for all $r \in \R$, and so the expected values $\inprod{p}{L(\varphi(r))} = \inprod{p}{\ell(r)}$ for all $p \in \simplex$ and $r \in \R$.
+  In particular, $\min_{u \in \R'}\inprod{p}{L(u)} = \min_{r \in \R}\inprod{p}{\ell(r)}$ for all $p \in \simplex$. 
+  Therefore, we can conclude that $\risk{L|_{\R'}} = \risk{\ell}$.
+  Combining with the above statement, we conclude $\risk{L} = \risk{\ell}$.
 
-  Generating $\R := \{u_f\}_{f\in F}$, we know that $\gamma = \phi(\Gamma \cap \R)$, where the two are the same up to relabeling \jessie{need more thorough argument on this?  Not sure if I believe it...} and $\Gamma \cap \R$ is elicited by $L|_\R$ by \jessie{COLT Lemma 11}, and thus has the same Bayes Risk as $L|_\R$ by \jessie{cite FK General Truthfulness Theorem 2}.
-  Applying \jessie{COLT Lemma 11}, we then observe that $\risk{L} = \risk{L|_\R} = \risk{\ell}$.
+%  Generating $\R := \{u_f\}_{f\in F}$, we know that $\gamma = \phi(\Gamma \cap \R)$, where the two are the same up to relabeling \jessie{need more thorough argument on this?  Not sure if I believe it...} and $\Gamma \cap \R$ is elicited by $L|_\R$ by \jessie{COLT Lemma 11}, and thus has the same Bayes Risk as $L|_\R$ by \jessie{cite FK General Truthfulness Theorem 2}.
+%  Applying \jessie{COLT Lemma 11}, we then observe that $\risk{L} = \risk{L|_\R} = \risk{\ell}$.
 
   
   \raf{Reverse: The high-level idea is that the projections (power diagrams) of $\risk{\ell}$ and $\risk{L}$ are the same, so since $\prop{\ell}$ has finitely many full-dimensional level sets, so does $\prop{L}$.  The property part of the embedding then follows; just take any $u_f$ like you have.  It remains to show that the losses themselves must match up; this is what the FK result is useful for.  Note though that you can't conclude that the minimizers are unique (and it's not true) since $\prop{L}$ is not redundant, as assumed in that paper.
     All that said, I'm pretty confused by what you are trying to do; seems like your contradiction is going the wrong way, and several steps are missing justification.}
 
-  For the reverse implication, we use contradiction. \jessie{But no properties... I didn't see how.  Different technique from below though.}
+  To start, assume that $\risk{L} = \risk{\ell}$.
+  The projection of the epigraphs onto $\simplex$ must then form the same power diagram \jessie{COLT Theorem 33}, corresponding to the level sets of the properties each loss elicits.
+  Notably, \jessie{as in proof of COLT Prop 12,} the facets of $\risk{\ell}$ project onto the level sets of $\gamma := \prop{\ell}$.
+  As $\ell$ is discrete, we know $\gamma$ is finite, and so the level sets of $\gamma$ are full-dimensional \jessie{by COLT Lemma 10} and union to the simplex by nondegeneracy of $\gamma$.
+  Since the risks of $L$ and $L$ are the same (and therefore, so are their projections onto $\simplex$), this same [finite] subset $\Theta$ of the level sets of $\Gamma$ that union to the simplex and are full-dimensional.
+  By \jessie{COLT Prop 12}, we can then conclude that $\Gamma$ embeds the finite property $\gamma$, and thus $L$ embeds the discrete loss $\ell$.
+   
     
-  \jessie{TODO: If we use this, change notation of $P_\ell$ to match what's already in the paper}
-  First, assume that $\risk{\ell} \neq \risk{L} +c$ for any constant $c$.
-  Denote by $P_\ell$ the facets of $\risk{\ell}$ projected onto $\simplex$, which must be different than the facets of $\risk{L}$ projected onto $\simplex$, denoted $P_L$.
-  That means, for some $p \in \simplex$ on the interior of a cell in $P_\ell$, we know $\nabla \risk{\ell}(p) \neq \nabla \risk{L}(p)$ \raf{don't see why this is necessarily true}.
-  Therefore, we know the argmins of $L$ and $\ell$ are unique and as the subgradients of the risks are not equal, then $r \in \argmin_{r'} \ell(r,p) \implies \varphi(r) \not \in \argmin_u L(u,p)$, and thus we contradict our embedding assumption.
-  
-  Now, if $\risk{\ell} = \risk{L}+c$ for some constant $c \neq 0$, then we contradict part $(i)$ of the definition of embedding where the loss values must match up.
-  
-  Therefore, if the loss $L$ embeds the discrete loss $\ell$, then we must observe $\risk{L} = \risk{\ell}$.
+%  \jessie{TODO: If we use this, change notation of $P_\ell$ to match what's already in the paper}
+%  First, assume that $\risk{\ell} \neq \risk{L} +c$ for any constant $c$.
+%  Denote by $P_\ell$ the facets of $\risk{\ell}$ projected onto $\simplex$, which must be different than the facets of $\risk{L}$ projected onto $\simplex$, denoted $P_L$.
+%  That means, for some $p \in \simplex$ on the interior of a cell in $P_\ell$, we know $\nabla \risk{\ell}(p) \neq \nabla \risk{L}(p)$ \raf{don't see why this is necessarily true}.
+%  Therefore, we know the argmins of $L$ and $\ell$ are unique and as the subgradients of the risks are not equal, then $r \in \argmin_{r'} \ell(r,p) \implies \varphi(r) \not \in \argmin_u L(u,p)$, and thus we contradict our embedding assumption.
+%  
+%  Now, if $\risk{\ell} = \risk{L}+c$ for some constant $c \neq 0$, then we contradict part $(i)$ of the definition of embedding where the loss values must match up.
+%  
+%  Therefore, if the loss $L$ embeds the discrete loss $\ell$, then we must observe $\risk{L} = \risk{\ell}$.
 \end{proof}
 \hrulefill
 \begin{proof}[Non-property version]
