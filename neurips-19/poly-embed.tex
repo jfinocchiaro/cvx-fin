@@ -194,8 +194,6 @@ The set of probability distributions on $\Y$ is denoted $\simplex\subseteq\reals
 We write $p_y$ for the probability of outcome $y \in \Y$ drawn from $p \in \simplex$.
 \jessie{Given labeled data of the form $(x,y)$, we abstract away the data input and consider the conditional probabilities $p(Y|X)$, and this is what we denote as $p_y$.}
 
-\raf{Important TODO: we use $\reals^\Y$ sometimes and $\reals^\Y_+$ other times; ideally both $+$, but we need to see what we can prove...  I know this is a key detail for polyhedral losses, to ensure the inf is always attained.}
-
 We assume that a given discrete prediction problem, such as classification, is given in the form of a \emph{discrete loss} $\ell:\R\to\reals^\Y_+$, which maps a report (prediction) $r$ from a finite set $\R$ to the vector of loss values $\ell(r) = (\ell(r)_y)_{y\in\Y}$ for each possible outcome $y\in\Y$.
 We will assume throughout that the given discrete loss is \emph{non-redundant}, meaning every report is uniquely optimal (minimizes expected loss) for some distribution $p\in\Delta(\Y)$.
 Similarly, surrogate losses will be written $L:\reals^d\to\reals^\Y_+$.
@@ -203,11 +201,11 @@ Similarly, surrogate losses will be written $L:\reals^d\to\reals^\Y_+$.
 We write expected loss of report $r$ when $Y \sim p$ as $\inprod{p}{L(r)}$.
 The \emph{Bayes risk} of a loss $L:\R\to\reals^\Y$ is the function $\risk{L}:\Delta(\Y)\to\reals$ given by $\risk{L}(p) := \inf_{r\in\R} \inprod{p}{L(r)}$; naturally for discrete losses we will write $\risk{\ell}$.
 
-\jessie{In general, we shall denote discrete reports by $r \in \R$, and real-valued reports by $u \in \U$.}
-For example, 0-1 loss is a discrete loss with $\R = \Y = \{1,2,\ldots,n\}$ given by $\ell(r)_y = \Ind[r \neq y]$, and has Bayes risk $\risk{\ell}(p) = \max_{y\in\Y} p_y$. \jessie{Isn't that the Score $G$?  Don't we want $\risk{\ell} = 1 - \min_{y \in \Y} p_y$?}
+%\jessie{In general, we shall denote discrete reports by $r \in \R$, and real-valued reports by $u \in \U$.}
+For example, 0-1 loss is a discrete loss with $\R = \Y = \{1,2,\ldots,n\}$ given by $\ell(r)_y = \Ind[r \neq y]$, and has Bayes risk $\risk{\ell}(p) = 1-\max_{y\in\Y} p_y$. \jessiet{Isn't that the Score $G$?  Don't we want $\risk{\ell} = 1 - \min_{y \in \Y} p_y$?}\raft{did you mean $1-\max$?}
 Two important examples of surrogates for 0-1 loss, with $\R=\reals$, are hinge loss $L(u)_y = \max(0,1-yu)$ and logistic loss $L(u)_y = \log(1+\exp(-yu))$.
 
-Most of the surrogates $L$ we consider will be \emph{polyhedral}, meaning piecewise linear and convex \jessie{and bounded from below?}; we therefore briefly recall the relevant definitions.
+Most of the surrogates $L$ we consider will be \emph{polyhedral}, meaning piecewise linear and convex; we therefore briefly recall the relevant definitions.
 In $\reals^d$, a \emph{polyhedral set} or \emph{polyhedron} is the intersection of a finite number of closed halfspaces.
 A \emph{polytope} is a bounded polyhedral set.
 A convex function $f:\reals^d\to\reals$ is \emph{polyhedral} if its epigraph is polyhedral, or equivalently, if it can be written as a pointwise maximum of a finite set of affine functions~\citep{rockafellar1997convex}.
@@ -218,22 +216,65 @@ A convex function $f:\reals^d\to\reals$ is \emph{polyhedral} if its epigraph is 
 %
 For example, the hinge loss is polyhedral, whereas logistic loss is not.
 
-\subsection{Links and Embedding}
+\subsection{Property Elicitation}
 
-To ensure consistency, we will seek ``separated'' link functions, which require that the excess loss of some report is bounded by (a constant times) the excess loss of the linked report.
+\raf{Let's leave this here and see how much we really need in the end...}
 
-\begin{definition}[Consistency]\label{def:consistency}
-  A surrogate $L:\reals^d\to\reals^\Y_+$ and link $\psi:\reals^d\to\R$ is \emph{consistent} with a discrete loss $\ell:\R\to\reals^\Y_+$ if \raf{statement about distributions on $\X\times\Y$, limits of hypotheses, and Bayes opt hypotheses}
+To make headway, we will appeal to concepts and results from the property elicitation literature, which elevates the \emph{property}, or map from distributions to optimal reports, as a central object to study in its own right.
+In our case, this map will often be multivalued, meaning a single distribution could yield multiple optimal reports.
+(For example, when $p=(1/2,1/2)$, both $y=1$ and $y=-1$ optimize 0-1 loss.)
+To this end, we will use double arrow notation to mean a mapping to all nonempty subsets, so that $\gamma: \simplex \toto \R$ is shorthand for $\gamma: \simplex \to 2^{\R} \setminus \emptyset$.
+
+\begin{definition}[Property, level set]\label{def:property}
+  A \emph{property} is a function $\Gamma:\simplex\toto\R$.
+  The \emph{level set} of $\Gamma$ for report $r$ is the set $\Gamma_r := \{p : r \in \Gamma(p)\}$.
 \end{definition}
 
-\begin{definition}[Separated Link]\label{def:links}
-  Let discrete loss $\ell:\R\to\reals^\Y_+$ and surrogate $L:\reals^d\to\reals^\Y_+$ be given.
-  A \emph{link function} is a map $\psi:\reals^d\to\R$.
-  We say that a link $\psi$ is \emph{$\delta$-separated} for some $\delta > 0$ if for all $p \in \simplex$ and $u\in\reals^d$, we have
-  \begin{align*}
-    \inprod{p}{L(u)} - \inf_{u' \in \reals^d} \inprod{p}{L(u')} \geq \delta\left(\inprod{p}{\ell(\psi(u))} - \min_{r \in \R} \inprod{p}{\ell(r)}\right)~.
-  \end{align*}
-  A link is \emph{separated} if it is $\delta$-separated for some $\delta>0$.
+
+Thus, $\Gamma(p)$ is the set of reports which should be optimal for a given distribution $p$, and $\Gamma_r$ is the set of distributions for which the report $r$ should be optimal.
+\raft{Finite property note commented out}%(Note that our definitions align such that discrete losses elicit finite properties; both are non-redundant in the correct senses.)
+For example, the \emph{mode} is the %finite
+property $\mode(p) = \argmax_{y\in\Y} p_y$, and captures the set of optimal reports for 0-1 loss: for each distribution over the labels, one should report the most likely label.
+In this case we say 0-1 loss \emph{elicits} the mode, as we formalize below.
+% This terminology comes from the information elicitation \jessiet{information vs property... do we care?}\raft{we could also say economics literature; not ``property'' though since that doesn't offer an explanation of the word ``elicits''} literature~\citep{savage1971elicitation,osband1985information-eliciting,lambert2008eliciting}, in which a report $r$ is elicited from some forecaster by scoring her with a loss on the observed outcome $y$.
+
+\begin{definition}[Elicits]
+  A loss $L:\R\to\reals^\Y_+$, \emph{elicits} a property $\Gamma:\simplex \toto \R$ if
+  \begin{equation}
+    \forall p\in\simplex,\;\;\;\Gamma(p) = \argmin_{r \in \R} \inprod{p}{L(r)}~.
+  \end{equation}
+  As $\Gamma$ is uniquely defined by $L$, we write $\prop{L}$ to refer to the property elicited by a loss $L$.
+\end{definition}
+
+For finite properties (those with $|\R|<\infty$) and discrete losses, we will use lowercase notation $\gamma$ and $\ell$, respectively, while $\Gamma$ and $L$ will be used for surrogate or general properties.
+% Often we will work with two properties simultaneously, a finite property $\gamma:\simplex\toto\R$, and its embedded version $\Gamma:\simplex\toto\reals^d$.
+% In this case, we write the embedded reports as $u\in\reals^d$, reserving $r\in\R$ for the finite property.
+
+\raf{informal descriptions of the hinge property and illustrate how it simplifies the embedding condition; cite appendix for the formal def of embedding property}
+
+
+\subsection{Links and Embeddings}
+
+To ensure consistency, we will seek ``calibration''  of the surrogate and link function.
+\raft{Separated stuff commented out}
+% , which require that the excess loss of some report is bounded by (a constant times) the excess loss of the linked report.
+
+% \begin{definition}[Consistency]\label{def:consistency}
+%   A surrogate $L:\reals^d\to\reals^\Y_+$ and link $\psi:\reals^d\to\R$ is \emph{consistent} with a discrete loss $\ell:\R\to\reals^\Y_+$ if \raf{statement about distributions on $\X\times\Y$, limits of hypotheses, and Bayes opt hypotheses}
+% \end{definition}
+
+% \begin{definition}[Separated Link]\label{def:links}
+%   Let discrete loss $\ell:\R\to\reals^\Y_+$ and surrogate $L:\reals^d\to\reals^\Y_+$ be given.
+%   A \emph{link function} is a map $\psi:\reals^d\to\R$.
+%   We say that a link $\psi$ is \emph{$\delta$-separated} for some $\delta > 0$ if for all $p \in \simplex$ and $u\in\reals^d$, we have
+%   \begin{align*}
+%     \inprod{p}{L(u)} - \inf_{u' \in \reals^d} \inprod{p}{L(u')} \geq \delta\left(\inprod{p}{\ell(\psi(u))} - \min_{r \in \R} \inprod{p}{\ell(r)}\right)~.
+%   \end{align*}
+%   A link is \emph{separated} if it is $\delta$-separated for some $\delta>0$.
+% \end{definition}
+
+\begin{definition}
+    \[ \inf_{u \in \reals^d : \psi(u) \not\in \gamma(p)} \inprod{p}{L(u)} > \inf_{u \in \reals^d} \inprod{p}{L(u)} . \]
 \end{definition}
 
 Several consistent convex surrogates in the literature can be thought of as ``embeddings'', wherein one maps the discrete reports to a vector space, and finds a convex loss which agrees with the original loss and has the same statistical behavior.
@@ -242,11 +283,15 @@ We formalize this notion as follows.
 \begin{definition}\label{def:loss-embed}
   A loss $L:\reals^d\to\reals^\Y$ \emph{embeds} a loss $\ell:\R\to\reals^\Y$ if there exists some injective embedding $\varphi:\R\to\reals^d$ such that
   (i) for all $r\in\R$ we have $L(\varphi(r)) = \ell(r)$, and (ii) for all $p\in\simplex,r\in\R$ we have
+  % \begin{equation}\label{eq:embed-loss}
+  %   r \in \argmin_{r'\in\R} \inprod{p}{\ell(r')} \iff \varphi(r) \in \argmin_{u\in\reals^d} \inprod{p}{L(u)}~.
+  % \end{equation}
   \begin{equation}\label{eq:embed-loss}
-    r \in \argmin_{r'\in\R} \inprod{p}{\ell(r')} \iff \varphi(r) \in \argmin_{u\in\reals^d} \inprod{p}{L(u)}~.
+    r \in \prop{\ell}(p) \iff \varphi(r) \in \prop{L}(p)~.
   \end{equation}
 \end{definition}
 %
+
 Note that it is not clear if embeddings give rise to separated links; indeed, apart from mapping the embedded reports back from whence they came \raft{I know... just wanted to say that} via $\psi(\varphi(r)) = r$, how to map the remaining values is far from clear.
 Constructing separated links from embeddings will therefore be a major focus in Section~\ref{sec:poly-loss-embed}.
 
@@ -268,46 +313,8 @@ If the linked surrogate correctly minimizes $L$ in expectation,
 % If the most likely outcome is not likely enough, the loss is minimized by ``abstaining'' from predicting; a situation one can imagine would be useful if a false positive is costly.
 
 
-\subsection{Property Elicitation}
-
-\raf{Let's leave this here and see how much we really need in the end...}
-
-To make headway, we will appeal to concepts and results from the property elicitation literature, which elevates the \emph{property}, or map from distributions to optimal reports, as a central object to study in its own right.
-In our case, this map will often be multivalued, meaning a single distribution could yield multiple optimal reports.
-(For example, when $p=(1/2,1/2)$, both $y=1$ and $y=-1$ optimize 0-1 loss.)
-To this end, we will use double arrow notation to mean a mapping to all nonempty subsets, so that $\gamma: \simplex \toto \R$ is shorthand for $\gamma: \simplex \to 2^{\R} \setminus \emptyset$.
-
-\begin{definition}[Property, level set]\label{def:property}
-  A \emph{property} is a function $\Gamma:\simplex\toto\R$.
-  The \emph{level set} of $\Gamma$ for report $r$ is the set $\Gamma_r := \{p : r \in \Gamma(p)\}$.
-\end{definition}
 
 
-Thus, $\Gamma(p)$ is the set of reports which should be optimal for a given distribution $p$, and $\Gamma_r$ is the set of distributions for which the report $r$ should be optimal.
-(Note that our definitions align such that discrete losses elicit finite properties; both are non-redundant in the correct senses.)
-For example, the \emph{mode} is the finite property $\mode(p) = \argmax_{y\in\Y} p_y$, and captures the set of optimal reports for 0-1 loss: for each distribution over the labels, one should report the most likely label.
-In this case we say 0-1 loss \emph{elicits} the mode, as we formalize below.
-% This terminology comes from the information elicitation \jessiet{information vs property... do we care?}\raft{we could also say economics literature; not ``property'' though since that doesn't offer an explanation of the word ``elicits''} literature~\citep{savage1971elicitation,osband1985information-eliciting,lambert2008eliciting}, in which a report $r$ is elicited from some forecaster by scoring her with a loss on the observed outcome $y$.
-
-\begin{definition}[Elicits]
-  A loss $L:\R\to\reals^\Y_+$, \emph{elicits} a property $\Gamma:\simplex \toto \R$ if
-  \begin{equation}
-    \forall p\in\simplex,\;\;\;\Gamma(p) = \argmin_{r \in \R} \inprod{p}{L(r)}~.
-  \end{equation}
-  As $\Gamma$ is uniquely defined by $L$, we write $\prop{L}$ to refer to the property elicited by a loss $L$.
-\end{definition}
-
-For finite properties and discrete losses, we will use lowercase notation $\gamma$ and $\ell$, respectively, while $\Gamma$ and $L$ will be used for surrogate or general properties.
-Often we will work with two properties simultaneously, a finite property $\gamma:\simplex\toto\R$, and its embedded version $\Gamma:\simplex\toto\reals^d$.
-In this case, we write the embedded reports as $u\in\reals^d$, reserving $r\in\R$ for the finite property.
-
-\raf{informal descriptions of the hinge property and illustrate how it simplifies the embedding condition; cite appendix for the formal def of embedding property}
-
-
-\begin{theorem}\label{thm:polyhedral-embed-prop}
-	Every polyhedral loss embeds a finite elicitable property.
-	%Moreover, a polyhedral loss $L$ indirectly elicits a non-redundant elicitable property $\gamma$ if and only if $\gamma$ is finite and $L$ embeds a property which refines $\gamma$.
-\end{theorem}
 
 \section{Embeddings and Polyhedral Losses}
 \label{sec:poly-loss-embed}
@@ -400,15 +407,33 @@ Combining Proposition~\ref{prop:embed-risk-poly} with the straightforward result
 \end{proof}
 
 We now turn to the reverse direction: is every discrete loss embedded by some polyhedral loss?
-Using a construction via convex conjugate duality, which has appeared several times in the literature\raft{CITE: DKR, frongillo-kash (WINE 2014), probably one of Bob's papers?, others?}, we see that the answer is yes, although the number of dimensions $d$ required could be as large as $n-1$.
-\raft{Should revisit this statement at the end; I have a feeling we'll want to kill ``$n$'' throughout the paper since we focus so much less on it, and the reader won't remember what $n$ is.}
+Using a construction via convex conjugate duality, which has appeared several times in the literature\raft{CITE: DKR, frongillo-kash (WINE 2014), probably one of Bob's papers?, others?}, we see that the answer is yes, although the number of dimensions $d$ required could be as large as $|\Y|$.
 
 \begin{theorem}\label{thm:discrete-loss-poly-embeddable}
   Every discrete loss $\ell$ is embedded by a polyhedral loss.
 \end{theorem}
 \begin{proof}
-  \raf{NOTE: need to ensure nonnegativity of $L$}
-  \raf{Already have the proof from Theorem~\ref{thm:general-duality-embedding}.  Should cite DKR and others...}
+  Let $n = |\Y|$, and let $C:\reals^n \to \reals$ be given by $(-\risk{\ell})^*$, the convex conjugate of $-\risk{\ell}$.
+  From standard results in convex analysis, $C$ is polyhedral as $-\risk{\ell}$ is, and $C$ is finite on all of $\reals^\Y$ as the domain of $-\risk{\ell}$ is bounded~\citet[Corollary 13.3.1]{rockafellar1997convex}.
+  Note that $-\risk{\ell}$ is a closed convex function, as the infimum of affine functions, and thus $(-\risk{\ell})^{**} = -\risk{\ell}$.
+  Define $L:\reals^n\to\reals^\Y$ by $L(u) = C(u)\ones - u$, where $\ones\in\reals^\Y$ is the all-ones vector.
+  We first show that $L$ embeds $\ell$, and then establish that the range of $L$ is in fact $\reals^\Y_+$, as desired.
+
+  We compute Bayes risks and apply Proposition~\ref{prop:embed-bayes-risks} to see that $L$ embeds $\ell$.
+  For any $p\in\simplex$, we have
+  \begin{align*}
+    \risk{L}(p)
+    &= \inf_{u\in\reals^n} \inprod{p}{C(u)\ones - u}
+    \\
+    &= \inf_{u\in\reals^n} C(u) - \inprod{p}{u}
+    \\
+    &= -\sup_{u\in\reals^n} \inprod{p}{u} - C(u)
+    \\
+    &= -C^*(p) = - (-\risk{\ell}(p))^{**} = \risk{\ell}(p)~.
+  \end{align*}
+  It remains to show $L(u)_y \geq 0$ for all $u\in\reals^n$, $y\in\Y$.
+  Letting $\delta_y\in\simplex$ be the point distribution on outcome $y\in\Y$, we have for all $u\in\reals^n$, $L(u)_y \geq \inf_{u'\in\reals^n} L(u')_y = \risk{L}(\delta_y) = \risk{\ell}(\delta_y) \geq 0$, where the final inequality follows from the nonnegativity of $\ell$.
+  \raft{FUTURE: to get $n-1$, just use the same trick as before and note that the Bayes risk doesn't change.  Should be a couple lines.  (Not needed for NeurIPS since we don't focus on the dimension.)}
 \end{proof}
 
 We have seen a tight connection between embeddings and polyhedral losses\raf{... what else can we say here?  Why is this cool?}
