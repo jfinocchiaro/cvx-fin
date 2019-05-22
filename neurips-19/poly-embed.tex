@@ -153,13 +153,13 @@ Furthermore, the kinds of strategies available for constructing surrogates, and 
 
 We augment this literature by studying a particularly natural approach for finding convex surrogates, wherein one ``embeds'' a discrete loss.
 Specifically, we say a convex surrogate $L$ embeds a discrete loss $\ell$ if there is an injective embedding from the discrete reports (predictions) to a vector space such that (i) the original loss values are recovered, and (ii) a report is $\ell$-optimal if and only if the embedded report is $L$-optimal.
-If additionally there exists a ``separated'' link function which maps approximately $L$-optimal reports to $\ell$-optimal reports, this condition is known to produce $\ell$-calibrated surrogates~\cite{agarwal2015consistent}.
+If this embedding can be extended to a calibrated link function, which maps approximately $L$-optimal reports to $\ell$-optimal reports, consistency follows~\cite{agarwal2015consistent}.
 Common examples which follow this general construction include hinge loss as a surrogate for 0-1 loss and the abstain surrogate mentioned above. \jessiet{Really 0-2 loss, but that seems like an unimportant nuance.}
 
 Using tools from property elicitation, we show a tight relationship between such embeddings and the class of polyhedral (piecewise-linear convex) loss functions.
 In particular, by focusing on Bayes risks, we show that every discrete loss is embedded by some polyhedral loss, and every polyhedral loss function embeds some discrete loss.
-Moreover, we show that any polyhedral loss gives rise to a separated link function to the loss it embeds, \raft{TODO: prove this :-]}
-thus giving a very general framework to construct calibrated convex surrogates for arbitrary losses.
+Moreover, we show that any polyhedral loss gives rise to a calibrated link function to the loss it embeds,
+thus giving a very general framework to construct consistent convex surrogates for arbitrary losses.
 
 %\jessie{Take out this paragraph?}
 %We go on to initiate a study of \emph{embedding dimension}: the minimal dimension for a given discrete loss to be so embedded.
@@ -169,15 +169,19 @@ thus giving a very general framework to construct calibrated convex surrogates f
 %We conclude with preliminary results in higher dimensions and other future directions.
 
 \subsection{Related works}
-Convex surrogates have been formalized and investigated in a variety of past work such as \cite{crammer2001algorithmic,bartlett2006convexity,bartlett2008classification}, particularly in the context of 0-1 loss, distributions on just two outcomes, and support vector machines.
+\raf{Let's dump a bunch of citations and not worry about going into detail.  I'll throw in a skeleton.}
 
-  One of the first works formally studying convex surrogates beyond binary outcomes is from~\citet{ramaswamy2018consistent}, who give an embedding of the \emph{abstain loss} into very few dimensions.
- For the case of $\reals^2$ \jessiet{$\reals^2$ or $n \in \{3, 4\}$?}, we will show that no embedding can do better. \jessiet{Take out this sentence?}
+The literature on convex surrogates focuses mainly on smooth surrogate losses~\raf{DKR;many more...}\cite{crammer2001algorithmic,bartlett2006convexity,bartlett2008classification}.
+Nevertheless, nonsmooth losses, such as the polyhedral losses we consider, have been proposed and studied for a variety of classification-like problems\raf{cites}.
+A notable addition to this literature is~\citet{ramaswamy2018consistent}, who argue that nonsmooth losses may enable dimension reduction of the prediction space (range of the surrogate hypothesis) relative to smooth losses, illustrating this conjecture with a surrogate for \emph{abstain loss} needing only $\log n$ dimensions for $n$ labels, whereas the best known smooth loss needs $n-1$.
+Their surrogate is a natural example of an embedding (cf.~Section~\ref{sec:abstain}), and serves as inspiration for our work.
 
-  \citet{agarwal2015consistent} and~\citet{ramaswamy2016convex} study the existence of convex surrogates; the latter proves lower bounds on dimensionality of hypothesis spaces for e.g.~0-1 loss via their notion of feasible subspace dimension.
-  These works are generally not directly comparable to our results, as they do not consider the embedding method. 
-  Agarwal and Agarwal~\cite{agarwal2015consistent} also consider properties that are real-valued, rather than possibly set-valued as we do.
-  However, we will mention relevant results inline.
+While property elicitation has by now an extensive literature~\cite{savage1971elicitation,osband1985information-eliciting,lambert2008eliciting,gneiting2011making,steinwart2014elicitation,frongillo2015vector-valued,fissler2016higher,lambert2018elicitation}\raft{others? already a bit much...}, these works are mostly concerned with point estimation problems.
+Literature directly connecting property elicitation to consistency is sparse, with the main reference being Agarwal and Agarwal~\cite{agarwal2015consistent}; note however that they consider single-valued properties, whereas properties elicited by general convex losses are necessarily set-valued.
+
+% \citet{agarwal2015consistent} and~\citet{ramaswamy2016convex} study the existence of convex surrogates; the latter proves lower bounds on dimensionality of hypothesis spaces for e.g.~0-1 loss via their notion of feasible subspace dimension.
+%   These works are generally not directly comparable to our results, as they do not consider the embedding method. 
+%   However, we will mention relevant results inline.
 
 
 \section{Setting}
@@ -410,7 +414,7 @@ Note that Bayes risk, a function from distributions over $\Y$ to the reals, may 
 % =======
 \end{proof}
 
-Combining Proposition~\ref{prop:embed-risk-poly} with the straightforward result that polyhedral losses have polyhedral Bayes risks, we obtain the first direction of our equivalence between polyhedral losses and embedding.
+Combining Proposition~\ref{prop:embed-risk-poly} with the following observation that polyhedral losses have polyhedral Bayes risks, we obtain the first direction of our equivalence between polyhedral losses and embedding.
 
 \begin{lemma}
   \label{lem:poly-loss-poly-risk}
@@ -427,9 +431,9 @@ Combining Proposition~\ref{prop:embed-risk-poly} with the straightforward result
 \begin{theorem}\label{thm:poly-embeds-discrete}
   Every polyhedral loss $L$ embeds a discrete loss.
 \end{theorem}
-\begin{proof}
-  We simply apply Lemma~\ref{lem:poly-loss-poly-risk} and Proposition~\ref{prop:embed-risk-poly}.
-\end{proof}
+% \begin{proof}
+%   We simply apply Lemma~\ref{lem:poly-loss-poly-risk} and Proposition~\ref{prop:embed-risk-poly}.
+% \end{proof}
 
 We now turn to the reverse direction: is every discrete loss embedded by some polyhedral loss?
 Using a construction via convex conjugate duality, which has appeared several times in the literature\raft{CITE: DKR, frongillo-kash (WINE 2014), probably one of Bob's papers?, others?}, we see that the answer is yes, although the number of dimensions $d$ required could be as large as $|\Y|$.
@@ -534,6 +538,7 @@ In some cases we simplify existing proofs, while in others we give new results, 
 \raf{Notes to self: The top-k and hypercube/set examples (except abstain) have the link built in, e.g.\ as the sign function), and they just work around it.  Our results may suggest that it's worth thinking ``outside the box'' (HAH, genious...) and looking for embeddings which are not the hypercube.}
 
 \subsection{Consistency of abstain surrogate, with tighter link}
+\label{sec:abstain}
 \raf{NEW: tighter link}
 
 \raf{Copied}
