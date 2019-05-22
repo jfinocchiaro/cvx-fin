@@ -230,8 +230,8 @@ To this end, we will use double arrow notation to mean a mapping to all nonempty
 
 \bo{The following is not ideal because everywhere else in the paper, we always use $\R$ with $\gamma$ and $\reals^d$ with $\Gamma$}
 \begin{definition}[Property, level set]\label{def:property}
-  A \emph{property} is a function $\Gamma:\simplex\toto\R$.
-  The \emph{level set} of $\Gamma$ for report $r$ is the set $\Gamma_r := \{p : r \in \Gamma(p)\}$.
+  A \emph{property} is a function $\Gamma:\simplex\toto\U$.
+  The \emph{level set} of $\Gamma$ for report $u$ is the set $\Gamma_u := \{p : u \in \Gamma(p)\}$.
 \end{definition}
 
 
@@ -624,10 +624,7 @@ Moreover, they go on to show consistency and provide a link function from their 
 \jessiet{Note about how they have $\sgn(0) = 1$?}
 
 \subsection{Inconsistency of top-$k$ losses}
-
-Yang and Koyejo~\cite{yang2018consistency} prove the inconsistency of a family of polyhedral surrogates for the top-$k$ classification problem.
-We are also able to show inconsistency using our embedding framework.
-\jessie{Add sentence on what top-k problem is intuitively.}
+~\citet{lapin2016loss, lapin2018analysis}, provide two surrogate losses for measuring top-$k$ error, one of which is shown to be convex, but their consistency is left as an open question.
 
 The top $k$ classification problem takes as input a set $r \in \R := \{r \subseteq [n] : |r| = k\}$, and observes outcome $y \in [n]$.
 We define the top-$k$ loss $\ell_{top-k}:\R \to \reals$ by
@@ -640,26 +637,24 @@ We define the top-$k$ loss $\ell_{top-k}:\R \to \reals$ by
 
 
 Yang and Koyejo~\cite{yang2018consistency} create a new surrogate loss that is consistent for the top-$k$ problem, but it should be noted that their surrogate is not convex.
-Additionally, they evaluate two losses given by Lapin et al.~\cite{lapin2016loss, lapin2018analysis}, one of which is shown to be convex, but their consistency is left as an open question.
-Following the notation of Yang, we call Lapin's~\cite{lapin2018analysis} convex surrogate $L_2$, and primarily focus on this.
+They also show that Lapin's surrogates are not consistent, but in a different manner than we do.
+Following the notation of Yang, we call Lapin's~\cite{lapin2018analysis} convex surrogate $L_2$, and focus on this.
 Here, we assume $r \subseteq [n]$ and $k \leq n$ is a constant.
 
-Our embedding framework can help lead us to distributions where the surrogate loss is not minimized by predicting the minimizer of $\ell_{top-k}$.
+Our embedding framework can help us find distributions where the surrogate loss is not minimized by predicting the minimizer of $\ell_{top-k}$.
 First, we want to show that for all $p \in \simplex$, there (1.) is some $u \in \{0,1\}^n$ that minimizes $\inprod{p}{L_2(\cdot)}$.
-Then, we show (2.) there is a discrete loss $\ell_2$ that is embedded by $L_2$, where the embedded reports are the corners of the $n$-dimensional hypercube.
+Then, we show (2.) there is a discrete loss $\ell_2 : \{0,1\}^n \to \reals^Y_+$ that is embedded by $L_2$.  %, where the embedded reports are the corners of the $n$-dimensional hypercube.
 For $k=1$, we know that the $\ell_{top-k}$ reduces to 0-1 loss, so finally, we (3.) characterize the distributions where $\risk{L_2}(p) = \risk{\ell_2}(p) \neq \risk{\ell_{top-k}}(p)$.
 
 \raft{Take another look at Theorem 2.4 of the top-k paper.  Losses can certainly be consistent without embedding $\ell$ (even if polyhedral: you can link multiple embedded points to a single discrete report, e.g.\ a convex surrogate for ranking loss can link to the mode), so the ``iff'' is not right.  I think it's worth spending some time thinking about what exactly we need to show to prove inconsistency.  In particular, see if this reasoning checks out:  Suppose we find a distribution $p$ for which an optimal surrogate report is $r$ but $\psi(r)$ is not optimal for $\ell$.  Since we could have a conditional distribution of $p$ for every $x$, so the optimal hypothesis would just be the constant function $h(x) = r$, which achieves the optimal $L$-loss, and when linked, $\psi \circ h(x) = \psi(r)$, which does not achieve the optimal $\ell$-loss.}
 
-Now, for example, consider the surrogate discussed by Lapin et al.~\cite{yang2018consistency}, and Yang and Koyejo~\cite{yang2018consistency}.
 We write the surrogate $L_2(u,y) := \max\left( \frac{1}{k} \sum_{i=1}^k (u + \indopp(y))_{[i]} - u_y \right)_+ $, where $\indopp(y) = \ones - e_y$, and $(x)_{[i]}$ is the $i^{th}$ largest component of $x$.
 
-Consider the following process:  (1.) For all $p \in \simplex$, we can show that there is some $u \in \{0,1\}^n$ such that $u \in \argmin_{u'} \inprod{p}{L_2(u')}$.
-(2.) Now consider the discrete loss
+When embedding, we consider the discrete loss
 \begin{align*}
-\ell_2(r,y) &= \Ind[y \not\in r] + \min\left(\frac{|r \setminus \{y\}|}{k}, 1\right)
+\ell_2(r,y) &= \Ind[y \not\in r] + \min\left(\frac{|r \setminus \{y\}|}{k}, 1\right)~,~
 \end{align*}
-We claim that $L_2$ embeds $\ell_2$.  
+and claim that $L_2$ embeds $\ell_2$.  
 (3.) Finally, taking $k = 1$, we see that $0 \in \argmin_{r' \subseteq [n]} \inprod{p}{\ell_2(r')}$ for any $p$ such that $\max_y p_y \leq 1/2$.
 
 \begin{enumerate}
