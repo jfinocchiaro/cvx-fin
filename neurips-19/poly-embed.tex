@@ -329,10 +329,10 @@ If the linked surrogate correctly minimizes $L$ in expectation,
 \label{sec:poly-loss-embed}
 
 In this section, we establish a tight relationship between the technique of embedding and the use of polyhedral (piecewise-linear convex) surrogate losses.
-Note that we have not yet shown consistency of such surrogates; this is the topic of the following section.
+We defer to the following section the question of when such surrogates are consistent.
 
-To begin, we observe that our embedding condition in Definition~\ref{def:loss-embed} can be very succinctly rewritten: it is equivalent to matching Bayes risks.
-This useful result will drive many of our findings in this section.
+To begin, we observe that, somewhat surprisingly, our embedding condition in Definition~\ref{def:loss-embed} is equivalent to merely matching Bayes risks.
+This useful fact will drive many of our results.
 
 \begin{proposition}\label{prop:embed-bayes-risks}
   A loss $L$ embeds discrete loss $\ell$ if and only if $\risk{L}=\risk{\ell}$.
@@ -392,7 +392,7 @@ Note that Bayes risk, a function from distributions over $\Y$ to the reals, may 
 \begin{proof}
   For the forward direction, suppose $L$ embeds a discrete loss $\ell$.
   By Proposition~\ref{prop:embed-bayes-risks}, we know that $\risk{L} = \risk{\ell}$.
-  Since $\ell$ is discrete, we know that $\risk{\ell}$ is polyhedral as $\risk{\ell}$ is the minimum of a finite set of linear functions in $\simplex$. %\raf{do we know? okay, we do---but why?}.
+  Since $\ell$ is discrete, $\risk{\ell}$ is polyhedral as the minimum of a finite set of linear functions in $\simplex$. %\raf{do we know? okay, we do---but why?}.
   Therefore, $\risk{L}$ is polyhedral.
   
   
@@ -447,10 +447,6 @@ Using a construction via convex conjugate duality, which has appeared several ti
 
 We have seen a tight connection between embeddings and polyhedral losses\raf{... what else can we say here?  Why is this cool?}
 
-
-To conclude, we briefly point out the interesting implications of these results on the structure of embedded \emph{properties} themselves.
-In particular, the following corollary states an equivalence between finite elicitable properties, embeddable properties, and properties embedded by polyhedral losses.
-
 %\begin{corollary}\label{cor:finite-elicit-embed}
 %  Let $\gamma$ be a finite property.
 %  The following are equivalent.
@@ -467,47 +463,6 @@ In particular, the following corollary states an equivalence between finite elic
 %  \raf{This follows from Proposition~\ref{prop:embed-trim}, but we're stating this as a corollary... let's see if it follows more directly from the above.  If it doesn't (one complication: there is no discrete loss starting from $2$ or $3$!) we can rephrase it as a theorem / proposition.}
 %\end{proof}
 
-\jessie{Do we want this at all?}
-To be useful in applications, a loss which embeds a property must be accompanied by a calibrated \jessie{separated?}link to that property.
-The definition of embedding makes part of the link clear: the link should map embedded reports back to the original reports, since they are equivalent in a strong sense.
-It is not a priori clear how to map the remaining reports, however.
-Fortunately, using the machinery developed in Proposition~\ref{prop:embed-trim}, we can easily construct a calibrated link on the remaining reports.
-
-\begin{proposition}\label{prop:embed-link}
-  Let $L$ elicit $\Gamma:\simplex\toto\reals^d$ which embeds a finite property $\gamma$.
-  Then there is a calibrated link from $\Gamma$ to $\gamma$. % which can be taken to be separated if $L$ is polyhedral.
-\end{proposition}
-\begin{proof}
-  Let $\gamma:\simplex\toto\R$.
-  Proposition~\ref{prop:embed-trim} gives us that $\trim(\Gamma) = \{\gamma_r : r\in\R\}$.
-  Then for any $u\in\reals^d$, there is some $r\in\R$ such that $\Gamma_u \subseteq \gamma_r$.
-  The link $\psi : \reals^d \to \R$ which encodes these choices is calibrated.
-  \raft{Commented out the separated stuff}
-  % Now assume $L$ is polyhedral.
-  % \jessiet{Hole jere: $j$-faces of the function.}
-  % For the second part of the statement, in order for $\psi$ to be separated, for $\epsilon > 0$, for each embedded point $u \in \reals^d$ and every $v \in B(\epsilon, u)$, we must observe $\psi(v) = \psi(u)$.
-  % If the loss $L$ is polyhedral, we want to show that we can construct a $\psi$ so that the above holds.
-  %
-  % First, consider that each of the embedded points in $u \in \varphi(\R)$ must have ball $B(\epsilon, u)$ centered on $u$ so that no other $w \in \varphi(\R)$ is in $B(\epsilon, u)$.
-  % If this is not true, then \jessie{...?} \jessiet{I'm not sure how this messes with things, but I would think the level sets corresponding to the two points would differ on a set of zero measure, if at all, or both be in the $\arginf$of the loss...?}
-  %
-  % Now for any $u \in \varphi(\R)$ and $v \in B(\epsilon, u)$, if $\psi(v)$ does not map to $\psi(u)$, then there must be some other $w \in \varphi(\R)$ so that $\psi(v) = \psi(w)$.
-  % Since $L$ is polyhedral, we know that for $p \in \simplex$ such that $v \in \Gamma(p)$, then since $u$ and $v$ are sufficiently close, $\E_p L(w,Y) = \E_p L(v,Y) \leq \E_p L(u,Y)$.
-  % However, if the inequality was strict, then we contradict the polyhedral structure of $L$, since $v$ is not an embedded point.
-  % Therefore, $v \in \Gamma(p) \implies u \in \Gamma(p)$, and we can alter the link function so that $\psi(v) = \psi(u)$.
-  %
-  %
-  % If no such $\psi$ existed, then for some $p$ such that $u \in \arginf_{z \in \R} \E_p L(z,Y)$, we know there is a $\delta > 0$ such that $\E_p L(v,Y) - \E_p L(u,Y) < \delta$ by continuity of $L$.
-%Additionally, if $\psi$ was not selective, then we know $\psi(v) = \psi(w)$ for some embedded point $w \neq u$.
-%Since the losses of $u$ and $v$ are not bounded about away from each other and $\psi(v) = \psi(w)$, then the loss $L$ must be constant on $\conv(\{u,v,w\})$, otherwise we would either contradict elicitability of $\Gamma$ or the construction of the calibrated link $\psi$.
-%Therefore, we can reassign $\psi(v) = \psi(u)$ for any $v\in B(\epsilon, u)$, and such a link additionally separated.
-\end{proof}
-
-In typical applications, one requires more of the link, namely that it should be separated (see Definition~\ref{def:links}).
-In most cases, devising a separated link is straightforward.
-Giving a construction that yields a separated link for all polyhedral losses is a nuanced problem described in the following section.
-\raf{Replace this paragraph with gloating about our result if we actually give this construction.}
-
 
 \section{Consistency via Separated Links}
 \label{sec:separated-links}
@@ -518,6 +473,19 @@ In this section, we show that separated link functions guarantee consistency, an
 We illustrate our construction in the following section.
 
 \raf{MOVE SOME PROPERTIES STUFF HERE?  E.g. Prop~\ref{prop:embed-trim}.}
+
+\raf{Bo: this proves one of your lemmas}
+\begin{proposition}\label{prop:embed-link}
+  Let $L$ elicit $\Gamma:\simplex\toto\reals^d$ which embeds a finite property $\gamma$.
+  Then there is a calibrated link from $\Gamma$ to $\gamma$. % which can be taken to be separated if $L$ is polyhedral.
+\end{proposition}
+\begin{proof}
+  Let $\gamma:\simplex\toto\R$.
+  Proposition~\ref{prop:embed-trim} gives us that $\trim(\Gamma) = \{\gamma_r : r\in\R\}$.
+  Then for any $u\in\reals^d$, there is some $r\in\R$ such that $\Gamma_u \subseteq \gamma_r$.
+  The link $\psi : \reals^d \to \R$ which encodes these choices is calibrated.
+\end{proof}
+
 
 \begin{lemma}
   \label{lem:polyhedral-range-gamma}
