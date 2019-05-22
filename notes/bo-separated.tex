@@ -75,7 +75,11 @@
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
+\newtheorem{claim}{Claim}
 \newtheorem{corollary}{Corollary}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
 
 \begin{document}
 
@@ -274,50 +278,216 @@ The next lemma shows that if a subset of $\mathcal{U}$ intersect, then their cor
   We take the minimum over these finitely many choices.
 \end{proof}
 
-\begin{lemma} \label{lemma:distance-loss}
-  If $L$ is a polyhedral loss, then for each $p$, there exists a constant $c$ such that:
-  if the set $U$ is optimal with expected loss $z$, and $d(U,u) \geq \delta$, then $L(u;p) > z + c\delta$.
-\end{lemma}
-\begin{proof}
-  \bo{Changed the statement to something hopefully correct}
-  \raf{Correct, but not strong enough for separated link.  Let's chat about it when the rest is settled.}
-%  \bo{TODO}
-%  \raf{My first thought was ``This is a great lemma!'' but I don't think it's quite true.  Again think of hinge, and take $p\to 0.5$ from above; $U = \{1\}$ the whole time, but $L(-1,p) \to L(1,p)$, so no constant $c$ will work.  We will want a lemma like this, but I think we'll want to relate $\ell$ differences to $L$ differences, especially since that's the new definition of separated link anyway.  (Note that this more nuanced version holds for this hinge example: yes $L(-1,p)$ is getting closer to $L(1,p)$, but so is $\ell(-1,p)$ to $\ell(1,p)$.}
-\end{proof}
-
-\begin{theorem}
-  Let $L(u,y)$ be a surrogate loss for $\ell(r,y)$ for which there exists some calibrated link.
-  Suppose $L$ is a polyhedral loss.
-  Then there exists a calibrated, \emph{separated} link $\psi$ between these losses, meaning, for all $p$,
-    \[ \inf_{u \in \R' : \psi(u) \not\in \gamma(p)} L(u;p) > \inf_{u \in \R'} L(u;p) . \]
-\end{theorem}
-\begin{proof}
-  We construct $\psi$.
-  
-  Fix a small enough $\epsilon$ as promised by Corollary \ref{cor:thick-intersect}.
-  
+\begin{definition} \label{def:thick-link}
+  Given polyhedral $L$ embedding some $\ell$, the \emph{$\epsilon$-thickened link} $\psi: \R' \to \R \cup \{\bot\}$ is constructed as follows.
   We will label each point $u \in \R'$ with a set of legal mappings $r \in \R$.
   Let $\Psi: \R' \toto \R$ be this labeling.
   Begin by initializing $\Psi(u) = \R$ for all $u$, i.e. all mappings are legal.
   Then, we apply the following iterative procedure.
   For each set $U \in \mathcal{U}$, for each $u \in B(U,\epsilon)$, we set $\Psi(u) = \Psi(u) \cap R_U$ where $R_U$ is given by Lemma \ref{lemma:U-surject}.
   Then, construct $\psi$ by making arbitrary legal choices, e.g. $\psi(u)$ is defined as the first element of $\R$ in $\Psi(u)$.
-  
-  We have to prove, first, that $\Psi(u)$ is nonempty for each $u$, and second, that $\psi$ is a separated, calibrated link.
-  
+  If there is no legal choice because $\Psi(u) = \emptyset$, set $\psi(u) = \bot$.
+\end{definition}
+
+\begin{theorem} \label{thm:small-eps-thick}
+  For all small enough $\epsilon$, the epsilon-thickened link $\psi$ is a well-defined link function from $\R'$ to $\R$, i.e. $\psi(u) \neq \bot$ for all $u$.
+\end{theorem}
+\begin{proof}
+  Fix a small enough $\epsilon$ as promised by Corollary \ref{cor:thick-intersect}.
   Consider any $u \in \R'$.
   If $u$ is not in $B(U,\epsilon)$ for any $U \in \mathcal{U}$, then we have $\Psi(u) = \R$, so it is nonempty.
   Otherwise, let $\{U_j : j \in \mathcal{J}\}$ be the family whose thickenings intersect at $u$.
   By Corollary \ref{cor:thick-intersect}, because of our choice of $\epsilon$, the family themselves has nonempty intersection.
   By Lemma \ref{lemma:calibrated-pos}, their corresponding report sets $\{R_j : j \in \mathcal{J}\}$ also intersect at some $r$, so $\Psi(u)$ is nonempty.
+\end{proof}  
+
+\begin{lemma} \label{lemma:distance-loss}
+  If $L$ is a polyhedral loss, then for each $p$, there exists a constant $c$ such that, for all $u$,
+    \[ L(u;p) - \inf_{u^* \in \R'} L(u^*;p) \geq c \cdot d(\Gamma(p),u) . \]
+\end{lemma}
+\begin{proof}
+  Fix $p$ and let $U = \Gamma(p)$.
+  If $u \in U$, then both sides are zero.
+  So it remains to find a $c$ such that the inequality holds for all $u \not\in U$.
   
-  Finally, we must show that $\psi$ is a separated, calibrated link.
-  It is calibrated because each $U$ maps under $\psi$ into the corresponding $R$ (since its entire thickening does).
-  For separation, fix $p$. Now, suppose $U$ is optimal and $u$ is not.
-  Now, if $u$ does not map to an optimal report, then it is not in $B(U,\epsilon)$.
-  So by Lemma \ref{lemma:distance-loss}, its expected loss is at least $c\epsilon$ larger than optimal for some $c$ depending only on $L$ and $p$.
-  This holds for all such $u$, so the link is separated.
+  $L(\cdot;p)$ is a convex polyhedral function, so it is the pointwise maximum over finitely many linear functions.
+  Construct the convex polyhedral function $\underbar{L}(\cdot;p)$ by dropping from the max those linear functions that are never equal to $L$ for any $u^* \in U$.
+  We have $\underbar{L}(u^*;p) = L(u^*;p)$ for all $u^* \in U$ and $\underbar{L}(u;p) \leq L(u;p)$ for all $u \not\in U$.
+  Now $\underbar{L}$ is the max over a finite number of linear functions.
+  Each such function $f$ with gradient $\nabla f$ is equal to $\underbar{L}$ above a closed, convex cell in the power diagram formed by projecting $\underbar{L}(\cdot;p)$.
+  If $f$ has nonzero gradient, its cell overlaps with $U$ exactly at some face of $U$.
+  We will prove that there exists $c_f > 0$ such that, for all $u$ in the corresponding cell of the power diagram,
+    \[ \underbar{L}(u;p) \geq L(u^*;p) + c_f \cdot d(U,u) . \]
+  We will then repeat this for the finitely many $f$ with nonzero gradient (which covers all points $u \not\in U$) and take the minimum to obtain the desired $c > 0$.
+
+  Consider the set of unit vectors $\{v \in \reals^d : \|v\|=1\}$ and the set of $u^*$ on the boundary of $U$.
+  For all pairs $u^*,v$ such that $v$ exposes $u^*$, let
+    \[ G_{u^*,v} = \left\{ u^* + \beta v : \beta \geq 0 \right\} . \]
+  Note that $\{ u : u \not\in U\} \subseteq \cup_{u^*,v} G_{u^*,v}$.
+  We claim each $G_{u^*,v}$ can be associated with some linear $f$ such that $f(u) = \underbar{L}(u;p)$ for all $u \in G_{u^*,v}$.
+  \bo{Need to prove this; I think it follows because $G_{u^*,v}$ lies completely within some cell of the power diagram formed by projecting $\underbar{L}$.}
+  Hence for all $u$ in $G_{u^*,v}$, we have
+  \begin{align*}
+    \underbar{L}(u;p) &= \underbar{L}(u^*;p) + (\nabla f) \cdot (d(u^*,u) v)  \\
+                      &= L(u^*;p) + c_{u^*,v} \cdot d(U,u)
+  \end{align*}
+  where $c_{u^*,v} := (\nabla f) \cdot v$, and we note $u^* = \min_{u' \in U} d(u',u)$. \bo{Should prove this; ought to follow because $v$ exposes $u^*$.}
+  We must have $c_{u^*,v} > 0$, otherwise $G_{u^*,v} \subseteq U$ which is a contradiction.
+  
+  Now for each $f$, we claim the set $\{u^*, v : \text{$G_{u^*,v}$ is associated with $f$}\}$ is closed.
+  This follows because the set of $u^*$ such that $f(u^*) = \underbar{L}(u^*;p)$ is closed, and for fixed $u^*$, the set of $v$ such that $G_{u^*,v}$ is in the cell of the power diagram is also closed.\bo{Should prove this.}
+  So for this $f$, the infimum over all positive $c_{u^*,v}$ is achieved by some positive member $c_f > 0$.
 \end{proof}
+
+\begin{theorem}
+  For small enough $\epsilon$, the $\epsilon$-thickened link $\psi$ satisfies that, for all $p$, there exists $\delta > 0$ such that, for all $u \in \R'$,
+    \[ L(u;p) - \inf_{u^* \in \R'} L(u^*;p) \geq \delta \left[ \ell(\psi(u);p) - \min_{r^* \in \R} \ell(r^*;p) \right] . \]
+\end{theorem}
+\begin{proof}
+  We take the $\epsilon$ thickened link, which is well-defined by Theorem \ref{thm:small-eps-thick}.
+  Fix $p$ and let $U = \Gamma(p)$.
+  The left-hand side is nonnegative, so it suffices to prove the result for all $u$ such that the right side is strictly positive, i.e. for all $u$ such that $\psi(u) \not\in \gamma(p)$.
+  By definition of the $\epsilon$-thickened link, we must have $d(U,u) \geq \epsilon$.
+  By Lemma \ref{lemma:distance-loss}, we have $L(u;p) - \inf_{u^*} L(u^*;p) \geq C$ where $C = c\epsilon$ for some $c > 0$.
+  This holds for all $u$.
+  Meanwhile,
+    \[ \ell(\psi(u);p) - \min_{r^*} \ell(r^*;p) \leq \max_{r \in \R} \ell(r;p) - \min_{r^* \in \R} \ell(r^*;p) =: D, \]
+  for some constant $D$.
+  This also holds for all $u$.
+  Set $\delta = \frac{C}{D}$ to complete the proof.
+\end{proof}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\break
+
+Bo: this is the proof sketch of the stronger result that Raf and I discussed.
+
+\begin{theorem}
+  There exists $\delta$ such that, for all $p,u$,
+    \[ L(u;p) - \inf_{u^*} L(u^*;p) \geq \delta \left[ \ell(\psi(u);p) - \min_{r^*} \ell(r^*;p) \right] . \]
+\end{theorem}
+\begin{proof}[Sketch]
+  The above theorem gives a $\delta_p > 0$ for each $p$.
+  \bo{Why doesn't this work? $\Delta_{\Y}$ is a closed set, so the infimum delta is positive, done.}
+
+  \bo{The kind of argument we were using...}
+  Fix $r^*$ and let $p^*$ be in the relative interior of the level set $\gamma_{r^*}$. (We have conditions implying that $\gamma_{r^*}$ is full-dimensional in the simplex...)
+  Let $\{ p^b : b \in B\}$ be the relative boundary of the level set $\gamma_{r^*}$.
+  It is indexed by, for example, the closed unit sphere $B = \{w : \|w\|=1\}$ via $p_b = \text{relbound}(\gamma_{r^*}) \cap \{p^* + \beta b : \beta \geq 0\}$.
+  For $\alpha \in [0,1]$, define the distribution $p^b_{\alpha} := \alpha p^* + (1-\alpha) p^b$ 
+  \begin{claim} \label{claim:p-bound-1}
+    Fix $b$.
+    There exists $\beta_b \in \reals$ such that $\inf_{u: d(U(p),u) \geq \epsilon} L(u;p^b_{\alpha}) - L(u^*;p^b_{\alpha}) \geq \alpha \beta_b$ for all $\alpha \in [0,1]$.
+  \end{claim}
+  Given this, we claim that $\beta_{b'} := \inf \{\beta_b : b \in B\}$ is achieved at some $b' \in B$ because it is a closed set.
+  So for all $p \in \gamma_{r^*}$, we have $\inf_{u: d(U(p),u) \geq \epsilon} L(u;p) - L(u^*;p) \geq \alpha \beta_{b'}$.
+\end{proof}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Bo: notes from chats with Raf about the separated result.
+
+
+%%%%%%%%% third chat, May 20
+
+%Main Thm: Show: for all r, r': for all p such that r' in gamma(p), we have
+%inf_{u : psi(u) = r} L(u;p) - L(u*;p) >= delta * [ ell(r;p) - ell(r';p) ]
+%
+%Proof: fix p_canon in interior of gamma_{r'}
+%Fix p_bd on boundary
+%Show exists v such that inf_{u: psi(u) = r} L(u;p) - L(u*;p) >= v*p for all p between p_canon and p_bd
+%Implies there exists delta > 0 such that inf_{u: psi(u) = r} L(u;p) - L(u*;p) >= delta * [ell(r;p) - ell(r';p)]
+%Argue that p_bd comes from a closed set, so the inf over these delta is achieved at some delta > 0.
+%
+%
+%Weaker lemma: Given r, r', p_canon, p_bd: show exists v such that
+%inf_{u: psi(u) = r} L(u;p) - L(u*;p) >= v*p
+%p*v > 0 for p in gamma_{r'} \ gamma_r
+%p*v = 0 for p in gamma_{r'} \cap gamma_r .
+%(for all p between p_canon and p_bd)
+%Improved weaker lemma: case on p_bd in gamma_r or not.
+%
+%%%%%%%%% second chat
+
+%let r1, r2, p be given with r1 in gamma(p).
+%
+%
+%want inf_{u: psi(u) = r2} L(u;p) - L(u*;p) >= delta
+%     -------------------------------------
+%           ell(r2;p) - ell(r1;p)
+%
+%for each p, we get a delta > 0.
+%
+%
+%
+%
+%Fix p. We have an optimal set U and "facets" (cell of the power diagram) {F}.
+%
+%Let d_f^y = nabla L_y(u_f).
+%
+%So given p, we have < p, d_f^y > is expected loss (plus something?)??
+%
+%Expected loss: sum_y p(y) L_y(u_f)
+%            >=   sum_y p(y) (c_y + ||d_f^y|| epsilon)
+%             =   c_y + epsilon <p, ||d_f||>
+%
+%L(u_f;p) - L(u_p;p)
+%
+% sum_y p(y) [ L_y(u_b) + d_f^y * (u_f - u_b) ] - sum_y p(y) L_y(u_b)
+%
+% = sum_y p(y) [ d_f^y * (u_f - u_b) ]
+%>= sum_y p(y) [ delta_y * epsilon ]
+%
+%
+%
+%directions of steepest increase (slope)
+%
+%d_f exposes a face of U ... perhaps the face adjacent to the "facet" f?
+%
+%U = tall thin triangle example, even with arbitrarily steep slopes, can have arbitrarily low function values, even epsilon away from U!!!
+
+
+
+%%%%%%%%%% first chat
+%
+%for all p, u:
+%
+%min_{embedded points} < p , L(u) - L(point) >
+%
+%>= delta * min_{r in R} < p , l(psi(u)) - l(r) >
+%
+%
+%for all p, r' in gamma(p), r' \neq r:
+%
+%inf_{u : psi(u) = r} <p, L(u) - L(u_{r'})>  >=  delta <p, l(r) - l(r')>
+%
+%
+%L_y(u) - L_y(u_{r'})        L_y(u_r) - L_y(u_{r'})
+%
+%
+%
+%Notice that whatever p is, its dot product with l(r) - l(r') is positive.
+%So have to show that if p is close to dot-product zero on the left, it's also on the right.
+%
+%
+%
+%Draw the line from u_{r'} to u, eventually the slope becomes positive and stays positive for at least epsilon
+%
+%say d_y = "slope" toward u_{r'}
+%
+%
+%let v = (u-u_{r'}) / ||u-u_{r'}||
+%
+%d_y = directional derivative in direction v (once positive)
+%
+%so I have <p, d_y*epsilon >
+
+
 
 
 
