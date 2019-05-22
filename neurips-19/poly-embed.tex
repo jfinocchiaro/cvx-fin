@@ -516,13 +516,13 @@ We have seen a tight connection between embeddings and polyhedral losses\raf{...
 
 We have now seen the tight relationship between polyhedral losses and embeddings; in particular, every polyhedral loss embeds some discrete loss.
 The embedding itself tells us how to map the embedded points back to the discrete reports (map $\varphi(r)$ to $r$), but it is not clear when this map can be extended to the remaining reports to obtain a full link function, and whether such a link can lead to consistency.
-In this section, we give a construction to generate calibrated links for \emph{any} polyhedral loss.
-We illustrate our construction in the following section.
 
-\raf{Bo: this proves one of your lemmas}
+In this section, we give a construction to generate calibrated links for \emph{any} polyhedral loss.
+The first step is to give a link $\psi$ such that minimizing expected surrogate loss, followed by applying $\psi$, minimizes expected original loss.
+
 \begin{proposition}\label{prop:embed-link}
   Let $L$ elicit $\Gamma:\simplex\toto\reals^d$ which embeds a finite property $\gamma$.
-  Then there is a ``valid'' \raf{my scare quotes} link from $\Gamma$ to $\gamma$. % which can be taken to be separated if $L$ is polyhedral.
+  Then there exists a link function $\psi: \reals^d \to \R$ that is \emph{valid} in the sense that, for any $p$, if $u$ minimizes expected $L$-loss (i.e. $u \in \Gamma(p)$, then $\psi(u)$ minimizes expected $\ell$-loss (i.e. $\psi(u) \in \gamma(p)$).
 \end{proposition}
 \begin{proof}
   Let $\gamma:\simplex\toto\R$.
@@ -531,12 +531,28 @@ We illustrate our construction in the following section.
   The link $\psi : \reals^d \to \R$ which encodes these choices is valid.
 \end{proof}
 
+However, this guarantee is weak: for a given $p$, $u$ could be arbitrarily close to optimal with respect to $L$, yet $\psi(u)$ could remain arbitrarily wrong.
+This kind of problem is ruled out by constructing a $\psi$ that is furthermore \emph{calibrated} (Definition \ref{def:calibrated}).
+The main construction begins from the intuitive approach of ``thickening'' the embedding points, by causing all $u$ in the neighborhood of an embedding point to link back to the corresponding report.
+However, we must consider cases where $\Gamma(p)$, the set of optimal $u$, is larger than just one embedding point.
+These cases have a nice structure:
 
 \begin{lemma}
   \label{lem:polyhedral-range-gamma}
   Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss, and let $\Gamma = \prop{L}$.
   Then the range of $\Gamma$, $\U = \Gamma(\simplex) = \{\Gamma(p) \subseteq \reals^d | p\in\simplex\}$, is a finite set of closed polyhedra.
 \end{lemma}
+For each of these finitely many $U \in \U$, we let $R_U$ be the set of reports whose embedding points lie in $U$.
+The idea will be to map points in $U$, as well as nearby  to something in $R_U$
+%We show in the full version \bo{okay wording?} that for any $p$, if $U = \Gamma(p)$, then $R_U = \gamma(p)$.
+
+\begin{definition} \label{def:eps-thick-link}
+  Given a polyhedral $L$ embedding some $\ell$, an $\epsilon > 0$, and a norm $\|\cdot\|$, the \emph{$\epsilon$-thickened link} $\psi$ is constructed as follows.
+  First, initialize $\Psi: \reals^d \toto \R$ by setting $\Psi(u) = \R$ for all $u$.
+  Then for each $U \in \U$, for all points $u$ such that $\inf_{u^* \in U} \|u^*-u\| < \epsilon$, update $\Psi(u) = \Psi(u) \cap R_U$.
+  Finally, define $\psi(u) \in \Psi(u)$, breaking ties arbitrarily.
+  If $\Psi(u)$ became empty, then leave $\psi(u)$ undefined.
+\end{definition}
 
 \raft{COOL THING TO POINT OUT: when $L$ is polyhedral, then $\prop{L}$ has a finite range (this result) and so does its (multivalued map) inverse (trim result)!}
 
