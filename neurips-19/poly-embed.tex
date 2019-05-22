@@ -171,12 +171,12 @@ thus giving a very general framework to construct consistent convex surrogates f
 \subsection{Related works}
 \raf{Let's dump a bunch of citations and not worry about going into detail.  I'll throw in a skeleton.}
 
-The literature on convex surrogates focuses mainly on smooth surrogate losses~\raf{DKR;many more...}\cite{crammer2001algorithmic,bartlett2006convexity,bartlett2008classification, duchi2018multiclass, williamson2016composite, reid2010composite}.
-Nevertheless, nonsmooth losses, such as the polyhedral losses we consider, have been proposed and studied for a variety of classification-like problems\raf{cites}.
+The literature on convex surrogates focuses mainly on smooth surrogate losses~\raf{DKR;many more...}\jessiet{DKR, some of Bob's added.}\cite{crammer2001algorithmic,bartlett2006convexity,bartlett2008classification, duchi2018multiclass, williamson2016composite, reid2010composite}.
+Nevertheless, nonsmooth losses, such as the polyhedral losses we consider, have been proposed and studied for a variety of classification-like problems\cite{ramaswamy2018consistent, boser1992training}\raf{cites} \jessiet{Do we want the SVM (Boser) cite?}.
 A notable addition to this literature is~\citet{ramaswamy2018consistent}, who argue that nonsmooth losses may enable dimension reduction of the prediction space (range of the surrogate hypothesis) relative to smooth losses, illustrating this conjecture with a surrogate for \emph{abstain loss} needing only $\log n$ dimensions for $n$ labels, whereas the best known smooth loss needs $n-1$.
 Their surrogate is a natural example of an embedding (cf.~Section~\ref{sec:abstain}), and serves as inspiration for our work.
 
-While property elicitation has by now an extensive literature~\cite{savage1971elicitation,osband1985information-eliciting,lambert2008eliciting,gneiting2011making,steinwart2014elicitation,frongillo2015vector-valued,fissler2016higher,lambert2018elicitation, finocchiaro2018convex}\raft{others? already a bit much...}, these works are mostly concerned with point estimation problems.
+While property elicitation has by now an extensive literature~\cite{savage1971elicitation,osband1985information-eliciting,lambert2008eliciting,gneiting2011making,steinwart2014elicitation,frongillo2015vector-valued,fissler2016higher,lambert2018elicitation}\raft{others? already a bit much...}, these works are mostly concerned with point estimation problems.
 Literature directly connecting property elicitation to consistency is sparse, with the main reference being~\citet{agarwal2015consistent}; note however that they consider single-valued properties, whereas properties elicited by general convex losses are necessarily set-valued.
 
 % \citet{agarwal2015consistent} and~\citet{ramaswamy2016convex} study the existence of convex surrogates; the latter proves lower bounds on dimensionality of hypothesis spaces for e.g.~0-1 loss via their notion of feasible subspace dimension.
@@ -564,21 +564,32 @@ In some cases we simplify existing proofs, while in others we give new results, 
 \subsection{Consistency of abstain surrogate and link construction}
 \label{sec:abstain}
 \raf{Jessie: could you add the definition of their surrogate and link?  Use eq:abstain-surrogate for the label}
+Consider the $\abstain{1/2}$ property, where one wants to report the most likely outcome, conditioned on such a $p_y \geq 1/2$.
+If there is no such $p_y$, then the $\abstain{1/2}$ property suggests we abstain from predicting any one outcome.
 
-\raf{Copied}
-... given by Ramaswamy et al.~\cite{ramaswamy2018consistent}.
-In their work, they provide a consistent, polyhedral surrogate for the abstain loss $\ell_{\abstain{\alpha}}:[n] \cup \{a\} \to \reals$ defined:
-\begin{align}\label{eq:abstain}
+~\citet{ramaswamy2018consistent} provides a consistent, polyhedral surrogate for a particular case of the abstain loss $\ell_{\abstain{\alpha}}:[n] \cup \{a\} \to \reals$ defined:
+\begin{align}\label{eq:abstain-discrete}
 \ell_{\abstain{\alpha}}(r,y) := \begin{cases}
 0 & r = y\\
 \alpha & r = a\\
-1 & otherwise
+1 & \text{otherwise}
 \end{cases}
 \end{align}
 Here, the report $a$ corresponds to ``abstaining'' from voting if the outcome of any outcome is not likely enough to occur.
 
-The surrogate provided by Ramaswamy et al.~\cite{ramaswamy2018consistent} for $\alpha = 1/2$ embeds the $n$ outcomes into the $n$ vertices of the $\ceil{\log_2(n)}$-dimensional hypercube (vertices in $\{\pm 1\}^n$), and embeds the abstain point at the origin.
-They go on to show consistency and provide a calibrated \jessiet{check that?} link function from their surrogate to $\ell_{\abstain{1/2}}$.
+The $\abstain{1/2}$ surrogate provided by Ramaswamy et al.~\cite{ramaswamy2018consistent} embeds the $n$ outcomes into the $n$ vertices of the $d := \ceil{\log_2(n)}$-dimensional hypercube (vertices in $\{\pm 1\}^n$), and embeds the abstain point at the origin.
+They give the surrogate
+\begin{equation}\label{eq:abstain-surrogate}
+L_{\abstain{1/2}}(u, y) = \left(\max_{j \in [d]}\varphi(y)_j u_j + 1\right)_+
+\end{equation}
+Moreover, they go on to show consistency and provide a link function from their surrogate to $\ell_{\abstain{1/2}}$.
+\begin{equation}\label{eq:abstain-link}
+	\phi(u) = \begin{cases}
+	a & \min_{i \in [d]} |u_i| \leq 1/2\\
+	\varphi^{-1}(\sgn(-u)) &\text{otherwise}
+	\end{cases}
+\end{equation}
+\jessiet{Note about how they have $\sgn(0) = 1$?}
 
 \subsection{Inconsistency of top-$k$ losses}
 
@@ -692,7 +703,7 @@ These results cast doubt on the effectiveness of the Lov\'asz hinge in practice.
 
 The construction given in Theorem~\ref{thm:discrete-loss-poly-embeddable}, together with the calibrated link construction in Section~\ref{sec:calibration}, can generate consistent convex surrogates for arbitrary discrete losses.
 For example, consider cost-sensitive classification; given an arbitrary loss matrix $C \in \reals^{n\times n}_+$ describing the loss $\ell_j(i) = C_{ij}$ of predicting label $i$ when the true label is $j$, we construct a convex surrogate based on the convex conjugate of $-\risk{\ell}$.
-While of course several surrogates are known for this problem~\raf{Jessie, could you cite \url{http://proceedings.mlr.press/v28/avilapires13.pdf} here}, they typically work in $n$ dimensions.
+While of course several surrogates are known for this problem~\cite{pires2013cost}\raf{Jessie, could you cite \url{http://proceedings.mlr.press/v28/avilapires13.pdf} here}, they typically work in $n$ dimensions.
 one advantage of our embedding framework is the ability to construct lower-dimensional surrogates when costs have certain geometric interpretations.
 For example, if $v_1,\ldots,v_n \in \reals^k$ are on the unit sphere and $C_{ij} = \inprod{v_i}{v_j}$, we can simply take $L_j(u) = $\raf{aaaand Noah woke up}
 
