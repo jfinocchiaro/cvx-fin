@@ -65,6 +65,7 @@
 \newcommand{\F}{\mathcal{F}}
 \newcommand{\I}{\mathcal{I}}
 \newcommand{\R}{\mathcal{R}}
+\newcommand{\U}{\mathcal{U}}
 \newcommand{\X}{\mathcal{X}}
 \newcommand{\Y}{\mathcal{Y}}
 
@@ -199,8 +200,9 @@ We can now see that a surrogate $L:\reals^d\to\reals^\Y$ embeds $\ell:\R\to\real
 \label{sec:poly-loss-embed}
 
 Throughout this section, consider $F$ to be the facets of the projection of the surface of $\risk{\ell}$ onto $\simplex$ for a discrete loss $\ell$.
-For a facet $f$, we also consider $u_f = \argmin_r \ell(r, p)$ for any $p \in \inter{f}$.
-(We know that this $u_f$ is the same regardless of the choice of $p$ since $\risk{\ell}$ has a constant, well-defined derivative on $\inter{f}$) 
+For a facet $f$, we also consider $u_f = \argmin_r \ell(r, p)$ \raf{be careful: $\in \argmin$} for any $p \in \inter{f}$.
+(We know that this $u_f$ is the same \raf{not sure about ``same'', maybe ``an element of the argmin''} regardless of the choice of $p$ since $\risk{\ell}$ has a constant, well-defined derivative on $\inter{f}$)
+\raf{Cite why we know this; it's in the COLT appendix}
 \hrule
 \hrulefill
 \begin{proposition}\label{prop:embed-bayes-risks}
@@ -209,46 +211,98 @@ For a facet $f$, we also consider $u_f = \argmin_r \ell(r, p)$ for any $p \in \i
   % A loss $L:\reals^d\to\reals^\Y$ embeds discrete $\ell:\R\to\reals^Y$ if and only if $\risk{L}=\risk{\ell}$.
 \end{proposition}
 \begin{proof}[Property version]
-  For the forward implication, suppose $L$ embeds the discrete loss $\ell$.
-  Then $\Gamma := \prop{L}$ embeds the finite property $\gamma$ elicited by $\ell$.
-
-  Generating $\R := \{u_f\}_{f\in F}$, we know that $\gamma = \phi(\Gamma \cap \R)$, where the two are the same up to relabeling \jessie{need more thorough argument on this?  Not sure if I believe it...} and $\Gamma \cap \R$ is elicited by $L|_\R$ by \jessie{COLT Lemma 11}, and thus has the same Bayes Risk as $L|_\R$ by \jessie{cite FK General Truthfulness Theorem 2}.
-  Applying \jessie{COLT Lemma 11}, we then observe that $\risk{L} = \risk{L|_\R} = \risk{\ell}$.
-  
-  For the reverse implication, we use contradiction. \jessie{But no properties... I didn't see how.  Different technique from below though.}
+  \raf{Forward: you had the right idea that this is mainly Lemma 11.  But you have to step through the logic much more carefully, and be rigorous.  Keep in mind: you already have $\varphi$ from the embedding, and you know the loss values match.  It's true that you need to map $u$ values to $r$ values, but what you have doesn't make sense.}
     
-  \jessie{TODO: If we use this, change notation of $P_\ell$ to match what's already in the paper}
-  First, assume that $\risk{\ell} \neq \risk{L} +c$ for any constant $c$.
-  Denote by $P_\ell$ the facets of $\risk{\ell}$ projected onto $\simplex$, which must be different than the facets of $\risk{L}$ projected onto $\simplex$, denoted $P_L$.
-  That means, for some $p \in \simplex$ on the interior of a cell in $P_\ell$, we know $\nabla \risk{\ell}(p) \neq \nabla \risk{L}(p)$.
-  Therefore, we know the argmins of $L$ and $\ell$ are unique and as the subgradients of the risks are not equal, then $r \in \argmin_{r'} \ell(r,p) \implies \varphi(r) \not \in \argmin_u L(u,p)$, and thus we contradict our embedding assumption.
+  \jessie{Redone.  Original version in comments below.}
+  For the forward implication, suppose $L$ embeds the discrete loss $\ell$ via the embedding $\varphi$.
+  Then $\Gamma := \prop{L}$ embeds the finite property $\gamma:\simplex \toto \R$ elicited by $\ell$.
+  Call $\U := \varphi(\R)$.
+  %For all $p \in \simplex$, we know that $\varphi(\gamma(p)) \subseteq \Gamma(p)$ \raf{Not true; focus on the next statement and show directly using def of embedding}.
+  $\gamma'(p) := \Gamma(p) \cap \U$ is nonempty for all $p \in \simplex$ because $r \in \gamma(p) \implies \varphi(r) \in \Gamma(p)$ for all $p \in \simplex$, and by definition $varphi(r) \in \U$, so $\varphi(r) \in \gamma'(p)$ for all $p \in \simplex$.
+  \jessie{Possible rephrase: $\gamma'(p) := \Gamma(p) \cap \U$ is nonempty for all $p \in \simplex$ as $\varphi(r) \in \gamma'(p)$ by the definition of embedding and nondegeneracy of $\gamma$.}
+  By \jessie{COLT Lemma 11}, we know that $L|_{\U}$ elicits $\gamma'$ and $\risk{L} = \risk{L|_{\U}}$.
   
-  Now, if $\risk{\ell} = \risk{L}+c$ for some constant $c \neq 0$, then we contradict part $(i)$ of the definition of embedding where the loss values must match up.
+%  As $|\R| = |\R'|$, we know there is a bijection from one to the other defined by the embedding $\varphi$ on a restricted domain.
+  By embedding, the loss values $L(\varphi(r)) = \ell(r)$ for all $r \in \R$, and so the expected values $\inprod{p}{L(\varphi(r))} = \inprod{p}{\ell(r)}$ for all $p \in \simplex$ and $r \in \R$.
+  In particular, $\min_{u \in \R'}\inprod{p}{L(u)} = \min_{r \in \R}\inprod{p}{\ell(r)}$ for all $p \in \simplex$. 
+  Therefore, we can conclude that $\risk{L|_{\R'}} = \risk{\ell}$.
+  Combining with the above statement, we conclude $\risk{L} = \risk{\ell}$.
+
+%  Generating $\R := \{u_f\}_{f\in F}$, we know that $\gamma = \phi(\Gamma \cap \R)$, where the two are the same up to relabeling \jessie{need more thorough argument on this?  Not sure if I believe it...} and $\Gamma \cap \R$ is elicited by $L|_\R$ by \jessie{COLT Lemma 11}, and thus has the same Bayes Risk as $L|_\R$ by \jessie{cite FK General Truthfulness Theorem 2}.
+%  Applying \jessie{COLT Lemma 11}, we then observe that $\risk{L} = \risk{L|_\R} = \risk{\ell}$.
+
   
-  Therefore, if the loss $L$ embeds the discrete loss $\ell$, then we must observe $\risk{L} = \risk{\ell}$.
+  \raf{Reverse: The high-level idea is that the projections (power diagrams) of $\risk{\ell}$ and $\risk{L}$ are the same, so since $\prop{\ell}$ has finitely many full-dimensional level sets, so does $\prop{L}$.  The property part of the embedding then follows; just take any $u_f$ like you have.  It remains to show that the losses themselves must match up; this is what the FK result is useful for.  Note though that you can't conclude that the minimizers are unique (and it's not true) since $\prop{L}$ is not redundant, as assumed in that paper.
+    All that said, I'm pretty confused by what you are trying to do; seems like your contradiction is going the wrong way, and several steps are missing justification.}
+
+  For the reverse implication, assume that $\risk{L} = \risk{\ell}$.
+  Since $\ell$ is discrete, we know these risks are polyhedral, as $\risk{\ell}$ is the pointwise min of a finite set of linear functions.
+  The projection of their epigraphs onto $\simplex$ forms a power diagram \jessie{COLT Theorem 33}, and since the risks are the same, we know the corresponding power diagrams are equal.  %, corresponding to the level sets of the properties each loss elicits.
+  Observe there are only finitely many cells in a power diagram; we call the set of full-dimensional cells in the power diagram $F$.
+  We claim that each cell $f \in F$ is then a level set $\gamma_r$ for some $r \in \R$, and equivalently, $\Gamma_{u_f}$ for some $u_f \in \reals^d$.
+  We go on to embed $\varphi: r \mapsto u_f$ for each $r \in \R$.
+  (By regularity assumptions, we consider that there is an $f \in F$ corresponding to each $r \in \R$.)
+  
+  Now, for each $f \in F$, fix some distribution $p \in \inter{f}$.
+  The supporting hyperplane of $\risk{\ell}(p)$ is unique, since $p$ belongs to exactly one facet of $\risk{\ell}$ (i.e. $\risk{\ell}(p)$ is differentiable.)
+  Since $\ell$ is discrete, the coefficients of the supporting hyperplane (in $\simplex \subseteq \reals^n$) exactly describe the loss over each outcome given the report $r \in \gamma(p)$.  \jessie{Double check??}
+  
+  Now choose some $u_f \in \argmin_{u'} L(u', p)$; we design $\varphi : r \mapsto u_f \in \Gamma(p)$.
+  Since $\risk{L}$ is polyhedral, the supporting hyperplane to $\risk{L}$ is unique for each $p \in \inter{f}$ and $f \in F$, and so the loss $L(u_f)$ is equal to $\risk{L}(p)$ for all such $p$.
+  \jessie{Don't think I phrased this correctly. revisit.}
+  Therefore, $u_f \in \Gamma(p)$ for all $p \in f$ since level sets of a property are closed. 
+  
+  We claim that $L$ embeds $\ell$, since we have $r \in \argmin_{r' \in \R} \ell(r', p) \iff \varphi(r) \in \argmin_{u' \in \U} L(u', p)$ by our design of $\varphi$.
+  Moreover, the equlity of $\ell(r)$ and $L(\varphi(r))$ can be seen by the risks being the same, and therefore so are the supporting hyperplanes (defining the loss values at $\ell(r)$ and $L(\varphi(r))$) for all $p \in f$ and $f \in F$, since $\cup_F f = \simplex$.  
+  
+  
+%  To start, assume that $\risk{L} = \risk{\ell}$.
+%  The projection of the epigraphs onto $\simplex$ must then form the same power diagram \jessie{COLT Theorem 33}, corresponding to the level sets of the properties each loss elicits.
+%  Notably, \jessie{as in proof of COLT Prop 12,} the facets of $\risk{\ell}$ project onto the level sets of $\gamma := \prop{\ell}$.
+%  As $\ell$ is discrete, we know $\gamma$ is finite \raf{note for later: we have to be careful about ``discrete'' and ``finite'' since they both bake in regularity conditions, like nondegeneracy as you mention, but also non-redundancy}, and so the level sets of $\gamma$ are full-dimensional \jessie{by COLT Lemma 10} and union to the simplex by nondegeneracy of $\gamma$.
+%  Since the risks of $L$ and $\ell$ are the same (and therefore, so are their projections onto $\simplex$), this same [finite] subset $\Theta$ of the level sets of $\Gamma$ that union to the simplex and are full-dimensional.
+%  By \jessie{COLT Prop 12}, we can then conclude that $\Gamma$ embeds the finite property $\gamma$, \raf{wait, you skipped the other condition for losses embedding each other $\rightarrow$} and thus $L$ embeds the discrete loss $\ell$ if $\ell(r) = L(\varphi(r))$ for all $r \in \R$.
+%  
+%  To see this, assume that for some $r \in \R$ that $\ell(r) \neq L(\varphi(r))$.
+%  Then for any distribution $p$ such that $p \in \gamma_r$, we know that $r \in \argmin_{r'} \ell(r', p)$.
+%  If $\ell(r, p) < L(\varphi(r), p)$, then we contradict the embedding result of the properties, as $r \in \gamma(p)$, but $\varphi(r) \not\in \Gamma(p)$, as there is some other report that yields a strictly lower loss for $L$.
+%  Similarly, for any $p' \in \Gamma_{\varphi(r)}$, we know that $\varphi(r) \in \argmin_u L(u, p')$.
+%  If $\ell(r, p') > L(\varphi(r), p')$, then we again contradict the property embedding, as $\varphi(r) \in \Gamma(p')$, but $r \not\in \gamma(p')$.
+%  However, there is some other report that yields a lower loss for $\ell$, given that the risks are the same.
+%  Therefore, we must have $\ell(r) = L(\varphi(r))$ for all $r \in \R$, and conclude that $L$ embeds the discrete loss $\ell$.
+    
+%  \jessie{TODO: If we use this, change notation of $P_\ell$ to match what's already in the paper}
+%  First, assume that $\risk{\ell} \neq \risk{L} +c$ for any constant $c$.
+%  Denote by $P_\ell$ the facets of $\risk{\ell}$ projected onto $\simplex$, which must be different than the facets of $\risk{L}$ projected onto $\simplex$, denoted $P_L$.
+%  That means, for some $p \in \simplex$ on the interior of a cell in $P_\ell$, we know $\nabla \risk{\ell}(p) \neq \nabla \risk{L}(p)$ \raf{don't see why this is necessarily true}.
+%  Therefore, we know the argmins of $L$ and $\ell$ are unique and as the subgradients of the risks are not equal, then $r \in \argmin_{r'} \ell(r,p) \implies \varphi(r) \not \in \argmin_u L(u,p)$, and thus we contradict our embedding assumption.
+%  
+%  Now, if $\risk{\ell} = \risk{L}+c$ for some constant $c \neq 0$, then we contradict part $(i)$ of the definition of embedding where the loss values must match up.
+%  
+%  Therefore, if the loss $L$ embeds the discrete loss $\ell$, then we must observe $\risk{L} = \risk{\ell}$.
 \end{proof}
 \hrulefill
-\begin{proof}[Non-property version]
-  \raf{Use distributions on the interior of the cells; since the risk is differentiable there, the loss is uniquely defined, and thus the same, and the same throughout the cell.}
-  %Jessie's first attempt at a proof
-  First, suppose $L$ embeds $\ell$, and fix $p \in \simplex$.
-  We want to show for all $p \in \simplex$ that $\inf_{u\in\reals^d} L(u,p) = \min_{r \in \R} \ell(r, p)$.
-  Consider two cases: first suppose there exists a $u \in \reals^d$ so that $u \in \arginf_{u' \in \reals^d}L(u',p)$ and $u \in \varphi(\R)$.
-  Then
-  \begin{align*}
-  \inf_u L(u,p) = \min_{r \in \R} L(\varphi(r), p) = \min_{r \in \R} \ell(r, p)
-  \end{align*}
-   first by the case assumption and then by the definition of embedding.
-  Now in the second case, if such a $u$ does not exist, then $\inf_{u \in \reals^d}L(u,p) < \min_r L(\varphi(r), p) = \min_r \ell(r,p)$.
-  Therefore, $r \in \argmin_r' \ell(r', p) \not\implies \varphi(r) \in \argmin_u L(u,p)$ contradicts the assertion that $L$ embeds $\ell$.
-
-  Now, to see that $\risk{\ell} = \risk{L} \implies L$ embeds $\ell$, consider that for each facet $f \in F$, we know by nonredundancy that there is some $p \in \inter{f}$ so that $\risk{L}$ is differentiable at $p$.
-  Moreover, by Frongillo and Kash~\cite[Theorem 2]{frongillo2014general} we know that both $\ell$ and $L$ have a unique minimizer at $p$, and since the subgradients of the risks are the same (by their equality), we know the minimizers of the losses are also the same, up to relabeling the reports via a bijection.
-  Therefore, we can see that $L$ embeds $\ell$, as $L(\varphi(r)) = \ell(r)$ for all $r\in\R$, which is a sufficient condition for embedding.
-\end{proof}
-
-\hrule
-\hrulefill
+%\begin{proof}[Non-property version]
+%  \raf{Use distributions on the interior of the cells; since the risk is differentiable there, the loss is uniquely defined, and thus the same, and the same throughout the cell.}
+%  %Jessie's first attempt at a proof
+%  First, suppose $L$ embeds $\ell$, and fix $p \in \simplex$.
+%  We want to show for all $p \in \simplex$ that $\inf_{u\in\reals^d} L(u,p) = \min_{r \in \R} \ell(r, p)$.
+%  Consider two cases: first suppose there exists a $u \in \reals^d$ so that $u \in \arginf_{u' \in \reals^d}L(u',p)$ and $u \in \varphi(\R)$.
+%  Then
+%  \begin{align*}
+%  \inf_u L(u,p) = \min_{r \in \R} L(\varphi(r), p) = \min_{r \in \R} \ell(r, p)
+%  \end{align*}
+%   first by the case assumption and then by the definition of embedding.
+%  Now in the second case, if such a $u$ does not exist, then $\inf_{u \in \reals^d}L(u,p) < \min_r L(\varphi(r), p) = \min_r \ell(r,p)$.
+%  Therefore, $r \in \argmin_r' \ell(r', p) \not\implies \varphi(r) \in \argmin_u L(u,p)$ contradicts the assertion that $L$ embeds $\ell$.
+%
+%  Now, to see that $\risk{\ell} = \risk{L} \implies L$ embeds $\ell$, consider that for each facet $f \in F$, we know by nonredundancy that there is some $p \in \inter{f}$ so that $\risk{L}$ is differentiable at $p$.
+%  Moreover, by Frongillo and Kash~\cite[Theorem 2]{frongillo2014general} we know that both $\ell$ and $L$ have a unique minimizer at $p$, and since the subgradients of the risks are the same (by their equality), we know the minimizers of the losses are also the same, up to relabeling the reports via a bijection.
+%  Therefore, we can see that $L$ embeds $\ell$, as $L(\varphi(r)) = \ell(r)$ for all $r\in\R$, which is a sufficient condition for embedding.
+%\end{proof}
+%
+%\hrule
+%\hrulefill
 
 \raft{Note at some point: matching risks is not necessary for \emph{consistency}, as evidenced by logistic loss for 0-1 loss.  Maybe we should just make the observation, earlier on, that \emph{embedding} is not necessary for consistency.}
 \raft{Note: ``discrete loss'' now connotes some regularity as well, just like we did with finite properties: every report should correspond to a full-dimensional cell.}
@@ -256,47 +310,36 @@ For a facet $f$, we also consider $u_f = \argmin_r \ell(r, p)$ for any $p \in \i
 
 From this more succinct embedding condition, we can in turn simplify the condition that a loss embeds \emph{some} discrete loss: it does if and only if its Bayes risk is polyhedral.
 (We say a concave function is polyhedral if its negation is a polyhedral convex function.)
-Note that Bayes risk, a function from distributions over $\Y$ to the reals, may be polyhedral even if the loss itself is not.
+Note that the Bayes risk, a function from distributions over $\Y$ to the reals, may be polyhedral even if the loss itself is not.
 
 \begin{proposition}\label{prop:embed-risk-poly}
   A loss $L$ embeds a discrete loss if and only if $\risk{L}$ is polyhedral.
-  \jessie{Ready for a look over.}
 \end{proposition}
-\begin{proof}[Property version]
-  Suppose $\Gamma := \prop{L}$ embeds the finite property $\gamma$, elicited by the discrete loss $\ell$.
-  We know that $\risk{\ell}$ is polyhedral as $\gamma$ is finite.
-  Since $L$ embeds $\ell$, we know $\risk{L} = \risk{\ell}$, and therefore $\risk{L}$ is also polyhedral. 
-  \jessie{This direction is shorter below without properties.}
-  
-  Now suppose $\risk{L}$ is polyhedral, and $\Gamma := \prop{L}$.
-  For the set of facets $F$ projected from the surface of $\risk{L}$ (cells of $P_L$), construct $\R := \{u_f\}_{f \in F}$, with $u_f$ as described earlier. 
-  By \jessie{COLT Lemma 11}, we know $\Gamma$ embeds $\gamma := \Gamma \cap \R$ elicited by the discrete loss $L|_\R$. 
-  Thus, $L$ embeds a discrete loss-- namely, $L|_\R$.
-\end{proof}
-\hrulefill
-\begin{proof}[Non-property version]
+\begin{proof}
   For the forward direction, suppose $L$ embeds a discrete loss $\ell$.
   By Proposition~\ref{prop:embed-bayes-risks}, we know that $\risk{L} = \risk{\ell}$.
-  Since $\ell$ is discrete, we know that $\risk{\ell}$ is polyhedral.
+  Since $\ell$ is discrete, we know that $\risk{\ell}$ is polyhedral as $\risk{\ell}$ is the minimum of a finite set of linear functions in $\simplex$. %\raf{do we know? okay, we do---but why?}.
   Therefore, $\risk{L}$ is polyhedral.
+  
+  
+  The reverse direction follows similarly to the proof of Proposition~\ref{prop:embed-bayes-risks}.
+  Consider, as above, the power diagram induced by projecting $\risk{L}$ onto $\simplex$ corresponding to the level sets of $\Gamma$.
+  Call the set of full-dimensional cells in this power diagram $F$, and note that $F$ is finite since it defined by a projection of a polyhedral function.
+  For each $f \in F$, there is a distribution $p \in \inter{f}$ such that the supporting hyperplane at $\risk{L}(p)$ is unique.
+  Pick some $u_f \in \argmin_{u' \in \U}L(u', p)$.
+  The coefficients of the supporting hyperplane of $\risk{L}(p)$ exactly describe the discrete loss $\ell(u_f)$.
+  Repeat this process for every facet, and denote $\R := \{u_f\}_{f \in F}$.
+  Since $\cup f = \simplex$, and each $f$ isequal to $\Gamma_{u_f}$ for some $u_f \in \reals^d$, we invoke Proposition~\ref{prop:embed-trim} \jessie{COLT Prop 12} to note $\Gamma:= \prop{L}$ embeds a finite property $\gamma := \prop{\ell}$, and their loss values match up, since $\ell$ is exactly described by the same supporting hyperplanes for each $p \in \simplex$.
+  
+%  Now suppose $\risk{L}$ is polyhedral, and $\Gamma := \prop{L}$.
+%  Consider, as above, the power diagram induced by projecting $\risk{L}$ onto $\simplex$ corresponding to the level sets of $\Gamma$.
+%  Call the set of full-dimensional cells in this power diagram $\F$, and note that $\F$ is finite since it defined by a projection of a polyhedral function.
+%  We know that $\trim(\Gamma)$ is a finite set, and its full dimensional level sets union to the simplex.
+%  We can then invoke \jessie{COLT Prop 12} to observe that $\Gamma$ embeds a finite property.
+%  In particular, when the embedding is the identity, we know that the loss values match up for each $r \in \R$, so we can conclude that $L$  embeds a discrete loss.
+%  \raf{I would have thought we could use COLT Prop 12 at this point in the proof... take a look at its proof, the 2 $\Rightarrow$ 3 part, and note that it already invokes Lemma 11, so it already proves this direction}
 
-  For the reverse implication, suppose $\risk{L}$ is polyhedral.
-  For each facet $f \in F$, consider the report $u_f$ as constructed above.
-  Since $F$ is finite, the set $\R = \{u_f\}_{f \in F}$ is finite.
-  Now define the discrete loss $\ell:\R \to \Y$ by $\ell(r,y) = L(r,y)$.
-
-  To see that $L$ embeds this discrete $\ell$, consider the embedding function to be the identity for all $r \in \R$.
-  By Proposition~\ref{prop:embed-bayes-risks}, it is sufficient to show $\risk{L} = \risk{\ell}$.
-  For all $p \in \simplex$, we observe
-  \begin{align*}
-  	\risk{L}(p) = \inf_{u \in \reals^d} L(u,p) = \min_{r \in \R} L(r,p) = \min_{r \in \R} \ell(r, p) = \risk{\ell}(p)
-  \end{align*}
-  Note that the second equality holds because for every $p \in \simplex$, we know there is some $r \in \R$ such that $r \in \arginf_u L(u,p)$ by closure of subgradient sets, and thus the loss values are the same, regardless of if we restrict to $\R$ or stay in $\reals^d$.
-  Thus, $L$ embeds the discrete $\ell$ as constructed by Proposition~\ref{prop:embed-bayes-risks}.
-
-  \raf{Just take the discrete reports to be the facets, and use the Bayes risk result.}
 \end{proof}
-\hrule 
 \hrulefill
 
 Combining Proposition~\ref{prop:embed-risk-poly} with the straightforward result that polyhedral losses have polyhedral Bayes risks, we obtain the first direction of our equivalence: every polyhedral loss embeds some discrete loss.
@@ -305,26 +348,26 @@ Combining Proposition~\ref{prop:embed-risk-poly} with the straightforward result
   Every polyhedral loss $L$ embeds a discrete loss.
   \jessie{My thoughts are in a comment, and I think Raf said it was wrong at one point, but I don't understand why exactly.}
 \end{theorem}
-\jessie{Non-property version is simpler.}
-\begin{proof}[Non-property version]
+\begin{proof}
   We merely show $L$ polyhedral $\implies$ $\risk{L}$ polyhedral, and apply Proposition~\ref{prop:embed-risk-poly}.
   \raf{Not sure how trivial this is, but it's definitely true.  I suspect it has a very short proof.}
-  \jessie{$L(u,p)$ polyhedral in $\reals^d$ for all $p \in \simplex$ implies $L^*(0,p) = -\risk{L}(p)$ polyhedral in $\simplex$ implies $\risk{L}$ polyhedral.
-  Now we can apply Proposition~\ref{prop:embed-risk-poly} to observe the result.}
-  
-  \jessie{Attempt 2: Since $L$ is polyhedral, it is the pointwise max of a finite set of affine functions.  As $\risk{L}$ is defined as the inf over a finite set of polyhedral functions, its epigraph is a subset of the expected loss for each report, and thus is still the finite intersection of closed halfspaces.}
-  \jessie{Going to refresh my brain-- come back to this, but if the other proof is insufficient, this idea is chasing down the correct path.}
+  \jessie{Follows as a Corollary of Lemma 3 in NeurIPS paper.}
+    
+  \jessie{Attempt 2} 
+  Since $L$ is polyhedral, it is the pointwise max of a finite set of affine functions.  As $-\risk{L}$ is defined as the sup over a finite set of polyhedral functions (namely, the negation of the functions defining $L$), it too is polyhedral.  
+  As $-\risk{L}$ is polyhedral, we can see that $\risk{L}$ is as well, since their epigraphs are simply translations of each other.
+  We now apply Proposition~\ref{prop:embed-risk-poly} to observe the result.
 \end{proof}
-\hrulefill
-\begin{proof}[Property version]
-  We know $L$ polyhedral implies $\risk{L}$ is polyhedral. \jessie{Does the above argument not work?  If it does, the other proof is shorter anyways.}
-  As before, construct, $\R = \{u_f\}_{f \in F}$, which is finite, as $F$ is finite. \jessie{We need the above statement to know that $F$ is finite, and therefore $\ell$ is discrete.}
-  To see our result, we specifically show that $L$ embeds $L|_\R$.
-  
-  Given the loss $L$, consider $\Gamma := \prop{L}$.
-  Revisiting the definition, it is apparent that $\Gamma$ embeds $\gamma := \Gamma \cap \R$ via the identity.
-  Moreover, $\ell := L|_\R$ elicits $\gamma$, and thus we can conclude that $L$ embeds the discrete loss $L|_\R$.
-\end{proof}
+%\hrulefill
+%\begin{proof}[Property version]
+%  We know $L$ polyhedral implies $\risk{L}$ is polyhedral. \jessie{Does the above argument not work?  If it does, the other proof is shorter anyways.}
+%  As before, construct, $\R = \{u_f\}_{f \in F}$, which is finite, as $F$ is finite. \jessie{We need the above statement to know that $F$ is finite, and therefore $\ell$ is discrete.}
+%  To see our result, we specifically show that $L$ embeds $L|_\R$.
+%  
+%  Given the loss $L$, consider $\Gamma := \prop{L}$.
+%  Revisiting the definition, it is apparent that $\Gamma$ embeds $\gamma := \Gamma \cap \R$ via the identity.
+%  Moreover, $\ell := L|_\R$ elicits $\gamma$, and thus we can conclude that $L$ embeds the discrete loss $L|_\R$.
+%\end{proof}
 
 \hrule
 \hrulefill
@@ -334,21 +377,21 @@ Combining Proposition~\ref{prop:embed-risk-poly} with the straightforward result
   \jessie{Ready for a look over.}
 \end{theorem}
 \begin{proof}[Property version]
-  Consider $\gamma := \prop{\ell}$, which is a finite property as $\dom(\ell)$ is finite.
+  Given $\ell:\R \to \reals_+^\Y$, consider $\gamma := \prop{\ell}$, which is a finite property as $\R$ is finite.
   The result is a corollary of \jessie{COLT Theorem 35} Theorem~\ref{thm:general-duality-embedding}, where the polyhedral loss $L$ is as constructed in the proof.
 \end{proof}
 \hrulefill
-\begin{proof}[Non-property version]
-  \raf{Already have the proof from Theorem~\ref{thm:general-duality-embedding}.  Should cite DKR and others...}
-  It is sufficient to show the existence of a polyhedral loss $L$ such that $\risk{\ell} = \risk{L}$.
-  Consider that $\risk{\ell}$ is closed and concave, since the domain $\simplex$ is closed.
-  Now construct $L$ as in \jessie{DKR} Duchi et al.~\cite[Proposition 3]{duchi2010multiclass}, where $H = \risk{\ell}$.
-  Then we know that $\risk{L} = \risk{\ell}$ by their result, and thus $L$ embeds $\ell$ by Proposition~\ref{prop:embed-bayes-risks}.
-  Moreover, we can see that $L$ is polyhedral as it is a linear transformation of a polyhedral concave function $\risk{\ell}$.
-\end{proof}
-
-\hrule
-\hrulefill
+%\begin{proof}[Non-property version]
+%  \raf{Already have the proof from Theorem~\ref{thm:general-duality-embedding}.  Should cite DKR and others...}
+%  It is sufficient to show the existence of a polyhedral loss $L$ such that $\risk{\ell} = \risk{L}$.
+%  Consider that $\risk{\ell}$ is closed and concave, since the domain $\simplex$ is closed.
+%  Now construct $L$ as in \jessie{DKR} Duchi et al.~\cite[Proposition 3]{duchi2010multiclass}, where $H = \risk{\ell}$.
+%  Then we know that $\risk{L} = \risk{\ell}$ by their result, and thus $L$ embeds $\ell$ by Proposition~\ref{prop:embed-bayes-risks}.
+%  Moreover, we can see that $L$ is polyhedral as it is a linear transformation of a polyhedral concave function $\risk{\ell}$.
+%\end{proof}
+%
+%\hrule
+%\hrulefill
 
 \begin{corollary}\label{cor:finite-elicit-embed}
   Let $\gamma$ be a finite property.
@@ -361,20 +404,23 @@ Combining Proposition~\ref{prop:embed-risk-poly} with the straightforward result
   \jessie{Not happy with this, but not sure how to improve it.}
 \end{corollary}
 \begin{proof}[Property version]
-	We just need to show that $2 \implies 1$.
-	Consider the finite property $\gamma$ embedded by the discrete loss $\ell$. \jessie{Need a proof that $\ell$ is discrete?}
-	By Theorem~\ref{thm:discrete-loss-poly-embeddable}, we know that there is a polyhedral loss $L$ that embeds $\ell$.
-	Therefore, $\Gamma := \prop{L}$ embeds $\gamma$.
-	Since $L$ elicits $\Gamma$, we can then see that $L|_\R$ elicits $\gamma' := \Gamma \cap \R$ by \jessie{COLT Lemma 11... hold up.  We need something else here.  This statement isn't quite true.}.
-	Thus, $\gamma$ is elicitable by some relabeling of $L|_\R$.
+  We just need to show that $2 \implies 1$.
+  Suppose the loss $\ell$ embeds $\gamma:\simplex \toto \R$, and $\ell$ elicits some (possibly different) property $\gamma':\simplex \toto\R'$.
+  If $\gamma$ and $\gamma'$ have the same level sets, then the elicitability of $\gamma'$ would imply that $\gamma$ is also elicitable, by $L(r) := \ell(\varphi(r))$.
+
+  Since $\gamma'$ embeds $\gamma$, we know that there is an injection $\varphi$ such that $r \in\gamma(p) \iff \varphi(r) \in \gamma'(p)$.
+  Therefore, for all $r \in \R$, we know that $\gamma_r = \gamma'_{\varphi(r)}$.
+  (Consider that $p \in \gamma_r \implies p \in \gamma'_{\varphi(r)}$, and so $\gamma_r \subseteq \gamma'_{\varphi(r)}$, and vice versa.)
+  Thus, the level sets are the same, and so $\gamma$ is elicitable by $L$ as described above.
+
 \end{proof}
-\hrulefill
-\begin{proof}[Non-property version]
-  We trivially have $3\Rightarrow 2$.
-  The direction $1\Rightarrow 3$ follows from Theorem~\ref{thm:discrete-loss-poly-embeddable}, by taking any discrete loss which elicits $\gamma$.
-  Finally, to see $2\Rightarrow 1$,
   \raf{This follows from Proposition~\ref{prop:embed-trim}, but we're stating this as a corollary... let's see if it follows more directly from the above.  If it doesn't (one complication: there is no discrete loss starting from $2$ or $3$!) we can rephrase it as a theorem / proposition.}
-\end{proof}
+\hrulefill
+%\begin{proof}[Non-property version]
+%  We trivially have $3\Rightarrow 2$.
+%  The direction $1\Rightarrow 3$ follows from Theorem~\ref{thm:discrete-loss-poly-embeddable}, by taking any discrete loss which elicits $\gamma$.
+%  Finally, to see $2\Rightarrow 1$,
+%\end{proof}
 
 
 \hrule
