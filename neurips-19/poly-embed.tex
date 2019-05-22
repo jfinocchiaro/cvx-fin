@@ -537,9 +537,9 @@ Below, we illustrate the power of this framework with specific examples from the
 In some cases we simplify existing proofs, while in others we give new results, such as the inconsistency of the recently proposed Lov\'asz hinge.
 \raf{Notes to self: The top-k and hypercube/set examples (except abstain) have the link built in, e.g.\ as the sign function), and they just work around it.  Our results may suggest that it's worth thinking ``outside the box'' (HAH, genious...) and looking for embeddings which are not the hypercube.}
 
-\subsection{Consistency of abstain surrogate, with tighter link}
+\subsection{Consistency of abstain surrogate and link construction}
 \label{sec:abstain}
-\raf{NEW: tighter link}
+\raf{Jessie: could you add the definition of their surrogate and link?  Use eq:abstain-surrogate for the label}
 
 \raf{Copied}
 ... given by Ramaswamy et al.~\cite{ramaswamy2018consistent}.
@@ -629,13 +629,14 @@ Thus, we can use our embedding framework to distinguish distributions where a su
 \subsection{Inconsistency of Lov\'asz hinge}
 \label{sec:lovasz-hinge}
 
-Many structured prediction settings can be thought of as making multiple predictions at once, with a loss function that jointly measures error based on the relationship between these predictions.\cite{hazan2010direct, gao2011consistency} \raf{CITE; can't remember which}
+Many structured prediction settings can be thought of as making multiple predictions at once, with a loss function that jointly measures error based on the relationship between these predictions~\cite{hazan2010direct, gao2011consistency}\raft{jessie: could you add ``On Structured Prediction Theory with Calibrated Convex Surrogate Losses'' by Osokin,Bach?}.
 In the case of $k$ binary predictions, these settings are typically formalized by taking the predictions and outcomes to be $\pm 1$ vectors, so $\R=\Y=\{-1,1\}^k$.
 One then defines a joint loss function, which is often merely a function of the set of mispredictions, meaning $\ell^g(r)_y = g(\{i \in [k] : r_i \neq y_i\})$ for some function $g:2^{[k]}\to\reals$.
+For example, Hamming loss is simply given by $g(S) = |S|$.
 In an effort to provide a general convex surrogate for these settings when $g$ is a submodular function, Yu and Blaschko~\cite{yu2018lovasz} introduce the \emph{Lov\'asz hinge}, which leverages the well-known convex Lov\'asz extension of submodular functions.
-While the authors provide theoretical justification and experiments, consistency of the Lov\'asz hinge is left open, which we resolve negatively.
+While the authors provide theoretical justification and experiments, consistency of the Lov\'asz hinge is left open, which we resolve.
 
-Rather than formally define the Lov\'asz hinge, we defer the full analysis to the original version of the paper~\cite{yu2015lovaszarxiv}, and focus here on the $k=2$ case.
+Rather than formally define the Lov\'asz hinge, we defer the complete analysis to the full version of the paper,\footnote{Citation withheld for anonymity.\raf{And because it's not up yet!}}\raft{Jessie: I meant \emph{our} paper :-].  Leaving this here:\cite{yu2015lovaszarxiv}} and focus here on the $k=2$ case.
 For brevity, we write $g_\emptyset := g(\emptyset)$, $g_{1,2} := g(\{1,2\})$, etc.
 Assuming $g$ is normalized and increasing (meaning $g_{1,2} \geq \{g_1,g_2\} \geq g_\emptyset = 0$), the Lov\'asz hinge $L:\reals^k\to\reals^\Y_+$ is given by
 \begin{multline}
@@ -652,13 +653,13 @@ Simplifying eq.~\eqref{eq:lovasz-hinge}, however, we have
   \label{eq:lovasz-hinge-abstain}
   L^g(u)_y = \max\bigl\{(1-u_1y_1)_+,(1-u_2y_2)_+\bigr\} = \max\bigl\{1-u_1y_1,1-u_2y_2,0\bigr\}~,
 \end{equation}
-which is exactly the abstain surrogate~\raf{eqref here}.
+which is exactly the abstain surrogate~\eqref{eq:abstain-surrogate}.
 We immediately conclude that $L^g$ cannot be consistent with $\ell^g$, as the origin will be the unique optimal report for $L^g$ under distributions with $p_y < 0.5$ for all $y$, and one can simply take a distribution which disagrees with the way ties are broken in $\psi$.
 For example, if we take $\sgn(0) = 1$, then under $p((1,1)) = p((1,-1)) = p((-1,1)) = 0.2$ and $p((-1,-1)) = 0.4$, we have $\{0\} = \argmin_{u\in\reals^2} p\cdot L^g(u)$, yet $\psi(0) = (1,1) \notin \{(-1,-1)\} = \argmin_{r\in\R} p\cdot\ell^g(r)$.
 
 In fact, this example is typical: using our embedding framework, and characterizing when $0\in\reals^2$ is an embedded point, one can show that $L^g$ is consistent if and only if $g_{1,2} = g_1 + g_2$.
-Moreover, in the linear case, which corresponds to $g$ being \emph{modular}, the Lov\'asz hinge reduces to weighted Hamming loss, which is known to be consistent~\raf{CITE}.
-In the full version of the paper~\cite{yu2015lovaszarxiv}, we generalize this observation for all $k$: $L^g$ is consistent if and only if $g$ is modular.
+Moreover, in the linear case, which corresponds to $g$ being \emph{modular}, the Lov\'asz hinge reduces to weighted Hamming loss, which is trivially consistent from the consistency of hinge loss for 0-1 loss.
+In the full version of the paper\raft{add cite later}, we generalize this observation for all $k$: $L^g$ is consistent if and only if $g$ is modular.
 In other words, even for $k>2$, the only consistent Lov\'asz hinge is weighted Hamming loss.
 These results cast doubt on the effectiveness of the Lov\'asz hinge in practice.
 
