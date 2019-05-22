@@ -313,34 +313,47 @@ To illustrate the idea of embeddings, we now look in detail at two key examples.
 First, consider a binary classification problem on the outcomes $\{-1, +1\}$.
 Both the hinge loss $L_{hinge}(u,y) := (1 - uy)_+$ and logistic loss $L_{logistic}(u,y) := \ln\left(1 + \exp(-yu)\right)$ are convex surrogates that are minimized in expectation by predicting the mode, as is 0-1 loss $\ell_{0-1}(r,y) := \Ind[r\neq y]$.
 However, we say that hinge loss embeds twice the 0-1 loss, while logistic loss does not embed 0-1 loss.
-First, taking $\R = \{-1,1\}$ and the embedding to be the identity, we can write 
-\begin{center}
-\begin{tabular}{ll}
-	$\inprod{p}{\ell_{0-1}(1)} = (1-p_1)$ & $\inprod{p}{\ell_{0-1}(-1)} = (p_1)$\\
-	$\inprod{p}{L_{hinge}(1)} = 2(1-p_1)$ & $\inprod{p}{L_{hinge}(-1)} = 2(p_1)$
-\end{tabular}
-\end{center}
 
-Thus, for every $r \in \R$ and $p \in \simplex$, we have $2 \inprod{p}{\ell_{0-1}(r)} = \inprod{p}{L_{hinge}(\varphi(r))}$.
+First, consider that 
+\begin{align*}
+	\ell_{0-1}(-1) = (0,1) && \ell_{0-1}(1) = (1,0)\\
+	L_{hinge}(-1) = (0,2) && L_{hinge}(1) = (2,0)\\
+\end{align*}
+Therefore, $L_{hinge}$ is twice $\ell_{0-1}$ for each $r \in \R$.
 
 Now to see that optimal reports map to optimal reports, consider that 
 \[
-\prop{2 \ell_{0-1}} = \begin{cases}
+\prop{\ell_{0-1}} = \begin{cases}
 1 & p_1 > 1/2 \\
 \{-1,1\} & p_1 = 1/2\\
 -1 & p_1 < 1/2
 \end{cases}
-\quad
+\qquad 
 \prop{L_{hinge}} = \begin{cases}
 [1,\infty) & p_1 = 1\\
 1 & p_1 \in (1/2,1) \\
 [-1,1] & p_1 = 1/2\\
 -1& p_1 \in (0, 1/2)\\
-(-\infty, -1)& p_1 = 0
+(-\infty, -1]& p_1 = 0
 \end{cases}
 \]
 
-One can see logistic loss does not embed $\ell_{0-1}$ because it elicits a continuous property, so there is an infinite set of unique optima over $\simplex$, and thus no injection exists mapping this set to $\{-1,1\}$.
+Now, take the embedding $\varphi$ to be the identity.  % := r$ if $r \in [-1,1]$, and $\sgn(r)$ otherwise.
+By inspection, we can see that if $r \in \prop{\ell_{0-1}}$, then $\varphi(r) = r \in \prop{L_{hinge}}$.  
+Concretely, $-1 \in \prop{\ell_{0-1}}$ and $\prop{L_{hinge}}$ if and only if $p_1 \in [0, 1/2]$. 
+Similarly, $1 \in \prop{\ell_{0-1}}$ and $\prop{L_{hinge}}$ if and only if $p_1 \in [1/2, 1]$.  
+
+Taking $\R = \{-1,1\}$ and the above embedding, we can write the expected loss over each report
+\begin{center}
+	\begin{tabular}{ll}
+		$\inprod{p}{\ell_{0-1}(1)} = (1-p_1)$ & $\inprod{p}{\ell_{0-1}(-1)} = (p_1)$\\
+		$\inprod{p}{L_{hinge}(1)} = 2(1-p_1)$ & $\inprod{p}{L_{hinge}(-1)} = 2(p_1)$
+	\end{tabular}
+\end{center}
+Thus, for every $r \in \R$ and $p \in \simplex$, we have $2 \inprod{p}{\ell_{0-1}(r)} = \inprod{p}{L_{hinge}(\varphi(r))}$.
+This leads us into the next section, where we show the Bayes Risks of the losses will be the same, accounting for the multiplicative constant, if one loss embeds the other.
+
+Additionally, one can see logistic loss does not embed $\ell_{0-1}$ because it elicits a continuous property, so there is an infinite set of unique optima over $\simplex$, and thus no injection exists mapping this set to $\{-1,1\}$.
 
 
 
@@ -383,7 +396,7 @@ This useful fact will drive many of our results.
   Combining with the above, we now have $\risk{L} = \risk{\ell}$.
   
   
-  \raft{Jessie: I commented out your version below the proof.  What I have is on the informal side (so not necessarily better than what you had), mostly because of the ``working in the affine hull'' bit.  It can all be formalized though: just take an appropriate linear projection of $\reals^n$ to $\reals^{n-1}$, and work with the projected versions of everything, and then project back.  I can explain more on a call...}
+  %\raft{Jessie: I commented out your version below the proof.  What I have is on the informal side (so not necessarily better than what you had), mostly because of the ``working in the affine hull'' bit.  It can all be formalized though: just take an appropriate linear projection of $\reals^n$ to $\reals^{n-1}$, and work with the projected versions of everything, and then project back.  I can explain more on a call...}
   For the reverse implication, assume that $\risk{L} = \risk{\ell}$.
   In what follows, we implicitly work in the affine hull of $\simplex$, so that interiors are well-defined, and $\risk{\ell}$ may be differentiable on the (relative) interior of $\simplex$.
   Since $\ell$ is discrete, $-\risk{\ell}$ is polyhedral as the pointwise maximum of a finite set of linear functions.
@@ -639,12 +652,12 @@ For $k=1$, we know that the $\ell_{top-k}$ reduces to 0-1 loss, so finally, we (
 \raft{Take another look at Theorem 2.4 of the top-k paper.  Losses can certainly be consistent without embedding $\ell$ (even if polyhedral: you can link multiple embedded points to a single discrete report, e.g.\ a convex surrogate for ranking loss can link to the mode), so the ``iff'' is not right.  I think it's worth spending some time thinking about what exactly we need to show to prove inconsistency.  In particular, see if this reasoning checks out:  Suppose we find a distribution $p$ for which an optimal surrogate report is $r$ but $\psi(r)$ is not optimal for $\ell$.  Since we could have a conditional distribution of $p$ for every $x$, so the optimal hypothesis would just be the constant function $h(x) = r$, which achieves the optimal $L$-loss, and when linked, $\psi \circ h(x) = \psi(r)$, which does not achieve the optimal $\ell$-loss.}
 
 Now, for example, consider the surrogate discussed by Lapin et al.~\cite{yang2018consistency}, and Yang and Koyejo~\cite{yang2018consistency}.
-We write the surrogate $L_2(u,y) := \max\left( \frac{1}{k} \sum_{i=1}^k (u + \indopp(y))_{[i]} - u_y \right) $, where $\indopp(y) = \ones - e_y$, and $(x)_{[i]}$ is the $i^{th}$ largest component of $x$.
+We write the surrogate $L_2(u,y) := \max\left( \frac{1}{k} \sum_{i=1}^k (u + \indopp(y))_{[i]} - u_y \right)_+ $, where $\indopp(y) = \ones - e_y$, and $(x)_{[i]}$ is the $i^{th}$ largest component of $x$.
 
 Consider the following process:  (1.) For all $p \in \simplex$, we can show that there is some $u \in \{0,1\}^n$ such that $u \in \argmin_{u'} \inprod{p}{L_2(u')}$.
 (2.) Now consider the discrete loss
 \begin{align*}
-\ell_2(r,y) &= 1 - \Ind[y \in r] + \min\left(\frac{|r| \setminus \{y\}}{k}, 1\right)
+\ell_2(r,y) &= \Ind[y \not\in r] + \min\left(\frac{|r \setminus \{y\}|}{k}, 1\right)
 \end{align*}
 We claim that $L_2$ embeds $\ell_2$.  
 (3.) Finally, taking $k = 1$, we see that $0 \in \argmin_{r' \subseteq [n]} \inprod{p}{\ell_2(r')}$ for any $p$ such that $\max_y p_y \leq 1/2$.
