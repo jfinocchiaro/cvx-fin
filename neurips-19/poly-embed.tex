@@ -339,44 +339,52 @@ This useful fact will drive many of our results.
   % A loss $L:\reals^d\to\reals^\Y$ embeds discrete $\ell:\R\to\reals^Y$ if and only if $\risk{L}=\risk{\ell}$.
 \end{proposition}
 \begin{proof}
-  \raft{Forward: you had the right idea that this is mainly Lemma 11.  But you have to step through the logic much more carefully, and be rigorous.  Keep in mind: you already have $\varphi$ from the embedding, and you know the loss values match.  It's true that you need to map $u$ values to $r$ values, but what you have doesn't make sense.}    
-  For the forward implication, suppose $L$ embeds the discrete loss $\ell$ via the embedding $\varphi$.
-  Then $\Gamma := \prop{L}$ embeds the finite property $\gamma:\simplex \toto \R$ elicited by $\ell$.
-  Call $\U := \varphi(\R)$.
-%  $\gamma'(p) := \Gamma(p) \cap \U$ is nonempty for all $p \in \simplex$ because $r \in \gamma(p) \implies \varphi(r) \in \Gamma(p)$ for all $p \in \simplex$, and by definition $\varphi(r) \in \U$, so $\varphi(r) \in \gamma'(p)$ for all $p \in \simplex$.
-  $\gamma'(p) := \Gamma(p) \cap \U$ is nonempty for all $p \in \simplex$ as $r \in \gamma(p) \implies \varphi(r) \in \gamma'(p)$ by the definition of embedding and nondegeneracy of $\gamma$.
-  By Lemma~\ref{lem:loss-restrict}, we know that $L|_{\U}$ elicits $\gamma'$ and $\risk{L} = \risk{L|_{\U}}$.
+  Throughout we have $L:\reals^d\to\reals^\Y_+$, $\ell:\R\to\reals^\Y_+$, and define $\Gamma = \prop{L}$ and $\gamma = \prop{\ell}$.
+  Suppose $L$ embeds $\ell$ via the embedding $\varphi$.
+  Let $\Gamma = \prop{L}$ and $\gamma = \prop{\ell}$.
+  Letting $\U := \varphi(\R)$, define $\gamma':\simplex \toto \U$ by $\gamma' : p \mapsto \Gamma(p)\cap \U$.
+  To see that $\gamma'(p) \neq \emptyset$ for all $p\in\simplex$, note that by the definition of $\gamma$ as the property elicited by $\ell$ we have some $r \in \gamma(p)$, and by the embedding condition~\eqref{eq:embed-loss}, $\varphi(r) \in \Gamma(p)$.
+  By Lemma~\ref{lem:loss-restrict}, we see that $L|_{\U}$ (the loss $L$ with reports restricted to $\U$) elicits $\gamma'$ and $\risk{L} = \risk{L|_{\U}}$.
+  As $L(\varphi(\cdot)) = \ell(\cdot)$ by the embedding, we have
+  \begin{equation*}
+    \risk{\ell}(p) = \min_{r \in \R}\inprod{p}{\ell(r)} = \min_{r \in \R}\inprod{p}{L(\varphi(r))} = \min_{u \in \U}\inprod{p}{L(u)} = \risk{L|_\U}~,
+  \end{equation*}
+  for all $p\in\simplex$.
+  Combining with the above, we now have $\risk{L} = \risk{\ell}$.
   
-%  As $|\R| = |\R'|$, we know there is a bijection from one to the other defined by the embedding $\varphi$ on a restricted domain.
-  By embedding, the loss values $L(\varphi(r)) = \ell(r)$ for all $r \in \R$, and so the expected values $\inprod{p}{L(\varphi(r))} = \inprod{p}{\ell(r)}$ for all $p \in \simplex$ and $r \in \R$.
-  In particular, $\min_{u \in \R'}\inprod{p}{L(u)} = \min_{r \in \R}\inprod{p}{\ell(r)}$ for all $p \in \simplex$. 
-  Therefore, we can conclude that $\risk{L|_{\R'}} = \risk{\ell}$.
-  Combining with the above statement, we conclude $\risk{L} = \risk{\ell}$.
-
   
-  \raft{Reverse: The high-level idea is that the projections (power diagrams) of $\risk{\ell}$ and $\risk{L}$ are the same, so since $\prop{\ell}$ has finitely many full-dimensional level sets, so does $\prop{L}$.  The property part of the embedding then follows; just take any $u_f$ like you have.  It remains to show that the losses themselves must match up; this is what the FK result is useful for.  Note though that you can't conclude that the minimizers are unique (and it's not true) since $\prop{L}$ is not redundant, as assumed in that paper.
-    All that said, I'm pretty confused by what you are trying to do; seems like your contradiction is going the wrong way, and several steps are missing justification.}
-
+  \raft{Jessie: I commented out your version below the proof.  What I have is on the informal side (so not necessarily better than what you had), mostly because of the ``working in the affine hull'' bit.  It can all be formalized though: just take an appropriate linear projection of $\reals^n$ to $\reals^{n-1}$, and work with the projected versions of everything, and then project back.  I can explain more on a call...}
   For the reverse implication, assume that $\risk{L} = \risk{\ell}$.
-  Since $\ell$ is discrete, we know these risks are polyhedral, as $\risk{\ell}$ is the pointwise min of a finite set of linear functions.
-  The projection of their epigraphs onto $\simplex$ forms a power diagram by \ref{thm:aurenhammer}, and since the risks are the same, we know the corresponding power diagrams are equal.  %, corresponding to the level sets of the properties each loss elicits.
-  Observe there are only finitely many cells in a power diagram; we call the set of full-dimensional cells in the power diagram $F$.
-  We claim that each cell $f \in F$ is then a level set $\gamma_r$ for some $r \in \R$, and equivalently, $\Gamma_{u_f}$ for some $u_f \in \reals^d$.
-  We go on to embed $\varphi: r \mapsto u_f$ for each $r \in \R$.
-  (By regularity assumptions, we consider that there is an $f \in F$ corresponding to each $r \in \R$.)
-  
-  Now, for each $f \in F$, fix some distribution $p \in \inter{f}$.
-  The supporting hyperplane of $\risk{\ell}(p)$ is unique, since $p$ belongs to exactly one facet of $\risk{\ell}$ (i.e. $\risk{\ell}(p)$ is differentiable.)
-  Since $\ell$ is discrete, the coefficients of the supporting hyperplane (in $\simplex \subseteq \reals^n$) exactly describe the loss over each outcome given the report $r \in \gamma(p)$.  \jessie{Double check??}
-  
-  Now choose some $u_f \in \argmin_{u'} L(u', p)$; we design $\varphi : r \mapsto u_f \in \Gamma(p)$.
-  Since $\risk{L}$ is polyhedral, the supporting hyperplane to $\risk{L}$ is unique for each $p \in \inter{f}$ and $f \in F$, and so the loss $L(u_f)$ is equal to $\risk{L}(p)$ for all such $p$.
-  \jessie{Don't think I phrased this correctly. revisit.}
-  Therefore, $u_f \in \Gamma(p)$ for all $p \in f$ since level sets of a property are closed. 
-  
-  We claim that $L$ embeds $\ell$, since we have $r \in \argmin_{r' \in \R} \ell(r', p) \iff \varphi(r) \in \argmin_{u' \in \U} L(u', p)$ by our design of $\varphi$.
-  Moreover, the equlity of $\ell(r)$ and $L(\varphi(r))$ can be seen by the risks being the same, and therefore so are the supporting hyperplanes (defining the loss values at $\ell(r)$ and $L(\varphi(r))$) for all $p \in f$ and $f \in F$, since $\cup_F f = \simplex$.  
+  In what follows, we implicitly work in the affine hull of $\simplex$, so that interiors are well-defined, and $\risk{\ell}$ may be differentiable on the (relative) interior of $\simplex$.
+  Since $\ell$ is discrete, $-\risk{\ell}$ is polyhedral as the pointwise maximum of a finite set of linear functions.
+  The projection of its epigraph $E_\ell$ onto $\simplex$ forms a power diagram by Theorem~\ref{thm:aurenhammer}, whose cells are full-dimensional and correspond to the level sets $\gamma_r$ of $\gamma = \prop{\ell}$.
+
+  For each $r\in\R$, let $p_r$ be a distribution in the interior of $\gamma_r$, and let $u_r \in \Gamma(p)$.
+  Observe that, by definition of the Bayes risk and $\Gamma$, for all $u\in\reals^d$ the hyperplane $v \mapsto \inprod{v}{-L(u_r)}$ supports the epigraph $E_L$ of $-\risk{L}$ at the point $(p,-\inprod{p}{L(u)})$ if and only if $u\in\Gamma(p)$.
+  Thus, the hyperplane $v \mapsto \inprod{v}{-L(u_r)}$ supports $E_L = E_\ell$ at the point $(p_r,-\inprod{p_r}{L(u_r)})$, and thus does so at the entire facet $\{(p,-\inprod{p}{L(u_r)}) : p\in\gamma_r\}$; by the above, $u_r \in \Gamma(p)$ for all such distributions as well.
+  We conclude that $u_r \in \Gamma(p) \iff p \in \gamma_r \iff r \in \gamma(p)$, satisfying condition~\eqref{eq:embed-loss} for $\varphi : r \mapsto u_r$.
+  To see that the loss values match, we merely note that the supporting hyperplanes to the facets of $E_L$ and $E_\ell$ are the same, and the loss values are uniquely determined by the supporting hyperplane.
+  (In particular, if $h$ supports the facet corresponding to $\gamma_r$, we have $\ell(r)_y = L(u_r)_y = h(\delta_y)$, where $\delta_y$ is the point distribution on outcome $y$.)
 \end{proof}
+\raf{Jessie's old proof here; feel free to cut if it's preserved in the proof sketches file}
+  % Observe there are only finitely many cells in a power diagram; we call the set of full-dimensional cells in the power diagram $F$.
+  % We claim that each cell $f \in F$ is then a level set $\gamma_r$ for some $r \in \R$, and equivalently, $\Gamma_{u_f}$ for some $u_f \in \reals^d$.
+  % We go on to embed $\varphi: r \mapsto u_f$ for each $r \in \R$.
+  % (By regularity assumptions, we consider that there is an $f \in F$ corresponding to each $r \in \R$.)
+  
+  % Now, for each $f \in F$, fix some distribution $p \in \inter{f}$.
+  % The supporting hyperplane of $\risk{\ell}(p)$ is unique, since $p$ belongs to exactly one facet of $\risk{\ell}$ (i.e. $\risk{\ell}(p)$ is differentiable.)
+  % Since $\ell$ is discrete, the coefficients of the supporting hyperplane (in $\simplex \subseteq \reals^n$) exactly describe the loss over each outcome given the report $r \in \gamma(p)$.  \jessie{Double check??}
+  
+  % Now choose some $u_f \in \argmin_{u'} L(u', p)$; we design $\varphi : r \mapsto u_f \in \Gamma(p)$.
+  % Since $\risk{L}$ is polyhedral, the supporting hyperplane to $\risk{L}$ is unique for each $p \in \inter{f}$ and $f \in F$, and so the loss $L(u_f)$ is equal to $\risk{L}(p)$ for all such $p$.
+  % \jessie{Don't think I phrased this correctly. revisit.}
+  % Therefore, $u_f \in \Gamma(p)$ for all $p \in f$ since level sets of a property are closed. 
+  
+  % We claim that $L$ embeds $\ell$, since we have $r \in \argmin_{r' \in \R} \ell(r', p) \iff \varphi(r) \in \argmin_{u' \in \U} L(u', p)$ by our design of $\varphi$.
+  % Moreover, the equlity of $\ell(r)$ and $L(\varphi(r))$ can be seen by the risks being the same, and therefore so are the supporting hyperplanes (defining the loss values at $\ell(r)$ and $L(\varphi(r))$) for all $p \in f$ and $f \in F$, since $\cup_F f = \simplex$.  
+
+
 
 \raft{Note at some point: matching risks is not necessary for \emph{consistency}, as evidenced by logistic loss for 0-1 loss.  Maybe we should just make the observation, earlier on, that \emph{embedding} is not necessary for consistency.}
 \raft{Note: ``discrete loss'' now connotes some regularity as well, just like we did with finite properties: every report should correspond to a full-dimensional cell.}
