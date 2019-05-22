@@ -45,7 +45,7 @@
 \newcommand{\posreals}{\reals_{>0}}%{\reals_{++}}
 \newcommand{\dom}{\mathrm{dom}}
 
-\newcommand{\prop}[1]{\Gamma[#1]}
+\newcommand{\prop}[1]{\mathrm{prop}[#1]}
 \newcommand{\eliccts}{\mathrm{elic}_\mathrm{cts}}
 \newcommand{\eliccvx}{\mathrm{elic}_\mathrm{cvx}}
 \newcommand{\elicpoly}{\mathrm{elic}_\mathrm{pcvx}}
@@ -185,25 +185,27 @@ Convex surrogates have been formalized and investigated in a variety of past wor
 
 For discrete prediction problems like classification, due to hardness of directly optimizing a given discrete loss, many machine learning algorithms can be thought of as minimizing a surrogate loss function with better optimization qualities, e.g., convexity.
 Of course, to show that this surrogate loss successfully addresses the original problem, one needs to establish consistency, which depends crucially on the choice of link function that maps surrogate reports (predictions) to original reports.
-We thus begin with a sufficient condition for link functions, after introducing our notation.
+After introducing notation, and terminology from property elicitation, we thus give a sufficient condition for consistency (Def.~\ref{def:calibrated}) which depends solely on the conditional distribution over $\Y$.
+\raft{Jessie: I addressed your point about conditional distributions here}
 
 \subsection{Notation and Losses}
 
 Let $\Y$ be a finite outcome (label) space, and throughout let $n=|\Y|$.
 The set of probability distributions on $\Y$ is denoted $\simplex\subseteq\reals^{\Y}$, represented as vectors of probabilities.
 We write $p_y$ for the probability of outcome $y \in \Y$ drawn from $p \in \simplex$.
-\jessie{Given labeled data of the form $(x,y)$, we abstract away the data input and consider the conditional probabilities $p(Y|X)$, and this is what we denote as $p_y$.}
 
 We assume that a given discrete prediction problem, such as classification, is given in the form of a \emph{discrete loss} $\ell:\R\to\reals^\Y_+$, which maps a report (prediction) $r$ from a finite set $\R$ to the vector of loss values $\ell(r) = (\ell(r)_y)_{y\in\Y}$ for each possible outcome $y\in\Y$.
 We will assume throughout that the given discrete loss is \emph{non-redundant}, meaning every report is uniquely optimal (minimizes expected loss) for some distribution $p\in\Delta(\Y)$.
-Similarly, surrogate losses will be written $L:\reals^d\to\reals^\Y_+$.
-(A generic loss will be written $L:\R\to\reals^\Y$.)
-We write expected loss of report $r$ when $Y \sim p$ as $\inprod{p}{L(r)}$.
-The \emph{Bayes risk} of a loss $L:\R\to\reals^\Y$ is the function $\risk{L}:\Delta(\Y)\to\reals$ given by $\risk{L}(p) := \inf_{r\in\R} \inprod{p}{L(r)}$; naturally for discrete losses we will write $\risk{\ell}$.
+Similarly, surrogate losses will be written $L:\reals^d\to\reals^\Y_+$, typically with reports written $u\in\reals^d$.
+\raft{Cut generic loss}%(A generic loss will be written $L:\R\to\reals^\Y$.)
+We write the corresponding expected loss when $Y \sim p$ as $\inprod{p}{\ell(r)}$ and $\inprod{p}{L(u)}$.
+The \emph{Bayes risk} of a loss $L:\reals^d\to\reals^\Y_+$ is the function $\risk{L}:\simplex\to\reals_+$ given by $\risk{L}(p) := \inf_{u\in\reals^d} \inprod{p}{L(u)}$; naturally for discrete losses we write $\risk{\ell}$ (and the infimum is over $\R$).
 
 %\jessie{In general, we shall denote discrete reports by $r \in \R$, and real-valued reports by $u \in \U$.}
-For example, 0-1 loss is a discrete loss with $\R = \Y = \{1,2,\ldots,n\}$ given by $\ell(r)_y = \Ind[r \neq y]$, and has Bayes risk $\risk{\ell}(p) = 1-\max_{y\in\Y} p_y$. \jessiet{Isn't that the Score $G$?  Don't we want $\risk{\ell} = 1 - \min_{y \in \Y} p_y$?}\raft{did you mean $1-\max$?}
-Two important examples of surrogates for 0-1 loss, with $\R=\reals$, are hinge loss $L(u)_y = \max(0,1-yu)$ and logistic loss $L(u)_y = \log(1+\exp(-yu))$.
+For example, 0-1 loss is a discrete loss with $\R = \Y = \{-1,1\}$
+\raft{was 1,..,n but that is not consistent with the way $y$ is used in the following}
+given by $\ell(r)_y = \Ind[r \neq y]$, and has Bayes risk $\risk{\ell}(p) = 1-\max_{y\in\Y} p_y$. \jessiet{Isn't that the Score $G$?  Don't we want $\risk{\ell} = 1 - \min_{y \in \Y} p_y$?}\raft{did you mean $1-\max$?}
+Two important examples of surrogates for 0-1 loss are hinge loss $L(u)_y = \max(0,1-yu)$ and logistic loss $L(u)_y = \log(1+\exp(-yu))$ for $u\in\reals$.
 
 Most of the surrogates $L$ we consider will be \emph{polyhedral}, meaning piecewise linear and convex; we therefore briefly recall the relevant definitions.
 In $\reals^d$, a \emph{polyhedral set} or \emph{polyhedron} is the intersection of a finite number of closed halfspaces.
@@ -214,16 +216,14 @@ A convex function $f:\reals^d\to\reals$ is \emph{polyhedral} if its epigraph is 
   A loss $L: \reals^d \to \reals^{\Y}_+$ is a \emph{polyhedral} if $L(u)_y$ is a polyhedral (convex) function of $u$ for each $y\in\Y$.
 \end{definition}
 %
-For example, the hinge loss is polyhedral, whereas logistic loss is not.
+For example, hinge loss is polyhedral, whereas logistic loss is not.
 
 \subsection{Property Elicitation}
-
-\raf{Let's leave this here and see how much we really need in the end...}
 
 To make headway, we will appeal to concepts and results from the property elicitation literature, which elevates the \emph{property}, or map from distributions to optimal reports, as a central object to study in its own right.
 In our case, this map will often be multivalued, meaning a single distribution could yield multiple optimal reports.
 (For example, when $p=(1/2,1/2)$, both $y=1$ and $y=-1$ optimize 0-1 loss.)
-To this end, we will use double arrow notation to mean a mapping to all nonempty subsets, so that $\gamma: \simplex \toto \R$ is shorthand for $\gamma: \simplex \to 2^{\R} \setminus \emptyset$.
+To this end, we will use double arrow notation to mean a mapping to all nonempty subsets, so that $\gamma: \simplex \toto \R$ is shorthand for $\Gamma: \simplex \to 2^{\R} \setminus \emptyset$.
 
 \begin{definition}[Property, level set]\label{def:property}
   A \emph{property} is a function $\Gamma:\simplex\toto\R$.
@@ -246,16 +246,14 @@ In this case we say 0-1 loss \emph{elicits} the mode, as we formalize below.
   As $\Gamma$ is uniquely defined by $L$, we write $\prop{L}$ to refer to the property elicited by a loss $L$.
 \end{definition}
 
-For finite properties (those with $|\R|<\infty$) and discrete losses, we will use lowercase notation $\gamma$ and $\ell$, respectively, while $\Gamma$ and $L$ will be used for surrogate or general properties.
+For finite properties (those with $|\R|<\infty$) and discrete losses, we will use lowercase notation $\gamma$ and $\ell$, respectively, while $\Gamma$ and $L$ will be used for surrogate (or general) properties and losses.
 % Often we will work with two properties simultaneously, a finite property $\gamma:\simplex\toto\R$, and its embedded version $\Gamma:\simplex\toto\reals^d$.
 % In this case, we write the embedded reports as $u\in\reals^d$, reserving $r\in\R$ for the finite property.
 
-\raf{informal descriptions of the hinge property and illustrate how it simplifies the embedding condition; cite appendix for the formal def of embedding property}
-
-
 \subsection{Links and Embeddings}
 
-To ensure consistency, we will seek ``calibration''  of the surrogate and link function.
+To assess whether a surrogate and link function align with the original loss, we turn to the common condition of \emph{calibration}.
+Roughly, a surrogate and link are calibrated if the best possible expected loss achieved by linking to an incorrect report is strictly suboptimal.
 \raft{Separated stuff commented out}
 % , which require that the excess loss of some report is bounded by (a constant times) the excess loss of the linked report.
 
@@ -274,10 +272,20 @@ To ensure consistency, we will seek ``calibration''  of the surrogate and link f
 % \end{definition}
 
 \begin{definition}
-    \[ \inf_{u \in \reals^d : \psi(u) \not\in \gamma(p)} \inprod{p}{L(u)} > \inf_{u \in \reals^d} \inprod{p}{L(u)} . \]
+  \label{def:calibrated}
+  Let original loss $\ell:\R\to\reals^\Y_+$, proposed surrogate $L:\reals^d\to\reals^\Y_+$, and link function $\psi:\reals^d\to\R$ be given.
+  We say $(L,\psi)$ is \emph{calibrated} with respect to $\ell$ if
+for all $p \in \simplex$,
+  \begin{equation}
+    \label{eq:calibrated}
+  \inf_{u \in \reals^d : \psi(u) \not\in \gamma(p)} \inprod{p}{L(u)} > \inf_{u \in \reals^d} \inprod{p}{L(u)}~.
+  \end{equation}
 \end{definition}
+It is well-known that calibration implies \emph{consistency}, in the sense that
+\raf{rough definition here}~\cite{agarwal2015consistent}.
 
-Several consistent convex surrogates in the literature can be thought of as ``embeddings'', wherein one maps the discrete reports to a vector space, and finds a convex loss which agrees with the original loss and has the same statistical behavior.
+Several consistent convex surrogates in the literature can be thought of as ``embeddings'', wherein one maps the discrete reports to a vector space, and finds a convex loss which agrees with the original loss.
+A key condition is that the original reports should be optimal exactly when the corresponding embedded points are optimal.
 We formalize this notion as follows.
 %
 \begin{definition}\label{def:loss-embed}
@@ -292,12 +300,13 @@ We formalize this notion as follows.
 \end{definition}
 %
 
-Note that it is not clear if embeddings give rise to separated links; indeed, apart from mapping the embedded reports back from whence they came \raft{I know... just wanted to say that} via $\psi(\varphi(r)) = r$, how to map the remaining values is far from clear.
-Constructing separated links from embeddings will therefore be a major focus in Section~\ref{sec:poly-loss-embed}.
+Note that it is not clear if embeddings give rise to calibrated links; indeed, apart from mapping the embedded points back to their original reports via $\psi(\varphi(r)) = r$, how to map the remaining values is far from clear.
+We address the question of when embeddings lead to calibrated links in Section~\ref{sec:poly-loss-embed}.
 
 
 \raf{How hinge fits in}
 \jessie{Added the paragraph below.}
+\raf{Give it another shot, but focus on flexing our formalism.  What does hinge elicit?  How can we see that it embeds (twice) 0-1 loss from our definitions?  Then maybe one sentence for why logistic does not.}
 To illustrate the idea of embeddings, we now look in detail at two key examples.
 First, consider a binary classification problem on the outcomes $\{-1, +1\}$.
 Both the hinge loss $L_{hinge}(u,y) := (1 - uy)_+$ and logistic loss $L_{logistic}(u,y) := \ln\left(1 + \exp(-uy)\right)$ are convex surrogates that are minimized in expectation by predicting the mode, as is 0-1 loss $\ell_{mode}(r,y) := \Ind[r\neq y]$.
