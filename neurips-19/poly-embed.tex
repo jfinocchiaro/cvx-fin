@@ -36,6 +36,7 @@
 \newcommand{\jessiet}[1]{\mytodo{purple!20!white}{JF: #1}}
 \newcommand{\bo}[1]{\mynote{blue}{[Bo: #1]}}
 \newcommand{\botodo}[1]{\mytodo{blue!20!white}{[Bo: #1]}}
+\newcommand{\btw}[1]{\mytodo{gray}{#1}}
 \ifnum\Comments=1               % fix margins for todonotes
   \setlength{\marginparwidth}{1in}
 \fi
@@ -83,7 +84,10 @@
 \newcommand{\ones}{\mathbbm{1}}
 \DeclarePairedDelimiter\ceil{\lceil}{\rceil}
 
-\newcommand{\Ind}[1]{\mathbf{1}[#1]}
+\newcommand{\Ind}[1]{\ones\{#1\}}
+
+\newcommand{\hinge}{L_{\mathrm{hinge}}}
+\newcommand{\ellzo}{\ell_{\text{0-1}}}
 
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
@@ -206,9 +210,8 @@ The \emph{Bayes risk} of a loss $L:\reals^d\to\reals^\Y_+$ is the function $\ris
 
 %\jessie{In general, we shall denote discrete reports by $r \in \R$, and real-valued reports by $u \in \U$.}
 For example, 0-1 loss is a discrete loss with $\R = \Y = \{-1,1\}$
-\raft{was 1,..,n but that is not consistent with the way $y$ is used in the following}
-given by $\ell(r)_y = \Ind{r \neq y}$, and has Bayes risk $\risk{\ell}(p) = 1-\max_{y\in\Y} p_y$.
-Two important examples of surrogates for 0-1 loss are hinge loss $L(u)_y = \max(0,1-yu)$ and logistic loss $L(u)_y = \log(1+\exp(-yu))$ for $u\in\reals$.
+given by $\ellzo(r)_y = \Ind{r \neq y}$, with Bayes risk $\risk{\ellzo}(p) = 1-\max_{y\in\Y} p_y$.
+Two important surrogates for $\ellzo$ are hinge loss $\hinge(u)_y = (1-yu)_+$, where $(x)_+ = \max(x,0)$, and logistic loss $L(u)_y = \log(1+\exp(-yu))$ for $u\in\reals$.
 
 Most of the surrogates $L$ we consider will be \emph{polyhedral}, meaning piecewise linear and convex; we therefore briefly recall the relevant definitions.
 In $\reals^d$, a \emph{polyhedral set} or \emph{polyhedron} is the intersection of a finite number of closed halfspaces.
@@ -308,54 +311,50 @@ Note that it is not clear if embeddings give rise to calibrated links; indeed, a
 We address the question of when embeddings lead to calibrated links in Section~\ref{sec:poly-loss-embed}.
 
 
-\raf{Give it another shot, but focus on flexing our formalism.  What does hinge elicit?  How can we see that it embeds (twice) 0-1 loss from our definitions?  Then maybe one sentence for why logistic does not.}
-To illustrate the idea of embeddings, we now look in detail at two key examples.
-First, consider a binary classification problem on the outcomes $\{-1, +1\}$.
-Both the hinge loss $L_{hinge}(u,y) := (1 - uy)_+$ and logistic loss $L_{logistic}(u,y) := \ln\left(1 + \exp(-yu)\right)$ are convex surrogates that are minimized in expectation by predicting the mode, as is 0-1 loss $\ell_{0-1}(r,y) := \Ind{r\neq y}$.
-However, we say that hinge loss embeds twice the 0-1 loss, while logistic loss does not embed 0-1 loss.
-
-First, consider that 
-\begin{align*}
-	\ell_{0-1}(-1) = (0,1) && \ell_{0-1}(1) = (1,0)\\
-	L_{hinge}(-1) = (0,2) && L_{hinge}(1) = (2,0)\\
-\end{align*}
-Therefore, $L_{hinge}$ is twice $\ell_{0-1}$ for each $r \in \R$.
-
-Now to see that optimal reports map to optimal reports, consider that 
+To illustrate the idea of embedding, let us examine hinge loss in detail as a surrogate for 0-1 loss for binary classification.
+Recall that we have $\R = \Y = \{-1, +1\}$, with $\hinge(u)_y = (1 - uy)_+$ and $\ellzo(r)_y := \Ind{r\neq y}$, typically with link function $\psi(u) = \sgn(u)$.
+We will see that hinge loss embeds (2 times) 0-1 loss, via the embedding $\varphi(r) = r$.
+For condition (i), it is straightforward to check that $\hinge(r)_y = 2\ellzo(r)_y$ for all $r,y\in\{-1,1\}$.
+% First, consider that 
+% \begin{align*}
+% 	\ellzo(-1) = (0,1) && \ellzo(1) = (1,0)\\
+% 	L_{hinge}(-1) = (0,2) && L_{hinge}(1) = (2,0)\\
+% \end{align*}
+% Therefore, $L_{hinge}$ is twice $\ellzo$ for each $r \in \R$.
+For condition (ii), let us compute the property each loss elicits:
 \[
-\prop{\ell_{0-1}} = \begin{cases}
+\prop{\ellzo}(p) = \begin{cases}
 1 & p_1 > 1/2 \\
 \{-1,1\} & p_1 = 1/2\\
 -1 & p_1 < 1/2
 \end{cases}
 \qquad 
-\prop{L_{hinge}} = \begin{cases}
+\prop{L_{hinge}}(p) = \begin{cases}
 [1,\infty) & p_1 = 1\\
 1 & p_1 \in (1/2,1) \\
 [-1,1] & p_1 = 1/2\\
 -1& p_1 \in (0, 1/2)\\
 (-\infty, -1]& p_1 = 0
-\end{cases}
+\end{cases}~.
 \]
+% Now, take the embedding $\varphi$ to be the identity.  % := r$ if $r \in [-1,1]$, and $\sgn(r)$ otherwise.
+In particular, we see that $-1 \in \prop{\ellzo}(p) \iff p_1 \in [0, 1/2] \iff -1 \in \prop{\hinge}(p)$, and $1 \in \prop{\ellzo}(p) \iff p_1 \in [1/2,1] \iff 1 \in \prop{\hinge}(p)$.
+With both conditions of Definition~\ref{def:loss-embed} satisfied, we conclude that $\hinge$ embeds $2\ellzo$.
+In this particular case, it is known $(\hinge,\psi)$ is calibrated for $\psi(u) = \sgn(u)$; we address in Section~\ref{sec:calibration} the interesting question of whether embeddings lead to calibration in general.
 
-Now, take the embedding $\varphi$ to be the identity.  % := r$ if $r \in [-1,1]$, and $\sgn(r)$ otherwise.
-By inspection, we can see that if $r \in \prop{\ell_{0-1}}$, then $\varphi(r) = r \in \prop{L_{hinge}}$.  
-Concretely, $-1 \in \prop{\ell_{0-1}}$ and $\prop{L_{hinge}}$ if and only if $p_1 \in [0, 1/2]$. 
-Similarly, $1 \in \prop{\ell_{0-1}}$ and $\prop{L_{hinge}}$ if and only if $p_1 \in [1/2, 1]$.  
+% Taking $\R = \{-1,1\}$ and the above embedding, we can write the expected loss over each report
+% \begin{center}
+% 	\begin{tabular}{ll}
+% 		$\inprod{p}{\ellzo(1)} = (1-p_1)$ & $\inprod{p}{\ellzo(-1)} = (p_1)$\\
+% 		$\inprod{p}{L_{hinge}(1)} = 2(1-p_1)$ & $\inprod{p}{L_{hinge}(-1)} = 2(p_1)$
+% 	\end{tabular}
+% \end{center}
+% Thus, for every $r \in \R$ and $p \in \simplex$, we have $2 \inprod{p}{\ellzo(r)} = \inprod{p}{L_{hinge}(\varphi(r))}$.
+% This leads us into the next section, where we show the Bayes Risks of the losses will be the same, accounting for the multiplicative constant, if one loss embeds the other.
 
-Taking $\R = \{-1,1\}$ and the above embedding, we can write the expected loss over each report
-\begin{center}
-	\begin{tabular}{ll}
-		$\inprod{p}{\ell_{0-1}(1)} = (1-p_1)$ & $\inprod{p}{\ell_{0-1}(-1)} = (p_1)$\\
-		$\inprod{p}{L_{hinge}(1)} = 2(1-p_1)$ & $\inprod{p}{L_{hinge}(-1)} = 2(p_1)$
-	\end{tabular}
-\end{center}
-Thus, for every $r \in \R$ and $p \in \simplex$, we have $2 \inprod{p}{\ell_{0-1}(r)} = \inprod{p}{L_{hinge}(\varphi(r))}$.
-This leads us into the next section, where we show the Bayes Risks of the losses will be the same, accounting for the multiplicative constant, if one loss embeds the other.
+% Additionally, one can see logistic loss does not embed $\ellzo$ because it elicits a continuous property, so there is an infinite set of unique optima over $\simplex$, and thus no injection exists mapping this set to $\{-1,1\}$.
 
-Additionally, one can see logistic loss does not embed $\ell_{0-1}$ because it elicits a continuous property, so there is an infinite set of unique optima over $\simplex$, and thus no injection exists mapping this set to $\{-1,1\}$.
-
-
+% \raf{$L_{logistic}(u,y) := \ln\left(1 + \exp(-yu)\right)$}
 
 
 
@@ -375,6 +374,7 @@ In this section, we establish a tight relationship between the technique of embe
 We defer to the following section the question of when such surrogates are consistent.
 
 To begin, we observe that, somewhat surprisingly, our embedding condition in Definition~\ref{def:loss-embed} is equivalent to merely matching Bayes risks.
+% For example, one can check that $\risk{\hinge} = 2\min\{p_1,p_2\} = 2\risk{\ellzo}$.
 This useful fact will drive many of our results.
 
 \begin{proposition}\label{prop:embed-bayes-risks}
@@ -410,9 +410,8 @@ This useful fact will drive many of our results.
   (In particular, if $h$ supports the facet corresponding to $\gamma_r$, we have $\ell(r)_y = L(u_r)_y = h(\delta_y)$, where $\delta_y$ is the point distribution on outcome $y$.)
 \end{proof}
 
-\raft{Note at some point: matching risks is not necessary for \emph{consistency}, as evidenced by logistic loss for 0-1 loss.  Maybe we should just make the observation, earlier on, that \emph{embedding} is not necessary for consistency.}
-\raft{Note: ``discrete loss'' now connotes some regularity as well, just like we did with finite properties: every report should correspond to a full-dimensional cell.}
-\raft{Note: DKR (section 3.1) realized the importance of matching Bayes risks, but they could only give general results for strictly convex (concave I should say) risks, in part because they fixed the link function to be a generalization of $\sgn$.  In contrast, we focus exclusively on non-strictly-convex risks.}
+\btw{RF: matching risks is not necessary for \emph{consistency}, as evidenced by logistic loss for 0-1 loss.  Maybe we should just make the observation, earlier on, that \emph{embedding} is not necessary for consistency.}
+\btw{RF: DKR (section 3.1) realized the importance of matching Bayes risks, but they could only give general results for strictly convex (concave I should say) risks, in part because they fixed the link function to be a generalization of $\sgn$.  In contrast, we focus exclusively on non-strictly-convex risks.}
 
 From this more succinct embedding condition, we can in turn simplify the condition that a loss embeds \emph{some} discrete loss: it does if and only if its Bayes risk is polyhedral.
 (We say a concave function is polyhedral if its negation is a polyhedral convex function.)
@@ -502,7 +501,7 @@ Using a construction via convex conjugate duality, which has appeared several ti
   \end{align*}
   It remains to show $L(u)_y \geq 0$ for all $u\in\reals^n$, $y\in\Y$.
   Letting $\delta_y\in\simplex$ be the point distribution on outcome $y\in\Y$, we have for all $u\in\reals^n$, $L(u)_y \geq \inf_{u'\in\reals^n} L(u')_y = \risk{L}(\delta_y) = \risk{\ell}(\delta_y) \geq 0$, where the final inequality follows from the nonnegativity of $\ell$.
-  \raft{FUTURE: to get $n-1$, just use the same trick as before and note that the Bayes risk doesn't change.  Should be a couple lines.  (Not needed for NeurIPS since we don't focus on the dimension.)}
+  \btw{FUTURE: to get $n-1$, just use the same trick as before and note that the Bayes risk doesn't change.  Should be a couple lines.  (Not needed for NeurIPS since we don't focus on the dimension.)}
 \end{proof}
 
 We have seen a tight connection between embeddings and polyhedral losses\raf{... what else can we say here?  Why is this cool?}
@@ -524,7 +523,7 @@ We have seen a tight connection between embeddings and polyhedral losses\raf{...
 %\end{proof}
 
 
-\section{Consistency via Separated Links}
+\section{Consistency via Calibrated Links}
 \label{sec:calibration}
 
 We have now seen the tight relationship between polyhedral losses and embeddings; in particular, every polyhedral loss embeds some discrete loss.
@@ -573,7 +572,7 @@ Let $\U$ contain all optimal report sets $U$ of the form above.
   If $\Psi(u)$ became empty, then leave $\psi(u)$ undefined.
 \end{definition}
 
-\raft{COOL THING TO POINT OUT: when $L$ is polyhedral, then $\prop{L}$ has a finite range (this result) and so does its (multivalued map) inverse (trim result)!}
+\btw{JOURNAL: cool to point out that when $L$ is polyhedral, $\prop{L}$ has a finite range (this result) and so does its (multivalued map) inverse (trim result)!}
 
 % \begin{proposition}
 %   If $\psi$ is a separated link between losses $L$ and $\ell$, then $L$ and $\psi$ are consistenty with $\ell$. \jessie{Rephrase?}
@@ -596,8 +595,8 @@ Let $\U$ contain all optimal report sets $U$ of the form above.
   We then show that the minimal gradient of the expected loss along any direction away from $U$ is lower-bounded, giving a constant excess expected loss at $u$.
 \end{proof}
 
-\raft{FUTURE: we should comment in the discussion section that we probably can show that *any* loss embedding $\ell$ must be polyhedral-ish, meaning polyhedral except for stuff that is never optimal.  This theorem would then not need the ``polyhedral'' part. This is related to the ``convex envelope conjucture'', that if $L$ embeds $\ell$ via $\varphi$, you can just take the loss $L'$ such that $L_y$ is the convex envelope of points $\{(\varphi(r),L(r)_y)\}_{r\in\R}$.}
-\raft{FUTURE: This prop and theorem give an excellent reason to focus on embeddings, since other techniques do not necessarily give you separated links for free.  Since we know we get them for free, we can just focus on the property, and study elicitation complexity; we know if we have a link at all it can be taken to be separated.  [[Is this true?]]}
+\btw{FUTURE: we should comment in the discussion section that we probably can show that *any* loss embedding $\ell$ must be polyhedral-ish, meaning polyhedral except for stuff that is never optimal.  This theorem would then not need the ``polyhedral'' part. This is related to the ``convex envelope conjucture'', that if $L$ embeds $\ell$ via $\varphi$, you can just take the loss $L'$ such that $L_y$ is the convex envelope of points $\{(\varphi(r),L(r)_y)\}_{r\in\R}$.}
+\btw{FUTURE: This prop and theorem give an excellent reason to focus on embeddings, since other techniques do not necessarily give you separated links for free.  Since we know we get them for free, we can just focus on the property, and study elicitation complexity; we know if we have a link at all it can be taken to be separated.  [[Is this true?]]}
 
 
 
