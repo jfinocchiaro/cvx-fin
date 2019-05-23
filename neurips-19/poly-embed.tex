@@ -636,28 +636,23 @@ Moreover, they go on to show consistency and provide a link function from their 
 
 \subsection{Inconsistency of top-$k$ losses}
 
-The top-$k$ classification problem takes as input a set $r \in \R := \{r \subseteq [n] : |r| = k\}$, and observes outcome $y \in [n]$.
-We define the top-$k$ loss $\ell_{top-k}:\R \to \reals$ by
+  The top-$k$ classification problem takes as input a set $r \in \R := \{r \subseteq [n] : |r| \leq k\}$, and observes outcome $y \in [n]$.
+  We define the top-$k$ loss $\ell_{top-k}:\R \to \reals$ by
 \begin{align}\label{eq:top-k}
-\ell_{top-k}(r,y) = \begin{cases}
-0 & y \in r\\
-1 & \text{otherwise}
-\end{cases}
+\ell_{top-k}(r,y) = \Ind{y \not \in r}
 \end{align}
 
-\citet{lapin2016loss, lapin2018analysis}, provide two surrogate losses for measuring top-$k$ error, one of which is shown to be convex, but their consistency is left as an open question.
-\citet{yang2018consistency} show the inconsistency of their losses, and create a new surrogate loss that is consistent for the top-$k$ problem, but it should be noted that Yang and Koyejo's surrogate is not convex.
-They also show that Lapin's surrogates are not consistent, but without too much intuition as to why.
-Following the notation of Yang, we call Lapin's~\cite{lapin2018analysis} convex surrogate $L_2$, and focus on this.
-Here, we assume $r \subseteq [n]$ and $k \leq n$ is a constant.
+  \citet{lapin2016loss, lapin2018analysis}, provide two surrogate losses for measuring top-$k$ error, one of which is shown to be convex, but their consistency is left as an open question.
+  \citet{yang2018consistency} show the inconsistency of their losses, and create a new surrogate loss that is consistent for the top-$k$ problem, but it should be noted that Yang and Koyejo's surrogate is not convex.
+  They also show that Lapin's surrogates are not consistent, but without too much intuition why.
+  Following the notation of Yang, we call Lapin's~\cite{lapin2018analysis} convex surrogate $L_2$, and focus on this.
+  Here, we assume $r \subseteq [n]$ and $k < n$ is a constant.
 
-We show that $L_2$ embeds some other discrete loss $\ell_2:\{0,1\}^n \to \reals^\Y_+$, which has a different Bayes Risk than $\ell_{0-1}$.
+ In order to do this, we want to show that for all $p \in \simplex$, $\inf_{u' \in \reals^n} \inprod{p}{L_2(u')} = \min_{u' \in \{0,1\}^n} \inprod{p}{L_2(u')}$. (Lemma~\ref{lem:top-k-optimal-corners}.) \jessiet{Appendix ref will be broken}
+Then, we show there is a discrete loss $\ell_2 : \{0,1\}^n \to \reals^\Y_+$ that is embedded by $L_2$.  (Lemma~\ref{lem:top-k-surrogate-embeds}.)\jessiet{Appendix ref will be broken}
 
-In order to do this, we want to show that for all $p \in \simplex$, $\inf_{u' \in \reals^n} \inprod{p}{L_2(u')} = \min_{u' \in \{0,1\}^n} \inprod{p}{L_2(u')}$. (Lemma~\ref{lem:top-k-optimal-corners}.)
-Then, we show there is a discrete loss $\ell_2 : \{0,1\}^n \to \reals^\Y_+$ that is embedded by $L_2$.  (Lemma~\ref{lem:top-k-surrogate-embeds}.)
-
-We conclude with a concrete example; $k=1$.
-One can see that the $\ell_{top-1}$ reduces to 0-1 loss, and we characterize the distributions $p \in \simplex$ where $\risk{L_2}(p) = \risk{\ell_2}(p) \neq \risk{\ell_{top-k}}(p)$.
+  We conclude with a concrete example: $k=1$.
+  One can see that the $\ell_{top-1} = \ell_{0-1}$, and we characterize the distributions $p \in \simplex$ where $\risk{L_2}(p) = \risk{\ell_2}(p) \neq \risk{\ell_{top-k}}(p)$.
 
 
 %\raft{Take another look at Theorem 2.4 of the top-k paper.  Losses can certainly be consistent without embedding $\ell$ (even if polyhedral: you can link multiple embedded points to a single discrete report, e.g.\ a convex surrogate for ranking loss can link to the mode), so the ``iff'' is not right.  I think it's worth spending some time thinking about what exactly we need to show to prove inconsistency.  In particular, see if this reasoning checks out:  Suppose we find a distribution $p$ for which an optimal surrogate report is $r$ but $\psi(r)$ is not optimal for $\ell$.  Since we could have a conditional distribution of $p$ for every $x$, so the optimal hypothesis would just be the constant function $h(x) = r$, which achieves the optimal $L$-loss, and when linked, $\psi \circ h(x) = \psi(r)$, which does not achieve the optimal $\ell$-loss.}
@@ -667,19 +662,21 @@ We are given the surrogate
 L_2(u,y) := \left( \frac{1}{k} \sum_{i=1}^k (u + \ones - e_y)_{[i]} - u_y \right)_+
 \end{align}
 where $x_{[i]}$ is the $i^{th}$ largest component of $x$.
-By Lemma~\ref{lem:top-k-optimal-corners}\jessie{in the Appendix... remove ref for camera ready version}, we can see that for all $p \in \simplex$, there is some $u \in \{0,1\}^n$ so that $u \in \argmin_{u' \in \reals^d} \inprod{p}{L_2(u)}$.
-With this, we show that $L_2$ actually embeds a discrete loss $\ell_2: \{0,1\}^n \to \reals^\Y_+$ defined on the corners of the hypercube below:
+By Lemma~\ref{lem:top-k-optimal-corners}\jessiet{in the Appendix... remove ref for camera ready version}, we can see that for all $p \in \simplex$, there is some $u \in \{0,1\}^n$ so that $u \in \argmin_{u' \in \reals^d} \inprod{p}{L_2(u)}$.
+With this, we show that $L_2$ actually embeds the discrete loss $\ell_2: \R \to \reals^\Y_+$, where $\R := \{r \subseteq 2^{[n]} : |r| \leq k \}$, given below:
 \begin{align}\label{eq:ell-2}
-\ell_2(r,y) &= \Ind{y \not\in r} + \min\left(\frac{|r \setminus \{y\}|}{k}, 1\right)
+\ell_2(r,y) &= \Ind{y \not\in r} + \frac{|r \setminus \{y\}|}{k}
 \end{align}
-We show that $L_2$ embeds $\ell_2$ in Lemma~\ref{lem:top-k-surrogate-embeds} \jessie{in the Appendix... remove ref for camera ready version}.
+We show that $L_2$ embeds $\ell_2$ in Lemma~\ref{lem:top-k-surrogate-embeds} \jessiet{in the Appendix... remove ref for camera ready version}.
 Moreover, by Proposition~\ref{prop:embed-bayes-risks}, we know $\risk{L_2} = \risk{\ell_2}$.
 
-While $L_2$ given by~\citet{lapin2018analysis} is not consistent with respect to top-$k$ loss, we do show a discrete loss $\ell_2$ so that $L_2$ is consistent with respect to $\ell_2$.
+While $L_2$ given by~\citet{lapin2018analysis} is not consistent with respect to top-$k$ loss, we can at least show a discrete loss $\ell_2$ where $L_2$ is consistent with respect to $\ell_2$, applying Theorem~\ref{thm:embed-implies-calibrated-link}.\jessiet{TODO: Make ref}
 
-Taking $k = 1$, we see that $\vec{0} \in \argmin_{r' \subseteq [n]} \inprod{p}{\ell_2(r')}$ for any $p$ with $\max_y p_y \leq 1/2$, while $\risk{\ell_{top-1}}(p) = 1 - \max_y p_y < 1$.
-First, we see that $\ell(\vec{0}, \bar{p}) = 1$ for all $p \in \simplex$.
-Taking any basis vector $e_y$, the expected loss $\ell_2(e_y, p) = 2 (1-p_y) \geq 1$ by assumption on $p$. 
+Now to see a set of distributions where $\risk{L_2}(p) \neq \risk{\ell_{top-1}}(p)$, we claim that $\vec{0}~\in~\argmin_{r' \subseteq [n]} \inprod{p}{\ell_2(r')} \implies \risk{\ell_2}(p) = 1$ for any $p$ with $\max_y p_y \leq 1/2$.
+Additionally $\risk{\ell_{top-1}}(p) = 1 - \max_y p_y < 1$.
+
+First, $\ell(\vec{0}, \bar{p}) = 1$ for all $p \in \simplex$.
+Taking the set $\{y\}$ for any $y \in \Y$, the expected loss $\ell_2(\{y\}, p) = 2 (1-p_y) \geq 1$ by assumption on $p$. 
 For any $r$ such that $|r| \geq 2$ \jessiet{In general, $|r| \geq k+1$}, we know that  $\ell_2(r,y) \geq 1$ for all $y \in \Y$, so the expected loss much be greater than or equal to $1$.
 Therefore, we have that $\vec{0} \in \argmin_{r' \subseteq [n]} \inprod{p}{\ell_2(r')}$ for any $p$ such that $\max_y p_y \leq 1/2$.
 
@@ -1009,26 +1006,46 @@ Finally, we have an important converse: if $\Gamma$ has finitely many full-dimen
 %%  In particular, $\gamma'$ refines $\gamma$, and as $\gamma'$ is finite, $\gamma$ must be finite.
 %\end{proof}
 
-\section{Top-$k$}
-Throughout this section, consider the surrogate and discrete loss $L_2(u,y)~:=~\left(\frac{1}{k} \sum_{i=1}^k (u + \ones - e_y)_{[i]} - u_y \right)_+$ and $\ell_2(r,y) = \Ind{y \not\in r} + \min\left(\frac{|r \setminus \{y\}|}{k}, 1\right)$ given in Equations~\ref{eq:L-2-surrogate} and~\ref{eq:ell-2}, respectively.
+\section{Top-$k$ surrogate}
+Throughout this section, consider the surrogate and discrete loss $L_2(u,y)~:=~\left(\frac{1}{k} \sum_{i=1}^k (u + \ones - e_y)_{[i]} - u_y \right)_+$ and $\ell_2(r,y) = \Ind{y \not\in r} + \frac{|r \setminus \{y\}|}{k}$ given in Equations~\ref{eq:L-2-surrogate} and~\ref{eq:ell-2}, respectively.
 
 
-Observe that $L_2$ is a polyhedral loss, since it can be written as the pointwise max of $\binom{n}{k} +1$ terms, where the $\binom{n}{k}$ terms are selecting the $k$ elements of $u + \indopp(y)$ with highest weight.
+Observe that $L_2$ is a polyhedral loss, since it can be written as the pointwise max of $\binom{n}{k} +1$ terms, where the $\binom{n}{k}$ terms are selecting the $k$ elements of $u + \ones - e_y$ with highest weight.
 By Lemma~\ref{lem:poly-loss-poly-risk}, we then know that $\risk{L_2}$ is also polyhedral.
 
 \begin{lemma}\label{lem:top-k-optimal-corners}
-	For all $p \in \simplex$, there is a $u \in \{0,1\}^n$ such that $u \in \argmin_{u'} \inprod{p}{L_2(u)}$.
+	For all $p \in \simplex$, there is a $u \in \{ u \in \{0,1\}^n : \|u\|_1 \leq k\}$ such that $u \in \argmin_{u' \in \reals^d} \inprod{p}{L_2(u)}$.
 \end{lemma}
-\begin{proof}
-	
+\begin{proof}[Sketch]
+  First, observe that $L_2$ is invariant in the $\ones$ direction, so without loss of generality, we can restrict our consideration to reports so that $u_{[n]} = 0$.
+  
+  We first claim that for all $y \in \Y$, the minimum of $L(u,y)$ is achieved by some $u \in [0,1]^n$.
+  Observe that if $u_{[1]} \geq u_{[n]} + 1$, the value of the loss gets ``cropped'' and will be the same by reporting $u_{[1]} = u_{[n]} + 1 = 1$. \jessiet{Flesh this out later.}
+  Since $u_{[n]} = 0 \implies u_{[1]} \in [0,1]$, we can then observe there is some $u \in \argmin_{u' \in \reals^d} L_2(u',y)$ so that $u \in [0,1]^n$.
+    
+  Now, since we can restrict to the closed hypercube, we claim that we can rewrite the surrogate $L_2$ as 
+  \begin{align*}
+  	\inprod{p}{L_2(u)} &:= \frac{1}{k} \left( \sum_{i=1}^k (1 - p_{[i]}) u_{[i]} + u_{[k+1]} \sum_{i=1}^k p_{[i]} \right) + 1 - \inprod{p}{u}
+  \end{align*}
+  
+  To verify this, observe the first term of the summation comes from the probability that you incorrectly did not have $u_y$ in the top-$k$, and the second term comes from the $(k+1)^{th}$ term being added when $u_y$ is correctly in the top $k$ (and therefore not an averaged term, since $u_y \in [0,1]$.) 
+  The $1$ is pulled out from the average, and $\inprod{p}{u}$ comes from the $-u_y$ term form each $y$ by linearity of expectation.
+  We don't need to concern ourselves with the max operator since $\frac{1}{k} \sum_{i=1}^k (u + \ones - e_y)_{[i]} - u_y \geq 0$ for all $y \in \Y$ on $[0,1]^n$.
+  
+  Since, for $u_{[j]}$ and $j \geq k+2$, the expected loss only decreases by increasing $u_{[j]}$ as much as possible, we increase them to $u_{[k+1]}$.
+  By our invariance in the $\ones$ direction, we can re-shift our values if necessary, setting $u_{[k+1]} = u_{[k+2]} = \ldots = u_{[n]} = 0$.
+  
+  Substituting these values into the expected loss, we now observe a linear objective over the hypercube, which is known to be optimal on some corner of the hypercube, so the rest of $u_{[1]}, u_{[2]}, \ldots, u_{[k]} \in \{0,1\}$.
+  Therefore, for all $p \in \simplex$, there is a report $u \in \{0,1\}^n$ optimizing $L_2$.
+  Moreover, for this optimal $u$, observe $\|u\|_{1} \leq k$ since we have $u_{[k+1]} = u_{[k+2]} = \ldots = u_{[n]} = 0$.
 \end{proof}
 
 \begin{lemma}\label{lem:top-k-surrogate-embeds}
 $L_2:\reals^n \to \reals^\Y_+$ embeds $\ell_2:2^{[n]} \to \reals^\Y_+$.
 \end{lemma}
 \begin{proof}
-  We can verify $\ell_2(r) = L_2(\varphi(r))$ for all $r \subseteq [n]$ and $\varphi(r)$ being its conversion from a set to binary vector, so $\varphi(\R) = \{0,1\}^n$.
-  Moreover, by Lemma~\ref{lem:top-k-optimal-corners} and the above equality, respectively, we know that $\inf_{u \in \reals^n} \inprod{p}{L_2(u)} = \min_{u \in \{0,1\}^n} \inprod{p}{L_2(u)} = \min_{r \subseteq}\ell_2(r)$, and so we conclude that $L_2$ embeds $\ell_2$.
+  We can verify $\ell_2(r) = L_2(\varphi(r))$ for all $r \subseteq [n]$ and $\varphi(r)$ being its conversion from a set to binary vector, so $\varphi(\R) = \{ u \in \{0,1\}^n : \|u\|_1 \leq k \}$.
+  Moreover, by Lemma~\ref{lem:top-k-optimal-corners} and the above equality, respectively, we know that $\inf_{u \in \reals^n} \inprod{p}{L_2(u)} = \min_{u \in \varphi(\R)} \inprod{p}{L_2(u)} = \min_{r \in \R}\inprod{p}{\ell_2(r)}$ for all $p \in \simplex$, and so we conclude that $L_2$ embeds $\ell_2$.
 \end{proof}
 
 
