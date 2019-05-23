@@ -529,35 +529,40 @@ We have seen a tight connection between embeddings and polyhedral losses\raf{...
 
 We have now seen the tight relationship between polyhedral losses and embeddings; in particular, every polyhedral loss embeds some discrete loss.
 The embedding itself tells us how to map the embedded points back to the discrete reports (map $\varphi(r)$ to $r$), but it is not clear when this map can be extended to the remaining reports to obtain a full link function, and whether such a link can lead to consistency.
-
 In this section, we give a construction to generate calibrated links for \emph{any} polyhedral loss.
-The first step is to give a link $\psi$ such that minimizing expected surrogate loss, followed by applying $\psi$, minimizes expected original loss.
 
-\begin{proposition}\label{prop:embed-link}
-  Let $L$ elicit $\Gamma:\simplex\toto\reals^d$ which embeds a finite property $\gamma$.
-  Then there exists a link function $\psi: \reals^d \to \R$ that is \emph{valid} in the sense that, for any $p$, if $u$ minimizes expected $L$-loss (i.e. $u \in \Gamma(p)$, then $\psi(u)$ minimizes expected $\ell$-loss (i.e. $\psi(u) \in \gamma(p)$).
-\end{proposition}
-\begin{proof}
-  Let $\gamma:\simplex\toto\R$.
-  Proposition~\ref{prop:embed-trim} gives us that $\trim(\Gamma) = \{\gamma_r : r\in\R\}$.
-  \bo{Have we defined trim already? Or is this proof going to the appendix?}
-  Then for any $u\in\reals^d$, there is some $r\in\R$ such that $\Gamma_u \subseteq \gamma_r$.
-  The link $\psi : \reals^d \to \R$ which encodes these choices is valid.
-\end{proof}
+The first step is to give a link $\psi$ such that exactly minimizing expected surrogate loss $L$, followed by applying $\psi$, always exactly minimizes expected original loss $\ell$.
+\bo{Maybe cite prop in the appendix}
+The existence of such a link is somewhat subtle, because in general some point $u$ that is far from any embedding point can minimize expected loss for two very different distributions $p,p'$, making it unclear whether there exists a link choice $\psi(u)$ that is simultaneously optimal for both.
+We show\bo{cite lemma} that as we vary $p$ over the infinite $\simplex$, there are only finitely many sets of the form $U = \argmin_{u \in \reals^d} \langle p, L(u) \rangle$.
+Associate each $U$ with $R_U \subseteq \R$, the set of reports whose embedding points are in $U$.
+Now enforce that all points in $U$ link to some report in $R_U$.
+(As a special case, embedding points must link to their corresponding reports.)
+Proving this is well-defined uses a chain of arguments involving the Bayes risk\bo{characterization prop in appendix, ...}, ultimately showing that if $u$ lies in multiple $U$, the corresponding report sets $R_U$ all intersect at some $r =: \psi(u)$.
 
-However, this guarantee is weak: for a given $p$, $u$ could be arbitrarily close to optimal with respect to $L$, yet $\psi(u)$ could remain arbitrarily wrong.
-This kind of problem is ruled out by constructing a $\psi$ that is furthermore \emph{calibrated} (Definition \ref{def:calibrated}).
-The main construction begins from the intuitive approach of ``thickening'' the embedding points, by causing all $u$ in the neighborhood of an embedding point to link back to the corresponding report.
-However, we must consider cases where $\Gamma(p)$, the set of optimal $u$, is larger than just one embedding point.
-These cases have a nice structure:
+%
+%\begin{proposition}\label{prop:embed-link}
+%  Let $L$ elicit $\Gamma:\simplex\toto\reals^d$ which embeds a finite property $\gamma$.
+%  Then there exists a link function $\psi: \reals^d \to \R$ that is \emph{valid} in the sense that, for any $p$, if $u$ minimizes expected $L$-loss (i.e. $u \in \Gamma(p)$, then $\psi(u)$ minimizes expected $\ell$-loss (i.e. $\psi(u) \in \gamma(p)$).
+%\end{proposition}
+%\begin{proof}
+%  Let $\gamma:\simplex\toto\R$.
+%  Proposition~\ref{prop:embed-trim} gives us that $\trim(\Gamma) = \{\gamma_r : r\in\R\}$.
+%  \bo{Have we defined trim already? Or is this proof going to the appendix?}
+%  Then for any $u\in\reals^d$, there is some $r\in\R$ such that $\Gamma_u \subseteq \gamma_r$.
+%  The link $\psi : \reals^d \to \R$ which encodes these choices is valid.
+%\end{proof}
 
-\begin{lemma}
-  \label{lem:polyhedral-range-gamma}
-  Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss, and let $\Gamma = \prop{L}$.
-  Then the range of $\Gamma$, $\U = \Gamma(\simplex) = \{\Gamma(p) \subseteq \reals^d | p\in\simplex\}$, is a finite set of closed polyhedra.
-\end{lemma}
-For each of these finitely many $U \in \U$, we let $R_U$ be the set of reports whose embedding points lie in $U$.
-The idea will be to map points in $U$, as well as points nearby, to something in $R_U$
+Intuitively, to create separation, we just need to ``thicken'' this construction by mapping all approximately-optimal points $u$ to optimal reports $r$.
+Let $\U$ contain all optimal report sets $U$ of the form above.
+
+%\begin{lemma}
+%  \label{lem:polyhedral-range-gamma}
+%  Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss, and let $\Gamma = \prop{L}$.
+%  Then the range of $\Gamma$, $\U = \Gamma(\simplex) = \{\Gamma(p) \subseteq \reals^d | p\in\simplex\}$, is a finite set of closed polyhedra.
+%\end{lemma}
+%For each of these finitely many $U \in \U$, we let $R_U$ be the set of reports whose embedding points lie in $U$.
+%The idea will be to map points in $U$, as well as points nearby, to something in $R_U$
 %We show in the full version \bo{okay wording?} that for any $p$, if $U = \Gamma(p)$, then $R_U = \gamma(p)$.
 
 \begin{definition} \label{def:eps-thick-link}
@@ -583,11 +588,11 @@ The idea will be to map points in $U$, as well as points nearby, to something in
 \end{theorem}
 
 \begin{proof}[Sketch]
-  \emph{Well-defined:} Recall that Proposition \ref{prop:embed-link} shows that we can always consistently map each point of $U$ to some member of $R_U$.
-  The key point was that if some collection such as $U,U',U''$ overlap at a $u$, then their report sets $R_U, R_{U'}, R_{U''}$ also overlap, so there is a valid choice $r = \psi(u)$.
-  Now, we thicken all sets $U \in \U$ by a small enough $\epsilon$ and show that if the \emph{thickened} sets overlap at $u$, then $U,U',U''$ themselves overlap, so again $R_U, R_{U'}, R_{U''}$ overlap and there is a valid chioce $r = \psi(u)$.
+  \emph{Well-defined:}
+  For the initial construction above, we argued that if some collection such as $U,U',U''$ overlap at a $u$, then their report sets $R_U, R_{U'}, R_{U''}$ also overlap, so there is a valid choice $r = \psi(u)$.
+  Now, we thicken all sets $U \in \U$ by a small enough $\epsilon$; it can be shown that if the \emph{thickened} sets overlap at $u$, then $U,U',U''$ themselves overlap, so again $R_U, R_{U'}, R_{U''}$ overlap and there is a valid chioce $r = \psi(u)$.
 
-  \emph{Calibrated:} By construction of the thickened link, if $u$ maps to a wrong report, i.e. $\psi(u) \not\in \gamma(p)$, then $u$ must have at least distance $\epsilon$ to the optimal set $U = \Gamma(p)$.
+  \emph{Calibrated:} By construction of the thickened link, if $u$ maps to a wrong report, i.e. $\psi(u) \not\in \gamma(p)$, then $u$ must have at least distance $\epsilon$ to the optimal set $U$.
   We then show that the minimal gradient of the expected loss along any direction away from $U$ is lower-bounded, giving a constant excess expected loss at $u$.
 \end{proof}
 
