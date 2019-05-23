@@ -462,19 +462,7 @@ Note that Bayes risk, a function from distributions over $\Y$ to the reals, may 
 % =======
 \end{proof}
 
-Combining Proposition~\ref{prop:embed-risk-poly} with the following observation that polyhedral losses have polyhedral Bayes risks, we obtain the first direction of our equivalence between polyhedral losses and embedding.
-
-\begin{lemma}
-  \label{lem:poly-loss-poly-risk}
-  If $L$ is polyhedral, $\risk{L}$ is polyhedral.
-\end{lemma}
-\begin{proof}
-  Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss, and $\Gamma = \prop{L}$.
-  By Lemma~\ref{lem:polyhedral-range-gamma}, $\U = \Gamma(\simplex)$ is finite.
-  For each $U\in \U$, select $u_U \in U$, and let $U' = \{u_U : U \in\U\}$.
-  Then for all $p\in\simplex$ we have $\Gamma(p) \cap U' \neq \emptyset$, so Lemma~\ref{lem:loss-restrict} gives us $\risk{L} = \risk{L|_{U'}}$, which is polyhedral as $U'$ is finite.
-  \btw{RF: interesting: we didn't need Proposition~\ref{prop:embed-risk-poly} after all.  This already gives the discrete loss $L$ embeds!}
-\end{proof}
+Combining Proposition~\ref{prop:embed-risk-poly} with the observation that polyhedral losses have polyhedral Bayes risks (Lemma~\ref{lem:poly-loss-poly-risk}), we obtain the first direction of our equivalence between polyhedral losses and embedding.
 
 \begin{theorem}\label{thm:poly-embeds-discrete}
   Every polyhedral loss $L$ embeds a discrete loss.
@@ -483,8 +471,10 @@ Combining Proposition~\ref{prop:embed-risk-poly} with the following observation 
 %   We simply apply Lemma~\ref{lem:poly-loss-poly-risk} and Proposition~\ref{prop:embed-risk-poly}.
 % \end{proof}
 
-We now turn to the reverse direction: is every discrete loss embedded by some polyhedral loss?
-Using a construction via convex conjugate duality, which has appeared several times in the literature (e.g.\ \cite{duchi2018multiclass,abernethy2013efficient,frongillo2014general}), we see that the answer is yes, although the number of dimensions $d$ required could be as large as $|\Y|$.
+We now turn to the reverse direction: which discrete losses are embedded by some polyhedral loss?
+Perhaps surprisingly, we show that \emph{every} discrete loss is embeddable,
+using a construction via convex conjugate duality which has appeared several times in the literature (e.g.\ \cite{duchi2018multiclass,abernethy2013efficient,frongillo2014general}).
+Note however that the number of dimensions $d$ required could be as large as $|\Y|$.
 %\raft{CITE: DKR, frongillo-kash (WINE 2014), probably one of Bob's papers?, others?}
 
 \begin{theorem}\label{thm:discrete-loss-poly-embeddable}
@@ -615,7 +605,7 @@ A key step in the following definition will be to narrow down a ``link envelope'
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Application to Specific Surrogates}\label{sec:examples}
 
-Our results give a framework to construct consistent surrogates and link functions, but they also provide a way to verify the consistency or inconsistency of given surrogates.
+Our results give a framework to construct consistent surrogates and link functions for any discrete loss, but they also provide a way to verify the consistency or inconsistency of given surrogates.
 Below, we illustrate the power of this framework with specific examples from the literature, as well as new examples.
 In some cases we simplify existing proofs, while in others we give new results, such as a new calibrated link for abstain loss, and the inconsistency of the recently proposed Lov\'asz hinge.
 \btw{RF: The top-k and hypercube/set examples (except abstain) have the link built in, e.g.\ as the sign function), and they just work around it.  Our results may suggest that it's worth thinking ``outside the box'' (HAH, genious...) and looking for embeddings which are not the hypercube.}
@@ -648,18 +638,16 @@ Consistency is proven for the following link function,
 \end{equation}
 
 In light of our framework, we can see that $L_{1/2}$ is an excellent example of an embedding, where $\varphi(y) = B(y)$ and $\varphi(\bot) = 0 \in \reals^d$.
-Moreover, the link function $\psi$ \jessie{changed from $\Psi$?} is exactly the link obtained from Theorem~\ref{thm:eps-thick-calibrated} with the norm being $\|\cdot\|_\infty$ and $\epsilon=1/2$.
-We show the full construction of $\psi$ in Figure~\ref{fig:abstain-links}, as well as a valid resolution yielding $\psi$.
-Thus, our framework would have simplified the process of finding such a link function.
-
-To illustrate this point further, we give an alternate link $\psi_1$ generated from Theorem~\ref{thm:eps-thick-calibrated} for $\|\cdot\|_1$ and $\epsilon=1$, shown in Figure~\ref{fig:abstain-links} on the right:
+Moreover, the link function $\psi$ can be recovered from Theorem~\ref{thm:eps-thick-calibrated} with norm $\|\cdot\|_\infty$ and $\epsilon=1/2$; see Figure~\ref{fig:abstain-links}(L).
+Hence, our framework would have simplified the process of finding such a link, and the corresponding proof of consistency.
+To illustrate this point further, we give an alternate link $\psi_1$ corresponding to $\|\cdot\|_1$ and $\epsilon=1$, shown in Figure~\ref{fig:abstain-links}(R):
 \begin{equation}\label{eq:abstain-link-1}
   \psi_1(u) = \begin{cases}
 	\bot & \|u\|_1 \leq 1\\
 	B^{-1}(\sgn(-u)) &\text{otherwise}
   \end{cases}~.
 \end{equation}
-In particular, Theorem~\ref{thm:eps-thick-calibrated} gives us calibration of $(L_{1/2},\psi_1)$ with respect to $\ellabs{1/2}$.
+Theorem~\ref{thm:eps-thick-calibrated} immediately gives calibration of $(L_{1/2},\psi_1)$ with respect to $\ellabs{1/2}$.
 Aside from its simplicity, one possible advantage of $\psi_1$ is that it appears to yield the same constant in generalization bounds as $\psi$, yet assigns $\bot$ to much less of the surrogate space $\reals^d$.
 It would be interesting to compare the two links in practice.
 
@@ -776,15 +764,15 @@ In other words, even for $k>2$, the only consistent Lov\'asz hinge is weighted H
 These results cast doubt on the effectiveness of the Lov\'asz hinge in practice.
 
 
-\subsection{New surrogates for cost-sensitive classification}
+% \subsection{New surrogates for cost-sensitive classification}
 
-\raf{I think we should cut this subsection, and maybe just remind the reader at the prelude to this section that Theorem~\ref{thm:discrete-loss-poly-embeddable} gives a construction for any discrete loss.}
-The construction given in Theorem~\ref{thm:discrete-loss-poly-embeddable}, together with the calibrated link construction in Section~\ref{sec:calibration}, can generate consistent convex surrogates for arbitrary discrete losses.
-For example, consider cost-sensitive classification; given an arbitrary loss matrix $C \in \reals^{n\times n}_+$ describing the loss $\ell_j(i) = C_{ij}$ of predicting label $i$ when the true label is $j$, we construct a convex surrogate based on the convex conjugate of $-\risk{\ell}$.
-While of course several surrogates are known for this problem~\cite{pires2013cost}, they typically work in $n$ dimensions.
-%\raf{Jessie, could you cite \url{http://proceedings.mlr.press/v28/avilapires13.pdf} here}
-one advantage of our embedding framework is the ability to construct lower-dimensional surrogates when costs have certain geometric interpretations.
-For example, if $v_1,\ldots,v_n \in \reals^k$ are on the unit sphere and $C_{ij} = \inprod{v_i}{v_j}$, we can simply take $L_j(u) = $\raf{aaaand Noah woke up}\raf{Just realized that this loss matrix has rank $k$ and thus is covered by AA15: just elicit the linear property $\E v_Y \in \reals^k$.}
+% \raf{I think we should cut this subsection, and maybe just remind the reader at the prelude to this section that Theorem~\ref{thm:discrete-loss-poly-embeddable} gives a construction for any discrete loss.}
+% The construction given in Theorem~\ref{thm:discrete-loss-poly-embeddable}, together with the calibrated link construction in Section~\ref{sec:calibration}, can generate consistent convex surrogates for arbitrary discrete losses.
+% For example, consider cost-sensitive classification; given an arbitrary loss matrix $C \in \reals^{n\times n}_+$ describing the loss $\ell_j(i) = C_{ij}$ of predicting label $i$ when the true label is $j$, we construct a convex surrogate based on the convex conjugate of $-\risk{\ell}$.
+% While of course several surrogates are known for this problem~\cite{pires2013cost}, they typically work in $n$ dimensions.
+% %\raf{Jessie, could you cite \url{http://proceedings.mlr.press/v28/avilapires13.pdf} here}
+% one advantage of our embedding framework is the ability to construct lower-dimensional surrogates when costs have certain geometric interpretations.
+% For example, if $v_1,\ldots,v_n \in \reals^k$ are on the unit sphere and $C_{ij} = \inprod{v_i}{v_j}$, we can simply take $L_j(u) = $\raf{aaaand Noah woke up}\raf{Just realized that this loss matrix has rank $k$ and thus is covered by AA15: just elicit the linear property $\E v_Y \in \reals^k$.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion and Future Directions} \label{sec:conclusion}
@@ -1006,7 +994,7 @@ Finally, we have an important converse: if $\Gamma$ has finitely many full-dimen
   By construction, we have $\gamma_i = \theta_i = \Gamma_{u_i}$ for all $i$, so letting $\varphi(i) = u_i$ we satisfy the definition of embedding, namely statement 1.
 \end{proof}
 
-\section{Polyhedral losses have finite optimzers}\label{app:pf-polyhedral-range-gamma}
+\section{Polyhedral losses}\label{app:polyhedral-losses}
 \begin{lemma}
   \label{lem:polyhedral-range-gamma}
   Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss, and let $\Gamma = \prop{L}$.
@@ -1028,6 +1016,17 @@ Finally, we have an important converse: if $\Gamma$ has finitely many full-dimen
   As $\F$ is finite, so is $\U$, and the elements of $\U$ are closed polyhedra as faces of $D_{\Y'}$ for some $\Y'\subseteq\Y$.
 \end{proof}
 
+\begin{lemma}
+  \label{lem:poly-loss-poly-risk}
+  If $L$ is polyhedral, $\risk{L}$ is polyhedral.
+\end{lemma}
+\begin{proof}
+  Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss, and $\Gamma = \prop{L}$.
+  By Lemma~\ref{lem:polyhedral-range-gamma}, $\U = \Gamma(\simplex)$ is finite.
+  For each $U\in \U$, select $u_U \in U$, and let $U' = \{u_U : U \in\U\}$.
+  Then for all $p\in\simplex$ we have $\Gamma(p) \cap U' \neq \emptyset$, so Lemma~\ref{lem:loss-restrict} gives us $\risk{L} = \risk{L|_{U'}}$, which is polyhedral as $U'$ is finite.
+  \btw{RF: interesting: we didn't need Proposition~\ref{prop:embed-risk-poly} after all.  This already gives the discrete loss $L$ embeds!}
+\end{proof}
 
 %\raft{The following statement is true I believe, but low priority: ``An elicitable property $\Gamma:\simplex\toto\reals$ is convex elicitable (elicited by a convex $L : \reals \to \reals^\Y$) if and only if it is monotone.''  Start of the proof commented out.  Just need to show that $b$ is the upper limit of $a$ and $a$ the lower of $b$; should follow from elicitability of $\Gamma$.}
 %\begin{lemma}\label{lem:prop-L-monotone}
