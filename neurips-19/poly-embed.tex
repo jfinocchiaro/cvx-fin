@@ -178,7 +178,8 @@ thus giving a very general framework to construct consistent convex surrogates f
 \subsection{Related works}
 
 The literature on convex surrogates focuses mainly on smooth surrogate losses~\cite{crammer2001algorithmic,bartlett2006convexity,bartlett2008classification, duchi2018multiclass, williamson2016composite, reid2010composite}.
-Nevertheless, nonsmooth losses, such as the polyhedral losses we consider, have been proposed and studied for a variety of classification-like problems\cite{boser1992training}\jessiet{Do we want the SVM (Boser) cite?}\raft{Basically anything we talk about in the examples. removed hari from this link since we mention it next}
+Nevertheless, nonsmooth losses, such as the polyhedral losses we consider, have been proposed and studied for a variety of classification-like problems\cite{yang2018consistency,yu2018lovasz,lapin2015top}.
+%\jessiet{Do we want the SVM (Boser) cite?}\raft{Basically anything we talk about in the examples. removed hari from this link since we mention it next}
 A notable addition to this literature is~\citet{ramaswamy2018consistent}, who argue that nonsmooth losses may enable dimension reduction of the prediction space (range of the surrogate hypothesis) relative to smooth losses, illustrating this conjecture with a surrogate for \emph{abstain loss} needing only $\log n$ dimensions for $n$ labels, whereas the best known smooth loss needs $n-1$.
 Their surrogate is a natural example of an embedding (cf.~Section~\ref{sec:abstain}), and serves as inspiration for our work.
 
@@ -294,7 +295,7 @@ for all $p \in \simplex$,
   \inf_{u \in \reals^d : \psi(u) \not\in \gamma(p)} \inprod{p}{L(u)} > \inf_{u \in \reals^d} \inprod{p}{L(u)}~.
   \end{equation}
 \end{definition}
-It is well-known that calibration implies \emph{consistency}, in the following sense~\cite{agarwal2015consistent}.
+It is well-known that calibration implies \emph{consistency}, in the same sense as~\citet{agarwal2015consistent}.
 Fix a fixed distribution $D \in \Delta(\X\times\Y)$, and let $L^*$ be the best possible expected $L$-loss achieved by any hypothesis $H:\X\to\reals^d$, and $\ell^*$ the best expected $\ell$-loss for any hypothesis $h:\X\to\R$, respectively.
 Then $(L,\psi)$ is consistent if a sequence of surrogate hypotheses $H_1,H_2,\ldots$ whose $L$-loss limits to $L^*$, then the $\ell$-loss of $\psi\circ H_1,\psi \circ H_2, \ldots$ limits to $\ell^*$.
 As Definition~\ref{def:calibrated} does not involve the feature space $\X$, we will drop it for the remainder of the paper.
@@ -466,7 +467,7 @@ Combining Proposition~\ref{prop:embed-risk-poly} with the following observation 
 \end{lemma}
 \begin{proof}
   Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss, and $\Gamma = \prop{L}$.
-  By Lemma~\ref{lem:polyhedral-range-gamma}, $\U = \Gamma(\simplex)$ is finite.
+  By Lemma~\ref{lemma:U-convex-closed}, $\U = \Gamma(\simplex)$ is finite.
   For each $U\in \U$, select $u_U \in U$, and let $U' = \{u_U : U \in\U\}$.
   Then for all $p\in\simplex$ we have $\Gamma(p) \cap U' \neq \emptyset$, so Lemma~\ref{lem:loss-restrict} gives us $\risk{L} = \risk{L|_{U'}}$, which is polyhedral as $U'$ is finite.
   \btw{RF: interesting: we didn't need Proposition~\ref{prop:embed-risk-poly} after all.  This already gives the discrete loss $L$ embeds!}
@@ -480,7 +481,7 @@ Combining Proposition~\ref{prop:embed-risk-poly} with the following observation 
 % \end{proof}
 
 We now turn to the reverse direction: is every discrete loss embedded by some polyhedral loss?
-Using a construction via convex conjugate duality, which has appeared several times in the literature\raft{CITE: DKR, frongillo-kash (WINE 2014), probably one of Bob's papers?, others?}, we see that the answer is yes, although the number of dimensions $d$ required could be as large as $|\Y|$.
+Using a construction via convex conjugate duality, which has appeared several times in the literature (e.g.\ \cite{duchi2018multiclass,frongillo2014general})\raft{CITE: DKR, frongillo-kash (WINE 2014), probably one of Bob's papers?, others?}, we see that the answer is yes, although the number of dimensions $d$ required could be as large as $|\Y|$.
 
 \begin{theorem}\label{thm:discrete-loss-poly-embeddable}
   Every discrete loss $\ell$ is embedded by a polyhedral loss.
@@ -601,8 +602,7 @@ Let $\U$ contain all optimal report sets $U$ of the form above.
   \emph{Calibrated:} By construction of the thickened link, if $u$ maps to a wrong report, i.e. $\psi(u) \not\in \gamma(p)$, then $u$ must have at least distance $\epsilon$ to the optimal set $U$.
   We then show that the minimal gradient of the expected loss along any direction away from $U$ is lower-bounded, giving a constant excess expected loss at $u$.
 \end{proof}
-\jessie{Should be add a note that the full proof is given in the Appendix?}
-\raf{Definitely}
+While we sketch the intuition here, the full proof is given in Section~\ref{app:calibration} of the Appendix.
 
 \btw{FUTURE: we should comment in the discussion section that we probably can show that *any* loss embedding $\ell$ must be polyhedral-ish, meaning polyhedral except for stuff that is never optimal.  This theorem would then not need the ``polyhedral'' part. This is related to the ``convex envelope conjucture'', that if $L$ embeds $\ell$ via $\varphi$, you can just take the loss $L'$ such that $L_y$ is the convex envelope of points $\{(\varphi(r),L(r)_y)\}_{r\in\R}$.}
 \btw{FUTURE: This prop and theorem give an excellent reason to focus on embeddings, since other techniques do not necessarily give you separated links for free.  Since we know we get them for free, we can just focus on the property, and study elicitation complexity; we know if we have a link at all it can be taken to be separated.  [[Is this true?]]}
@@ -1170,24 +1170,6 @@ Finally, we have an important converse: if $\Gamma$ has finitely many full-dimen
 %\end{proof}
 
 
-\section{Proofs omitted from main paper}\label{app:omitted-proofs}
-\jessiet{Rename this section}
-\begin{proof}[Proof of Lemma~\ref{lem:polyhedral-range-gamma}]
-  For all $p$, let $P(p)$ be the epigraph of the convex function $u\mapsto \inprod{p}{L(u)}$.
-  From Lemma~\ref{lem:polyhedral-pd-same}, we have that the power diagram $D_\Y$ induced by the projection of $P(p)$ onto $\reals^d$ is the same for any $p\in\inter\simplex$.
-  Let $\F_\Y$ be the set of faces of $D_\Y$, which by the above are the set of faces of $P(p)$ projected onto $\reals^d$ for any $p\in\inter\simplex$.
-
-  We claim for all $p\in\inter\simplex$, that $\Gamma(p) \in \F_\Y$.
-  To see this, let $u \in \Gamma(p)$, and $u' = (u,\inprod{p}{L(u)}) \in P(p)$.
-  The optimality of $u$ is equivalent to $u'$ being contained in the face $F$ of $P(p)$ exposed by the normal $(0,\ldots,0,-1)\in\reals^{d+1}$.
-  Thus, $\Gamma(p) = \argmin_{u\in\reals^d} \inprod{p}{L(u)}$ is a projection of $F$ onto $\reals^d$, which is an element of $\F_\Y$.
-
-  Now consider $\Y'\subset \Y$, $\Y'\neq\emptyset$.
-  Applying the above argument, we have a similar guarantee: a finite set $\F_{\Y'}$ such that $\Gamma(p) \in \F_{\Y'}$ for all $p$ with support exactly $\Y'$.
-  Taking $\F = \bigcup\{\F_{\Y'} | \Y'\subseteq\Y, \Y'\neq\emptyset\}$, we have for all $p\in\simplex$ that $\Gamma(p) \in \F$, giving $\U \subseteq \F$.
-  As $\F$ is finite, so is $\U$, and the elements of $\U$ are closed polyhedra as faces of $D_{\Y'}$ for some $\Y'\subseteq\Y$.
-\end{proof}
-
 
 %\begin{proof}[Proof of Theorem~\ref{thm:polyhedral-embed-prop}]
 %  Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss, and $\Gamma = \prop{L}$.
@@ -1428,7 +1410,7 @@ The next lemma shows that if a subset of $\U$ intersect, then their correspondin
 
 
 \section{Top-$k$ surrogate}
-Throughout this section, consider the surrogate and discrete loss $L_2(u,y)~:=~\left(\frac{1}{k} \sum_{i=1}^k (u + \ones - e_y)_{[i]} - u_y \right)_+$ and $\ell_2(r,y) = \Ind{y \not\in r} + \frac{|r \setminus \{y\}|}{k}$ given in Equations~\ref{eq:L-2-surrogate} and~\ref{eq:ell-2}, respectively.
+Throughout this section, consider the surrogate and discrete loss $L_2(u)_y~:=~\left(\frac{1}{k} \sum_{i=1}^k (u + \ones - e_y)_{[i]} - u_y \right)_+$ and $\ell_2(r,y) = \Ind{y \not\in r} + \frac{|r \setminus \{y\}|}{k}$ given in Equations~\ref{eq:L-2-surrogate} and~\ref{eq:ell-2}, respectively.
 
 
 Observe that $L_2$ is a polyhedral loss, since it can be written as the pointwise max of $\binom{n}{k} +1$ terms, where the $\binom{n}{k}$ terms are selecting the $k$ elements of $u + \ones - e_y$ with highest weight.
