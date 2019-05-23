@@ -661,11 +661,11 @@ It would be interesting to compare the two links in practice.
 
 \raf{Jessie: stuff to update / change:}
   \begin{itemize}
-  \item Need to mention the link function typically used; don't see it anywhere
+  \item Need to mention the link function typically used; don't see it anywhere \jessie{Fixed, but could be checked.  right under eq 2}
   \item You keep saying $L(r,y)$ not $L(r)_y$ for all losses \jessie{fixed}
   \item Let's use our property notation; $\prop{L_2}$ instead of argmins \jessie{fixed}
-  \item The story we discussed: YK show $L_2$ is inconsistent.  Our framework lets us ask: with what discrete loss \emph{is} $L_2$ consistent?  (It also assures us that $L_2$ is consistent for something...)
-  \item The next part of the story: oh look, $L_2$ embeds something which is $\ell_{top-k}$ plus some other term, so (a) we can see very clearly what $L_2$ ``is doing'', and (b) we can see where to look for distributions yielding inconsistency, namely ones for which we actually prefer to report a set with $|r|<k$.
+  \item The story we discussed: YK show $L_2$ is inconsistent.  Our framework lets us ask: with what discrete loss \emph{is} $L_2$ consistent?  (It also assures us that $L_2$ is consistent for something...) \jessie{Fixed}
+  \item The next part of the story: oh look, $L_2$ embeds something which is $\ell_{top-k}$ plus some other term, so (a) we can see very clearly what $L_2$ ``is doing'', and (b) we can see where to look for distributions yielding inconsistency, namely ones for which we actually prefer to report a set with $|r|<k$. \jessie{Fixed with question}
   \item Domain of $\ell_2$ should not be $\{0,1\}^n$ anymore \jessie{fixed}
   \end{itemize}
   
@@ -675,17 +675,20 @@ It would be interesting to compare the two links in practice.
 \ell_{top-k}(r,y) = \Ind{y \not \in r}
 \end{align}
 
-  \citet{lapin2016loss, lapin2018analysis}, provide two surrogate losses for measuring top-$k$ error, one of which is shown to be convex, but their consistency is left as an open question.
+  \citet{lapin2015top, lapin2016loss, lapin2018analysis}, provide two surrogate losses for measuring top-$k$ error, one of which is shown to be convex, but their consistency is left as an open question.
   \citet{yang2018consistency} show the inconsistency of their losses, and create a new surrogate loss that is consistent for the top-$k$ problem, but it should be noted that Yang and Koyejo's surrogate is not convex.
   They also show that Lapin's surrogates are not consistent, but without too much intuition why.
-  Following the notation of Yang, we call Lapin's~\cite{lapin2018analysis} convex surrogate $L_2$, and focus on this.
-  Here, we assume $r \subseteq [n]$ and $k < n$ is a constant.
+  Following the notation of Yang, we call Lapin's~\cite{lapin2016loss} convex surrogate $L_2$, and focus on this.
+  Here, we assume $k < n$ is a constant.
 
- In order to do this, we want to show that for all $p \in \simplex$, $\inf_{u' \in \reals^n} \inprod{p}{L_2(u')} = \min_{u' \in \{0,1\}^n} \inprod{p}{L_2(u')}$. (Lemma~\ref{lem:top-k-optimal-corners}.) \jessiet{Appendix ref will be broken}
-Then, given the set $\R = \{r \subseteq 2^{[n]} : |r| \leq k\}$, we show there is a discrete loss $\ell_2 : \R \to \reals^\Y_+$ that is embedded by $L_2$.  (Lemma~\ref{lem:top-k-surrogate-embeds}.)\jessiet{Appendix ref will be broken}
+% In order to do this, we want to show that for all $p \in \simplex$, $\inf_{u' \in \reals^n} \inprod{p}{L_2(u')} = \min_{u' \in \{0,1\}^n} \inprod{p}{L_2(u')}$. (Lemma~\ref{lem:top-k-optimal-corners}.) \jessiet{Appendix ref will be broken... this sentence doesn't really contribute to the story}
 
-  We conclude with a concrete example: $k=1$.
-  One can see that the $\ell_{top-1} = \ell_{0-1}$, and we characterize the distributions $p \in \simplex$ where $\risk{L_2}(p) = \risk{\ell_2}(p) \neq \risk{\ell_{top-k}}(p)$.
+We know from Theorem~\ref{thm:poly-embeds-discrete} that every polyhedral loss embeds some discrete loss, and our framework shows us one such loss.
+In Equation~\ref{eq:ell-2}, we show a loss embedded by $L_2$ which is similar, but generally not equal to $\ell_{top-k}$.  
+So while $L_2$ is not consistent with respect to $\ell_{top-k}$, we can show it is consistent with respect to $\ell_{2}$ by embedding and Theorem~\ref{thm:eps-thick-calibrated}.
+
+%  We conclude with a concrete example: $k=1$.
+%  One can see that the $\ell_{top-1} = \ell_{0-1}$, and we characterize the distributions $p \in \simplex$ where $\risk{L_2}(p) = \risk{\ell_2}(p) \neq \risk{\ell_{top-k}}(p)$.
 
 
 %\raft{Take another look at Theorem 2.4 of the top-k paper.  Losses can certainly be consistent without embedding $\ell$ (even if polyhedral: you can link multiple embedded points to a single discrete report, e.g.\ a convex surrogate for ranking loss can link to the mode), so the ``iff'' is not right.  I think it's worth spending some time thinking about what exactly we need to show to prove inconsistency.  In particular, see if this reasoning checks out:  Suppose we find a distribution $p$ for which an optimal surrogate report is $r$ but $\psi(r)$ is not optimal for $\ell$.  Since we could have a conditional distribution of $p$ for every $x$, so the optimal hypothesis would just be the constant function $h(x) = r$, which achieves the optimal $L$-loss, and when linked, $\psi \circ h(x) = \psi(r)$, which does not achieve the optimal $\ell$-loss.}
@@ -695,23 +698,30 @@ We are given the surrogate
 L_2(u)_y := \left( \frac{1}{k} \sum_{i=1}^k (u + \ones - e_y)_{[i]} - u_y \right)_+
 \end{align}
 where $x_{[i]}$ is the $i^{th}$ largest component of $x$.
-By Lemma~\ref{lem:top-k-optimal-corners}\jessiet{in the Appendix... remove ref for camera ready version}, we can see that for all $p \in \simplex$, there is some $u \in \{0,1\}^n$ so that $u \in \prop{L_2(u)}$.
+\jessie{Link added here}
+While not explicitly stated, they link the surrogate by the function $\psi(u)$, mapping $u$ to the set of indices for the largest $k$ elements of $u$, with ties broken arbitrarily, but consistently.
+
+By Lemma~\ref{lem:top-k-optimal-corners}\jessiet{in the Appendix... remove ref for camera ready version}, we can see that for all $p \in \simplex$, there is some $u \in \{0,1\}^n$ so that $u \in \prop{L_2}$.
 With this, we show that $L_2$ actually embeds the discrete loss $\ell_2: \R \to \reals^\Y_+$ given below:
 \begin{align}\label{eq:ell-2}
 \ell_2(r)_y &= \Ind{y \not\in r} + \frac{|r \setminus \{y\}|}{k}
 \end{align}
-We show that $L_2$ embeds $\ell_2$ in Lemma~\ref{lem:top-k-surrogate-embeds} \jessiet{in the Appendix... remove ref for camera ready version}.
-Moreover, by Proposition~\ref{prop:embed-bayes-risks}, we know $\risk{L_2} = \risk{\ell_2}$.
+We show that $L_2$ embeds $\ell_2$ in Lemma~\ref{lem:top-k-surrogate-embeds} \jessiet{in the Appendix... remove ref}.
+%Moreover, by Proposition~\ref{prop:embed-bayes-risks}, we know $\risk{L_2} = \risk{\ell_2}$.
 
-While $L_2$ given by~\citet{lapin2018analysis} is not consistent with respect to top-$k$ loss, we can at least show a discrete loss $\ell_2$ where $L_2$ is consistent with respect to $\ell_2$, applying Theorem~\ref{thm:embed-implies-calibrated-link}.\jessiet{TODO: Make ref}
+%While $L_2$ given by~\citet{lapin2018analysis} is not consistent with respect to top-$k$ loss, we can at least show a discrete loss $\ell_2$ where $L_2$ is consistent with respect to $\ell_2$, applying Theorem~\ref{thm:embed-implies-calibrated-link}.\jessiet{TODO: Make ref}
 
-Now to see a set of distributions where $\risk{L_2}(p) \neq \risk{\ell_{top-1}}(p)$, we claim that $\vec{0}~\in~\prop{\ell_2} \implies \risk{\ell_2}(p) = 1$ for any $p$ with $\max_y p_y \leq 1/2$.
-Additionally $\risk{\ell_{top-1}}(p) = 1 - \max_y p_y < 1$.
+Let us re-write $\ell_2(r)_y = \ell_{top-k}(r)_y + \frac{|r \setminus \{y\}|}{k}$.
+We can now see pretty clearly what $L_2$ is doing, as well as where to look for distributions yielding inconsistency: those where it is preferable to report a set with $|r| < k$. \jessie{Less than k or greater than 1?}
+
+We now focus on the case where $k=1$; the top-$k$ loss reduces to 0-1 loss in this case.
+To show a set of distributions where $\prop{\ell_2}(p) \neq \prop{\ell_{top-k}}(p)$, we claim that $\vec{0}~\in~\prop{\ell_2} \implies \risk{\ell_2}(p) = 1$ for any $p$ with $\max_y p_y \leq 1/2$.
+Additionally $\risk{\ell_{top-1}}(p) = 1 - \max_y p_y < 1 \implies \vec{0} \not\in \prop{\ell_{top-k}}(p)$.
 
 First, $\ell(\vec{0}, \bar{p}) = 1$ for all $p \in \simplex$.
 Taking the set $\{y\}$ for any $y \in \Y$, the expected loss $\inprod{p}{\ell_2(\{y\})} = 2 (1-p_y) \geq 1$ by assumption on $p$. 
-For any $r$ such that $|r| \geq 2$ \jessiet{In general, $|r| \geq k+1$}, we know that  $\ell_2(r)_y \geq 1$ for all $y \in \Y$, so the expected loss much be greater than or equal to $1$.
-Therefore, we have that $\vec{0} \in \prop{\ell_2}$ for any $p$ such that $\max_y p_y \leq 1/2$.
+%For any $r$ such that $|r| \geq 2$ \jessiet{In general, $|r| \geq k+1$}, we know that  $\ell_2(r)_y \geq 1$ for all $y \in \Y$, so the expected loss much be greater than or equal to $1$.
+Therefore, we have that $\vec{0} \in \prop{\ell_2}(p)$ but $\vec{0} \not\in \prop{\ell_{top-k}}(p)$ for any $p$ such that $\max_y p_y \leq 1/2$.
 
 
 
