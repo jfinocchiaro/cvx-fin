@@ -36,7 +36,7 @@
 \newcommand{\jessiet}[1]{\mytodo{purple!20!white}{JF: #1}}
 \newcommand{\bo}[1]{\mynote{blue}{[Bo: #1]}}
 \newcommand{\botodo}[1]{\mytodo{blue!20!white}{[Bo: #1]}}
-\newcommand{\btw}[1]{\mytodo{gray}{#1}}
+\newcommand{\btw}[1]{}%TURN OFF FOR NOW \mytodo{gray}{#1}}
 \ifnum\Comments=1               % fix margins for todonotes
   \setlength{\marginparwidth}{1in}
 \fi
@@ -88,6 +88,7 @@
 
 \newcommand{\hinge}{L_{\mathrm{hinge}}}
 \newcommand{\ellzo}{\ell_{\text{0-1}}}
+\newcommand{\ellabs}[1]{\ell_{#1}}
 
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
@@ -606,41 +607,64 @@ Let $\U$ contain all optimal report sets $U$ of the form above.
 
 Our results give a framework to construct consistent surrogates and link functions, but they also provide a way to verify the consistency or inconsistency of given surrogates.
 Below, we illustrate the power of this framework with specific examples from the literature, as well as new examples.
-In some cases we simplify existing proofs, while in others we give new results, such as the inconsistency of the recently proposed Lov\'asz hinge.
-\raf{Notes to self: The top-k and hypercube/set examples (except abstain) have the link built in, e.g.\ as the sign function), and they just work around it.  Our results may suggest that it's worth thinking ``outside the box'' (HAH, genious...) and looking for embeddings which are not the hypercube.}
+In some cases we simplify existing proofs, while in others we give new results, such as a new calibrated link for abstain loss, and the inconsistency of the recently proposed Lov\'asz hinge.
+\btw{RF: The top-k and hypercube/set examples (except abstain) have the link built in, e.g.\ as the sign function), and they just work around it.  Our results may suggest that it's worth thinking ``outside the box'' (HAH, genious...) and looking for embeddings which are not the hypercube.}
 
 \subsection{Consistency of abstain surrogate and link construction}
 \label{sec:abstain}
-\raf{Jessie: could you add the definition of their surrogate and link?  Use eq:abstain-surrogate for the label}
-Consider the $\abstain{1/2}$ property, where one wants to report the most likely outcome, conditioned on such a $p_y \geq 1/2$.
-If there is no such $p_y$, then the $\abstain{1/2}$ property suggests we abstain from predicting any one outcome.
 
-~\citet{ramaswamy2018consistent} provides a consistent, polyhedral surrogate for a particular case of the abstain loss $\ell_{\abstain{\alpha}}:[n] \cup \{a\} \to \reals$ defined:
+In classification settings with a large number of labels, several authors consider a variant of classification, with the addition of a ``reject'' or \emph{abstain} option.
+For example, \citet{ramaswamy2018consistent} study the loss $\ellabs{\alpha} : [n] \cup \{\bot\} \to \reals^\Y_+$ defined by
 \begin{align}\label{eq:abstain-discrete}
-\ell_{\abstain{\alpha}}(r,y) := \begin{cases}
+\ellabs{\alpha}(r)_y = \begin{cases}
 0 & r = y\\
-\alpha & r = a\\
+\alpha & r = \bot\\
 1 & \text{otherwise}
-\end{cases}
+\end{cases}~.
 \end{align}
-Here, the report $a$ corresponds to ``abstaining'' from voting if the outcome of any outcome is not likely enough to occur.
-
-The $\abstain{1/2}$ surrogate provided by Ramaswamy et al.~\cite{ramaswamy2018consistent} embeds the $n$ outcomes into the $n$ vertices of the $d := \ceil{\log_2(n)}$-dimensional hypercube (vertices in $\{\pm 1\}^n$), and embeds the abstain point at the origin.
-They give the surrogate
+Here, the report $\bot$ corresponds to ``abstaining'' if no label is sufficiently likely, specifically, if no $y\in\Y$ has $p_y \geq 1-\alpha$.
+\citet{ramaswamy2018consistent} provide a polyhedral surrogate for $\ellabs{\alpha}$, which we present here for $\alpha=1/2$.
+Letting $d = \ceil{\log_2(n)}$ their surrogate is $L_{1/2} : \reals^d \to \reals^\Y_+$ given by
 \begin{equation}\label{eq:abstain-surrogate}
-L_{\abstain{1/2}}(u, y) = \left(\max_{j \in [d]}\varphi(y)_j u_j + 1\right)_+
+L_{1/2}(u)_y = \left(\max_{j \in [d]}B(y)_j u_j + 1\right)_+~,
 \end{equation}
-Moreover, they go on to show consistency and provide a link function from their surrogate to $\ell_{\abstain{1/2}}$.
+where $B:[n]\to\{-1,1\}^d$ is a arbitrary injection; let us assume $n = 2^d$ so that we have a bijection.
+Consistency is proven for the following link function,
 \begin{equation}\label{eq:abstain-link}
-	\phi(u) = \begin{cases}
-	a & \min_{i \in [d]} |u_i| \leq 1/2\\
-	\varphi^{-1}(\sgn(-u)) &\text{otherwise}
-	\end{cases}
+  \psi(u) = \begin{cases}
+	\bot & \min_{i \in [d]} |u_i| \leq 1/2\\
+	B^{-1}(\sgn(-u)) &\text{otherwise}
+  \end{cases}~.
 \end{equation}
-\jessiet{Note about how they have $\sgn(0) = 1$?}
+
+In light of our framework, we can see that $L_{1/2}$ is an excellent example of an embedding, where $\varphi(y) = B(y)$ and $\varphi(\bot) = 0 \in \reals^d$.
+Moreover, the link function $\psi$ is exactly the link obtained from Theorem\raf{ref Bo's stuff} with the norm being $\|\cdot\|_\infty$ and $\epsilon=1/2$.
+We show the full construction of $\Psi$ in Figure\raf{ref}, as well as a valid resolution yielding $\psi$.
+Thus, our framework would have simplified the process of finding such a link function.
+
+To illustrate this point further, we give an alternate link $\psi_1$ generated from Theorem\raf{ref Bo's stuff} for $\|\cdot\|_1$ and $\epsilon=1$, shown in Figure\raf{ref}:
+\begin{equation}\label{eq:abstain-link}
+  \psi_1(u) = \begin{cases}
+	\bot & \|u\|_1 \leq 1\\
+	B^{-1}(\sgn(-u)) &\text{otherwise}
+  \end{cases}~.
+\end{equation}
+In particular, Theorem\raf{ref Bo's stuff} gives us calibration of $(L_{1/2},\psi_1)$ with respect to $\ellabs{1/2}$.
+Aside from its simplicity, one possible advantage of $\psi_1$ is that it appears to yield the same constant in generalization bounds as $\psi$, yet assigns $\bot$ to much less of the surrogate space $\reals^d$.
+It would be interesting to compare the two links in practice.
 
 \subsection{Inconsistency of top-$k$ losses}
 
+\raf{Jessie: stuff to update / change:}
+  \begin{itemize}
+  \item Need to mention the link function typically used; don't see it anywhere
+  \item You keep saying $L(r,y)$ not $L(r)_y$ for all losses
+  \item Let's use our property notation; $\prop{L_2}$ instead of argmins
+  \item The story we discussed: YK show $L_2$ is inconsistent.  Our framework lets us ask: with what discrete loss \emph{is} $L_2$ consistent?  (It also assures us that $L_2$ is consistent for something...)
+  \item The next part of the story: oh look, $L_2$ embeds something which is $\ell_{top-k}$ plus some other term, so (a) we can see very clearly what $L_2$ ``is doing'', and (b) we can see where to look for distributions yielding inconsistency, namely ones for which we actually prefer to report a set with $|r|<k$.
+  \item Domain of $\ell_2$ should not be $\{0,1\}^n$ anymore
+  \end{itemize}
+  
   The top-$k$ classification problem takes as input a set $r \in \R := \{r \subseteq [n] : |r| \leq k\}$, and observes outcome $y \in [n]$.
   We define the top-$k$ loss $\ell_{top-k}:\R \to \reals$ by
 \begin{align}\label{eq:top-k}
@@ -732,12 +756,13 @@ These results cast doubt on the effectiveness of the Lov\'asz hinge in practice.
 
 \subsection{New surrogates for cost-sensitive classification}
 
+\raf{I think we should cut this subsection, and maybe just remind the reader at the prelude to this section that Theorem~\ref{thm:discrete-loss-poly-embeddable} gives a construction for any discrete loss.}
 The construction given in Theorem~\ref{thm:discrete-loss-poly-embeddable}, together with the calibrated link construction in Section~\ref{sec:calibration}, can generate consistent convex surrogates for arbitrary discrete losses.
 For example, consider cost-sensitive classification; given an arbitrary loss matrix $C \in \reals^{n\times n}_+$ describing the loss $\ell_j(i) = C_{ij}$ of predicting label $i$ when the true label is $j$, we construct a convex surrogate based on the convex conjugate of $-\risk{\ell}$.
 While of course several surrogates are known for this problem~\cite{pires2013cost}, they typically work in $n$ dimensions.
 %\raf{Jessie, could you cite \url{http://proceedings.mlr.press/v28/avilapires13.pdf} here}
 one advantage of our embedding framework is the ability to construct lower-dimensional surrogates when costs have certain geometric interpretations.
-For example, if $v_1,\ldots,v_n \in \reals^k$ are on the unit sphere and $C_{ij} = \inprod{v_i}{v_j}$, we can simply take $L_j(u) = $\raf{aaaand Noah woke up}
+For example, if $v_1,\ldots,v_n \in \reals^k$ are on the unit sphere and $C_{ij} = \inprod{v_i}{v_j}$, we can simply take $L_j(u) = $\raf{aaaand Noah woke up}\raf{Just realized that this loss matrix has rank $k$ and thus is covered by AA15: just elicit the linear property $\E v_Y \in \reals^k$.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion and Future Directions} \label{sec:conclusion}
