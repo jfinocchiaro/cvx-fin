@@ -179,7 +179,7 @@ thus giving a very general framework to construct consistent convex surrogates f
 
 \paragraph{Related works.}
 The literature on convex surrogates focuses mainly on smooth surrogate losses~\cite{crammer2001algorithmic,bartlett2006convexity,bartlett2008classification, duchi2018multiclass, williamson2016composite, reid2010composite}.
-Nevertheless, nonsmooth losses, such as the polyhedral losses we consider, have been proposed and studied for a variety of classification-like problems\cite{yang2018consistency,yu2018lovasz,lapin2015top}.
+Nevertheless, nonsmooth losses, such as the polyhedral losses we consider, have been proposed and studied for a variety of classification-like problems~\cite{yang2018consistency,yu2018lovasz,lapin2015top}.
 %\jessiet{Do we want the SVM (Boser) cite?}\raft{Basically anything we talk about in the examples. removed hari from this link since we mention it next}
 A notable addition to this literature is~\citet{ramaswamy2018consistent}, who argue that nonsmooth losses may enable dimension reduction of the prediction space (range of the surrogate hypothesis) relative to smooth losses, illustrating this conjecture with a surrogate for \emph{abstain loss} needing only $\log n$ dimensions for $n$ labels, whereas the best known smooth loss needs $n-1$.
 Their surrogate is a natural example of an embedding (cf.~Section~\ref{sec:abstain}), and serves as inspiration for our work.
@@ -773,7 +773,7 @@ These results cast doubt on the effectiveness of the Lov\'asz hinge in practice.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion and Future Directions} \label{sec:conclusion}
 % \paragraph{Summary.}
-This paper formalizes an intuitive way to design convex surrogate losses for classification-like problems -- by embedding the labels into $\reals^d$.
+This paper formalizes an intuitive way to design convex surrogate losses for classification-like problems -- by embedding the reports into $\reals^d$.
 We establish a close relationship between embedding and polyhedral surrogates, showing both that every polyhedral loss embeds a discrete loss (Theorem~\ref{thm:poly-embeds-discrete}) and that every discrete loss is embedded by some polyhedral loss (Theorem~\ref{thm:discrete-loss-poly-embeddable}).
 We then construct a calibrated link function from a surrogate to the discrete loss it embeds, showing the consistency of our surrogates.
 We conclude with examples of how the embedding framework presented can be applied to understand surrogates given in the literature, including those for the abstain loss, top-$k$ loss, and Lov\'asz Hinge.\bo{commented stuff for space}
@@ -1287,31 +1287,33 @@ We next show that $\U = \{u \in \{0,1\}^n : \|u\|_0 \leq k\}$ is always represen
   \[
     L'(u)_y = \left( 1 - u_y + \frac{1}{k} \sum_{i=1}^k (u - e_y)_{[i]} \right)_+~.
   \]
-  Next, we observe that $L'$ is invariant in the $\ones$ direction, so without loss of generality, we can restrict our consideration to reports so that $u_{[n]} = 0$.
-  To see this,
+  Examining this expression, observe that
+  if $u_i < u_{[k+1]}$, then $(u-e_y)_i < (u-e_y)_{[k]}$, as only one entry changes (and decreases) from one to the other.
+  Hence, if $u_i < u_{[k+1]}$, then the index $i$ will not appear in the summation for any $y$, and thus only influences the loss when $y=i$.
+  Now consider the loss of $u'$ which is the same as $u$ but with $u_i' = u_{[k+1]}$.
+  Then $L'(u')_y \leq L'(u)_y$ when $y=i$ and $L'(u')_y = L'(u)_y$ when $y\neq i$.
+  From this we see that without loss of generality, $u_{[k+1]} = \cdots = u_{[n]}$.
+  
+  Next, we show that $L'$ is invariant in the $\ones$ direction:
   \begin{align*}
     L'(u + \alpha \ones)_y &= \left( 1 - (u_y + \alpha) + \frac{1}{k} \sum_{i=1}^k ((u + \alpha) - e_y)_{[i]} \right)_+\\
     &= \left( 1 - (u_y + \alpha) + \frac{1}{k}\left[ \alpha k + \sum_{i=1}^k (u - e_y)_{[i]} \right] \right)_+\\
     &= \left( 1 -u_y + \frac{1}{k}\left[ \sum_{i=1}^k (u - e_y)_{[i]} \right] \right)_+\\
-  &= L'(u)_y
+  &= L'(u)_y~.
   \end{align*}
-  
+  Thus, without loss of generality, we now have $u_{[k+1]} = \cdots = u_{[n]} = 0$.
 
+  Let $u_{[1..j]} := \sum_{i=1}^j u_{[i]}$.
   We now claim that for all $y \in \Y$, the minimum of $L(u)_y$ is achieved by some $u \in [0,1]^n$.
-  This follows from the observation that if $u_{[1]} > 1$, the the loss only decreases by reporting $u_{[1]} = u_{[n]} + 1 = 1$.
+  \raf{Only hole left is the following line.  I think it might not be true.}
+  This follows from the observation that if $u_i > 1$, the the loss only decreases by reporting $u_i = 1$.
   For $u\in[0,1]^n$, the argument to $(\cdot)_+$ is nonnegative, so we can rewrite the expected loss of $L'$ as
   \begin{align*}
-  	\inprod{p}{L'(u)} &= \frac{1}{k} \left( \sum_{i=1}^k (1 - p_{[i]}) u_{[i]} + u_{[k+1]} \sum_{i=1}^k p_{[i]} \right) + 1 - \inprod{p}{u}
+  	\inprod{p}{L'(u)} &= 1 - \inprod{p}{u} + \frac{1}{k} \left( \sum_{i=1}^k (1 - p_{[i]}) u_{[i]} \right) = 1 + \inprod{\tfrac 1 k \ones - (1+\tfrac 1 k)p}{u}~.
   \end{align*}
-  To verify this, observe the first term of the summation comes from the probability that you incorrectly did not have $u_y$ in the top-$k$, and the second term comes from the $(k+1)^{th}$ term being added when $u_y$ is correctly in the top $k$ (and therefore not an averaged term, since $u_y \in [0,1]$.)
-  The $1$ is pulled out from the average, and $\inprod{p}{u}$ comes from the $-u_y$ term form each $y$ by linearity of expectation.
-
-  Since, for $u_{[j]}$ and $j \geq k+2$, the expected loss only decreases by increasing $u_{[j]}$ as much as possible, we increase them to $u_{[k+1]}$.
-  By our invariance in the $\ones$ direction, we can re-shift our values if necessary, setting $u_{[k+1]} = u_{[k+2]} = \ldots = u_{[n]} = 0$.
-
-  Substituting these values into the expected loss, we now observe a linear objective over the hypercube, which is known to be optimal on some corner of the hypercube, so the rest of $u_{[1]}, u_{[2]}, \ldots, u_{[k]} \in \{0,1\}$.
-  Therefore, for all $p \in \simplex$, there is a report $u \in \{0,1\}^n$ optimizing $L'$.
-  Moreover, for this optimal $u$, observe $\|u\|_{1} \leq k$ since we have $u_{[k+1]} = u_{[k+2]} = \ldots = u_{[n]} = 0$, so we observe that $u \in \U$ as well.
+  As a linear objective over the hypercube, $\inprod{p}{L'}$ must be optimal on some corner of the hypercube, so we conclude $u_{[1]}, u_{[2]}, \ldots, u_{[k]} \in \{0,1\}$.
+  In particular, for all $p \in \simplex$, there is a report $u \in \{0,1\}^n$ optimizing $L'$, and since
+  Moreover, there is an optimal $u$ with $\|u\|_{1} \leq k$ since we have $u_{[k+1]} = u_{[k+2]} = \ldots = u_{[n]} = 0$, so some $u \in \U$ must be optimal as well.
 \end{proof}
 
 \begin{lemma}\label{lem:top-k-surrogate-embeds}
