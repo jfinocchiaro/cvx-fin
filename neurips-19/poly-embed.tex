@@ -802,8 +802,8 @@ We conclude with examples of how the embedding framework presented can be applie
 
 % \paragraph{Directions.}
 One open question of particular interest involves the dimension of the input to a surrogate; given a discrete loss, can we construct the surrogate that embeds it \emph{of minimal dimension}?
-Often, we na\"ively embed the reports into an $n$-dimensional space, so the dimensionality of the problem increases with the number of possible labels.
-As the dimension of the optimization problem is a function of this \emph{embedding dimension}, a promising direction is to leverage tools from elicitation complexity~\cite{lambert2008eliciting,frongillo2015elicitation} and convex calibration dimension~\cite{ramaswamy2016convex} to understand when it can be reduced.
+If we na\"ively embed the reports into an $n$-dimensional space, the dimensionality of the problem scales with the number of possible labels $n$.
+As the dimension of the optimization problem is a function of this \emph{embedding dimension} $d$, a promising direction is to leverage tools from elicitation complexity~\cite{lambert2008eliciting,frongillo2015elicitation} and convex calibration dimension~\cite{ramaswamy2016convex} to understand when we can take $d <\!\!< n$.
 %There are several direct open questions involving the dimension of the surrogate loss.
 %It would be interesting and perhaps practically useful to develop further techniques for upper bounds: automatically constructing embeddings in $\reals^d$ and associated polyhedral losses from a given property, with $d$ as small as possible.
 %Another direction is additional lower bound techniques, or further development of our necessary conditions.
@@ -886,7 +886,10 @@ We extend Aurenhammer's result to a weighted sum of convex functions, showing th
 \end{proof}
 
 \section{Embedding properties}\label{app:embed-props}
-In ``embedding a property,'' we typically think of embedding a finite property, elicited by a discrete loss.
+
+It is often convenient to work directly with properties and set aside the losses which elicit them.
+To this end, we say a property to embeds another if eq.~\eqref{eq:embed-loss} holds.
+We begin with the notion of redundancy.
 \begin{definition}[Finite property, non-redundant]
   A property $\Gamma:\simplex\toto\R$ is \emph{redundant} if for some $r,r'\in\R$ we have $\Gamma_r \subseteq \Gamma_{r'}$, and \emph{non-redundant} otherwise.
   $\Gamma$ is \emph{finite} if it is non-redundant and $\R$ is a finite set.
@@ -1307,23 +1310,23 @@ We next show that $\U = \{u \in \{0,1\}^n : \|u\|_0 \leq k\}$ is always represen
   Let $u_{[1..j]} := \sum_{i=1}^j u_{[i]}$.
   We now claim that for all $y \in \Y$, the minimum of $L(u)_y$ is achieved by some $u \in [0,1]^n$.
   \raf{Only hole left is the following line.  I think it might not be true.}
-  This follows from the observation that if $u_i > 1$, the the loss only decreases by reporting $u_i = 1$.
+  This follows from the observation that if $u_i > 1$, the the loss only decreases by reporting $u'$ which is equal to $u$ but with $u'_i = 1$.
   For $u\in[0,1]^n$, the argument to $(\cdot)_+$ is nonnegative, so we can rewrite the expected loss of $L'$ as
   \begin{align*}
   	\inprod{p}{L'(u)} &= 1 - \inprod{p}{u} + \frac{1}{k} \left( \sum_{i=1}^k (1 - p_{[i]}) u_{[i]} \right) = 1 + \inprod{\tfrac 1 k \ones - (1+\tfrac 1 k)p}{u}~.
   \end{align*}
   As a linear objective over the hypercube, $\inprod{p}{L'}$ must be optimal on some corner of the hypercube, so we conclude $u_{[1]}, u_{[2]}, \ldots, u_{[k]} \in \{0,1\}$.
-  In particular, for all $p \in \simplex$, there is a report $u \in \{0,1\}^n$ optimizing $L'$, and since
-  Moreover, there is an optimal $u$ with $\|u\|_{1} \leq k$ since we have $u_{[k+1]} = u_{[k+2]} = \ldots = u_{[n]} = 0$, so some $u \in \U$ must be optimal as well.
+  In particular, for all $p \in \simplex$, there is a report $u \in \{0,1\}^n$ optimizing $L'$; since we can take $\|u\|_0 \leq k$ by the above observation that $u_{[k+1]} = u_{[k+2]} = \ldots = u_{[n]} = 0$, some $u \in \U$ must be optimal as well.
 \end{proof}
 
-\begin{lemma}\label{lem:top-k-surrogate-embeds}
-$L':\reals^n \to \reals^\Y_+$ embeds $\ell':\R \to \reals^\Y_+$.
-\end{lemma}
-\begin{proof}
-  We can verify $\ell'(r) = L'(\varphi(r))$ for all $r \subseteq [n]$ and $\varphi(r)$ being its conversion from a set to binary vector, so $\varphi(\R) = \{ u \in \{0,1\}^n : \|u\|_1 \leq k \}$.
-  Moreover, by Lemma~\ref{lem:top-k-optimal-corners} and the above equality, respectively, we know that $\inf_{u \in \reals^n} \inprod{p}{L'(u)} = \min_{u \in \varphi(\R)} \inprod{p}{L'(u)} = \min_{r \in \R}\inprod{p}{\ell'(r)}$ for all $p \in \simplex$, and so we conclude that $L'$ embeds $\ell'$.
-\end{proof}
+\raf{Cut this final lemma for now}
+% \begin{lemma}\label{lem:top-k-surrogate-embeds}
+% $L':\reals^n \to \reals^\Y_+$ embeds $\ell':\R \to \reals^\Y_+$.
+% \end{lemma}
+% \begin{proof}
+%   We can verify $\ell'(r) = L'(\varphi(r))$ for all $r \subseteq [n]$ and $\varphi(r)$ being its conversion from a set to binary vector, so $\varphi(\R) = \{ u \in \{0,1\}^n : \|u\|_1 \leq k \}$.
+%   Moreover, by Lemma~\ref{lem:top-k-optimal-corners} and the above equality, respectively, we know that $\inf_{u \in \reals^n} \inprod{p}{L'(u)} = \min_{u \in \varphi(\R)} \inprod{p}{L'(u)} = \min_{r \in \R}\inprod{p}{\ell'(r)}$ for all $p \in \simplex$, and so we conclude that $L'$ embeds $\ell'$.
+% \end{proof}
 
 
 \end{document}
