@@ -530,9 +530,8 @@ In this section, we give a construction to generate calibrated links for \emph{a
 Appendix~\ref{app:calibration} contains the full proof; this section provides a sketch along with the main construction and result.
 The first step is to give a link $\psi$ such that exactly minimizing expected surrogate loss $L$, followed by applying $\psi$, always exactly minimizes expected original loss $\ell$.
 The existence of such a link is somewhat subtle, because in general some point $u$ that is far from any embedding point can minimize expected loss for two very different distributions $p,p'$, making it unclear whether there exists a link choice $\psi(u)$ that is simultaneously optimal for both.
-We show that as we vary $p$ over the infinite $\simplex$, there are only finitely many sets of the form $U = \argmin_{u \in \reals^d} \langle p, L(u) \rangle$.
-Associate each $U$ with $R_U \subseteq \R$, the set of reports whose embedding points are in $U$.
-Now enforce that all points in $U$ link to some report in $R_U$.
+We show that as we vary $p$ over $\simplex$, there are only finitely many sets of the form $U = \argmin_{u \in \reals^d} \inprod{p}{L(u)}$ (Lemma~\ref{lem:polyhedral-range-gamma}).
+Associating each $U$ with $R_U \subseteq \R$, the set of reports whose embedding points are in $U$, we enforce that all points in $U$ link to some report in $R_U$.
 (As a special case, embedding points must link to their corresponding reports.)
 Proving this is well-defined uses a chain of arguments involving the Bayes risk, ultimately showing that if $u$ lies in multiple $U$, the corresponding report sets $R_U$ all intersect at some $r =: \psi(u)$.
 
@@ -589,7 +588,7 @@ A key step in the following definition will be to narrow down a ``link envelope'
   For the initial construction above, we argued that if some collection such as $U,U',U''$ overlap at a $u$, then their report sets $R_U, R_{U'}, R_{U''}$ also overlap, so there is a valid choice $r = \psi(u)$.
   Now, we thicken all sets $U \in \U$ by a small enough $\epsilon$; it can be shown that if the \emph{thickened} sets overlap at $u$, then $U,U',U''$ themselves overlap, so again $R_U, R_{U'}, R_{U''}$ overlap and there is a valid chioce $r = \psi(u)$.
 
-  \emph{Calibrated:} By construction of the thickened link, if $u$ maps to a wrong report, i.e. $\psi(u) \not\in \gamma(p)$, then $u$ must have at least distance $\epsilon$ to the optimal set $U$.
+  \emph{Calibrated:} By construction of the thickened link, if $u$ maps to an incorrect report, i.e.\ $\psi(u) \not\in \gamma(p)$, then $u$ must have at least distance $\epsilon$ to the optimal set $U$.
   We then show that the minimal gradient of the expected loss along any direction away from $U$ is lower-bounded, giving a constant excess expected loss at $u$.
 \end{proof}
 
@@ -659,7 +658,7 @@ It would be interesting to compare the two links in practice.
 \begin{minipage}{0.32\linewidth}
 \includegraphics[width=\linewidth]{./tikz/abstain-link-l1.pdf}
 \end{minipage}\hfill
-\caption{Constructing links for the abstain surrogate $L_{1/2}$ with $d=2$. The embedding is shown in bold labeled by the corresponding reports. (L) The map $\Psi$ resulting from Theorem~\ref{thm:eps-thick-calibrated} using $\|\cdot\|_\infty$ and $\epsilon = 1/2$, and a possible link $\psi$ which matches eq.~\eqref{eq:abstain-link} from~\cite{ramaswamy2018consistent}.  (M) An illustration of the thickened sets from Definition~\ref{def:eps-thick-link} for two sets $U \in \U$, using $\|\cdot\|_1$ and $\epsilon = 1$. (R) The $\Psi$ and $\psi$ from Theorem~\ref{thm:eps-thick-calibrated} using $\|\cdot\|_1$ and $\epsilon = 1$}
+\caption{Constructing links for the abstain surrogate $L_{1/2}$ with $d=2$. The embedding is shown in bold labeled by the corresponding reports. (L) The link envelope $\Psi$ resulting from Theorem~\ref{thm:eps-thick-calibrated} using $\|\cdot\|_\infty$ and $\epsilon = 1/2$, and a possible link $\psi$ which matches eq.~\eqref{eq:abstain-link} from~\cite{ramaswamy2018consistent}.  (M) An illustration of the thickened sets from Definition~\ref{def:eps-thick-link} for two sets $U \in \U$, using $\|\cdot\|_1$ and $\epsilon = 1$. (R) The $\Psi$ and $\psi$ from Theorem~\ref{thm:eps-thick-calibrated} using $\|\cdot\|_1$ and $\epsilon = 1$.}
 \label{fig:abstain-links}
 \end{center}
 \end{figure}
@@ -689,21 +688,23 @@ Specifically, while $(L',\psi)$ is not consistent for $\elltopk$, since $L'$ is 
 We therefore turn to deriving this discrete loss $\ell'$.
 
 In Lemma~\ref{lem:top-k-optimal-corners}\jessiet{in the Appendix... remove ref for camera ready version}, we show that the set $\U = \{u \in \{0,1\}^n : \|u\|_0 \leq k\}$ is always represented among the optimizers of $L'$, meaning for all $p \in \simplex$ we have $\prop{L'}(p) \cap \U \neq \emptyset$.
-From Lemma~\ref{lem:loss-restrict}\raft{was Lemma~\ref{lem:top-k-surrogate-embeds}}, then, $L'$ must embed $L'|_\U$, which gives us $\ell':\R'\to\reals^\Y_+$ via the natural embedding from sets $\R' = \{r \subseteq [n] : |r| \leq k\}$ to their indicator vectors.
+From Lemma~\ref{lem:loss-restrict}\raft{was Lemma~\ref{lem:top-k-surrogate-embeds}}, then, $L'$ must embed $L'|_\U$, which gives us $\ell':\R'\to\reals^\Y_+$ via the natural embedding from sets $\R' = \{r \subseteq [n] : |r| \leq k\}$ to their indicator vectors:
 \begin{align}\label{eq:ell-2}
-\ell'(r)_y &= \Ind{y \not\in r} + \tfrac 1 k |r \setminus \{y\}|~.
+\ell'(r)_y &= \Ind{y \not\in r} + \tfrac 1 k |r \setminus \{y\}| = (1+\tfrac 1 k)\Ind{y \not\in r} + \tfrac 1 k (|r|-1)~.
 \end{align}
-We now see that $\ell'$ is essentially $\elltopk$ (extended to smaller sets) plus an additional cardinality term.
+We now see that $\ell'$ is essentially $\elltopk$ (extended to sets smaller than $k$) plus an additional cardinality term which rewards smaller sets.
 
 Knowledge of what loss $L'$ actually embeds greatly simplifies the task of proving inconsistency with $\elltopk$.
 Specifically, we see that $\ell'$ allows sets of cardinality strictly less than $k$, so we can look for a distribution making one of these smaller sets optimal.
-Writing the expected loss, we have $\inprod{p}{\ell'(r)} = 1 - p(r) + \tfrac 1 k (|r|-p(r)) = 1 + \tfrac 1 k |r| - (1 + \tfrac 1 k) p(r)$, where $p(r) = \sum_{i\in r} p_i$.
+Writing the expected loss, we have
+%$\inprod{p}{\ell'(r)} = 1 - p(r) + \tfrac 1 k (|r|-p(r)) = 1 + \tfrac 1 k |r| - (1 + \tfrac 1 k) p(r)$,\\
+$\inprod{p}{\ell'(r)} = (1+\tfrac 1 k)(1 - p(r)) + \tfrac 1 k (|r|-1) = 1 + \tfrac 1 k |r| - (1 + \tfrac 1 k) p(r)$, where $p(r) = \sum_{i\in r} p_i$.
 % It is now easy to see that the optimal $r$ for any fixed cardinality $|r|=c$ is the $c$ most likely labels.
 So let us ask when it is better to drop an element $i$ from $r$:
 % If $i$ is the index of the $c$th most likely label (so $p_i = p_{[c]}$)
-we have $\inprod{p}{\ell'(r)-\ell'(r\setminus\{i\})} = \tfrac 1 k - p_i$, meaning we will drop elements from $r$ until they all have weight at least $\tfrac 1 k$.
+we have $\inprod{p}{\ell'(r)-\ell'(r\setminus\{i\})} = \tfrac 1 k - (1+\tfrac 1 k)p_i$, meaning we will drop elements from $r$ until they all have weight at least $\tfrac 1 {k+1}$.
 In particular, for distributions close to uniform, $r=\emptyset$ is optimal, already giving us inconsistency\raft{If space (nope) we should spell this out like Jessie did: however ties are broken at $u=0$, pick a distribution with bumps going against the ties, and $u=0$ is still optimal.}.
-More generally, as $k < n$, the set $P = \{p\in\simplex : \max_{r\in\R'} p(r) < n/k\}$ is full-dimensional and guarantees that at least one of the top $k$ labels has probability $< \tfrac 1 k$.
+More generally, as $k < n$, the set $P = \{p\in\simplex : \max_{r\in\R'} p(r) < k/(k+1)\}$ is full-dimensional and guarantees that at least one of the top $k$ labels has probability strictly less than $\tfrac 1 {k+1}$.
 
 % We now focus on the case where $k=1$; the top-$k$ loss reduces to 0-1 loss in this case.
 % To show a set of distributions where $\prop{\ell'}(p) \neq \prop{\elltopk}(p)$, we claim that $\vec{0}~\in~\prop{\ell'} \implies \risk{\ell'}(p) = 1$ for any $p$ with $\max_y p_y \leq 1/2$.
@@ -749,7 +750,7 @@ Simplifying eq.~\eqref{eq:lovasz-hinge}, however, we have
   \label{eq:lovasz-hinge-abstain}
   L^g(u)_y = \max\bigl\{(1-u_1y_1)_+,(1-u_2y_2)_+\bigr\} = \max\bigl\{1-u_1y_1,1-u_2y_2,0\bigr\}~,
 \end{equation}
-which is exactly the abstain surrogate~\eqref{eq:abstain-surrogate}.
+which is exactly the abstain surrogate~\eqref{eq:abstain-surrogate} for $d=2$.
 We immediately conclude that $L^g$ cannot be consistent with $\ell^g$, as the origin will be the unique optimal report for $L^g$ under distributions with $p_y < 0.5$ for all $y$, and one can simply take a distribution which disagrees with the way ties are broken in $\psi$.
 For example, if we take $\sgn(0) = 1$, then under $p((1,1)) = p((1,-1)) = p((-1,1)) = 0.2$ and $p((-1,-1)) = 0.4$, we have $\{0\} = \argmin_{u\in\reals^2} p\cdot L^g(u)$, yet $\psi(0) = (1,1) \notin \{(-1,-1)\} = \argmin_{r\in\R} p\cdot\ell^g(r)$.
 
@@ -773,10 +774,10 @@ These results cast doubt on the effectiveness of the Lov\'asz hinge in practice.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion and Future Directions} \label{sec:conclusion}
 % \paragraph{Summary.}
-This paper formalizes an intuitive way to design convex surrogate losses for classification-like problems -- by embedding the reports into $\reals^d$.
+This paper formalizes an intuitive way to design convex surrogate losses for classification-like problems---by embedding the reports into $\reals^d$.
 We establish a close relationship between embedding and polyhedral surrogates, showing both that every polyhedral loss embeds a discrete loss (Theorem~\ref{thm:poly-embeds-discrete}) and that every discrete loss is embedded by some polyhedral loss (Theorem~\ref{thm:discrete-loss-poly-embeddable}).
-We then construct a calibrated link function from a surrogate to the discrete loss it embeds, showing the consistency of our surrogates.
-We conclude with examples of how the embedding framework presented can be applied to understand surrogates given in the literature, including those for the abstain loss, top-$k$ loss, and Lov\'asz Hinge.\bo{commented stuff for space}
+We then construct a calibrated link function from any polyhedral loss to the discrete loss it embeds, giving consistency for all such losses.
+We conclude with examples of how the embedding framework presented can be applied to understand existing surrogates in the literature, including those for the abstain loss, top-$k$ loss, and Lov\'asz hinge.\bo{commented stuff for space}
 %We use our link construction to understand calibrated links for abstain different than the one given by~\citet{ramaswamy2018consistent}.
 %While one top-$k$ surrogate has already been shown to be inconsistent, we show the similar discrete loss that the surrogate embeds.
 %Finally, we use our framework to prove the inconsistency of the Lov\'asz Hinge.
@@ -802,7 +803,7 @@ We conclude with examples of how the embedding framework presented can be applie
 % \paragraph{Directions.}
 One open question of particular interest involves the dimension of the input to a surrogate; given a discrete loss, can we construct the surrogate that embeds it \emph{of minimal dimension}?
 Often, we na\"ively embed the reports into an $n$-dimensional space, so the dimensionality of the problem increases with the number of possible labels.
-As the dimension of the optimization problem is a function of this \emph{embedding dimension},  we would like to understand when it can be reduced.
+As the dimension of the optimization problem is a function of this \emph{embedding dimension}, a promising direction is to leverage tools from elicitation complexity~\cite{lambert2008eliciting,frongillo2015elicitation} and convex calibration dimension~\cite{ramaswamy2016convex} to understand when it can be reduced.
 %There are several direct open questions involving the dimension of the surrogate loss.
 %It would be interesting and perhaps practically useful to develop further techniques for upper bounds: automatically constructing embeddings in $\reals^d$ and associated polyhedral losses from a given property, with $d$ as small as possible.
 %Another direction is additional lower bound techniques, or further development of our necessary conditions.
