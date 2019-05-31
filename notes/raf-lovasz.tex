@@ -1,4 +1,7 @@
-\documentclass{article}
+\documentclass[10pt]{article}
+\usepackage[a5paper,lmargin=10pt,rmargin=1in]{geometry}
+\usepackage[numbers]{natbib}
+
 \usepackage[utf8]{inputenc}
 \usepackage{mathtools, amsthm, amsmath, amssymb, graphicx, verbatim}
 %\usepackage[thmmarks, thref, amsthm]{ntheorem}
@@ -30,7 +33,7 @@
 \newcommand{\posreals}{\reals_{>0}}%{\reals_{++}}
 \newcommand{\dom}{\mathrm{dom}}
 
-\newcommand{\prop}[1]{\Gamma[#1]}
+\newcommand{\prop}[1]{\mathrm{prop}[#1]}
 \newcommand{\eliccts}{\mathrm{elic}_\mathrm{cts}}
 \newcommand{\eliccvx}{\mathrm{elic}_\mathrm{cvx}}
 \newcommand{\elicpoly}{\mathrm{elic}_\mathrm{pcvx}}
@@ -50,9 +53,12 @@
 \newcommand{\F}{\mathcal{F}}
 \newcommand{\I}{\mathcal{I}}
 \newcommand{\R}{\mathcal{R}}
+\newcommand{\U}{\mathcal{U}}
 \newcommand{\X}{\mathcal{X}}
 \newcommand{\Y}{\mathcal{Y}}
 
+
+\newcommand{\risk}[1]{\underline{#1}}
 \newcommand{\inprod}[2]{\langle #1, #2 \rangle}%\mathrm{int}(#1)}
 \newcommand{\inter}[1]{\mathring{#1}}%\mathrm{int}(#1)}
 %\newcommand{\expectedv}[3]{\overline{#1}(#2,#3)}
@@ -79,96 +85,264 @@
 
 \begin{document}
 
+\raf{Note for camera-ready and/or journal version: we should at some point beef up the restriction lemma ($L|_\R$) so that it says $L$ embeds $L|_\R$.  To do this, we'll need to relax our definition of discrete loss to allow for redundant reports.  Maybe say a loss is \emph{minimal} if there are no such reports, and use this in the few results that rely on non-redundancy (like the matching Bayes risks result).  Then for sufficient conditions we can talk about embedding without worrying about showing non-redundancy, which seems to be most useful in practice.}
 
-Let $N = \{1,\ldots,k\}$, $\Y = 2^N$, $U = \{-1,0,1\}^k$.
+\section{Lov\'asz Hinge}
 
-For $S\subseteq N$, let $\ones_S \in \{0,1\}^k$ with $(\ones_S)_i = 1 \iff i\in S$.
-Let $\chi_S \in \{-1,1\}^k$ with $\chi_S = 2\ones_S - \ones$.
+The Lov\'asz hinge, introduced by~\citet{yu2018lovasz}, is a (convex) polyhedral surrogate for discrete losses described in terms of a submodular function, based on the well-known Lov\'asz extension.
+We will study this surrogate using our framework, first identifying the loss it embeds, and then leveraging this loss to find a proof of inconsistency.
+As defining the Lov\'asz hinge takes care, we begin with definitions.
 
-We depart from our usual notation for clarity, so we have discrete loss $\ell : \Y \times \Y \to \reals$ and surrogate $L : \reals^k \times \Y \to \reals$.
+\subsection{Notation and Definitions}
+Let $N = \{1,\ldots,k\}$ be the index set for our binary predictions, with outcomes $\Y = 2^N$ corresponding to the set of labels which are assigned $+1$.
+To map to the usual labels $\{-1,1\}$, for any $S\subseteq N$, we let $\ones_S \in \{0,1\}^k$ with $(\ones_S)_i = 1 \iff i\in S$ be the 0-1 indicator for $S$, and we let $\chi_S \in \{-1,1\}^k$ with $\chi_S = 2\ones_S - \ones$ be the $\pm 1$ indicator.
+For clarity of exposition, we will depart from our usual notation for loss functions, writing a discrete loss $\ell : \R \times \Y \to \reals$ and surrogate $L : \reals^k \times \Y \to \reals$, and writing expected loss $L(u;p)$.
+The link will be the sign function $\psi = \sgn$, with ties broken arbitrarily.
 
-Given a set-valued function $f$, its \emph{Lov\'asz extension} $F:\reals^k\to\reals$ is given by
-$F(u) = \sum_{i=1}^k u_{j_i} (f(\{j_1,\ldots,j_i\}) - f(\{j_1,\ldots,j_{i-1}\})$ where for each $u$ the indices $j$ are 
+A set function $f:2^N\to\reals$ is \emph{submodular} if for all $S,T\subseteq N$ we have $f(S) + f(T) \geq f(S\cup T) + f(S\cap T)$.
+A function is \emph{supermodular} if the inequality is reversed, and \emph{modular} if it holds with equality, for all $S,T\subseteq N$.
+The function $f$ is \emph{increasing} if we have $f(S\cup T) \geq f(S)$, again for all $S,T\subseteq N$.
 
-Again given $f$ the \emph{Lov\'asz hinge} is the loss $L:\reals^k\times\Y\to\reals$ given by $L(u,S) = F((\ones - u \odot \chi_S)_+)$, where $v (u \odot y)_i = u_iy_i$ is the Hadamard (element-wise) product and $((u)_+)_i = \max(u_i,0)$.
-\raf{Actually, this is just the definition for the increasing $f$ case -- still need to work out the other one, but I think it should work the same.}
+We are interested in convex surrogates for the following discrete loss $\ell:\R\times\Y\to\reals$, where $\R=\Y=2^N$,
+\begin{equation}
+  \label{eq:discrete-set-loss}
+  \ell^f(A,S) = f(A\triangle S)~,
+\end{equation}
+where $\triangle$ is the symmetric difference operator, defined by $S\triangle T = (S\setminus T) \cup (T\setminus S)$.
+Note: throughout we assume $\triangle$ has operator precedence over $\setminus$, $\cap$, and $\cup$.
+In words, $\ell^f$ measures the joint error of our $k$ predictions by computing the set of mispredictions (elements in $A$ but not $S$ and vice versa) and calling the set function $f$.
+
+A natural approach to deriving convex surrogates in the case of submodular functions $f$ is the Lov\'asz extension, which is known to be convex when $f$ if (and only if) submodular.
+Given any set-valued function $f:2^N\to\reals$, its \emph{Lov\'asz extension} $F:\reals^k\to\reals$ is given by
+\begin{equation}\label{eq:lovasz-ext}
+  F(u) = \E[f(\{i:u_i \geq \Theta\})]~,
+% F(u) = \sum_{i=1}^k u_{j_i} (f(\{j_1,\ldots,j_i\}) - f(\{j_1,\ldots,j_{i-1}\})~,
+\end{equation}
+where $\Theta$ is a uniformly distributed random variable on $[0,1]$.
+There are several equivalent formulations for the Lov\'asz extension; see~\citet[Definition 3.1]{bach2013learning}.
+
+Given set function $f$ with Lov\'asz extension $F$, \citet{yu2018lovasz} define the \emph{Lov\'asz hinge} as the loss $L^f:\reals^k\times\Y\to\reals$ given by
+\begin{equation}
+  \label{eq:lovasz-hinge}
+  L^f(u,S) =
+  \begin{cases}
+    F\bigl((\ones - u \odot \chi_S)_+\bigr) & \text{if $f$ is increasing}
+    \\
+    \bigl(F(\ones - u \odot \chi_S)\bigr)_+ & \text{otherwise}
+  \end{cases}~,
+\end{equation}
+where $v (u \odot y)_i = u_iy_i$ is the Hadamard (element-wise) product and $((u)_+)_i = \max(u_i,0)$.
+In what follows, we focus on the increasing case, which is the most natural: when you make an additional error, your loss cannot decrease.
+
+\subsection{What does $L$ embed?}
+
+From well-known facts about the Lov\'asz extension (see Lemma~\ref{lem:lovasz-trim} below), $L^f$ is certainly polyhedral, and thus by our framework we know it must embed a discrete loss $\hat\ell^f$, which may or may not be the same as $\ell^f$.
+As with the top-$k$ example, we begin our analysis by calculating $\hat\ell^f$.
+
+Let $\Gamma^f = \prop{L^f}$ and $\U = \{-1,0,1\}^k$.
+Note that, for disjoint sets $A,B \subseteq N$, we have $\chi_A + \ones_B \in \U$, which at coordinate $i$ evaluates to $1$ for $i\in A$, $0$ for $i\in B$, and $-1$ otherwise.
+Moreover, every point in $\U$ can be uniquely described in this way.
+Finally, observe $\chi_A + \ones_B = \chi_A \odot \ones_{N\setminus B}$.
+
+We will show that for every distribution $p$, an element of $\U$ is always represented in the minimizers of $L^f$, i.e., $\Gamma^f(p)$.
+First, we show that we may restrict to the filled hypercube $[-1,1]^k$ without loss of generality.
 
 \begin{lemma}
-  \label{lem:bar-f}
-  For any set function $f$, define $\bar f := 2^{-k} \sum_{S\subseteq N} f(S)$.
-  Let $f$ be submodular and normalized.
-  Then $\bar f \geq f(N)/2$, and $f$ is modular if and only if $\bar f = f(N)/2$.
+  \label{lem:lovasz-cube}
+  Let $f:2^N\to\reals_+$ be increasing and normalized.
+  Then for all $p\in\simplex$, $\Gamma(p) \cap [-1,1]^k \neq \emptyset$.
 \end{lemma}
+\begin{proof}
+  Let $u\in\Gamma^f(p)$ such that $|u_i|>1$ for some $i\in [k]$, and furthermore suppose $|u_i|$ is the smallest value among all such coordinates, i.e., $|u_i| = \min\{|u_j| : |u_j| > 1\}$.
+  We show that $u'\in\Gamma^f(p)$ where $u'_j = u_j$ for $j\neq i$ and $u'_i = \sgn(u_i)$ so that $|u'_i|=1$; the result then follows by iterating this argument until there are no entries with $|u_i|>1$.
+  In fact, we will show the stronger statement that for all $S\in\Y$, $L^f(u',S) \leq L^f(u,S)$.
+  Let $w = \ones - u\odot \chi_S$ and $w' = \ones - u'\odot \chi_S$, and note that $L^f(u,S) = F(w_+)$ and $L^f(u',S) = F(w'_+)$.
+  
+  First, consider the case that $(\chi_S)_iu_i > 0$; that is, if $u_i > 0$ and $i\in S$, or $u_i < 0$ and $i\notin S$.
+  Here $1-(\chi_S)_iu_i = 1-|u_i| < 0$, so $w_i < 0$.
+  For $u'$, we similarly have $w'_i = 1-|u'_i| = 0$.
+  As $u$ and $u'$ differ only at index $i$, the same holds for $w$ and $w'$; we thus have $w_+ = w'_+$, so the loss remains unchanged.
+  
+  In the other case, $(\chi_S)_iu_i < 0$, we have $w_i = 1+|u_i| > 2$ and $w'_i = 1+|u'_i| = 2$, and again the other entries are identical.
+  In particular, $w'_i \leq w_i$.
+  Moreover, we claim that there is other value in between, i.e.,\ there is no index $j\neq i$ such that $w'_i < w_j < w_i$.
+  This follows from our assumption on $i$: if we had such a $j$, then we must have $2 < 1 - (\chi_S)_ju_j < 1 + |u_i|$, which can only occur when $\sgn(u_j) \neq \chi_S$, and thus $-(\chi_S)_ju_j = |u_j|$; we conclude $1 < |u_j| < |u_i|$, a contradiction.
+  Thus, for all $j\neq i$, we have either $w_j \leq w'_i \leq w_i$ or $w'_i \leq w_i \leq w_j$.
+  In light of $w'_j = w_j$, this is equivalent to either (a) $w_j \leq w_i$ and $w'_j \leq w'_i$, or (b) $w_i \leq w_j$ and $w'_i \leq w'_j$.
+  Thus, there is a permutation $\pi$ which orders the elements of both $w$ and $w'$ simultaneously: for all $j,j'\in [k]$, $j<j'$, we have both $w_{\pi_j} \geq w_{\pi_{j'}}$ and $w'_{\pi_j} \geq w'_{\pi_{j'}}$.
+  By another common representation of the Lov\'asz extension~\cite[Equation 3.1]{bach2013learning}, we thus have $F(w_+) - F(w'_+) = ((w_+)_i - (w'_+)_i)(f(T\cup\{i\})-f(T)) = (|u_i|-1)(f(T\cup\{i\})-f(T)) > 0$,
+  where $T = \{\pi_1,\ldots,\pi_j\}$ such that $\pi_{j+1} = i$, and we have used the fact that $f$ is increasing and $|u_i|>1$.
+\end{proof}
+
+From Lemma~\ref{lem:lovasz-cube}, we may now simplify the loss.
+When $u\in[-1,1]^k$, we simply have $L^f(u,S) = F(\ones - u \odot \chi_S)$, as the coordinates of the input to $F$ are nonnegative.
+We now further restrict to $\U$.
 
 \begin{lemma}
   \label{lem:lovasz-trim}
-  Let $\Gamma = \prop{L}$.
-  Then $\trim(\Gamma) \subseteq \{\Gamma_u : u \in U\}$.
+  Let $\Gamma = \prop{L^f}$.
+  Then for all $p\in\simplex$, $\Gamma(p) \cap \U \neq \emptyset$.
 \end{lemma}
 \begin{proof}
-  \raf{Because $F$ is linear on the simplices... so every face has one of these points as a vertex.}
+  We will construct polytopes $P^A_\pi \subseteq [-1,1]^k$ for every set $A\subseteq N$ and permutation $\pi \in N^N$, satisfying three conditions: (i) these polytopes cover the hypercube, meaning $\cup_{A,\pi} P^A_\pi = [-1,1]^k$, (ii) $P^A_\pi$ is the convex hull of points in $\U$, and (iii) for all $S\subseteq N$, $L(\cdot,S)$ is linear on $P^A_\pi$.
+  The result will then follow, as $L(\cdot;p)$ will be also linear on each $P^A_\pi$, and thus minimized at a vertex.
+
+  To begin, let us recall the polyhedra on which the Lov\'asz extension is linear; for any permutation $\pi$, define $P_\pi = \{u\in\reals^k : u_{\pi_1} \geq \cdots \geq u_{\pi_k}\}$.
+  It is clear from the definition that $F$ is linear on $P_\pi$; see also Equation 3.1, and ``Linear interpolation on simplices'' (pg.\ 19) in \citet{bach2013learning}.
+  We will use these polyhedra to identify the regions where $L(\cdot,S)$ is linear simultaneously for all outcomes $S\in\Y$.
+  For any $A\subseteq N$ and permutation $\pi$, let
+  \begin{equation}
+    \label{eq:poly-pi}
+    P^A_\pi = \{u\in[-1,1]^k : u \odot \chi_A \in P_\pi \cap \reals^k_+\}~.
+  \end{equation}
+  That is, $P^A_\pi$ contains all points $u$ such that $u \odot \chi_A$ is nonnegative (meaning $\sgn(u)$ matches $\chi_A$, breaking ties at $0$ favorably) and such that the coordinates of $u \odot \chi_A$ are in increasing order according to $\pi$.
+  
+  Condition (i) follows immediately: for any $u\in[-1,1]^k$, let $A = \{i:u_i\geq 0\}$, and $\pi$ be any permutation ordering the elements of $u \odot \chi_A$.
+  For condition (ii), note that for any $u\in P^A_\pi$, as $u\odot \chi_A \in P_\pi$ we may write
+  \begin{equation}
+    \label{eq:udot-conv}
+    u \odot \chi_A = \sum_{i=1}^{k-1} \left( u_{\pi_i} (\chi_A)_{\pi_i} - u_{\pi_{i+1}} (\chi_A)_{\pi_{i+1}} \right) \ones_{\{\pi_1,\ldots,\pi_i\}} + u_{\pi_k} (\chi_A)_{\pi_k} \ones
+    % + (1-u_{\pi_1}(\chi_A)_{\pi_1} \cdot 0
+    ~,
+  \end{equation}
+  which is a convex combination (again, see \citet[pg.\ 20]{bach2013learning}).
+  We simply apply the involution $\odot\chi_A$ again, to obtain
+  \begin{equation}
+    \label{eq:udot-conv}
+    u = \sum_{i=1}^{k-1} \left( u_{\pi_i} (\chi_A)_{\pi_i} - u_{\pi_{i+1}} (\chi_A)_{\pi_{i+1}} \right) \ones_{\{\pi_1,\ldots,\pi_i\}}\odot \chi_A + u_{\pi_k} (\chi_A)_{\pi_k} \chi_A
+    % + (1-u_{\pi_1}(\chi_A)_{\pi_1} \cdot 0
+    ~,
+  \end{equation}
+  and condition (ii) follows as $\ones_B \cdot \chi_A \in \U$ for all sets $B\subseteq N$.
+
+  Finally, for condition (iii), fix a subset $A\subseteq N$ and permutation $\pi$.
+  For each outcome $S\subseteq N$, we will construct an alternate permutation $\pi^S$ such that for all $u\in P^A_\pi$ we have $\ones - u\odot\chi_S \in P_{\pi^S}$.
+  As $F$ is linear on $P_{\pi'}$ for all permutations $\pi'$, we will conclude that for any fixed subset $S$ the loss $L(u,S) = F(\ones - u\odot\chi_S)$ will be linear in $u$ on $P^A_\pi$.
+
+  To construct $\pi^S$, we ``shatter'' the permutation $\pi$ into two pieces, depending on whether an index is in $A\triangle S$ or not.
+  In particular, note that if $i\in A\triangle S$, then for all $u\in P^A_\pi$ we have $u_i(\chi_A)_i \geq 0$ and $(\chi_A)_i = -(\chi_S)_i$, so $(\ones - u\odot\chi_S)_i = 1 - u_i(\chi_S)_i = 1 + u_i(\chi_A)_i \geq 1$.
+  Similarly, when $i\notin A\triangle S$, then $(\chi_A)_i = (\chi_S)_i$, so $(\ones - u\odot\chi_S)_i = 1 - u_i(\chi_S)_i = 1 - u_i(\chi_A)_i \leq 1$.
+  As $\pi$ orders the elements $u_i(\chi_S)_i$ in decreasing order, we see that the following permutation $\pi^S$ will order the elements of $\ones - u\odot\chi_S$ in decreasing order: order the elements in $A\triangle S$ according to $\pi$, followed be the remaining elements according to the reverse of $\pi$.
+  As the definition of $\pi^S$ is independent of $u$, we see that $u\in P^A_\pi \implies \ones - u\odot\chi_S \in P_{\pi^S}$, as desired.
 \end{proof}
+
+We can now see that $L^f$ embeds the loss given by $L^f$ restricted to $\U$, as $\U$ is a finite set.
+In fact, we can write this loss entirely in terms of $f$ itself.
 
 \begin{lemma}
   \label{lem:lovasz-u}
-  Let $u\in U$, so that $u = \ones_A - \ones_B$ where $A\cap B = \emptyset$.
-  Let $C = N \setminus (A\cup B)$.
-  Then $L(u,S) = f((A\triangle S)\setminus C) + f((A\triangle S)\cup C)$.
+  Let $\hat\ell^f:\hat\R\times\Y\to\reals_+$, where $\hat\R = \{(A,B) \in 2^N \times 2^N: A\cap B=\emptyset\}$, be given by
+  \begin{equation}
+    \label{eq:lovasz-embeds}
+    \hat\ell^f((A,B),S) = L^f(\chi_A + \ones_B,S) = f(A\triangle S\setminus B) + f(A\triangle S\cup B)~.
+  \end{equation}
+  Then the Lov\'asz hinge $L^f$ embeds $\hat\ell^f$.
 \end{lemma}
 \begin{proof}
-  \raf{FB = Francis Bach's notes (URL commented out)}% \url{https://arxiv.org/pdf/1111.6453.pdf}
-  We have $L(u,S) = F((\ones - u\odot\chi_S)_+) = F(\ones - u\odot\chi_S)$ as $u\in U$.
-  Examining the cases for $x = \ones - u\odot\chi_S$, we have $x_i = 1$ if $i \in C$ (since then $u_i = 0$), $x_i = 2$ if $i \in S \triangle A \setminus C$, and $x_i = 0$ otherwise.
-%  (Or more directly, $x = \ones - (\ones_A - \ones_B)\odot(2\ones_S - \ones) = \ones - 2\ones_A\odot\ones_S + \ones_A + 2\ones_B\odot\ones_S - \ones_B$...
-  Thus, we have $x = 2\ones_{S \triangle A \setminus C} + \ones_C$.
-  Appealing to~\raf{FB Prop 3.1(h)}, we have the result.
+  As observed above, the set $\U$ is in bijection with $\hat \R$, using the transformation $u = \chi_A + \ones_B$.
+  As also observed above, we may write $u = \chi_A \odot \ones_{N\setminus B}$ as well.
+  Combining Lemma~\ref{lem:lovasz-trim} with \raf{RESTRICTION LEMMA}, we see that $L^f$ embeds $L^f|_\U$.
+  It thus only remains to verify the form~\eqref{eq:lovasz-embeds}.
+  We have $L^f(u,S) = F(x)$ where $x = \ones - u\odot\chi_S = \ones - \ones_{N\setminus B} \odot \chi_A \odot \chi_S = \ones + \ones_{N\setminus B} \odot \chi_{A\triangle S} = \ones_{B} + 2\ones_{A\triangle S\setminus B}$.
+  As $(A\triangle S \setminus B) \cup B = A\triangle S \cup B$, the result follows from~\cite[Prop 3.1(h)]{bach2013learning}.
 \end{proof}
 
-Let $\bar p$ be the uniform distribution on $\Y$.
+From the form~\eqref{eq:lovasz-embeds}, we see that $\hat\ell^f$ matches $2\ell$ when $B=\emptyset$, just as hinge loss embeds twice 0-1 loss.
+When $B$ is nonempty, it acts as an ``abstain set'', guaranteeing some loss in the second term, but removing errors in the first term.
+
+\subsection{Inconsistency}
+
+In light of the previous results, we can see that to show inconsistency we may focus on reports $(A,B)$ with $B\neq\emptyset$.
+Intuitively, if such a report is ever optimal, then $L^f$ has a ``blind spot'' with respect to the indices in $B$, and we can leverage this to ``fool'' $L^f$.
+In particular, we will focus on the uniform distribution $\bar p$ on $\Y$, and perturb it slightly depending on $B$ to find an optimal point $u\in\U$ which maps to a suboptimal report.
+In fact, we will show that one can always find such a point violating calibration, unless $f$ is modular.
+
+Given our focus on the uniform distribution, the following definition will be useful: for any set function $f$, let $\bar f := \E_{S\sim \bar p}[f(S)] = 2^{-k} \sum_{S\subseteq N} f(S)$.
+The next two lemmas relate $\bar f$ and $f(N)$ to expected loss and modularity.
 
 \begin{lemma}
   \label{lem:2-bar-f}
-  For all $u\in U$, $L(u;\bar p) \geq f(N)$.
-  For all $u\in \{-1,1\}^k$, $L(u;\bar p) = 2\bar f$.
+  For all $(A,B) \in \hat\R$, $\hat\ell^f((A,B);\bar p) \geq f(N)$.
+  For all $A\subseteq N$, $\hat\ell^f((A,\emptyset);\bar p) = 2\bar f$.
 \end{lemma}
 \begin{proof}
-  Let $u\in U$, and let $A,C\subseteq N$ be as in Lemma~\ref{lem:lovasz-u}.
-  Then letting $\overline C := N\setminus C$ for short, we have
+  Letting $\overline B := N\setminus B$ for short, we have
   \begin{align*}
-    L(u;\bar p)
-    &= 2^{-k} \sum_{S\subseteq N} f((A\triangle S)\setminus C) + f((A\triangle S)\cup C)
+    \hat\ell^f((A,B);\bar p)
+    &= 2^{-k} \sum_{S\subseteq N} f(A\triangle S\setminus B) + f(A\triangle S\cup B)
     \\
-    &= 2^{-(k-|C|)} \sum_{T\subseteq N\setminus C} f(T) + f(T\cup C)
+    &= 2^{-|\overline B|} \sum_{T\subseteq \overline B} f(T) + f(T\cup B)
     \\
-    &= \frac 1 2 \left( 2^{-(k-|C|)} \sum_{T\subseteq N\setminus C} f(T) + f((N\setminus C)\setminus T) + f(T\cup C) + f(((N\setminus C)\setminus T)\cup C)\right)
+    &= \frac 1 2 \; 2^{-|\overline B|} \sum_{T\subseteq \overline B} f(T) + f(\overline B\setminus T) + f(T\cup B) + f((\overline B\setminus T)\cup B)
     \\
-    &\geq \frac 1 2 \left( f(N\setminus C) + f(\emptyset) + f(N) + f(C) \right)
+    &\geq \frac 1 2 \left( f(\overline B) + f(\emptyset) + f(N) + f(B) \right)
     \\
-    &\geq \frac 1 2 \left( f(N) + f(N) \right)~,
+    &\geq \frac 1 2 \left( f(N) + f(N) \right) = f(N)~,
   \end{align*}
   where we use submodularity in both inequalities.
+  The second statement follows from the second equality above after setting $B=\emptyset$, as then $\overline B = N$ and thus $T$ ranges over all of $2^N$.
 \end{proof}
 
+\begin{lemma}
+  \label{lem:bar-f}
+  Let $f$ be submodular and normalized.
+  Then $\bar f \geq f(N)/2$, and $f$ is modular if and only if $\bar f = f(N)/2$.
+\end{lemma}
+\begin{proof}
+  The inequality follows from Lemma~\ref{lem:2-bar-f} with $B=\emptyset$.
+  Next, note that if $f$ modular we trivially have $\bar f = f(N)/2$.
+  If $f$ is submodular but not modular, we must have some $S\subseteq N$ and $i\in S$ such that $f(S) - f(S\setminus\{i\}) < f(\{i\})$.
+  \raft{I have a proof of this; will fill in later}
+  By submodularity, we conclude that $f(N) - f(N\setminus\{i\}) < f(\{i\})$ as well; rearranging, $f(\{i\}) + f(N\setminus\{i\}) > f(N) = f(N) + f(\emptyset)$.
+  Again examining the proof of Lemma~\ref{lem:2-bar-f}, we see that the first inequality must be strict, as we have one such $T\subseteq N$, namely $T=\{i\}$, for which the inequality in submodularity is strict.
+\end{proof}
+
+
 \begin{theorem}
-  Let $f$ be submodular, normalized, increasing, and satisfy $\{\emptyset\} = \argmin_{S\subseteq N} f(S)$.
-  Then the Lov\'asz hinge for $f$ is consistent if and only if $f$ is modular.
-  \raft{I am only dealing with the increasing case for now.  I'm quite confident the other case works too.}
+  Let $f$ be submodular, normalized, and increasing.
+  Then $(L^f,\sgn)$ is consistent if and only if $f$ is modular.
 \end{theorem}
 \begin{proof}
-  Let $\bar p$ be the uniform distribution, and $\delta_S$ be point distribution on arbitrary $S\subseteq N$.
-  For sufficiently small $\epsilon$ \raf{FILL IN LATER}, let $p = (1-\epsilon) \bar p + \epsilon \delta_S$.
-  Then for all $u\in\{-1,1\}^k$ we have $L(u;p) = (1-\epsilon) 2 \bar f + \epsilon L(u,S) \geq (1-\epsilon)\bar f > L(0;p) = f(N)$.
-  Let $u \in \Gamma(p) \cap U$, which is nonempty by Lemma~\ref{lem:lovasz-trim}; by the above, we conclude $u\notin\{-1,1\}^k$.
-  Observe that $c = L(u;p) = \min_{u'\in\reals^k} L(u';p)$ is independent of the choice of $S$, by symmetry of $L$.
+  If $f$ is modular, then $F$ is linear, and $L^f(\cdot;p)$ is linear on $[-1,1]^k$.
+  We conclude that $L^f(\cdot;p)$ is minimized at a vertex of the hypercube, meaning $L^f$ embeds $2\ell^f$.
+  (Equivalently, there is always an optimal report $(A,\emptyset)\in\hat\R$ for $\hat\ell^f$.)
+  Calibration and consistency then follow.
+  \raft{Too informal; should flesh out}
+
+  Now suppose $f$ is submodular but not modular.
+  As $f$ is increasing, we will assume without loss of generality that $f(\{i\}) > 0$ for all $i\in N$, which is equivalent to $f(S) > 0$ for all $S\neq\emptyset$; otherwise, $f(T) = f(T\setminus\{i\})$ for all $T\subseteq N$, so discard $i$ from $N$ and continue.
+  In particular, we have $\{\emptyset\} = \argmin_{S\subseteq N} f(S)$.
+  \raft{Probably too informal}
   
-  Now let $T\subseteq N$ such that $\chi_T = \sgn(u)$, breaking ties at 0 arbitrarily.
-  If $T\neq S$, we are done, as $\{S\} = \argmin_{S'\subseteq N} \ell(S';p)$ by our assumption that $\emptyset$ minimizes $f$.
-  If $T=S$, observe that we can write $u = \ones_A - \ones_B$ where $A\cap B = \emptyset$ and $C = N \setminus (A\cup B) \neq \emptyset$.
-  Let $p' = (1-\epsilon) \bar p + \epsilon \delta_{S'}$ where $S' = S \triangle C$.
+  Define $\epsilon = \bar f / (2\bar f - f(N))$, which is strictly positive by Lemma~\ref{lem:bar-f}.
+  Let $p = (1-\epsilon) \bar p + \epsilon \delta_\emptyset$, where again $\bar p$ is the uniform distribution, and $\delta_\emptyset$ is the point distribution on $\emptyset$.
+  From Lemma~\ref{lem:2-bar-f}, for all $A\subseteq N$ we have
+  \begin{align*}
+    \hat\ell^f((A,\emptyset);p)
+    &= (1-\epsilon) 2 \bar f + \epsilon \, \hat\ell^f((A,\emptyset),\emptyset)\\
+    &= (1-\epsilon) 2 \bar f + \epsilon \, 2f(A)\\
+    &\geq (1-\epsilon)2 \bar f > f(N) = \hat\ell^f((\emptyset,N);p)~.
+  \end{align*}
+  As we have some report with strictly lower loss than all reports of the form $(A,\emptyset)$, we conclude that we must have some $(A,B) \in \prop{\hat\ell^f}(p)$ with $B\neq\emptyset$.
+  We can also see that $\prop{\ell^f}(p) = \{\emptyset\}$ by the second equality and the fact that $\{\emptyset\} = \argmin_{S\subseteq N} f(S)$.
+
+  Revisiting $L^f$, from Lemma~\ref{lem:lovasz-u} and the map between $\U$ and $\hat\R$, we have some $u\in\Gamma^f(p)$ which we can write $u = \chi_A + \ones_B$.
+  Let $T\subseteq N$ such that $\chi_T = \sgn(u)$ after breaking ties, and note that $A \subseteq T \subseteq A\cup B$.
+  If $T\neq\emptyset$, we are done, as by the above $\emptyset$ optimizes $\ell^f$, so we have violated calibration and therefore consistency.
+
+  Otherwise, $T=\emptyset$, so $A=\emptyset$ as well.
+  In this case, we will modify $p$ to put weight on $B\neq\emptyset$ instead of $\emptyset$, and will find that $u$ is still optimal for $L^f$, again violating calibration.
+  To show optimality, let $c = L^f(u;p) = \risk{L^f}(p)$, and note that by symmetry of $L^f$, for any $S\subseteq N$ we have $c = \risk{L^f}(p^S)$ as well, where $p^S = (1-\epsilon)\bar p + \epsilon \delta_S$.
+  \raft{Too informal; should flesh out}
+  In particular, this will hold for $p^B$.
   By Lemma~\ref{lem:lovasz-u}, we have
-  $L(u,S') = f((A\triangle S')\setminus C) + f((A\triangle S')\cup C) = f((A\triangle (S\triangle C))\setminus C) + f((A\triangle (S\triangle C))\cup C) = f((A\triangle S)\setminus C) + f((A\triangle S)\cup C) = L(u,S)$.
-  Thus, $L(u,p') = (1-\epsilon) L(u,\bar p) + \epsilon L(u,S') = (1-\epsilon) L(u,\bar p) + \epsilon L(u,S') = L(u,p) = c$, so $u$ is still optimal by our observation that $c$ is independent of the choice of $S$.
-  As $\chi_{S'} \neq \sgn(u)$, we are done.
+  $L^f(u,B) = f(\emptyset\triangle B\setminus B) + f(\emptyset\triangle B\cup B) = f(\overline B) + f(N) = f(\emptyset\triangle \emptyset\setminus B) + f(\emptyset\triangle \emptyset\cup B) = L^f(u,\emptyset)$.
+  Thus, $L^f(u,p^B) = (1-\epsilon) L^f(u,\bar p) + \epsilon L^f(u,B) = (1-\epsilon) L^f(u,\bar p) + \epsilon L^f(u,\emptyset) = L^f(u,p) = c$, so $u$ is still optimal.
+  As $\chi_B \neq \chi_T = \sgn(u)$, we are done.
 \end{proof}
+
+\bibliographystyle{plainnat}
+\bibliography{lovasz,../neurips-19/extra.bib}
+
 
 \end{document}
