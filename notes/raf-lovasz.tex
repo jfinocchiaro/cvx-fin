@@ -112,7 +112,7 @@ where $\triangle$ is the symmetric difference operator, defined by $S\triangle T
 Note: throughout we assume $\triangle$ has operator precedence over $\setminus$, $\cap$, and $\cup$.
 In words, $\ell^f$ measures the joint error of our $k$ predictions by computing the set of mispredictions (elements in $A$ but not $S$ and vice versa) and calling the set function $f$.
 
-A natural approach to deriving convex surrogates in the case of submodular functions $f$ is the Lov\'asz extension, which is known to be convex when $f$ if (and only if) submodular.
+A natural approach to deriving convex surrogates in the case of submodular functions $f$ is the Lov\'asz extension, which is known to be convex when $f$ if (and only if) submodular. \jessiet{Doesn't make grammatical sense to me.}
 Given any set-valued function $f:2^N\to\reals$, its \emph{Lov\'asz extension} $F:\reals^k\to\reals$ is given by
 \begin{equation}\label{eq:lovasz-ext}
   F(u) = \E[f(\{i:u_i \geq \Theta\})]~,
@@ -165,13 +165,14 @@ First, we show that we may restrict to the filled hypercube $[-1,1]^k$ without l
   
   In the other case, $(\chi_S)_iu_i < 0$, we have $w_i = 1+|u_i| > 2$ and $w'_i = 1+|u'_i| = 2$, and again the other entries are identical.
   In particular, $w'_i \leq w_i$.
-  Moreover, we claim that there is other value in between, i.e.,\ there is no index $j\neq i$ such that $w'_i < w_j < w_i$.
+  Moreover, we claim that there is \jessie{ADD: no} other value in between, i.e.,\ there is no index $j\neq i$ such that $w'_i < w_j < w_i$.
   This follows from our assumption on $i$: if we had such a $j$, then we must have $2 < 1 - (\chi_S)_ju_j < 1 + |u_i|$, which can only occur when $\sgn(u_j) \neq \chi_S$, and thus $-(\chi_S)_ju_j = |u_j|$; we conclude $1 < |u_j| < |u_i|$, a contradiction.
   Thus, for all $j\neq i$, we have either $w_j \leq w'_i \leq w_i$ or $w'_i \leq w_i \leq w_j$.
   In light of $w'_j = w_j$, this is equivalent to either (a) $w_j \leq w_i$ and $w'_j \leq w'_i$, or (b) $w_i \leq w_j$ and $w'_i \leq w'_j$.
   Thus, there is a permutation $\pi$ which orders the elements of both $w$ and $w'$ simultaneously: for all $j,j'\in [k]$, $j<j'$, we have both $w_{\pi_j} \geq w_{\pi_{j'}}$ and $w'_{\pi_j} \geq w'_{\pi_{j'}}$.
   By another common representation of the Lov\'asz extension~\cite[Equation 3.1]{bach2013learning}, we thus have $F(w_+) - F(w'_+) = ((w_+)_i - (w'_+)_i)(f(T\cup\{i\})-f(T)) = (|u_i|-1)(f(T\cup\{i\})-f(T)) > 0$,
   where $T = \{\pi_1,\ldots,\pi_j\}$ such that $\pi_{j+1} = i$, and we have used the fact that $f$ is increasing and $|u_i|>1$.
+  \jessiet{I think this should technically be a $\geq 0$, since we have no notion of ``strictly increasing'' so even if $f$ is increasing, we could still have $f(T\cup\{i\})-f(T) = 0$.  Doesn't affect the result though.}
 \end{proof}
 
 From Lemma~\ref{lem:lovasz-cube}, we may now simplify the loss.
@@ -201,10 +202,12 @@ We now further restrict to $\U$.
   For condition (ii), note that for any $u\in P^A_\pi$, as $u\odot \chi_A \in P_\pi$ we may write
   \begin{equation}
     \label{eq:udot-conv}
-    u \odot \chi_A = \sum_{i=1}^{k-1} \left( u_{\pi_i} (\chi_A)_{\pi_i} - u_{\pi_{i+1}} (\chi_A)_{\pi_{i+1}} \right) \ones_{\{\pi_1,\ldots,\pi_i\}} + u_{\pi_k} (\chi_A)_{\pi_k} \ones
+    u \odot \chi_A = \sum_{i=1}^{k-1} \left[ \left( u_{\pi_i} (\chi_A)_{\pi_i} - u_{\pi_{i+1}} (\chi_A)_{\pi_{i+1}} \right) \ones_{\{\pi_1,\ldots,\pi_i\}} \right] + u_{\pi_k} (\chi_A)_{\pi_k} \ones
     % + (1-u_{\pi_1}(\chi_A)_{\pi_1} \cdot 0
     ~,
   \end{equation}
+  \jessiet{The indicator notation is confusing to me with the ones vector also in the same context.  That's just a personal opinion though.}
+  \jessiet{Unclear to me at first what the summation is over.  Added brackets to clarify.}
   which is a convex combination (again, see \citet[pg.\ 167]{bach2013learning}).
   We simply apply the involution $\odot\chi_A$ again, to obtain
   \begin{equation}
@@ -214,6 +217,7 @@ We now further restrict to $\U$.
     ~,
   \end{equation}
   and condition (ii) follows as $\ones_B \cdot \chi_A \in \U$ for all sets $B\subseteq N$.
+  \jessiet{What is $B$ here? I might just be slow, but I missed the step where this leads to Condition (ii)}
 
   Finally, for condition (iii), fix a subset $A\subseteq N$ and permutation $\pi$.
   For each outcome $S\subseteq N$, we will construct an alternate permutation $\pi^S$ such that for all $u\in P^A_\pi$ we have $\ones - u\odot\chi_S \in P_{\pi^S}$.
@@ -222,7 +226,7 @@ We now further restrict to $\U$.
   To construct $\pi^S$, we ``shatter'' the permutation $\pi$ into two pieces, depending on whether an index is in $A\triangle S$ or not.
   In particular, note that if $i\in A\triangle S$, then for all $u\in P^A_\pi$ we have $u_i(\chi_A)_i \geq 0$ and $(\chi_A)_i = -(\chi_S)_i$, so $(\ones - u\odot\chi_S)_i = 1 - u_i(\chi_S)_i = 1 + u_i(\chi_A)_i \geq 1$.
   Similarly, when $i\notin A\triangle S$, then $(\chi_A)_i = (\chi_S)_i$, so $(\ones - u\odot\chi_S)_i = 1 - u_i(\chi_S)_i = 1 - u_i(\chi_A)_i \leq 1$.
-  As $\pi$ orders the elements $u_i(\chi_S)_i$ in decreasing order, we see that the following permutation $\pi^S$ will order the elements of $\ones - u\odot\chi_S$ in decreasing order: order the elements in $A\triangle S$ according to $\pi$, followed be the remaining elements according to the reverse of $\pi$.
+  As $\pi$ orders the elements $u_i(\chi_S)_i$ in decreasing order, we see that the following permutation $\pi^S$ will order the elements of $\ones - u\odot\chi_S$ in decreasing order: sort the elements in $A\triangle S$ according to $\pi$, followed by the remaining elements according to the reverse of $\pi$.
   As the definition of $\pi^S$ is independent of $u$, we see that $u\in P^A_\pi \implies \ones - u\odot\chi_S \in P_{\pi^S}$, as desired.
 \end{proof}
 
@@ -244,6 +248,7 @@ In fact, we can write this loss entirely in terms of $f$ itself.
   Combining Lemma~\ref{lem:lovasz-trim} with \raf{RESTRICTION LEMMA}, we see that $L^f$ embeds $L^f|_\U$.
   It thus only remains to verify the form~\eqref{eq:lovasz-embeds}.
   We have $L^f(u,S) = F(x)$ where $x = \ones - u\odot\chi_S = \ones - \ones_{N\setminus B} \odot \chi_A \odot \chi_S = \ones + \ones_{N\setminus B} \odot \chi_{A\triangle S} = \ones_{B} + 2\ones_{A\triangle S\setminus B}$.
+  \jessiet{This next line lost me.}
   As $(A\triangle S \setminus B) \cup B = A\triangle S \cup B$, the result follows from~\cite[Prop 3.1(h)]{bach2013learning}.
 \end{proof}
 
@@ -262,11 +267,11 @@ The next two lemmas relate $\bar f$ and $f(N)$ to expected loss and modularity.
 
 \begin{lemma}
   \label{lem:2-bar-f}
-  For all $(A,B) \in \hat\R$, $\hat\ell^f((A,B);\bar p) \geq f(N)$.
+  For all $(A,B) \in \hat\R$, $\hat\ell^f((A,B);\bar p) \geq f(N)$. \jessiet{Intuitively, this seems backwards?  Since $f$ is increasing.  But that might be the point.}
   For all $A\subseteq N$, $\hat\ell^f((A,\emptyset);\bar p) = 2\bar f$.
 \end{lemma}
 \begin{proof}
-  Letting $\overline B := N\setminus B$ for short, we have
+  Letting $\overline B := N\setminus B$ for short \jessiet{To make notation more consistent, maybe change $\overline B$ to $B^c$ so something else to deviate from the average notation.}, we have
   \begin{align*}
     \hat\ell^f((A,B);\bar p)
     &= 2^{-k} \sum_{S\subseteq N} f(A\triangle S\setminus B) + f(A\triangle S\cup B)
@@ -280,6 +285,7 @@ The next two lemmas relate $\bar f$ and $f(N)$ to expected loss and modularity.
     &\geq \frac 1 2 \left( f(N) + f(N) \right) = f(N)~,
   \end{align*}
   where we use submodularity in both inequalities.
+  \jessiet{I didn't see how we got from first line to second until this little reminder that $B = \emptyset$ below-- any chance we can move that above the arithmetic?}
   The second statement follows from the second equality above after setting $B=\emptyset$, as then $\overline B = N$ and thus $T$ ranges over all of $2^N$.
 \end{proof}
 
@@ -314,7 +320,7 @@ The next two lemmas relate $\bar f$ and $f(N)$ to expected loss and modularity.
   In particular, we have $\{\emptyset\} = \argmin_{S\subseteq N} f(S)$.
   \raft{Probably too informal}
   
-  Define $\epsilon = \bar f / (2\bar f - f(N))$, which is strictly positive by Lemma~\ref{lem:bar-f}.
+  Define $\epsilon = \bar f / (2\bar f - f(N))$, which is strictly positive by Lemma~\ref{lem:bar-f} \jessie{and submodularity of $f$}.
   Let $p = (1-\epsilon) \bar p + \epsilon \delta_\emptyset$, where again $\bar p$ is the uniform distribution, and $\delta_\emptyset$ is the point distribution on $\emptyset$.
   From Lemma~\ref{lem:2-bar-f}, for all $A\subseteq N$ we have
   \begin{align*}
