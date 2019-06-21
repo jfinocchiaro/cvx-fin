@@ -1,0 +1,380 @@
+\documentclass[12pt]{article}
+\PassOptionsToPackage{numbers, compress, sort}{natbib}
+\usepackage{../neurips-19/neurips_2019}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks  %[implicit=false, bookmarks=false]
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+
+\usepackage{mathtools, amsmath, amssymb, amsthm, graphicx, verbatim}
+%\usepackage[thmmarks, thref, amsthm]{ntheorem}
+\usepackage{color}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.2}
+\hypersetup{colorlinks,breaklinks,
+            linkcolor=darkblue,urlcolor=darkblue,
+            anchorcolor=darkblue,citecolor=darkblue}
+\usepackage{wrapfig}
+\usepackage{subcaption}
+\usepackage[colorinlistoftodos,textsize=tiny]{todonotes} % need xargs for below
+%\usepackage{accents}
+\usepackage{bbm}
+\usepackage{xspace}
+
+\usetikzlibrary{calc}
+\newcommand{\Comments}{1}
+\newcommand{\mynote}[2]{\ifnum\Comments=1\textcolor{#1}{#2}\fi}
+\newcommand{\mytodo}[2]{\ifnum\Comments=1%
+  \todo[linecolor=#1!80!black,backgroundcolor=#1,bordercolor=#1!80!black]{#2}\fi}
+\newcommand{\raf}[1]{\mynote{green}{[RF: #1]}}
+\newcommand{\raft}[1]{\mytodo{green!20!white}{RF: #1}}
+\newcommand{\jessie}[1]{\mynote{purple}{[JF: #1]}}
+\newcommand{\jessiet}[1]{\mytodo{purple!20!white}{JF: #1}}
+\newcommand{\bo}[1]{\mynote{blue}{[Bo: #1]}}
+\newcommand{\botodo}[1]{\mytodo{blue!20!white}{[Bo: #1]}}
+\ifnum\Comments=1               % fix margins for todonotes
+  \setlength{\marginparwidth}{1in}
+\fi
+
+
+\newcommand{\reals}{\mathbb{R}}
+\newcommand{\posreals}{\reals_{>0}}%{\reals_{++}}
+\newcommand{\dom}{\mathrm{dom}}
+\newcommand{\epi}{\text{epi}}
+\newcommand{\prop}[1]{\Gamma[#1]}
+\newcommand{\eliccts}{\mathrm{elic}_\mathrm{cts}}
+\newcommand{\eliccvx}{\mathrm{elic}_\mathrm{cvx}}
+\newcommand{\elicpoly}{\mathrm{elic}_\mathrm{pcvx}}
+\newcommand{\elicembed}{\mathrm{elic}_\mathrm{embed}}
+
+\newcommand{\cell}{\mathrm{cell}}
+
+\newcommand{\abstain}[1]{\mathrm{abstain}_{#1}}
+\newcommand{\mode}{\mathrm{mode}}
+
+\newcommand{\simplex}{\Delta_\Y}
+
+% alphabetical order, by convention
+\newcommand{\C}{\mathcal{C}}
+\newcommand{\D}{\mathcal{D}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\I}{\mathcal{I}}
+\newcommand{\R}{\mathcal{R}}
+\newcommand{\U}{\mathcal{U}}
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\Y}{\mathcal{Y}}
+
+\newcommand{\risk}[1]{\underline{#1}}
+\newcommand{\inprod}[2]{\langle #1, #2 \rangle}%\mathrm{int}(#1)}
+\newcommand{\inter}[1]{\mathring{#1}}%\mathrm{int}(#1)}
+%\newcommand{\expectedv}[3]{\overline{#1}(#2,#3)}
+\newcommand{\expectedv}[3]{\E_{Y\sim{#3}} {#1}(#2,Y)}
+\newcommand{\toto}{\rightrightarrows}
+\newcommand{\strip}{\mathrm{strip}}
+\newcommand{\trim}{\mathrm{trim}}
+\newcommand{\fplc}{finite-piecewise-linear and convex\xspace} %xspace for use in text
+\newcommand{\conv}{\mathrm{conv}}
+\newcommand{\indopp}{\bar{\mathbbm{1}}}
+\newcommand{\ones}{\mathbbm{1}}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+
+\newcommand{\Ind}[1]{\mathbf{1}\{#1\}}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\arginf}{arg\,inf}
+\DeclareMathOperator*{\sgn}{sgn}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{conjecture}{Conjecture}
+
+
+\title{Consistent Polyhedral Surrogates via Embedding}
+%\title{Convex Surrogates via Polyhedral Losses}
+\author{%
+ Jessica Finocchiaro\raf{Jessie?} \\
+ \texttt{jessica.finocchiaro@colorado.edu}\\
+ CU Boulder
+ \And
+ Rafael Frongillo\\
+ \texttt{raf@colorado.edu}\\
+ CU Boulder
+ \And
+ Bo\\
+ \texttt{bwag@colorado.edu}\\
+ MSFT
+}
+
+\begin{document}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\appendix
+
+
+\section{Top-$k$ surrogate}
+Throughout this section, consider the surrogate and discrete loss $L'(u)_y~=~\left(\frac{1}{k} \sum_{i=1}^k (u + \ones - e_y)_{[i]} - u_y \right)_+$ and $\ell'(r)_y = \Ind{y \not\in r} + \frac{1}{k} |r \setminus \{y\}|$ given in Equations~\ref{eq:L-2-surrogate} and~\ref{eq:ell-2}, respectively.
+
+\begin{lemma}\label{lem:top-k-polyhedral}
+	$L'$ is a polyhedral loss.
+\end{lemma}
+\begin{proof}
+	Observe $L'$ can be written as the pointwise max of $\binom{n}{k} +1$ terms, where the $\binom{n}{k}$ terms are selecting the $k$ elements of $u + \ones - e_y$, and the max comes from selecting the $u_i$ elements with highest weight.
+\end{proof}
+%By Lemma~\ref{lem:poly-loss-poly-risk}, we then know that $\risk{L'}$ is also polyhedral.
+
+We next show that $\U = \{u \in \{0,1\}^n : \|u\|_0 \leq k\}$ is always represented among the optimizers of $L'$. \begin{lemma}\label{lem:top-k-optimal-corners}
+	For all $p \in \simplex$ we have $\prop{L'}(p) \cap \U \neq \emptyset$.
+\end{lemma}
+\begin{proof}
+	Let us first simplify $L'$:
+	\[
+	L'(u)_y = \left( 1 - u_y + \frac{1}{k} \sum_{i=1}^k (u - e_y)_{[i]} \right)_+~.
+	\]
+	Examining this expression, observe that
+	if $u_i < u_{[k+1]}$, then $(u-e_y)_i < (u-e_y)_{[k]}$, as only one entry changes (and decreases) from one to the other.
+	Hence, if $u_i < u_{[k+1]}$, then the index $i$ will not appear in the summation for any $y$, and thus only influences the loss when $y=i$.
+	Now consider the loss of $u'$ which is the same as $u$ but with $u_i' = u_{[k+1]}$.
+	Then $L'(u')_y \leq L'(u)_y$ when $y=i$ and $L'(u')_y = L'(u)_y$ when $y\neq i$.
+	From this we see that without loss of generality, $u_{[k+1]} = \cdots = u_{[n]}$.
+	
+	Next, we show that $L'$ is invariant in the $\ones$ direction:
+	\begin{align*}
+	L'(u + \alpha \ones)_y &= \left( 1 - (u_y + \alpha) + \frac{1}{k} \sum_{i=1}^k ((u + \alpha) - e_y)_{[i]} \right)_+\\
+	&= \left( 1 - (u_y + \alpha) + \frac{1}{k}\left[ \alpha k + \sum_{i=1}^k (u - e_y)_{[i]} \right] \right)_+\\
+	&= \left( 1 -u_y + \frac{1}{k}\left[ \sum_{i=1}^k (u - e_y)_{[i]} \right] \right)_+\\
+	&= L'(u)_y~.
+	\end{align*}
+	Thus, without loss of generality, we now have $u_{[k+1]} = \cdots = u_{[n]} = 0$.
+	
+	Let $u_{[1..j]} := \sum_{i=1}^j u_{[i]}$.
+	We now claim that for all $y \in \Y$, the minimum of $L(u)_y$ is achieved by some $u \in [0,1]^n$.
+	\raf{Only hole left is the following line.  I think it might not be true.} \jessie{It's not.  But see the next 4 pages for attempts to prove the previous claim.}
+	This follows from the observation that if $u_i < 0$, the the loss only decreases by reporting $u'$ which is equal to $u$ but with $u'_i = 0$, by Lemma~\ref{lem:top-k-optimal-hypercube}.
+	For $u\in[0,1]^n$, the argument to $(\cdot)_+$ is nonnegative, so we can rewrite the expected loss of $L'$ as
+	\begin{align*}
+	\inprod{p}{L'(u)} &= 1 - \inprod{p}{u} + \frac{1}{k} \left( \sum_{i=1}^k (1 - p_{[i]}) u_{[i]} \right) = 1 + \inprod{\tfrac 1 k \ones - (1+\tfrac 1 k)p}{u}~.
+	\end{align*}
+	As a linear objective over the hypercube, $\inprod{p}{L'}$ must be optimal on some corner of the hypercube, so we conclude $u_{[1]}, u_{[2]}, \ldots, u_{[k]} \in \{0,1\}$.
+	
+	In particular, for all $p \in \simplex$, there is a report $u \in \{0,1\}^n$ optimizing $L'$; since we can take $\|u\|_0 \leq k$ by the above observation that $u_{[k+1]} = u_{[k+2]} = \ldots = u_{[n]} = 0$, some $u \in \U$ must be optimal as well.
+\end{proof}
+
+\raf{Cut final lemma for now}
+% \begin{lemma}\label{lem:top-k-surrogate-embeds}
+% $L':\reals^n \to \reals^\Y_+$ embeds $\ell':\R \to \reals^\Y_+$.
+% \end{lemma}
+% \begin{proof}
+%   We can verify $\ell'(r) = L'(\varphi(r))$ for all $r \subseteq [n]$ and $\varphi(r)$ being its conversion from a set to binary vector, so $\varphi(\R) = \{ u \in \{0,1\}^n : \|u\|_1 \leq k \}$.
+%   Moreover, by Lemma~\ref{lem:top-k-optimal-corners} and the above equality, respectively, we know that $\inf_{u \in \reals^n} \inprod{p}{L'(u)} = \min_{u \in \varphi(\R)} \inprod{p}{L'(u)} = \min_{r \in \R}\inprod{p}{\ell'(r)}$ for all $p \in \simplex$, and so we conclude that $L'$ embeds $\ell'$.
+% \end{proof}
+
+
+%\hrule
+%This commented out section has a bunch of errors.
+%\begin{lemma}
+%	For all $p \in \simplex$, $\prop{L'} \cap [0,1]^n \neq \emptyset$.
+%\end{lemma}
+%\begin{proof}
+%	\jessie{Idea here: Fix $u_{[1]} = 1$ and then show that increasing $u_{[k+1]} \to 0$ strictly decreases losses where $u_{[k+1]} < 0$.  Denote by $u'$ this adjusted report, where $u_{[k+1]} = \ldots = u_{[n]} = 0$.}
+%	
+%	Let $u_{[1..j]} := \sum_{i=1}^j u_{[i]}$.
+%	We now claim that for all $y \in \Y$, the minimum of $L(u)_y$ is achieved by some $u \in [0,1]^n$.
+%	
+%	First, we set $u_{[1]} = 1$ by invariance in the $\ones$ direction.
+%	Given this, if $u_{[k+1]} \leq 0$, then we observe $L'(u)_y = \left(1- u_y + \tfrac 1 k (u-e_y)_{[1,\ldots,k]}\right)_+$.
+%	\jessie{Want to claim that $u_{[k+1]} \geq 0$.}
+%	%  In this case, we want to claim that having $u_{[k+2]} \geq u_{[k+1]}$, since $u_{[k+2]}, \ldots, u_{[n]}$ do not affect the loss, unless corresponding to $y$, so we want to increase these values as much as possible without them being part of the summand. 
+%	(In this case, for $u_y <0$, increasing $u_y$ to $0$ would decrease loss, since it would not affect the summand.)
+%	Additionally, if $u_{[k+1]} <0$, then the average $\tfrac 1 k (u - e_y)_{[1, \ldots, k]} \leq \tfrac 1 k u_{[2,\ldots,k]}$, so setting $u_{[k+1]} = 0$ can only decrease the loss.  (By the same argument used for $u_{[k+2]}$.)
+%	Therefore, we can set $u_{[k+1]} \geq 0$.\jessie{Is this true?  Revisit}
+%	
+%	Since $u_{[n]} = u_{[k+1]} \geq 0$, we have that there is some $u \in [0,1]^n$ minimizing $L'$.  
+%	
+%	\jessie{It goes on from the incorrect proof...}
+%	For $u\in[0,1]^n$, the argument to $(\cdot)_+$ is nonnegative, so we can rewrite the expected loss of $L'$ as
+%	\begin{align*}
+%	\inprod{p}{L'(u)} &= 1 - \inprod{p}{u} + \frac{1}{k} \left( \sum_{i=1}^k (1 - p_{[i]}) u_{[i]} \right) = 1 + \inprod{\tfrac 1 k \ones - (1+\tfrac 1 k)p}{u}~.
+%	\end{align*}
+%	As a linear objective over the hypercube, $\inprod{p}{L'}$ must be optimal on some corner of the hypercube, so we conclude for all $p \in \simplex$, there is a report $u \in \{0,1\}^n$ optimizing $L'$.
+%	
+%	So let us ask when it is better to set $u_i$ to $0$: \jessie{similar argument to the body of paper}
+%	
+%	\begin{align*}
+%	\inprod{p}{L'(u) - L'(\bar u)} &= 1 + \inprod{\tfrac 1 k \ones - (1 + \tfrac 1 k) p}{u} - (1 + \inprod{\tfrac 1 k \ones - (1 + \tfrac 1 k) p}{\bar u})\\
+%	&= \tfrac 1 k - (1+ \tfrac 1 k p_i) u_i - \tfrac 1 k - (1+ \tfrac 1 k p_i) \bar u_i \\
+%	&= \tfrac 1 k - (1 + \tfrac 1 k) p_i
+%	\end{align*}
+%	We can then see this term is positive only if $p_i > \tfrac 1 {k+1}$.
+%	
+%	Since at most $k$ elements can simultaneously have weight greater than $k+1$, we can then take $u_{[k+1]} = u_{[k+2]} = \ldots = u_{[n]} = 0$.
+%	We then observe an optimal report in $\U$ for all $p \in \simplex$.
+%	%  (On the uniform distribution, we argue that $\vec 0$ is also an optimal report, and so there is a report in $\U$ optimizing $L'$.)
+%	%  In particular, for all $p \in \simplex$, there is a report $u \in \{0,1\}^n$ optimizing $L'$; since we can take $\|u\|_0 \leq k$ by the above observation that $u_{[k+1]} = u_{[k+2]} = \ldots = u_{[n]} = 0$, some $u \in \U$ must be optimal as well.
+%\end{proof}
+
+\hrule
+\begin{lemma}
+	For all $p \in \simplex$, there is a $u \in [0,1]^n$ optimizing $\inprod{p}{L'}$.
+\end{lemma}
+\begin{proof}
+  \jessie{Idea: Use results from Rockafellar to argue that for every convex combination of functions, there must be a minimizer in the Minkowski sum of a subset of the minimizers over each loss.  As $e_y$ minimizes $L(u)_y$, then there is some minimizers in the Monkowski sum of the basis vectors, which is $[0,1]^n$.}
+  First, observe that for all $y \in \Y$, we have $L'(\cdot)_y$ bounded from below, so $\inprod p{L'(\cdot)}$ is also bounded from below for all $p \in \simplex$.
+	
+  Observe that for each point mass $\delta_y$, the expected loss $\inprod{\delta_y}{L'(\cdot)} = L'(\cdot)_y$ can be minimized by reporting $e_y$.
+  Since every $p \in \simplex$ is a convex combination of point mass distributions, we claim the expected loss can be minmized by reporting some $u \in [0,1]^n$, this domain being the Minkowski sum of the $e_y$ vectors.
+  %Note that the Minkowski sum of the $e_y$ vectors is $[0,1]^n$.
+  \jessiet{Another thought: Sufficient to show $u_{[k+1]} \geq u_{[1]} - 1$?}
+	
+  Fix $p \in \simplex$, and call $f_i(u) := p_i L'(u)_i|_{[0,1]^n}$ the weighted loss on outcome $i$ restricted to $[0,1]^n$.  (Define $f_i(u) = \infty$ for all $u \in \reals^n \setminus [0,1]^n$.)
+  We know that all $f_i$ are polyhedral, since they are simply a (convex) restriction of polyhedral losses.
+  By Rockafellar~\cite[Theorem 19.2]{rockafellar1997convex}, we then know $f^*_i$ is also polyhedral on $[0,1]^n$.
+  Moreover, we know that $[0,1]^n = \dom f^*_i$ for all $i$ since $f_i$ is bounded from below, and so the intersection $\dom f^*_1 \cap \ldots \cap \dom f^*_n = [0,1]^n$ is nonempty.
+  We can then apply Rockafellar~\cite[Corollary 20.1.1]{rockafellar1997convex} to observe the infimal convolution $f_1 \Box \ldots \Box f_n$ is polyhedral and its infimum is always attained.
+  Since this term is a polyhedral function, its epigraph is a polyhedral set by definition.
+  We know that $\epi(f_1 \Box \ldots \Box f_n) = \epi(f_1) \oplus \epi(f_2) \oplus \ldots \oplus \epi(f_n)$, where $\oplus$ is the Minkowski sum. \jessiet{cite... current source is Wikipedia}
+  %	Since the infimal convolution is polyhedral (and therefore bounded from below), the epigraph is closed \jessie{what we want?  is this true?}
+  Moreover, $\epi(f_1) \oplus \ldots \oplus \epi(f_n)$ is defined on $[0,1]^n$ and the infimum of the facet surface is attained.
+  We have that $\epi(f_1 +f_2 + \ldots + f_n) \subseteq \epi(f_1) \oplus \ldots \oplus \epi(f_n)$ in this scenario, since each $f_i$ is nonnegative for all $u \in [0,1]^n$, so if $(u, y) \in \epi(\sum_i f_i)$ for $y \geq f(u)$, then $y$ can be broken up into $y_1, \ldots, y_n$ so that $y = \sum_i y_i$ and $y_i \geq f_i(u)$, also implying each $y_i \geq 0$.
+  \jessie{This fails because $\subseteq$ is not sufficient, but equality is not true.}
+%  \jessie{Also break down $u$ and use superadditivity of convex functions.}
+  $(u, y_i) \in \epi(f_i) \implies (u, y) \in \oplus_i \epi(f_i)$ for all $i$ since $y \geq y_i$.
+	
+  As the sum of closed functions is closed, we also know $\sum_i f_i$ is closed, so the infimum of the superset being attained means an infimum on the facets of the subset-- here, the expected loss over $[0,1]^n$.
+	
+  We know the infimum attained by taking a convex combination over $\{f_y\}_{y \in \Y}$ is the same as any over $\{L'_y\}_{y \in \Y}$, since, for all $y \in \Y$, we have $\inf_{u \in \reals^n} L'(u)_y = \inf_{u \in [0,1]^n} L'(u)_y$, so we cannot strictly improve expected loss by changing the minimizing report over the hypercube on any outcome.
+  \jessie{Definitely missing some crucial deets.  Either flesh out or scrap.}
+\end{proof}
+
+\begin{lemma}\label{lem:top-k-optimal-hypercube}
+	For all $p \in \simplex$ we have $\prop{L'}(p) \cap [0,1]^n \neq \emptyset$.
+\end{lemma}
+\begin{proof}
+  \jessie{Idea here: Fix $u_{[1]} = 1$ and then show that increasing $u_{[k+1]} \to 0$ strictly decreases losses where $u_{[k+1]} < 0$.  Denote by $u'$ this adjusted report, where $u_{[k+1]} = \ldots = u_{[n]} = 0$.}
+  
+  First, by invariance in the ones direction, let us fix $u_{[1]} = 1$.
+  Now we want to show that, for some minimizer of the loss, $u_{[n]} = u_{[k+1]} \geq 0$.
+  We do this by showing that for $u$ such that $u_{[\ell]} < 0$, changing the report to $u'$ where $u'_{[i]} = 0$ for $i = \ell, \ldots, n$ (and $u'_{[i]} = u_{[i]}$ for $i = 1, \ldots, \ell-1$) does not increase the expected loss. 
+  Here, let $\ell$ be the ordered index of the first such negative entry.)
+  For $u_{[\ell]} < 0$, we say that $u_{[\ell]}, \ldots, u_{[n]} = -\epsilon$.
+  First, note that if $\ell > k+1$, then $u_{[k+1]} \geq 0$ and the result follows from the logic allowing us to conclude $u_{[k+1]} = \ldots = u_{[n]}$.
+  Therefore, we assume $\ell \leq k+1$.
+  
+  Now, consider that if $y \in [\ell, \ldots, n]$, we have
+  \begin{align*}
+  L'(u)_y &= \left(1 - u_y + \frac{1}{k} (u-e_y)_{[1\ldots k]}\right)_+ &&   L'(u')_y &= \left(1 - u'_y + \frac{1}{k} (u'-e_y)_{[1\ldots k]}\right)_+\\
+  &= \left(1 + \epsilon - \frac{1}{k} u_{[1 \ldots k]}\right)_+ &&   &= \left(1 - \frac{1}{k} u'_{[1 \ldots k]}\right)_+\\
+  &= \left(1 + \epsilon - \frac{1}{k} u_{[1 \ldots k]}\right) &&   &= \left(1 - \frac{1}{k} u'_{[1 \ldots k]}\right)~.~
+  \end{align*}
+  
+  Now, with some more manipulation, we can see that if $y \in [1, \ldots, \ell - 1]$, let $\rho_y := (u_y - 1 + \epsilon)_+$.
+  Then we have
+  \begin{align*}
+  L'(u)_y &= \left(1 - u_y + \frac{1}{k} (u-e_y)_{[1,\ldots,k]}\right)_+ \\
+  &= \left(1 - u_y + \frac{1}{k} (u_{[1,\ldots,k+1 \setminus y]} + \rho) \right)_+ \\
+  &= \left(1 - u_y + \frac{1}{k} (u_{[1,\ldots,\ell-1 \setminus y]} + u_{[\ell,\ldots,k+1 \setminus y]} + \rho_y) \right)_+ \\
+  &= \left(1 - u_y + \frac{1}{k} (u_{[1,\ldots,\ell-1 \setminus y]} + \rho_y + (k +1 - \ell)(-\epsilon)) \right)_+ \\
+  \end{align*}
+  
+  Similarly, for $u'$, we have
+  \begin{align*}
+  L'(u')_y &= \left(1 - u'_y + \frac{1}{k} (u'-e_y)_{[1,\ldots,k]}\right)_+ \\
+  &= \left(1 - u'_y + \frac{1}{k} u'_{[1,\ldots,k+1 \setminus y]} \right)_+ \\
+  &= \left(1 - u'_y + \frac{1}{k} u_{[1,\ldots, \ell-1 \setminus y]} \right)_+ \\
+  \end{align*}
+
+Now in order to show $\inprod{p}{L'(u)} \geq \inprod{p}{L'(u')}$, we can show the difference is nonnegative.
+Let us call $\frac{k+1 - \ell}{k} =: \delta$.
+We can now write
+\begin{align*}
+\inprod{p}{L'(u)} - \inprod{p}{L'(u')} &= \sum_{i = \ell}^n p_{[i]}(1 + \epsilon - \frac{1}{k} u_{[1, \ldots, k]}) + \sum_{i = 1}^{\ell-1} p_{[i]}(1 - \frac{1}{k} u_{[1, \ldots, k]}) \\&+ \sum_{i=1}^{\ell-1} p_{[i]} \left[\left(1 -u_y + \frac 1 k (u_{[1,\ldots,\ell-1 \setminus y]} + \rho_y - \epsilon(k+1 - \ell))\right)_+ - (1 - u_y + \frac 1 k u_{[1,\ldots, \ell-1 \setminus y]})_+ \right]\\
+&= p_{[\ell, \ldots, n]} \epsilon + \sum_{i=1}^{\ell-1} p_{[i]} \left[\left(1 -u_y + \frac 1 k (u_{[1,\ldots,\ell-1 \setminus y]} + \rho_y) - \frac{\epsilon}{k} \delta \right)_+ - (1 - u_y + \frac 1 k u_{[1,\ldots, \ell-1 \setminus y]})_+ \right]\\
+\end{align*}
+
+
+Now for a second, assume that $\frac \epsilon k \delta \leq 1 - u_y + \tfrac 1 k u_{[1, \ldots, \ell-1 \setminus y]} + \tfrac{\rho_y}{k}$ for all $y \in \Y$.
+(We see a contradiction otherwise... see below.)
+Then both of the latter terms are nonnegative, and we can reduce the difference of expected losses to
+\begin{align*}
+\inprod{p}{L'(u)} - \inprod{p}{L'(u')} &= p_{[\ell, \ldots, n]} \epsilon - p_{[1,\ldots, \ell-1]} \epsilon
+ \delta + \sum_{i=1}^{\ell-1} p_{[i]} \frac{\rho_i}{k}\\
+ &= \epsilon \left(p_{[\ell, \ldots, n]} - p_{[1,\ldots, \ell-1]} \delta \right) + \sum_{i=1}^{\ell-1} p_{[i]} \frac{\rho_i}{k}
+\end{align*}
+\jessie{This gives a condition for when the difference is nonnegative, but it isn't always true that this reduced term is nonnegative.}
+Observe the inverse relationship between $\delta$ and $p_{[1, \ldots, \ell-1]}$.
+%As $\ell$ is increased to $k+1$ (maximizing $p_{[1, \ldots, \ell-1]}$), the term $\delta$ becomes $0$.
+%Similarly, as $\ell$ is taken to be smaller (say, for example, $\ell = 1$) the distribution $p_{[1,\ldots, \ell-1]}$ tends toward $0$.
+
+Here's a counter example where the difference is negative: consider $n = 5$, $k = 4$, $p = \delta_1$ and $u = (1,1/2, -1/2, -1/2, -1/2)$.  We can see that $\inprod{p}{L'(u)} = 0$, and $\inprod{p}{L'(u')} = 1/8$, so their difference is negative.
+
+Now we show that $\frac \epsilon k \delta > 1 - u_y + \tfrac 1 k u_{[1, \ldots, \ell-1 \setminus y]} + \tfrac{\rho_y}{k}$ cannot hold for any $y \in \Y$ by the observation that $\tfrac{\epsilon}{k} \geq \delta \tfrac{\epsilon}{k}$ and that the second term is greater than or equal to $\tfrac 1 k$.  Since $\epsilon \leq 1$, \jessiet{Assumption on $\epsilon$ here that we talked about at some point... I can justify it.} the inequality cannot hold without contradiction, as we have $\tfrac 1 k \geq \tfrac \epsilon k \geq  \delta \tfrac \epsilon k$, which cannot be strictly larger than a term greater than or equal to $\tfrac 1 k$.
+
+\hrule
+\jessie{This part is given in the next proof.}
+For distributions where the difference of the expected losses is negative \jessie{characterize}, we construct a different $\bar u$ and show this will not increase the loss.
+Consider $\bar u = \Ind{p_i \geq \frac 1 k }$.
+We will show that for all $p \in \simplex$ and any $u$ different from $\bar u$ in one spot such that $u \in \Gamma(p)$, we have the excess loss given by $u_i$ broken up into three cases.
+First, if $y < \ell$, then the excess loss on $\bar u_i$ is given by $(1- u_y) + \tfrac 1 k \max(u_y-1, u_{k+1})$.
+As $u \in \Gamma(p)$ with $u_1 = 1$, we have $0 \leq u_i \leq 1$ here, so this loss is bounded from below by $(1 - \frac 1 k)(1-u_y)$, which is nonnegative.
+
+For $\ell \leq y \leq k-1$, we know that $u \in \Gamma(p) \implies u_y \leq 0$.
+As the excess loss given by $u$ is $(\frac 1 k - 1)u_y$, and both terms are nonpositive, the excess loss is nonnegative.
+
+Finally, for $y \geq k$, the excess loss is given by $-u_y$.
+Similarly, we have $u_y \leq 0$, so the excess loss is nonnegative.
+
+As, for any $y$, the excess loss given by \jessie{FILL IN}
+
+Claim: Let $u \in \Gamma(p)$.  Then $p_\ell \leq \frac 1 k \implies u_\ell \leq 0$.
+\jessie{Not true... this is where I gave up and moved on to a brute force technique.}
+\end{proof}
+
+
+\begin{lemma}
+For all $p \in \simplex$, we have $\prop{L'}(p) \cap \{0,1\}^n \neq \emptyset$ 
+\end{lemma}
+\begin{proof}
+\jessie{Hand wavy in parts, and brute forces the result all the way to the end.}
+
+Consider $L'(u)_y = \left( 1 - u_y + \frac 1 k (u- e_y)_{[1, \ldots, k]} \right)_+$.
+Now, fix $p \in \simplex$.
+The most $u_y$ can ``influence'' $\inprod{p}{L'(u)}$ is by $-p_y u_y + \frac 1 k u_y (1-p_y)$.
+We can focus on this element-wise difference as \jessie{flesh out reason why.}
+By invariance in the ones direction, set $u_1 = 1$ and without loss of generality, suppose that $u$ is ordered so $u_i = u_{[i]}$ for all $i= 1, \ldots, n.$ 
+We can see that $u_y$ can only decrease expected loss over $p$ if
+\begin{align*}
+-p_y u_y + \frac 1 k u_y - \frac{p_y}k u_y \leq 0 
+&\iff \frac 1 k u_y \leq \frac{k+1}k p_y u_y \\
+&\iff \frac 1 {k+1} u_y \leq p_y u_y \\
+&\iff (\frac{1}{k+1} - p_y)u_y \leq 0\\
+&\iff \sgn(\frac{1}{k+1} - p_y) \neq \sgn(u_y)~.~
+\end{align*}
+Thus, if $p_y \geq \frac 1 {k+1}$, we want $u_y \geq 0$ in order to minimize expected loss.
+%\jessie{Claim: Fixing $u_1 = 1$, set $u_y = 1$ for $\prop{L'} \cap \{0,1\}^n$.  I think we can leave as is for $\prop{L'} \cap [0,1]^n$}
+
+On the other hand, if $p_y \leq \frac 1 {k+1}$, then we want $u_y \leq 0$ in order to minimize expected loss.
+Suppose $u_y = - \epsilon$, for some $\epsilon \geq 0$.
+If $u_y \in [k+1]$, then $u_y$ contrubutes at least $(1 + \epsilon) p_y - \frac{\epsilon}{k}(1-p_y)$ to the loss.
+
+If $u_y \not \in [k+1]$, then it contributes exactly $(1 + \epsilon) p_y$ to the expected loss.
+In order to minimize this, we then want to set $u_{[k+2]} = \ldots = u_{[n]} = 0$.
+Since $u_y \geq u_{[n]}$, we then conclude $u_y \geq 0$.
+Combining with our earlier optimization condition, we conclude that for $u \in \Gamma(p)$, $p_y < \frac 1 {k+1}$ implies that $u_y = 0$.
+
+Since at most $k$ outcomes can have probability $p_y \geq \frac 1 {k+1}$, we know this constructed $u$ has $\|u\|_\infty \leq k$.
+\end{proof}
+
+\end{document}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
