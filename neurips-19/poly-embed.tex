@@ -1211,7 +1211,6 @@ The next lemma shows that if a subset of $\U$ intersect, then their correspondin
 
 In the rest of the section, for shorthand, we write $L(u;p) := \langle p, L(u) \rangle$ and similarly $\ell(r;p)$.
 
-%Bo new
 \begin{lemma} \label{lemma:exposed-shortest}
   Let $U$ be a convex, closed set and $u \not\in U$.
   Then $\inf_{u^* \in U} \|u-u^*\|$ is achieved by some unique $u^* \in U$.
@@ -1221,12 +1220,11 @@ In the rest of the section, for shorthand, we write $L(u;p) := \langle p, L(u) \
   Unique achievement of the infimum is well-known.
   (Achievement follows e.g. because the set $U \cap \{u' : \|u - u'\| \leq d(U,u) + 1\}$ is closed and compact, so the continuous function $u' \mapsto \|u-u'\|$ achieves its infimum.
   Uniqueness follows because for two different points $u',u''$ at the same distance from $u$, the point $0.5u' + 0.5u''$ is strictly closer and also lies in the convex set $U$.)
-  Now suppose $u = u' + \alpha' v'$ where $v'$ exposes $u'$.
+  Now suppose $u = u' + \alpha' v'$ where $v'$ is a unit vector exposing $u'$.
   Then $U$ is contained in the halfspace $\{u'': \langle u'', v'' \rangle \leq \langle u',v' \rangle \}$.
-  We claim $u'$ is the closest point in this halfspace to $u$,\bo{seems obvious, should be proven} so the distance of $u$ to this halfspace equals its distance to $u'$ which equals its distance to $U$.
-  We have already seen that this distance is uniquely achieved by $u' = u^*$.
+  But every point in this halfspace is distance at least $\alpha'$ from $u$, as $\|u-u''\| \geq \langle v, u - u'' \rangle \geq \langle v, u-u'\rangle = \alpha'$.
+  So $u'$ uniquely achieves this minimum distance.
 \end{proof}
-%end Bo new
 
 \begin{lemma} \label{lemma:distance-loss}
   If $L$ is a polyhedral loss, then for each $p$, there exists a constant $c$ such that, for all $u$,
@@ -1246,25 +1244,40 @@ In the rest of the section, for shorthand, we write $L(u;p) := \langle p, L(u) \
   We will prove that there exists $c_f > 0$ such that, for all $u$ in the corresponding cell of the power diagram,
     \[ \hat{L}(u;p) \geq L(u^*;p) + c_f \cdot d(U,u) . \]
   We will then repeat this for the finitely many $f$ with nonzero gradient (which covers all points $u \not\in U$) and take the minimum to obtain the desired $c > 0$.
+  This will complete the proof.
 
   Consider the set of unit vectors $\{v \in \reals^d : \|v\|=1\}$ and the set of $u^*$ on the boundary of $U$.
   For all pairs $u^*,v$ such that $v$ exposes $u^*$, let
     \[ G_{u^*,v} = \left\{ u^* + \beta v : \beta \geq 0 \right\} . \]
   Note that $\{ u : u \not\in U\} \subseteq \cup_{u^*,v} G_{u^*,v}$.
-  We claim each $G_{u^*,v}$ can be associated with at least one linear $f$ such that $f(u) = \hat{L}(u;p)$ for all $u \in G_{u^*,v}$.
-  \bo{Need to prove this; I think it follows because $G_{u^*,v}$ lies completely within some cell of the power diagram formed by projecting $\hat{L}$.}
-  Hence for all $u$ in $G_{u^*,v}$, we have
-  \begin{align*}
-    \hat{L}(u;p) &= \hat{L}(u^*;p) + (\nabla f) \cdot (d(u^*,u) v)  \\
-                      &= L(u^*;p) + c_{u^*,v} \cdot d(U,u)
-  \end{align*}
-  where $c_{u^*,v} := (\nabla f) \cdot v$, and we note $u^* = \min_{u' \in U} d(u',u)$. \bo{Should prove this; ought to follow because $v$ exposes $u^*$.}
-  We must have $c_{u^*,v} > 0$, otherwise $G_{u^*,v} \subseteq U$ which is a contradiction.
+  We proceed as follows:
+  \begin{enumerate}
+    \item Each $G_{u^*,v}$ can be associated with at least one of the finitely many linear functions $f$ as follows: $f(u) = \hat{L}(u;p)$ for all $u \in G_{u^*,v}$.
+    \item There exists a constant $c_{u^*,v} > 0$ such that $f(u) = L(u^*;p) + c_{u^*,v} \cdot d(U,u)$ for all $u \in G_{u^*,v}$.
+    \item The set of $(u^*,v)$ associated with $f$ is compact (closed and bounded), and the map $(u^*,v) \mapsto c_{u^*,v}$ is continuous.
+    \item Hence, there is an infimum $c > 0$ such that $f(u) \geq L(u^*;p) + c \cdot d(U,u)$ for all $u$ in all $G_{u^*,v}$ associated with $f$.
+    \item Taking the minimum such $c$ over these finitely many $f$, we obtain $L(u;p) \geq \hat{L}(u;p) \geq inf_{u^*} L(u^*;p) + c \cdot d(U,u)$ for all $u \not\in U$.
+  \end{enumerate}
 
-  Now for each $f$, we claim the set $\{u^*, v : \text{$G_{u^*,v}$ is associated with $f$}\}$ is closed.
-  This follows because the set of $u^*$ such that $f(u^*) = \hat{L}(u^*;p)$ is closed, and for fixed $u^*$, the set of $v$ such that $G_{u^*,v}$ is in the cell of the power diagram is also closed.\bo{Should prove this.}
-  The set is also bounded and the map $(u^*,v) \mapsto (\nabla f)\cdot v =: c_{u^*,v}$ is continuous, so the infimum over all positive $c_{u^*,v}$ is achieved by some positive member $c_f > 0$.
+  (1) Follows because $G_{u^*,v}$ is contained in a cell of the power diagram, so it lies below the function where $\hat{L}(\cdot;p) = f(\cdot)$. \bo{Should have more justification!}
+
+  (2) Let $\nabla f$ denote the gradient of the linear function $f$.
+  Note that $f(u^*) = \hat{L}(u^*;p) = L(u^*;p)$.
+  So we can write
+  \begin{align*}
+    f(u) &= f(u^*) + (\nabla f)\cdot (d(u^*,u) v)  \\
+         &= f(u^*) + c_{u^*,v} \cdot d(U,u)
+  \end{align*}
+  where $c_{u^*,v} = (\nabla f)\cdot v$ and we used that $d(u^*,u) = d(U,u)$ by Lemma \ref{lemma:exposed-shortest}.
+  We must have $c_{u^*,v} > 0$ because the set $U$ minimizes $L(\cdot;p)$, which is upper-bounded by $f$, so $f(u) > f(u^*) = L(u^*;p)$.
+
+  (3) \bo{This one needs more details}
+  This follows because the set of $u^*$ such that $f(u^*) = \hat{L}(u^*;p)$ is closed, and for fixed $u^*$, the set of $v$ such that $G_{u^*,v}$ is in the cell of the power diagram is also closed.
+  The set is also bounded \bo{is there a corner case to consider here?} and the map $(u^*,v) \mapsto (\nabla f)\cdot v =: c_{u^*,v}$ is continuous for fixed $f$ (it is linear in $v$ only).
+
+  Applying (4) and (5) prove the theorem.
 \end{proof}
+\bo{Improving the above: may suffice to only consider unit vectors $v$. Claim is that it's associated with $\argmax_i (\nabla f_i)\cdot v$. Now show the set of $v$ associated with $f_i$ is compact, and that for each $v$, it's true that for all $u^*$ exposed by $v$ and all $u = u^* + \alpha v$ for some $\alpha > 0$, we have $f(u) \geq f(u^*) + c_v \cdot d(U,u)$.}
 
 \begin{theorem} \label{thm:app-eps-thick-sep}
   For small enough $\epsilon$, the $\epsilon$-thickened link $\psi$ (Definition \ref{def:eps-thick-link}) satisfies that, for all $p$, there exists $\delta > 0$ such that, for all $u \in \R'$,
