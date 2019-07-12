@@ -1236,8 +1236,9 @@ In the rest of the section, for shorthand, we write $L(u;p) := \langle p, L(u) \
   So it remains to find a $c$ such that the inequality holds for all $u \not\in U$.
 
   $L(\cdot;p)$ is a convex polyhedral function, so it is the pointwise maximum over finitely many linear functions.
+  Recall that $\risk{L}(p) = \min_{u} L(u;p)$, the Bayes risk.
   Construct the convex polyhedral function $\hat{L}(\cdot;p)$ by dropping from the max those linear functions that are never equal to $L$ for any $u^* \in U$.
-  We have $\hat{L}(u^*;p) = L(u^*;p)$ for all $u^* \in U$ and $\hat{L}(u;p) \leq L(u;p)$ for all $u \not\in U$.
+  We have $\hat{L}(u^*;p) = \risk{L}(p)$ for all $u^* \in U$ and $\hat{L}(u;p) \leq L(u;p)$ for all $u \not\in U$.
   Now $\hat{L}$ is the max over a finite number of linear functions.
   Each such function $f$ with gradient $\nabla f$ is equal to $\hat{L}$ above a closed, convex cell in the power diagram formed by projecting $\hat{L}(\cdot;p)$.
   If $f$ has nonzero gradient, its cell overlaps with $U$ exactly at some face of $U$.
@@ -1249,31 +1250,34 @@ In the rest of the section, for shorthand, we write $L(u;p) := \langle p, L(u) \
   Consider the set of unit vectors $\{v \in \reals^d : \|v\|=1\}$ and the set of $u^*$ on the boundary of $U$.
   For all pairs $u^*,v$ such that $v$ exposes $u^*$, let
     \[ G_{u^*,v} = \left\{ u^* + \beta v : \beta \geq 0 \right\} . \]
-  Note that $\{ u : u \not\in U\} \subseteq \cup_{u^*,v} G_{u^*,v}$.
-  We proceed as follows:
+  %Note that $\{ u : u \not\in U\} \subseteq \cup_{u^*,v} G_{u^*,v}$.
+  We will prove the following steps:
   \begin{enumerate}
     \item Each $G_{u^*,v}$ can be associated with at least one of the finitely many linear functions $f$ as follows: $f(u) = \hat{L}(u;p)$ for all $u \in G_{u^*,v}$.
-    \item There exists a constant $c_{u^*,v} > 0$ such that $f(u) = L(u^*;p) + c_{u^*,v} \cdot d(U,u)$ for all $u \in G_{u^*,v}$.
-    \item The set of $(u^*,v)$ associated with $f$ is compact (closed and bounded), and the map $(u^*,v) \mapsto c_{u^*,v}$ is continuous.
-    \item Hence, there is an infimum $c > 0$ such that $f(u) \geq L(u^*;p) + c \cdot d(U,u)$ for all $u$ in all $G_{u^*,v}$ associated with $f$.
-    \item Taking the minimum such $c$ over these finitely many $f$, we obtain $L(u;p) \geq \hat{L}(u;p) \geq inf_{u^*} L(u^*;p) + c \cdot d(U,u)$ for all $u \not\in U$.
+    \item There exists a constant $c_{v} > 0$ such that $L(u) = \risk{L}(p) + c_{v} \cdot d(U,u)$ for all $u \in G_{u^*,v}$ and all $u^*$ exposed by $v$.
+    \item The set of unit vectors $v$ that can be associated with $f$ is compact (closed and bounded), and the map $v \mapsto c_{v}$ is continuous on this set.
+    \item Hence, there is an infimum $c > 0$ such that $f(u) \geq \risk{L}(p) + c \cdot d(U,u)$ for all $u$ in all $G_{u^*,v}$ associated with $f$.
+    \item Taking the minimum such $c$ over these finitely many $f$, we obtain $L(u;p) \geq \hat{L}(u;p) \geq \risk{L}(p) + c \cdot d(U,u)$ for all $u \not\in U$.
   \end{enumerate}
 
-  (1) Follows because $G_{u^*,v}$ is contained in a cell of the power diagram, so it lies below the function where $\hat{L}(\cdot;p) = f(\cdot)$. \bo{Should have more justification!}
+  (1) Follows because $G_{u^*,v}$ is contained in a cell of the power diagram, which is a set of points where $\hat{L}(\cdot;p) = f(\cdot)$. \bo{Should have more justification.}
 
   (2) Let $\nabla f$ denote the gradient of the linear function $f$.
-  Note that $f(u^*) = \hat{L}(u^*;p) = L(u^*;p)$.
-  So we can write
+  Note that because $u^*$ is on the boundary of $U$, we have $f(u^*) = \hat{L}(u^*;p) = \risk{L}(p)$.
+  So we can write, using Lemma \ref{lemma:exposed-shortest},
   \begin{align*}
+    f(u) &= f(u^*) + (\nabla f)\cdot (u - u^*)  \\
     f(u) &= f(u^*) + (\nabla f)\cdot (d(u^*,u) v)  \\
-         &= f(u^*) + c_{u^*,v} \cdot d(U,u)
+         &= \risk{L}(p) + c_{v} \cdot d(U,u)  \\
   \end{align*}
-  where $c_{u^*,v} = (\nabla f)\cdot v$ and we used that $d(u^*,u) = d(U,u)$ by Lemma \ref{lemma:exposed-shortest}.
-  We must have $c_{u^*,v} > 0$ because the set $U$ minimizes $L(\cdot;p)$, which is upper-bounded by $f$, so $f(u) > f(u^*) = L(u^*;p)$.
+  where $c_{v} = (\nabla f)\cdot v$.
+  We must have $c_{v} > 0$ because the set $U$ minimizes $L(\cdot;p)$, so $f(u) > f(u^*) = \risk{L}(p)$.
 
-  (3) \bo{This one needs more details}
-  This follows because the set of $u^*$ such that $f(u^*) = \hat{L}(u^*;p)$ is closed, and for fixed $u^*$, the set of $v$ such that $G_{u^*,v}$ is in the cell of the power diagram is also closed.
-  The set is also bounded \bo{is there a corner case to consider here?} and the map $(u^*,v) \mapsto (\nabla f)\cdot v =: c_{u^*,v}$ is continuous for fixed $f$ (it is linear in $v$ only).
+  (3) The set of $u^*$ where $f(u^*) = \risk{L}(p)$ is the intersection of two cells of the power diagram, i.e. the boundary of $U$ with the cell associated with $f$.
+  Hence it is closed and convex.
+  The set of unit vectors $v$ that expose a closed, convex set of boundary points is also closed and convex.
+  \bo{That should be justified/rechecked.}
+  It is also bounded, hence compact.
 
   Applying (4) and (5) prove the theorem.
 \end{proof}
