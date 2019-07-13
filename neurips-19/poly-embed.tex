@@ -688,7 +688,7 @@ Specifically, while $(L',\psi)$ is not consistent for $\elltopk$, since $L'$ is 
 We therefore turn to deriving this discrete loss $\ell'$.
 
 In Lemma~\ref{lem:top-k-optimal-corners}\jessiet{in the Appendix... remove ref for camera ready version}, we show that the set $\U = \{u \in \{0,1\}^n : \|u\|_0 \leq k\}$ is always represented among the optimizers of $L'$, meaning for all $p \in \simplex$ we have $\prop{L'}(p) \cap \U \neq \emptyset$.
-From Lemma~\ref{lem:loss-restrict}\raft{was Lemma~\ref{lem:top-k-surrogate-embeds}}, then, $L'$ must embed $L'|_\U$, which gives us $\ell':\R'\to\reals^\Y_+$ via the natural embedding from sets $\R' = \{r \subseteq [n] : |r| \leq k\}$ to their indicator vectors:
+From Lemma~\ref{lem:loss-restrict}\raft{was lem:top-k-surrogate-embeds}, then, $L'$ must embed $L'|_\U$, which gives us $\ell':\R'\to\reals^\Y_+$ via the natural embedding from sets $\R' = \{r \subseteq [n] : |r| \leq k\}$ to their indicator vectors:
 \begin{align}\label{eq:ell-2}
 \ell'(r)_y &= \Ind{y \not\in r} + \tfrac 1 k |r \setminus \{y\}| = (1+\tfrac 1 k)\Ind{y \not\in r} + \tfrac 1 k (|r|-1)~.
 \end{align}
@@ -1227,6 +1227,7 @@ In the rest of the section, for shorthand, we write $L(u;p) := \langle p, L(u) \
 \end{proof}
 
 \begin{lemma} \label{lemma:distance-loss}
+  \raft{What I changed: linear ftn $\to$ affine; name the cell $U_f$ for $f$; also name set of functions $\F$, normals $V_f$, etc}
   If $L$ is a polyhedral loss, then for each $p$, there exists a constant $c$ such that, for all $u$,
     \[ L(u;p) - \inf_{u^* \in \R'} L(u^*;p) \geq c \cdot d(\Gamma(p),u) . \]
 \end{lemma}
@@ -1235,34 +1236,33 @@ In the rest of the section, for shorthand, we write $L(u;p) := \langle p, L(u) \
   If $u \in U$, then both sides are zero.
   So it remains to find a $c$ such that the inequality holds for all $u \not\in U$.
 
-  $L(\cdot;p)$ is a convex polyhedral function, so it is the pointwise maximum over finitely many linear functions.
+  $L(\cdot;p)$ is a convex polyhedral function, so it is the pointwise maximum over finitely many affine functions.
   Recall that $\risk{L}(p) = \min_{u} L(u;p)$, the Bayes risk.
-  Construct the convex polyhedral function $\hat{L}(\cdot;p)$ by dropping from the max those linear functions that are never equal to $L$ for any $u^* \in U$.
+  Construct the convex polyhedral function $\hat{L}(\cdot;p)$ by dropping from the maximum those affine functions that are never equal to $L$ for any $u^* \in U$.
   We have $\hat{L}(u^*;p) = \risk{L}(p)$ for all $u^* \in U$ and $\hat{L}(u;p) \leq L(u;p)$ for all $u \not\in U$.
-  Now $\hat{L}$ is the max over a finite number of linear functions.
-  Each such function $f$ with gradient $\nabla f$ is equal to $\hat{L}$ above a closed, convex cell in the power diagram formed by projecting $\hat{L}(\cdot;p)$.
-  If $f$ has nonzero gradient, its cell overlaps with $U$ exactly at some face of $U$.
-  We will prove that there exists $c_f > 0$ such that, for all $u$ in the corresponding cell of the power diagram,
-    \[ \hat{L}(u;p) \geq L(u^*;p) + c_f \cdot d(U,u) . \]
-  We will then repeat this for the finitely many $f$ with nonzero gradient (which covers all points $u \not\in U$) and take the minimum to obtain the desired $c > 0$.
-  This will complete the proof.
+  Now $\hat{L}$ is also a maximum over finitely many affine functions $\F$.
+  Each such function $f\in\F$ is equal to $\hat{L}$ above a closed, convex cell $U_f\subseteq\reals^d$ in the power diagram formed by projecting $\hat{L}(\cdot;p)$.
+  If $f$ has nonzero gradient, then $U_f \cap U$ is a face of $U$.
+  We will prove that there exists $c_f > 0$ such that, for all $u\in U_f$,
+    \[ \hat{L}(u;p) \geq \risk{L}(p) + c_f \cdot d(U,u) . \]
+  Taking $c$ to be the minimum of $c_f$ over the finitely many $f\in\F$ with nonzero gradient (which covers all points $u \not\in U$) will complete the proof.
 
-  Consider the set of unit vectors $\{v \in \reals^d : \|v\|=1\}$ and the set of $u^*$ on the boundary of $U$.
-  For all pairs $u^*,v$ such that $v$ exposes $u^*$, let
+  Consider the set of unit vectors $V = \{v \in \reals^d : \|v\|=1\}$ and the boundary of $U$, denoted $\partial U$.
+  For any $u^*\in\partial U$, $v\in V$ such that $v$ exposes $u^*$, let\raft{I'm not actually sure what definition of ``exposes'' we are using here; I think we just mean that $v$ is normal to $U$ at $u^*$, right?}
     \[ G_{u^*,v} = \left\{ u^* + \beta v : \beta \geq 0 \right\} . \]
   %Note that $\{ u : u \not\in U\} \subseteq \cup_{u^*,v} G_{u^*,v}$.
   We will prove the following steps:
   \begin{enumerate}
-    \item Each $G_{u^*,v}$ can be associated with at least one of the finitely many linear functions $f$ as follows: $f(u) = \hat{L}(u;p)$ for all $u \in G_{u^*,v}$.
-    \item There exists a constant $c_{v} > 0$ such that $L(u) = \risk{L}(p) + c_{v} \cdot d(U,u)$ for all $u \in G_{u^*,v}$ and all $u^*$ exposed by $v$.
-    \item The set of unit vectors $v$ that can be associated with $f$ is compact (closed and bounded), and the map $v \mapsto c_{v}$ is continuous on this set.
-    \item Hence, there is an infimum $c > 0$ such that $f(u) \geq \risk{L}(p) + c \cdot d(U,u)$ for all $u$ in all $G_{u^*,v}$ associated with $f$.
-    \item Taking the minimum such $c$ over these finitely many $f$, we obtain $L(u;p) \geq \hat{L}(u;p) \geq \risk{L}(p) + c \cdot d(U,u)$ for all $u \not\in U$.
+    \item For all $u^*\in\partial U$, $v\in V$ such that $v$ exposes $u^*$, there is some $f\in\F$ such that $G_{u^*,v}\subseteq U_f$.
+    \item For all $v\in V$, there exists a constant $c_{v} > 0$ such that $L(u) = \risk{L}(p) + c_{v} \cdot d(U,u)$ for all $u \in G_{u^*,v}$ and all $u^*$ exposed by $v$.
+    \item For all $f\in \F$, the set $V_f = \{v\in V : \exists u^*\in\partial U\: G_{u^*,v} \subseteq U_f\}$ is compact (closed and bounded), and the map $v \mapsto c_{v}$ is continuous on $V_f$.
+    \item Hence, there is an infimum $c_f > 0$ such that $f(u) \geq \risk{L}(p) + c_f \cdot d(U,u)$ for all $u\in U_f$.
+    \item Taking $c = \min \{c_f : f\in\F, \nabla f \neq 0\}$, we obtain $L(u;p) \geq \hat{L}(u;p) \geq \risk{L}(p) + c \cdot d(U,u)$ for all $u \not\in U$.
   \end{enumerate}
 
   (1) Follows because $G_{u^*,v}$ is contained in a cell of the power diagram, which is a set of points where $\hat{L}(\cdot;p) = f(\cdot)$. \bo{Should have more justification.}
 
-  (2) Let $\nabla f$ denote the gradient of the linear function $f$.
+  (2) Let $\nabla f$ denote the gradient of the affine function $f$.
   Note that because $u^*$ is on the boundary of $U$, we have $f(u^*) = \hat{L}(u^*;p) = \risk{L}(p)$.
   So we can write, using Lemma \ref{lemma:exposed-shortest},
   \begin{align*}
@@ -1273,13 +1273,12 @@ In the rest of the section, for shorthand, we write $L(u;p) := \langle p, L(u) \
   where $c_{v} = (\nabla f)\cdot v$.
   We must have $c_{v} > 0$ because the set $U$ minimizes $L(\cdot;p)$, so $f(u) > f(u^*) = \risk{L}(p)$.
 
-  (3) The set of $u^*$ where $f(u^*) = \risk{L}(p)$ is the intersection of two cells of the power diagram, i.e. the boundary of $U$ with the cell associated with $f$.
-  Hence it is closed and convex.
-  The set of unit vectors $v$ that expose a closed, convex set of boundary points is also closed and convex.
-  \bo{That should be justified/rechecked.}
-  It is also bounded, hence compact.
-
-  Applying (4) and (5) prove the theorem.
+  (3) The intersection $U_f \cap U$ is a face of $U$.
+  $V_f$ is simply the union of normal cones $N_U(u^*)$ intersected with $V$ for all $u^* \in U_f \cap U$; as normal cones are identical in the relative interiors of faces, and $U_f\cap U$ is the union of finitely many such relative interiors of faces, $V_f$ is union of finitely many closed convex sets, and thus closed.
+  \raft{This could stand a more formal treatment}
+  Boundedness follows as $V$ is bounded.
+  
+  Finally, steps (4) and (5) are immediate.
 \end{proof}
 
 \begin{theorem} \label{thm:app-eps-thick-sep}
