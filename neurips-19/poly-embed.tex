@@ -664,62 +664,124 @@ It would be interesting to compare the two links in practice.
 \end{figure}
 
 \subsection{Inconsistency of top-$k$ losses}
-
+% 7.14.19- proposed version for arXiv
 \btw{The story we discussed: YK show $L'$ is inconsistent.  Our framework lets us ask: with what discrete loss \emph{is} $L'$ consistent?  (It also assures us that $L'$ is consistent for something...) Oh look, $L'$ embeds something which is $\elltopk$ plus some other term, so (a) we can see very clearly what $L'$ ``is doing'', and (b) we can see where to look for distributions yielding inconsistency, namely ones for which we actually prefer to report a set with $|r|<k$.}
 
 In certain classification problems, for example in information retrieval, it is common to predict a set of possible labels.
 As one instance, for $k<n$ the top-$k$ classification problem has reports $\R := \{r \subseteq [n] : |r| = k\}$, with label $y \in [n]$.
-The natural discrete loss $\elltopk:\R \to \reals^\Y_+$ is given by
-\begin{align}\label{eq:top-k}
-  \elltopk(r,y) = \Ind{y \not \in r}~,
-\end{align}
-which simply gives a penalty if the label was not in the reported set.
 
-Surrogates for this problem commonly take reports $u\in\reals^n$, with the link $\psi(u) = \{u_{[1]},\ldots,u_{[k]}\}$, where $x_{[u]}$ is the $i^{th}$ largest component of $u$, with ties broken arbitrarily.
+Surrogates for this problem commonly take reports $u\in\reals^n$, with the link $\psi(u) = \{u_{[1]},\ldots,u_{[k]}\}$, where $u_{[i]}$ is the $i^{th}$ largest component of $u$, with ties broken arbitrarily.
 \citet{lapin2015top, lapin2016loss, lapin2018analysis} provide the following convex surrogate loss for this problem, which \citet{yang2018consistency} show to be inconsistent:%
 \footnote{Yang and Koyejo also introduce a consistent surrogate, but it is non-convex.}
 \begin{align}\label{eq:L-2-surrogate}
-  L'(u)_y := \left( \tfrac{1}{k} \textstyle\sum_{i=1}^k (u + \ones - e_y)_{[i]} - u_y \right)_+~,
+L_k(u)_y := \left( 1-u_y + \tfrac{1}{k} \textstyle\sum_{i=1}^k (u - e_y)_{[i]} \right)_+~,
 \end{align}
 where $e_y$ is $1$ in component $y$ and 0 elsewhere.
 
-With our framework, we can say more.
-Specifically, while $(L',\psi)$ is not consistent for $\elltopk$, since $L'$ is polyhedral (Lemma~\ref{lem:top-k-polyhedral}), we know from Theorem~\ref{thm:poly-embeds-discrete} that it embeds \emph{some} discrete loss $\ell'$, and from Theorem~\ref{thm:eps-thick-calibrated} there is a link $\psi'$ such that $(L',\psi')$ is calibrated (and consistent) for $\ell'$.
-We therefore turn to deriving this discrete loss $\ell'$.
+For concreteness, consider the case with $k = 2$ over $n=3$ outcomes.
+%Without loss of generality, suppose $u$ is sorted in decreasing order, i.e. $u_1 \geq u_2 \geq u_3 = 0$ by invariance in the $\ones$ direction, shown in the Appendix.
+We can re-write $L_2(u)_y = \left(1 - u_y + \tfrac 1 2 (u_{[1]}+ u_{[2]} - \min(1,u_y))\right)_+$.
+One can verify that for every distribution $p \in \Delta_3$, $\inprod{p}{L}$ has a minimizer in the set $\R'$ composed of the tuples $i$ given by $\Gamma_i$ in Figure~\ref{fig:convex-surrogate-top-k}.
 
-In Lemma~\ref{lem:top-k-optimal-corners}\jessiet{in the Appendix... remove ref for camera ready version}, we show that the set $\U = \{u \in \{0,1\}^n : \|u\|_0 \leq k\}$ is always represented among the optimizers of $L'$, meaning for all $p \in \simplex$ we have $\prop{L'}(p) \cap \U \neq \emptyset$.
-From Lemma~\ref{lem:loss-restrict}\raft{was Lemma~\ref{lem:top-k-surrogate-embeds}}, then, $L'$ must embed $L'|_\U$, which gives us $\ell':\R'\to\reals^\Y_+$ via the natural embedding from sets $\R' = \{r \subseteq [n] : |r| \leq k\}$ to their indicator vectors:
-\begin{align}\label{eq:ell-2}
-\ell'(r)_y &= \Ind{y \not\in r} + \tfrac 1 k |r \setminus \{y\}| = (1+\tfrac 1 k)\Ind{y \not\in r} + \tfrac 1 k (|r|-1)~.
-\end{align}
-We now see that $\ell'$ is essentially $\elltopk$ (extended to sets smaller than $k$) plus an additional cardinality term which rewards smaller sets.
+%transition here
+\begin{figure}
+\begin{minipage}{0.3\linewidth}
+	\centering
+	\includegraphics[width=\linewidth]{tikz/original-top-k}
+	\caption{The minimizers of the $top-2$ loss $\ell_{top-2}$ as a function of $p$.}
+	\label{fig:original-top-k}
+\end{minipage}
+\hfill
+\begin{minipage}{0.3\linewidth}
+	\centering
+	\includegraphics[width=\linewidth]{tikz/convex-surrogate-top-k}
+	\caption{Level sets for the minimizers of $\inprod{p}{L(\cdot)}$.}
+	\label{fig:convex-surrogate-top-k}
+\end{minipage}
+\hfill
+\begin{minipage}{0.3\linewidth}
+	\centering
+	\includegraphics[width=\linewidth]{tikz/finite-surrogate-top-k}
+	\caption{The finite property $\prop{L|_\R}$}
+	\label{fig:finite-surrogate-top-k}
+\end{minipage}
+\end{figure}
 
-Knowledge of what loss $L'$ actually embeds greatly simplifies the task of proving inconsistency with $\elltopk$.
-Specifically, we see that $\ell'$ allows sets of cardinality strictly less than $k$, so we can look for a distribution making one of these smaller sets optimal.
-Writing the expected loss, we have
-%$\inprod{p}{\ell'(r)} = 1 - p(r) + \tfrac 1 k (|r|-p(r)) = 1 + \tfrac 1 k |r| - (1 + \tfrac 1 k) p(r)$,\\
-$\inprod{p}{\ell'(r)} = (1+\tfrac 1 k)(1 - p(r)) + \tfrac 1 k (|r|-1) = 1 + \tfrac 1 k |r| - (1 + \tfrac 1 k) p(r)$, where $p(r) = \sum_{i\in r} p_i$.
-% It is now easy to see that the optimal $r$ for any fixed cardinality $|r|=c$ is the $c$ most likely labels.
-So let us ask when it is better to drop an element $i$ from $r$:
-% If $i$ is the index of the $c$th most likely label (so $p_i = p_{[c]}$)
-we have $\inprod{p}{\ell'(r)-\ell'(r\setminus\{i\})} = \tfrac 1 k - (1+\tfrac 1 k)p_i$, meaning we will drop elements from $r$ until they all have weight at least $\tfrac 1 {k+1}$.
-In particular, for distributions close to uniform, $r=\emptyset$ is optimal, already giving us inconsistency\raft{If space (nope) we should spell this out like Jessie did: however ties are broken at $u=0$, pick a distribution with bumps going against the ties, and $u=0$ is still optimal.}.
-More generally, as $k < n$, the set $P = \{p\in\simplex : \max_{r\in\R'} p(r) < k/(k+1)\}$ is full-dimensional and guarantees that at least one of the top $k$ labels has probability strictly less than $\tfrac 1 {k+1}$.
+Figure~\ref{fig:original-top-k} gives a map of the property values of $\gamma_{top-2} := \prop{\ell_{top-2}}$ over the domain, $\Delta_3$, where $\ell_{top-2}(r)_y = \Ind{y \not\in r}$.
+(Each cell in this simplex is a level set $\gamma_r$ and corresponds to a flat piece of the Bayes Risk $\risk{\ell_{top-2}}$.)
+Moreover, Figure~\ref{fig:convex-surrogate-top-k} maps the property $\Gamma := \prop{L_2}$ over $\Delta_3$.
+By visual inspection, we can observe there is no ``refining'' mapping from $\gamma_{top-2}$ to $\Gamma$.
+By refining, we loosely mean that, for some $j \in \R$, there is no $I \subseteq \reals^n$ such that $\cup_{i \in I}\Gamma_i = \gamma_{top-2,j}$.
+If such a mapping existed, it would allude to one possible consistent link $\psi$ by which $L_2$ embeds $\ell_{top-2}$.
 
-% We now focus on the case where $k=1$; the top-$k$ loss reduces to 0-1 loss in this case.
-% To show a set of distributions where $\prop{\ell'}(p) \neq \prop{\elltopk}(p)$, we claim that $\vec{0}~\in~\prop{\ell'} \implies \risk{\ell'}(p) = 1$ for any $p$ with $\max_y p_y \leq 1/2$.
-% Additionally $\risk{\ell_{top-1}}(p) = 1 - \max_y p_y < 1 \implies \vec{0} \not\in \prop{\elltopk}(p)$.
+However, by Theorem~\ref{thm:poly-embeds-discrete}, we do know that $L_2$ embeds some discrete loss $\ell_2 := L_2|_\R$ since it is polyhedral; the level sets of $\prop{\ell_2} $ are shown in Figure~\ref{fig:finite-surrogate-top-k}.
+\jessie{I can't find a nice reduction of this loss for reports with a $2$ in the vector.}
+At first glance, these properties seem indentical, but $\prop{L_2}$ has an infinite number of level sets at each distribution, not shown in Figure~\ref{fig:convex-surrogate-top-k} for simplicity.
+We can ``refine'' $\prop{L_2}$ down to $\prop{\ell_2}$ by the axiom of choice.
 
-% First, $\ell(\vec{0}, \bar{p}) = 1$ for all $p \in \simplex$.
-% Taking the set $\{y\}$ for any $y \in \Y$, the expected loss $\inprod{p}{\ell'(\{y\})} = 2 (1-p_y) \geq 1$ by assumption on $p$.
-% %For any $r$ such that $|r| \geq 2$ \jessiet{In general, $|r| \geq k+1$}, we know that  $\ell'(r)_y \geq 1$ for all $y \in \Y$, so the expected loss much be greater than or equal to $1$.
-% Therefore, we have that $\vec{0} \in \prop{\ell'}(p)$ but $\vec{0} \not\in \prop{\elltopk}(p)$ for any $p$ such that $\max_y p_y \leq 1/2$.
+\jessie{Not sure if this is too much detail...}
+For intuition, since $\prop{\ell}$ does not refine $\prop{L}$, then $L$ does not embed $\ell$.
+For example, we can take two distributions $p_1 \in \gamma_{top-2, \{1,1,0\}}$ and $p_2 \in \gamma_{top-2, \{1,0,1\}}$ such that $p_1, p2 \in \Gamma_{(1,0,0)}$.
+Regardless of the choice of $\psi((1,0,0))$, for either $p_1$ or $p_2$, $\psi((1,0,0)) \not \in \argmin_u \inprod{p_i}{\ell_{top-2}(u)}$.
+Thus, we see that $L_2$ is not a consistent surrogate for $\ell_{top-2}$.
 
 
-
-%Since we can see that $\ell' \neq \elltopk$, we can then see that $L'$ is not consistent with respect to $\elltopk$.
-%Similarly, given $L_4(u,y) := \max\left(\frac{1}{k} \sum_{i=1}^k (1 + u_{\setminus y})_{[i]} - s_y, 0\right)$, we can actually see that $L_4$ also embeds $\ell'$.
-%We will double up on notation and call this discrete loss $\ell_4$ as well, for the sake of matching subscripts of discrete losses to the surrogates that embed them.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% old version submitted to NuerIPS%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\btw{The story we discussed: YK show $L'$ is inconsistent.  Our framework lets us ask: with what discrete loss \emph{is} $L'$ consistent?  (It also assures us that $L'$ is consistent for something...) Oh look, $L'$ embeds something which is $\elltopk$ plus some other term, so (a) we can see very clearly what $L'$ ``is doing'', and (b) we can see where to look for distributions yielding inconsistency, namely ones for which we actually prefer to report a set with $|r|<k$.}
+%
+%In certain classification problems, for example in information retrieval, it is common to predict a set of possible labels.
+%As one instance, for $k<n$ the top-$k$ classification problem has reports $\R := \{r \subseteq [n] : |r| = k\}$, with label $y \in [n]$.
+%The natural discrete loss $\elltopk:\R \to \reals^\Y_+$ is given by
+%\begin{align}\label{eq:top-k}
+%  \elltopk(r,y) = \Ind{y \not \in r}~,
+%\end{align}
+%which simply gives a penalty if the label was not in the reported set.
+%
+%Surrogates for this problem commonly take reports $u\in\reals^n$, with the link $\psi(u) = \{u_{[1]},\ldots,u_{[k]}\}$, where $x_{[u]}$ is the $i^{th}$ largest component of $u$, with ties broken arbitrarily.
+%\citet{lapin2015top, lapin2016loss, lapin2018analysis} provide the following convex surrogate loss for this problem, which \citet{yang2018consistency} show to be inconsistent:%
+%\footnote{Yang and Koyejo also introduce a consistent surrogate, but it is non-convex.}
+%\begin{align}\label{eq:L-2-surrogate}
+%  L'(u)_y := \left( \tfrac{1}{k} \textstyle\sum_{i=1}^k (u + \ones - e_y)_{[i]} - u_y \right)_+~,
+%\end{align}
+%where $e_y$ is $1$ in component $y$ and 0 elsewhere.
+%
+%With our framework, we can say more.
+%Specifically, while $(L',\psi)$ is not consistent for $\elltopk$, since $L'$ is polyhedral (Lemma~\ref{lem:top-k-polyhedral}), we know from Theorem~\ref{thm:poly-embeds-discrete} that it embeds \emph{some} discrete loss $\ell'$, and from Theorem~\ref{thm:eps-thick-calibrated} there is a link $\psi'$ such that $(L',\psi')$ is calibrated (and consistent) for $\ell'$.
+%We therefore turn to deriving this discrete loss $\ell'$.
+%
+%In Lemma~\ref{lem:top-k-optimal-corners}\jessiet{in the Appendix... remove ref for camera ready version}, we show that the set $\U = \{u \in \{0,1\}^n : \|u\|_0 \leq k\}$ is always represented among the optimizers of $L'$, meaning for all $p \in \simplex$ we have $\prop{L'}(p) \cap \U \neq \emptyset$.
+%From Lemma~\ref{lem:loss-restrict}\raft{was Lemma~\ref{lem:top-k-surrogate-embeds}}, then, $L'$ must embed $L'|_\U$, which gives us $\ell':\R'\to\reals^\Y_+$ via the natural embedding from sets $\R' = \{r \subseteq [n] : |r| \leq k\}$ to their indicator vectors:
+%\begin{align}\label{eq:ell-2}
+%\ell'(r)_y &= \Ind{y \not\in r} + \tfrac 1 k |r \setminus \{y\}| = (1+\tfrac 1 k)\Ind{y \not\in r} + \tfrac 1 k (|r|-1)~.
+%\end{align}
+%We now see that $\ell'$ is essentially $\elltopk$ (extended to sets smaller than $k$) plus an additional cardinality term which rewards smaller sets.
+%
+%Knowledge of what loss $L'$ actually embeds greatly simplifies the task of proving inconsistency with $\elltopk$.
+%Specifically, we see that $\ell'$ allows sets of cardinality strictly less than $k$, so we can look for a distribution making one of these smaller sets optimal.
+%Writing the expected loss, we have
+%%$\inprod{p}{\ell'(r)} = 1 - p(r) + \tfrac 1 k (|r|-p(r)) = 1 + \tfrac 1 k |r| - (1 + \tfrac 1 k) p(r)$,\\
+%$\inprod{p}{\ell'(r)} = (1+\tfrac 1 k)(1 - p(r)) + \tfrac 1 k (|r|-1) = 1 + \tfrac 1 k |r| - (1 + \tfrac 1 k) p(r)$, where $p(r) = \sum_{i\in r} p_i$.
+%% It is now easy to see that the optimal $r$ for any fixed cardinality $|r|=c$ is the $c$ most likely labels.
+%So let us ask when it is better to drop an element $i$ from $r$:
+%% If $i$ is the index of the $c$th most likely label (so $p_i = p_{[c]}$)
+%we have $\inprod{p}{\ell'(r)-\ell'(r\setminus\{i\})} = \tfrac 1 k - (1+\tfrac 1 k)p_i$, meaning we will drop elements from $r$ until they all have weight at least $\tfrac 1 {k+1}$.
+%In particular, for distributions close to uniform, $r=\emptyset$ is optimal, already giving us inconsistency\raft{If space (nope) we should spell this out like Jessie did: however ties are broken at $u=0$, pick a distribution with bumps going against the ties, and $u=0$ is still optimal.}.
+%More generally, as $k < n$, the set $P = \{p\in\simplex : \max_{r\in\R'} p(r) < k/(k+1)\}$ is full-dimensional and guarantees that at least one of the top $k$ labels has probability strictly less than $\tfrac 1 {k+1}$.
+%
+%% We now focus on the case where $k=1$; the top-$k$ loss reduces to 0-1 loss in this case.
+%% To show a set of distributions where $\prop{\ell'}(p) \neq \prop{\elltopk}(p)$, we claim that $\vec{0}~\in~\prop{\ell'} \implies \risk{\ell'}(p) = 1$ for any $p$ with $\max_y p_y \leq 1/2$.
+%% Additionally $\risk{\ell_{top-1}}(p) = 1 - \max_y p_y < 1 \implies \vec{0} \not\in \prop{\elltopk}(p)$.
+%
+%% First, $\ell(\vec{0}, \bar{p}) = 1$ for all $p \in \simplex$.
+%% Taking the set $\{y\}$ for any $y \in \Y$, the expected loss $\inprod{p}{\ell'(\{y\})} = 2 (1-p_y) \geq 1$ by assumption on $p$.
+%% %For any $r$ such that $|r| \geq 2$ \jessiet{In general, $|r| \geq k+1$}, we know that  $\ell'(r)_y \geq 1$ for all $y \in \Y$, so the expected loss much be greater than or equal to $1$.
+%% Therefore, we have that $\vec{0} \in \prop{\ell'}(p)$ but $\vec{0} \not\in \prop{\elltopk}(p)$ for any $p$ such that $\max_y p_y \leq 1/2$.
+%
+%
+%
+%%Since we can see that $\ell' \neq \elltopk$, we can then see that $L'$ is not consistent with respect to $\elltopk$.
+%%Similarly, given $L_4(u,y) := \max\left(\frac{1}{k} \sum_{i=1}^k (1 + u_{\setminus y})_{[i]} - s_y, 0\right)$, we can actually see that $L_4$ also embeds $\ell'$.
+%%We will double up on notation and call this discrete loss $\ell_4$ as well, for the sake of matching subscripts of discrete losses to the surrogates that embed them.
 
 
 \subsection{Inconsistency of Lov\'asz hinge}
