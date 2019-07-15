@@ -1273,7 +1273,6 @@ The next lemma shows that if a subset of $\U$ intersect, then their correspondin
 
 In the rest of the section, for shorthand, we write $L(u;p) := \langle p, L(u) \rangle$ and similarly $\ell(r;p)$.
 
-%Bo new
 \begin{lemma} \label{lemma:exposed-shortest}
   Let $U$ be a convex, closed set and $u \not\in U$.
   Then $\inf_{u^* \in U} \|u-u^*\|$ is achieved by some unique $u^* \in U$.
@@ -1283,14 +1282,14 @@ In the rest of the section, for shorthand, we write $L(u;p) := \langle p, L(u) \
   Unique achievement of the infimum is well-known.
   (Achievement follows e.g. because the set $U \cap \{u' : \|u - u'\| \leq d(U,u) + 1\}$ is closed and compact, so the continuous function $u' \mapsto \|u-u'\|$ achieves its infimum.
   Uniqueness follows because for two different points $u',u''$ at the same distance from $u$, the point $0.5u' + 0.5u''$ is strictly closer and also lies in the convex set $U$.)
-  Now suppose $u = u' + \alpha' v'$ where $v'$ exposes $u'$.
+  Now suppose $u = u' + \alpha' v'$ where $v'$ is a unit vector exposing $u'$.
   Then $U$ is contained in the halfspace $\{u'': \langle u'', v'' \rangle \leq \langle u',v' \rangle \}$.
-  We claim $u'$ is the closest point in this halfspace to $u$,\bo{seems obvious, should be proven} so the distance of $u$ to this halfspace equals its distance to $u'$ which equals its distance to $U$.
-  We have already seen that this distance is uniquely achieved by $u' = u^*$.
+  But every point in this halfspace is distance at least $\alpha'$ from $u$, as $\|u-u''\| \geq \langle v, u - u'' \rangle \geq \langle v, u-u'\rangle = \alpha'$.
+  So $u'$ uniquely achieves this minimum distance.
 \end{proof}
-%end Bo new
 
 \begin{lemma} \label{lemma:distance-loss}
+  \raft{What I changed: linear ftn $\to$ affine; name the cell $U_f$ for $f$; also name set of functions $\F$, normals $V_f$, etc}
   If $L$ is a polyhedral loss, then for each $p$, there exists a constant $c$ such that, for all $u$,
     \[ L(u;p) - \inf_{u^* \in \R'} L(u^*;p) \geq c \cdot d(\Gamma(p),u) . \]
 \end{lemma}
@@ -1299,33 +1298,70 @@ In the rest of the section, for shorthand, we write $L(u;p) := \langle p, L(u) \
   If $u \in U$, then both sides are zero.
   So it remains to find a $c$ such that the inequality holds for all $u \not\in U$.
 
-  $L(\cdot;p)$ is a convex polyhedral function, so it is the pointwise maximum over finitely many linear functions.
-  Construct the convex polyhedral function $\hat{L}(\cdot;p)$ by dropping from the max those linear functions that are never equal to $L$ for any $u^* \in U$.
-  We have $\hat{L}(u^*;p) = L(u^*;p)$ for all $u^* \in U$ and $\hat{L}(u;p) \leq L(u;p)$ for all $u \not\in U$.
-  Now $\hat{L}$ is the max over a finite number of linear functions.
-  Each such function $f$ with gradient $\nabla f$ is equal to $\hat{L}$ above a closed, convex cell in the power diagram formed by projecting $\hat{L}(\cdot;p)$.
-  If $f$ has nonzero gradient, its cell overlaps with $U$ exactly at some face of $U$.
-  We will prove that there exists $c_f > 0$ such that, for all $u$ in the corresponding cell of the power diagram,
-    \[ \hat{L}(u;p) \geq L(u^*;p) + c_f \cdot d(U,u) . \]
-  We will then repeat this for the finitely many $f$ with nonzero gradient (which covers all points $u \not\in U$) and take the minimum to obtain the desired $c > 0$.
+  $L(\cdot;p)$ is a convex polyhedral function, so it is the pointwise maximum over finitely many affine functions.
+  Recall that $\risk{L}(p) = \min_{u} L(u;p)$, the Bayes risk.
+  Construct the convex polyhedral function $\hat{L}(\cdot;p)$ by dropping from the maximum those affine functions that are never equal to $L$ for any $u^* \in U$.
+  We have $\hat{L}(u^*;p) = \risk{L}(p)$ for all $u^* \in U$ and $\hat{L}(u;p) \leq L(u;p)$ for all $u \not\in U$.
+  Now $\hat{L}$ is also a maximum over finitely many affine functions $\F$.
+  Each such function $f\in\F$ is equal to $\hat{L}$ above a closed, convex cell $U_f\subseteq\reals^d$ in the power diagram formed by projecting $\hat{L}(\cdot;p)$.
+  If $f$ has nonzero gradient, then $U_f \cap U$ is a face of $U$.
+  We will prove that there exists $c_f > 0$ such that, for all $u\in U_f$,
+    \[ \hat{L}(u;p) \geq \risk{L}(p) + c_f \cdot d(U,u) . \]
+  Taking $c$ to be the minimum of $c_f$ over the finitely many $f\in\F$ with nonzero gradient (which covers all points $u \not\in U$) will complete the proof.
 
-  Consider the set of unit vectors $\{v \in \reals^d : \|v\|=1\}$ and the set of $u^*$ on the boundary of $U$.
-  For all pairs $u^*,v$ such that $v$ exposes $u^*$, let
-    \[ G_{u^*,v} = \left\{ u^* + \beta v : \beta \geq 0 \right\} . \]
-  Note that $\{ u : u \not\in U\} \subseteq \cup_{u^*,v} G_{u^*,v}$.
-  We claim each $G_{u^*,v}$ can be associated with at least one linear $f$ such that $f(u) = \hat{L}(u;p)$ for all $u \in G_{u^*,v}$.
-  \bo{Need to prove this; I think it follows because $G_{u^*,v}$ lies completely within some cell of the power diagram formed by projecting $\hat{L}$.}
-  Hence for all $u$ in $G_{u^*,v}$, we have
+  Consider the set of unit vectors $V = \{v \in \reals^d : \|v\|=1\}$ and the boundary of $U$, denoted $\partial U$.
+  For any $u^*\in\partial U$, $v\in V$ such that $v$ exposes $u^*$, let
+  \raft{NOTE: we need to define ``exposes'' or just phrase in terms of normals: $v$ is normal to $U$ at $u^*$}
+  $G_{u^*,v} = \left\{ u^* + \beta v : \beta \geq 0 \right\}$
+  be the ray leaving $U$ from $u^*$ in direction $v$.
+  % Note that $\{ u : u \not\in U\} \subseteq \cup_{u^*,v} G_{u^*,v}$.
+  For each $f\in\F$, we define the set $R_f \subseteq \partial U \times V$ to be the points $(u^*,v)$ such that there exists $\epsilon>0$ with $G_{u^*,v} \cap U_f = G_{u^*,v} \cap B(u^*,\epsilon)$; that is, such that the ray $G_{u^*,v}$ starts its journey in $U_f$.
+  Futhermore, define $U^*_{f,v} = \{u^* \in \partial U : (u^*,v)\in R_f\}$ and $V_f = \{v\in V: \exists u^*\in U_f\cap U,\: (u^*,v) \in R_f\}$.
+  (That is, $U^*_{f,v}$ is the set of points from which the ray in direction $v$ begins in $U_f$, and $V_f$ is the set of all normal directions in which some ray begins in $U_f$.)
+  Finally, define $G_f = \cup_{(u^*,v)\in R_f} G_{u^*,v}$ as the union of all such rays beginning in $U_f$.
+  Note that $\cup_{f\in\F} G_f \supseteq \reals^d \setminus U$; this follows as every point not in $U$ is on a normal ray out of $U$, which must begin in some cell $U_f$.
+
+  We will prove the following steps:
+  \begin{enumerate}
+  % \item For all $u^*\in\partial U$, $v\in V$ such that $v$ exposes $u^*$, there is some $f\in\F$ such that $u^* \in U_f$ and $G_{u^*,v} \cap U_f \neq \{u^*\}$.
+  %   (That is, the ray $G_{u^*,v}$ begins its journey away from $U$ within $U_f$.)
+    \item For all $f\in\F$, $v\in V_f$, there exists a constant $c_{f,v} > 0$ such that $L(u;p) \geq \risk{L}(p) + c_{f,v} \cdot d(U,u)$ for all $u \in G_{u^*,v}$ and all $u^*\in U^*_{f,v}$.
+    \item For all $f\in \F$, the set $V_f$ is compact, and the map $v \mapsto c_{f,v}$ is continuous on $V_f$.
+    \item Hence, there is an infimum $c_f > 0$ such that $f(u) \geq \risk{L}(p) + c_f \cdot d(U,u)$ for all $u\in G_f$.
+    \item Let $c = \min \{c_f : f\in\F, \nabla f \neq 0\}$; then $L(u;p) \geq \risk{L}(p) + c \cdot d(U,u)$ for all $u \not\in U$.
+  \end{enumerate}
+
+  % (1) Follows because $G_{u^*,v}$ is contained in a cell of the power diagram, which is a set of points where $\hat{L}(\cdot;p) = f(\cdot)$. \bo{Should have more justification.}
+
+  (1) Let $\nabla f$ denote the gradient of the affine function $f$.
+  Note that because $u^*$ is on the boundary of $U$, we have $f(u^*) = \hat{L}(u^*;p) = \risk{L}(p)$.
+  So we can write, using Lemma \ref{lemma:exposed-shortest},
   \begin{align*}
-    \hat{L}(u;p) &= \hat{L}(u^*;p) + (\nabla f) \cdot (d(u^*,u) v)  \\
-                      &= L(u^*;p) + c_{u^*,v} \cdot d(U,u)
+    f(u) &= f(u^*) + (\nabla f)\cdot (u - u^*)  \\
+    f(u) &= f(u^*) + (\nabla f)\cdot (d(u^*,u) v)  \\
+         &= \risk{L}(p) + c_{f,v} \cdot d(U,u)  \\
   \end{align*}
-  where $c_{u^*,v} := (\nabla f) \cdot v$, and we note $u^* = \min_{u' \in U} d(u',u)$. \bo{Should prove this; ought to follow because $v$ exposes $u^*$.}
-  We must have $c_{u^*,v} > 0$, otherwise $G_{u^*,v} \subseteq U$ which is a contradiction.
+  where $c_{f,v} = (\nabla f)\cdot v$.
+  We must have $c_{f,v} > 0$ because the set $U$ minimizes $L(\cdot;p)$, so $f(u) > f(u^*) = \risk{L}(p)$.
+  The result now follows as $L(u;p) \geq \hat L(u;p) \geq f(u)$.
 
-  Now for each $f$, we claim the set $\{u^*, v : \text{$G_{u^*,v}$ is associated with $f$}\}$ is closed.
-  This follows because the set of $u^*$ such that $f(u^*) = \hat{L}(u^*;p)$ is closed, and for fixed $u^*$, the set of $v$ such that $G_{u^*,v}$ is in the cell of the power diagram is also closed.\bo{Should prove this.}
-  The set is also bounded and the map $(u^*,v) \mapsto (\nabla f)\cdot v =: c_{u^*,v}$ is continuous, so the infimum over all positive $c_{u^*,v}$ is achieved by some positive member $c_f > 0$.
+  (2) The intersection $U_f \cap U$ is a face of $U$, and thus decomposes as the union of relative interiors of subfaces, $U_f \cap U = \cup_i \mathrm{ri}(F_i)$.
+  For each $i$, let $V_i = \{v\in V: \exists u^*\in \mathrm{ri}(F_i),\: (u^*,v)\in R_f\}$.
+  % set $N_U(u^*)$ is the same for all $u^*\in\mathrm{ri}(F_i)$~\cite{lu2008normal}.
+  % \raft{That is a total punt reference---not sure the result is in there, but it easily could be!}
+  For any $v\in V_i$, we may consider the power diagram restricted to $A$, the affine hull of $\{u + \alpha v: u\in U, \alpha\in\reals\}$.
+  As there is some $u^*\in U$ such that $(u^*,v)\in R_f$, in particular, $U_f\cap A$ intersects $A\cap\mathrm{ri}(F_i)$ and thus must contain $A\cap\mathrm{ri}(F_i)$.
+  We conclude that $(u',v)\in R_f$ for all other $u'\in \mathrm{ri}(F_i)$.
+  \raft{The idea here is that if you can start in $\mathrm{ri}(F_i)$ and move in direction $v$ and land immediately in $U_f$, then you can do that anywhere from $\mathrm{ri}(F_i)$; otherwise $U_f$ intersects only part of $\mathrm{ri}(F_i)$ (at least when restricting to $A$), a contradiction.}
+  Thus, we have $\{(u^*,v) \in R_f : u^*\in F_i\} = F_i \times V_i$.
+  For closure, pick any $u^*\in \mathrm{ri}(F_i)$, and consider a sequence $\{v_j\}_j$ with $(u^*,v_j)\in R_f$, and corresponding witnesses $\{\epsilon_j\}_j$.
+  Then we have $u^* + \epsilon_j v_j \in U_f$ for all $j$, and as $u^*\in U_f$ and $U_f$ is closed and convex, the limiting point must be contained in $U_f$ as well.
+  \raft{Thus is totally bogus actually, since the limiting point could be $u^*$ itself.  Need a different approach I think.}
+  We have now shown $V_f$ to be the union of finitely many closed convex sets, and thus closed.
+  Boundedness follows as $V$ is bounded.
+  Finally, $c_{f,v}$ is linear in $v$, and thus continuous.
+
+  Steps (3) and (4) are immediate and complete the proof.
 \end{proof}
 
 \begin{theorem} \label{thm:app-eps-thick-sep}
@@ -1376,7 +1412,7 @@ We next show that $\U = \{u \in \{0,1\}^n : \|u\|_0 \leq k\}$ is always represen
   Now consider the loss of $u'$ which is the same as $u$ but with $u_i' = u_{[k+1]}$.
   Then $L'(u')_y \leq L'(u)_y$ when $y=i$ and $L'(u')_y = L'(u)_y$ when $y\neq i$.
   From this we see that without loss of generality, $u_{[k+1]} = \cdots = u_{[n]}$.
-  
+
   Next, we show that $L'$ is invariant in the $\ones$ direction:
   \begin{align*}
     L'(u + \alpha \ones)_y &= \left( 1 - (u_y + \alpha) + \frac{1}{k} \sum_{i=1}^k ((u + \alpha) - e_y)_{[i]} \right)_+\\
