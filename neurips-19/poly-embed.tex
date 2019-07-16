@@ -718,10 +718,12 @@ These results cast doubt on the effectiveness of the Lov\'asz hinge in practice.
 % 7.14.19- proposed version for arXiv
 \btw{The story we discussed: YK show $L'$ is inconsistent.  Our framework lets us ask: with what discrete loss \emph{is} $L'$ consistent?  (It also assures us that $L'$ is consistent for something...) Oh look, $L'$ embeds something which is $\elltopk$ plus some other term, so (a) we can see very clearly what $L'$ ``is doing'', and (b) we can see where to look for distributions yielding inconsistency, namely ones for which we actually prefer to report a set with $|r|<k$.}
 
-In certain classification problems, it is common to predict a set of possible labels.
-As one instance, for $k<n$ the top-$k$ classification problem has reports $\R := \{r \subseteq [n] : |r| = k\}$, with label $y \in [n]$.
-The top-k loss is given by $\elltopk : r \mapsto \Ind{y \not\in r}$, allowing some tolerance for error when ground truth may be ambiguous, as is common for object identification in images.
-Surrogates for this problem commonly take reports $u\in\reals^n$, with the link $\psi(u) = \{u_{[1]},\ldots,u_{[k]}\}$, where $u_{[i]}$ is the $i^{th}$ largest component of $u$, with ties broken arbitrarily.
+% As one instance, the top-$k$ classification problem is to predict the set of $k$ most likely labels; formally, we have $\R := \{r \subseteq [n] : |r| = k\}$, $\Y = [n]$, 
+% $1<k<n$, and discrete loss $\elltopk : r \mapsto \Ind{y \not\in r}$.
+In certain classification problems when ground truth may be ambiguous, such as object identification, it is common to predict a set of possible labels.
+As one instance, the top-$k$ classification problem is to predict the set of $k$ most likely labels; formally, we have $\R := \{r \in \{0,1\}^n : \|r\|_0 = k\}$, $1<k<n$, $\Y = [n]$, and discrete loss $\elltopk(r)_y = 1-r_y$.
+Surrogates for this problem commonly take reports $u\in\reals^n$, with the link $\psi(u) = \{u_{[1]},\ldots,u_{[k]}\}$, where $u_{[i]}$ is the $i^{th}$ largest entry of $u$.
+% , with ties broken arbitrarily.
 
 \citet{lapin2015top, lapin2016loss, lapin2018analysis} provide the following convex surrogate loss for this problem, which \citet{yang2018consistency} show to be inconsistent:%
 \footnote{Yang and Koyejo also introduce a consistent surrogate, but it is non-convex.}
@@ -729,9 +731,16 @@ Surrogates for this problem commonly take reports $u\in\reals^n$, with the link 
 L^k(u)_y := \left( 1-u_y + \tfrac{1}{k} \textstyle\sum_{i=1}^k (u - e_y)_{[i]} \right)_+~,
 \end{align}
 where $e_y$ is $1$ in component $y$ and 0 elsewhere.
+With our framework, we can say more.
+Specifically, while $(L^k,\psi)$ is not consistent for $\elltopk$, since $L^k$ is polyhedral (Lemma~\ref{lem:top-k-polyhedral}), we know from Theorem~\ref{thm:poly-embeds-discrete} that it embeds \emph{some} discrete loss $\ell^k$, and from Theorem~\ref{thm:eps-thick-calibrated} there is a link $\psi'$ such that $(L^k,\psi')$ is calibrated (and consistent) for $\ell^k$.
+We therefore turn to deriving this discrete loss $\ell^k$.
+
 For concreteness, consider the case with $k = 2$ over $n=3$ outcomes.
-%Without loss of generality, suppose $u$ is sorted in decreasing order, i.e. $u_1 \geq u_2 \geq u_3 = 0$ by invariance in the $\ones$ direction, shown in the Appendix.
 We can re-write $L^2(u)_y = \left(1 - u_y + \tfrac 1 2 (u_{[1]}+ u_{[2]} - \min(1,u_y))\right)_+$.
+By inspection, we can derive the properties elicited by $\elltop{2}$ and $L^2$, respectively, which reveals that the set $\R'$ consisting of all permutations of $(1,0,0)$, $(1,1,0)$, and $(2,1,0)$, are always represented among the minimizers of $L^2$.
+Thus, $L^2$ embeds the loss $\ell^2(r)_y = $ \raf{Jessie fill in}.
+Moreover, we can visually inspect the corresponding properties to immediately see why $L^2$ is inconsistent (Fig.~\ref{fig:top-k-simplices}): for distributions where the two least likely labels are roughly equally (un)likely, the minimizer will put all weight on the most likely label, and thus unable to distinguish the other two.
+More generally, $L^2$ cannot be consistent because the property it embeds does not ``refine'' (subdivide) the top-$k$ property, so not just $\psi$, but \emph{no} link function, could make $L^2$ consistent.
 
 \begin{figure}
 	\begin{minipage}{0.42\linewidth}
@@ -745,25 +754,28 @@ We can re-write $L^2(u)_y = \left(1 - u_y + \tfrac 1 2 (u_{[1]}+ u_{[2]} - \min(
 		\includegraphics[width=\linewidth]{tikz/finite-surrogate-top-k}
 		\label{fig:finite-surrogate-top-k}
 	\end{minipage}
-	\caption{Minimizers of $\inprod{p}{\elltop{2}}$ and $\inprod{p}{\ell^2}$, respectively, varying $p$ over $\Delta_3$.}
+	\caption{Minimizers of $\inprod{p}{\elltop{2}}$ and $\inprod{p}{\ell^2}$, respectively, varying $p$ over $\Delta_3$. \raf{The projection is off somehow; uniform distribution should be the centroid, and more generally, both figures should be rotationally symmetric.}}
 	\label{fig:top-k-simplices}
 \end{figure}
 
-Figure~\ref{fig:top-k-simplices} (left) gives a map of the property values of $\gamma^{\text{top-2}} := \prop{\elltop{2}}$ over $\Delta_3$.
-Similarly, for every distribution $p \in \Delta_3$, $\inprod{p}{L^2}$ has a minimizer in the set $\R'$ composed of the tuples shown in Figure~\ref{fig:top-k-simplices} (right), and thus $\risk{L^2} = \risk{\ell^2}$, where $\ell^2 := L^2|_{\R'}$, so Figure~\ref{fig:top-k-simplices} (right) shows $\gamma^2 := \prop{\ell^2}$.
-%Therefore, we know $L^2$ embeds $\ell^2$ by Proposition~\ref{prop:embed-bayes-risks}.
-%(Each cell in this simplex is a level set $\gamma^{\text{top-2}}_r$ and corresponds to a flat piece of the Bayes Risk $\risk{\elltop{2}}$.)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Jessie's version here 7/16/2019
 
-By visual inspection, we can observe there is no ``refining'' mapping from $\gamma^{\text{top-2}}$ to $\gamma^2$.
-In refining, we loosely mean that, for some $j \in \R$, there is no $I \subseteq \reals^n$ such that $\cup_{i \in I}\gamma^2_i = \gamma^{\text{top-2}}_{j}$.
-%If such a mapping existed, it would allude to one possible consistent link $\psi$ by which $L^2$ embeds $\elltop{2}$.
-Conversely, we can ``refine'' $\prop{L^2}$ down to $\prop{\ell^2}$ by using the axiom of choice to construct $\R'$.
+% Figure~\ref{fig:top-k-simplices} (left) gives a map of the property values of $\gamma^{\text{top-2}} := \prop{\elltop{2}}$ over $\Delta_3$.
+% Similarly, for every distribution $p \in \Delta_3$, $\inprod{p}{L^2}$ has a minimizer in the set $\R'$ composed of the tuples shown in Figure~\ref{fig:top-k-simplices} (right), and thus $\risk{L^2} = \risk{\ell^2}$, where $\ell^2 := L^2|_{\R'}$, so Figure~\ref{fig:top-k-simplices} (right) shows $\gamma^2 := \prop{\ell^2}$.
+% %Therefore, we know $L^2$ embeds $\ell^2$ by Proposition~\ref{prop:embed-bayes-risks}.
+% %(Each cell in this simplex is a level set $\gamma^{\text{top-2}}_r$ and corresponds to a flat piece of the Bayes Risk $\risk{\elltop{2}}$.)
 
-\jessie{Not sure if this is too much detail...}
-Since $\prop{\elltop{2}}$ does not refine $\prop{L^2}$, then $L^2$ does not embed $\elltop{2}$.
-For example, we can take distributions $p_1 \in \gamma^{top-2}_{\{1,2\}}$ and $p_2 \in \gamma^{top-2}_{\{1,3\}}$ such that $p_1, p_2 \in \Gamma_{(1,0,0)}$.
-Regardless of $\psi((1,0,0))$, for either $p_1$ or $p_2$, we will observe $\psi((1,0,0)) \not \in \argmin_u \inprod{p_i}{\elltop{2}(u)}$.
-Thus, we see that $L^2$ is not a consistent surrogate for $\elltop{2}$.
+% By visual inspection, we can observe there is no ``refining'' mapping from $\gamma^{\text{top-2}}$ to $\gamma^2$.
+% In refining, we loosely mean that, for some $j \in \R$, there is no $I \subseteq \reals^n$ such that $\cup_{i \in I}\gamma^2_i = \gamma^{\text{top-2}}_{j}$.
+% %If such a mapping existed, it would allude to one possible consistent link $\psi$ by which $L^2$ embeds $\elltop{2}$.
+% Conversely, we can ``refine'' $\prop{L^2}$ down to $\prop{\ell^2}$ by using the axiom of choice to construct $\R'$.
+
+% \jessie{Not sure if this is too much detail...}
+% Since $\prop{\elltop{2}}$ does not refine $\prop{L^2}$, then $L^2$ does not embed $\elltop{2}$.
+% For example, we can take distributions $p_1 \in \gamma^{top-2}_{\{1,2\}}$ and $p_2 \in \gamma^{top-2}_{\{1,3\}}$ such that $p_1, p_2 \in \Gamma_{(1,0,0)}$.
+% Regardless of $\psi((1,0,0))$, for either $p_1$ or $p_2$, we will observe $\psi((1,0,0)) \not \in \argmin_u \inprod{p_i}{\elltop{2}(u)}$.
+% Thus, we see that $L^2$ is not a consistent surrogate for $\elltop{2}$.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% old version submitted to NuerIPS%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
