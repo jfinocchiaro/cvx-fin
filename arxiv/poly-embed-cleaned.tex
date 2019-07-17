@@ -1,0 +1,1302 @@
+\documentclass[12pt]{article}
+\PassOptionsToPackage{numbers, compress, sort}{natbib}
+\usepackage[preprint]{neurips_2019}
+
+\usepackage[utf8]{inputenc} 
+\usepackage[T1]{fontenc}    
+\usepackage{hyperref}       
+\usepackage{url}            
+\usepackage{booktabs}       
+\usepackage{amsfonts}       
+\usepackage{nicefrac}       
+\usepackage{microtype}      
+
+\usepackage{mathtools, amsmath, amssymb, amsthm, graphicx, verbatim}
+\usepackage{color}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.2}
+\hypersetup{colorlinks,breaklinks,
+            linkcolor=darkblue,urlcolor=darkblue,
+            anchorcolor=darkblue,citecolor=darkblue}
+\usepackage{wrapfig}
+\usepackage[font=small]{caption}
+\usepackage{subcaption}
+\usepackage[colorinlistoftodos,textsize=tiny]{todonotes} 
+\usepackage{bbm}
+\usepackage{xspace}
+
+\usetikzlibrary{calc}
+\newcommand{\Comments}{1}
+\newcommand{\mynote}[2]{\ifnum\Comments=1\textcolor{#1}{#2}\fi}
+\newcommand{\mytodo}[2]{\ifnum\Comments=1
+  \todo[linecolor=#1!80!black,backgroundcolor=#1,bordercolor=#1!80!black]{#2}\fi}
+\newcommand{\raf}[1]{\mynote{green}{[RF: #1]}}
+\newcommand{\raft}[1]{\mytodo{green!20!white}{RF: #1}}
+\newcommand{\jessie}[1]{\mynote{purple}{[JF: #1]}}
+\newcommand{\jessiet}[1]{\mytodo{purple!20!white}{JF: #1}}
+\newcommand{\bo}[1]{\mynote{blue}{[Bo: #1]}}
+\newcommand{\botodo}[1]{\mytodo{blue!20!white}{[Bo: #1]}}
+\newcommand{\btw}[1]{}
+\ifnum\Comments=1               
+  \setlength{\marginparwidth}{1in}
+\fi
+
+
+\newcommand{\reals}{\mathbb{R}}
+\newcommand{\posreals}{\reals_{>0}}
+\newcommand{\dom}{\mathrm{dom}}
+
+\newcommand{\prop}[1]{\mathrm{prop}[#1]}
+\newcommand{\eliccts}{\mathrm{elic}_\mathrm{cts}}
+\newcommand{\eliccvx}{\mathrm{elic}_\mathrm{cvx}}
+\newcommand{\elicpoly}{\mathrm{elic}_\mathrm{pcvx}}
+\newcommand{\elicembed}{\mathrm{elic}_\mathrm{embed}}
+
+\newcommand{\cell}{\mathrm{cell}}
+
+\newcommand{\abstain}[1]{\mathrm{abstain}_{#1}}
+\newcommand{\mode}{\mathrm{mode}}
+
+\newcommand{\simplex}{\Delta_\Y}
+
+\newcommand{\C}{\mathcal{C}}
+\newcommand{\D}{\mathcal{D}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\I}{\mathcal{I}}
+\newcommand{\R}{\mathcal{R}}
+\newcommand{\U}{\mathcal{U}}
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\Y}{\mathcal{Y}}
+
+\newcommand{\risk}[1]{\underline{#1}}
+\newcommand{\inprod}[2]{\langle #1, #2 \rangle}
+\newcommand{\inter}[1]{\mathring{#1}}
+\newcommand{\expectedv}[3]{\E_{Y\sim{#3}} {#1}(#2,Y)}
+\newcommand{\toto}{\rightrightarrows}
+\newcommand{\strip}{\mathrm{strip}}
+\newcommand{\trim}{\mathrm{trim}}
+\newcommand{\fplc}{finite-piecewise-linear and convex\xspace} 
+\newcommand{\conv}{\mathrm{conv}}
+\newcommand{\indopp}{\bar{\mathbbm{1}}}
+\newcommand{\ones}{\mathbbm{1}}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+
+\newcommand{\Ind}[1]{\ones\{#1\}}
+
+\newcommand{\hinge}{L_{\mathrm{hinge}}}
+\newcommand{\ellzo}{\ell_{\text{0-1}}}
+\newcommand{\ellabs}[1]{\ell_{#1}}
+\newcommand{\elltopk}{\ell^{\text{top-$k$}}}
+\newcommand{\elltop}[1]{\ell^{\text{top-$#1$}}}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\arginf}{arg\,inf}
+\DeclareMathOperator*{\sgn}{sgn}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{conjecture}{Conjecture}
+
+\newtheorem{definition}{Definition}
+\newtheorem{assumption}{Assumption}
+
+
+\title{An Embedding Framework for Consistent Polyhedral Surrogates}
+\author{
+ Jessie Finocchiaro\\
+ \texttt{jefi8453@colorado.edu}\\
+ CU Boulder
+ \And
+ Rafael Frongillo\\
+ \texttt{raf@colorado.edu}\\
+ CU Boulder
+ \And
+ Bo Waggoner\\
+ \texttt{bwag@colorado.edu}\\
+ Microsoft Research, CU Boulder
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We formalize and study the natural approach of designing convex surrogate loss functions via embeddings for problems such as classification or ranking. In this approach, one embeds each of the finitely many predictions (e.g. classes) as a point in $\reals^d$, assigns the original loss values to these points, and convexifies the loss in between to obtain a surrogate.
+We prove that this approach is equivalent, in a strong sense, to working with polyhedral (piecewise linear convex) losses.
+Moreover, given any polyhedral loss $L$, we give a construction of a link function through which $L$ is a consistent surrogate for the loss it embeds.
+We go on to illustrate the power of this embedding framework with succinct proofs of consistency or inconsistency of various polyhedral surrogates in the literature.
+\end{abstract}
+
+
+
+\section{Introduction}\label{sec:intro}
+
+
+Convex surrogate losses are a central building block in machine learning for classification and classification-like problems.
+A growing body of work seeks to design and analyze convex surrogates for given loss functions, and more broadly, understand when such surrogates can and cannot be found.
+For example, recent work has developed tools to bound the required number of dimensions of the surrogate's hypothesis space~\cite{frongillo2015elicitation,  ramaswamy2016convex}.
+Yet in some cases these bounds are far from tight, such as for \emph{abstain loss} (classification with an abstain option)~\cite{bartlett2008classification, yuan2010classification, ramaswamy2016convex, ramaswamy2018consistent, zhang2018reject}.
+Furthermore, the kinds of strategies available for constructing surrogates, and their relative power, are not well-understood.
+
+We augment this literature by studying a particularly natural approach for finding convex surrogates, wherein one ``embeds'' a discrete loss.
+Specifically, we say a convex surrogate $L$ embeds a discrete loss $\ell$ if there is an injective embedding from the discrete reports (predictions) to a vector space such that (i) the original loss values are recovered, and (ii) a report is $\ell$-optimal if and only if the embedded report is $L$-optimal.
+If this embedding can be extended to a calibrated link function, which maps approximately $L$-optimal reports to $\ell$-optimal reports, consistency follows~\cite{agarwal2015consistent}.
+Common examples which follow this general construction include hinge loss as a surrogate for 0-1 loss and the abstain surrogate mentioned above.
+
+Using tools from property elicitation, we show a tight relationship between such embeddings and the class of polyhedral (piecewise-linear convex) loss functions.
+In particular, by focusing on Bayes risks, we show that every discrete loss is embedded by some polyhedral loss, and every polyhedral loss function embeds some discrete loss.
+Moreover, we show that any polyhedral loss gives rise to a calibrated link function to the loss it embeds,
+thus giving a very general framework to construct consistent convex surrogates for arbitrary losses.
+
+
+\paragraph{Related works.}
+The literature on convex surrogates focuses mainly on smooth surrogate losses~\cite{crammer2001algorithmic,bartlett2006convexity,bartlett2008classification, duchi2018multiclass, williamson2016composite, reid2010composite}.
+Nevertheless, nonsmooth losses, such as the polyhedral losses we consider, have been proposed and studied for a variety of classification-like problems~\cite{yang2018consistency,yu2018lovasz,lapin2015top}.
+A notable addition to this literature is~\citet{ramaswamy2018consistent}, who argue that nonsmooth losses may enable dimension reduction of the prediction space (range of the surrogate hypothesis) relative to smooth losses, illustrating this conjecture with a surrogate for \emph{abstain loss} needing only $\log n$ dimensions for $n$ labels, whereas the best known smooth loss needs $n-1$.
+Their surrogate is a natural example of an embedding (cf.~Section~\ref{sec:abstain}), and serves as inspiration for our work.
+
+While property elicitation has by now an extensive literature~\cite{savage1971elicitation,osband1985information-eliciting,lambert2008eliciting,gneiting2011making,steinwart2014elicitation,frongillo2015vector-valued,fissler2016higher,lambert2018elicitation}, these works are mostly concerned with point estimation problems.
+Literature directly connecting property elicitation to consistency is sparse, with the main reference being~\citet{agarwal2015consistent}; note however that they consider single-valued properties, whereas properties elicited by general convex losses are necessarily set-valued.
+
+
+
+\section{Setting}
+\label{sec:setting}
+
+For discrete prediction problems like classification, due to hardness of directly optimizing a given discrete loss, many machine learning algorithms can be thought of as minimizing a surrogate loss function with better optimization qualities, e.g., convexity.
+Of course, to show that this surrogate loss successfully addresses the original problem, one needs to establish consistency, which depends crucially on the choice of link function that maps surrogate reports (predictions) to original reports.
+After introducing notation, and terminology from property elicitation, we thus give a sufficient condition for consistency (Def.~\ref{def:calibrated}) which depends solely on the conditional distribution over $\Y$.
+
+\subsection{Notation and Losses}
+
+Let $\Y$ be a finite outcome (label) space, and throughout let $n=|\Y|$.
+The set of probability distributions on $\Y$ is denoted $\simplex\subseteq\reals^{\Y}$, represented as vectors of probabilities.
+We write $p_y$ for the probability of outcome $y \in \Y$ drawn from $p \in \simplex$.
+
+We assume that a given discrete prediction problem, such as classification, is given in the form of a \emph{discrete loss} $\ell:\R\to\reals^\Y_+$, which maps a report (prediction) $r$ from a finite set $\R$ to the vector of loss values $\ell(r) = (\ell(r)_y)_{y\in\Y}$ for each possible outcome $y\in\Y$.
+We will assume throughout that the given discrete loss is \emph{non-redundant}, meaning every report is uniquely optimal (minimizes expected loss) for some distribution $p\in\simplex$.
+Similarly, surrogate losses will be written $L:\reals^d\to\reals^\Y_+$, typically with reports written $u\in\reals^d$.
+We write the corresponding expected loss when $Y \sim p$ as $\inprod{p}{\ell(r)}$ and $\inprod{p}{L(u)}$.
+The \emph{Bayes risk} of a loss $L:\reals^d\to\reals^\Y_+$ is the function $\risk{L}:\simplex\to\reals_+$ given by $\risk{L}(p) := \inf_{u\in\reals^d} \inprod{p}{L(u)}$; naturally for discrete losses we write $\risk{\ell}$ (and the infimum is over $\R$).
+
+For example, 0-1 loss is a discrete loss with $\R = \Y = \{-1,1\}$
+given by $\ellzo(r)_y = \Ind{r \neq y}$, with Bayes risk $\risk{\ellzo}(p) = 1-\max_{y\in\Y} p_y$.
+Two important surrogates for $\ellzo$ are hinge loss $\hinge(u)_y = (1-yu)_+$, where $(x)_+ = \max(x,0)$, and logistic loss $L(u)_y = \log(1+\exp(-yu))$ for $u\in\reals$.
+
+Most of the surrogates $L$ we consider will be \emph{polyhedral}, meaning piecewise linear and convex; we therefore briefly recall the relevant definitions.
+In $\reals^d$, a \emph{polyhedral set} or \emph{polyhedron} is the intersection of a finite number of closed halfspaces.
+A \emph{polytope} is a bounded polyhedral set.
+A convex function $f:\reals^d\to\reals$ is \emph{polyhedral} if its epigraph is polyhedral, or equivalently, if it can be written as a pointwise maximum of a finite set of affine functions~\citep{rockafellar1997convex}.
+\begin{definition}[Polyhedral loss]
+  A loss $L: \reals^d \to \reals^{\Y}_+$ is \emph{polyhedral} if $L(u)_y$ is a polyhedral (convex) function of $u$ for each $y\in\Y$.
+\end{definition}
+For example, hinge loss is polyhedral, whereas logistic loss is not.
+
+\subsection{Property Elicitation}
+
+To make headway, we will appeal to concepts and results from the property elicitation literature, which elevates the \emph{property}, or map from distributions to optimal reports, as a central object to study in its own right.
+In our case, this map will often be multivalued, meaning a single distribution could yield multiple optimal reports.
+(For example, when $p=(1/2,1/2)$, both $y=1$ and $y=-1$ optimize 0-1 loss.)
+To this end, we will use double arrow notation to mean a mapping to all nonempty subsets, so that $\gamma: \simplex \toto \R$ is shorthand for $\Gamma: \simplex \to 2^{\R} \setminus \emptyset$.
+See the discussion following Definition~\ref{def:elicits} for conventions regarding $\R$, $\Gamma$, $\gamma$, $L$, $\ell$, etc.
+
+\begin{definition}[Property, level set]\label{def:property}
+  A \emph{property} is a function $\Gamma:\simplex\toto\R$.
+  The \emph{level set} of $\Gamma$ for report $r$ is the set $\Gamma_r := \{p : r \in \Gamma(p)\}$.
+\end{definition}
+
+
+Intuitively, $\Gamma(p)$ is the set of reports which should be optimal for a given distribution $p$, and $\Gamma_r$ is the set of distributions for which the report $r$ should be optimal.
+For example, the \emph{mode} is the 
+property $\mode(p) = \argmax_{y\in\Y} p_y$, and captures the set of optimal reports for 0-1 loss: for each distribution over the labels, one should report the most likely label.
+In this case we say 0-1 loss \emph{elicits} the mode, as we formalize below.
+
+\begin{definition}[Elicits]
+  \label{def:elicits}
+  A loss $L:\R\to\reals^\Y_+$, \emph{elicits} a property $\Gamma:\simplex \toto \R$ if
+  \begin{equation}
+    \forall p\in\simplex,\;\;\;\Gamma(p) = \argmin_{r \in \R} \inprod{p}{L(r)}~.
+  \end{equation}
+  As $\Gamma$ is uniquely defined by $L$, we write $\prop{L}$ to refer to the property elicited by a loss $L$.
+\end{definition}
+
+For finite properties (those with $|\R|<\infty$) and discrete losses, we will use lowercase notation $\gamma$ and $\ell$, respectively, with reports $r\in\R$; for surrogate properties and losses we use $\Gamma$ and $L$, with reports $u\in\reals^d$.
+For general properties and losses, we will also use $\Gamma$ and $L$, as above.
+
+
+\subsection{Links and Embeddings}
+
+To assess whether a surrogate and link function align with the original loss, we turn to the common condition of \emph{calibration}.
+Roughly, a surrogate and link are calibrated if the best possible expected loss achieved by linking to an incorrect report is strictly suboptimal.
+
+
+
+\begin{definition}
+  \label{def:calibrated}
+  Let original loss $\ell:\R\to\reals^\Y_+$, proposed surrogate $L:\reals^d\to\reals^\Y_+$, and link function $\psi:\reals^d\to\R$ be given.
+  We say $(L,\psi)$ is \emph{calibrated} with respect to $\ell$ if
+for all $p \in \simplex$,
+  \begin{equation}
+    \label{eq:calibrated}
+  \inf_{u \in \reals^d : \psi(u) \not\in \gamma(p)} \inprod{p}{L(u)} > \inf_{u \in \reals^d} \inprod{p}{L(u)}~.
+  \end{equation}
+\end{definition}
+It is well-known that calibration implies \emph{consistency}, in the following sense (cf.~\cite{agarwal2015consistent}).
+Given feature space $\X$, fix a distribution $D \in \Delta(\X\times\Y)$.
+Let $L^*$ be the best possible expected $L$-loss achieved by any hypothesis $H:\X\to\reals^d$, and $\ell^*$ the best expected $\ell$-loss for any hypothesis $h:\X\to\R$, respectively.
+Then $(L,\psi)$ is consistent if a sequence of surrogate hypotheses $H_1,H_2,\ldots$ whose $L$-loss limits to $L^*$, then the $\ell$-loss of $\psi\circ H_1,\psi \circ H_2, \ldots$ limits to $\ell^*$.
+As Definition~\ref{def:calibrated} does not involve the feature space $\X$, we will drop it for the remainder of the paper.
+
+Several consistent convex surrogates in the literature can be thought of as ``embeddings'', wherein one maps the discrete reports to a vector space, and finds a convex loss which agrees with the original loss.
+A key condition is that the original reports should be optimal exactly when the corresponding embedded points are optimal.
+We formalize this notion as follows.
+\begin{definition}\label{def:loss-embed}
+  A loss $L:\reals^d\to\reals^\Y$ \emph{embeds} a loss $\ell:\R\to\reals^\Y$ if there exists some injective embedding $\varphi:\R\to\reals^d$ such that
+  (i) for all $r\in\R$ we have $L(\varphi(r)) = \ell(r)$, and (ii) for all $p\in\simplex,r\in\R$ we have
+  \begin{equation}\label{eq:embed-loss}
+    r \in \prop{\ell}(p) \iff \varphi(r) \in \prop{L}(p)~.
+  \end{equation}
+\end{definition}
+
+Note that it is not clear if embeddings give rise to calibrated links; indeed, apart from mapping the embedded points back to their original reports via $\psi(\varphi(r)) = r$, how to map the remaining values is far from clear.
+We address the question of when embeddings lead to calibrated links in Section~\ref{sec:calibration}.
+
+
+To illustrate the idea of embedding, let us examine hinge loss in detail as a surrogate for 0-1 loss for binary classification.
+Recall that we have $\R = \Y = \{-1, +1\}$, with $\hinge(u)_y = (1 - uy)_+$ and $\ellzo(r)_y := \Ind{r\neq y}$, typically with link function $\psi(u) = \sgn(u)$.
+We will see that hinge loss embeds (2 times) 0-1 loss, via the embedding $\varphi(r) = r$.
+For condition (i), it is straightforward to check that $\hinge(r)_y = 2\ellzo(r)_y$ for all $r,y\in\{-1,1\}$.
+For condition (ii), let us compute the property each loss elicits, i.e., the set of optimal reports for each $p$:
+\[
+\prop{\ellzo}(p) = \begin{cases}
+1 & p_1 > 1/2 \\
+\{-1,1\} & p_1 = 1/2\\
+-1 & p_1 < 1/2
+\end{cases}
+\qquad
+\prop{L_{hinge}}(p) = \begin{cases}
+[1,\infty) & p_1 = 1\\
+1 & p_1 \in (1/2,1) \\
+[-1,1] & p_1 = 1/2\\
+-1& p_1 \in (0, 1/2)\\
+(-\infty, -1]& p_1 = 0
+\end{cases}~.
+\]
+In particular, we see that $-1 \in \prop{\ellzo}(p) \iff p_1 \in [0, 1/2] \iff -1 \in \prop{\hinge}(p)$, and $1 \in \prop{\ellzo}(p) \iff p_1 \in [1/2,1] \iff 1 \in \prop{\hinge}(p)$.
+With both conditions of Definition~\ref{def:loss-embed} satisfied, we conclude that $\hinge$ embeds $2\ellzo$.
+In this particular case, it is known $(\hinge,\psi)$ is calibrated for $\psi(u) = \sgn(u)$; we address in Section~\ref{sec:calibration} the interesting question of whether embeddings lead to calibration in general.
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Embeddings and Polyhedral Losses}
+\label{sec:poly-loss-embed}
+
+In this section, we establish a tight relationship between the technique of embedding and the use of polyhedral (piecewise-linear convex) surrogate losses.
+We defer to the following section the question of when such surrogates are consistent.
+
+To begin, we observe that, somewhat surprisingly, our embedding condition in Definition~\ref{def:loss-embed} is equivalent to merely matching Bayes risks.
+This useful fact will drive many of our results.
+
+\begin{proposition}\label{prop:embed-bayes-risks}
+  A loss $L$ embeds discrete loss $\ell$ if and only if $\risk{L}=\risk{\ell}$.
+\end{proposition}
+\begin{proof}
+  Throughout we have $L:\reals^d\to\reals^\Y_+$, $\ell:\R\to\reals^\Y_+$, and define $\Gamma = \prop{L}$ and $\gamma = \prop{\ell}$.
+  Suppose $L$ embeds $\ell$ via the embedding $\varphi$.
+  Letting $\U := \varphi(\R)$, define $\gamma':\simplex \toto \U$ by $\gamma' : p \mapsto \Gamma(p)\cap \U$.
+  To see that $\gamma'(p) \neq \emptyset$ for all $p\in\simplex$, note that by the definition of $\gamma$ as the property elicited by $\ell$ we have some $r \in \gamma(p)$, and by the embedding condition~\eqref{eq:embed-loss}, $\varphi(r) \in \Gamma(p)$.
+  By Lemma~\ref{lem:loss-restrict}, we see that $L|_{\U}$ (the loss $L$ with reports restricted to $\U$) elicits $\gamma'$ and $\risk{L} = \risk{L|_{\U}}$.
+  As $L(\varphi(\cdot)) = \ell(\cdot)$ by the embedding, we have
+  \begin{equation*}
+    \risk{\ell}(p) = \min_{r \in \R}\inprod{p}{\ell(r)} = \min_{r \in \R}\inprod{p}{L(\varphi(r))} = \min_{u \in \U}\inprod{p}{L(u)} = \risk{L|_\U}~,
+  \end{equation*}
+  for all $p\in\simplex$.
+  Combining with the above, we now have $\risk{L} = \risk{\ell}$.
+
+  For the reverse implication, assume that $\risk{L} = \risk{\ell}$.
+  In what follows, we implicitly work in the affine hull of $\simplex$, so that interiors are well-defined, and $\risk{\ell}$ may be differentiable on the (relative) interior of $\simplex$.
+  Since $\ell$ is discrete, $-\risk{\ell}$ is polyhedral as the pointwise maximum of a finite set of linear functions.
+  The projection of its epigraph $E_\ell$ onto $\simplex$ forms a power diagram by Theorem~\ref{thm:aurenhammer}, whose cells are full-dimensional and correspond to the level sets $\gamma_r$ of $\gamma = \prop{\ell}$.
+
+  For each $r\in\R$, let $p_r$ be a distribution in the interior of $\gamma_r$, and let $u_r \in \Gamma(p)$.
+  Observe that, by definition of the Bayes risk and $\Gamma$, for all $u\in\reals^d$ the hyperplane $v \mapsto \inprod{v}{-L(u_r)}$ supports the epigraph $E_L$ of $-\risk{L}$ at the point $(p,-\inprod{p}{L(u)})$ if and only if $u\in\Gamma(p)$.
+  Thus, the hyperplane $v \mapsto \inprod{v}{-L(u_r)}$ supports $E_L = E_\ell$ at the point $(p_r,-\inprod{p_r}{L(u_r)})$, and thus does so at the entire facet $\{(p,-\inprod{p}{L(u_r)}) : p\in\gamma_r\}$; by the above, $u_r \in \Gamma(p)$ for all such distributions as well.
+  We conclude that $u_r \in \Gamma(p) \iff p \in \gamma_r \iff r \in \gamma(p)$, satisfying condition~\eqref{eq:embed-loss} for $\varphi : r \mapsto u_r$.
+  To see that the loss values match, we merely note that the supporting hyperplanes to the facets of $E_L$ and $E_\ell$ are the same, and the loss values are uniquely determined by the supporting hyperplane.
+  (In particular, if $h$ supports the facet corresponding to $\gamma_r$, we have $\ell(r)_y = L(u_r)_y = h(\delta_y)$, where $\delta_y$ is the point distribution on outcome $y$.)
+\end{proof}
+
+
+From this more succinct embedding condition, we can in turn simplify the condition that a loss embeds \emph{some} discrete loss: it does if and only if its Bayes risk is polyhedral.
+(We say a concave function is polyhedral if its negation is a polyhedral convex function.)
+Note that Bayes risk, a function from distributions over $\Y$ to the reals, may be polyhedral even if the loss itself is not.
+
+\begin{proposition}\label{prop:embed-risk-poly}
+  A loss $L$ embeds a discrete loss if and only if $\risk{L}$ is polyhedral.
+\end{proposition}
+\begin{proof}
+  If $L$ embeds $\ell$, Proposition~\ref{prop:embed-bayes-risks} gives us $\risk{L} = \risk{\ell}$, and its proof already argued that $\risk{\ell}$ is polyhedral.
+  For the converse, let $\risk{L}$ be polyhedral; we again examine the proof of Proposition~\ref{prop:embed-bayes-risks}.
+  The projection of $\risk{L}$ onto $\simplex$ forms a power diagram by Theorem~\ref{thm:aurenhammer} with finitely many cells $C_1,\ldots,C_k$, which we can index by $\R := \{1,\ldots,k\}$.
+  Defining the property $\gamma:\simplex\toto\R$ by $\gamma_r = C_r$ for $r\in\R$, we see that the same construction gives us points $u_r \in\reals^d$ such that $u_r \in \Gamma(p) \iff r \in \gamma(p)$.
+  Defining $\ell:\R\to\reals^\Y_+$ by $\ell(r) = L(u_r)$, the same proof shows that $L$ embeds $\ell$.
+\end{proof}
+
+Combining Proposition~\ref{prop:embed-risk-poly} with the observation that polyhedral losses have polyhedral Bayes risks (Lemma~\ref{lem:poly-loss-poly-risk}), we obtain the first direction of our equivalence between polyhedral losses and embedding.
+
+\begin{theorem}\label{thm:poly-embeds-discrete}
+  Every polyhedral loss $L$ embeds a discrete loss.
+\end{theorem}
+
+We now turn to the reverse direction: which discrete losses are embedded by some polyhedral loss?
+Perhaps surprisingly, we show that \emph{every} discrete loss is embeddable,
+using a construction via convex conjugate duality which has appeared several times in the literature (e.g.\ \cite{duchi2018multiclass,abernethy2013efficient,frongillo2014general}).
+Note however that the number of dimensions $d$ required could be as large as $|\Y|$.
+
+\begin{theorem}\label{thm:discrete-loss-poly-embeddable}
+  Every discrete loss $\ell$ is embedded by a polyhedral loss.
+\end{theorem}
+\begin{proof}
+  Let $n = |\Y|$, and let $C:\reals^n \to \reals$ be given by $(-\risk{\ell})^*$, the convex conjugate of $-\risk{\ell}$.
+  From standard results in convex analysis, $C$ is polyhedral as $-\risk{\ell}$ is, and $C$ is finite on all of $\reals^\Y$ as the domain of $-\risk{\ell}$ is bounded~\cite[Corollary 13.3.1]{rockafellar1997convex}.
+  Note that $-\risk{\ell}$ is a closed convex function, as the infimum of affine functions, and thus $(-\risk{\ell})^{**} = -\risk{\ell}$.
+  Define $L:\reals^n\to\reals^\Y$ by $L(u) = C(u)\ones - u$, where $\ones\in\reals^\Y$ is the all-ones vector.
+  We first show that $L$ embeds $\ell$, and then establish that the range of $L$ is in fact $\reals^\Y_+$, as desired.
+
+  We compute Bayes risks and apply Proposition~\ref{prop:embed-bayes-risks} to see that $L$ embeds $\ell$.
+  For any $p\in\simplex$, we have
+  \begin{align*}
+    \risk{L}(p)
+    &= \inf_{u\in\reals^n} \inprod{p}{C(u)\ones - u}\\
+    &= \inf_{u\in\reals^n} C(u) - \inprod{p}{u}\\
+    &= -\sup_{u\in\reals^n} \inprod{p}{u} - C(u)\\
+    &= -C^*(p) = - (-\risk{\ell}(p))^{**} = \risk{\ell}(p)~.
+  \end{align*}
+  It remains to show $L(u)_y \geq 0$ for all $u\in\reals^n$, $y\in\Y$.
+  Letting $\delta_y\in\simplex$ be the point distribution on outcome $y\in\Y$, we have for all $u\in\reals^n$, $L(u)_y \geq \inf_{u'\in\reals^n} L(u')_y = \risk{L}(\delta_y) = \risk{\ell}(\delta_y) \geq 0$, where the final inequality follows from the nonnegativity of $\ell$.
+\end{proof}
+
+
+
+
+\section{Consistency via Calibrated Links}
+\label{sec:calibration}
+
+We have now seen the tight relationship between polyhedral losses and embeddings; in particular, every polyhedral loss embeds some discrete loss.
+The embedding itself tells us how to link the embedded points back to the discrete reports (map $\varphi(r)$ to $r$), but it is not clear when this link can be extended to the remaining reports, and whether such a link can lead to consistency.
+In this section, we give a construction to generate calibrated links for \emph{any} polyhedral loss.
+
+Appendix~\ref{app:calibration} contains the full proof; this section provides a sketch along with the main construction and result.
+The first step is to give a link $\psi$ such that exactly minimizing expected surrogate loss $L$, followed by applying $\psi$, always exactly minimizes expected original loss $\ell$.
+The existence of such a link is somewhat subtle, because in general some point $u$ that is far from any embedding point can minimize expected loss for two very different distributions $p,p'$, making it unclear whether there exists a link choice $\psi(u)$ that is simultaneously optimal for both.
+We show that as we vary $p$ over $\simplex$, there are only finitely many sets of the form $U = \argmin_{u \in \reals^d} \inprod{p}{L(u)}$ (Lemma~\ref{lem:polyhedral-range-gamma}).
+Associating each $U$ with $R_U \subseteq \R$, the set of reports whose embedding points are in $U$, we enforce that all points in $U$ link to some report in $R_U$.
+(As a special case, embedding points must link to their corresponding reports.)
+Proving this is well-defined uses a chain of arguments involving the Bayes risk, ultimately showing that if $u$ lies in multiple $U$, the corresponding report sets $R_U$ all intersect at some $r =: \psi(u)$.
+
+
+Intuitively, to create separation, we just need to ``thicken'' this construction by mapping all approximately-optimal points $u$ to optimal reports $r$.
+Let $\U$ contain all optimal report sets $U$ of the form above.
+A key step in the following definition will be to narrow down a ``link envelope'' $\Psi$ where $\Psi(u)$ denotes the legal or valid choices for $\psi(u)$.
+
+
+\begin{definition} \label{def:eps-thick-link}
+  Given a polyhedral $L$ that embeds some $\ell$, an $\epsilon > 0$, and a norm $\|\cdot\|$, the \emph{$\epsilon$-thickened link} $\psi$ is constructed as follows.
+  First, initialize $\Psi: \reals^d \toto \R$ by setting $\Psi(u) = \R$ for all $u$.
+  Then for each $U \in \U$, for all points $u$ such that $\inf_{u^* \in U} \|u^*-u\| < \epsilon$, update $\Psi(u) = \Psi(u) \cap R_U$.
+  Finally, define $\psi(u) \in \Psi(u)$, breaking ties arbitrarily.
+  If $\Psi(u)$ became empty, then leave $\psi(u)$ undefined.
+\end{definition}
+
+
+
+\begin{theorem}\label{thm:eps-thick-calibrated}
+  Let $L$ be polyhedral, and $\ell$ the discrete loss it embeds from Theorem~\ref{thm:poly-embeds-discrete}.
+  Then for small enough $\epsilon > 0$, the $\epsilon$-thickened link $\psi$ is well-defined and, furthermore, is a calibrated link from $L$ to $\ell$.
+\end{theorem}
+
+\begin{proof}[Sketch]
+  \emph{Well-defined:}
+  For the initial construction above, we argued that if some collection such as $U,U',U''$ overlap at a $u$, then their report sets $R_U, R_{U'}, R_{U''}$ also overlap, so there is a valid choice $r = \psi(u)$.
+  Now, we thicken all sets $U \in \U$ by a small enough $\epsilon$; it can be shown that if the \emph{thickened} sets overlap at $u$, then $U,U',U''$ themselves overlap, so again $R_U, R_{U'}, R_{U''}$ overlap and there is a valid chioce $r = \psi(u)$.
+
+  \emph{Calibrated:} By construction of the thickened link, if $u$ maps to an incorrect report, i.e.\ $\psi(u) \not\in \gamma(p)$, then $u$ must have at least distance $\epsilon$ to the optimal set $U$.
+  We then show that the minimal gradient of the expected loss along any direction away from $U$ is lower-bounded, giving a constant excess expected loss at $u$.
+\end{proof}
+
+
+
+
+\section{Application to Specific Surrogates}\label{sec:examples}
+
+Our results give a framework to construct consistent surrogates and link functions for any discrete loss, but they also provide a way to verify the consistency or inconsistency of given surrogates.
+Below, we illustrate the power of this framework with specific examples from the literature, as well as new examples.
+In some cases we simplify existing proofs, while in others we give new results, such as a new calibrated link for abstain loss, and the inconsistency of the recently proposed Lov\'asz hinge.
+
+\subsection{Consistency of abstain surrogate and link construction}
+\label{sec:abstain}
+
+In classification settings with a large number of labels, several authors consider a variant of classification, with the addition of a ``reject'' or \emph{abstain} option.
+For example, \citet{ramaswamy2018consistent} study the loss $\ellabs{\alpha} : [n] \cup \{\bot\} \to \reals^\Y_+$ defined by $\ellabs{\alpha}(r)_y = 0$ if $r=y$, $\alpha$ if $r = \bot$, and 1 otherwise.
+Here, the report $\bot$ corresponds to ``abstaining'' if no label is sufficiently likely, specifically, if no $y\in\Y$ has $p_y \geq 1-\alpha$.
+\citet{ramaswamy2018consistent} provide a polyhedral surrogate for $\ellabs{\alpha}$, which we present here for $\alpha=1/2$.
+Letting $d = \ceil{\log_2(n)}$ their surrogate is $L_{1/2} : \reals^d \to \reals^\Y_+$ given by
+\begin{equation}\label{eq:abstain-surrogate}
+L_{1/2}(u)_y = \left(\max\nolimits_{j \in [d]}B(y)_j u_j + 1\right)_+~,
+\end{equation}
+where $B:[n]\to\{-1,1\}^d$ is a arbitrary injection; let us assume $n = 2^d$ so that we have a bijection.
+Consistency is proven for the following link function,
+\begin{equation}\label{eq:abstain-link}
+  \psi(u) = \begin{cases}
+	\bot & \min_{i \in [d]} |u_i| \leq 1/2\\
+	B^{-1}(\sgn(-u)) &\text{otherwise}
+  \end{cases}~.
+\end{equation}
+
+In light of our framework, we can see that $L_{1/2}$ is an excellent example of an embedding, where $\varphi(y) = B(y)$ and $\varphi(\bot) = 0 \in \reals^d$.
+Moreover, the link function $\psi$ can be recovered from Theorem~\ref{thm:eps-thick-calibrated} with norm $\|\cdot\|_\infty$ and $\epsilon=1/2$; see Figure~\ref{fig:abstain-links}(L).
+Hence, our framework would have simplified the process of finding such a link, and the corresponding proof of consistency.
+To illustrate this point further, we give an alternate link $\psi_1$ corresponding to $\|\cdot\|_1$ and $\epsilon=1$, shown in Figure~\ref{fig:abstain-links}(R):
+\begin{equation}\label{eq:abstain-link-1}
+  \psi_1(u) = \begin{cases}
+	\bot & \|u\|_1 \leq 1\\
+	B^{-1}(\sgn(-u)) &\text{otherwise}
+  \end{cases}~.
+\end{equation}
+Theorem~\ref{thm:eps-thick-calibrated} immediately gives calibration of $(L_{1/2},\psi_1)$ with respect to $\ellabs{1/2}$.
+Aside from its simplicity, one possible advantage of $\psi_1$ is that it appears to yield the same constant in generalization bounds as $\psi$, yet assigns $\bot$ to much less of the surrogate space $\reals^d$.
+It would be interesting to compare the two links in practice.
+
+
+\begin{figure}
+\begin{center}
+\begin{minipage}{0.32\linewidth}
+\includegraphics[width=\linewidth]{./abstain-link-linf.pdf}
+\end{minipage}\hfill
+\begin{minipage}{0.32\linewidth}
+\includegraphics[width=\linewidth]{./abstain-link-U-regions-l1.pdf}
+\end{minipage}\hfill
+\begin{minipage}{0.32\linewidth}
+\includegraphics[width=\linewidth]{./abstain-link-l1.pdf}
+\end{minipage}\hfill
+\caption{Constructing links for the abstain surrogate $L_{1/2}$ with $d=2$. The embedding is shown in bold labeled by the corresponding reports. (L) The link envelope $\Psi$ resulting from Theorem~\ref{thm:eps-thick-calibrated} using $\|\cdot\|_\infty$ and $\epsilon = 1/2$, and a possible link $\psi$ which matches eq.~\eqref{eq:abstain-link} from~\cite{ramaswamy2018consistent}.  (M) An illustration of the thickened sets from Definition~\ref{def:eps-thick-link} for two sets $U \in \U$, using $\|\cdot\|_1$ and $\epsilon = 1$. (R) The $\Psi$ and $\psi$ from Theorem~\ref{thm:eps-thick-calibrated} using $\|\cdot\|_1$ and $\epsilon = 1$.}
+\label{fig:abstain-links}
+\end{center}
+\end{figure}
+
+
+\subsection{Inconsistency of Lov\'asz hinge}
+\label{sec:lovasz-hinge}
+
+Many structured prediction settings can be thought of as making multiple predictions at once, with a loss function that jointly measures error based on the relationship between these predictions~\cite{hazan2010direct, gao2011consistency, osokin2017structured}.
+In the case of $k$ binary predictions, these settings are typically formalized by taking the predictions and outcomes to be $\pm 1$ vectors, so $\R=\Y=\{-1,1\}^k$.
+One then defines a joint loss function, which is often merely a function of the set of mispredictions, meaning $\ell^g(r)_y = g(\{i \in [k] : r_i \neq y_i\})$ for some function $g:2^{[k]}\to\reals$.
+For example, Hamming loss is simply given by $g(S) = |S|$.
+In an effort to provide a general convex surrogate for these settings when $g$ is a submodular function, Yu and Blaschko~\cite{yu2018lovasz} introduce the \emph{Lov\'asz hinge}, which leverages the well-known convex Lov\'asz extension of submodular functions.
+While the authors provide theoretical justification and experiments, consistency of the Lov\'asz hinge is left open, which we resolve.
+
+Rather than formally define the Lov\'asz hinge, we defer the complete analysis to Appendix~\ref{app:lovasz}, and focus here on the $k=2$ case.
+For brevity, we write $g_\emptyset := g(\emptyset)$, $g_{1,2} := g(\{1,2\})$, etc.
+Assuming $g$ is normalized and increasing (meaning $g_{1,2} \geq \{g_1,g_2\} \geq g_\emptyset = 0$), the Lov\'asz hinge $L:\reals^k\to\reals^\Y_+$ is given by
+\begin{multline}
+  \label{eq:lovasz-hinge}
+  L^g(u)_y = \max\Bigl\{(1-u_1y_1)_+ g_1 + (1-u_2y_2)_+ (g_{1,2}-g_1),\\[-4pt] (1-u_2y_2)_+ g_2 + (1-u_1y_1)_+ (g_{1,2}-g_2)\Bigr\}~,
+\end{multline}
+where $(x)_+ = \max\{x,0\}$.
+We will explore the range of values of $g$ for which $L^g$ is consistent, where the link function $\psi:\reals^2\to\{-1,1\}^2$ is fixed as $\psi(u)_i = \sgn(u_i)$, with ties broken arbitrarily.
+
+Let us consider $g_\emptyset = 0$, $g_1 = g_2 = g_{1,2} = 1$, for which $\ell^g$ is merely 0-1 loss on $\Y$.
+For consistency, then, for any distribution $p\in\simplex$, we must have that whenever $u \in \argmin_{u'\in\reals^2} p\cdot L^g(u')$, then $\psi(u)$ must be the most likely outcome, in $\argmax_{y\in\Y} p(y)$.
+Simplifying eq.~\eqref{eq:lovasz-hinge}, however, we have
+\begin{equation}
+  \label{eq:lovasz-hinge-abstain}
+  L^g(u)_y = \max\bigl\{(1-u_1y_1)_+,(1-u_2y_2)_+\bigr\} = \max\bigl\{1-u_1y_1,1-u_2y_2,0\bigr\}~,
+\end{equation}
+which is exactly the abstain surrogate~\eqref{eq:abstain-surrogate} for $d=2$.
+We immediately conclude that $L^g$ cannot be consistent with $\ell^g$, as the origin will be the unique optimal report for $L^g$ under distributions with $p_y < 0.5$ for all $y$, and one can simply take a distribution which disagrees with the way ties are broken in $\psi$.
+For example, if we take $\sgn(0) = 1$, then under $p((1,1)) = p((1,-1)) = p((-1,1)) = 0.2$ and $p((-1,-1)) = 0.4$, we have $\{0\} = \argmin_{u\in\reals^2} p\cdot L^g(u)$, yet $\psi(0) = (1,1) \notin \{(-1,-1)\} = \argmin_{r\in\R} p\cdot\ell^g(r)$.
+
+In fact, this example is typical: using our embedding framework, and characterizing when $0\in\reals^2$ is an embedded point, one can show that $L^g$ is consistent if and only if $g_{1,2} = g_1 + g_2$.
+Moreover, in the linear case, which corresponds to $g$ being \emph{modular}, the Lov\'asz hinge reduces to weighted Hamming loss, which is trivially consistent from the consistency of hinge loss for 0-1 loss.
+In Appendix~\ref{app:lovasz}, we generalize this observation for all $k$: $L^g$ is consistent if and only if $g$ is modular.
+In other words, even for $k>2$, the only consistent Lov\'asz hinge is weighted Hamming loss.
+These results cast doubt on the effectiveness of the Lov\'asz hinge in practice.
+
+
+
+
+\subsection{Inconsistency of top-$k$ losses}
+
+In certain classification problems when ground truth may be ambiguous, such as object identification, it is common to predict a set of possible labels.
+As one instance, the top-$k$ classification problem is to predict the set of $k$ most likely labels; formally, we have $\R := \{r \in \{0,1\}^n : \|r\|_0 = k\}$, $1<k<n$, $\Y = [n]$, and discrete loss $\elltopk(r)_y = 1-r_y$.
+Surrogates for this problem commonly take reports $u\in\reals^n$, with the link $\psi(u) = \{u_{[1]},\ldots,u_{[k]}\}$, where $u_{[i]}$ is the $i^{th}$ largest entry of $u$.
+
+\citet{lapin2015top, lapin2016loss, lapin2018analysis} provide the following convex surrogate loss for this problem, which \citet{yang2018consistency} show to be inconsistent:
+\footnote{Yang and Koyejo also introduce a consistent surrogate, but it is non-convex.}
+\begin{align}\label{eq:L-2-surrogate}
+L^k(u)_y := \left( 1-u_y + \tfrac{1}{k} \textstyle\sum_{i=1}^k (u - e_y)_{[i]} \right)_+~,
+\end{align}
+where $e_y$ is $1$ in component $y$ and 0 elsewhere.
+With our framework, we can say more.
+Specifically, while $(L^k,\psi)$ is not consistent for $\elltopk$, since $L^k$ is polyhedral (Lemma~\ref{lem:top-k-polyhedral}), we know from Theorem~\ref{thm:poly-embeds-discrete} that it embeds \emph{some} discrete loss $\ell^k$, and from Theorem~\ref{thm:eps-thick-calibrated} there is a link $\psi'$ such that $(L^k,\psi')$ is calibrated (and consistent) for $\ell^k$.
+We therefore turn to deriving this discrete loss $\ell^k$.
+
+For concreteness, consider the case with $k = 2$ over $n=3$ outcomes.
+We can re-write $L^2(u)_y = \left(1 - u_y + \tfrac 1 2 (u_{[1]}+ u_{[2]} - \min(1,u_y))\right)_+$.
+By inspection, we can derive the properties elicited by $\elltop{2}$ and $L^2$, respectively, which reveals that the set $\R'$ consisting of all permutations of $(1,0,0)$, $(1,1,0)$, and $(2,1,0)$, are always represented among the minimizers of $L^2$.
+Thus, $L^2$ embeds the loss $\ell^2(r)_y = 0$ if $r_y = 2$ or $\ell^2(r)_y = 1 - r_y + \tfrac 1 2 \inprod{r}{\ones-e_y}$ otherwise.
+Observe that this is like $\elltop{2}$, with a punishment for reporting weight on elements of $r$ other than the outcome and a reward for showing a ``higher confidence'' in the correct outcome (i.e. $r_y = 2$).
+Moreover, we can visually inspect the corresponding properties (Fig.~\ref{fig:top-k-simplices}) to immediately see why $L^2$ is inconsistent: for distributions where the two least likely labels are roughly equally (un)likely, the minimizer will put all weight on the most likely label, and thus fail to distinguish the other two.
+More generally, $L^2$ cannot be consistent because the property it embeds does not ``refine'' (subdivide) the top-$k$ property, so not just $\psi$, but \emph{no} link function, could make $L^2$ consistent.
+
+\begin{figure}
+	\begin{minipage}{0.4\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{original-top-k}
+		\label{fig:original-top-k}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.4\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{finite-surrogate-top-k}
+		\label{fig:finite-surrogate-top-k}
+	\end{minipage}
+	\caption{Minimizers of $\inprod{p}{\elltop{2}}$ and $\inprod{p}{\ell^2}$, respectively, varying $p$ over $\Delta_3$. 
+	}
+	\label{fig:top-k-simplices}
+\end{figure}
+
+
+
+
+
+
+
+\section{Conclusion and Future Directions} \label{sec:conclusion}
+This paper formalizes an intuitive way to design convex surrogate losses for classification-like problems---by embedding the reports into $\reals^d$.
+We establish a close relationship between embedding and polyhedral surrogates, showing both that every polyhedral loss embeds a discrete loss (Theorem~\ref{thm:poly-embeds-discrete}) and that every discrete loss is embedded by some polyhedral loss (Theorem~\ref{thm:discrete-loss-poly-embeddable}).
+We then construct a calibrated link function from any polyhedral loss to the discrete loss it embeds, giving consistency for all such losses.
+We conclude with examples of how the embedding framework presented can be applied to understand existing surrogates in the literature, including those for the abstain loss, top-$k$ loss, and Lov\'asz hinge.
+
+
+
+One open question of particular interest involves the dimension of the input to a surrogate; given a discrete loss, can we construct the surrogate that embeds it \emph{of minimal dimension}?
+If we na\"ively embed the reports into an $n$-dimensional space, the dimensionality of the problem scales with the number of possible labels $n$.
+As the dimension of the optimization problem is a function of this \emph{embedding dimension} $d$, a promising direction is to leverage tools from elicitation complexity~\cite{lambert2008eliciting,frongillo2015elicitation} and convex calibration dimension~\cite{ramaswamy2016convex} to understand when we can take $d <\!\!< n$.
+
+
+
+
+\subsection*{Acknowledgements}
+We thank Arpit Agarwal and Peter Bartlett for several discussions early on, which led to several important insights.
+We thank Eric Balkanski for his help with Lemma~\ref{lem:bar-f}.
+This material is based upon work supported by the National Science Foundation under Grant No.\ 1657598.
+\newpage
+\bibliographystyle{plainnat}
+\bibliography{diss,extra}
+
+\appendix
+
+\newpage
+\section{Power diagrams}
+First, we present several definitions from Aurenhammer~\cite{aurenhammer1987power}.
+\begin{definition}\label{def:cell-complex}
+  A \emph{cell complex} in $\reals^d$ is a set $C$ of faces (of dimension $0,\ldots,d$) which (i) union to $\reals^d$, (ii) have pairwise disjoint relative interiors, and (iii) any nonempty intersection of faces $F,F'$ in $C$ is a face of $F$ and $F'$ and an element of $C$.
+\end{definition}
+
+\begin{definition}\label{def:power-diagram}
+  Given sites $s_1,\ldots,s_k\in\reals^d$ and weights $w_1,\ldots,w_k \geq 0$, the corresponding \emph{power diagram} is the cell complex given by
+  \begin{equation}
+    \label{eq:pd}
+    \cell(s_i) = \{ x \in\reals^d : \forall j \in \{1,\ldots,k\} \, \|x - s_i\|^2 - w_i \leq \|x - s_j\| - w_j\}~.
+  \end{equation}
+\end{definition}
+
+\begin{definition}\label{def:affine-equiv}
+  A cell complex $C$ in $\reals^d$ is \emph{affinely equivalent} to a (convex) polyhedron $P \subseteq \reals^{d+1}$ if $C$ is a (linear) projection of the faces of $P$.
+\end{definition}
+
+\begin{theorem}[Aurenhammer~\cite{aurenhammer1987power}]\label{thm:aurenhammer}
+  A cell complex is affinely equivalent to a convex polyhedron if and only if it is a power diagram.
+\end{theorem}
+
+In particular, one can consider the epigraph of a polyhedral convex function on $\reals^d$ and the projection down to $\reals^d$; in this case we call the resulting power diagram \emph{induced} by the convex function.
+We extend Aurenhammer's result to a weighted sum of convex functions, showing that the induced power diagram is the same for any choice of strictly positive weights.
+
+\begin{lemma}\label{lem:polyhedral-pd-same}
+  Let $f_1,\ldots,f_m:\reals^d\to\reals$ be polyhedral convex functions.
+  The power diagram induced by $\sum_{i=1}^m p_i f_i$ is the same for all $p \in \inter\simplex$.
+\end{lemma}
+\begin{proof}
+  For any convex function $g$ with epigraph $P$, the proof of~\citet[Theorem 4]{aurenhammer1987power} shows that the power diagram induced by $g$ is determined by the facets of $P$.
+  Let $F$ be a facet of $P$, and $F'$ its projection down to $\reals^d$.
+  It follows that $g|_{F'}$ is affine, and thus $g$ is differentiable on $\inter F'$ with constant derivative $d\in\reals^d$.
+  Conversely, for any subgradient $d'$ of $g$, the set of points $\{x\in\reals^d : d'\in\partial g(x)\}$ is the projection of a face of $P$; we conclude that $F = \{(x,g(x))\in\reals^{d+1} : d\in\partial g(x)\}$ and $F' = \{x\in\reals^d : d\in\partial g(x)\}$.
+
+  Now let $f := \sum_{i=1}^k f_i$ with epigraph $P$, and $f' := \sum_{i=1}^k p_i f_i$ with epigraph $P'$.
+  By Rockafellar~\cite{rockafellar1997convex}, $f,f'$ are polyhedral.
+  We now show that $f$ is differentiable whenever $f'$ is differentiable:
+  \begin{align*}
+    \partial f(x) = \{d\}
+    &\iff \sum_{i=1}^k \partial f_i(x) = \{d\} \\
+    &\iff \forall i\in\{1,\ldots,k\}, \; \partial f_i(x) = \{d_i\} \\
+    &\iff \forall i\in\{1,\ldots,k\}, \; \partial p_i f_i(x) = \{p_id_i\} \\
+    &\iff \sum_{i=1}^k \partial p_if_i(x) = \left\{\sum_{i=1}^k p_id_i\right\} \\
+    &\iff \partial f'(x) = \left\{\sum_{i=1}^k p_id_i\right\}~.
+  \end{align*}
+  From the above observations, every facet of $P$ is determined by the derivative of $f$ at any point in the interior of its projection, and vice versa.
+  Letting $x$ be such a point in the interior, we now see that the facet of $P'$ containing $(x,f'(x))$ has the same projection, namely $\{x'\in\reals^d : \nabla f(x) \in \partial f(x')\} = \{x'\in\reals^d : \nabla f'(x) \in \partial f'(x')\}$.
+  Thus, the power diagrams induced by $f$ and $f'$ are the same.
+  The conclusion follows from the observation that the above held for any strictly positive weights $p$, and $f$ was fixed.
+\end{proof}
+
+\section{Embedding properties}\label{app:embed-props}
+
+It is often convenient to work directly with properties and set aside the losses which elicit them.
+To this end, we say a property to embeds another if eq.~\eqref{eq:embed-loss} holds.
+We begin with the notion of redundancy.
+\begin{definition}[Finite property, non-redundant]
+  A property $\Gamma:\simplex\toto\R$ is \emph{redundant} if for some $r,r'\in\R$ we have $\Gamma_r \subseteq \Gamma_{r'}$, and \emph{non-redundant} otherwise.
+  $\Gamma$ is \emph{finite} if it is non-redundant and $\R$ is a finite set.
+  We typically write finite properties in lower case, as $\gamma$.
+\end{definition}
+
+
+When working with convex losses which are not strictly convex, one quickly encounters redundant properties: if $\inprod{p}{L(\cdot)}$ is minimized by a point where $p\cdot L$ is flat, then there will be an uncountable set of reports which also minimize the loss.
+As results in property elicitation typically assume non-redundant properties (e.g.~\cite{frongillo2014general,frongillo2015elicitation}), it is useful to consider a transformation which removes redundant level sets.
+We capture this transformation as the trim operator presented below.
+
+\begin{definition}\label{def:trim}
+  Given an elicitable property $\Gamma:\simplex \toto\R$, we define $\trim(\Gamma) = \{\Gamma_u : u \in \R \text{ s.t. } \neg\exists u'\in\R,u'\neq u,\, \Gamma_u \subsetneq \Gamma_{u'}\}$ as the set of maximal level sets of $\Gamma$.
+\end{definition}
+
+Take note that the unlabeled property $\trim(\Gamma)$ is non-redundant, meaning that for any $\theta \in \trim(\Gamma)$, there is no level set $\theta' \in \trim(\Gamma)$ such that $\theta \subset \theta'$.
+
+Before we state the Proposition needed to prove many of the statements in Section~\ref{sec:poly-loss-embed}, we will need to general lemmas about properties and their losses.
+The first follows from standard results relating finite properties to power diagrams (see Theorem~\ref{thm:aurenhammer} in the appendix), and its proof is omitted.
+The second is closely related to the trim operator: it states that if some subset of the reports are always represented among the minimizers of a loss, then one may remove all other reports and elicit the same property (with those other reports removed).
+
+\begin{lemma}\label{lem:finite-full-dim}
+  Let $\gamma$ be a finite (non-redundant) property elicited by a loss $L$.
+  Then the negative Bayes risk $G$ of $L$ is polyhedral, and the level sets of $\gamma$ are the projections of the facets of the epigraph of $G$ onto $\simplex$, and thus form a power diagram.
+  In particular, the level sets $\gamma$ are full-dimensional in $\simplex$ (i.e.,\ of dimension $n-1$).
+\end{lemma}
+
+\begin{lemma}\label{lem:loss-restrict}
+  Let $L$ elicit $\Gamma:\simplex\toto\R_1$, and let $\R_2\subseteq\R_1$ such that $\Gamma(p) \cap \R_2 \neq \emptyset$ for all $p\in\simplex$.
+  Then $L|_{\R_2}$ ($L$ restricted to $\R_2$) elicits $\gamma:\simplex\toto\R_2$ defined by $\gamma(p) = \Gamma(p)\cap \R_2$.
+  Moreover, the Bayes risks of $L$ and $L|_{\R_2}$ are the same.
+\end{lemma}
+\begin{proof}
+  Let $p\in\simplex$ be fixed throughout.
+  First let $r \in \gamma(p) = \Gamma(p) \cap \R_2$.
+  Then $r \in \Gamma(p) = \argmin_{u\in\R_1} \inprod{p}{L(u)}$, so as $r\in\R_2$ we have in particular $r \in \argmin_{u\in\R_2} \inprod{p}{L(u)}$.
+  For the other direction, suppose $r \in \argmin_{u\in\R_2} \inprod{p}{L(u)}$.
+  By our assumption, we must have some $r^* \in \Gamma(p) \cap \R_2$.
+  On the one hand, $r^*\in\Gamma(p) = \argmin_{u\in\R_1} \inprod{p}{L(u)}$.
+  On the other, as $r^* \in \R_2$, we certainly have $r^* \in \argmin_{u\in\R_2} \inprod{p}{L(u)}$.
+  But now we must have $\inprod{p}{L(r)} = \inprod{p}{L(r^*)}$, and thus $r \in \argmin_{u\in\R_1} \inprod{p}{L(u)} = \Gamma(p)$ as well.
+  We now see $r \in \Gamma(p) \cap \R_2$.
+  Finally, the equality of the Bayes risks $\min_{u\in\R_1} \inprod{p}{L(u)} = \min_{u\in\R_2} \inprod{p}{L(u)}$ follows immediately by the above, as $\emptyset \neq \Gamma(p)\cap\R_2 \subseteq \Gamma(p)$ for all $p\in\simplex$.
+\end{proof}
+
+We now state a useful result for proving the existence of an embedding loss, which shows remarkable structure of embeddable properties, and the properties that embed them.
+First, we conclude that any embeddable property must be elicitable.
+We also conclude that if $\Gamma$ embeds $\gamma$, the level sets of $\Gamma$ must all be redundant relative to $\gamma$.
+In other words, $\Gamma$ is exactly the property $\gamma$, just with other reports filling in the gaps between the embedded reports of $\gamma$.
+(When working with convex losses, these extra reports are typically the convex hull of the embedded reports.)
+In this sense, we can regard embedding as a minor departure from direct elicitation: if a loss $L$ elicits $\Gamma$ which embeds $\gamma$, we can think of $L$ as essentially eliciting $\gamma$ itself.
+Finally, we have an important converse: if $\Gamma$ has finitely many full-dimensional level sets, or if $\trim(\Gamma)$ is finite, then $\Gamma$ must embed some finite elicitable property with those same level sets.
+
+
+
+\begin{proposition}\label{prop:embed-trim}
+  Let $\Gamma:\simplex\toto\reals^d$ be an elicitable property.
+  The following are equivalent:
+  \begin{enumerate}\setlength{\itemsep}{0pt}
+  \item $\Gamma$ embeds a finite property $\gamma:\simplex \toto \R$.
+  \item $\trim(\Gamma)$ is a finite set, and $\cup\,\trim(\Gamma) = \simplex$.
+  \item There is a finite set of full-dimensional level sets $\Theta$ of $\Gamma$, and $\cup\,\Theta = \simplex$.
+  \end{enumerate}
+  Moreover, when any of the above hold, $\{\gamma_r : r\in\R\} = \trim(\Gamma) = \Theta$, and $\gamma$ is elicitable.
+\end{proposition}
+\begin{proof}
+  Let $L$ elicit $\Gamma$.
+
+  1 $\Rightarrow$ 2:
+  By the embedding condition, taking $\R_1 = \reals^d$ and $\R_2 = \varphi(\R)$ satisfies the conditions of Lemma~\ref{lem:loss-restrict}: for all $p\in\simplex$, as $\gamma(p) \neq \emptyset$ by definition, we have some $r\in\gamma(p)$ and thus some $\varphi(r) \in \Gamma(p)$.
+  Let $G(p) := -\min_{u\in\reals^d} \inprod{p}{L(u)}$ be the negative Bayes risk of $L$, which is convex, and $G_{\R}$ that of $L|_{\varphi(\R)}$.
+  By the Lemma, we also have $G = G_\R$.
+  As $\gamma$ is finite, $G$ is polyhedral.
+  Moreover, the projection of the epigraph of $G$ onto $\simplex$ forms a power diagram, with the facets projecting onto the level sets of $\gamma$, the cells of the power diagram.
+  (See Theorem~\ref{thm:aurenhammer}.)
+  As $L$ elicits $\Gamma$, for all $u\in\reals^d$, the hyperplane $p\mapsto \inprod{p}{L(u)}$ is a supporting hyperplane of the epigraph of $G$ at $(p,G(p))$ if and only if $u\in\Gamma(p)$.
+  This supporting hyperplane exposes some face $F$ of the epigraph of $G$, which must be contained in some facet $F'$.
+  Thus, the projection of $F$, which is $\Gamma_u$, must be contained in the projection of $F'$, which is a level set of $\gamma$.
+  We conclude that $\Gamma_u \subseteq \gamma_r$ for some $r\in\R$.
+  Hence, $\trim(\Gamma) = \{\gamma_r : r\in\R\}$, which is finite, and unions to $\simplex$.
+
+  2 $\Rightarrow$ 3: let $\R = \{u_1,\ldots,u_k\} \subseteq\reals^d$ be a set of distinct reports such that $\trim(\Gamma) = \{\Gamma_{u_1},\ldots,\Gamma_{u_k}\}$.
+  Now as $\cup\,\trim(\Gamma) = \simplex$, for any $p\in\simplex$, we have $p\in\Gamma_{u_i}$ for some $u_i\in\R$, and thus $\Gamma(p) \cap \R \neq \emptyset$.
+  We now satisfy the conditions of Lemma~\ref{lem:loss-restrict} with $\R_1 = \reals^d$ and $\R_2 = \R$.
+  The property $\gamma:p\mapsto\Gamma(p)\cap\R$ is non-redundant by the definition of $\trim$, finite, and elicitable.
+  Now from Lemma~\ref{lem:finite-full-dim}, the level sets $\Theta = \{\gamma_r:r\in\R\}$ are full-dimensional, and union to $\simplex$.
+  Statement 3 then follows from the fact that $\gamma_r = \Gamma_r$ for all $r\in\R$.
+
+  3 $\Rightarrow$ 1: let $\Theta = \{\theta_1,\ldots,\theta_k\}$.
+  For all $i\in\{1,\ldots,k\}$ let $u_i\in\reals^d$ such that $\Gamma_{u_i} = \theta_i$.
+  Now define $\gamma:\simplex\toto\{1,\ldots,k\}$ by $\gamma(p) = \{i : p\in\theta_i\}$, which is non-degenerate as $\cup\,\Theta = \simplex$.
+  By construction, we have $\gamma_i = \theta_i = \Gamma_{u_i}$ for all $i$, so letting $\varphi(i) = u_i$ we satisfy the definition of embedding, namely statement 1.
+\end{proof}
+
+\section{Polyhedral losses}\label{app:polyhedral-losses}
+\begin{lemma}
+  \label{lem:polyhedral-range-gamma}
+  Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss, and let $\Gamma = \prop{L}$.
+  Then the range of $\Gamma$, $\U = \Gamma(\simplex) = \{\Gamma(p) \subseteq \reals^d | p\in\simplex\}$, is a finite set of closed polyhedra.
+\end{lemma}
+\begin{proof}
+  For all $p$, let $P(p)$ be the epigraph of the convex function $u\mapsto \inprod{p}{L(u)}$.
+  From Lemma~\ref{lem:polyhedral-pd-same}, we have that the power diagram $D_\Y$ induced by the projection of $P(p)$ onto $\reals^d$ is the same for any $p\in\inter\simplex$.
+  Let $\F_\Y$ be the set of faces of $D_\Y$, which by the above are the set of faces of $P(p)$ projected onto $\reals^d$ for any $p\in\inter\simplex$.
+
+  We claim for all $p\in\inter\simplex$, that $\Gamma(p) \in \F_\Y$.
+  To see this, let $u \in \Gamma(p)$, and $u' = (u,\inprod{p}{L(u)}) \in P(p)$.
+  The optimality of $u$ is equivalent to $u'$ being contained in the face $F$ of $P(p)$ exposed by the normal $(0,\ldots,0,-1)\in\reals^{d+1}$.
+  Thus, $\Gamma(p) = \argmin_{u\in\reals^d} \inprod{p}{L(u)}$ is a projection of $F$ onto $\reals^d$, which is an element of $\F_\Y$.
+
+  Now consider $\Y'\subset \Y$, $\Y'\neq\emptyset$.
+  Applying the above argument, we have a similar guarantee: a finite set $\F_{\Y'}$ such that $\Gamma(p) \in \F_{\Y'}$ for all $p$ with support exactly $\Y'$.
+  Taking $\F = \bigcup\{\F_{\Y'} | \Y'\subseteq\Y, \Y'\neq\emptyset\}$, we have for all $p\in\simplex$ that $\Gamma(p) \in \F$, giving $\U \subseteq \F$.
+  As $\F$ is finite, so is $\U$, and the elements of $\U$ are closed polyhedra as faces of $D_{\Y'}$ for some $\Y'\subseteq\Y$.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:poly-loss-poly-risk}
+  If $L$ is polyhedral, $\risk{L}$ is polyhedral.
+\end{lemma}
+\begin{proof}
+  Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss, and $\Gamma = \prop{L}$.
+  By Lemma~\ref{lem:polyhedral-range-gamma}, $\U = \Gamma(\simplex)$ is finite.
+  For each $U\in \U$, select $u_U \in U$, and let $U' = \{u_U : U \in\U\}$.
+  Then for all $p\in\simplex$ we have $\Gamma(p) \cap U' \neq \emptyset$, so Lemma~\ref{lem:loss-restrict} gives us $\risk{L} = \risk{L|_{U'}}$, which is polyhedral as $U'$ is finite.
+\end{proof}
+
+
+
+
+
+
+\section{Thickened link and calibration} \label{app:calibration}
+
+We define some notation and assumptions to be used throughout this section.
+Let some norm $\|\cdot\|$ on finite-dimensional Euclidean space be given.
+Given a set $T$ and a point $u$, let $d(T,u) = \inf_{t \in T} \|t-u\|$.
+Given two sets $T,T'$, let $d(T,T') = \inf_{t\in T, t' \in T'} \|t-t'\|$.
+Finally, let the ``thickening'' $B(T,\epsilon)$ be defined as
+  \[ B(T,\epsilon) = \{u \in \R' : d(T,u) < \epsilon \} . \]
+
+\begin{assumption} \label{assume:cal}
+  $\ell: \R \times \Y \to \reals^{\Y}_+$ is a loss on a finite report set $\R$, eliciting the property $\gamma: \simplex \toto \R$.
+  It is embedded by $L: \reals^d \times \Y \to \reals^{\Y}_+$, which elicits the property $\Gamma: \simplex \toto \reals^d$.
+  The embedding points are $\{\varphi(r) : r \in \R\}$.
+\end{assumption}
+
+Given Assumption \ref{assume:cal}, let $\mathcal{S} \subseteq 2^{\R}$ be defined as $\mathcal{S} = \{\gamma(p) : p \in \Delta_{\Y}\}$.
+In other words, for each $p$, we take the set of optimal reports $R = \gamma(p) \subseteq \R$, and we add $R$ to $\mathcal{S}$.
+Let $\U \subseteq 2^{\reals^d}$ be defined as $\U = \{\Gamma(p) : p \in \Delta_{\Y}\}$.
+For each $U \in \U$, let $R_U = \{r: \varphi(r) \in U\}$.
+
+The next lemma shows that if a subset of $\U$ intersect, then their corresponding report sets intersect as well.
+\begin{lemma} \label{lemma:calibrated-pos}
+  Let $\U' \subseteq \U$.
+  If $\cap_{U\in\U'} U \neq \emptyset$ then $\cap_{U\in\U'} R_U \neq \emptyset$.
+\end{lemma}
+\begin{proof}
+  Let $u \in \cap_{U\in\U'} U$.
+  Then we claim there is some $r$ such that $\Gamma_u \subseteq \gamma_r$.
+  This follows from Proposition \ref{prop:embed-trim}, which shows that $\trim(\Gamma) = \{ \gamma_r : r \in \R\}$.
+  Each $\Gamma_u$ is either in $\trim(\Gamma)$ or is contained in some set in $\trim(\Gamma)$, by definition, proving the claim.
+
+  For each $U \in \U'$, for any $p$ such that $U = \Gamma(p)$, we have in particular that $u$ is optimal for $p$, so $p \in \Gamma_u$, so $p \in \gamma_r$, so $r$ is optimal for $p$.
+  This implies that $\phi(r)$, the embedding point, is optimal for $p$, so $\phi(r) \in U$.
+  This holds for all $U \in \U'$, so $r \in \cap_{U\in\U'} R_U$, so it is nonempty.
+\end{proof}
+
+\begin{lemma} \label{lemma:enclose-halfspaces}
+  Let $D$ be a closed, convex polyhedron in $\reals^d$.
+  For any $\epsilon > 0$, there exists an \emph{open}, convex set $D'$, the intersection of a finite number of open halfspaces, such that
+    \[ D \subseteq D' \subseteq B(D,\epsilon) . \]
+\end{lemma}
+\begin{proof}
+  Let $S$ be the standard open $\epsilon$-ball $B(\{\vec{0}\},\epsilon)$.
+  Note that $B(D,\epsilon) = D + S$ where $+$ is the Minkowski sum.
+  Now let $S' = \{u : \|u\|_1 \leq \delta\}$ be the closed $\delta$ ball in $L_1$ norm.
+  By equivalence of norms in Euclidean space~\cite[Appendix A.1.4]{boyd2004convex}, we can take $\delta$ small enough yet positive such that $S' \subseteq S$.
+  By standard results, the Minkowski sum of two closed, convex polyhedra, $D'' = D + S'$ is a closed polyhedron, i.e. the intersection of a finite number of closed halfspaces. (A proof: we can form the higher-dimensional polyhedron $\{(x,y,z) : x \in D, y \in S', z = x+y\}$, then project onto the $z$ coordinates.)
+
+  Now, if $T' \subseteq T$, then the Minkowksi sum satisfies $D + T' \subseteq D + T$.
+  In particular, because $\emptyset \subseteq S' \subseteq S$, we have
+    \[ D \subseteq D'' \subseteq B(D,\epsilon) . \]
+  Now let $D'$ be the interior of $D''$, i.e. if $D'' = \{x : Ax \leq b\}$, then we let $D' = \{x: Ax < b\}$.
+  We retain $D' \subseteq B(D,\epsilon)$.
+  Further, we retain $D \subseteq D'$, because $D$ is contained in the interior of $D'' = D + S'$.
+  (Proof: if $x \in D$, then for some $\gamma$, $x + B(\{\vec{0}\},\gamma) = B(x,\gamma)$ is contained in $D + S'$.)
+  This proves the lemma.
+\end{proof}
+
+\begin{lemma} \label{lemma:thick-nonempty}
+  Let $\{U_j : j \in \mathcal{J}\}$ be a finite collection of closed, convex sets with $\cap_{j\in\mathcal{J}} U_j \neq \emptyset$.
+  Then there exists  $\epsilon > 0$ such that $\cap_j B(U_j,\epsilon) \subseteq B(\cap_j U_j, \delta)$.
+\end{lemma}
+\begin{proof}
+  We induct on $|\mathcal{J}|$.
+  If $|\mathcal{J}|=1$, set $\epsilon = \delta$.
+  If $|\mathcal{J}|>1$, let $j\in\mathcal{J}$ be arbitrary, let $U' = \cap_{j'\neq j} U_{j'}$, and let $C(\epsilon) = \cap_{j' \neq j} B(U_{j'},\epsilon)$.
+  Let $D = U_j \cap U'$.
+  We must show that $B(U_j,\epsilon) \cap C(\epsilon) \subseteq B(D,\delta)$.
+  By Lemma \ref{lemma:enclose-halfspaces}, we can enclose $D$ strictly within a polyhedron $D'$, the intersection of a finite number of open halfspaces, which is itself strictly enclosed in $B(D,\delta)$.
+  (For example, if $D$ is a point, then enclose it in a hypercube, which is enclosed in the ball $B(D,\delta)$.)
+  We will prove that, for small enough $\epsilon$, $B(U_j,\epsilon) \cap C(\epsilon)$ is contained in $D'$.
+  This implies that it is contained in $B(D,\delta)$.
+
+  For each halfspace defining $D'$, consider its complement $F$, a closed halfspace.
+  We prove that $F \cap B(U_j,\epsilon) \cap C(\epsilon) = \emptyset$.
+  Consider the intersections of $F$ with $U$ and $U'$, call them $G$ and $G'$.
+  These are closed, convex sets that do not intersect (because $D$ in contained in the complement of $F$).
+  So $G$ and $G'$ are separated by a nonzero distance, so $B(G,\gamma) \cap B(G',\gamma) = \emptyset$ for small enough $\gamma$.
+  And $B(G,\gamma) = F \cap B(U_j,\gamma)$ while $B(G',\gamma) = F \cap B(U',\gamma)$.
+  This proves that $F \cap B(U_j,\gamma) \cap B(U',\gamma) = \emptyset$.
+  By inductive assumption, $C(\epsilon) \subseteq B(U',\gamma)$ for small enough $\epsilon = \epsilon_F$.
+  So $F \cap B(U_j,\gamma) \cap C(\epsilon) = \emptyset$.
+  We now let $\epsilon$ be the minimum over these finitely many $\epsilon_F$ (one per halfspace).
+\end{proof}
+
+\begin{figure}
+\caption{Illustration of a special case of the proof of Lemma \ref{lemma:thick-nonempty} where there are two sets $U_1,U_2$ and their intersection $D$ is a point. We build the polyhedron $D'$ inside $B(D,\delta)$. By considering each halfspace that defines $D'$, we then show that for small enough $\epsilon$, $B(U_1,\epsilon)$ and $B(U_2,\epsilon)$ do not intersect outside $D'$. So the intersection is contained in $D'$, so it is contained in $B(D,\delta)$.}
+\includegraphics[width=0.24\textwidth]{separated-proof-2} \hfill
+\includegraphics[width=0.24\textwidth]{separated-proof-3} \hfill
+\includegraphics[width=0.24\textwidth]{separated-proof-4} \hfill
+\includegraphics[width=0.24\textwidth]{separated-proof-5}
+\end{figure}
+
+\begin{lemma} \label{lemma:thick-empty}
+  Let $\{U_j : j \in \mathcal{J}\}$ be a finite collection of nonempty closed, convex sets with $\cap_{j\in\mathcal{J}} U_j = \emptyset$.
+  Then for all $\delta > 0$, there exists  $\epsilon > 0$ such that $\cap_{j\in\mathcal{J}} B(U_j,\epsilon) = \emptyset$.
+\end{lemma}
+\begin{proof}
+  By induction on the size of the family.
+  Note that the family must have size at least two.
+  Let $U_j$ be any set in the family and let $U' = \cap_{j' \neq j} U_{j'}$.
+  There are two possibilities.
+
+  The first possibility, which includes the base case where the size of the family is two, is the case $U'$ is nonempty.
+  Because $U_j$ and $U'$ are non-intersecting closed convex sets, they are separated by some distance $\epsilon$.
+  By Lemma \ref{lemma:thick-nonempty}, for any $\epsilon > 0$, there exists $\delta > 0$ such that $\cap_{j'\neq j} B(U_{j'},\delta) \subseteq B(U', \epsilon/3)$.
+  Then we have $B(U_j, \epsilon/3) \cap B(U', \epsilon/3) = \emptyset$.
+
+  The second possibility is that $U'$ is empty.
+  This implies we are not in the base case, as the family must have three or more sets.
+  By inductive assumption, for small enough $\delta$ we have $\cap_{j' \neq j} B(U_{j'},\delta) = \emptyset$, which proves this case.
+\end{proof}
+
+
+\begin{corollary} \label{cor:thick-intersect}
+  There exists a small enough $\epsilon > 0$ such that, for any subset $\{U_j : j \in \mathcal{J}\}$ of $\U$, if $\cap_j U_j = \emptyset$, then $\cap_j B(U_j,\epsilon) = \emptyset$.
+\end{corollary}
+\begin{proof}
+  For each subset, Lemma \ref{lemma:thick-empty} gives an $\epsilon$.
+  We take the minimum over these finitely many choices.
+\end{proof}
+
+\begin{theorem} \label{thm:small-eps-thick}
+  For all small enough $\epsilon$, the epsilon-thickened link $\psi$ (Definition \ref{def:eps-thick-link}) is a well-defined link function from $\R'$ to $\R$, i.e. $\psi(u) \neq \bot$ for all $u$.
+\end{theorem}
+\begin{proof}
+  Fix a small enough $\epsilon$ as promised by Corollary \ref{cor:thick-intersect}.
+  Consider any $u \in \R'$.
+  If $u$ is not in $B(U,\epsilon)$ for any $U \in \U$, then we have $\Psi(u) = \R$, so it is nonempty.
+  Otherwise, let $\{U_j : j \in \mathcal{J}\}$ be the family whose thickenings intersect at $u$.
+  By Corollary \ref{cor:thick-intersect}, because of our choice of $\epsilon$, the family themselves has nonempty intersection.
+  By Lemma \ref{lemma:calibrated-pos}, their corresponding report sets $\{R_j : j \in \mathcal{J}\}$ also intersect at some $r$, so $\Psi(u)$ is nonempty.
+\end{proof}
+
+In the rest of the section, for shorthand, we write $L(u;p) := \langle p, L(u) \rangle$ and similarly $\ell(r;p)$.
+
+\begin{lemma} \label{lemma:exposed-shortest}
+  Let $U$ be a convex, closed set and $u \not\in U$.
+  Then $\inf_{u^* \in U} \|u-u^*\|$ is achieved by some unique $u^* \in U$.
+  Furthermore, $u^*$ is the unique member of $U$ such that $u = u^* + \alpha v$ for some $\alpha > 0$ and unit vector $v$ that exposes $u^*$.
+\end{lemma}
+\begin{proof}
+  Unique achievement of the infimum is well-known.
+  (Achievement follows e.g. because the set $U \cap \{u' : \|u - u'\| \leq d(U,u) + 1\}$ is closed and compact, so the continuous function $u' \mapsto \|u-u'\|$ achieves its infimum.
+  Uniqueness follows because for two different points $u',u''$ at the same distance from $u$, the point $0.5u' + 0.5u''$ is strictly closer and also lies in the convex set $U$.)
+  Now suppose $u = u' + \alpha' v'$ where $v'$ is a unit vector exposing $u'$.
+  Then $U$ is contained in the halfspace $\{u'': \langle u'', v'' \rangle \leq \langle u',v' \rangle \}$.
+  But every point in this halfspace is distance at least $\alpha'$ from $u$, as $\|u-u''\| \geq \langle v, u - u'' \rangle \geq \langle v, u-u'\rangle = \alpha'$.
+  So $u'$ uniquely achieves this minimum distance.
+\end{proof}
+
+\begin{lemma} \label{lemma:distance-loss}
+  If $L$ is a polyhedral loss, then for each $p$, there exists a constant $c$ such that, for all $u$,
+    \[ L(u;p) - \inf_{u^* \in \R'} L(u^*;p) \geq c \cdot d(\Gamma(p),u) . \]
+\end{lemma}
+\begin{proof}
+  Fix $p$ and let $U = \Gamma(p)$.
+  If $u \in U$, then both sides are zero.
+  So it remains to find a $c$ such that the inequality holds for all $u \not\in U$.
+
+  $L(\cdot;p)$ is a convex polyhedral function, so it is the pointwise maximum over finitely many affine functions.
+  Recall that $\risk{L}(p) = \min_{u} L(u;p)$, the Bayes risk.
+  Construct the convex polyhedral function $\hat{L}(\cdot;p)$ by dropping from the maximum those affine functions that are never equal to $L$ for any $u^* \in U$.
+  We have $\hat{L}(u^*;p) = \risk{L}(p)$ for all $u^* \in U$ and $\hat{L}(u;p) \leq L(u;p)$ for all $u \not\in U$.
+  Now $\hat{L}$ is also a maximum over finitely many affine functions $\F$.
+  Each such function $f\in\F$ is equal to $\hat{L}$ above a closed, convex cell $U_f\subseteq\reals^d$ in the power diagram formed by projecting $\hat{L}(\cdot;p)$.
+  If $f$ has nonzero gradient, then $U_f \cap U$ is a face of $U$.
+  We will prove that there exists $c_f > 0$ such that, for all $u\in U_f$,
+    \[ \hat{L}(u;p) \geq \risk{L}(p) + c_f \cdot d(U,u) . \]
+  Taking $c$ to be the minimum of $c_f$ over the finitely many $f\in\F$ with nonzero gradient (which covers all points $u \not\in U$) will complete the proof.
+
+  Consider the set of unit vectors $V = \{v \in \reals^d : \|v\|=1\}$ and the boundary of $U$, denoted $\partial U$.
+  For any $u^*\in\partial U$, $v\in V$ such that $v$ exposes $u^*$, let
+  $G_{u^*,v} = \left\{ u^* + \beta v : \beta \geq 0 \right\}$
+  be the ray leaving $U$ from $u^*$ in direction $v$.
+  For each $f\in\F$, we define the set $R_f \subseteq \partial U \times V$ to be the points $(u^*,v)$ such that there exists $\epsilon>0$ with $G_{u^*,v} \cap U_f = G_{u^*,v} \cap B(u^*,\epsilon)$; that is, such that the ray $G_{u^*,v}$ starts its journey in $U_f$.
+  Futhermore, define $U^*_{f,v} = \{u^* \in \partial U : (u^*,v)\in R_f\}$ and $V_f = \{v\in V: \exists u^*\in U_f\cap U,\: (u^*,v) \in R_f\}$.
+  (That is, $U^*_{f,v}$ is the set of points from which the ray in direction $v$ begins in $U_f$, and $V_f$ is the set of all normal directions in which some ray begins in $U_f$.)
+  Finally, define $G_f = \cup_{(u^*,v)\in R_f} G_{u^*,v}$ as the union of all such rays beginning in $U_f$.
+  Note that $\cup_{f\in\F} G_f \supseteq \reals^d \setminus U$; this follows as every point not in $U$ is on a normal ray out of $U$, which must begin in some cell $U_f$.
+
+  We will prove the following steps:
+  \begin{enumerate}
+    \item For all $f\in\F$, $v\in V_f$, there exists a constant $c_{f,v} > 0$ such that $L(u;p) \geq \risk{L}(p) + c_{f,v} \cdot d(U,u)$ for all $u \in G_{u^*,v}$ and all $u^*\in U^*_{f,v}$.
+    \item For all $f\in \F$, the set $V_f$ is compact, and the map $v \mapsto c_{f,v}$ is continuous on $V_f$.
+    \item Hence, there is an infimum $c_f > 0$ such that $f(u) \geq \risk{L}(p) + c_f \cdot d(U,u)$ for all $u\in G_f$.
+    \item Let $c = \min \{c_f : f\in\F, \nabla f \neq 0\}$; then $L(u;p) \geq \risk{L}(p) + c \cdot d(U,u)$ for all $u \not\in U$.
+  \end{enumerate}
+
+
+  (1) Let $\nabla f$ denote the gradient of the affine function $f$.
+  Note that because $u^*$ is on the boundary of $U$, we have $f(u^*) = \hat{L}(u^*;p) = \risk{L}(p)$.
+  So we can write, using Lemma \ref{lemma:exposed-shortest},
+  \begin{align*}
+    f(u) &= f(u^*) + (\nabla f)\cdot (u - u^*)  \\
+    f(u) &= f(u^*) + (\nabla f)\cdot (d(u^*,u) v)  \\
+         &= \risk{L}(p) + c_{f,v} \cdot d(U,u)  \\
+  \end{align*}
+  where $c_{f,v} = (\nabla f)\cdot v$.
+  We must have $c_{f,v} > 0$ because the set $U$ minimizes $L(\cdot;p)$, so $f(u) > f(u^*) = \risk{L}(p)$.
+  The result now follows as $L(u;p) \geq \hat L(u;p) \geq f(u)$.
+
+  (2) The intersection $U_f \cap U$ is a face of $U$, and thus decomposes as the union of relative interiors of subfaces, $U_f \cap U = \cup_i \mathrm{ri}(F_i)$.
+  For each $i$, let $V_i = \{v\in V: \exists u^*\in \mathrm{ri}(F_i),\: (u^*,v)\in R_f\}$.
+  For any $v\in V_i$, we may consider the power diagram restricted to $A$, the affine hull of $\{u + \alpha v: u\in U, \alpha\in\reals\}$.
+  As there is some $u^*\in U$ such that $(u^*,v)\in R_f$, in particular, $U_f\cap A$ intersects $A\cap\mathrm{ri}(F_i)$ and thus must contain $A\cap\mathrm{ri}(F_i)$.
+  We conclude that $(u',v)\in R_f$ for all other $u'\in \mathrm{ri}(F_i)$.
+  Thus, we have $\{(u^*,v) \in R_f : u^*\in F_i\} = F_i \times V_i$.
+  For closure, pick any $u^*\in \mathrm{ri}(F_i)$, and consider a sequence $\{v_j\}_j$ with $(u^*,v_j)\in R_f$, and corresponding witnesses $\{\epsilon_j\}_j$.
+  Then we have $u^* + \epsilon_j v_j \in U_f$ for all $j$, and as $u^*\in U_f$ and $U_f$ is closed and convex, the limiting point must be contained in $U_f$ as well.
+  We have now shown $V_f$ to be the union of finitely many closed convex sets, and thus closed.
+  Boundedness follows as $V$ is bounded.
+  Finally, $c_{f,v}$ is linear in $v$, and thus continuous.
+
+  Steps (3) and (4) are immediate and complete the proof.
+\end{proof}
+
+\begin{theorem} \label{thm:app-eps-thick-sep}
+  For small enough $\epsilon$, the $\epsilon$-thickened link $\psi$ (Definition \ref{def:eps-thick-link}) satisfies that, for all $p$, there exists $\delta > 0$ such that, for all $u \in \R'$,
+    \[ L(u;p) - \inf_{u^* \in \R'} L(u^*;p) \geq \delta \left[ \ell(\psi(u);p) - \min_{r^* \in \R} \ell(r^*;p) \right] . \]
+\end{theorem}
+\begin{proof}
+  We take the $\epsilon$ thickened link, which is well-defined by Theorem \ref{thm:small-eps-thick}.
+  Fix $p$ and let $U = \Gamma(p)$.
+  The left-hand side is nonnegative, so it suffices to prove the result for all $u$ such that the right side is strictly positive, i.e. for all $u$ such that $\psi(u) \not\in \gamma(p)$.
+  By definition of the $\epsilon$-thickened link, we must have $d(U,u) \geq \epsilon$.
+  By Lemma \ref{lemma:distance-loss}, we have $L(u;p) - \inf_{u^*} L(u^*;p) \geq C$ where $C = c\epsilon$ for some $c > 0$.
+  This holds for all $u$.
+  Meanwhile,
+    \[ \ell(\psi(u);p) - \min_{r^*} \ell(r^*;p) \leq \max_{r \in \R} \ell(r;p) - \min_{r^* \in \R} \ell(r^*;p) =: D, \]
+  for some constant $D$.
+  This also holds for all $u$.
+  Set $\delta = \frac{C}{D}$ to complete the proof.
+\end{proof}
+
+\begin{proof}[Proof of Theorem \ref{thm:eps-thick-calibrated}]
+  The two claims are Theorems \ref{thm:small-eps-thick} and \ref{thm:app-eps-thick-sep}.
+\end{proof}
+
+
+\section{Lov\'asz Hinge}\label{app:lovasz}
+
+The Lov\'asz hinge, introduced by~\citet{yu2018lovasz}, is a (convex) polyhedral surrogate for discrete losses described in terms of a submodular function, based on the well-known Lov\'asz extension.
+We will study this surrogate using our framework, first identifying the loss it embeds, and then leveraging this loss to find a proof of inconsistency.
+As defining the Lov\'asz hinge takes care, we begin with definitions.
+
+\subsection{Notation and Definitions}
+Let $N = \{1,\ldots,k\}$ be the index set for our binary predictions, with outcomes $\Y = 2^N$ corresponding to the set of labels which are assigned $+1$.
+To map to the usual labels $\{-1,1\}$, for any $S\subseteq N$, we let $\ones_S \in \{0,1\}^k$ with $(\ones_S)_i = 1 \iff i\in S$ be the 0-1 indicator for $S$, and we let $\chi_S \in \{-1,1\}^k$ with $\chi_S = 2\ones_S - \ones$ be the $\pm 1$ indicator.
+For clarity of exposition, we will depart from our usual notation for loss functions, writing a discrete loss $\ell : \R \times \Y \to \reals$ and surrogate $L : \reals^k \times \Y \to \reals$, and writing expected loss $L(u;p)$.
+The link will be the sign function $\psi = \sgn$, with ties broken arbitrarily.
+
+A set function $f:2^N\to\reals$ is \emph{submodular} if for all $S,T\subseteq N$ we have $f(S) + f(T) \geq f(S\cup T) + f(S\cap T)$.
+A function is \emph{supermodular} if the inequality is reversed, and \emph{modular} if it holds with equality, for all $S,T\subseteq N$.
+The function $f$ is \emph{increasing} if we have $f(S\cup T) \geq f(S)$, again for all $S,T\subseteq N$.
+
+We are interested in convex surrogates for the following discrete loss $\ell:\R\times\Y\to\reals$, where $\R=\Y=2^N$,
+\begin{equation}
+\label{eq:discrete-set-loss}
+\ell^f(A,S) = f(A\triangle S)~,
+\end{equation}
+where $\triangle$ is the symmetric difference operator, defined by $S\triangle T = (S\setminus T) \cup (T\setminus S)$.
+Note: throughout we assume $\triangle$ has operator precedence over $\setminus$, $\cap$, and $\cup$.
+In words, $\ell^f$ measures the joint error of our $k$ predictions by computing the set of mispredictions (elements in $A$ but not $S$ and vice versa) and calling the set function $f$.
+
+A natural approach to deriving convex surrogates in the case of submodular functions $f$ is the Lov\'asz extension, which is known to be convex when $f$ if (and only if) submodular. 
+Given any set-valued function $f:2^N\to\reals$, its \emph{Lov\'asz extension} $F:\reals^k\to\reals$ is given by
+\begin{equation}\label{eq:lovasz-ext}
+F(u) = \E[f(\{i:u_i \geq \Theta\})]~,
+\end{equation}
+where $\Theta$ is a uniformly distributed random variable on $[0,1]$.
+There are several equivalent formulations for the Lov\'asz extension; see~\citet[Definition 3.1]{bach2013learning}.
+
+Given set function $f$ with Lov\'asz extension $F$, \citet{yu2018lovasz} define the \emph{Lov\'asz hinge} as the loss $L^f:\reals^k\times\Y\to\reals$ given by
+\begin{equation}
+\label{eq:lovasz-hinge}
+L^f(u,S) =
+\begin{cases}
+F\bigl((\ones - u \odot \chi_S)_+\bigr) & \text{if $f$ is increasing}
+\\
+\bigl(F(\ones - u \odot \chi_S)\bigr)_+ & \text{otherwise}
+\end{cases}~,
+\end{equation}
+where $v (u \odot y)_i = u_iy_i$ is the Hadamard (element-wise) product and $((u)_+)_i = \max(u_i,0)$.
+In what follows, we focus on the increasing case, which is the most natural: when you make an additional error, your loss cannot decrease.
+
+\subsection{What does $L$ embed?}
+
+From well-known facts about the Lov\'asz extension (see Lemma~\ref{lem:lovasz-trim} below), $L^f$ is certainly polyhedral, and thus by our framework we know it must embed a discrete loss $\hat\ell^f$, which may or may not be the same as $\ell^f$.
+As with the top-$k$ example, we begin our analysis by calculating $\hat\ell^f$.
+
+Let $\Gamma^f = \prop{L^f}$ and $\U = \{-1,0,1\}^k$.
+Note that, for disjoint sets $A,B \subseteq N$, we have $\chi_A + \ones_B \in \U$, which at coordinate $i$ evaluates to $1$ for $i\in A$, $0$ for $i\in B$, and $-1$ otherwise.
+Moreover, every point in $\U$ can be uniquely described in this way.
+Finally, observe $\chi_A + \ones_B = \chi_A \odot \ones_{N\setminus B}$.
+
+We will show that for every distribution $p$, an element of $\U$ is always represented in the minimizers of $L^f$, i.e., $\Gamma^f(p)$.
+First, we show that we may restrict to the filled hypercube $[-1,1]^k$ without loss of generality.
+
+\begin{lemma}
+	\label{lem:lovasz-cube}
+	Let $f:2^N\to\reals_+$ be increasing and normalized.
+	Then for all $p\in\simplex$, $\Gamma(p) \cap [-1,1]^k \neq \emptyset$.
+\end{lemma}
+\begin{proof}
+	Let $u\in\Gamma^f(p)$ such that $|u_i|>1$ for some $i\in [k]$, and furthermore suppose $|u_i|$ is the smallest value among all such coordinates, i.e., $|u_i| = \min\{|u_j| : |u_j| > 1\}$.
+	We show that $u'\in\Gamma^f(p)$ where $u'_j = u_j$ for $j\neq i$ and $u'_i = \sgn(u_i)$ so that $|u'_i|=1$; the result then follows by iterating this argument until there are no entries with $|u_i|>1$.
+	In fact, we will show the stronger statement that for all $S\in\Y$, $L^f(u',S) \leq L^f(u,S)$.
+	Let $w = \ones - u\odot \chi_S$ and $w' = \ones - u'\odot \chi_S$, and note that $L^f(u,S) = F(w_+)$ and $L^f(u',S) = F(w'_+)$.
+	
+	First, consider the case that $(\chi_S)_iu_i > 0$; that is, if $u_i > 0$ and $i\in S$, or $u_i < 0$ and $i\notin S$.
+	Here $1-(\chi_S)_iu_i = 1-|u_i| < 0$, so $w_i < 0$.
+	For $u'$, we similarly have $w'_i = 1-|u'_i| = 0$.
+	As $u$ and $u'$ differ only at index $i$, the same holds for $w$ and $w'$; we thus have $w_+ = w'_+$, so the loss remains unchanged.
+	
+	In the other case, $(\chi_S)_iu_i < 0$, we have $w_i = 1+|u_i| > 2$ and $w'_i = 1+|u'_i| = 2$, and again the other entries are identical.
+	In particular, $w'_i \leq w_i$.
+	Moreover, we claim that there is no other value in between, i.e.,\ there is no index $j\neq i$ such that $w'_i < w_j < w_i$.
+	This follows from our assumption on $i$: if we had such a $j$, then we must have $2 < 1 - (\chi_S)_ju_j < 1 + |u_i|$, which can only occur when $\sgn(u_j) \neq \chi_S$, and thus $-(\chi_S)_ju_j = |u_j|$; we conclude $1 < |u_j| < |u_i|$, a contradiction.
+	Thus, for all $j\neq i$, we have either $w_j \leq w'_i \leq w_i$ or $w'_i \leq w_i \leq w_j$.
+	In light of $w'_j = w_j$, this is equivalent to either (a) $w_j \leq w_i$ and $w'_j \leq w'_i$, or (b) $w_i \leq w_j$ and $w'_i \leq w'_j$.
+	Thus, there is a permutation $\pi$ which orders the elements of both $w$ and $w'$ simultaneously: for all $j,j'\in [k]$, $j<j'$, we have both $w_{\pi_j} \geq w_{\pi_{j'}}$ and $w'_{\pi_j} \geq w'_{\pi_{j'}}$.
+	By another common representation of the Lov\'asz extension~\cite[Equation 3.1]{bach2013learning}, we thus have $F(w_+) - F(w'_+) = ((w_+)_i - (w'_+)_i)(f(T\cup\{i\})-f(T)) = (|u_i|-1)(f(T\cup\{i\})-f(T)) > 0$,
+	where $T = \{\pi_1,\ldots,\pi_j\}$ such that $\pi_{j+1} = i$, and we have used the fact that $f$ is increasing and $|u_i|>1$.
+\end{proof}
+
+From Lemma~\ref{lem:lovasz-cube}, we may now simplify the loss.
+When $u\in[-1,1]^k$, we simply have $L^f(u,S) = F(\ones - u \odot \chi_S)$, as the coordinates of the input to $F$ are nonnegative.
+We now further restrict to $\U$.
+
+\begin{lemma}
+	\label{lem:lovasz-trim}
+	Let $\Gamma = \prop{L^f}$.
+	Then for all $p\in\simplex$, $\Gamma(p) \cap \U \neq \emptyset$.
+\end{lemma}
+\begin{proof}
+	We will construct polytopes $P^A_\pi \subseteq [-1,1]^k$ for every set $A\subseteq N$ and permutation $\pi \in N^N$, satisfying three conditions: (i) these polytopes cover the hypercube, meaning $\cup_{A,\pi} P^A_\pi = [-1,1]^k$, (ii) $P^A_\pi$ is the convex hull of points in $\U$, and (iii) for all $S\subseteq N$, $L(\cdot,S)$ is linear on $P^A_\pi$.
+	The result will then follow, as $L(\cdot;p)$ will be also linear on each $P^A_\pi$, and thus minimized at a vertex.
+	
+	To begin, let us recall the polyhedra on which the Lov\'asz extension is linear; for any permutation $\pi$, define $P_\pi = \{u\in\reals^k : u_{\pi_1} \geq \cdots \geq u_{\pi_k}\}$.
+	It is clear from the definition that $F$ is linear on $P_\pi$; see also Equation 3.1, and ``Linear interpolation on simplices'' (pg.\ 167) in \citet{bach2013learning}.
+	We will use these polyhedra to identify the regions where $L(\cdot,S)$ is linear simultaneously for all outcomes $S\in\Y$.
+	For any $A\subseteq N$ and permutation $\pi$, let
+	\begin{equation}
+	\label{eq:poly-pi}
+	P^A_\pi = \{u\in[-1,1]^k : u \odot \chi_A \in P_\pi \cap \reals^k_+\}~.
+	\end{equation}
+	That is, $P^A_\pi$ contains all points $u$ such that $u \odot \chi_A$ is nonnegative (meaning $\sgn(u)$ matches $\chi_A$, breaking ties at $0$ favorably) and such that the coordinates of $u \odot \chi_A$ are in increasing order according to $\pi$.
+	
+	Condition (i) follows immediately: for any $u\in[-1,1]^k$, let $A = \{i:u_i\geq 0\}$, and $\pi$ be any permutation ordering the elements of $u \odot \chi_A$.
+	For condition (ii), note that for any $u\in P^A_\pi$, as $u\odot \chi_A \in P_\pi$ we may write
+	\begin{equation}
+	\label{eq:udot-conv}
+	u \odot \chi_A = \sum_{i=1}^{k-1} \left[ \left( u_{\pi_i} (\chi_A)_{\pi_i} - u_{\pi_{i+1}} (\chi_A)_{\pi_{i+1}} \right) \ones_{\{\pi_1,\ldots,\pi_i\}} \right] + u_{\pi_k} (\chi_A)_{\pi_k} \ones
+	~,
+	\end{equation}
+	which is a convex combination (again, see \citet[pg.\ 167]{bach2013learning}).
+	We simply apply the involution $\odot\chi_A$ again, to obtain
+	\begin{equation}
+	\label{eq:udot-conv}
+	u = \sum_{i=1}^{k-1} \left( u_{\pi_i} (\chi_A)_{\pi_i} - u_{\pi_{i+1}} (\chi_A)_{\pi_{i+1}} \right) \ones_{\{\pi_1,\ldots,\pi_i\}}\odot \chi_A + u_{\pi_k} (\chi_A)_{\pi_k} \chi_A
+	~,
+	\end{equation}
+	and condition (ii) follows as $\ones_B \cdot \chi_A \in \U$ for all sets $B\subseteq N$.
+	
+	Finally, for condition (iii), fix a subset $A\subseteq N$ and permutation $\pi$.
+	For each outcome $S\subseteq N$, we will construct an alternate permutation $\pi^S$ such that for all $u\in P^A_\pi$ we have $\ones - u\odot\chi_S \in P_{\pi^S}$.
+	As $F$ is linear on $P_{\pi'}$ for all permutations $\pi'$, we will conclude that for any fixed subset $S$ the loss $L(u,S) = F(\ones - u\odot\chi_S)$ will be linear in $u$ on $P^A_\pi$.
+	
+	To construct $\pi^S$, we ``shatter'' the permutation $\pi$ into two pieces, depending on whether an index is in $A\triangle S$ or not.
+	In particular, note that if $i\in A\triangle S$, then for all $u\in P^A_\pi$ we have $u_i(\chi_A)_i \geq 0$ and $(\chi_A)_i = -(\chi_S)_i$, so $(\ones - u\odot\chi_S)_i = 1 - u_i(\chi_S)_i = 1 + u_i(\chi_A)_i \geq 1$.
+	Similarly, when $i\notin A\triangle S$, then $(\chi_A)_i = (\chi_S)_i$, so $(\ones - u\odot\chi_S)_i = 1 - u_i(\chi_S)_i = 1 - u_i(\chi_A)_i \leq 1$.
+	As $\pi$ orders the elements $u_i(\chi_S)_i$ in decreasing order, we see that the following permutation $\pi^S$ will order the elements of $\ones - u\odot\chi_S$ in decreasing order: sort the elements in $A\triangle S$ according to $\pi$, followed by the remaining elements according to the reverse of $\pi$.
+	As the definition of $\pi^S$ is independent of $u$, we see that $u\in P^A_\pi \implies \ones - u\odot\chi_S \in P_{\pi^S}$, as desired.
+\end{proof}
+
+We can now see that $L^f$ embeds the loss given by $L^f$ restricted to $\U$, as $\U$ is a finite set.
+In fact, we can write this loss entirely in terms of $f$ itself.
+
+\begin{lemma}
+	\label{lem:lovasz-u}
+	Let $\hat\ell^f:\hat\R\times\Y\to\reals_+$, where $\hat\R = \{(A,B) \in 2^N \times 2^N: A\cap B=\emptyset\}$, be given by
+	\begin{equation}
+	\label{eq:lovasz-embeds}
+	\hat\ell^f((A,B),S) = L^f(\chi_A + \ones_B,S) = f(A\triangle S\setminus B) + f(A\triangle S\cup B)~.
+	\end{equation}
+	Then the Lov\'asz hinge $L^f$ embeds $\hat\ell^f$.
+\end{lemma}
+\begin{proof}
+	As observed above, the set $\U$ is in bijection with $\hat \R$, using the transformation $u = \chi_A + \ones_B$.
+	As also observed above, we may write $u = \chi_A \odot \ones_{N\setminus B}$ as well.
+	Combining Lemma~\ref{lem:lovasz-trim} with \ref{lem:loss-restrict}, we see that $L^f$ embeds $L^f|_\U$.
+	It thus only remains to verify the form~\eqref{eq:lovasz-embeds}.
+	We have $L^f(u,S) = F(x)$ where $x = \ones - u\odot\chi_S = \ones - \ones_{N\setminus B} \odot \chi_A \odot \chi_S = \ones + \ones_{N\setminus B} \odot \chi_{A\triangle S} = \ones_{B} + 2\ones_{A\triangle S\setminus B}$.
+	As $(A\triangle S \setminus B) \cup B = A\triangle S \cup B$, the result follows from~\cite[Prop 3.1(h)]{bach2013learning}.
+\end{proof}
+
+From the form~\eqref{eq:lovasz-embeds}, we see that $\hat\ell^f$ matches $2\ell$ when $B=\emptyset$, just as hinge loss embeds twice 0-1 loss.
+When $B$ is nonempty, it acts as an ``abstain set'', guaranteeing some loss in the second term, but removing errors in the first term.
+
+\subsection{Inconsistency}
+
+In light of the previous results, we can see that to show inconsistency we may focus on reports $(A,B)$ with $B\neq\emptyset$.
+Intuitively, if such a report is ever optimal, then $L^f$ has a ``blind spot'' with respect to the indices in $B$, and we can leverage this to ``fool'' $L^f$.
+In particular, we will focus on the uniform distribution $\bar p$ on $\Y$, and perturb it slightly depending on $B$ to find an optimal point $u\in\U$ which maps to a suboptimal report.
+In fact, we will show that one can always find such a point violating calibration, unless $f$ is modular.
+
+Given our focus on the uniform distribution, the following definition will be useful: for any set function $f$, let $\bar f := \E_{S\sim \bar p}[f(S)] = 2^{-k} \sum_{S\subseteq N} f(S)$.
+The next two lemmas relate $\bar f$ and $f(N)$ to expected loss and modularity.
+
+\begin{lemma}
+	\label{lem:2-bar-f}
+	For all $(A,B) \in \hat\R$, $\hat\ell^f((A,B);\bar p) \geq f(N)$. 
+	For all $A\subseteq N$, $\hat\ell^f((A,\emptyset);\bar p) = 2\bar f$.
+\end{lemma}
+\begin{proof}
+	Letting $\overline B := N\setminus B$ for short 
+	\begin{align*}
+	\hat\ell^f((A,B);\bar p)
+	&= 2^{-k} \sum_{S\subseteq N} f(A\triangle S\setminus B) + f(A\triangle S\cup B)
+	\\
+	&= 2^{-|\overline B|} \sum_{T\subseteq \overline B} f(T) + f(T\cup B)
+	\\
+	&= \frac 1 2 \; 2^{-|\overline B|} \sum_{T\subseteq \overline B} f(T) + f(\overline B\setminus T) + f(T\cup B) + f((\overline B\setminus T)\cup B)
+	\\
+	&\geq \frac 1 2 \left( f(\overline B) + f(\emptyset) + f(N) + f(B) \right)
+	\\
+	&\geq \frac 1 2 \left( f(N) + f(N) \right) = f(N)~,
+	\end{align*}
+	where we use submodularity in both inequalities.
+	The second statement follows from the second equality above after setting $B=\emptyset$, as then $\overline B = N$ and thus $T$ ranges over all of $2^N$.
+\end{proof}
+
+\begin{lemma}
+	\label{lem:bar-f}
+	Let $f$ be submodular and normalized.
+	Then $\bar f \geq f(N)/2$, and $f$ is modular if and only if $\bar f = f(N)/2$.
+\end{lemma}
+\begin{proof}
+	The inequality follows from Lemma~\ref{lem:2-bar-f} with $B=\emptyset$.
+	Next, note that if $f$ modular we trivially have $\bar f = f(N)/2$.
+	If $f$ is submodular but not modular, we must have some $S\subseteq N$ and $i\in S$ such that $f(S) - f(S\setminus\{i\}) < f(\{i\})$.
+	By submodularity, we conclude that $f(N) - f(N\setminus\{i\}) < f(\{i\})$ as well; rearranging, $f(\{i\}) + f(N\setminus\{i\}) > f(N) = f(N) + f(\emptyset)$.
+	Again examining the proof of Lemma~\ref{lem:2-bar-f}, we see that the first inequality must be strict, as we have one such $T\subseteq N$, namely $T=\{i\}$, for which the inequality in submodularity is strict.
+\end{proof}
+
+
+\begin{theorem}
+	Let $f$ be submodular, normalized, and increasing.
+	Then $(L^f,\sgn)$ is consistent if and only if $f$ is modular.
+\end{theorem}
+\begin{proof}
+	If $f$ is modular, then $F$ is linear, and $L^f(\cdot;p)$ is linear on $[-1,1]^k$.
+	We conclude that $L^f(\cdot;p)$ is minimized at a vertex of the hypercube, meaning $L^f$ embeds $2\ell^f$.
+	(Equivalently, there is always an optimal report $(A,\emptyset)\in\hat\R$ for $\hat\ell^f$.)
+	Calibration and consistency then follow.
+	
+	Now suppose $f$ is submodular but not modular.
+	As $f$ is increasing, we will assume without loss of generality that $f(\{i\}) > 0$ for all $i\in N$, which is equivalent to $f(S) > 0$ for all $S\neq\emptyset$; otherwise, $f(T) = f(T\setminus\{i\})$ for all $T\subseteq N$, so discard $i$ from $N$ and continue.
+	In particular, we have $\{\emptyset\} = \argmin_{S\subseteq N} f(S)$.
+	
+	Define $\epsilon = \bar f / (2\bar f - f(N))$, which is strictly positive by Lemma~\ref{lem:bar-f} and submodularity of $f$.
+	Let $p = (1-\epsilon) \bar p + \epsilon \delta_\emptyset$, where again $\bar p$ is the uniform distribution, and $\delta_\emptyset$ is the point distribution on $\emptyset$.
+	From Lemma~\ref{lem:2-bar-f}, for all $A\subseteq N$ we have
+	\begin{align*}
+	\hat\ell^f((A,\emptyset);p)
+	&= (1-\epsilon) 2 \bar f + \epsilon \, \hat\ell^f((A,\emptyset),\emptyset)\\
+	&= (1-\epsilon) 2 \bar f + \epsilon \, 2f(A)\\
+	&\geq (1-\epsilon)2 \bar f > f(N) = \hat\ell^f((\emptyset,N);p)~.
+	\end{align*}
+	As we have some report with strictly lower loss than all reports of the form $(A,\emptyset)$, we conclude that we must have some $(A,B) \in \prop{\hat\ell^f}(p)$ with $B\neq\emptyset$.
+	We can also see that $\prop{\ell^f}(p) = \{\emptyset\}$ by the second equality and the fact that $\{\emptyset\} = \argmin_{S\subseteq N} f(S)$.
+	
+	Revisiting $L^f$, from Lemma~\ref{lem:lovasz-u} and the map between $\U$ and $\hat\R$, we have some $u\in\Gamma^f(p)$ which we can write $u = \chi_A + \ones_B$.
+	Let $T\subseteq N$ such that $\chi_T = \sgn(u)$ after breaking ties, and note that $A \subseteq T \subseteq A\cup B$.
+	If $T\neq\emptyset$, we are done, as by the above $\emptyset$ optimizes $\ell^f$, so we have violated calibration and therefore consistency.
+	
+	Otherwise, $T=\emptyset$, so $A=\emptyset$ as well.
+	In this case, we will modify $p$ to put weight on $B\neq\emptyset$ instead of $\emptyset$, and will find that $u$ is still optimal for $L^f$, again violating calibration.
+	To show optimality, let $c = L^f(u;p) = \risk{L^f}(p)$, and note that by symmetry of $L^f$, for any $S\subseteq N$ we have $c = \risk{L^f}(p^S)$ as well, where $p^S = (1-\epsilon)\bar p + \epsilon \delta_S$.
+	In particular, this will hold for $p^B$.
+	By Lemma~\ref{lem:lovasz-u}, we have
+	$L^f(u,B) = f(\emptyset\triangle B\setminus B) + f(\emptyset\triangle B\cup B) = f(\overline B) + f(N) = f(\emptyset\triangle \emptyset\setminus B) + f(\emptyset\triangle \emptyset\cup B) = L^f(u,\emptyset)$.
+	Thus, $L^f(u,p^B) = (1-\epsilon) L^f(u,\bar p) + \epsilon L^f(u,B) = (1-\epsilon) L^f(u,\bar p) + \epsilon L^f(u,\emptyset) = L^f(u,p) = c$, so $u$ is still optimal.
+	As $\chi_B \neq \chi_T = \sgn(u)$, we are done.
+\end{proof}
+
+\section{Top-$k$ surrogate}
+
+Throughout this section, consider the surrogate and discrete loss $L^k(u)_y~=~\left(\frac{1}{k} \sum_{i=1}^k (u + \ones - e_y)_{[i]} - u_y \right)_+$ given in Equation~\ref{eq:L-2-surrogate}.
+
+\begin{lemma}\label{lem:top-k-polyhedral}
+$L^k$ is a polyhedral loss.
+\end{lemma}
+\begin{proof}
+Observe $L^k$ can be written as the pointwise max of $\binom{n}{k} +1$ terms, where the $\binom{n}{k}$ terms are selecting the $k$ elements of $u + \ones - e_y$, and the max comes from selecting the $u_i$ elements with highest weight.
+\end{proof}
+
+
+
+\end{document}
