@@ -27,7 +27,7 @@
 \usepackage{xspace}
 
 \usetikzlibrary{calc}
-\newcommand{\Comments}{0}
+\newcommand{\Comments}{1}
 \newcommand{\mynote}[2]{\ifnum\Comments=1\textcolor{#1}{#2}\fi}
 \newcommand{\mytodo}[2]{\ifnum\Comments=1%
   \todo[linecolor=#1!80!black,backgroundcolor=#1,bordercolor=#1!80!black]{#2}\fi}
@@ -738,23 +738,26 @@ We therefore turn to deriving this discrete loss $\ell^k$.
 For concreteness, consider the case with $k = 2$ over $n=3$ outcomes.
 We can re-write $L^2(u)_y = \left(1 - u_y + \tfrac 1 2 (u_{[1]}+ u_{[2]} - \min(1,u_y))\right)_+$.
 By inspection, we can derive the properties elicited by $\elltop{2}$ and $L^2$, respectively, which reveals that the set $\R'$ consisting of all permutations of $(1,0,0)$, $(1,1,0)$, and $(2,1,0)$, are always represented among the minimizers of $L^2$.
-Thus, $L^2$ embeds the loss $\ell^2(r)_y = $ \raf{Jessie fill in}.
+Thus, $L^2$ embeds the loss $\ell^2(r)_y = 1 - r_y + \tfrac 1 2 \inprod{r}{\ones-e_y}$ if $r_y = 1$ or $0$, and $0$ otherwise.
+Observe that this is like $\elltop{2}$, with a punishment for reporting weight on elements of $r$ other than the outcome and a reward for showing a ``higher confidence'' in the correct outcome (i.e. $r_y = 2$).
 Moreover, we can visually inspect the corresponding properties (Fig.~\ref{fig:top-k-simplices}) to immediately see why $L^2$ is inconsistent: for distributions where the two least likely labels are roughly equally (un)likely, the minimizer will put all weight on the most likely label, and thus fail to distinguish the other two.
 More generally, $L^2$ cannot be consistent because the property it embeds does not ``refine'' (subdivide) the top-$k$ property, so not just $\psi$, but \emph{no} link function, could make $L^2$ consistent.
 
 \begin{figure}
-	\begin{minipage}{0.42\linewidth}
+	\begin{minipage}{0.4\linewidth}
 		\centering
 		\includegraphics[width=\linewidth]{tikz/original-top-k}
 		\label{fig:original-top-k}
 	\end{minipage}
 	\hfill
-	\begin{minipage}{0.42\linewidth}
+	\begin{minipage}{0.4\linewidth}
 		\centering
 		\includegraphics[width=\linewidth]{tikz/finite-surrogate-top-k}
 		\label{fig:finite-surrogate-top-k}
 	\end{minipage}
-	\caption{Minimizers of $\inprod{p}{\elltop{2}}$ and $\inprod{p}{\ell^2}$, respectively, varying $p$ over $\Delta_3$. \raf{The projection is off somehow; uniform distribution should be the centroid, and more generally, both figures should be rotationally symmetric.}}
+	\caption{Minimizers of $\inprod{p}{\elltop{2}}$ and $\inprod{p}{\ell^2}$, respectively, varying $p$ over $\Delta_3$. 
+%\raf{The projection is off somehow; uniform distribution should be the centroid, and more generally, both figures should be rotationally symmetric.}
+	}
 	\label{fig:top-k-simplices}
 \end{figure}
 
@@ -1389,18 +1392,18 @@ In the rest of the section, for shorthand, we write $L(u;p) := \langle p, L(u) \
 \end{proof}
 
 
-%\section{Top-$k$ surrogate}
-%\jessie{Can scrap Lemma 13... not sure the point of Lemma 12 on its own, but it might be worth keeping.  Thoughts?}
-%Throughout this section, consider the surrogate and discrete loss $L'(u)_y~=~\left(\frac{1}{k} \sum_{i=1}^k (u + \ones - e_y)_{[i]} - u_y \right)_+$ and $\ell'(r)_y = \Ind{y \not\in r} + \frac{1}{k} |r \setminus \{y\}|$ given in Equations~\ref{eq:L-2-surrogate} and~\ref{eq:ell-2}, respectively.
-%
-%\begin{lemma}\label{lem:top-k-polyhedral}
-%$L'$ is a polyhedral loss.
-%\end{lemma}
-%\begin{proof}
-%Observe $L'$ can be written as the pointwise max of $\binom{n}{k} +1$ terms, where the $\binom{n}{k}$ terms are selecting the $k$ elements of $u + \ones - e_y$, and the max comes from selecting the $u_i$ elements with highest weight.
-%\end{proof}
-%%By Lemma~\ref{lem:poly-loss-poly-risk}, we then know that $\risk{L'}$ is also polyhedral.
-%
+\section{Top-$k$ surrogate}
+
+Throughout this section, consider the surrogate and discrete loss $L^k(u)_y~=~\left(\frac{1}{k} \sum_{i=1}^k (u + \ones - e_y)_{[i]} - u_y \right)_+$ given in Equation~\ref{eq:L-2-surrogate}.
+
+\begin{lemma}\label{lem:top-k-polyhedral}
+$L^k$ is a polyhedral loss.
+\end{lemma}
+\begin{proof}
+Observe $L^k$ can be written as the pointwise max of $\binom{n}{k} +1$ terms, where the $\binom{n}{k}$ terms are selecting the $k$ elements of $u + \ones - e_y$, and the max comes from selecting the $u_i$ elements with highest weight.
+\end{proof}
+%By Lemma~\ref{lem:poly-loss-poly-risk}, we then know that $\risk{L'}$ is also polyhedral.
+
 %We next show that $\U = \{u \in \{0,1\}^n : \|u\|_0 \leq k\}$ is always represented among the optimizers of $L'$. \begin{lemma}\label{lem:top-k-optimal-corners}
 %  For all $p \in \simplex$ we have $\prop{L'}(p) \cap \U \neq \emptyset$.
 %\end{lemma}
@@ -1438,13 +1441,13 @@ In the rest of the section, for shorthand, we write $L(u;p) := \langle p, L(u) \
 %\end{proof}
 %
 %\raf{Cut this final lemma for now}
-%% \begin{lemma}\label{lem:top-k-surrogate-embeds}
-%% $L':\reals^n \to \reals^\Y_+$ embeds $\ell':\R \to \reals^\Y_+$.
-%% \end{lemma}
-%% \begin{proof}
-%%   We can verify $\ell'(r) = L'(\varphi(r))$ for all $r \subseteq [n]$ and $\varphi(r)$ being its conversion from a set to binary vector, so $\varphi(\R) = \{ u \in \{0,1\}^n : \|u\|_1 \leq k \}$.
-%%   Moreover, by Lemma~\ref{lem:top-k-optimal-corners} and the above equality, respectively, we know that $\inf_{u \in \reals^n} \inprod{p}{L'(u)} = \min_{u \in \varphi(\R)} \inprod{p}{L'(u)} = \min_{r \in \R}\inprod{p}{\ell'(r)}$ for all $p \in \simplex$, and so we conclude that $L'$ embeds $\ell'$.
-%% \end{proof}
+% \begin{lemma}\label{lem:top-k-surrogate-embeds}
+% $L':\reals^n \to \reals^\Y_+$ embeds $\ell':\R \to \reals^\Y_+$.
+% \end{lemma}
+% \begin{proof}
+%   We can verify $\ell'(r) = L'(\varphi(r))$ for all $r \subseteq [n]$ and $\varphi(r)$ being its conversion from a set to binary vector, so $\varphi(\R) = \{ u \in \{0,1\}^n : \|u\|_1 \leq k \}$.
+%   Moreover, by Lemma~\ref{lem:top-k-optimal-corners} and the above equality, respectively, we know that $\inf_{u \in \reals^n} \inprod{p}{L'(u)} = \min_{u \in \varphi(\R)} \inprod{p}{L'(u)} = \min_{r \in \R}\inprod{p}{\ell'(r)}$ for all $p \in \simplex$, and so we conclude that $L'$ embeds $\ell'$.
+% \end{proof}
 
 
 \end{document}
