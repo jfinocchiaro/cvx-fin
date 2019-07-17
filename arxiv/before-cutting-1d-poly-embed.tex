@@ -1,0 +1,1373 @@
+\documentclass[12pt]{article}
+\PassOptionsToPackage{numbers, compress, sort}{natbib}
+\usepackage{neurips_2019}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks  %[implicit=false, bookmarks=false]
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+
+\usepackage{mathtools, amsmath, amssymb, amsthm, graphicx, verbatim}
+%\usepackage[thmmarks, thref, amsthm]{ntheorem}
+\usepackage{color}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.2}
+\hypersetup{colorlinks,breaklinks,
+            linkcolor=darkblue,urlcolor=darkblue,
+            anchorcolor=darkblue,citecolor=darkblue}
+\usepackage{wrapfig}
+\usepackage{subcaption}
+\usepackage[colorinlistoftodos,textsize=tiny]{todonotes} % need xargs for below
+%\usepackage{accents}
+\usepackage{bbm}
+\usepackage{xspace}
+
+\usetikzlibrary{calc}
+\newcommand{\Comments}{1}
+\newcommand{\mynote}[2]{\ifnum\Comments=1\textcolor{#1}{#2}\fi}
+\newcommand{\mytodo}[2]{\ifnum\Comments=1%
+  \todo[linecolor=#1!80!black,backgroundcolor=#1,bordercolor=#1!80!black]{#2}\fi}
+\newcommand{\raf}[1]{\mynote{green}{[RF: #1]}}
+\newcommand{\raft}[1]{\mytodo{green!20!white}{RF: #1}}
+\newcommand{\jessie}[1]{\mynote{purple}{[JF: #1]}}
+\newcommand{\jessiet}[1]{\mytodo{purple!20!white}{JF: #1}}
+\newcommand{\bo}[1]{\mynote{blue}{[Bo: #1]}}
+\newcommand{\botodo}[1]{\mytodo{blue!20!white}{[Bo: #1]}}
+\ifnum\Comments=1               % fix margins for todonotes
+  \setlength{\marginparwidth}{1in}
+\fi
+
+
+\newcommand{\reals}{\mathbb{R}}
+\newcommand{\posreals}{\reals_{>0}}%{\reals_{++}}
+\newcommand{\dom}{\mathrm{dom}}
+
+\newcommand{\prop}[1]{\Gamma[#1]}
+\newcommand{\eliccts}{\mathrm{elic}_\mathrm{cts}}
+\newcommand{\eliccvx}{\mathrm{elic}_\mathrm{cvx}}
+\newcommand{\elicpoly}{\mathrm{elic}_\mathrm{pcvx}}
+\newcommand{\elicembed}{\mathrm{elic}_\mathrm{embed}}
+
+\newcommand{\cell}{\mathrm{cell}}
+
+\newcommand{\abstain}[1]{\mathrm{abstain}_{#1}}
+\newcommand{\mode}{\mathrm{mode}}
+
+\newcommand{\simplex}{\Delta_\Y}
+
+% alphabetical order, by convention
+\newcommand{\C}{\mathcal{C}}
+\newcommand{\D}{\mathcal{D}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\I}{\mathcal{I}}
+\newcommand{\R}{\mathcal{R}}
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\Y}{\mathcal{Y}}
+
+\newcommand{\risk}[1]{\underline{#1}}
+\newcommand{\inprod}[2]{\langle #1, #2 \rangle}%\mathrm{int}(#1)}
+\newcommand{\inter}[1]{\mathring{#1}}%\mathrm{int}(#1)}
+%\newcommand{\expectedv}[3]{\overline{#1}(#2,#3)}
+\newcommand{\expectedv}[3]{\E_{Y\sim{#3}} {#1}(#2,Y)}
+\newcommand{\toto}{\rightrightarrows}
+\newcommand{\strip}{\mathrm{strip}}
+\newcommand{\trim}{\mathrm{trim}}
+\newcommand{\fplc}{finite-piecewise-linear and convex\xspace} %xspace for use in text
+\newcommand{\conv}{\mathrm{conv}}
+\newcommand{\indopp}{\bar{\mathbbm{1}}}
+\newcommand{\ones}{\mathbbm{1}}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+
+\newcommand{\Ind}{\mathbf{1}}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\arginf}{arg\,inf}
+\DeclareMathOperator*{\sgn}{sgn}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{conjecture}{Conjecture}
+
+
+%\title{An Embedding Framework for Consistent Polyhedral Surrogates}
+\title{Consistent Polyhedral Surrogates via Embeddings}
+%\title{Convex Surrogates via Polyhedral Losses}
+\author{%
+ Jessica Finocchiaro\raf{Jessie?} \\
+ \texttt{jessica.finocchiaro@colorado.edu}\\
+ CU Boulder
+ \And
+ Rafael Frongillo\\
+ \texttt{raf@colorado.edu}\\
+ CU Boulder
+ \And
+ Bo\\
+ \texttt{bwag@colorado.edu}\\
+ MSFT
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+  We formalize and study the natural approach of designing convex surrogate loss functions via embeddings, for problems such as classification or ranking which involve a finite number of possible predictions.
+  Specifically, we consider surrogate losses given by embedding each prediction as a point in $\reals^d$, and convexifying the loss.
+  We prove that this approach is equivalent, in a strong sense, to working with polyhedral (piecewise linear convex) losses.
+  We then investigate the dimensionality of the surrogate hypothesis space required for such an embedding, giving a complete characterization of the 1-dimensional case.
+  We illustrate our results with modest lower bounds for abstain loss, and conclude with future directions.
+\end{abstract}
+
+%  Convex surrogates are sweet.
+%  Given a loss for a classification-like problem, there are two natural approaches to design convex surrogates.
+%  First, one may attempt to map each prediction to a low-dimensional vector, and try to find a convex loss in that space with the right calibration.
+%  Second, one may simply try to find a surrogate within the class of piecewise-linear convex, or polyhedral, losses.
+%  We show an equivalence between these two approaches, and \raf{more stuff}.
+%  We show that every loss with a finite number of predictions has a convex surrogate in the above sense using one fewer dimension that the number of outcomes, and give a full characterization of the losses needing only $d$ dimensions for such a surrogate.
+%  We then apply this characterization to show novel lower bounds for abstain loss, demonstrating the power of our techniques over \raf{check this} alternatives such as feasible subspace dimension.
+
+%\begin{keywords}%
+%  information elicitation, proper scoring rules, surrogate loss functions
+%\end{keywords}
+
+\section{Introduction}\label{sec:intro}
+
+%\raf{MOVED FROM SEC 2; maybe incorporate?}
+%Often, for computational or other reasons, one is interested in a property $\gamma$ such as the mode, but wishes to elicit it by minimizing some other ``surrogate'' loss $L$ over some other space such as $\reals^d$, then mapping the result back to $\R$ using a link function.
+%We now formalize this procedure.
+%
+
+Convex surrogate losses are a central building block in machine learning for classification and classification-like problems.
+A growing body of work seeks to design and analyze convex surrogates for given loss functions, and more broadly, understand when such surrogates can and cannot be found.
+For example, recent work has developed tools to bound the required number of dimensions of the surrogate's hypothesis space~\cite{frongillo2015elicitation,  ramaswamy2016convex}.
+Yet in some cases these bounds are far from tight, such as for \emph{abstain loss} (classification with an abstain option)~\cite{bartlett2008classification, yuan2010classification, ramaswamy2016convex, ramaswamy2018consistent}.
+Furthermore, the kinds of strategies available for constructing surrogates, and their relative power, are not well-understood.
+
+We augment this literature by studying a particularly natural approach for finding convex surrogates, wherein one ``embeds'' a discrete loss.
+Specifically, we say a convex surrogate $L$ embeds a discrete loss $\ell$ if there is an injective embedding from the discrete reports (predictions) to a vector space such that (i) the original loss values are recovered, and (ii) a report is $\ell$-optimal if and only if the embedded report is $L$-optimal.
+If additionally there exists a ``separated'' link function which maps approximately $L$-optimal reports to $\ell$-optimal reports, this condition is known to produce $\ell$-calibrated surrogates~\cite{agarwal2015consistent}.
+Common examples which follow this general construction include hinge loss as a surrogate for 0-1 loss and the abstain surrogate mentioned above.
+
+Using tools from property elicitation, we show a tight relationship between such embeddings and the class of polyhedral (piecewise-linear convex) loss functions.
+In particular, by focusing on Bayes risks, we show that every discrete loss is embedded by some polyhedral loss, and every polyhedral loss function embeds some discrete loss.
+Moreover, we show that any polyhedral loss gives rise to a separated link function to the loss it embeds, \raft{TODO: prove this :-]}
+thus giving a very general framework to construct calibrated convex surrogates for arbitrary losses.
+
+We go on to initiate a study of \emph{embedding dimension}: the minimal dimension for a given discrete loss to be so embedded.
+Our results give a complete characterization in the case of dimension 1; that is, real-valued surrogates.
+We find that a discrete loss can be embedded in the real line if and only if it is order-sensitive, meaning there is an ordering of the predictions such that the loss increases as one moves away from the correct prediction.
+We show further that order-sensitivity characterizes the existence of \emph{any} real-valued convex surrogate, implying that embeddings lose no generality.
+We conclude with preliminary results in higher dimensions and other future directions.
+
+\subsection{Related works}
+Convex surrogates have been formalized and investigated in a variety of past work such as \cite{crammer2001algorithmic,bartlett2006convexity,bartlett2008classification}, particularly in the context of 0-1 loss, distributions on just two outcomes, and support vector machines.
+%  \cite{crammer2001algorithmic} is one of the first papers to present a convex surrogate for multiclass classification problems in the context of support vector machines.
+%  They use the convex surrogate $L(\textbf{r},y) = (\max_{j\neq y} r_j - r_y + 1)_+$, where $\textbf{r}$ is a $n$-dimensional vector corresponding to the entire distribution, and $r_j$ is the $j^{th}$ component of \textbf{r}.
+%
+%  \cite{bartlett2006convexity} provides one of the most well-known formalizations of convex surrogates for properties on binary outcomes.
+%  This work evaluates the risk bounds of convex surrogates and shows the sufficiency of convex surrogates such as logistic loss to replace the 0-1 loss for ease of optimization, and has inspired a line of research in the design of consistent surrogate losses for binary classification problems.
+%  \jessiet{This is based on what I remember.  Couldn't find the free version (off the campus network) but also didn't look hard at all, since I'm guessing one of you two already knows this paper better than I do.}
+%
+%%  \cite{bartlett2008classification} studies the abstain property with $n=2$ and shows a variation of the hinge loss that is one convex surrogate that elicits the abstain property to two outcomes.
+%
+%  \cite{ramaswamy2012classification} discuss and formalize the notion of \emph{convex calibration} dimension for finite properties.
+%  The concept they call convex calibration dimension is one notion of elicitation complexity discussion in this paper.
+%  Denoted here by $\eliccvx(\gamma)$, convex calibration refers to the minimum dimension $d$ such that the property $\gamma$ can be indirectly elicited by a convex loss $L:\reals^d \to \reals^\Y_+$.
+%
+%  Most of the preliminary work on the construction of convex surrogate losses focuses on learning the mode in a binary classification problem.
+  One of the first works formally studying convex surrogates beyond binary outcomes is~\cite{ramaswamy2018consistent}, who give an embedding of the \emph{abstain loss} into very few dimensions.
+For the case of $\reals^2$ \jessiet{$\reals^2$ or $n \in \{3, 4\}$?}, we will show that no embedding can do better.
+%  Rather than focusing on the mode, this paper proves bounds on the elicitation complexity of the abstain property.
+%  They provide a consistent surrogate that elicits abstain with $\alpha = 1/2$ in $\ceil*{\log_2 n}$ dimensions. \jessiet{I don't like how much I'm talking about elicitation without the context.}
+%  It remains unknown if this bound is tight, although in Conjecture~\ref{conj:abstain-tight}, we conjecture that it is, at least from the perspective from ``embedding''.
+%  If true, then we will need new approaches in order to indirectly elicit the abstain property by a convex surrogate for any dimension lower than $\ceil*{\log_2 n}$.
+%
+%  \cite{agarwal2015consistent} introduces the notion of a \emph{calibrated property}, which is very similar to our \emph{surrogate property} that we elicit by a convex surrogate in lieu of directly eliciting a finite property.
+%  However, they do not consider properties to be set-valued, leading to subtle differences in the property values for some distributions.
+%  Additionally, most of their results focus on linear properties. \jessiet{is there a relationship between linear and orderable properties?  If not, we can probably remove this statement.}
+%
+  \citet{agarwal2015consistent} and~\citet{ramaswamy2016convex} study the existence of convex surrogates; the latter proves lower bounds on dimensionality of hypothesis spaces for e.g.~0-1 loss via their notion of feasible subspace dimension.
+  These works are generally not directly comparable to our results, as they do not consider the embedding method. \jessiet{In what sense do they not consider embedding?  The formalism we present?  They intuitively embed into the reals, but I don't remember if they focus on polyhedral losses}
+  However, we will mention relevant results inline.
+%  In~\cite{ramaswamy2016convex}, the authors introduce a new method of obtaining upper bounds on elicitation complexity called the \emph{Feasible Subspace Dimension}.
+%  This method uses local information about distributions in a property in order to find bounds on the convex elicitation complexity of a property.
+%  For example, Feasible Subspace Dimension can be used to find a tight bound on $\eliccvx$(mode), but does not reveal a tight bound for the abstain property discussed later.
+%  This suggests that the bound on $\eliccvx$(abstain) must be found using more \emph{global} information about the property.
+%  We discuss this in Section~\ref{sec:general-dimensions}, showing previously unknown necessary conditions for embedding finite properties.
+
+
+% \subsection{Notation}
+% \begin{itemize}
+%   \item $\Y$ is the finite outcome space, and $n := |\Y|$.
+%   \item $\simplex\subseteq\reals^\Y$ is the set of distributions over $\Y$, thought of as vectors of probabilities.
+%   \item For an outcome $y$, we denote $p_y$ as the probability of outcome $y$ being observed in nature.
+%   \item If $\gamma = \prop{\ell}$, then $\gamma:\simplex \toto \R$ is the property elicited by the loss $\ell: \R \to \reals^\Y$.
+%   \item $d$ is the dimension of the embedding space
+%   \item $L:\reals^d \to \reals^\Y_+$ is a loss taking a report $u \in \reals^d$ and mapping the loss over each outcome in $\Y$. \raf{Changed to $\reals^\Y_+$ below.}
+%   \item $\Gamma: \simplex \toto \reals^d$ is the set-valued property mapping a probability distribution to a report $u \in \reals^d$.
+%   \item $\Gamma_u = \{ p \in \simplex : u \in \Gamma(p) \}$
+%   \item $\psi$ is the link function (see below)
+%   \item $\varphi:\R \to \reals^d$ is the embedding function
+%   \item $\trim(\Gamma)$ and $\strip(\Gamma)$
+%   \item $\eliccvx$, $\elicembed$, and $\elicpoly$
+%   \item $V$ and $B(P)$ as we get ready for later.
+% \end{itemize}
+
+
+
+\section{Setting}
+\label{sec:setting}
+
+For discrete prediction problems like classification, due to hardness of directly optimizing a given discrete loss, many machine learning algorithms can be thought of as minimizing a surrogate loss function with better optimization qualities, e.g., convexity.
+Of course, to show that this surrogate loss successfully addresses the original problem, one needs to establish consistency, which depends crucially on the choice of link function that maps surrogate reports (predictions) to original reports.
+We thus begin with a sufficient condition for link functions, after introducing our notation.
+
+\subsection{Notation and Losses}
+
+Let $\Y$ be a finite outcome (label) space, and throughout let $n=|\Y|$.
+The set of probability distributions on $\Y$ is denoted $\simplex\subseteq\reals^{\Y}$, represented as vectors of probabilities.
+We write $p_y$ for the probability of outcome $y \in \Y$ drawn from $p \in \simplex$.
+\jessiet{Do we want to go into the detail of thinking of $p_y$ as $p(Y|X)$ in finite data}
+
+\raf{Important TODO: we use $\reals^\Y$ sometimes and $\reals^\Y_+$ other times; ideally both $+$, but we need to see what we can prove...  I know this is a key detail for polyhedral losses, to ensure the inf is always attained.}
+\jessiet{If the convex loss is bounded from below by $M$, we can say $\reals^\Y_+$ WLOG since $L$ elicits $\Gamma$ implies $(L +c)$ elicits $\Gamma$ for any constant $c$-- in particular, $M$.  We might also assume our discrete loss is nonnegative?}
+
+We assume that a given discrete prediction problem, such as classification, is given in the form of a \emph{discrete loss} $\ell:\R\to\reals^\Y_+$, which maps a report (prediction) $r$ from a finite set $\R$ to the vector of loss values $\ell(r) = (\ell(r)_y)_{y\in\Y}$ for each possible outcome $y\in\Y$.
+We will assume throughout that the given discrete loss is \emph{non-redundant}, meaning every report is uniquely optimal (minimizes expected loss) for some distribution $p\in\Delta(\Y)$.
+Similarly, surrogate losses will be written $L:\reals^d\to\reals^\Y_+$.
+(A generic loss be written $L:\R\to\reals^\Y$.)
+We write expected loss of report $r$ when $Y \sim p$ as $\inprod{p}{L(r)}$.
+The \emph{Bayes risk} of a loss $L:\R\to\reals^\Y$ is the function $\risk{L}:\Delta(\Y)\to\reals$ given by $\risk{L}(p) := \inf_{r\in\R} \inprod{p}{L(r)}$; naturally for discrete losses we will write $\risk{\ell}$.
+
+For example, 0-1 loss is a discrete loss with $\R = \Y = \{1,2,\ldots,n\}$ given by $\ell(r)_y = \Ind[r \neq y]$, and has Bayes risk $\risk{\ell}(p) = \max_{y\in\Y} p_y$.
+Two important examples of surrogates for 0-1 loss, with $\R=\reals$, are hinge loss $L(u)_y = \max(0,1-yu)$ and logistic loss $L(u)_y = \log(1+\exp(-yu))$.
+\jessiet{Do we want to mention $r \to$ discrete reports and $u \to$ real reports?}
+
+Most of the surrogates $L$ we consider will be \emph{polyhedral}, meaning piecewise linear and convex\jessiet{and bounded from below?}; we therefore briefly recall the relevant definitions.
+In $\reals^d$, a \emph{polyhedral set} or \emph{polyhedron} is the intersection of a finite number of closed halfspaces.
+A \emph{polytope} is a bounded polyhedral set.
+A convex function $f:\reals^d\to\reals$ is \emph{polyhedral} if its epigraph is polyhedral, or equivalently, if it can be written as a pointwise maximum of a finite set of affine functions~\citep{rockafellar1997convex}.
+%
+\begin{definition}[Polyhedral loss]
+  A loss $L: \reals^d \to \reals^{\Y}_+$ is a \emph{polyhedral} if $L(u)_y$ is a polyhedral (convex) function of $u$ for each $y\in\Y$.
+\end{definition}
+%
+For example, the hinge loss is polyhedral, whereas logistic loss is not.
+
+\subsection{Links and Embedding}
+
+To ensure consistency, we will seek ``separated'' link functions, which require that the excess loss of some report is bounded by (a constant times) the excess loss of the linked report.
+
+\begin{definition}[Consistency]\label{def:consistency}
+We say that a surrogate $L(u)$ is \emph{consistent} with respect to a discrete loss $\ell(r)$ if, for all $p \in \simplex$, \jessie{....?}
+\end{definition}
+
+\begin{definition}[Separated Link]\label{def:links}
+  Let discrete loss $\ell:\R\to\reals^\Y_+$ and surrogate $L:\reals^d\to\reals^\Y_+$ be given.
+  A \emph{link function} is a map $\psi:\reals^d\to\R$.
+  We say that a link $\psi$ is \emph{$\delta$-separated} for some $\delta > 0$ if for all $p \in \simplex$ and $u\in\reals^d$, we have
+  \begin{align*}
+    \inprod{p}{L(u)} - \inf_{u' \in \reals^d} \inprod{p}{L(u')} \geq \delta\left(\inprod{p}{\ell(\psi(u))} - \min_{r \in \R} \inprod{p}{\ell(r)}\right)~.
+  \end{align*}
+  A link is \emph{separated} if it is $\delta$-separated for some $\delta>0$.
+\end{definition}
+
+We omit the details connecting this definition to consistency, and instead refer the reader to Ramaswamy et al.~\cite{ramaswamy2018consistent}.
+(See the proof of Theorems 8.1-8.3.).
+\raf{We could flesh this out if we want.  Might be worth it.  Their entire proof(s) establish $\delta$-separation, and then the line ``The Theorem simply follows from linearity of expectation.''}
+
+Several consistent convex surrogates in the literature can be thought of as ``embeddings'': map the discrete reports to a vector space, and find a convex loss which agrees with the original loss and has the same statistical behavior.
+We formalize this notion as follows.
+%
+\begin{definition}\label{def:loss-embed}
+  A loss $L:\reals^d\to\reals^\Y$ \emph{embeds} a loss $\ell:\R\to\reals^\Y$ if there exists some injective embedding $\varphi:\R\to\reals^d$ such that
+  (i) for all $r\in\R$ we have $L(\varphi(r)) = \ell(r)$, and (ii) for all $p\in\simplex,r\in\R$ we have
+  \begin{equation}\label{eq:embed-loss}
+    r \in \argmin_{r'\in\R} \inprod{p}{\ell(r')} \iff \varphi(r) \in \argmin_{u\in\reals^d} \inprod{p}{L(u)}~.
+  \end{equation}
+\end{definition}
+%
+Note that embeddings do not automatically give rise to separated links; indeed, apart from mapping the embedded reports back from whence they came \raft{I know... just wanted to say that} via $\psi(\varphi(r)) = r$, how to map the remaining values is far from clear.
+Constructing separated links from embeddings will therefore be a major focus in Section~\ref{sec:poly-loss-embed}.
+
+
+\raf{How hinge and abstain fit in}
+\jessie{Added the paragraphs below.}
+To illustrate the idea of embeddings, we now look in detail at two key examples.
+First, consider a binary classification problem on the outcomes $\{-1, +1\}$.
+We know that both the hinge loss $L_{hinge}(u,y) := (1 - uy)_+$ and logistic loss $L_{logistic}(u,y) := \ln\left(1 + \exp(-uy)\right)$ are convex surrogates that are minimized in expectation by predicting the mode, as is 0-1 loss $\ell_{mode}(r,y) := \textbf{1}[r\neq y]$.
+However, we say that hinge loss embeds the mode, while logistic loss does not.
+\jessie{Come back to flesh this out if space?}
+
+In another example, we consider the abstain loss and an embedding given by Ramaswamy et al.~\cite{ramaswamy2018consistent} in Section~\ref{sec:examples}, but note that the link function they provide is not unique.
+Essentially, the discrete abstain$(1/2)$ loss is minimized in expectation by predicting the most likely outcome $\argmax_y p_y$, conditioned on $p_y \geq 1/2$.
+If the most likely outcome is not likely enough, the loss is minimized by ``abstaining'' from predicting; a situation one can imagine would be useful if a false positive is costly.
+\jessie{Are we adding discussion about the choice of link relative to the norm?}
+
+
+\subsection{Property Elicitation}
+
+\raf{Let's leave this here and see how much we really need in the end...}
+
+To make headway, we will appeal to concepts and results from the property elicitation literature, which elevates the \emph{property}, or map from distributions to optimal reports, as a central object to study in its own right.
+In our case, this map will often be multivalued, meaning a single distribution could yield multiple optimal reports.
+(For example, when $p=(1/2,1/2)$, both $y=1$ and $y=-1$ optimize 0-1 loss.)
+To this end, we will use double arrow notation to mean a mapping to all nonempty subsets, so that $\gamma: \simplex \toto \R$ is shorthand for $\gamma: \simplex \to 2^{\R} \setminus \emptyset$.
+
+\begin{definition}[Property, level set]\label{def:property}
+  A \emph{property} is a function $\Gamma:\simplex\toto\R$.
+  The \emph{level set} of $\Gamma$ for report $r$ is the set $\Gamma_r := \{p : r \in \Gamma(p)\}$.
+\end{definition}
+
+\begin{definition}[Finite property, non-redundant]
+  A property $\Gamma:\simplex\toto\R$ is \emph{redundant} if for some $r,r'\in\R$ we have $\Gamma_r \subseteq \Gamma_{r'}$, and \emph{non-redundant} otherwise.
+  $\Gamma$ is \emph{finite} if it is non-redundant and $\R$ is a finite set.
+  We typically write finite properties in lower case, as $\gamma$.
+\end{definition}
+
+Thus, $\Gamma(p)$ is the set of reports which should be optimal for a given distribution $p$, and $\Gamma_r$ is the set of distributions for which the report $r$ should be optimal.
+(Note that our definitions align such that discrete losses elicit finite properties; both are non-redundant in the correct senses.)
+For example, the \emph{mode} is the finite property $\mode(p) = \argmax_{y\in\Y} p_y$, and captures the set of optimal reports for 0-1 loss: for each distribution over the labels, one should report the most likely label.
+In this case we say 0-1 loss \emph{elicits} the mode, as we formalize below.
+% This terminology comes from the information elicitation \jessiet{information vs property... do we care?}\raft{we could also say economics literature; not ``property'' though since that doesn't offer an explanation of the word ``elicits''} literature~\citep{savage1971elicitation,osband1985information-eliciting,lambert2008eliciting}, in which a report $r$ is elicited from some forecaster by scoring her with a loss on the observed outcome $y$.
+
+\begin{definition}[Elicits]
+  A loss $L:\R\to\reals^\Y_+$, \emph{elicits} a property $\Gamma:\simplex \toto \R$ if
+  \begin{equation}
+    \forall p\in\simplex,\;\;\;\Gamma(p) = \argmin_{r \in \R} \inprod{p}{L(r)}~.
+  \end{equation}
+  As $\Gamma$ is uniquely defined by $L$, we write $\prop{L}$ to refer to the property elicited by a loss $L$.
+\end{definition}
+
+For finite properties and discrete losses, we will use lowercase notation $\gamma$ and $\ell$, respectively, while $\Gamma$ and $L$ will be used for surrogate or general properties.
+Often we will work with two properties simultaneously, a finite property $\gamma:\simplex\toto\R$, and its embedded version $\Gamma:\simplex\toto\reals^d$.
+In this case, we write the embedded reports as $u\in\reals^d$, reserving $r\in\R$ for the finite property.
+
+\raf{Again, not sure we'll even need the property versions...}
+With this terminology in hand, we can restate our definition of embedding.
+First, we formalize the notion of embedding properties.
+\begin{definition}
+  A property $\Gamma : \simplex \toto \reals^d$ \emph{embeds} a property $\gamma : \simplex \toto \R$ if there exists some injective embdedding $\varphi:\R\to\reals^d$ such that for all $p\in\simplex,r\in\R$ we have $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p)$.
+  Similarly, we say a loss $L:\reals^d\to\reals^\Y$ embeds $\gamma$ if $\prop{L}$ embeds $\gamma$.
+\end{definition}
+We can now see that a surrogate $L:\reals^d\to\reals^\Y$ embeds $\ell:\R\to\reals^\Y$ if and only if $\prop{L}$ embeds $\prop{\ell}$ via $\varphi$ and for all $r\in\R$ we have $L(\varphi(r)) = \ell(r)$.
+
+
+\subsection{Important Examples}\label{sec:important-examples}
+\raf{Probably should move this up to where we introduce embeddings.}
+
+  Ranking and classification problems are well-known to the field of machine learning.
+  The most studied classification problem is the elicitation of the mode.
+  While the mode over $n$ outcomes is elicitable by 0-1 loss, it is known that eliciting the mode by a convex loss is much more difficult.
+  In fact, the best convex surrogate that can be used to elicit the mode ``embeds'' the reports into $\reals^{n-1}$.
+  Therefore, we say $\eliccvx($mode$) = n-1$.
+
+  A property of interest similar to the mode is the $\abstain{\alpha}$ property.
+  In this property in which one reports the most likely outcome if the probability of such an outcome is greater than $1-\alpha$, and otherwise ``abstains'' from reporting.
+  That is, $\gamma(p) = \argmax_{r \in \R}p_r$ if $\max_{r \in \R} p_r \geq 1-\alpha$ and is ``abstain'' otherwise.
+  The finite loss eliciting $\abstain{\alpha}$ can be written
+  $\ell(r,y) = 0$ if $r=y$, $\alpha$ if $r=\text{abstain}$, and $1$ otherwise.
+\cite{ramaswamy2018consistent} show that $\elicpoly(\abstain{1/2}) \leq \ceil{\log_2 n}$, although it is not known if this bound is tight.
+
+
+\section{Embeddings and Polyhedral Losses}
+\label{sec:poly-loss-embed}
+
+In this section, we establish a tight relationship between the technique of embedding and the use of polyhedral (piecewise-linear convex) surrogate losses.
+Note that we have not yet shown consistency of such surrogates; this is the topic of the following section.
+
+To begin, we observe that our embedding condition in Definition~\ref{def:loss-embed} can be very succinctly rewritten: it is equivalent to matching Bayes risks.
+This useful result will drive many of our findings in this section.
+
+\begin{proposition}\label{prop:embed-bayes-risks}
+  A loss $L$ embeds discrete loss $\ell$ if and only if $\risk{L}=\risk{\ell}$.
+  % A loss $L:\reals^d\to\reals^\Y$ embeds discrete $\ell:\R\to\reals^Y$ if and only if $\risk{L}=\risk{\ell}$.
+\end{proposition}
+\begin{proof}
+  \raf{Use distributions on the interior of the cells; since the risk is differentiable there, the loss is uniquely defined, and thus the same, and the same throughout the cell.}
+  \jessie{Stated in COLT Lemma 11 and Prop 12 (Lemma~\ref{lem:finite-full-dim} and Prop~\ref{prop:embed-trim} here), but I don't see us prove this in the original paper.}
+
+  \jessie{The forward implication is a corollary of COLT Lemma 11}
+
+  %Jessie's first attempt at a proof
+  First, suppose $L$ embeds $\ell$, and fix $p \in \simplex$.
+  We want to show for all $p \in \simplex$ that $\inf_{u\in\reals^d} L(u,p) = \min_{r \in \R} \ell(r, p)$.
+  Consider two cases: first suppose there exists a $u \in \reals^d$ so that $u \in \arginf_{u' \in \reals^d}L(u',p)$ and $u \in \varphi(\R)$.
+  Then
+  \begin{align*}
+  \inf_u L(u,p) = \min_{r \in \R} L(\varphi(r), p) = \min_{r \in \R} \ell(r, p)
+  \end{align*}
+   first by the case assumption and then by the definition of embedding.
+  Now in the second case, if such a $u$ does not exist, then $\inf_{u \in \reals^d}L(u,p) < \min_r L(\varphi(r), p) = \min_r \ell(r,p)$.
+  Therefore, $r \in \argmin_r' \ell(r', p) \implies \varphi(r) \not \in \argmin_u L(u,p)$ which contradicts the assertion that $L$ embeds $\ell$.
+
+  \jessie{Not sure on this one, just FYI.  I think it's a corollary of COLT Prop 12, now Prop~\ref{prop:embed-trim}.}
+  Now, to see that $\risk{\ell} = \risk{L} \implies L$ embeds $\ell$, consider $F$ to be the set of facets of the surface of $\risk{L}$.
+  For each facet $f \in \F$, we know by nonredundancy that there is some $p \in \inter{f}$ so that $\risk{L}$ is differentiable at $p$.
+  Moreover, by Frongillo and Kash~\cite[Theorem 2?]{frongillo2014general} \jessie{Check ref} we know that both $\ell$ and $L$ have a unique minimizer at $p$, and since the subgradients of the risks are the same (by their equality), we know the minimizers of the losses are also the same, up to relabeling the reports via a bijection.
+  Therefore, we can see that $L$ embeds $\ell$, as $L(\varphi(r),y) = \ell(r,y)$ for all $r\in\R$ and $y \in \Y$.
+  \jessie{Incomplete...?}
+
+%  Now let us show that $\risk{L} = \risk{\ell} \implies L$ embeds $\ell$.
+%  Let $F$ be the set of facets in $\risk{\ell}$.
+%  For each $f \in F$, there is some $p \in \inter{f}$ so that $\risk{L}(p) = \risk{\ell}(p)$ is differentiable, and so the loss $L$ must then be uniquely defined.
+%  \jessie{This is my interpretation of your note, but I don't see how this proves the existence of an embedding.  My inclination is to show there's the ``stripped'' loss that we embed ($\varphi(u) = u$) and for any bijection $\phi$, we can see that $\ell$ can be modified to $\ell^\phi$ so that $\risk{\ell} = \risk{\ell^\phi}$, and $L$ also embeds $\ell^\phi$ with $\varphi(r) = \phi(r)$.  Does that make sense?}
+
+
+\end{proof}
+
+\raft{Note at some point: matching risks is not necessary for \emph{consistency}, as evidenced by logistic loss for 0-1 loss.  Maybe we should just make the observation, earlier on, that \emph{embedding} is not necessary for consistency.}
+\raft{Note: ``discrete loss'' now connotes some regularity as well, just like we did with finite properties: every report should correspond to a full-dimensional cell.}
+\raft{Note: DKR (section 3.1) realized the importance of matching Bayes risks, but they could only give general results for strictly convex (concave I should say) risks, in part because they fixed the link function to be a generalization of $\sgn$.  In contrast, we focus exclusively on non-strictly-convex risks.}
+
+From this more succinct embedding condition, we can in turn simplify the condition that a loss embeds \emph{some} discrete loss: it does if and only if its Bayes risk is polyhedral.
+(We say a concave function is polyhedral if its negation is a polyhedral convex function.)
+Note that Bayes risk, a function from distributions over $\Y$ to the reals, may be polyhedral even if the loss itself is not.
+
+\begin{proposition}\label{prop:embed-risk-poly}
+  A loss $L$ embeds a discrete loss if and only if $\risk{L}$ is polyhedral.
+\end{proposition}
+\begin{proof}
+  \jessie{My attempt below}
+  For the forward direction, suppose $L$ embeds a discrete loss $\ell$.
+  By Proposition~\ref{prop:embed-bayes-risks}, we know that $\risk{L} = \risk{\ell}$.
+  Since $\ell$ is discrete, we know that $\risk{\ell}$ is polyhedral. \jessie{Need to prove? Stated as fact in proof of COLT Prop 12...}
+  Therefore, $\risk{L}$ is polyhedral.
+
+  For the reverse implication, suppose $\risk{L}$ is polyhedral.
+  For each facet $f \in F$ of $\risk{L}$, consider the report $u_f = \arginf_{u'} L(u', p)$ for some $p \in \inter f$.
+  (Note that $u_f$ will be unique and the same regardless of the choice of $p\in \inter f$, since $\risk{L}$ is differentiable here.)
+  Since $\risk{L}$ has a finite set of facets, the set $\R = \{u_f\}_{f \in F}$ is finite.
+  Now define the discrete loss $\ell:\R \to \Y$ by $\ell(r,y) = L(r,y)$.
+
+  To see that $L$ embeds this discrete $\ell$, consider the embedding function to be the identity for all $r \in \R$.
+  By Proposition~\ref{prop:embed-bayes-risks}, it is sufficient to show $\risk{L} = \risk{\ell}$.
+  For all $p \in \simplex$, we observe
+  \begin{align*}
+  	\risk{L}(p) = \inf_{u \in \reals^d} L(u,p) = \min_{r \in \R} L(r,p) = \min_{r \in \R} \ell(r, p) = \risk{\ell}(p)
+  \end{align*}
+  Note that the second equality holds because for every $p \in \simplex$, we know there is some $r \in \R$ such that $r \in \arginf_u L(u,p)$ by closure of subgradient sets, and thus the loss values are the same, regardless of if we restrict to $\R$ or stay in $\reals^d$.
+  Thus, $L$ embeds the discrete $\ell$ as constructed by Proposition~\ref{prop:embed-bayes-risks}.
+
+  \raf{Just take the discrete reports to be the facets, and use the Bayes risk result.}
+\end{proof}
+
+Combining Proposition~\ref{prop:embed-risk-poly} with the straightforward result that polyhedral losses have polyhedral Bayes risks, we obtain the first direction of our equivalence: every polyhedral loss embeds some discrete loss.
+
+\begin{theorem}\label{thm:poly-embeds-discrete}
+  Every polyhedral loss $L$ embeds a discrete loss.
+\end{theorem}
+\begin{proof}
+  We merely show $L$ polyhedral $\implies$ $\risk{L}$ polyhedral, and apply Proposition~\ref{prop:embed-risk-poly}.
+  \raf{Not sure how trivial this is, but it's definitely true.  I suspect it has a very short proof.}
+  \jessie{$L(u,p)$ polyhedral in $\reals^d$ implies $L^*(0,p) = -\risk{L}(p)$ polyhedral in $\simplex$ implies $\risk{L}$ polyhedral.
+  Now we can apply Proposition~\ref{prop:embed-risk-poly} to observe the result.}
+
+  \jessie{Can also show that $L$ embeds $L|_\R$ like the original paper and use COLT Lemma 11/Lemma~\ref{lem:finite-full-dim}.}
+\end{proof}
+
+We now turn to the reverse direction: is every discrete loss embedded by some polyhedral loss?
+Using a construction via convex conjugate duality, which has appeared several times in the literature\raft{CITE: DKR, frongillo-kash (WINE 2014), probably one of Bob's papers?, others?}, we see that the answer is yes, although the number of dimensions $d$ required could be as large as $n-1$.
+\raft{Should revisit this statement at the end; I have a feeling we'll want to kill ``$n$'' throughout the paper since we focus so much less on it, and the reader won't remember what $n$ is.}
+
+\begin{theorem}\label{thm:discrete-loss-poly-embeddable}
+  Every discrete loss $\ell$ is embedded by a polyhedral loss.
+\end{theorem}
+\begin{proof}
+  \raf{Already have the proof from Theorem~\ref{thm:general-duality-embedding}.  Should cite DKR and others...}
+  \jessie{Might try tonight without properties?}
+\end{proof}
+
+We have seen a tight connection between embeddings and polyhedral losses\raf{... what else can we say here?  Why is this cool?}
+
+
+To conclude, we briefly point out the interesting implications of these results on the structure of embedded \emph{properties} themselves.
+In particular, the following corollary states an equivalence between finite elicitable properties, embeddable properties, and properties embedded by polyhedral losses.
+
+\begin{corollary}\label{cor:finite-elicit-embed}
+  Let $\gamma$ be a finite property.
+  The following are equivalent.
+  \begin{enumerate}\setlength{\itemsep}{0pt}
+  \item $\gamma$ is elicitable.
+  \item $\gamma$ is embeddable.
+  \item $\gamma$ is embeddable via a polyhedral loss.
+  \end{enumerate}
+\end{corollary}
+\begin{proof}
+  We trivially have $3\Rightarrow 2$.
+  The direction $1\Rightarrow 3$ follows from Theorem~\ref{thm:discrete-loss-poly-embeddable}, by taking any discrete loss which elicits $\gamma$.
+  Finally, to see $2\Rightarrow 1$,
+  \raf{This follows from Proposition~\ref{prop:embed-trim}, but we're stating this as a corollary... let's see if it follows more directly from the above.  If it doesn't (one complication: there is no discrete loss starting from $2$ or $3$!) we can rephrase it as a theorem / proposition.}
+\end{proof}
+
+
+\hrule
+\bigskip
+OLD STUFF
+\bigskip
+\hrule
+
+When working with convex losses which are not strictly convex, one quickly encounters redundant properties: if $\inprod{p}{L(\cdot)}$ is minimized by a point where $p\cdot L$ is flat, then there will be an uncountable set of reports which also minimize the loss.
+As results in property elicitation typically assume non-redundant properties (e.g.~\cite{frongillo2014general,frongillo2015elicitation}) it is useful to consider a transformation which removes redundant level sets.
+We capture this transformation as the trim operator presented below.
+
+\begin{definition}\label{def:trim}
+  Given an elicitable property $\Gamma:\simplex \toto\R$, we define $\trim(\Gamma) = \{\Gamma_u : u \in \R \text{ s.t. } \neg\exists u'\in\R,u'\neq u,\, \Gamma_u \subsetneq \Gamma_{u'}\}$ as the set of maximal level sets of $\Gamma$.
+\end{definition}
+\raft{Note for later: should be able to show that the union of trim is the simplex.}
+
+Take note that the unlabeled property $\trim(\Gamma)$ is non-redundant, meaning that for any $\theta \in \trim(\Gamma)$, there is no level set $\theta' \in \trim(\Gamma)$ such that $\theta \subset \theta'$.
+
+Before we state our first result, we will need to general lemmas about properties and their losses.
+The first follows from standard results relating finite properties to power diagrams (see Theorem~\ref{thm:aurenhammer} in the appendix), and its proof is omitted.
+The second is closely related to the trim operator: it states that if some subset of the reports are always represented among the minimizers of a loss, then one may remove all other reports and elicit the same property (with those other reports removed).
+
+\begin{lemma}\label{lem:finite-full-dim}
+  Let $\gamma$ be a finite (non-redundant) property elicited by a loss $L$.
+  Then the negative Bayes risk $G$ of $L$ is polyhedral, and the level sets of $\gamma$ are the projections of the facets of the epigraph of $G$ onto $\simplex$, and thus form a power diagram.
+  In particular, the level sets $\gamma$ are full-dimensional in $\simplex$ (i.e.,\ of dimension $n-1$).
+\end{lemma}
+
+
+We now state our first result, which shows remarkable structure of embeddable properties, and the properties that embed them.
+First, we conclude that any embeddable property must be elicitable.
+We also conclude that if $\Gamma$ embeds $\gamma$, the level sets of $\Gamma$ must all be redundant relative to $\gamma$.
+In other words, $\Gamma$ is exactly the property $\gamma$, just with other reports filling in the gaps between the embedded reports of $\gamma$.
+(When working with convex losses, these extra reports are typically the convex hull of the embedded reports.)
+In this sense, we can regard embedding as a minor departure from direct elicitation: if a loss $L$ elicits $\Gamma$ which embeds $\gamma$, we can think of $L$ as essentially eliciting $\gamma$ itself.
+Finally, we have an important converse: if $\Gamma$ has finitely many full-dimensional level sets, or if $\trim(\Gamma)$ is finite, then $\Gamma$ must embed some finite elicitable property with those same level sets.
+\raft{Commented out what used to be before trim; not 100\% sure how to integrate.}
+% Looking at the $\trim$ of a property allows us to relate the finite property of interest to the subtlely different surrogate property that we actually elicit when embedding the original property into $\reals^d$.
+% In the surrogate property, there is often an infinite set of ``hidden'' level sets corresponding to the reports in the convex hull of embedded points whose level sets have nonempty intersection.
+% Taking the $\trim$ thus allows us to remove labels so that we can relate the optimal sets of original reports and their embedded points, and then we remove the ``hidden'' level sets that are only optimal when we are indifferent between a subset of the embedded points.
+
+
+\begin{proposition}\label{prop:embed-trim}
+  Let $\Gamma:\simplex\toto\reals^d$ be an elicitable property.
+  The following are equivalent:
+  \begin{enumerate}\setlength{\itemsep}{0pt}
+  \item $\Gamma$ embeds a finite property $\gamma:\simplex \toto \R$.
+  \item $\trim(\Gamma)$ is a finite set, and $\cup\,\trim(\Gamma) = \simplex$.
+  \item There is a finite set of full-dimensional level sets $\Theta$ of $\Gamma$, and $\cup\,\Theta = \simplex$.
+  \end{enumerate}
+  Moreover, when any of the above hold, $\{\gamma_r : r\in\R\} = \trim(\Gamma) = \Theta$, and $\gamma$ is elicitable.
+\end{proposition}
+
+
+To be useful in applications, a loss which embeds a property must be accompanied by a calibrated link to that property.
+The definition of embedding makes part of the link clear: the link should map embedded reports back to the original reports, since they are equivalent in a strong sense.
+It is not a priori clear how to map the remaining reports, however.
+Fortunately, using the machinery developed in Proposition~\ref{prop:embed-trim}, we can easily construct a calibrated link on the remaining reports.
+
+\begin{proposition}\label{prop:embed-link}
+  Let $L$ elicit $\Gamma:\simplex\toto\reals^d$ which embeds a finite property $\gamma$.
+  Then there is a calibrated link from $\Gamma$ to $\gamma$. % which can be taken to be separated if $L$ is polyhedral.
+\end{proposition}
+\begin{proof}
+  Let $\gamma:\simplex\toto\R$.
+  Proposition~\ref{prop:embed-trim} gives us that $\trim(\Gamma) = \{\gamma_r : r\in\R\}$.
+  Then for any $u\in\reals^d$, there is some $r\in\R$ such that $\Gamma_u \subseteq \gamma_r$.
+  The link $\psi : \reals^d \to \R$ which encodes these choices is calibrated.
+  \raft{Commented out the separated stuff}
+  % Now assume $L$ is polyhedral.
+  % \jessiet{Hole jere: $j$-faces of the function.}
+  % For the second part of the statement, in order for $\psi$ to be separated, for $\epsilon > 0$, for each embedded point $u \in \reals^d$ and every $v \in B(\epsilon, u)$, we must observe $\psi(v) = \psi(u)$.
+  % If the loss $L$ is polyhedral, we want to show that we can construct a $\psi$ so that the above holds.
+  %
+  % First, consider that each of the embedded points in $u \in \varphi(\R)$ must have ball $B(\epsilon, u)$ centered on $u$ so that no other $w \in \varphi(\R)$ is in $B(\epsilon, u)$.
+  % If this is not true, then \jessie{...?} \jessiet{I'm not sure how this messes with things, but I would think the level sets corresponding to the two points would differ on a set of zero measure, if at all, or both be in the $\arginf$of the loss...?}
+  %
+  % Now for any $u \in \varphi(\R)$ and $v \in B(\epsilon, u)$, if $\psi(v)$ does not map to $\psi(u)$, then there must be some other $w \in \varphi(\R)$ so that $\psi(v) = \psi(w)$.
+  % Since $L$ is polyhedral, we know that for $p \in \simplex$ such that $v \in \Gamma(p)$, then since $u$ and $v$ are sufficiently close, $\E_p L(w,Y) = \E_p L(v,Y) \leq \E_p L(u,Y)$.
+  % However, if the inequality was strict, then we contradict the polyhedral structure of $L$, since $v$ is not an embedded point.
+  % Therefore, $v \in \Gamma(p) \implies u \in \Gamma(p)$, and we can alter the link function so that $\psi(v) = \psi(u)$.
+  %
+  %
+  % If no such $\psi$ existed, then for some $p$ such that $u \in \arginf_{z \in \R} \E_p L(z,Y)$, we know there is a $\delta > 0$ such that $\E_p L(v,Y) - \E_p L(u,Y) < \delta$ by continuity of $L$.
+%Additionally, if $\psi$ was not selective, then we know $\psi(v) = \psi(w)$ for some embedded point $w \neq u$.
+%Since the losses of $u$ and $v$ are not bounded about away from each other and $\psi(v) = \psi(w)$, then the loss $L$ must be constant on $\conv(\{u,v,w\})$, otherwise we would either contradict elicitability of $\Gamma$ or the construction of the calibrated link $\psi$.
+%Therefore, we can reassign $\psi(v) = \psi(u)$ for any $v\in B(\epsilon, u)$, and such a link additionally separated.
+\end{proof}
+In typical applications, one requires more of the link, namely that it should be separated (see Definition~\ref{def:links}).
+In most cases, devising a separated link is straightforward, for example with polyhedral losses using bullet 3 in Theorem~\ref{thm:finite-elicit-embed} below.
+Giving a construction that yields a separated link for all polyhedral losses is a challenging open question.
+\raft{Replace this paragraph with gloating about our result if we actually give this construction.}
+
+
+\section{Consistency via Separated Links}
+\label{sec:separated-links}
+
+\raf{MOVE SOME PROPERTIES STUFF HERE?  E.g. Prop~\ref{prop:embed-trim}.}
+
+\begin{proposition}
+  If $\psi$ is a separated link between losses $L$ and $\ell$, then \raf{how do we want to talk about consistency?}
+\end{proposition}
+\begin{proof}
+  \raf{Use Hari's theorems from their section 8.}
+\end{proof}
+
+\begin{theorem}
+  Let $L$ be polyhedral loss, and $\ell$ the discrete loss it embeds from Theorem~\ref{thm:poly-embeds-discrete}.
+  Then there a separated link $\psi$ between $L$ and $\ell$.
+\end{theorem}
+\raft{Note: we should comment in the discussion section that we probably can show that *any* loss embedding $\ell$ must be polyhedral-ish, meaning polyhedral except for stuff that is never optimal.  This theorem would then not need the ``polyhedral'' part. This is related to the ``convex envelope conjucture'', that if $L$ embeds $\ell$ via $\varphi$, you can just take the loss $L'$ such that $L_y$ is the convex envelope of points $\{(\varphi(r),L(r)_y)\}_{r\in\R}$.}
+
+Remark: This prop and theorem give an excellent reason to focus on embeddings, since other techniques do not necessarily give you separated links for free.  Since we know we get them for free, we can just focus on the property, and study elicitation complexity; we know if we have a link at all it can be taken to be separated.  \raf{Is this true?}
+
+\section{Embeddings via Real-Valued Losses}
+\label{sec:1d}
+
+\begin{itemize}
+\item Def: order-sensitive, orderable.
+\item Theorem (Lambert et al): $\ell$ order-sensitive iff $\prop{\ell}$ orderable.
+\item Theorem: $\ell$ 1-embeddable iff $\ell$ order-sensitive.  Moreover,   1-embeddable implies 1-embeddable via polyhedral loss.
+  % \item Prop: Every polyhedral $L:\reals\to\reals^\Y$ embeds an order-sensitive $\ell$.
+
+\item Def: indirectly elicits (necessary but not sufficient for consistency).
+\item Prop: If convex $L:\reals\to\reals^\Y$ indirectly elicits finite $\gamma$, then $\gamma$ is orderable.
+\item Remark: TFAE for all the complexity classes (but don't define them rigorously).
+\item Remark: Also, note that we have ``indirectly elicitable $\implies$ exists separated link'', so elicitation complexity does capture consistency here.
+\item Cor: Abstain, mode, not embeddable / indirectly elicitable in 1d when $n\geq 3$.
+\end{itemize}
+
+
+\subsection*{Elicitation complexity stuff moved here}
+
+\raf{NOTE: I cut the definition of indirectly elicits.  I think we should defer this to our next paper which will need to define the complexity classes much more carefully}
+
+% It is often useful to express the relationship between $L$ and $\gamma$ without referring to $\Gamma=\prop{L}$, which is captured by \emph{indirect elicitation}.
+
+% \begin{definition}
+%   A loss \emph{indirectly elicits} a property $\gamma$ if it elicits a property with a separated link to $\gamma$.
+% \end{definition}
+
+
+Given a discrete loss $\ell$ eliciting a finite property $\gamma$, we seek a surrogate loss $L$ with certain attributes, such as convexity, smoothness, etc.
+In doing so, we may be interested in the minimum number of dimensions needed for such a surrogate; this is the notion of \emph{elicitation complexity}~\citep{lambert2008eliciting,fissler2016higher,frongillo2015elicitation}.
+The two notions of elicitation complexity we use most are as follows: let $\eliccvx(\gamma)$ be the minimum dimension $d$ such that $\gamma$ can be indirectly elicited by a convex loss function $L: \reals^d \to \reals^\Y_+$, and $\elicpoly(\gamma)$ the minimum such $d$ where $L$ is polyhedral.
+We will also discuss $\eliccts$, which is the complexity with respect to continuous, real-valued, non-locally-constant properties (\S~\ref{sec:1d}), and $\elicembed$, which is the minimum dimension for $\gamma$ to be embedded (Definition~\ref{def:embedding-dim}).
+
+\raf{Probably cut; save for later paper.  Should still make this a very brief comment combined with the next paragraph, which should also be condesed to one line for now.}
+Roughly speaking, a calibrated link requires that optimal surrogate reports map to optimal original reports, while a separated link adds the stronger guarantee that one cannot approach the optimal surrogate loss while making suboptimal original predictions.
+A classic example of a link which is both calibrated and separated is $\psi = \sgn$ when $\gamma=\mode$ and $L$ is either hinge loss or logistic loss.
+On the other hand, the link $\psi(u) =-1$ for $u \leq -1$ and $\psi(u) = 1$ for $u > -1$
+would not be separated for hinge loss, but it would still be calibrated, as the reports $u\in(-1,1)$ are optimal for hinge loss only when $p=(1/2,1/2)$, in which case both $-1$ and $1$ are optimal for the mode (0-1 loss).
+
+As a brief aside, we note that previous definitions of elicitation complexity have used a more straightforward link function, as the properties considered were single-valued~\citep{lambert2008eliciting,fissler2016higher,frongillo2015elicitation}.
+In particular, if both $\gamma$ and $\Gamma$ are single-valued, these works simply require $\gamma = \psi \circ \Gamma$.
+When $\Gamma$ is set-valued, one still straightforwardly requires $\gamma(p) = \psi(u)$ for all $u \in \Gamma(p)$.
+The notion of a calibrated link from Definition~\ref{def:links} \jessie{Only have separated links in there at the moment} is only required when both $\gamma$ and $\Gamma$ could be set-valued, as is the case in general for convex surrogates of finite properties.
+
+\raf{Embedding dimension moved here}
+
+In the following sections, however, we will focus on the dimension $d$, and ask questions about the minimum $d$ required to embed a property.
+
+\begin{definition}\label{def:embedding-dim}
+  We say $\gamma$ is \emph{$d$-embeddable}, or just \emph{embeddable}, if such an $L$ exists and is convex.
+  The \emph{embedding dimension} of a finite property $\gamma$, written $\elicembed(\gamma)$, is the minimum $d\geq 0$ such that $\gamma$ is $d$-embeddable.
+\end{definition}
+
+
+\subsection*{Back to regularly schemduled program}
+
+In the previous section, we saw that every finite elicitable property is embeddable.
+We now turn to a more fine-grained question: given a finite elicitable property $\gamma$, how many dimensions $d$ are required to embed $\gamma$ in $\reals^d$?
+We call the minimum such $d$ the \emph{embedding dimension} of $\gamma$.
+\raft{Do we want to call this ``embedding complexity''?}
+We begin with $d=1$, or real-valued embeddings.
+As we will see, the notion of \emph{orderable} properties, defined below, will play a central role.
+In particular, a finite elicitable property is 1-embeddable if and only if it is orderable.
+We then go on to draw tight connections between orderability and other elicitation complexity notions, such as via general convex losses or continuous properties, yielding a thorough understanding of the real-valued case.
+
+Let us first define what it means for a finite property to be orderable.
+\begin{definition}
+  A finite property $\gamma:\simplex\toto\R$ is \emph{orderable} if there is an enumeration $\R = \{r_1,\ldots,r_k\}$ such that for all $i\in\{1,\ldots,k-1\}$, the intersection $\gamma_{r_i} \cap \gamma_{r_{i+1}}$ is a hyperplane intersected with $\simplex$.
+\end{definition}
+
+\citet{lambert2018elicitation} shows that a finite property has a \emph{order-sensitive} loss, meaning one assigning higher loss to ``farther'' reports (with respect to a given order), if and only if it is orderable.
+We will see that, in fact, a finite property is 1-embeddable if and only if it is orderable.
+Both the forward direction and its converse will make use of a related definition: we say a property is \emph{monotone} if, roughly speaking, it can be defined in terms of (possibly infinitely many) hyperplanes whose normal vectors have coefficients which are monotone in the report value.
+
+First, the forward direction.
+
+\begin{proposition}\label{prop:orderable-embed}
+  Every orderable property $\gamma$ is 1-embeddable.
+\end{proposition}
+
+The converse of Proposition~\ref{prop:orderable-embed}, that every 1-embeddable property is orderable, follows from a much broader statement, given below as Proposition~\ref{prop:indirect-orderable}: finite elicitable properties which are indirectly elicited by 1-dimensional convex losses must be orderable.
+Together with Proposition~\ref{prop:embed-link}, which shows that embeddings give rise to calibrated links, we have in particular that 1-embeddable finite properties are orderable.
+
+\begin{proposition}\label{prop:indirect-orderable}
+  If convex $L : \reals \to \reals^\Y$ indirectly elicits a finite elicitable property $\gamma$, then $\gamma$ is orderable.
+\end{proposition}
+
+The proof of Proposition~\ref{prop:indirect-orderable} follows from Lemma~\ref{lem:prop-L-monotone} in Appendix~\ref{app:dimension-1}, which states that the property elicited by any convex loss must be monotone in the sense above.
+(The functions $a,b$ are constructed in terms of the subgradients of the loss, thus guaranteeing monotonicity of their coefficients.)
+The result then follows from the equivalence of monotonicity and orderability for finite properties (Lemma~\ref{lem:orderable-monotone}).
+
+As a corollary of Proposition~\ref{prop:indirect-orderable} and Theorem~\ref{thm:polyhedral-embed}, we now also see that polyhedral losses embed orderable properties.
+
+\begin{corollary}\label{cor:embed-orderable}
+  Every polyhedral $L : \reals \to \reals^\Y$ embeds an orderable property.
+\end{corollary}
+
+We now see that orderability characterizes 1-embeddable properties, and have started to see that the concept is central even when considering indirect elicitation.
+In particular, a conclusion of the previous two results is that if a finite elicitable property has elicitation complexity 1 with respect to convex or polyhedral losses, it must be orderable.
+This in turn implies that these elicitation complexity classes coincide in dimension 1.
+We now formalize this observation, and add one more complexity class: that of continuous real-valued non-locally-constant properties.
+
+\begin{theorem}\label{thm:1d-tfae}
+  Let $\gamma$ be a finite elicitable property.
+  The following are equivalent.
+  \begin{enumerate}\setlength{\itemsep}{0pt}
+  \item $\gamma$ is orderable.
+  \item $\elicembed(\gamma)=1$. ($\gamma$ is 1-embeddable.)
+  \item $\elicpoly(\gamma)=1$. ($\gamma$ is indirectly elicitable via a polyhedral loss $L:\reals\to\reals^\Y$.)
+  \item $\eliccvx(\gamma)=1$. ($\gamma$ is indirectly elicitable via a convex loss $L:\reals\to\reals^\Y$.)
+  \item $\eliccts(\gamma)=1$. ($\gamma$ is indirectly elicitable via a real-valued continuous non-locally-constant property.)
+  \end{enumerate}
+\end{theorem}
+
+The proof, given in Appendix~\ref{app:dimension-1}, only shows the equivalence 1 $\Leftrightarrow$ 5, as we have already established the equivalence of the first four statements: $1 \Rightarrow 2,3,4$ from Proposition~\ref{prop:orderable-embed}, as the proof gives a loss which is polyhedral (and convex), and Proposition~\ref{prop:indirect-orderable} shows $2,3,4 \Rightarrow 1$, as each of these cases would give a convex loss indirectly eliciting a finite elicitable property.
+Note that while~\citet{finocchiaro2018convex} gives a similar statement to $1\Leftrightarrow 5$, namely that continuous non-locally-constant real-valued properties are elicitable if and only if they are convex elicitable, their proof relies on several regularity conditions which we do not require; we instead give a direct proof.
+
+From Theorem~\ref{thm:1d-tfae}, we can already prove lower bounds on embedding dimension, as well as the other complexity classes mentioned.
+Here are two simple examples.
+\begin{corollary}
+  Let $n\geq 3$ and $\alpha\in(0,1)$.  Then the following are bounded below by 2:
+    $\elicembed(\abstain{\alpha})$,
+    $\elicpoly(\abstain{\alpha})$,
+    $\eliccvx(\abstain{\alpha})$,
+    $\eliccts(\abstain{\alpha})$,
+    $\elicembed(\mode)$,
+    $\elicpoly(\mode)$,
+    $\eliccvx(\mode)$,
+    $\eliccts(\mode)$.
+\end{corollary}
+\jessiet{Can we separate the abstain and mode by a new line so they kind of line up?  Or just write it a more elegant way than exhaustive?}
+\begin{proof}
+  % Every cell (level set) of an orderable property is adjacent to at most two other cells.
+  % This fails to hold for \raf{abstain} when $n\geq 3$ and the mode when $n\geq 4$.
+  % For the mode when $n=3$, we simply observe that the intersection of any two adjacent cells fails to be a hyperplane.
+  The cell adjacency graph of an orderable property must be a path, but for the mode it is the complete graph on $n$ nodes, and for $\abstain{\alpha}$ a star graph on $n+1$ nodes, which are not paths when $n \geq 3$.
+\end{proof}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Proving (in)consistency via embeddings}
+\raf{Notes about the story, partially to myself, partially to Jessie: I think we want to emphasize the proofs of consistency and inconsistency (as the section title reflects), but we also want to illustrate our constructive approach to finding a link.  Basically, most of these examples (except abstain) have the link built in (usually as the sign function, though slightly different for top-k), and they just work around it.  For abstain, we can give alternate link functions, and hopefully show that the L1-based link has a better calibration function.  For the others, it may suggest that it's worth thinking ``outside the box'' (HAH, genious...) for embeddings which are not the hypercube.}
+
+The above techniques allow us to evaluate and simplify some previous results in the literature.
+\subsection{Top-$k$ loss}
+Yang and Koyejo~\cite{yang2018consistency} prove the inconsistency of a family of surrogates for the top-$k$ classification problem.
+
+The top $k$ classification problem takes as input a vector $u \in \reals^n$, and observes outcome $y \in [n]$.
+The input is sorted in descending order, and the function $t_k(u)$ yields a set of outcomes associated to the first $k$ elements of this sorted input.
+For example, if $u = (4,1,2)$, then $t_k(u) = \{0,2\}$ for the first and third outcomes.
+
+We say the top-$k$ loss is
+\begin{align}
+\ell_{top-k}(u,y) = \begin{cases}
+0 & y \in t_k(u)\\
+1 & \text{otherwise}
+\end{cases}
+\end{align}
+
+
+Yang and Koyejo~\cite{yang2018consistency} create a new surrogate loss that is consistent for the top-$k$ problem, although it should be noted that their surrogate is not convex.
+In particular, Yang and Koyejo evaluate two losses given by Lapin et al.~\cite{lapin2016loss, lapin2018analsis}, one of which is shown to be convex, but its consistency is left as an open question.
+
+After our discussion of embeddings, we now have a way of proving consistency: a surrogate $L$ is consistent with respect to a discrete loss $\ell$ \jessie{we still haven't defined consistency... here I'm going by Yang's consistency.  I suppose we still need a proof of this.} if and only if $L$ embeds $\ell$.
+\raf{Consistency: it's is about the expected loss over $(x,y)$ pairs, and showing that getting the best surrogate loss should mean getting the best original loss.  Take another look at Theorem 2.4 of the top-k paper.  Losses can certainly be consistent without embedding $\ell$ (even if polyhedral: you can link multiple embedded points to a single discrete report, e.g.\ a convex surrogate for ranking loss can link to the mode), so the ``iff'' is not right.  I think it's worth spending some time thinking about what exactly we need to show to prove inconsistency.  In particular, see if this reasoning checks out:  Suppose we find a distribution $p$ for which an optimal surrogate report is $r$ but $\psi(r)$ is not optimal for $\ell$.  Since we could have a conditional distribution of $p$ for every $x$, so the optimal hypothesis would just be the constant function $h(x) = r$, which achieves the optimal $L$-loss, and when linked, $\psi \circ h(x) = \psi(r)$, which does not achieve the optimal $\ell$-loss.}
+We can then prove that the surrogates given by Lapin et al.~\cite{lapin2018analysis} are not consistent in a more suffice manner; we do so by showing the discrete loss that their surrogate embeds is not equal to  $\ell_{top-k}$.
+
+Here, $r \in 2^n$ can be thought of as a binary 0-1 vector representing set inclusion and $k \leq n$ is a constant.
+There is some ambiguity on how $t_k(r)$ should be defined if $\|r \|_\infty > k$, so we shall say that $y \not \in t_k(r)$ in such instances.
+
+Now, for example, consider the surrogate discussed by Lapin et al.~\cite{yang2018consistency}, and Yang and Koyejo~\cite{yang2018consistency}.
+Following the numbering of Yang and Koyejo, we call the surrogate $L_2(u,y) := \max\left( \frac{1}{k} \sum_{i=1}^k (u + \indopp(y))_{[i]} - u_y \right) $, where $\indopp(y) = \ones - e_y$, and $(x)_{[i]}$ is the $i^{th}$ largest component of $x$.
+
+It can be verified that
+$\ell_2(r,y) = \begin{cases}
+\min\left(\frac{HD(r, e_y)}{k}, 1\right) & r_y = 1 \\
+1 + \min \left(\frac{HD(s, \vec{0})}{k}, 1\right) & r_y = 0
+\end{cases}$,
+ where $HD(\cdot, \cdot)$ is the Hamming distance between two vectors.
+
+Since we can see that $\ell_2 \neq \ell_{top-k}$, we can then see that $L_2$ is not consistent with respect to $\ell_{top-k}$.
+Similarly, given $L_4(u,y) := \max\left(\frac{1}{k} \sum_{i=1}^k (1 + u_{\setminus y})_{[i]} - s_y, 0\right)$, we can actually see that $L_4$ also embeds $\ell_2$.
+We will double up on notation and call this discrete loss $\ell_4$ as well, for the sake of matching subscripts of discrete losses to the surrogates that embed them.
+
+So even though the surrogates $L_2$ and $L_4$ are convex, they are not consistent with respect to $\ell_{top-k}$.
+This begs the question: what is the relationship between consistency and convexity of a surrogate loss?
+Are there instances where only one can be achieved, but not both?
+
+\subsection{Lov\'asz Hinge}
+\jessie{Lovasz hinge paper~\cite{yu2018lovasz}}
+\raf{I'm tempted to do the following.  We give the abstain counter-example for $k=2$ (I've been using $k$ for the number of elements in the set constructions, but maybe $n$ is better; we can sync up notation later), and then characterize the $k=2$ case informally, showing that the only thing that works is when $f(\{1,2\}) = f(\{1\}) + f(\{2\})$.  Then we can say ``In fact, in full version of the paper, we show a much tighter result: essentially the only Lov\'asz hinge that is consistent is weighted Hamming loss'' or something to that effect.  This leaves room for us to send a journal version to JMLR (for which we'll need some new results), which seems like a good idea for a paper like this: We seem to have useful tools here, so why not let them marinate a bit in NeurIPS, collect feedback, and then publish a more polished/mature version.}
+
+
+\subsection{Abstain loss}
+Our final example of an embedded loss is given by Ramaswamy et al.~\cite{ramaswamy2018consistent}.
+In their work, they provide a consistent, polyhedral \jessie{?} surrogate for the abstain loss $\ell_{abs_{\alpha}}:[n] \cup \{a\} \to \reals$ defined:
+\begin{align}\label{eq:abstain}
+\ell_{abs_{\alpha}}(r,y) := \begin{cases}
+0 & r = y\\
+\alpha & r = a\\
+1 & otherwise
+\end{cases}
+\end{align}
+Here, the report $a$ corresponds to ``abstaining'' from voting if the outcome of any outcome is not likely enough to occur.
+
+The surrogate provided by Ramaswamy et al.~\cite{ramaswamy2018consistent} for $\alpha = 1/2$ embeds the $n$ outcomes into the $n$ vertices of the $\ceil{\log_2(n)}$-dimensional hypercube (vertices in $\{\pm 1\}^n$), and embeds the abstain point at the origin.
+They go on to show consistency and provide a \jessie{which type?} link function from their surrogate to $\ell_{abs_{1/2}}$.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusion and Future Directions} \label{sec:conclusion}
+\paragraph{Summary.}
+This work is part of a broader research program to understand convex surrogates through the lens of property elicitation.  % the relationship between finite losses and convex surrogates, the link functions connecting them, and the properties they elicit.
+We seek a general theory that, given a property, can prescribe when and how to construct convex surrogate losses that elicit it, and specifically, determine the minimum dimension required.
+Even more broadly, one could replace ``convex'' by any notion of ``nice'' surrogate.
+
+This work formalized the \emph{embedding} approach where labels are identified with points in $\reals^d$.
+We saw \bo{in theorem ??} that this approach is tightly connected to the use of polyhedral (i.e. piecewise linear convex) loss functions.
+We also saw that it is a general technique that can be used for any finite elicitable property.
+
+We then investigated the \emph{dimensionality} of $\reals^d$ required for such embeddings, giving a characterization in terms of the structure of the property in the simplex.
+This gave a complete understanding of the one-dimensional case, and a complete characterization albeit weaker understanding in higher dimensions.
+%RF got here
+%The two key conditions are an optimality condition that relates the structure of each level set to existence of polytopes in $\reals^d$ satisfying certain conditions; and a monotonicity condition relating such polytopes for different level sets.
+%This yields new lower bounds in particular for the abstain loss.
+
+\paragraph{Directions.}
+There are several direct open questions involving embedding dimension.
+It would be interesting and perhaps practically useful to develop further techniques for upper bounds: automatically constructing embeddings in $\reals^d$ and associated polyhedral losses from a given property, with $d$ as small as possible.
+Another direction is additional lower bound techniques, or further development of our necessary conditions.
+
+This paper also suggests an agenda of defining more nuanced classes of surrogate losses and studying their properties.
+For example, a tangential topic in this work was the characteristics of a ``good'' link function; formalizing and exploring this question is an exciting direction.
+We would also like to move toward a full understanding of the differences between these classes.
+For example, how does embedding dimension compare in general to convex elicitation dimension (the dimensionality $d$ required of \emph{any} convex surrogate loss)?
+These questions have both theoretical interest and potential practical significance.
+
+\begin{conjecture}
+  $\mathrm{elic}_{embed}(\Gamma) = \mathrm{elic}_{Pcvx}(\Gamma) = \mathrm{elic}_{cvx}(\Gamma)$ for all finite elicitable $\Gamma$.
+\end{conjecture}
+
+
+\raf{ACKNOWLEDGEMENTS (commented out for submission)}
+% \subsection*{Acknowledgements}
+% We thank Peter Bartlett for several discussions early on, which led to a proof of \raf{1-d reduction} among other insights.
+% Arpit
+% Eric Balkanski for a proof of \raf{Lemma on submodularity}
+% NSF grant
+\bibliographystyle{plainnat}
+\bibliography{diss,extra}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\appendix
+
+%% Jessie commented out 1/31/19 because of the updated proof to the trim TFAE, these are now no longer necessary.
+%%\section{Considering unlabeled properties}
+%%  Note that when $\Gamma$ is elicitable, there is a convex score $G:\simplex \to \reals$ representing the Bayes Risk (i.e. $G(p)$ is the minimal expected loss over all reports at $p$.)
+%%  There is a set $\D \subseteq \partial_p G$ so that there is a bijection $\phi:\D \to \R$.
+%%  Therefore, the subgradients of $G$ correspond to the property value at the distribution $p$.
+%%
+%%  The next two proofs take advantage of this duality correspondence between the subgradients of the convex score $G$ of an elicitable property and the property values.
+%%
+%%
+%%\begin{lemma}\label{lem:trim-subsets-not-full-dimensional}
+%%Let $\Gamma:\simplex \toto \R'$ be an elicitable property.
+%%For any $u,w \in \R'$, if $\Gamma_u \subsetneq \Gamma_w$, then $\Gamma_u$ is not full dimensional.
+%%\end{lemma}
+%%\begin{proof}
+%%  If there is a full-dimensional level set $\Gamma_u \subsetneq \Gamma_w$, then the corresponding scoring rule $G$ must not be differentiable (i.e. $|\partial_p G(p)| > 1$) for all $p \in \Gamma_u$.
+%%%  (This is true because $\phi^{-1}(u) \neq \phi^{-1}(w)$ as the level sets are not equal.)
+%%  However, closed, convex, full-dimensional level sets have positive Lebesgue measure in $\reals^{n-1}$,\jessiet{I don't know if we need a citation/proof for this assertion...} and thus contradicts the convexity of $G$, as convex functions are differentiable at all but a countable set of points.
+%%  This in turn contradicts the elicitability of $\Gamma$, and so, we conclude that $\Gamma_u$ is not full-dimensional.
+%%\end{proof}
+%%
+%%\begin{lemma}\label{lem:unique-opt-on-inter}
+%%  Let $\Gamma:\simplex \toto \R'$ be an elicitable property such that $\trim(\Gamma)$ is finite.
+%%  For all $u \in \R'$, if $p \in \inter{\Gamma_u}$, then $\Gamma(p) = \{u\}$.
+%%\end{lemma}
+%%\begin{proof}
+%%\jessiet{Come back and formalize}
+%%  We'll use the relationship between non-redundant properties and subgradients of the expected score $G$.
+%%  Now consider the following convex analysis fact: for any convex function and any two point which share a subgradient, the function is flat between those points.
+%%  In particular, $G$ is flat on $\Gamma_u$, and therefore $G$ must be differentiable on the interior of $\Gamma_u$.
+%%  Therefore, $G$ must only have one subgradient on $\inter{\Gamma_u}$.
+%%  \bigskip
+%%  \jessie{Formalization below}
+%%  \hrule
+%%  Consider that $\trim(\Gamma)$ is non-redundant, and $p \in \inter{\Gamma_u}$ only if $\Gamma_u \in \trim(\Gamma)$ by Lemma~\ref{lem:trim-full-dim}, as a closed, convex set is full-dimensional if and only if it has nonempty interior. \jessiet{Sanity check here?}
+%%  Since $\Gamma$ is elicitable, the score $G$ must be convex.
+%%  For $w \in \R'$, if $\Gamma_w \subseteq \Gamma_u$, then we contradict the nonredundancy of $\trim(\Gamma)$, so we only worry about the case where $\Gamma_w \not \subseteq \Gamma_u$..
+%%
+%%  Suppose there is such a level set.
+%%  There must be another level set $v$ so that $\Gamma_w \cap \inter{\Gamma_v}$ is nonempty, since level sets of elicitable properties are closed.
+%%  Therefore, for $q \in \Gamma_w$, we observe $\Gamma(q) \subseteq \{u,w\}$ or $\{v,w\}$.
+%%  More importantly- for $q \in \Gamma_w$, $\Gamma(q)$ is not constant.
+%%
+%%  Let's say there is a $q \in \Gamma_w \cap \inter{\Gamma_u}$ and $q' \in \Gamma_w \cap \inter{\Gamma_v}$.
+%%  Additionally, $\conv(\{q,q'\}) \subseteq \Gamma_w$, and observe that $\conv(\{q,q'\})$ is not countable.
+%%  Since there is a bijection from $\Gamma(p)$ to $\partial_p G(p)$, we then note that $|\partial_pG(p)| > 1$ on an uncountable set, and $\partial_p G(p)$ is not constant on $\conv(\{q,q'\})$.
+%%  This contradicts the convexity of $G$, and in turn, the elicitability of $\Gamma$ and $\trim(\Gamma)$.
+%%
+%%  Therefore, for all $p \in \inter{\Gamma_u}$, we must observe $\Gamma(p) = \{u\}$.
+%%
+%%\end{proof}
+%%
+%%\begin{corollary}\label{cor:cant-span-interiors}
+%%  If $\Gamma:\simplex \toto \R'$ is a non-redundant, finite elicitable property, no level set spans the interior of two other level sets.
+%%  Formally, there is no $w \in \R'$ so that for any $p \in \inter{\Gamma_u}$ and $q \in \inter{\Gamma_v}$, $p,q \in \Gamma_w$ for reports $u,v \in \R'$ with $u \neq v$.
+%%\end{corollary}
+%%\jessiet{I can write something for a proof of this if you want, but it follows from the previous statement pretty quickly.}
+%%
+%%\begin{lemma}\label{lem:trim-full-dim}
+%%  Consider a nondegenerate, elicitable property $\Gamma$ with finitely many full-dimensional level sets.
+%%  Every $\theta \in \Theta := \trim(\Gamma)$ is full-dimensional.
+%%\end{lemma}
+%%\begin{proof}
+%%  Consider an arbitrary level set $\theta$.
+%%  If $\theta$ is not full-dimensional, we want to show that it must be the intersection of some full-dimensional level sets in $\trim(\Gamma)$.\jessiet{Why?  Add more details about why the level set can't span two full-dimensional level sets}
+%%  If it is a proper subset of the level sets of which it is the intersection, and so it is not in the $\trim$ as it is in the subtracted set.
+%%
+%%  Now suppose that a level set $\theta$ was not full-dimensional and not a proper subset of any one level set.
+%%  It must then span the interior multiple level sets, as level sets of elicitable properties are closed.
+%%  By Corollary~\ref{cor:cant-span-interiors}, we contradict the elicitability of $\Gamma$.
+%%  Thus, any $\theta$ that is not full-dimensional must be the intersection of a finite set of full-dimensional level sets $\theta_i \in \trim(\Gamma)$.
+%%  As trimming a property removes such redundant reports, we then observe that $\theta \not \in \trim(\Gamma)$.
+%%  Therefore, each $\theta \in \trim(\Gamma)$ must be full-dimensional.
+%%\end{proof}
+
+
+
+%\begin{lemma}\label{lem:finite-nonred-fdls}
+%Let $\Gamma:\simplex \toto \R'$ be a non-redundant, finite elicitable property.
+%Each level set $\Gamma_u \in \{\Gamma_u : u \in \R' \}$ is full-dimensional.
+%\end{lemma}
+%\begin{proof}
+%Let us consider 3 cases: first, we cannot observe a level set is a subset of or equal to another by nonredundancy of the property.
+%Now, if one level set spans the interiors of two different level sets, we will see that this property is not elicitable.
+%Since we assume $\Gamma$ is elicitable, we know the score $G$ is convex over $\simplex$.
+
+%Now, suppose there are two distributions $q,q'$ such that $q \in \inter{\Gamma_u}$ and $q' \in \inter{\Gamma_{u'}}$ for $u \neq u'$.
+%Additionally, if there is a report $w$ such that $\conv(\{q,q'\}) \subseteq \Gamma_w$, we say that the level set $\Gamma_w$ spans the interior of two level sets.
+
+%First, consider that if $q \in \inter{\Gamma_u}$ and $q' \in \inter{\Gamma_{u'}}$ are two non-redundant points in the set $S$ such that $\Gamma_w = \conv(S)$, then there are distributions $p := q + \epsilon(q-q')$ and $p' = q' + \epsilon(q'-q)$ that are both in the interior of their respective level sets and $\Gamma(p) \cap \Gamma(p') = \emptyset$.
+%By \jessie{Raf and Ian 2018} Lemma 10, then for $\lambda \in (0,1)$, the score $G(\lambda p + (1-\lambda) p') < \lambda G(p) + (1-\lambda) G(p')$.
+%However, if $q$ and $q'$ share a subgradient, then the score $G$ is flat on $\conv(\{q,q'\})$, which is a subset of $\conv(\{p,p'\})$.
+%However, this contradicts \jessie{Raf and Ian 2018} Lemma 10, as the score $G$ is flat (and therefore the strict inequality is actually an equality) on $(a,b) \subseteq (0,1)$.
+
+%Now, if the level set $\Gamma_w$ is described as the convex hull of distributions $q \not \in \inter{\Gamma_u}$ or $q' \not \in \inter{\Gamma_{u'}}$, such distributions $p$ and $p'$ do not exist in the respective level sets.
+%\jessie{.... other argument}
+
+%Therefore, for the elicitable property $\Gamma$, there cannot be a level set $\Gamma_w$ that spans the interiors of two other level set.s
+
+%\end{proof}
+\newpage
+\section{To Sort}
+\jessiet{Lol we should probably change the name of this}
+\raft{No kidding!  Was this really in the COLT submission??  Hilarious.}
+Several definitions from \citet{aurenhammer1987power}.
+\begin{definition}\label{def:cell-complex}
+  A \emph{cell complex} in $\reals^d$ is a set $C$ of faces (of dimension $0,\ldots,d$) which (i) union to $\reals^d$, (ii) have pairwise disjoint relative interiors, and (iii) any nonempty intersection of faces $F,F'$ in $C$ is a face of $F$ and $F'$ and an element of $C$.
+\end{definition}
+
+\begin{definition}\label{def:power-diagram}
+  Given sites $s_1,\ldots,s_k\in\reals^d$ and weights $w_1,\ldots,w_k \geq 0$, the corresponding \emph{power diagram} is the cell complex given by
+  \begin{equation}
+    \label{eq:pd}
+    \cell(s_i) = \{ x \in\reals^d : \forall j \in \{1,\ldots,k\} \, \|x - s_i\|^2 - w_i \leq \|x - s_j\| - w_j\}~.
+  \end{equation}
+\end{definition}
+
+\begin{definition}\label{def:affine-equiv}
+  A cell complex $C$ in $\reals^d$ is \emph{affinely equivalent} to a (convex) polyhedron $P \subseteq \reals^{d+1}$ if $C$ is a (linear) projection of the faces of $P$.
+\end{definition}
+
+\begin{theorem}[\cite{aurenhammer1987power}]\label{thm:aurenhammer}
+  A cell complex is affinely equivalent to a convex polyhedron if and only if it is a power diagram.
+\end{theorem}
+
+In particular, one can consider the epigraph of a polyhedral convex function on $\reals^d$ and the projection down to $\reals^d$; in this case we call the resulting power diagram \emph{induced} by the convex function.
+We extend Aurenhammer's result to a weighted sum of convex functions, showing that the induced power diagram is the same for any choice of strictly positive weights.
+
+\begin{lemma}\label{lem:polyhedral-pd-same}
+  Let $f_1,\ldots,f_k:\reals^d\to\reals$ be polyhedral convex functions.
+  \jessiet{Replace $k$ with $m$?}
+  The power diagram induced by $\sum_{i=1}^k p_i f_i$ is the same for all $p \in \inter\simplex$.
+\end{lemma}
+\begin{proof}
+  For any convex function $g$ with epigraph $P$, the proof of~\citet[Theorem 4]{aurenhammer1987power} shows that the power diagram induced by $g$ is determined by the facets of $P$.
+  Let $F$ be a facet of $P$, and $F'$ its projection down to $\reals^d$.
+  It follows that $g|_{F'}$ is affine, and thus $g$ is differentiable on $\inter F'$ with constant derivative $d\in\reals^d$.
+  Conversely, for any subgradient $d'$ of $g$, the set of points $\{x\in\reals^d : d'\in\partial g(x)\}$ is the projection of a face of $P$; we conclude that $F = \{(x,g(x))\in\reals^{d+1} : d\in\partial g(x)\}$ and $F' = \{x\in\reals^d : d\in\partial g(x)\}$.
+
+  Now let $f := \sum_{i=1}^k f_i$ with epigraph $P$, and $f' := \sum_{i=1}^k p_i f_i$ with epigraph $P'$.
+  By \raf{Rockafellar}\jessiet{\cite{rockafellar1997convex}}, $f,f'$ are polyhedral.
+  We now show that $f$ is differentiable whenever $f'$ is differentiable:
+  \begin{align*}
+    \partial f(x) = \{d\}
+    &\iff \sum_{i=1}^k \partial f_i(x) = \{d\} \\
+    &\iff \forall i\in\{1,\ldots,k\}, \; \partial f_i(x) = \{d_i\} \\
+    &\iff \forall i\in\{1,\ldots,k\}, \; \partial p_i f_i(x) = \{p_id_i\} \\
+    &\iff \sum_{i=1}^k \partial p_if_i(x) = \left\{\sum_{i=1}^k p_id_i\right\} \\
+    &\iff \partial f'(x) = \left\{\sum_{i=1}^k p_id_i\right\}~.
+  \end{align*}
+  From the above observations, every facet of $P$ is determined by the derivative of $f$ at any point in the interior of its projection, and vice versa.
+  Letting $x$ be such a point in the interior, we now see that the facet of $P'$ containing $(x,f'(x))$ has the same projection, namely $\{x'\in\reals^d : \nabla f(x) \in \partial f(x')\} = \{x'\in\reals^d : \nabla f'(x) \in \partial f'(x')\}$.
+  Thus, the power diagrams induced by $f$ and $f'$ are the same.
+  The conclusion follows from the observation that the above held for any strictly positive weights $p$, and $f$ was fixed.
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:polyhedral-embed}]
+  Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss.
+  For all $p$, let $P(p)$ be the epigraph of the convex function $u\mapsto \inprod{p}{L(u)}$.
+  From Lemma~\ref{lem:polyhedral-pd-same}, we have that the power diagram induced by the projection of $P(p)$ onto $\reals^d$ is the same for any $p\in\inter\simplex$.
+  Let $q\in\inter\simplex$ be the uniform distribution on $\Y$, and $V_\Y$ be the set of vertices of $P(q)$ projected onto $\reals^d$.
+  By the above, this set is the same had we replaced $q$ by any $p\in\inter\simplex$.
+  \raf{I just realized that the focus on vertices is ill-fated: the hinge-with-extra-dimenson example shows that there might not be \emph{any} vertices.  We need to stick to faces (not necessarily facets) of the $P(q)$.}
+
+  Now let $\Gamma := \Gamma[L]$.
+  We claim for all $p\in\inter\simplex$, that $\Gamma(p) \cap V_\Y \neq \emptyset$.
+  To see this, let $u \in \Gamma(p)$, and $u' = (u,\inprod{p}{L(u)}) \in P(p)$.
+  The optimality of $u$ is equivalent to $u$ being contained in the face exposed by the normal $(0,\ldots,0,-1)\in\reals^{d+1}$, which is a face of $P(p)$.
+  Let $v'\in\reals^{d+1}$ be a vertex on such a face, and $v\in V_\Y$ its projection onto $\reals^d$.
+  Then $v$ is also optimal, and therefore $v\in\Gamma(p)$.
+
+  Now consider $\Y'\subset \Y$.
+  Applying the above argument on distributions $p$ with support exactly $\Y'$, we have a similar guarantee: a finite set $V_{\Y'}$ such that $\Gamma(p) \cap V_{\Y'} \neq \emptyset$ for all $p$ with support exactly $\Y'$.
+  (When $\Y' = \{y\}$ is a singleton, we simply take the projected vertices of $L(\cdot)_y$.)
+
+  Thus, taking $V = \bigcup_{\Y'\subseteq\Y} V_{\Y'}$, we have for all $p\in\simplex$ that $\Gamma(p) \cap V \neq \emptyset$.
+  This implies that $\trim(\Gamma) \subseteq \{\Gamma_v : v\in V\}$, which is finite, so Proposition~\ref{prop:embed-trim} now gives the conclusion.
+  \jessiet{Do we need to show the preimage of $\Gamma$ is $V$?}
+
+  \raft{I might be delusional, but this second part ended up being much slicker than I'd thought, by essentially chaining definitions and maps.  Please check!}
+  For the second part, let $\gamma':\simplex\toto\R'$ be the finite elicitable property embedded by $L$, with embedding $\varphi:\R'\to\reals^d$, and let $\psi$ be a calibrated link to a non-redundant elicitable property $\gamma:\simplex\toto\R$.
+  Then letting $\psi' = (\psi \circ \varphi):\R'\to\R$, we see that $\psi'$ is a calibrated link from $\gamma'$ to $\gamma$:
+  for all $r'\in\R'$, we have $\gamma'_{r'} = \prop{L}_{\varphi(r')} \subseteq \gamma_{\psi(\varphi(r'))}$.
+  In particular, $\gamma'$ refines $\gamma$, and as $\gamma'$ is finite, $\gamma$ must be finite.
+\end{proof}
+
+\begin{theorem}\label{thm:general-duality-embedding}
+  Let $\gamma:\simplex\toto\R$ be a non-redundant elicitable property, elicited by a loss whose Bayes risk is a closed function.
+  Then $\gamma$ is $(n-1)$-embeddable, where $n=|\Y|$.
+  \raft{Low priority: what conditions on $L$ or $\gamma$ ensure that the Bayes risk is closed?}
+  \jessiet{\url{https://en.wikipedia.org/wiki/Closed_convex_function} so the simplex $\simplex$  being closed should suggest the Bayes Risk and $G$ are closed.}\raft{It's more complicated than that though -- e.g. take a continuous convex function on the simplex and and then increase the values of the function arbitrarily on the poles of the simplex.  Still convex, but not closed (or continuous)}
+\end{theorem}
+\begin{proof}
+  $G:\simplex\to\reals$ be the negative Bayes risk of the loss $L_\gamma$ eliciting $\gamma$, given by $G(p) = -\min_{r\in\R} \inprod{p}{L_\gamma(r)}$.
+  Let $C:\reals^\Y\to\reals$ be the convex conjugate of $G$, given by $C(u) = \sup_{p\in\simplex} \inprod{p}{u} - G(p)$, which is finite on all of $\reals^\Y$ by~\citet[Corollary 13.3.1]{rockafellar1997convex} as $\dom\, G = \simplex$ is bounded.
+
+  By~\citet[Theorem 2]{frongillo2014general} we know that for some $\D \subseteq \partial G(\simplex) \subseteq \reals^\Y$ we have a bijection $s : \R \to \D$ such that $\gamma(p) = s^{-1}(\D \cap \partial G(p))$.
+  (In other words, $\gamma$ is a relabeling of subgradients of $G$.)
+  Thus, we can write
+  \begin{equation}
+    \label{eq:1}
+    r \in \gamma(p) \iff s(r) \in \partial G(p) \iff p \in \partial C(s(r))~,
+  \end{equation}
+  where the final equivalence follows from~\cite[Corollary 23.5.2]{rockafellar1997convex} as $G$ is a closed convex function.
+
+  Now define $L:\reals^n\to\reals_+^\Y$ by $L(u) = C(u)\ones - u$, where $\ones\in\reals^\Y$ is the all-ones vector.
+  \jessiet{Geometrically, what does this look like?  I'm imagining it as our tipping cost function, but I'm not sure on that.}
+  We will show that $L$ embeds $\gamma$.
+  As $L$ is convex, we may write the optimality condition as
+  \begin{equation}
+    \label{eq:2}
+    u \in \prop{L}(p) \iff u \in \argmin_{u'} \inprod{p}{L(u')} \iff 0 \in \partial \inprod{p}{L(u)}~,
+  \end{equation}
+  where the subgradient $\partial$ is with respect to $u$.
+  Plugging in our definition of $L$, we have
+  \begin{align*}
+    0 \in \partial \inprod{p}{L(u)}
+    & \iff 0 \in \partial \inprod{p}{\left(C(u)\ones - u\right)}
+    \\
+    % & \iff 0 \in \partial \left(C(u) - p\cdot u\right)
+    % \\
+    & \iff 0 \in \partial C(u) - \{p\}
+    \\
+    & \iff p \in \partial C(u)~.
+  \end{align*}
+  \jessiet{Not sure I see this- REVISIT.}
+
+  Together with eq.~\eqref{eq:1}, we now have for any $u \in \D$ and $p\in\simplex$ that
+  \begin{equation}
+    \label{eq:3}
+    u \in \prop{L}(p) \iff p \in \partial C(u) \iff s^{-1}(u) \in \gamma(p)~.
+  \end{equation}
+  Recalling that $s$ is a bijection, we conclude that $L$ embeds $\gamma$ with embedding function $\varphi:\R\to\reals^\Y$ given by $\varphi(r) = s(r)$.
+
+  We have now shown that $\gamma$ is $n$-embeddable.
+  \jessiet{Notation question: is $C'(u';\ones)$ the directional derivative in the $\ones$ direction?}
+  To drop a dimension, first note that $C$ is linear in the $\ones$ direction: for all $u'\in\reals^\Y$, the directional derivative $C'(u';\ones) = \sup_{p\in\partial C(u')} \inprod{p}{\ones} = 1$ as $\partial C(u')\subseteq\simplex$ for all $u'$; thus
+  $C(u+\alpha\ones) = C(u) + \int_0^\alpha C'(u+\beta\ones;\ones) d\beta = C(u) + \alpha$.
+  This linearity translates to invariance of $L$ in the direction of $\ones$:
+  \begin{align*}
+    L(u + \alpha\ones) = C(u+\alpha\ones)\ones - (u + \alpha\ones) = C(u)\ones + \alpha\ones - u - \alpha\ones = L(u)~.
+  \end{align*}
+  We now have for any $u\in\D$,
+  \begin{align*}
+    s^{-1}(u) \in \gamma(p) \iff u \in \prop{L}(p) \iff u - u_n\ones \in \prop{L}(p)\cap\R_2~.
+  \end{align*}
+  Letting $L':\reals^{n-1}\to\reals^\Y$ given by $L'(u') = L((u',0))$, \jessiet{specify for $u \in \reals^{n-1}$} and evoking Lemma~\ref{lem:loss-restrict}, we conclude $\prop{L'}(p) = \prop{L}\cap\R_2$ and thus $L'$ embeds $\gamma$ as well, with the embedding $\varphi(r) = (s(r)_1 - s(r)_n, \ldots, s(r)_{n-1} - s(r)_n)$.
+  \jessiet{The notation $C'$ being a derivative kind of bothers me since $L'$ is used for another generic function... although I may just be misreading it or not familiar with standard notations.}
+\end{proof}
+
+\section{Dimension 1}\label{app:dimension-1}
+\begin{proof}[Proof of Proposition~\ref{prop:embed-trim}]
+  Let $L$ elicit $\Gamma$.
+
+  1 $\Rightarrow$ 2:
+  By the embedding condition, taking $\R_1 = \reals^d$ and $\R_2 = \varphi(\R)$ satisfies the conditions of Lemma~\ref{lem:loss-restrict}: for all $p\in\simplex$, as $\gamma(p) \neq \emptyset$ by definition, we have some $r\in\gamma(p)$ and thus some $\varphi(r) \in \Gamma(p)$.
+  Let $G(p) := -\min_{u\in\reals^d} \inprod{p}{L(u)}$ be the negative Bayes risk of $L$, which is convex, and $G_{\R}$ that of $L|_{\varphi(\R)}$.
+  By the Lemma, we also have $G = G_\R$.
+  As $\gamma$ is finite, $G$ is polyhedral.
+  Moreover, the projection of the epigraph of $G$ onto $\simplex$ forms a power diagram, with the facets projecting onto the level sets of $\gamma$, the cells of the power diagram.
+  (See Theorem~\ref{thm:aurenhammer}.)
+  As $L$ elicits $\Gamma$, for all $u\in\reals^d$, the hyperplane $p\mapsto \inprod{p}{L(u)}$ is a supporting hyperplane of the epigraph of $G$ at $(p,G(p))$ if and only if $u\in\Gamma(p)$.
+  This supporting hyperplane exposes some face $F$ of the epigraph of $G$, which must be contained in some facet $F'$.
+  Thus, the projection of $F$, which is $\Gamma_u$, must be contained in the projection of $F'$, which is a level set of $\gamma$.
+  We conclude that $\Gamma_u \subseteq \gamma_r$ for some $r\in\R$.
+  Hence, $\trim(\Gamma) = \{\gamma_r : r\in\R\}$, which is finite, and unions to $\simplex$.
+
+
+  %%% The below is basically the argument from the Lemma, for this specific case.
+  % We will first show $L'$ elicits $\gamma$, where $L':\R\to\reals^\Y_+$ is defined by $L'(r) = L(\varphi(r))$.
+  % From the definition of embedding, for all $p\in\simplex$ we have $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p) = \argmin_{u\in\reals^d} p\cdot L(u)$.
+  % Thus, $r\in\gamma(p)$ implies $r \in \argmin_{r'\in\R} p\cdot L(\varphi(r')) = \argmin_{r'\in\R} p\cdot L'(r')$.
+  % For the other direction, let $r \in \argmin_{r'\in\R} p\cdot L'(r')$, and let $r'\in\gamma(p)$ (where use $\gamma(p) \neq \emptyset$).
+  % By the above, we have $r'\in\argmin_{r'\in\R} p\cdot L'(r')$ as well, so we must have $p\cdot L'(r) = p\cdot L'(r')$, and therefore $p\cdot L(\varphi(r)) = p\cdot L(\varphi(r'))$.
+  % But we also have $\varphi(r') \in \argmin_{u\in\reals^d} p\cdot L(u)$, and therefore $\varphi(r) \in \argmin_{u\in\reals^d} p\cdot L(u) = \Gamma(p)$.
+  % By the definition of embedding, we now have $r \in \gamma(p)$, as was to be shown.
+
+  % for all the given that $\Gamma$ embeds the finite property $\gamma$, we show that $\trim(\Gamma) = \{\Gamma_u : u \in \varphi(\R) \} = \{\gamma_r : r \in \R\}$.
+  % By elicitability, each level set $\Gamma_u$ corresponds to a subgradient of the expected score function, call it $G(p) := -\langle p, L(\Gamma(p))\rangle$ for any choice from $\Gamma$.
+  % We claim $G$ is polyhedral. $\gamma$ is finite (and by definition non-redundant), so each level set $\gamma_r = \Gamma_{\phi(r)}$ is full-dimensional\bo{need to prove this separately in a lemma}.
+  % So the corresponding subgradient is tangent to $G$ above a full-dimensional level set, and this is true for every $\gamma_r$.
+  % Every $p$ is in one of these level sets and so is below some facet.
+  % This implies that $G$ is polyhedral with facets exactly corresponding to $\{\gamma_r : r \in \R\} = \{\Gamma_u : u \in \varphi(\R)\}$.
+  % Finally, for any $u \not\in \varphi(\R)$, we have\bo{need to cite a lemma statement, per discussion with Raf} that $\Gamma_u$ lies below some face of the epigraph of $G$, hence is contained in the set lying below some facet, which is one of the $\Gamma_{\varphi(r)}$.
+  % So the maximal level sets of $\Gamma$ are exactly those lying below facets, which are exactly the level sets of $\gamma$.
+  % This gives 2, and the fact that the level sets of $\gamma$ are full-dimensional and union to $\Delta_{\Y}$ gives 3.
+
+  % Clearly, $\trim(\Gamma) \supseteq \{\Gamma_u : u \in \varphi(\R)\}$ as we are simply restricting the number of level sets we are indexing over.
+%  Now, consider some $\theta \in \trim(\Gamma)$ and the report $u$ so that $\theta = \Gamma_u$.
+%  If $u \in \varphi(\R)$, then clearly we are done.
+%  If $u \not\in \varphi(\R)$ but there is some report $w \in \varphi(\R)$ so that $\Gamma_u = \Gamma_w$, then we are again done since $\trim(\Gamma)$ is non-redundant.
+%  If there is no such $w \in \R$, then we claim $\Gamma_u \not \in \trim(\Gamma)$.
+%  To see this, consider that if $\Gamma_u$ is full-dimensional, it must be a relabeling of another report by Lemma~\ref{lem:unique-opt-on-inter} in the Appendix.
+%  If $\Gamma_u$ is not full-dimensional, it must be a proper subset of some full-dimensional level set by Lemma~\ref{lem:trim-subsets-not-full-dimensional}, and therefore not in $\trim(\Gamma)$.
+%%\jessiet{skimmed over this, but follows from the convexity of the scoring rule.  My thought for the paper is to put that proof in the appendix,and just have a footnote or side note here with a reference to the proof in the appendix.}
+%  Thus, we conclude $\trim(\Gamma) \subseteq \{\Gamma_u : u \in \varphi(\R)\}$.
+%  Since the sets are equal and the latter is finite, we conclude that if $\Gamma$ embeds the finite property $\gamma$, then $\trim(\Gamma)$ is finite.
+
+%  For $2 \implies 3$, since each level set $\theta \in \trim(\Gamma)$ is full-dimensional by Lemma~\ref{lem:trim-full-dim}, suppose for now that $\Theta := \trim(\Gamma)$.
+%  %As $\Gamma$ is nondegenerate, for every $p \in \simplex$, there must be some report $u$ corresponding to the level set such that $p \in \Gamma_u$.
+%  Since $\Gamma$ is nondegenerate, for all $p \in \simplex$, there is a level set $\theta \in \trim(\Gamma)$ such that $p \in \theta$, since the level sets of elicitable properties are closed and convex, and only level sets that are not full-dimensional level sets are removed in taking $\trim(\Gamma)$.
+%  If, for some $p \in \simplex$, the level set $\Gamma_u$ corresponding to $p$ was removed, it would be because there is a level set corresponding to $w \in \reals^d$ such that $\Gamma_u \subset \Gamma_w$, but then $p \in \Gamma_w$.
+
+  2 $\Rightarrow$ 3: let $\R = \{u_1,\ldots,u_k\} \subseteq\reals^d$ be a set of distinct reports such that $\trim(\Gamma) = \{\Gamma_{u_1},\ldots,\Gamma_{u_k}\}$.
+  Now as $\cup\,\trim(\Gamma) = \simplex$, for any $p\in\simplex$, we have $p\in\Gamma_{u_i}$ for some $u_i\in\R$, and thus $\Gamma(p) \cap \R \neq \emptyset$.
+  We now satisfy the conditions of Lemma~\ref{lem:loss-restrict} with $\R_1 = \reals^d$ and $\R_2 = \R$.
+  The property $\gamma:p\mapsto\Gamma(p)\cap\R$ is non-redundant by the definition of $\trim$, finite, and elicitable.
+  Now from Lemma~\ref{lem:finite-full-dim}, the level sets $\Theta = \{\gamma_r:r\in\R\}$ are full-dimensional, and union to $\simplex$.
+  Statement 3 then follows from the fact that $\gamma_r = \Gamma_r$ for all $r\in\R$.
+
+  %%% Again, this is subsumed by the Lemma
+  % Let $\R = \{u_1,\ldots,u_k\}$; we show that $\gamma:\simplex\toto\R$, $\gamma(p) = \{u_i : p\in\Gamma_{u_i}\} = \Gamma(p) \cap \R$, is elicitable.
+  % Define $L':\R\to\reals^\Y_+$ by $L'(u_i) = L(u_i)$.
+  % Clearly, if $u_i \in \gamma(p)$, then $u_i \in \Gamma(p) = \argmin_{u\in\reals^d} p\cdot L(u)$, and thus $u_i \in \argmin_{u\in\R} p\cdot L'(u)$.
+  % For the other direction, suppose $u_i \in \argmin_{u\in\R} p\cdot L'(u)$.
+  % For any $u' \in \Gamma(p)$, by the definition of $\trim$, we have some $u_j\in\R$ for which $u_j\in\Gamma(p) = \argmin_{u\in\reals^d} p\cdot L(u)$ as well.
+  % But now we must have $p\cdot L(u_i) = p\cdot L(u_j)$, and thus $u_i \in \Gamma(p)$ as well.
+  % As $u_i\in\R$, we have $u_i \in \Gamma(p)\cap \R = \gamma(p)$, as desired.
+
+
+  3 $\Rightarrow$ 1: let $\Theta = \{\theta_1,\ldots,\theta_k\}$.
+  For all $i\in\{1,\ldots,k\}$ let $u_i\in\reals^d$ such that $\Gamma_{u_i} = \theta_i$.
+  Now define $\gamma:\simplex\toto\{1,\ldots,k\}$ by $\gamma(p) = \{i : p\in\theta_i\}$, which is non-degenerate as $\cup\,\Theta = \simplex$.
+  By construction, we have $\gamma_i = \theta_i = \Gamma_{u_i}$ for all $i$, so letting $\varphi(i) = u_i$ we satisfy the definition of embedding, namely statement 1.
+\end{proof}
+
+
+\begin{definition}\label{def:monotone-prop}
+  A property $\Gamma:\simplex\toto\R$ is \emph{monotone} if there are maps $a:\R\to\reals^\Y$, $b:\R\to\reals^\Y$ and a total ordering $<$ of $\R$ such that the following two conditions hold.
+  \begin{enumerate}
+  \item For all $r\in\R$, we have $\Gamma_r = \{p\in\simplex : \inprod{a(r)}{p} \leq 0 \leq \inprod{b(r)}{p} \}$.
+  \item For all $r < r'$, we have $a(r) \leq b(r) \leq a(r') \leq b(r')$ (component-wise).
+  % \item For all $r,r'\in\R$ and $p\in\Gamma_{r'}\setminus\Gamma_r$, we have $b(r) \cdot p < 0 \implies r' > r$ and $a(r) \cdot p > 0 \implies r' < r$.
+  \end{enumerate}
+\end{definition}
+
+\begin{proof}[Proof of Proposition~\ref{prop:orderable-embed}]
+  Let $\R = \{r_1,\ldots,r_k\}$ be the report space for $\gamma$.
+  From Lemma~\ref{lem:prop-L-monotone}, stating that finite properties are orderable if and only if they are monotone, we have functions $a:\R\to\reals^\Y, b:\R\to\reals^\Y$ satisfying the following: (i) $\gamma_{r_i} = \{p\in\simplex : \inprod{a(r_i)}{p} \leq 0 \leq \inprod{b(r_i)}{p} \}$ for all $i\in\{1,\ldots,k\}$, and (ii) $a(r_i) \leq b(r_i) = a(r_{i+1}) \leq b(r_{i+1})$ for all $i \in \{1,\ldots,k-1\}$.
+  We now define $\varphi(r_i) = i \in \reals$, and define $L$ as follows:
+  \begin{equation*}
+    L(u)_y =
+    \begin{cases}
+      a(r_1) u & u < 1 \\
+      c_i + b(r_i) u & u \in [i,i+1), i\in\{1,\ldots,k\} \\
+      c_k + b(r_k) u & u \geq k+1
+    \end{cases}~,
+  \end{equation*}
+  where the $c_i$ are chosen to make $L(u)_y$ continuous, namely, $c_i = \sum_{j=1}^{i} a(r_j)_y$.
+  (Recall that $b(r_i) = a(r_{i+1})$.)
+  By the condition (ii) above, $L(\cdot)_y$ is convex for all $y\in\Y$, and moreover, its subgradients at $\varphi(\R) = \{1,\ldots,k\}$ are given by
+  $\partial L(i)_y = [a(r_i)_y,b(r_i)_y]$.
+  \jessiet{I believe it, but it might help a reader to explain why it's convex a little more.}
+  By condition (i), for all $i\in\{1,\ldots,k\}$ and $p\in\simplex$ we now have
+  \begin{align*}
+    i \in \prop{L}(p)
+    &\iff 0 \in \partial \inprod{p}{L(i)} \\
+    % &\iff 0 \in \sum_{y\in\Y} p_y \partial L(i)_y \\
+    &\iff 0 \in \sum_{y\in\Y} p_y [a(r_i)_y,b(r_i)_y] \\
+    &\iff \inprod{a(r_i)}{p} \leq 0 \leq \inprod{b(r_i)}{p} \\
+    &\iff r_i \in \gamma(p)~,
+  \end{align*}
+  where the sum is a Minkowski sum.
+\end{proof}
+
+\begin{lemma}\label{lem:orderable-monotone}
+  A finite property is orderable if and only if it is monotone.
+\end{lemma}
+\begin{proof}
+  Let $\gamma:\simplex\toto\R$ be finite and monotone.
+  Then we can use the total ordering of $\R$ to write $\R = \{r_1,\ldots,r_k\}$ such that $r_i < r_{i+1}$ for all $i \in \{1,\ldots,k-1\}$.
+  We now have $\gamma_{r_i} \cap \gamma_{r_{i+1}} = \{p\in\simplex : \inprod{a(r_{i+1})}{p} \leq 0 \leq \inprod{b(r_i)}{p} \}$.
+  If this intersection is empty, then there must be some $p$ with $\inprod{b(r_i)}{p} < 0$ and $\inprod{a(r_{i+1})}{p} > 0$; by monotonicity, no earlier or later reports can be in $\gamma(p)$, so we see that $\gamma(p) = \emptyset$, a contradiction.
+  Thus the intersection is nonempty, and as we also know $b(r_i) \leq a(r_{i+1})$ we conclude $b(r_i) = a(r_{i+1})$, and the intersection is the hyperplane defined by $b(r_i) = a(r_{i+1})$.
+
+  For the converse, let $\gamma:\simplex\toto\R$ be finite and orderable.
+  From~\cite[Theorem 4]{lambert2018elicitation}, we have positively-oriented normals $v_i\in\reals^\Y$ for all $i \in \{1,\ldots,k-1\}$ such that $\gamma_{r_i} \cap \gamma_{r_{i+1}} = \{p\in\simplex : \inprod{v_i}{p} = 0\}$, and moreover, for all $i \in \{2,\ldots,k-1\}$, we have $\gamma_{r_i} = \{p\in\simplex : \inprod{v_{i-1}}{p} \leq 0 \leq \inprod{v_i}{p}\}$, while $\gamma_{r_1} = \{p\in\simplex : 0 \leq \inprod{v_1}{p} \}$ and $\gamma_{r_k} = \{p\in\simplex : \inprod{v_{k-1}}{p} \leq 0\}$.
+  \jessiet{Should the sign on $\gamma_{r_k}$ be changed?}
+  From the positive orientation of the $v_i$, we have for all $p\in\simplex$ that $\sgn(\inprod{v_i}{p})$ is monotone in $i$.
+  In particular, it must be that for all $y$, $\sgn((v_i)_y)$ is monotone in $i$, taking the distribution with all weight on outcome $y$.
+  % (Similarly, if $\gamma(\ones_y) = \{r_j,r_{j+1}\}$, then $(v_i)_y = v_i \cdot \ones_y < 0$ for $i < j$, $(v_j)_y = 0$, and $(v_i)_y > 0$ for $i > j$.)
+  \raft{This observation could use a better proof.}
+
+  For all $i\in\{2,\ldots,k-1\}$, we wish to find $\alpha_i \geq 0$ such that $v_{i-1} \leq \alpha_i v_i$ (component-wise).
+  \jessiet{How should $w$ be interpreted?}
+  To this end, fix $i$ and let $v = v_{i-1}, w = v_{i}, \alpha=\alpha_i$.
+  By the above, there is no $y\in\Y$ with $v_y > 0 > w_y$, so the condition $v \leq \alpha w$ is equivalent to the following:
+
+  \begin{enumerate}
+  \item[(i)] For all $y$ with $v_y,w_y < 0$, $\alpha \leq v_y/w_y$.
+  \item[(ii)] For all $y$ with $v_y,w_y > 0$, $\alpha \geq v_y/w_y$.
+  \end{enumerate}
+  Defining $\Y^- = \{y\in\Y: v_i,w_y < 0\}, \Y^+ = \{y\in\Y: v_i,w_y > 0\}$, these conditions are in turn equivalent to $\min_{y\in\Y^-} v_y/w_y \geq \max_{y\in\Y^+} v_y/w_y$, with the usual conventions $\min \emptyset = \infty,\; \max \emptyset = -\infty$.
+  Suppose this inequality were not satisfied.
+  Then we would have $y \in \Y^-,y'\in\Y^+$ such that $0 < v_y/w_y < w_{y'}/v_y$, which would in turn imply $|v_y|/v_{y'} < |w_y| / w_{y'}$.
+  Letting $c = \tfrac 1 2 \left(|w_y| / w_{y'} + |v_y|/v_{y'}\right)$ and taking $p$ to be the distribution with weight $1/(1+c)$ on $y$ and $c/(1+c)$ on $y'$, we see that
+  \begin{align*}
+    \inprod{v}{p} &= \frac 1 {1+c} \left(v_y + \tfrac 1 2 (|w_y| / w_{y'} + |v_y|/v_{y'})v_{y'}\right) > \frac 1 {1+c} \left(v_y + (|v_y|/v_{y'})v_{y'}\right) = 0
+    \\
+    \inprod{w}{p} &= \frac 1 {1+c} \left(w_y + \tfrac 1 2 (|w_y| / w_{y'} + |v_y|/v_{y'})v_{y'}\right) < \frac 1 {1+c} \left(w_y + (|w_y|/w_{y'})w_{y'}\right) = 0~,
+  \end{align*}
+  thus violating the observation that $\sgn(\inprod{v_i}{p})$ is monotone in $i$ (recall that $v = v_{i-1}, w = v_{i}$).
+
+  We can now construct the $a,b$ in Definition~\ref{def:monotone-prop}.
+  Letting
+  \[\alpha_i = \tfrac 1 2 \left(\min_{y\in\Y^-(i)} (v_{i-1})_y/(v_{i})_y + \max_{y\in\Y^+(i)} (v_{i-1})_y/(v_{i})_y\right)~,\] the preceding argument shows that $v_{i-1} \leq \alpha_i v_{i}$ for all $i \in \{2,\ldots,k-1\}$.
+  We now set $b(r_i) = a(r_{i+1}) = (\prod_{j=2}^i \alpha_j) v_i$ for $i\in\{1,\ldots,k-1\}$, as well as $a(r_1) = -\max_{y\in\Y} |(v_1)_y|\ones$ and $b(r_k) = \max_{y\in\Y} |a(r_k)_y|\ones$, where $\ones\in\reals^\Y$ denotes the all-ones vector.
+
+  The above establishes the second condition of monotone properties in Definition~\ref{def:monotone-prop}.
+  To see the first condition, note that we have already established it for $i\in\{2,\ldots,k-1\}$.
+  For $i=1,k$, we merely observe that $\inprod{a(r_1)}{p} \leq 0$ and $\inprod{b(r_k)}{p} \geq 0$ for all $p\in\simplex$.
+\end{proof}
+
+\raft{The following statement is true I believe, but low priority: ``An elicitable property $\Gamma:\simplex\toto\reals$ is convex elicitable (elicited by a convex $L : \reals \to \reals^\Y$) if and only if it is monotone.''  Start of the proof commented out.  Just need to show that $b$ is the upper limit of $a$ and $a$ the lower of $b$; should follow from elicitability of $\Gamma$.}
+\begin{lemma}\label{lem:prop-L-monotone}
+  For any convex $L : \reals \to \reals^\Y_+$, the property $\prop{L}$ is monotone.
+\end{lemma}
+\begin{proof}
+  If $L$ is convex and elicits $\Gamma$, let $a,b$ be defined by $a(r)_y = \partial_- L(r)_y$ and $b(r) = \partial_+ L(r)_y$, that is, the left and right derivatives of $L(\cdot)_y$ at $r$, respectively.
+  Then $\partial L(r)_y = [a(r)_y,b(r)_y]$.
+  We now have $r \in \prop{L}(p) \iff 0 \in \partial \inprod{p}{L(r)} \iff \inprod{a(r)}{p} \leq 0 \leq \inprod{b(r)}{p}$, showing the first condition.
+  The second condition follows as the subgradients of $L$ are monotone functions (see e.g.~\citet[Theorem 24.1]{rockafellar1997convex}).
+  % Conversely, given such an $a,b$, we appeal to~\citet[Theorem 24.2]{rockafellar1997convex}, which gives us that $L(u)_y := \int_0^u a(u)_y$ is convex, and
+\end{proof}
+
+\newcommand{\Pbar}{\overline P}
+\begin{lemma}\label{lem:pbar}
+  Let $\gamma:\simplex\toto\R$ be a finite elicitable property, and suppose there is a calibrated link $\psi$ from an elicitable $\Gamma$ to $\gamma$.
+  For each $r\in\R$, define $P_r = \bigcup_{u\in\psi^{-1}(r)} \Gamma_u \subseteq \simplex$, and let $\Pbar_r$ denote the closure of the convex hull of $P_r$.
+  Then $\gamma_r = \Pbar_r$ for all $r\in\R$.
+\end{lemma}
+\begin{proof}
+  As $P_r \subseteq \gamma_r$ by the definition of calibration, and $\gamma_r$ is closed and convex, we must have $\Pbar_r \subseteq \gamma_r$.
+  Furthermore, again by calibration of $\psi$, we must have $\bigcup_{r\in\R} P_r = \bigcup_{u\in\reals} \Gamma_u = \simplex$, and thus $\bigcup_{r\in\R} \Pbar_r = \simplex$ as well.
+  Suppose for a contradiction that $\gamma_r \neq \Pbar_r$ for some $r\in\R$.
+  From Lemma~\ref{lem:finite-full-dim}, $\gamma_r$ has nonempty interior, so we must have some $p\in\inter\gamma_r \setminus \Pbar_r$.
+  But as $\bigcup_{r'\in\R} \Pbar_{r'} = \simplex$, we then have some $r'\neq r$ with $p\in\Pbar_{r'} \subseteq \gamma_{r'}$.
+  By Theorem~\ref{thm:aurenhammer}, the level sets of $\gamma$ form a power diagram, and in particular a cell complex, so we have contradicted point (ii) of Definition~\ref{def:cell-complex}: the relative interiors of the faces must not be disjoint.
+  Hence, for all $r\in\R$ we have $\gamma_r = \Pbar_r$.
+\end{proof}
+
+We now prove the remaining results.
+%Proposition~\ref{prop:indirect-orderable}, which states the following: if convex $L : \reals \to \reals^\Y$ indirectly elicits a finite elicitable property $\gamma$, then $\gamma$ is orderable.
+\begin{proof}[of Proposition~\ref{prop:indirect-orderable}]
+  Let $\gamma:\simplex\toto\R$.
+  From Lemma~\ref{lem:prop-L-monotone}, $\Gamma := \prop{L}$ is monotone.
+  Let $\psi:\reals\to\R$ be the calibrated link from $\Gamma$ to $\gamma$.
+  From Lemma~\ref{lem:pbar}, we have $\Pbar_r = \gamma_r$ for all $r\in\R$, where $\Pbar_r$ is the closure of the convex hull of $\bigcup_{u\in\psi^{-1}(r)} \Gamma_u$.
+
+  As $\Gamma$ is monotone, we must have $a,b : \R\to\reals^\Y$ such that $\Pbar_r = \{p\in\simplex : \inprod{a(r)}{p} \leq 0 \leq \inprod{b(r)}{p} \}$.
+  (Take $a(r)_y = \inf_{u\in\psi^{-1}(r)} a(u)_y$ and $b(r)_y = \sup_{u\in\psi^{-1}(r)} b(u)_y$.)
+  Now taking $p_r\in\inter\gamma_r$ and picking $u_r \in \Gamma(p_r)$, we order $\R = \{r_1,\ldots,r_k\}$ so that $u_{r_i} < u_{r_{i+1}}$ for all $i\in\{1,\ldots,k-1\}$.
+  (The $u_{r_i}$ must all be distinct, as we chose $p_r$ so that $\gamma(p_r) = \{r\}$, so $\psi(u_{r_i}) = r_i$ for all $i$.)
+
+  Let $i\in\{1,\ldots,k-1\}$.
+  By monotonicity of $\Gamma$, we must have $a(r_i) \leq b(r_i) \leq a(r_{i+1}) \leq b(r_{i+1})$.
+  As $\bigcup_{r\in\R} \Pbar_r = \bigcup_{r\in\R} \gamma_r = \simplex$, we must therefore have $b(r_i) = a(r_{i+1})$.
+  Finally, we conclude $\gamma_{r_i} \cap \gamma_{r_{i+1}} = \{p\in\simplex : \inprod{b(r_i)}{p} = 0\}$.
+  As these statements hold for all $i\in\{1,\ldots,k-1\}$, $\gamma$ is orderable.
+\end{proof}
+
+\newcommand{\floor}[1]{\lfloor #1\rfloor}
+\begin{proof}[of Theorem~\ref{thm:1d-tfae}]
+  As remarked before the theorem statement, it remains only to show $1 \iff 5$.
+  \raft{This got a tad hand-wavy toward the end, but I think it's not too bad.}
+  For the forward direction, by Lemma~\ref{lem:orderable-monotone}, we have $v(0),\ldots,v(k)\in\reals^\Y$ such that the coefficients $v(i)_y$ are monotone in $i$ for all $y\in\Y$, and the following two conditions hold: (1) \jessiet{Change to (i) and (ii) for consistency?} for all $i\in\{1,\ldots,k\}$ we have $\gamma_{r_i} = \{p\in\simplex : \inprod{v(i-1)}{p} \leq 0 \leq \inprod{v(i)}{p} \}$, and (2) for all $i\in\{1,\ldots,k-1\}$ we have $\gamma_{r_i} \cap \gamma_{r_{i+1}} = \{p\in\simplex : \inprod{v(i)}{p} = 0\}$.
+  Letting $\floor{u}$ denote the floor function, and $\mathrm{mod}(u) := u - \floor{u}$, we extend the above definition to $v:[0,k]\to\reals^\Y$ given by
+  \begin{align*}
+    v(u) = (1-\mathrm{mod}(u))v(\floor{u}) + \mathrm{mod}(u)v(\floor{u}+1)~,
+  \end{align*}
+  which is continuous by construction.
+  Moreover, $v(\cdot)_y$ is monotone for all $y\in\Y$.
+  As the level sets $\gamma_r$ are full-dimensional (Lemma~\ref{lem:finite-full-dim}), for all $p\in\simplex$, there is a unique $u\in[0,k]$ such that $\inprod{v(u)}{p} = 0$.
+  \jessiet{Why is the above statement true on boundaries of level sets?}
+  We conclude that the property $\Gamma:\simplex\to[0,k]$ given by $\Gamma_u = \{p\in\simplex : \inprod{v(u)}{p} = 0\}$ is a single-valued property, which continuous as $v$ is continuous.
+  Finally, the link $\psi(u) = \floor{u}+1$ is calibrated from $\Gamma$ to $\gamma$.
+
+  For the converse, let $\Gamma:\simplex\to\reals$ be a continuous, non-locally-constant, elicitable property, with a calibrated link $\psi:\reals\to\R$ to $\gamma$.
+  By~\cite{lambert2018elicitation,steinwart2014elicitation}, we have some continuous $v:\Gamma(\simplex)\to\reals^\Y$ such that for all $u\in\Gamma(\simplex)$ we have $\Gamma_u = \{p\in\simplex : \inprod{v(u)}{p} = 0\}$.
+
+  Let $c_r = \inf\psi^{-1}(r)$ and $d_r = \sup \psi^{-1}(r)$ for all $r\in\R$, and let $I_r = (c_r,d_r)$.
+  By continuity, $\Gamma^{-1}(I_r)$ is an open set, and the definition of calibration, we have $\Gamma^{-1}(I_r) \subseteq \gamma_r$; we conclude $\Gamma^{-1}(I_r) \subseteq \inter\gamma_r$. \jessiet{Why $\subseteq$ and not $=$?}
+  Again by continuity of $\Gamma$, we must have $\Gamma(\gamma_r) = [c_r,d_r] := \overline I_r$.
+
+  As the interiors of the level sets of $\gamma$ are disjoint (Theorem~\ref{thm:aurenhammer}), the intervals $\{I_r:r\in\R\}$ must also be disjoint.
+  Define an ordering $\R = \{r_1,\ldots,r_k\}$ so that $I_{r_1} < \cdots < I_{r_k}$.
+  Then for all $i\in\{1,\ldots,k-1\}$ we must have $d_{r_i} = c_{r_{i+1}}$; otherwise, the point $u = \tfrac 1 2 (d_{r_i} + c_{r_{i+1}})$ would not belong to any $\overline I_r$, and as $\Gamma(\simplex) = \Gamma(\bigcup_r\gamma_r) = \bigcup_r \overline I_r$, this would violate continuity of $\Gamma$.
+  We conclude that $\gamma_{r_i}\cap\gamma_{r_{i+1}} = \Gamma_{d_i} = \{p\in\simplex : \inprod{v(d_i)}{p} = 0\}$ for all $i\in\{1,\ldots,k-1\}$.
+\end{proof}
+
+
+\end{document}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
