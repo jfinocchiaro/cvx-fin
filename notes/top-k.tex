@@ -148,6 +148,24 @@ We then set these terms to $0$ to reach our assumption.
 
 Observe that, for a minimizer of $L^{top-k}$, we can assume there is no $u_i$ such that $u_i > \bar u_{-i} +1$, since reassigning such a $u'_i := \bar u_{-i} +1$ results in $L^{top-k}(u')_i = L^{top-k}(u)_i = 0$, but reduces $L^{top-k}(\cdot)_j$ for all $j \neq i$ by decreasing $\ubar$.
 
+To see this, consider $u_y = \bar u_{-y} + 1 + \epsilon$ and $u'_y = \bar u_{-y} + 1$, with $u_i = u'_i \; \forall i \neq y$. 
+\begin{align*}
+L^{top-k}(u)_y &= \left(1 - (\bar u_{-y} + \epsilon + 1) + \frac 1 k \left(\sum_{i=1, i \neq y}^k u_i + \bar u_{-y} + \epsilon\right) \right)_+\\ 
+&= \left(1 - (\bar u_{-y} + \epsilon + 1) + \frac 1 k \left((k-1) \bar u_{-y} + \bar u_{-y} + \epsilon\right) \right)_+\\
+&= \left(-\bar u_{-y} - \epsilon + \bar u_{-y} + \frac \epsilon k \right)_+ \\
+&= (-\frac{k-1}{k}\epsilon)_+\\
+&= 0
+\end{align*}
+\begin{align*}
+L^{top-k}(u')_y &= \left(1 - (\bar u_{-y} + 1) + \frac 1 k \left(\sum_{i=1, i \neq y}^k u_i + \bar u_{-y} \right) \right)_+\\ 
+&= \left(1 - (\bar u_{-y} + 1) + \frac 1 k \left((k-1) \bar u_{-y} + \bar u_{-y} \right) \right)_+\\
+&= \left(-\bar u_{-y} + \bar u_{-y}\right)_+ \\
+&= 0
+\end{align*}
+
+Now, for any outcome $i \neq y$, we know that $\bar u_{-i} > \bar u_{-i}$ because of $u_y$.
+Since $u_y$ is only added in $L^{top-k}(\cdot)_i$ as part of the $\bar u_{-i}$ term, we can see that $L^{top-k}(u)_i \geq L^{top-k}(u')_i$ for all $i \neq y$.
+
 \section{Re-writing the loss}
 
 First, observe that we can re-write
@@ -156,8 +174,13 @@ L^{top-k}(u)_y&=\left(\frac{1}{k} \sum_{i=1}^k (u + \ones - e_y)_{[i]} - u_y \ri
 &=\left(1 - u_y + \frac{1}{k} \sum_{i=1}^k (u - e_y)_{[i]} \right)_+\\
 &=\left(1 - u_y + \frac{1}{k} \sum_{i=1}^k (u - \min(u_y, 1)\Ind{y \leq k})_{i} \right)_+
 \end{align*}
+\jessie{Do we need the indicator given the assumptions...?}
 
-One can verify that, given our assumptions on $u$, the term inside $(\cdot)_+$ of $L^{top-k}(u)_y$ is nonnegative, so we can drop the $(\cdot)_+$ operator on this report space.
+Consider that the loss value is $1 + \bar u$ if $y > k$, since $u_y = 0$ in this case, so the loss is nonnegative even before applying the $(\cdot)_+$ operator.
+If $y \leq k$ and $u_y \in [0,1]$, then the loss is nonnegative before applying $(\cdot)_+$ as $1-u_y \geq 0$, as is $\bar u$.
+Now if $u_y \in (1, \bar u_{-y} + 1]$, then the term inside $(\cdot)_+$ of $L^{top-k}(u)_y$ is equal to $\frac{1}{k-1} + 1 +  \ubar_{-y} - u_y $
+Since $u_y \leq 1 +  \ubar_{-y}$, we can see this term is nonnegative.
+Therefore, we can drop the $(\cdot)_+$ operator on this report space.
 
 We can now write the expected loss as follows:
 \begin{align*}
