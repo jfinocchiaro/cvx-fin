@@ -186,45 +186,56 @@ We can now write the expected loss as follows:
 \begin{align*}
 \inprod{p}{L^{top-k}(u)} &= \sum_{y=1}^n p_y L^{top-k}(u)_y \\
 &= \sum_{y=1}^b p_y L^{top-k}(u)_y + \sum_{y=b+1}^k p_y L^{top-k}(u)_y + \sum_{y=k+1}^n p_y L^{top-k}(u)_y\\
-&= \sum_{y=1}^b p_y (1 - \frac 1 k - u_y + \ubar) + \sum_{y=b+1}^k p_y (1 - \frac{k+1} k u_y + \ubar) + \sum_{y=k+1}^n p_y(1-u_y + \ubar)\\
-&= 1 + \ubar - \inprod{p}{u} - \inprod{p \odot \Ind{y \leq i}}{\frac 1 k \ones} - \inprod{p \odot \Ind{i+1 \leq y \leq k}}{ \frac u k}\\
+&= \sum_{y=1}^b p_y (1 - \frac 1 k - u_y + \ubar) + \sum_{y=b+1}^k p_y (1 - \frac{k+1} k u_y + \ubar) + \sum_{y=k+1}^n p_y(1 + \ubar)\\
+&= 1 + \ubar - \inprod{p}{u} - \inprod{p \odot \Ind{y \leq b}}{\frac 1 k \ones} - \inprod{p \odot \Ind{b+1 \leq y \leq k}}{ \frac u k}\\
 &= 1 + \ubar - \inprod{p}{u + \frac 1 k \min(u, \ones)}
 \end{align*}
 When considering the Bayes Risk, we use this final form of the expected loss.
 
 \subsection{Bayes Risk}
-First, consider the case where $u_y = 0$ and $u'_y = 1$, with $u_j = u'_j \;\forall i \neq j$.
-As the expected loss is linear on $u_y$, and these are the boundary cases, we know that $u$ is optimal on one of these two reports in this case.
+Now we consider minimizing the expected loss given above.
+Since the expected loss is linear, we can look at each outcome $y$ and when the coefficient of $u_y$ is positive and negative.
+In essence, this is the subgradient in the $u_y$ direction, and so we can see when $L^{top-k}$ is increasing as a function if $u_y$ by evaluating when the sign of $u_y$'s coefficient.
 
-So we ask when is $\inprod{p}{L^{top-k}(u)} \leq \inprod{p}{L^{top-k}(u')}$?
-\begin{align*}
-1 + \ubar - \inprod{p}{u + \frac 1 k \min(u, \ones)} &\leq 1 + \ubar' - \inprod{p}{u' + \frac 1 k \min(u', \ones)}\\
-- \inprod{p}{u + \frac 1 k \min(u, \ones)} &\leq \frac {1}{k} - \inprod{p}{u' + \frac 1 k \min(u', \ones)}\\
-0 &\leq \frac{1}{k} - p_y(\frac{k+1}{k})\\
-p_y &\leq \frac{1}{k+1}
-\end{align*}
+Given our final form of $L^{top-k}$, the coefficient of $u_y$ is $\frac 1 k - p_y(\frac {k+1}{k})$ if $u_y \in [0,1]$, and $\frac 1 k - p_y$ if $u_y > 1$.
 
-Conversely, if $p_y > \frac{1}{k+1}$, it is to better to report $u_y = 1$ than $u_y = 0$.
-However, since we are not restricted to the unit hypercube, we might ask when it is optimal to bring $u_y = 1$ up to $u'_y = 1 + \epsilon$ given $\epsilon > 0$.
-Here, we consider when $\inprod{p}{L^{top-k}(u)} \leq \inprod{p}{L^{top-k}(u')}$.
-\begin{align*}
-1 + \ubar - \inprod{p}{u + \frac 1 k \min(u, \ones)} &\leq 1 + \ubar' - \inprod{p}{u' + \frac 1 k \min(u', \ones)}\\
-\frac{1}{k} - p_y (\frac{k+1}{k}) &\leq \frac{1+\epsilon}{k} - p_y (\frac{k+1}{k}(1 + \epsilon))\\
-p_y &\leq \frac{1}{k}
-\end{align*}
-In this case, $u_y=1$ is preferable to $u+y >1$.
-If $p_y > \frac 1 k$, then we want to push $u_y$ as high as we can, but recall that we restrict to $u_y \leq \ubar_{-y} + 1$.
-Because the upper bound on $u_y$ depends on $\ubar$, we can't determine $u$ iteratively.
+If $p_y \leq \frac 1 {k+1}$, this coefficient is nonnegative in both cases, so we want to set $u_y = 0$.
+If $p_y \in [\frac 1 {k+1}, \frac 1 k]$, the coefficient is nonpositive in the first case, and nonnegative in the second, so we want to set $u_y = 1$.
+If $p_y \geq \frac 1 k$, then the coefficient is nonpositive in both cases, so we want to set $u$ as high as permitted.
+%First, consider the case where $u_y = 0$ and $u'_y = 1$, with $u_j = u'_j \;\forall i \neq j$.
+%As the expected loss is linear on $u_y$, and these are the boundary cases, we know that $u$ is optimal on one of these two reports in this case.
+%
+%So we ask when is $\inprod{p}{L^{top-k}(u)} \leq \inprod{p}{L^{top-k}(u')}$?
+%\begin{align*}
+%1 + \ubar - \inprod{p}{u + \frac 1 k \min(u, \ones)} &\leq 1 + \ubar' - \inprod{p}{u' + \frac 1 k \min(u', \ones)}\\
+%- \inprod{p}{u + \frac 1 k \min(u, \ones)} &\leq \frac {1}{k} - \inprod{p}{u' + \frac 1 k \min(u', \ones)}\\
+%0 &\leq \frac{1}{k} - p_y(\frac{k+1}{k})\\
+%p_y &\leq \frac{1}{k+1}
+%\end{align*}
+%
+%Conversely, if $p_y > \frac{1}{k+1}$, it is to better to report $u_y = 1$ than $u_y = 0$.
+%However, since we are not restricted to the unit hypercube, we might ask when it is optimal to bring $u_y = 1$ up to $u'_y = 1 + \epsilon$ given $\epsilon > 0$.
+%Here, we consider when $\inprod{p}{L^{top-k}(u)} \leq \inprod{p}{L^{top-k}(u')}$.
+%\begin{align*}
+%1 + \ubar - \inprod{p}{u + \frac 1 k \min(u, \ones)} &\leq 1 + \ubar' - \inprod{p}{u' + \frac 1 k \min(u', \ones)}\\
+%\frac{1}{k} - p_y (\frac{k+1}{k}) &\leq \frac{1+\epsilon}{k} - p_y (\frac{k+1}{k}(1 + \epsilon))\\
+%p_y &\leq \frac{1}{k}
+%\end{align*}
+%In this case, $u_y=1$ is preferable to $u+y >1$.
+%If $p_y > \frac 1 k$, then we want to push $u_y$ as high as we can, but recall that we restrict to $u_y \leq \ubar_{-y} + 1$.
+%Because the upper bound on $u_y$ depends on $\ubar$, we can't determine $u$ iteratively.
+
+
 However, we can construct $u$ as given below.
 \begin{conjecture}
 	Fix $p \in \simplex$.
-	Let $g_t = |\{p_i : p_i \geq \frac 1 k\}|$ and $g_b = | \{p_i \in (\frac{1}{k+1}, \frac{1}{k})\}|$.
+	Let $g_t = |\{p_i : p_i \geq \frac 1 k\}|$ and $g_s = | \{p_i \in (\frac{1}{k+1}, \frac{1}{k})\}|$.
 	The property \[\gamma(p) = 
 	\left[
 	\begin{cases}
 	0 & p_i \leq \frac {1}{k+1}\\
 	1 & p_i \in (\frac{1}{k+1}, \frac{1}{k})\\
-	\frac{g_b + k-1}{k-g_t} & o/w
+	\frac{g_s + k-1}{k-g_t} & o/w
 	\end{cases}
 	\right]_{i=1}^n
 	\] refines the property $\prop{L^{top-k}}$.
