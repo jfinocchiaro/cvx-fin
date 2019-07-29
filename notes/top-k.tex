@@ -121,18 +121,20 @@
 
 \begin{document}
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\appendix
-
-
 \section{Top-$k$ surrogate}
 Throughout this section, consider the surrogate and discrete loss $L^{top-k}(u)_y~=~\left(\frac{1}{k} \sum_{i=1}^k (u + \ones - e_y)_{[i]} - u_y \right)_+$.
 
 First, we want to write $L^{top-k}$ in a linear form with the $\max(\cdot, 0)$ operation.
 Then, using this linear form of the expected loss, we are able to evaluate when certain report values are optimal for the expected loss as a function of $p$.
 
-\subsection{Assumptions and notation}
+\subsection{Notation and Assumptions}
+\subsubsection{Notation}
+Let $\bar{u} = \frac 1 k \sum_{i = 1}^k u_i$ and similarly, $\bar{u}_{-y} = \frac{1}{k-1} \sum_{i=1, i \neq y}^k u_i$ be the averages of the first $k$ elements of $u$ and the average of the first $k$ elements of $u$ besides $y$, respectively.
+Moreover, we say $b = \argmax_i \{u_i : u_i > 1\}$.
+
+We use $\odot$ to denote the Hadamard (element-wise) vector product.
+Also, $\min(\vec u, \vec v)$ is the element-wise minimum of vectors $\vec u, \vec v \in \reals^d$.
+
 \subsubsection{Assumptions}
 Throughout, we make two assumptions for ease of exposition, but both follow without loss of generality for an optimal report.
 First, assume that $u$ is ordered, where $u_1 \geq u_2 \geq \ldots \geq u_n$.
@@ -144,10 +146,7 @@ Moreover, for $i > k+1$, this $u_i$ can never affect the $\bar{u}$ term that is 
 Thus, we minimize expected loss by pulling $u_{k+2},\ldots, u_n$ up to $u_{k+1}$.
 We then set these terms to $0$ to reach our assumption.
 
-\subsubsection{Notation}
-Let $\bar{u} = \frac 1 k \sum_{i = 1}^k u_i$ and similarly, $\bar{u}_{-y} = \frac{1}{k-1} \sum_{i=1, i \neq y}^k u_i$ be the averages of the first $k$ elements of $u$ and the average of the first $k$ elements of $u$ besides $y$, respectively.
-
-We use $\odot$ to denote the Hadamard (element-wise) vector product.
+Observe that, for a minimizer of $L^{top-k}$, we can assume there is no $u_i$ such that $u_i > \bar u_{-i} +1$, since reassigning such a $u'_i := \bar u_{-i} +1$ results in $L^{top-k}(u')_i = L^{top-k}(u)_i = 0$, but reduces $L^{top-k}(\cdot)_j$ for all $j \neq i$ by decreasing $\ubar$.
 
 \section{Re-writing the loss}
 
@@ -155,75 +154,55 @@ First, observe that we can re-write
 \begin{align*} 
 L^{top-k}(u)_y&=\left(\frac{1}{k} \sum_{i=1}^k (u + \ones - e_y)_{[i]} - u_y \right)_+\\ 
 &=\left(1 - u_y + \frac{1}{k} \sum_{i=1}^k (u - e_y)_{[i]} \right)_+\\
-&=\left(1 - u_y + \frac{1}{k} \sum_{i=1}^k (u - \min(u_y, 1)\Ind{y \leq k})_{i} \right)_+\\
+&=\left(1 - u_y + \frac{1}{k} \sum_{i=1}^k (u - \min(u_y, 1)\Ind{y \leq k})_{i} \right)_+
 \end{align*}
 
-First, we break this into three cases:
-\begin{enumerate}
-	\item $y > k$. Here, we observe that $L^{top-k}(u)_y = (1-u_y + \bar{u})_+ > 0$ for all $u$ given our assumptions, so we don't need to worry about the $\max(\cdot,0)$ operation.
-	\item $y \leq k$, $u_y \leq 1$. Here, $\min(u_y,1) = u_y$, so we can rewrite the loss as $L^{top-k}(u)_y = (1 - \frac {k+1}{k} u_y + \bar u)_+$, which always has the inside term nonnegative.
-	\item $y \leq k$, $u_y > 1$. The term inside $\cdot_+$ of $L^{top-k}(u)_y$ is nonnegative and equal to $1 - \frac 1 k - u_y + \ubar$ when $u_y \leq \bar{u}_{-y} + 1$, and $0$ if $u_y \geq \bar{u}_{-y} + 1$.
-\end{enumerate}
-
-Therefore, the expected loss can by written as four summations.
-We introduce the constants $t < b \leq k$ to mark the boundaries between cases.
-We say $t = \argmax_i \{u_i : u_i > \bar u_{-i} +1\}$ and $b = \argmax_i \{u_i : u_i > 1\}$.
-We will argue that we can assume $t = 0$ (i.e. there is no $u_i$ such that $u_i > \bar u_{-i} +1$) for a minimizing report, since reassigning such a $u'_i := \bar u_{-i} +1$ results in $L^{top-k}(u')_i = L^{top-k}(u)_i = 0$, but reduces $L^{top-k}(\cdot)_j$ for all $j \neq i$ by decreasing $\ubar$.
+One can verify that, given our assumptions on $u$, the term inside $(\cdot)_+$ of $L^{top-k}(u)_y$ is nonnegative, so we can drop the $(\cdot)_+$ operator on this report space.
 
 We can now write the expected loss as follows:
 \begin{align*}
 \inprod{p}{L^{top-k}(u)} &= \sum_{y=1}^n p_y L^{top-k}(u)_y \\
-&= \sum_{y=1}^t p_y L^{top-k}(u)_y + \sum_{y=t+1}^b p_y L^{top-k}(u)_y + \sum_{y=b+1}^k p_y L^{top-k}(u)_y + \sum_{y=k+1}^n p_y L^{top-k}(u)_y\\
-&= 0 + \sum_{y=t+1}^b p_y (1 - \frac 1 k - u_y + \ubar) + \sum_{y=b+1}^k p_y (1 - \frac{k+1} k u_y + \ubar) + \sum_{y=k+1}^n p_y(1-u_y + \ubar)\\
-\end{align*}
-Moreover, substituting $t=0$, we can simplify further:
-\begin{align*}
+&= \sum_{y=1}^b p_y L^{top-k}(u)_y + \sum_{y=b+1}^k p_y L^{top-k}(u)_y + \sum_{y=k+1}^n p_y L^{top-k}(u)_y\\
+&= \sum_{y=1}^b p_y (1 - \frac 1 k - u_y + \ubar) + \sum_{y=b+1}^k p_y (1 - \frac{k+1} k u_y + \ubar) + \sum_{y=k+1}^n p_y(1-u_y + \ubar)\\
 &= 1 + \ubar - \inprod{p}{u} - \inprod{p \odot \Ind{y \leq i}}{\frac 1 k \ones} - \inprod{p \odot \Ind{i+1 \leq y \leq k}}{ \frac u k}\\
-&= 1 + \ubar - \inprod{p \odot \Ind{y \leq i}}{\frac 1 k \ones + u} - \inprod{p \odot \Ind{i+1 \leq y \leq k}}{ \frac {k+1} k u}\\
+&= 1 + \ubar - \inprod{p}{u + \frac 1 k \min(u, \ones)}
 \end{align*}
 When considering the Bayes Risk, we use this final form of the expected loss.
 
 \subsection{Bayes Risk}
-First, consider the case where $u_y = 0$ and $u'_y = 1$, where $u_j = u'_j \forall i \neq j$.
-Note that $y \in \{t+1, \ldots, n\}$.
+First, consider the case where $u_y = 0$ and $u'_y = 1$, with $u_j = u'_j \;\forall i \neq j$.
 As the expected loss is linear on $u_y$, and these are the boundary cases, we know that $u$ is optimal on one of these two reports in this case.
 
 So we ask when is $\inprod{p}{L^{top-k}(u)} \leq \inprod{p}{L^{top-k}(u')}$?
-\jessie{Fix the two-line situation here...}
 \begin{align*}
-1 + \ubar - \inprod{p \odot \Ind{y \leq i}}{\frac 1 k \ones + u} - \inprod{p \odot \Ind{i+1 \leq y \leq k}}{ \frac {k+1} k u} &\leq 1 + \ubar' - \inprod{p \odot \Ind{y \leq i}}{\frac 1 k \ones + u'} - \inprod{p \odot \Ind{i+1 \leq y \leq k}}{ \frac {k+1} k u'}\\
-- \inprod{p \odot \Ind{i+1 \leq y \leq k}}{ \frac {k+1} k u} &\leq \frac{1}{k} - \inprod{p \odot \Ind{i+1 \leq y \leq k}}{ \frac {k+1} k u'}\\
--p_y \frac{k+1}{k} u_y &\leq \frac{1}{k} - p_y \frac{k+1}{k} u'_y \\
-0 &\leq \frac{1}{k} - p_y \frac{k+1}{k}\\
+1 + \ubar - \inprod{p}{u + \frac 1 k \min(u, \ones)} &\leq 1 + \ubar' - \inprod{p}{u' + \frac 1 k \min(u', \ones)}\\
+- \inprod{p}{u + \frac 1 k \min(u, \ones)} &\leq \frac {1}{k} - \inprod{p}{u' + \frac 1 k \min(u', \ones)}\\
+0 &\leq \frac{1}{k} - p_y(\frac{k+1}{k})\\
 p_y &\leq \frac{1}{k+1}
 \end{align*}
 
 Conversely, if $p_y > \frac{1}{k+1}$, it is to better to report $u_y = 1$ than $u_y = 0$.
 However, since we are not restricted to the unit hypercube, we might ask when it is optimal to bring $u_y = 1$ up to $u'_y = 1 + \epsilon$ given $\epsilon > 0$.
 Here, we consider when $\inprod{p}{L^{top-k}(u)} \leq \inprod{p}{L^{top-k}(u')}$.
-
 \begin{align*}
-1 + \ubar - \inprod{p \odot \Ind{y \leq i}}{\frac 1 k \ones + u} - \inprod{p \odot \Ind{i+1 \leq y \leq k}}{ \frac {k+1} k u} &\leq 1 + \ubar' - \inprod{p \odot \Ind{y \leq i}}{\frac 1 k \ones + u'} - \inprod{p \odot \Ind{i+1 \leq y \leq k}}{ \frac {k+1} k u'}\\
-\frac{1}{k}- \inprod{p \odot \Ind{y \leq i}}{\frac 1 k \ones + u} &\leq \frac{1+\epsilon}{k} - \inprod{p \odot \Ind{y \leq i}}{\frac 1 k \ones + u'}\\
-\frac{1}{k}- p_y(1 + \frac{1}{k}) &\leq \frac{1+\epsilon}{k} - p_y(1 + \epsilon + \frac{1}{k})\\
-0 &\leq \frac{\epsilon}{k} - p_y(\epsilon)\\
-p_y \leq \frac 1 k
+1 + \ubar - \inprod{p}{u + \frac 1 k \min(u, \ones)} &\leq 1 + \ubar' - \inprod{p}{u' + \frac 1 k \min(u', \ones)}\\
+\frac{1}{k} - p_y (\frac{k+1}{k}) &\leq \frac{1+\epsilon}{k} - p_y (\frac{k+1}{k}(1 + \epsilon))\\
+p_y &\leq \frac{1}{k}
 \end{align*}
 In this case, $u_y=1$ is preferable to $u+y >1$.
-If $p_y > \frac 1 k$, then we want to push $u_y$ as high as we can, but are restricted to $u_y \leq \ubar_{-y} + 1$.
+If $p_y > \frac 1 k$, then we want to push $u_y$ as high as we can, but recall that we restrict to $u_y \leq \ubar_{-y} + 1$.
 Because the upper bound on $u_y$ depends on $\ubar$, we can't determine $u$ iteratively.
 However, we can construct $u$ as given below.
-
 \begin{conjecture}
 	Fix $p \in \simplex$.
 	Let $g_t = |\{p_i : p_i \geq \frac 1 k\}|$ and $g_b = | \{p_i \in (\frac{1}{k+1}, \frac{1}{k})\}|$.
 	The property \[\gamma(p) = 
 	\left[
-	\begin{cases*}
+	\begin{cases}
 	0 & p_i \leq \frac {1}{k+1}\\
 	1 & p_i \in (\frac{1}{k+1}, \frac{1}{k})\\
-	\frac{g_b}{k - g_t} + \frac{k-1}{k-g_t} & o/w
-	\end{cases*}
+	\frac{g_b + k-1}{k-g_t} & o/w
+	\end{cases}
 	\right]_{i=1}^n
 	\] refines the property $\prop{L^{top-k}}$.
 \end{conjecture}
