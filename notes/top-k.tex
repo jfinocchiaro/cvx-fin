@@ -122,38 +122,39 @@
 \begin{document}
 
 \section{Top-$k$ surrogate}
-Throughout this section, consider the surrogate and discrete loss \begin{equation}\label{eq:top-k-surrogate}
-L^{top-k}(u)_y~=~\left(1 - u_y + \frac{1}{k} \sum_{i=1}^k (u - e_y)_{[i]} \right)_+
+Throughout this section, consider the surrogate loss \begin{equation}\label{eq:top-k-surrogate}
+L^{top-k}(u)_y~=~\left(1 - u_y + \frac{1}{k} \sum_{i=1}^k (u - e_y)_{[i]} \right)_+~.~
 \end{equation}
 
-First, we want to write $L^{top-k}$ in a linear form with the $(\cdot)_+$ operator.
+We want to write $L^{top-k}$ in a linear form with the $(\cdot)_+$ operator.
 Then, using this linear form of the expected loss, we are able to write a finite set of optimal reports over $\simplex$.
 
 \subsection{Notation and Assumptions}
 \subsubsection{Notation}
 Let $\bar{u} = \frac 1 k \sum_{i = 1}^k u_i$ and similarly, $\bar{u}_{-y} = \frac{1}{k-1} \sum_{i=1, i \neq y}^k u_i$ be the averages of the first $k$ elements of $u$ and the average of the first $k$ elements of $u$ besides $y$, respectively.
 Moreover, we say $b = \argmax_i \{u_i : u_i > 1\}$, assuming $u$ is ordered.
-See below for justification.
+See below in Section~\ref{sec:assumptions} for justification.
 
 We use $\odot$ to denote the Hadamard (element-wise) vector product.
-Also, $\min(\vec w, \vec v)$ is the element-wise minimum of vectors $\vec w, \vec v \in \reals^d$.
+$\min(\vec w, \vec v)$ denotes the element-wise minimum of vectors $\vec w, \vec v \in \reals^d$.
 
-\subsubsection{Assumptions}
+\subsubsection{Assumptions}\label{sec:assumptions}
 Throughout, we make two assumptions for ease of exposition, but both follow without loss of generality for an optimal report.  %, as well as a third assumption when thinking about minimizing the expected loss.
 First, assume that $u$ is ordered, where $u_1 \geq u_2 \geq \ldots \geq u_n$.
-This is without loss of generality, as we can simply reorder $p$ if this is not the case.
+This is without loss of generality, as we can reorder $p$ so that each $p_i$ corresponds to the ordered $u_i$ that it originally corresponded to.
+This is simply for ease of exposition.
 
 Second, we will say $u_{k+1} = \ldots = u_{n-1} = u_n = 0$.
-This partially follows from the invariance of $L^{top-k}$ in the $\ones$ direction.
-Moreover, for $i > k+1$, this $u_i$ can never affect the $\bar{u}$ term that is added, and can only be subtracted in the case that $i = y$.
-Thus, we minimize expected loss by pulling $u_{k+2},\ldots, u_n$ up to $u_{k+1}$.
-We then set these terms to $0$ to reach our assumption.
+This partially follows from the invariance of $L^{top-k}$ in the $\ones$ direction, by setting $u_{k+1} = 0$.
+For $i > k+1$, observe that $u_i$ can never affect the $\bar{u}$ term that is added, and can only be subtracted in the case that $i = y$.
+Therefore, we minimize expected loss by pulling $u_{k+2},\ldots, u_n$ up to $u_{k+1}$, making it as ``tight'' as possible.
+This leads to our assumption, which we can make since we are primarily interested in finding \emph{a} minimizer of $L^{top-k}$, rather than \emph{all} minimizers.
 
 \begin{lemma}\label{lem:top-threshold}
-	There is a minimizer $u$ of $L^{top-k}$ such that for all $u_i$, we have $u_i \leq \bar u_{-i} +1$. 
+	For all $p \in \simplex$, there is a minimizer $u$ of $\inprod{L^{top-k}(\cdot)}{p}$ such that for all $u_i$, we have $u_i \leq \bar u_{-i} +1$. 
 \end{lemma}
 \begin{proof}
-	Reassigning such a $u'_i := \bar u_{-i} +1$ results in $L^{top-k}(u')_i = L^{top-k}(u)_i = 0$, but reduces $L^{top-k}(\cdot)_j$ for all $j \neq i$ by decreasing $\ubar$.
+	Reassigning such a $u'_i := \bar u_{-i} +1$ results in $L^{top-k}(u')_i = L^{top-k}(u)_i = 0$, but we observe $L^{top-k}(u')_j \leq L^{top-k}(u)_j$ for all $j \neq i$ by decreasing $\ubar$, since $u_i \geq 0$.
 
 To see this, consider $u_y = \bar u_{-y} + 1 + \epsilon$ and $u'_y = \bar u_{-y} + 1$, with $u_i = u'_i \; \forall i \neq y$. 
 \begin{align*}
@@ -177,18 +178,24 @@ Since $u_y$ is only added in $L^{top-k}(\cdot)_i$ as part of the $\bar u_{-i}$ t
 
 \section{Re-writing the loss}
 
-First, observe that we can re-write
+
+With the assumptions above and considering minimizers satisfying Lemma~\ref{lem:top-threshold}, we can rewrite the loss.
 \begin{align*} 
-L^{top-k}(u)_y&=\left(\frac{1}{k} \sum_{i=1}^k (u + \ones - e_y)_{[i]} - u_y \right)_+\\ 
-&=\left(1 - u_y + \frac{1}{k} \sum_{i=1}^k (u - e_y)_{[i]} \right)_+\\
-&=\left(1 - u_y + \frac{1}{k} \sum_{i=1}^k (u - \min(u_y, 1)\Ind{y \leq k})_{i} \right)_+
+L^{top-k}(u)_y&=\left(1 - u_y + \frac{1}{k} \sum_{i=1}^k (u - e_y)_{[i]} \right)_+\\
+&=\left(1 - u_y + \bar u - \frac{1}{k}(\min(u_y, 1)) \right)_+
+%&=\left(1 - u_y + \frac{1}{k} \sum_{i=1}^k (u - \min(u_y, 1)\Ind{y \leq k})_{i} \right)_+ original, but we don't need the indicator with our assumtions that u_{k+1} = ... = u_n = 0, since that is the min of u_y and 1 in that case.
 \end{align*}
 
-Consider that the loss value is $1 + \bar u$ when $y > k$, since $u_y = 0$ in this case, so the loss is nonnegative even before applying the $(\cdot)_+$ operator.
-If $y \leq k$ and $u_y \in [0,1]$, then the loss is nonnegative before applying $(\cdot)_+$ as $1-u_y \geq 0$, as is $\bar u$.
-Now if $u_y \in (1, \bar u_{-y} + 1]$, then the term inside $(\cdot)_+$ of $L^{top-k}(u)_y$ is equal to $\frac{1}{k-1} + 1 +  \ubar_{-y} - u_y $
-Since $u_y \leq 1 +  \ubar_{-y}$, we can see this term is nonnegative.
-Therefore, we can drop the $(\cdot)_+$ operator on this report space.
+Consider that the loss value is $1 + \bar u$ when $y > k$, since $u_y = 0$ in this case and the summation resolves to $\bar u$, so the loss is nonnegative even before applying the $(\cdot)_+$ operator.
+
+If $y \leq k$ and $u_y \in [0,1]$, then the loss is nonnegative before applying $(\cdot)_+$ as $1-u_y \geq 0$, as is the term in the summation, $\frac k {k-1} \bar u_{-y}$.
+
+Now if $u_y \in (1, \bar u_{-y} + 1]$, then the term inside the $(\cdot)_+$ operator of $L^{top-k}(u)_y$ is greater than or equal to $0$.
+To see this, consider $1 - u_y + \bar u - \frac 1 k = 1 - u_y + \frac k {k-1} \bar u_{-y} + \frac 1 k u_y - \frac 1 k$, and look at the first three elements and the last two.
+Since $u_y \geq 1$, the difference between the last two terms $\frac 1 k u_y - \frac 1 k \geq 0$.
+Additionally, since $u_y \leq 1 +  \ubar_{-y}$, we can see the sum of these terms is nonnegative.
+
+Therefore, we can drop the $(\cdot)_+$ operator on the assumed report space.
 
 We can now write the expected loss as follows:
 \begin{align*}
@@ -198,51 +205,68 @@ We can now write the expected loss as follows:
 &= 1 + \ubar - \inprod{p}{u} - \inprod{p \odot \Ind{y \leq b}}{\frac 1 k \ones} - \inprod{p \odot \Ind{b+1 \leq y \leq k}}{ \frac u k}\\
 &= 1 + \ubar - \inprod{p}{u + \frac 1 k \min(u, \ones)}
 \end{align*}
-When considering the Bayes Risk, we use this final form of the expected loss.
 
-\subsection{Studying the Bayes Risk}
-First, consider the case where $u_y = 0$ and $u'_y = 1$, with $u_j = u'_j \;\forall i \neq j$.
-As the expected loss is linear on $u_y$, and these are the boundary cases, we know that $u$ is optimal on one of these two reports in this case.
-
-So we ask when is $\inprod{p}{L^{top-k}(u)} \leq \inprod{p}{L^{top-k}(u')}$?
-\begin{align*}
-- \inprod{p}{u + \frac 1 k \min(u, \ones)} &\leq \frac {1}{k} - \inprod{p}{u' + \frac 1 k \min(u', \ones)}\\
-0 &\leq \frac{1}{k} - p_y(\frac{k+1}{k})\\
-p_y &\leq \frac{1}{k+1}
-\end{align*}
-
-Conversely, if $p_y > \frac{1}{k+1}$, it is to better to report $u_y = 1$ than $u_y = 0$.
-However, since we are not restricted to the unit hypercube, we might ask when it is optimal to bring $u_y = 1$ up to $u'_y = 1 + \epsilon$ given $\epsilon > 0$.
-Here, we consider when $\inprod{p}{L^{top-k}(u)} \leq \inprod{p}{L^{top-k}(u')}$.
-\begin{align*}
-%1 + \ubar - \inprod{p}{u + \frac 1 k \min(u, \ones)} &\leq 1 + \ubar' - \inprod{p}{u' + \frac 1 k \min(u', \ones)}\\
-\frac{1}{k} - p_y (\frac{k+1}{k}) &\leq \frac{1+\epsilon}{k} - p_y (\frac{k+1}{k}(1 + \epsilon))\\
-p_y &\leq \frac{1}{k}
-\end{align*}
-In this case, $u_y=1$ is preferable to $u+y >1$.
-If $p_y > \frac 1 k$, then we want to push $u_y$ as high as we can, but recall that we restrict to $u_y \leq \ubar_{-y} + 1$.
+%\subsection{Studying the Bayes Risk}
+%First, consider the case where $u_y = 0$ and $u'_y = 1$, with $u_j = u'_j \;\forall i \neq j$.
+%As the expected loss is linear on $u_y$, and these are the boundary cases, we know that $u$ is optimal on one of these two reports in this case.
+%
+%So we ask when is $\inprod{p}{L^{top-k}(u)} \leq \inprod{p}{L^{top-k}(u')}$?
+%\begin{align*}
+%- \inprod{p}{u + \frac 1 k \min(u, \ones)} &\leq \frac {1}{k} - \inprod{p}{u' + \frac 1 k \min(u', \ones)}\\
+%0 &\leq \frac{1}{k} - p_y(\frac{k+1}{k})\\
+%p_y &\leq \frac{1}{k+1}
+%\end{align*}
+%
+%Conversely, if $p_y > \frac{1}{k+1}$, it is to better to report $u_y = 1$ than $u_y = 0$.
+%However, since we are not restricted to the unit hypercube, we might ask when it is optimal to bring $u_y = 1$ up to $u'_y = 1 + \epsilon$ given $\epsilon > 0$.
+%Here, we consider when $\inprod{p}{L^{top-k}(u)} \leq \inprod{p}{L^{top-k}(u')}$.
+%\begin{align*}
+%%1 + \ubar - \inprod{p}{u + \frac 1 k \min(u, \ones)} &\leq 1 + \ubar' - \inprod{p}{u' + \frac 1 k \min(u', \ones)}\\
+%\frac{1}{k} - p_y (\frac{k+1}{k}) &\leq \frac{1+\epsilon}{k} - p_y (\frac{k+1}{k}(1 + \epsilon))\\
+%p_y &\leq \frac{1}{k}
+%\end{align*}
+%In this case, $u_y=1$ is preferable to $u+y >1$.
+%If $p_y > \frac 1 k$, then we want to push $u_y$ as high as we can, but recall that we restrict to $u_y \leq \ubar_{-y} + 1$.
 Because the upper bound on $u_y$ depends on $\ubar$, we can't determine $u$ iteratively.
-In fact, we might have some $p_y \in [\frac 1 {k+1}, \frac 1 k]$ that we want to crank up past one, since this allows us to crank up other high-probability report values even farther.
+%In fact, we might have some $p_y \in [\frac 1 {k+1}, \frac 1 k]$ that we want to crank up past one, since this allows us to crank up other high-probability report values even farther.
+However, we can show that for each element $y$ of $u$, $L^{top-k}$ is linear on $[0,1]$ and $[1, \bar u_{-y} + 1]$, and therefore an optimal report must be one of these three values.
 
-\begin{theorem}
+\begin{lemma}\label{lem:linear-pieces}
+	For each element $u_i$ of $u$, the expected loss $\inprod{p}{L^{top-k}(u)}$ is linear on $[0,1]$ and $[1, \bar u_{-i} + 1]$ for all $p \in \simplex$.
+	\jessie{Not sure if this is the right statement.}	
+\end{lemma}
+\begin{proof}
+	For all $p \in \simplex$, we know that 
+	\begin{equation}
+	\inprod{p}{L^{top-k}(u)} = 1 - \bar u + \inprod{p}{u + \frac 1 k \min{u,\ones}}~.~
+	\end{equation}
+	For any $p$, we then have 
+	\begin{align*}
+	\inprod{p}{L^{top-k}(u)} &= 1 + \bar u - \inprod{p}{u + \frac 1 k \min{u,\ones}}\\
+	 &= 1 + \bar u - \sum_{y \neq i}p_y (u_y + \frac 1 k \min(u_y, 1)) - p_i \frac {k+1} k u_i~,~
+	\end{align*}
+	which is linear on $u_i$.
+	
+	Similarly, for $u_i \in [1, \bar u_{-i} + 1]$, we can write $\inprod{p}{L^{top-k}(u)} = 1 + \bar u - \sum_{y \neq i}p_y (u_y + \frac 1 k \min(u_y, 1)) - p_i u_i - p_i$, which is linear in $u_i$.
+\end{proof}
+
+\begin{theorem}\label{thm:finite-set}
 	For the loss $L^{top-k} : \reals^n \times \Y \to \reals_+$ given in Equation~\ref{eq:top-k-surrogate}, there is an optimal report in the following report set $\R$:
 	\begin{align*}
 	\R := \left\{ \frac{|M| + k -1}{k - |H|} \mathbf{1}_H + \mathbf{1}_M : H, M \subset [n], H\cap M = \emptyset, |H| + |M| \leq k \right\}
 	\end{align*}
 \end{theorem}
 \begin{proof}[Proof Sketch.]
-	The above work tells us that when $p_y > \frac 1 {k+1}$, it is optimal to set $u_y > 0$, and otherwise, it is optimal to set $u_y = 0$.
-	Since $L^{top-k}$ is linear on $[0,1]$ and $[1, c]$ for some $c \geq 1$ and all dimensions $i \in [n]$, we know that the optimum is on the boundary of such reports, so when we bump $u_y$ up to some number greater than $0$, it should either be one $1$ or $c$ to be an optima.
+%	The above work tells us that when $p_y > \frac 1 {k+1}$, it is optimal to set $u_y > 0$, and otherwise, it is optimal to set $u_y = 0$.
+	Since $L^{top-k}$ is linear on $[0,1]$ and $[1, c]$ for some $c \geq 1$ and all dimensions $i \in [n]$, we know that the optimum is on the boundary of such reports, so when we bump $u_y$ up to some number greater than $0$, it should either be one $1$ or $c$ to be an optimal report.
 	$H$ represents the elements of the report that are bumped up to $c$, and $M$ represents the elements of the report that are bumped up to $1$.
-	Since we know that no distribution has more than $k$ outcomes with weight greater than $\frac 1 {k+1}$, we know that the size of $H \cup M$ must be less than or equal to $k$, and $H \cap M$ is empty by each element of $u$ being real-valued, so for $c > 1$, $u_i$ cannot simultaneously be equal to $c$ and $1$.
+	Since we know that no distribution has more than $k$ outcomes with weight greater than $\frac 1 {k+1}$, we know that the size of $H \cup M$ must be less than or equal to $k$, and $H \cap M$ is empty by each element of $u$ being real-valued, so for $c > 1$, $u_i$ cannot simultaneously be equal to $c$ and $1$, hence the restrictions on $\R$.
 	(Note: if $c = 1$, then WLOG, we can say $H = \emptyset$.)
 	
-	To see the reason for $c := \frac{|M| + k -1}{k - |H|}$, consider the following: given the loss $L^{top-k}$, when we want to ``crank $u_i$'' above $1$, we want to do so as much as possible, until hitting some threshold discussed in Lemma~\ref{lem:top-threshold}, due to the $(\cdot)_+$ operator surrounding the loss.
+	To see the reason for $c := \frac{|M| + k -1}{k - |H|}$, consider that, given the loss $L^{top-k}$, when we want to ``crank $u_i$'' above $1$, we want to do so as much as possible, until hitting some threshold discussed in Lemma~\ref{lem:top-threshold}, due to the $(\cdot)_+$ operator surrounding the loss.
 	Exceeding the threshold on $u_i > c$ then can only increase expected loss.
 	
-	We can take $H$ to be the set of elements of $u$ that get ``cranked up,'' and $M$ to be the set of elements of $u$ that should be set to $1$.
-	
-	Then, for $i \in H$, cranking $u_i$ as high as possible, we want to have $c = u_i = \bar u _{-i} + 1$, which we can see that 
+	Then, for $i \in H$, ``cranking'' $u_i$ as high as possible, we want to have $c = u_i = \bar u _{-i} + 1$, which we can see that 
 	\begin{align*}
 	c &= \bar u_{-i} + 1 \\
 	c &= \frac{(c (|H|-1)) + |M|}{k-1} + 1\\
@@ -253,8 +277,17 @@ In fact, we might have some $p_y \in [\frac 1 {k+1}, \frac 1 k]$ that we want to
 \end{proof}
 
 
-By the above, we now have a finite set of optimal reports for $L^{top-k}$.
+By Theorem~\ref{thm:finite-set}, we now have a finite set of optimal reports for $L^{top-k}$.
 This yields the finite loss $L|_\R$ embedded by $L^{top-k}$.
+This gives the discrete loss $\ell^{top-k} : \R \times\Y \to \reals_+$ by
+\begin{align}
+\ell^{top-k}(r,y) &= \begin{cases}
+0 & u_y = \bar u_{-y} + 1\\
+\bar u - \frac 1 k & u_y = 1\\
+1 + \bar u & u_y = 0
+\end{cases}~.~
+\end{align}
+\jessie{Not sure if there's more we want to say on this.}
 
 %\begin{conjecture}
 %	Fix $p \in \simplex$.
