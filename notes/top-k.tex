@@ -131,9 +131,10 @@ Then, using this linear form of the expected loss, we are able to write a finite
 
 \subsection{Notation and Assumptions}
 \subsubsection{Notation}
-Let $\bar{u} = \frac 1 k \sum_{i = 1}^k u_i$ and similarly, $\bar{u}_{-y} = \frac{1}{k-1} \sum_{i=1, i \neq y}^k u_i$ be the averages of the first $k$ elements of $u$ and the average of the first $k$ elements of $u$ besides $y$, respectively.
+Let $\bar{u} = \frac 1 k \sum_{i = 1}^k u_i$ and similarly, $\bar{u}_{-y} = \frac{1}{k-1} \sum_{i=1, i \neq y}^k u_i$ be the averages of the first $k$ sorted elements of $u$ and the average of the first $k$ sorted elements of $u$ besides $y$, respectively.
 Moreover, we say $b = \argmax_i \{u_i : u_i > 1\}$, assuming $u$ is ordered.
 See below in Section~\ref{sec:assumptions} for justification.
+If each $u_i \leq 1$, then we assign $b = 0$.
 
 We use $\odot$ to denote the Hadamard (element-wise) vector product.
 $\min(\vec w, \vec v)$ denotes the element-wise minimum of vectors $\vec w, \vec v \in \reals^d$.
@@ -193,19 +194,19 @@ If $y \leq k$ and $u_y \in [0,1]$, then the loss is nonnegative before applying 
 Now if $u_y \in (1, \bar u_{-y} + 1]$, then the term inside the $(\cdot)_+$ operator of $L^{top-k}(u)_y$ is greater than or equal to $0$.
 To see this, consider $1 - u_y + \bar u - \frac 1 k = 1 - u_y + \frac k {k-1} \bar u_{-y} + \frac 1 k u_y - \frac 1 k$, and look at the first three elements and the last two.
 Since $u_y \geq 1$, the difference between the last two terms $\frac 1 k u_y - \frac 1 k \geq 0$.
-Additionally, since $u_y \leq 1 +  \ubar_{-y}$, we can see the sum of these terms is nonnegative.
+Additionally, since $u_y \leq 1 +  \ubar_{-y}$, we can see the difference of these terms is nonnegative.
 
 Therefore, we can drop the $(\cdot)_+$ operator on the assumed report space.
 
 We can now write the expected loss as follows:
 \begin{align*}
 \inprod{p}{L^{top-k}(u)} &= \sum_{y=1}^n p_y L^{top-k}(u)_y \\
-&= \sum_{y=1}^b p_y L^{top-k}(u)_y + \sum_{y=b+1}^k p_y L^{top-k}(u)_y + \sum_{y=k+1}^n p_y L^{top-k}(u)_y\\
-&= \sum_{y=1}^b p_y (1 - \frac 1 k - u_y + \ubar) + \sum_{y=b+1}^k p_y (1 - \frac{k+1} k u_y + \ubar) + \sum_{y=k+1}^n p_y(1 - u_y + \ubar)\\
-&= 1 + \ubar - \inprod{p}{u} - \inprod{p \odot \Ind{y \leq b}}{\frac 1 k \ones} - \inprod{p \odot \Ind{b+1 \leq y \leq k}}{ \frac u k}\\
+%&= \sum_{y=1}^b p_y L^{top-k}(u)_y + \sum_{y=b+1}^k p_y L^{top-k}(u)_y + \sum_{y=k+1}^n p_y L^{top-k}(u)_y\\
+%&= \sum_{y=1}^b p_y (1 - \frac 1 k - u_y + \ubar) + \sum_{y=b+1}^k p_y (1 - \frac{k+1} k u_y + \ubar) + \sum_{y=k+1}^n p_y(1 - u_y + \ubar)\\
+%&= 1 + \ubar - \inprod{p}{u} - \inprod{p \odot \Ind{y \leq b}}{\frac 1 k \ones} - \inprod{p \odot \Ind{b+1 \leq y \leq k}}{ \frac u k}\\
 &= 1 + \ubar - \inprod{p}{u + \frac 1 k \min(u, \ones)}
 \end{align*}
-\jessie{I re-wrote the form of the loss at the top of the section, and it seems like this final form of the expected loss is now trivial to get to...?  Right?}
+%\jessie{I re-wrote the form of the loss at the top of the section, and it seems like this final form of the expected loss is now trivial to get to...?  Right?}
 
 %\subsection{Studying the Bayes Risk}
 %First, consider the case where $u_y = 0$ and $u'_y = 1$, with $u_j = u'_j \;\forall i \neq j$.
@@ -248,7 +249,7 @@ However, we can show that for each element $y$ of $u$, $L^{top-k}$ is linear on 
 	\end{align*}
 	which is linear on $u_i$.
 	
-	Similarly, for $u_i \in [1, \bar u_{-i} + 1]$, we can write $\inprod{p}{L^{top-k}(u)} = 1 + \bar u - \sum_{y \neq i}p_y (u_y + \frac 1 k \min(u_y, 1)) - p_i u_i - p_i$, which is linear in $u_i$.
+	Similarly, for $u_i \in [1, \bar u_{-i} + 1]$, we can write $\inprod{p}{L^{top-k}(u)} = 1 + \bar u - \sum_{y \neq i}p_y (u_y + \frac 1 k \min(u_y, 1)) - p_i u_i - p_i/k$, which is linear in $u_i$.
 \end{proof}
 
 \begin{theorem}\label{thm:finite-set}
@@ -283,9 +284,9 @@ This yields the finite loss $L|_\R$ embedded by $L^{top-k}$.
 This gives the discrete loss $\ell^{top-k} : \R \times\Y \to \reals_+$ by
 \begin{align}
 \ell^{top-k}(r,y) &= \begin{cases}
-0 & u_y = \bar u_{-y} + 1\\
-\bar u - \frac 1 k & u_y = 1\\
-1 + \bar u & u_y = 0
+0 & r_y = \bar r_{-y} + 1\\
+\bar r - \frac 1 k & r_y = 1\\
+1 + \bar r & r_y = 0
 \end{cases}~.~
 \end{align}
 \jessie{Not sure if there's more we want to say on this.}
