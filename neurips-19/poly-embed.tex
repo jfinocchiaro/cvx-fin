@@ -35,6 +35,7 @@
 \newcommand{\raft}[1]{\mytodo{green!20!white}{RF: #1}}
 \newcommand{\jessie}[1]{\mynote{purple}{[JF: #1]}}
 \newcommand{\jessiet}[1]{\mytodo{purple!20!white}{JF: #1}}
+\newcommand{\proposedadd}[1]{\mynote{orange}{[PROPOSED ADDITION: #1]}}
 \newcommand{\bo}[1]{\mynote{blue}{[Bo: #1]}}
 \newcommand{\botodo}[1]{\mytodo{blue!20!white}{[Bo: #1]}}
 \newcommand{\btw}[1]{}%TURN OFF FOR NOW \mytodo{gray}{#1}}
@@ -112,7 +113,7 @@
 %\title{Consistent Polyhedral Surrogates via Embeddings}
 %\title{Convex Surrogates via Polyhedral Losses}
 \author{%
- Jessie Finocchiaro\raf{Jessie?} \\
+ Jessie Finocchiaro \\
  \texttt{jefi8453@colorado.edu}\\
  CU Boulder
  \And
@@ -120,9 +121,9 @@
  \texttt{raf@colorado.edu}\\
  CU Boulder
  \And
- Bo\\
+ Bo Waggoner\\
  \texttt{bwag@colorado.edu}\\
- MSFT
+ Microsoft Research, New York City
 }
 
 \begin{document}
@@ -228,6 +229,10 @@ A convex function $f:\reals^d\to\reals$ is \emph{polyhedral} if its epigraph is 
 \end{definition}
 %
 For example, hinge loss is polyhedral, whereas logistic loss is not.
+\jessie{R2 asked for more intuition on this definition... not sure what more to add}
+
+
+\proposedadd{We focus on polyhedral losses in this context because, as Ramaswamy et al.~\cite[Section 1.2]{ramaswamy2018consistent} point out, smooth surrogates that estimate the conditional probability generally do much more than necessary, or practical in many cases.  In minimizing a polyhedral loss, they make the argument that one only learns what is necessary, in accordance with Vapnik's dictum~\cite[Section 1.9]{vapnik1999nature}.}
 
 \subsection{Property Elicitation}
 
@@ -242,8 +247,8 @@ See the discussion following Definition~\ref{def:elicits} for conventions regard
   The \emph{level set} of $\Gamma$ for report $r$ is the set $\Gamma_r := \{p : r \in \Gamma(p)\}$.
 \end{definition}
 
-
-Intuitively, $\Gamma(p)$ is the set of reports which should be optimal for a given distribution $p$, and $\Gamma_r$ is the set of distributions for which the report $r$ should be optimal.
+\proposedadd{When we discuss \emph{reports}, we are talking about the prediction yielded by $h(x)$ for the learned hypothesis function $h : \X \to \R$ over the input space $\X$.  In this case, we can think of $p$ as the conditional probability $p = Pr[Y = y | X = x]$ when the true distribution is over $\X \times\Y$.  Throughout, we abstract away the input $X \sim \X$ and can work with these conditional probabilities $p \in \simplex$.}
+Intuitively, $\Gamma(p)$ is the set of reports which should be optimal for a given distribution $p$, \proposedadd{; that is, $\Gamma(p)$ is the prediction that minimizes expected loss when the outcome $Y \sim p$.  Moreover, \ldots} and $\Gamma_r$ is the set of distributions for which the report $r$ should be optimal.
 \btw{Finite property note commented out}%(Note that our definitions align such that discrete losses elicit finite properties; both are non-redundant in the correct senses.)
 For example, the \emph{mode} is the %finite
 property $\mode(p) = \argmax_{y\in\Y} p_y$, and captures the set of optimal reports for 0-1 loss: for each distribution over the labels, one should report the most likely label.
@@ -606,6 +611,8 @@ Below, we illustrate the power of this framework with specific examples from the
 In some cases we simplify existing proofs, while in others we give new results, such as a new calibrated link for abstain loss, and the inconsistency of the recently proposed Lov\'asz hinge.
 \btw{RF: The top-k and hypercube/set examples (except abstain) have the link built in, e.g.\ as the sign function), and they just work around it.  Our results may suggest that it's worth thinking ``outside the box'' (HAH, genious...) and looking for embeddings which are not the hypercube.}
 
+\proposedadd{In general, we are not overly concerned with the computational complexity of computing the surrogate and link, since these calculations only need to be computer once.  They are generally derived mathematically, rather than computationally.  These symbolically calculations typically tend to be straightforward, but can sometimes be tricky.}
+
 \subsection{Consistency of abstain surrogate and link construction}
 \label{sec:abstain}
 
@@ -675,7 +682,7 @@ For example, Hamming loss is simply given by $g(S) = |S|$.
 In an effort to provide a general convex surrogate for these settings when $g$ is a submodular function, Yu and Blaschko~\cite{yu2018lovasz} introduce the \emph{Lov\'asz hinge}, which leverages the well-known convex Lov\'asz extension of submodular functions.
 While the authors provide theoretical justification and experiments, consistency of the Lov\'asz hinge is left open, which we resolve.
 
-Rather than formally define the Lov\'asz hinge, we defer the complete analysis to the full version of the paper,\footnote{Citation withheld for anonymity.\raf{And because it's not up yet!}} and focus here on the $k=2$ case.
+Rather than formally define the Lov\'asz hinge, we defer the complete analysis to the full version of the paper~\cite{finocchiaro2019embedding}, and focus here on the $k=2$ case.
 For brevity, we write $g_\emptyset := g(\emptyset)$, $g_{1,2} := g(\{1,2\})$, etc.
 %\raft{Jessie: I meant \emph{our} paper :-].  Leaving this here:\cite{yu2015lovaszarxiv}}
 Assuming $g$ is normalized and increasing (meaning $g_{1,2} \geq \{g_1,g_2\} \geq g_\emptyset = 0$), the Lov\'asz hinge $L:\reals^k\to\reals^\Y_+$ is given by
@@ -699,7 +706,7 @@ For example, if we take $\sgn(0) = 1$, then under $p((1,1)) = p((1,-1)) = p((-1,
 
 In fact, this example is typical: using our embedding framework, and characterizing when $0\in\reals^2$ is an embedded point, one can show that $L^g$ is consistent if and only if $g_{1,2} = g_1 + g_2$.
 Moreover, in the linear case, which corresponds to $g$ being \emph{modular}, the Lov\'asz hinge reduces to weighted Hamming loss, which is trivially consistent from the consistency of hinge loss for 0-1 loss.
-In the full version of the paper\raft{add cite later}, we generalize this observation for all $k$: $L^g$ is consistent if and only if $g$ is modular.
+In the full version of the paper~\cite{finocchiaro2019embedding}, we generalize this observation for all $k$: $L^g$ is consistent if and only if $g$ is modular.
 In other words, even for $k>2$, the only consistent Lov\'asz hinge is weighted Hamming loss.
 These results cast doubt on the effectiveness of the Lov\'asz hinge in practice.
 
@@ -745,22 +752,35 @@ Moreover, we can visually inspect the corresponding properties (Fig.~\ref{fig:to
 More generally, $L^2$ cannot be consistent because the property it embeds does not ``refine'' (subdivide) the top-$k$ property, so not just $\psi$, but \emph{no} link function, could make $L^2$ consistent.
 
 \begin{figure}
-	\begin{minipage}{0.4\linewidth}
+	\begin{minipage}{0.45\linewidth}
 		\centering
 		\includegraphics[width=\linewidth]{tikz/original-top-k}
 		\label{fig:original-top-k}
 	\end{minipage}
 	\hfill
-	\begin{minipage}{0.4\linewidth}
+	\begin{minipage}{0.45\linewidth}
 		\centering
 		\includegraphics[width=\linewidth]{tikz/finite-surrogate-top-k}
 		\label{fig:finite-surrogate-top-k}
 	\end{minipage}
-	\caption{Minimizers of $\inprod{p}{\elltop{2}}$ and $\inprod{p}{\ell^2}$, respectively, varying $p$ over $\Delta_3$. 
-%\raf{The projection is off somehow; uniform distribution should be the centroid, and more generally, both figures should be rotationally symmetric.}
-	}
+	\caption{Minimizers of $\inprod{p}{\elltop{2}}$ and $\inprod{p}{\ell^2}$, respectively, varying $p$ over $\Delta_3$.}
 	\label{fig:top-k-simplices}
 \end{figure}
+
+\proposedadd{To generalize this result, first consider that Lapin's surrogate is polyhedral, and we propose that each coordinate of an optimal report $u \in \reals_+^n$ must be at one of three points: $0$, $1$, or another ``high'' point that is a function of the number of high points and $M = |\{i : u_i = 1\}|$.  Since there are only a finite number of such optimal reports, $\R$, we know that this embeds a finite loss, namely $L^2_\R$.
+\begin{align*}
+\R := \left\{ \frac{|M| + k -1}{k - |H|} \mathbf{1}_H + \mathbf{1}_M : H, M \subset [n], H\cap M = \emptyset, |H| + |M| \leq k \right\}
+\end{align*}
+The discrete loss $\ell^{top-2} = L^2|_\R$ is then defined as follows:
+\begin{equation}
+\ell^{top-k}(r,y) = \begin{cases}
+0 & r_y = \bar r_{-y} + 1\\
+\bar r - \frac 1 k & r_y = 1\\
+1 + \bar r & r_y = 0
+\end{cases}~,~
+\end{equation}
+where $\bar r = \frac 1 k \sum_{i=1}^k r_{[i]}$.
+}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Jessie's version here 7/16/2019
@@ -846,9 +866,9 @@ This paper formalizes an intuitive way to design convex surrogate losses for cla
 We establish a close relationship between embedding and polyhedral surrogates, showing both that every polyhedral loss embeds a discrete loss (Theorem~\ref{thm:poly-embeds-discrete}) and that every discrete loss is embedded by some polyhedral loss (Theorem~\ref{thm:discrete-loss-poly-embeddable}).
 We then construct a calibrated link function from any polyhedral loss to the discrete loss it embeds, giving consistency for all such losses.
 We conclude with examples of how the embedding framework presented can be applied to understand existing surrogates in the literature, including those for the abstain loss, top-$k$ loss, and Lov\'asz hinge.\bo{commented stuff for space}
-%We use our link construction to understand calibrated links for abstain different than the one given by~\citet{ramaswamy2018consistent}.
-%While one top-$k$ surrogate has already been shown to be inconsistent, we show the similar discrete loss that the surrogate embeds.
-%Finally, we use our framework to prove the inconsistency of the Lov\'asz Hinge.
+\proposedadd{We use our link construction to understand calibrated links for abstain different than the one given by~\citet{ramaswamy2018consistent}.
+While one top-$k$ surrogate has already been shown to be inconsistent, we show the similar discrete loss that the surrogate embeds.
+Finally, we use our framework to prove the inconsistency of the Lov\'asz Hinge.}
 
 %%%% Pre-neurips
 %This work is part of a broader research program to understand convex surrogates through the lens of property elicitation.  % the relationship between finite losses and convex surrogates, the link functions connecting them, and the properties they elicit.
@@ -887,12 +907,11 @@ As the dimension of the optimization problem is a function of this \emph{embeddi
 %\end{conjecture}
 
 
-\raf{ACKNOWLEDGEMENTS (commented out for submission)}
 \subsection*{Acknowledgements}
 We thank Arpit Agarwal and Peter Bartlett for several discussions early on, which led to several important insights.
 % to a proof of %\raf{1-d reduction} among other insights.
 % Additionally, we thank Arpit Agarwal for early insights and bringing out attention to the abstain property.
-We thank Eric Balkanski for his help with Lemma~\ref{lem:bar-f}.
+We thank Eric Balkanski for his help with Lemma~\ref{lem:bar-f}\jessie{We don't have the Lov\'asz hinge appendix here?}.
 This material is based upon work supported by the National Science Foundation under Grant No.\ 1657598.
 \newpage
 \bibliographystyle{plainnat}
@@ -981,7 +1000,7 @@ We capture this transformation as the trim operator presented below.
   Given an elicitable property $\Gamma:\simplex \toto\R$, we define $\trim(\Gamma) = \{\Gamma_u : u \in \R \text{ s.t. } \neg\exists u'\in\R,u'\neq u,\, \Gamma_u \subsetneq \Gamma_{u'}\}$ as the set of maximal level sets of $\Gamma$.
 \end{definition}
 
-\raft{Note for later: should be able to show that the union of trim is the simplex.}
+\btw{RF: Note for later: should be able to show that the union of trim is the simplex.}
 Take note that the unlabeled property $\trim(\Gamma)$ is non-redundant, meaning that for any $\theta \in \trim(\Gamma)$, there is no level set $\theta' \in \trim(\Gamma)$ such that $\theta \subset \theta'$.
 
 Before we state the Proposition needed to prove many of the statements in Section~\ref{sec:poly-loss-embed}, we will need to general lemmas about properties and their losses.
@@ -1459,17 +1478,18 @@ TODO for camera-ready (tagging the person who'll probably end up doing it)
 	\item \jessie{Make poster and link to it online}
 	\item All: Address todos in paper.
 	\item OPTIONAL: Make/link to slides and/or on paper
-	\item Reviewer 1
+	\item Reviewer 1 (Didn't change review)
 	\begin{enumerate}
-		\item \jessie{Clarify terms like \emph{reports} and \emph{properties}.}
+		\item Clarify terms like \emph{reports} and \emph{properties}. \jessie{Done}
 	\end{enumerate}
 	\item Reviewer 2 (didn't change review)
 	\begin{enumerate}
-		\item Provide more intuition for definitions
+		\item Motivate polyhedral losses
+		\item Definitions 1-3 intuition \jessie{Done}
 	\end{enumerate}
 	\item Reviewer 3 (didn't change review)
 	\begin{enumerate}
-		\item \raf{Add discussion on the computational complexity (or lack thereof) of constructing $L$ and $\psi$}
+		\item Add discussion on the computational complexity (or lack thereof) of constructing $L$ and $\psi$.
 		\item \jessie{Make sure we have corrected top-$k$ proof.}
 	\end{enumerate}
 	\item Meta-Review: ``Inserting all the comments made to answers R2 and R3 is a must for the paper to be very good.''
