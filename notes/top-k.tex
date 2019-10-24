@@ -140,7 +140,7 @@ Let $\bar{u} = \frac 1 k \sum_{i = 1}^k u_{[i]}$ and similarly, $\bar{u}_{-y} = 
 %If each $u_i \leq 1$, then we assign $b = 0$.
 
 %We use $\odot$ to denote the Hadamard (element-wise) vector product.
-Let $\min(\vec w, \vec v)$ denote the element-wise minimum of vectors $\vec w, \vec v \in \reals^d$.
+Let $\min(\vec w, \vec v) \in \reals^d$ denote the element-wise minimum of vectors $\vec w, \vec v \in \reals^d$.
 
 \subsubsection{Assumptions}\label{sec:assumptions}
 Throughout, we make three assumptions about our report set. 
@@ -167,6 +167,7 @@ For our second assumption, we first observe that $L^{top-k}$ is invariant in the
 \end{proof}
 
 \begin{lemma}\label{lem:extra-elts-zero}
+  \raf{This statement seems off.  I think you want to say that for all $u\in\reals^d$, there is a $u'$ satisfying assumption~\ref{assum:nonneg} such that $L(u')_y \leq L(u)_y$ for all $y$ (pardon lazy notation).}
 	For all $y \in \Y$, there is a minimizer $u$ of $L^{top-k}(\cdot)_y$ satisfying Assumption~\ref{assum:ordered-u} such that $u_{k+1} = \ldots = u_{n-1} = u_n = 0$.
 \end{lemma}
 \begin{proof}
@@ -256,8 +257,11 @@ This leads to our final assumption.
 	We restrict to $u$ such that for all $u_i$, we have $u_i \leq \bar u_{-i} +1$.
 \end{assumption}
 
+
+
 \section{Re-writing the loss}
 The following Lemma allows us to consider the loss without the $(\cdot)_+$ operator.
+\raf{I think it might be handy to introduce the set $\U$ here to be the points satisfying all three assumptions --- maybe explicitly write the constraints and nod to the assumptions.  Then we can say $u\in\U$ and forget the assumptions going forward.}
 
 \begin{lemma}\label{lem:get-rid-max-op}
 	For all $u$ satisfying Assumptions~\ref{assum:ordered-u},~\ref{assum:nonneg}, and~\ref{assum:top-threshold}, we have $1 -u_y + \frac{1}{k} \sum_{i=1}^k (u - e_y)_{[i]} \geq 0$.
@@ -293,6 +297,7 @@ This statement allows us to consider the loss $L^{top-k}$ without the $(\cdot)_+
 \end{proof}
 
 With Assumptions~\ref{assum:ordered-u}, \ref{assum:nonneg}, \ref{assum:top-threshold} and Lemma~\ref{lem:get-rid-max-op}, we can know re-write the loss for each outcome in a simplified form.
+\raf{Note: some inconsistency in the way you use this $\min$ operator and denote $\ones$; see below too}
 \begin{lemma}\label{lem:new-form-surrogate}
 	For $u$ satisfying Assumptions~\ref{assum:ordered-u},~\ref{assum:nonneg}, and~\ref{assum:top-threshold}, the top-$k$ surrogate can be re-written:
 \begin{align*} 
@@ -370,7 +375,9 @@ However, we can show that for each element $y$ of $u$, $L^{top-k}$ is linear on 
 
 \begin{lemma}\label{lem:linear-pieces}
 	For each element $u_i$ of $u$, the expected loss $\inprod{p}{L^{top-k}(u)}$ is linear on $[0,1]$ and $[1, \bar u_{-i} + 1]$ for all $p \in \simplex$.
-	\jessie{Not sure if this is the right statement.}	
+	\jessie{Not sure if this is the right statement.}
+    \raf{Not sure either.  One thing to be careful about: you either have to make sure that the intervals in question yield points in the set $\U$, or refer to the original form of the loss.  Because the form of the loss you are using only is shown to hold when $u\in\U$.  Hopefully that made sense.}
+    \raf{One thing that would help: let's visualize $\U$ for some value of $k,n$ to get some intuition for what this set is.  Maybe $k=2$ and $n=3$, but only plot the first 2 coordinates?}
 \end{lemma}
 \begin{proof}
 	For all $p \in \simplex$ and $u$ satisfying Assumptions~\ref{assum:ordered-u},~\ref{assum:nonneg}, and~\ref{assum:top-threshold}, we know that 
@@ -393,7 +400,7 @@ However, we can show that for each element $y$ of $u$, $L^{top-k}$ is linear on 
 	\begin{align*}
 	\R := \left\{ \frac{|M| + k -1}{k - |H|} \mathbf{1}_H + \mathbf{1}_M : H, M \subset [n], H\cap M = \emptyset, |H| + |M| \leq k \right\}
 	\end{align*}
-	\jessie{Check the $|H|+|M| \leq k$ condition. Worst case, the set $\R$ is still finite without it.}
+	\jessie{Check the $|H|+|M| \leq k$ condition. Worst case, the set $\R$ is still finite without it.}\raf{follows from assump~\ref{assum:nonneg}, no?}
 \end{theorem}
 \begin{proof}[Proof Sketch.]
 %	The above work tells us that when $p_y > \frac 1 {k+1}$, it is optimal to set $u_y > 0$, and otherwise, it is optimal to set $u_y = 0$.
