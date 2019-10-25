@@ -202,10 +202,13 @@ Of course, to show that this surrogate loss successfully addresses the original 
 After introducing notation, and terminology from property elicitation, we thus give a sufficient condition for consistency (Def.~\ref{def:calibrated}) which depends solely on the conditional distribution over $\Y$.
 
 \subsection{Notation and Losses}
+\label{sec:notation-losses}
 
 Let $\Y$ be a finite outcome (label) space, and throughout let $n=|\Y|$.
 The set of probability distributions on $\Y$ is denoted $\simplex\subseteq\reals^{\Y}$, represented as vectors of probabilities.
 We write $p_y$ for the probability of outcome $y \in \Y$ drawn from $p \in \simplex$.
+\raft{ADDED}
+We first discuss the conditional setting, with just labels $\Y$ and no features $\X$, and show in \S~\ref{sec:links-embeddings} how these notions relate to the usual $\X\times\Y$ setting.
 
 We assume that a given discrete prediction problem, such as classification, is given in the form of a \emph{discrete loss} $\ell:\R\to\reals^\Y_+$, which maps a report (prediction) $r$ from a finite set $\R$ to the vector of loss values $\ell(r) = (\ell(r)_y)_{y\in\Y}$ for each possible outcome $y\in\Y$.
 We will assume throughout that the given discrete loss is \emph{non-redundant}, meaning every report is uniquely optimal (minimizes expected loss) for some distribution $p\in\simplex$.
@@ -229,10 +232,11 @@ A convex function $f:\reals^d\to\reals$ is \emph{polyhedral} if its epigraph is 
 \end{definition}
 %
 For example, hinge loss is polyhedral, whereas logistic loss is not.
-\raft{CHANGED}
+\raft{ADDED}
 To motivate our focus on polyhedral losses, we echo Ramaswamy et al.~\cite[Section 1.2]{ramaswamy2018consistent}, who note that smooth surrogates often encode much more information than necessary, and in these cases non-smooth surrogates are the only candidates to achieve a low dimension $d$ above.
 
 \subsection{Property Elicitation}
+\label{sec:property-elicitation}
 
 To make headway, we will appeal to concepts and results from the property elicitation literature, which elevates the \emph{property}, or map from distributions to optimal reports, as a central object to study in its own right.
 In our case, this map will often be multivalued, meaning a single distribution could yield multiple optimal reports.
@@ -245,6 +249,7 @@ See the discussion following Definition~\ref{def:elicits} for conventions regard
   The \emph{level set} of $\Gamma$ for report $r$ is the set $\Gamma_r := \{p : r \in \Gamma(p)\}$.
 \end{definition}
 
+\raf{I am not sure this is the place to clarify these connections.  I added a forward reference to \S~\ref{sec:links-embeddings} at the top of this section, saying we'll move to the $\X\times\Y$ setting then, and I wonder if that's all we need to do.  If we want to do more, I think \S~\ref{sec:links-embeddings} would be the place to do it.  E.g.\ we can discuss $\Gamma(\Pr[Y\mid X=x])$ and $\gamma$, etc., using the notation at the end of \S~\ref{sec:property-elicitation}.  Jessie, feel free to give it a shot.}
 \proposedadd{When we discuss \emph{reports}, we are talking about the prediction yielded by $h(x)$ for the learned hypothesis function $h : \X \to \R$ over the input space $\X$.  In this case, we can think of $p$ as the conditional probability $p = Pr[Y = y | X = x]$ when the true distribution is over $\X \times\Y$.  Throughout, we abstract away the input $X \sim \X$ and can work with these conditional probabilities $p \in \simplex$.}
 Intuitively, $\Gamma(p)$ is the set of reports which should be optimal for a given distribution $p$, \proposedadd{; that is, $\Gamma(p)$ is the prediction that minimizes expected loss when the outcome $Y \sim p$.  Moreover, \ldots} and $\Gamma_r$ is the set of distributions for which the report $r$ should be optimal.
 \btw{Finite property note commented out}%(Note that our definitions align such that discrete losses elicit finite properties; both are non-redundant in the correct senses.)
@@ -270,6 +275,7 @@ For general properties and losses, we will also use $\Gamma$ and $L$, as above.
 % In this case, we write the embedded reports as $u\in\reals^d$, reserving $r\in\R$ for the finite property.
 
 \subsection{Links and Embeddings}
+\label{sec:links-embeddings}
 
 To assess whether a surrogate and link function align with the original loss, we turn to the common condition of \emph{calibration}.
 Roughly, a surrogate and link are calibrated if the best possible expected loss achieved by linking to an incorrect report is strictly suboptimal.
@@ -599,6 +605,11 @@ A key step in the following definition will be to narrow down a ``link envelope'
 \btw{FUTURE: we should comment in the discussion section that we probably can show that *any* loss embedding $\ell$ must be polyhedral-ish, meaning polyhedral except for stuff that is never optimal.  This theorem would then not need the ``polyhedral'' part. This is related to the ``convex envelope conjucture'', that if $L$ embeds $\ell$ via $\varphi$, you can just take the loss $L'$ such that $L_y$ is the convex envelope of points $\{(\varphi(r),L(r)_y)\}_{r\in\R}$.}
 \btw{FUTURE: This prop and theorem give an excellent reason to focus on embeddings, since other techniques do not necessarily give you separated links for free.  Since we know we get them for free, we can just focus on the property, and study elicitation complexity; we know if we have a link at all it can be taken to be separated.  [[Is this true?]]}
 
+Note that the construction given above in Definition~\ref{def:eps-thick-link} is not necessarily computationally efficient as the number of labels $n$ grows.
+In practice this potential inefficiency is not typically a concern, as the family of losses typically has some closed form expression in terms of $n$, and thus the construction can proceed at the symbolic level.
+We illustrate this formulaic approach in \S~\ref{sec:abstain}.
+% \proposedadd{In general, we are not overly concerned with the computational complexity of computing the surrogate and link, since these calculations only need to be computed once.  They are generally derived mathematically, rather than computationally.  These symbolic calculations typically tend to be straightforward, but can sometimes be tricky.}
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -609,8 +620,6 @@ Below, we illustrate the power of this framework with specific examples from the
 In some cases we simplify existing proofs, while in others we give new results, such as a new calibrated link for abstain loss, and the inconsistency of the recently proposed Lov\'asz hinge.
 \btw{RF: The top-k and hypercube/set examples (except abstain) have the link built in, e.g.\ as the sign function), and they just work around it.  Our results may suggest that it's worth thinking ``outside the box'' (HAH, genious...) and looking for embeddings which are not the hypercube.}
 
-\raf{Will shorten.}
-\proposedadd{In general, we are not overly concerned with the computational complexity of computing the surrogate and link, since these calculations only need to be computed once.  They are generally derived mathematically, rather than computationally.  These symbolic calculations typically tend to be straightforward, but can sometimes be tricky.}
 
 \subsection{Consistency of abstain surrogate and link construction}
 \label{sec:abstain}
@@ -865,6 +874,7 @@ This paper formalizes an intuitive way to design convex surrogate losses for cla
 We establish a close relationship between embedding and polyhedral surrogates, showing both that every polyhedral loss embeds a discrete loss (Theorem~\ref{thm:poly-embeds-discrete}) and that every discrete loss is embedded by some polyhedral loss (Theorem~\ref{thm:discrete-loss-poly-embeddable}).
 We then construct a calibrated link function from any polyhedral loss to the discrete loss it embeds, giving consistency for all such losses.
 We conclude with examples of how the embedding framework presented can be applied to understand existing surrogates in the literature, including those for the abstain loss, top-$k$ loss, and Lov\'asz hinge.\bo{commented stuff for space}
+\raf{Is this in response to some reviewer, or just because we had to comment stuff for space?}
 \proposedadd{We use our link construction to understand calibrated links for abstain different than the one given by~\citet{ramaswamy2018consistent}.
 While one top-$k$ surrogate has already been shown to be inconsistent, we show the similar discrete loss that the surrogate embeds.
 Finally, we use our framework to prove the inconsistency of the Lov\'asz Hinge.}
@@ -907,10 +917,10 @@ As the dimension of the optimization problem is a function of this \emph{embeddi
 
 
 \subsection*{Acknowledgements}
-We thank Arpit Agarwal and Peter Bartlett for several discussions early on, which led to several important insights.
+We thank Arpit Agarwal and Peter Bartlett for many early discussions, which led to several important insights.
 % to a proof of %\raf{1-d reduction} among other insights.
 % Additionally, we thank Arpit Agarwal for early insights and bringing out attention to the abstain property.
-We thank Eric Balkanski for his help with Lemma~\ref{lem:bar-f}\jessie{We don't have the Lov\'asz hinge appendix here?}.
+We thank Eric Balkanski for help with a lemma about submodular functions. %Lemma~\ref{lem:bar-f}\jessie{We don't have the Lov\'asz hinge appendix here?}.
 This material is based upon work supported by the National Science Foundation under Grant No.\ 1657598.
 \newpage
 \bibliographystyle{plainnat}
