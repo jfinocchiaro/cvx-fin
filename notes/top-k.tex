@@ -166,9 +166,15 @@ For our second assumption, we first observe that $L^{top-k}$ is invariant in the
 	\end{align*}
 \end{proof}
 
+\begin{assumption}\label{assum:nonneg}
+	We will say $u_{k+1} = \ldots = u_{n-1} = u_n = 0$.
+\end{assumption}
+This partially follows from the invariance of $L^{top-k}$ in the $\ones$ direction shown in Lemma~\ref{lem:invar-ones}.
+We set $u_{k+1} = 0$, and then show weak dominance of the nonnegative $u'$ over any $u$ that contains negative components as in Lemma~\ref{lem:extra-elts-zero}.
+
 \begin{lemma}\label{lem:extra-elts-zero}
-  \raf{This statement seems off.  I think you want to say that for all $u\in\reals^d$, there is a $u'$ satisfying assumption~\ref{assum:nonneg} such that $L(u')_y \leq L(u)_y$ for all $y$ (pardon lazy notation).}
-	For all $y \in \Y$, there is a minimizer $u$ of $L^{top-k}(\cdot)_y$ satisfying Assumption~\ref{assum:ordered-u} such that $u_{k+1} = \ldots = u_{n-1} = u_n = 0$.
+%  \raf{This statement seems off.  I think you want to say that for all $u\in\reals^d$, there is a $u'$ satisfying assumption~\ref{assum:nonneg} such that $L(u')_y \leq L(u)_y$ for all $y$ (pardon lazy notation).}
+	For all $u \in \reals^d$ satisfying Assumption~\ref{assum:ordered-u}, there is a $u'$ satisfying Assumption~\ref{assum:nonneg} so that $L^{top-k}(u)_y \geq L^{top-k}(u')_y$ for all $y \in \Y$.
 \end{lemma}
 \begin{proof}
 	By Lemma~\ref{lem:invar-ones}, we can fix $u_{k+1} = 0$.
@@ -200,15 +206,10 @@ For our second assumption, we first observe that $L^{top-k}$ is invariant in the
 	&= L^{top-k}(u')_y~.~
 	\end{align*}
 
-	Since, $L^{top-k}(u)_y \geq L^{top-k}(u')_y$ for all $y \in \Y$, this also holds for the expected loss for all $p \in \simplex$.
-	Therefore, if $u$ minimizes $L^{top-k}$, so does $u'$.
+	As an aside, since $L^{top-k}(u)_y \geq L^{top-k}(u')_y$ for all $y \in \Y$, this also holds for the expected loss for all $p \in \simplex$.
 \end{proof}
 
-\begin{assumption}\label{assum:nonneg}
-	We will say $u_{k+1} = \ldots = u_{n-1} = u_n = 0$.
-\end{assumption}
-This partially follows from the invariance of $L^{top-k}$ in the $\ones$ direction shown in Lemma~\ref{lem:invar-ones}.
-We set $u_{k+1} = 0$, and then show weak dominance of the nonnegative $u'$ over any $u$ that contains negative components as in Lemma~\ref{lem:extra-elts-zero}.
+
 
 %For $i > k+1$, observe that $u_i$ can never affect the $\bar{u}$ term that is added, and can only be subtracted in the case that $i = y$. 
 %Therefore, we minimize expected loss by pulling $u_{k+2},\ldots, u_n$ up to $u_{k+1}$, making it as ``tight'' as possible.
@@ -261,10 +262,17 @@ This leads to our final assumption.
 
 \section{Re-writing the loss}
 The following Lemma allows us to consider the loss without the $(\cdot)_+$ operator.
+Before we do so, consider the set $\U$ to be all $u \in \reals^n$ satisfying Assumptions~\ref{assum:ordered-u}, \ref{assum:nonneg}, and ~\ref{assum:top-threshold}.
+That is, 
+\begin{align*}
+\U := \{ u \in \reals^n : \bar u_1 + 1 \geq u_1 \geq u_2 \geq \ldots \geq u_k \geq 0 = u_{k+1} = \ldots = u_n \}~.~
+\end{align*}
+\jessie{this is wrong... doesn't have $u_2 \leq \bar u_{-2}+1$... at least not trivially.}
+
 \raf{I think it might be handy to introduce the set $\U$ here to be the points satisfying all three assumptions --- maybe explicitly write the constraints and nod to the assumptions.  Then we can say $u\in\U$ and forget the assumptions going forward.}
 
 \begin{lemma}\label{lem:get-rid-max-op}
-	For all $u$ satisfying Assumptions~\ref{assum:ordered-u},~\ref{assum:nonneg}, and~\ref{assum:top-threshold}, we have $1 -u_y + \frac{1}{k} \sum_{i=1}^k (u - e_y)_{[i]} \geq 0$.
+	For all $u \in \U$, we have $1 -u_y + \frac{1}{k} \sum_{i=1}^k (u - e_y)_{[i]} \geq 0$.
 \end{lemma}
 This statement allows us to consider the loss $L^{top-k}$ without the $(\cdot)_+$ operator, since the inside term being nonnegative implies the max of the term and $0$ is always the inside term.
 \begin{proof}
@@ -318,14 +326,14 @@ L^{top-k}(u)_y  &= 1 - u_y + \bar u - \frac{1}{k}(\min(u_y, 1))~.~
 	\begin{align*}
 	L^{top-k}(u)_y &= 1 - u_y + \bar u - \frac{u_y}{k}~.~
 	\end{align*}
-	In this case, $u_y = \min(u_y, 1)$ is subtracted from $1 - u_y + \bar u$.
+	In this case, $u_y = \min(u_y, 1)$, and $\frac {u_y}{k}$ is subtracted from $1 - u_y + \bar u$.
 
-	If $u_y > 1$, then $(u-e_y)_{[k]} >\geq 0$, and $(u_y - 1)$ is part of the summation.
+	If $u_y > 1$, then $(u-e_y)_{[k]} \geq 0$, and $(u_y - 1)$ is part of the summation.
 	This yields
 	\begin{align*}
 	L^{top-k}(u)_y &= 1 - u_y + \bar u - \frac{1}{k}~,~
 	\end{align*}
-	where, as in the above case, $1 = \min(u_y, 1)$, and this is again the term subtracted from $1 - u_y + \bar u$.
+	where, as in the above case, $1 = \min(u_y, 1)$, and $\frac{1}{k}$ is the term subtracted from $1 - u_y + \bar u$.
 	
 	Both cases lead to the lemma statement.
 \end{proof}
@@ -400,13 +408,12 @@ However, we can show that for each element $y$ of $u$, $L^{top-k}$ is linear on 
 	\begin{align*}
 	\R := \left\{ \frac{|M| + k -1}{k - |H|} \mathbf{1}_H + \mathbf{1}_M : H, M \subset [n], H\cap M = \emptyset, |H| + |M| \leq k \right\}
 	\end{align*}
-	\jessie{Check the $|H|+|M| \leq k$ condition. Worst case, the set $\R$ is still finite without it.}\raf{follows from assump~\ref{assum:nonneg}, no?}
 \end{theorem}
 \begin{proof}[Proof Sketch.]
 %	The above work tells us that when $p_y > \frac 1 {k+1}$, it is optimal to set $u_y > 0$, and otherwise, it is optimal to set $u_y = 0$.
 	Since $L^{top-k}$ is linear on $[0,1]$ and $[1, c]$ for some $c \geq 1$ and all dimensions $i \in [n]$, we know that the optimum is on the boundary of such reports, so when we bump $u_y$ up to some number greater than $0$, it should either be one $1$ or $c$ to be an optimal report.
 	$H$ represents the elements of the report that are bumped up to $c$, and $M$ represents the elements of the report that are bumped up to $1$.
-	We know that the size of $H \cup M$ must be less than or equal to $k$ by \jessie{???}, and $H \cap M$ is empty by each element of $u$ being real-valued, so for $c > 1$, $u_i$ cannot simultaneously be equal to $c$ and $1$, hence the restrictions on $\R$.
+	We know that the size of $H \cup M$ must be less than or equal to $k$ by Assumption~\ref{assum:nonneg}, and $H \cap M$ is empty by each element of $u$ being real-valued, so for $c > 1$, $u_i$ cannot simultaneously be equal to $c$ and $1$, hence the restrictions on $\R$.
 	Note that if $c = 1$, then we can say $H = \emptyset$.
 	
 	To see the reason for $c := \frac{|M| + k -1}{k - |H|}$, consider that, given the loss $L^{top-k}$, when we want to ``crank $u_i$'' above $1$, we want to do so as much as possible, until hitting the threshold discussed in Assumption~\ref{assum:top-threshold}.
