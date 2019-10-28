@@ -131,7 +131,7 @@
 \maketitle
 
 \begin{abstract}
-We formalize and study the natural approach of designing convex surrogate loss functions via embeddings for problems such as classification or ranking. In this approach, one embeds each of the finitely many predictions (e.g. classes) as a point in $\reals^d$, assigns the original loss values to these points, and convexifies the loss in between to obtain a surrogate.
+We formalize and study the natural approach of designing convex surrogate loss functions via embeddings for problems such as classification or ranking. In this approach, one embeds each of the finitely many predictions (e.g. classes) as a point in $\reals^d$, assigns the original loss values to these points, and convexifies the loss in some way to obtain a surrogate.
 We prove that this approach is equivalent, in a strong sense, to working with polyhedral (piecewise linear convex) losses.
 Moreover, given any polyhedral loss $L$, we give a construction of a link function through which $L$ is a consistent surrogate for the loss it embeds.
 We go on to illustrate the power of this embedding framework with succinct proofs of consistency or inconsistency of various polyhedral surrogates in the literature.
@@ -164,8 +164,8 @@ Furthermore, the kinds of strategies available for constructing surrogates, and 
 
 We augment this literature by studying a particularly natural approach for finding convex surrogates, wherein one ``embeds'' a discrete loss.
 Specifically, we say a convex surrogate $L$ embeds a discrete loss $\ell$ if there is an injective embedding from the discrete reports (predictions) to a vector space such that (i) the original loss values are recovered, and (ii) a report is $\ell$-optimal if and only if the embedded report is $L$-optimal.
-If this embedding can be extended to a calibrated link function, which maps approximately $L$-optimal reports to $\ell$-optimal reports, consistency follows~\cite{agarwal2015consistent}.
-Common examples which follow this general construction include hinge loss as a surrogate for 0-1 loss and the abstain surrogate mentioned above.
+If this embedding can be extended to a calibrated link function, which maps approximately $L$-optimal reports to $\ell$-optimal reports, then consistency follows~\cite{agarwal2015consistent}.
+Common examples of this general construction include hinge loss as a surrogate for 0-1 loss and the abstain surrogate mentioned above.
 
 Using tools from property elicitation, we show a tight relationship between such embeddings and the class of polyhedral (piecewise-linear convex) loss functions.
 In particular, by focusing on Bayes risks, we show that every discrete loss is embedded by some polyhedral loss, and every polyhedral loss function embeds some discrete loss.
@@ -240,7 +240,7 @@ To motivate our focus on polyhedral losses, we echo Ramaswamy et al.~\cite[Secti
 
 To make headway, we will appeal to concepts and results from the property elicitation literature, which elevates the \emph{property}, or map from distributions to optimal reports, as a central object to study in its own right.
 In our case, this map will often be multivalued, meaning a single distribution could yield multiple optimal reports.
-(For example, when $p=(1/2,1/2)$, both $y=1$ and $y=-1$ optimize 0-1 loss.)
+(For example, when $p=(1/2,1/2)$, both $r=1$ and $r=-1$ optimize 0-1 loss.)
 To this end, we will use double arrow notation to mean a mapping to all nonempty subsets, so that $\gamma: \simplex \toto \R$ is shorthand for $\Gamma: \simplex \to 2^{\R} \setminus \emptyset$.
 See the discussion following Definition~\ref{def:elicits} for conventions regarding $\R$, $\Gamma$, $\gamma$, $L$, $\ell$, etc.
 
@@ -363,7 +363,7 @@ For condition (ii), let us compute the property each loss elicits, i.e., the set
 % Now, take the embedding $\varphi$ to be the identity.  % := r$ if $r \in [-1,1]$, and $\sgn(r)$ otherwise.
 In particular, we see that $-1 \in \prop{\ellzo}(p) \iff p_1 \in [0, 1/2] \iff -1 \in \prop{\hinge}(p)$, and $1 \in \prop{\ellzo}(p) \iff p_1 \in [1/2,1] \iff 1 \in \prop{\hinge}(p)$.
 With both conditions of Definition~\ref{def:loss-embed} satisfied, we conclude that $\hinge$ embeds $2\ellzo$.
-In this particular case, it is known $(\hinge,\psi)$ is calibrated for $\psi(u) = \sgn(u)$; we address in Section~\ref{sec:calibration} the interesting question of whether embeddings lead to calibration in general.
+In this particular case, it is known $(\hinge,\psi)$ is calibrated for $\psi(u) = \sgn(u)$; in Section~\ref{sec:calibration} we show that, perhaps surprisingly, all embeddings lead to calibration with an appropriate link.
 
 % Taking $\R = \{-1,1\}$ and the above embedding, we can write the expected loss over each report
 % \begin{center}
@@ -396,7 +396,7 @@ In this particular case, it is known $(\hinge,\psi)$ is calibrated for $\psi(u) 
 In this section, we establish a tight relationship between the technique of embedding and the use of polyhedral (piecewise-linear convex) surrogate losses.
 We defer to the following section the question of when such surrogates are consistent.
 
-To begin, we observe that, somewhat surprisingly, our embedding condition in Definition~\ref{def:loss-embed} is equivalent to merely matching Bayes risks.
+To begin, we observe that our embedding condition in Definition~\ref{def:loss-embed} is equivalent to merely matching Bayes risks.
 % For example, one can check that $\risk{\hinge} = 2\min\{p_1,p_2\} = 2\risk{\ellzo}$.
 This useful fact will drive many of our results.
 
@@ -437,7 +437,7 @@ This useful fact will drive many of our results.
 
 From this more succinct embedding condition, we can in turn simplify the condition that a loss embeds \emph{some} discrete loss: it does if and only if its Bayes risk is polyhedral.
 (We say a concave function is polyhedral if its negation is a polyhedral convex function.)
-Note that Bayes risk, a function from distributions over $\Y$ to the reals, may be polyhedral even if the loss itself is not.
+Note that the Bayes risk, a function from distributions over $\Y$ to the reals, may be polyhedral even if the loss itself is not.
 
 \begin{proposition}\label{prop:embed-risk-poly}
   A loss $L$ embeds a discrete loss if and only if $\risk{L}$ is polyhedral.
@@ -538,13 +538,14 @@ The embedding itself tells us how to link the embedded points back to the discre
 In this section, we give a construction to generate calibrated links for \emph{any} polyhedral loss.
 
 \bo{Removed comments to point to appendix, since that creates more links...}
-Appendix~\ref{app:calibration} in the full version~\cite{finocchiaro2019embedding} contains the full proof; this section provides a sketch along with the main construction and result.
+
+The full version~\cite[Appendix~\ref{app:calibration}]{finocchiaro2019embedding} contains the full proof; this section provides a sketch along with the main construction and result.
 The first step is to give a link $\psi$ such that exactly minimizing expected surrogate loss $L$, followed by applying $\psi$, always exactly minimizes expected original loss $\ell$.
-The existence of such a link is somewhat subtle, because in general some point $u$ that is far from any embedding point can minimize expected loss for two very different distributions $p,p'$, making it unclear whether there exists a link choice $\psi(u)$ that is simultaneously optimal for both.
+The existence of such a link is somewhat subtle, because in general some point $u$ that is far from any embedding point can minimize expected loss for two very different distributions $p,p'$, making it unclear whether there exists a choice $\psi(u)\in\R$ that is $\ell$-optimal for both distributions.
 We show that as we vary $p$ over $\simplex$, there are only finitely many sets of the form $U = \argmin_{u \in \reals^d} \inprod{p}{L(u)}$ (Lemma~\ref{lem:polyhedral-range-gamma}).
 Associating each $U$ with $R_U \subseteq \R$, the set of reports whose embedding points are in $U$, we enforce that all points in $U$ link to some report in $R_U$.
 (As a special case, embedding points must link to their corresponding reports.)
-Proving this is well-defined uses a chain of arguments involving the Bayes risk, ultimately showing that if $u$ lies in multiple $U$, the corresponding report sets $R_U$ all intersect at some $r =: \psi(u)$.
+Proving that these choices are well-defined uses a chain of arguments involving the Bayes risk, ultimately showing that if $u$ lies in multiple such sets $U$, the corresponding report sets $R_U$ all intersect at some $r =: \psi(u)$.
 
 %
 %\begin{proposition}\label{prop:embed-link}
@@ -559,7 +560,7 @@ Proving this is well-defined uses a chain of arguments involving the Bayes risk,
 %  The link $\psi : \reals^d \to \R$ which encodes these choices is valid.
 %\end{proof}
 
-Intuitively, to create separation, we just need to ``thicken'' this construction by mapping all approximately-optimal points $u$ to optimal reports $r$.
+Intuitively, to ensure calibration, we just need to ``thicken'' this construction, by mapping all approximately-optimal points $u$ to optimal reports $r$.
 Let $\U$ contain all optimal report sets $U$ of the form above.
 A key step in the following definition will be to narrow down a ``link envelope'' $\Psi$ where $\Psi(u)$ denotes the legal or valid choices for $\psi(u)$.
 
