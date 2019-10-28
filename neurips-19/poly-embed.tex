@@ -687,8 +687,8 @@ It would be interesting to compare the two links in practice.
 
 Many structured prediction settings can be thought of as making multiple predictions at once, with a loss function that jointly measures error based on the relationship between these predictions~\cite{hazan2010direct, gao2011consistency, osokin2017structured}.
 In the case of $k$ binary predictions, these settings are typically formalized by taking the predictions and outcomes to be $\pm 1$ vectors, so $\R=\Y=\{-1,1\}^k$.
-One then defines a joint loss function, which is often merely a function of the set of mispredictions, meaning $\ell^g(r)_y = g(\{i \in [k] : r_i \neq y_i\})$ for some function $g:2^{[k]}\to\reals$.
-For example, Hamming loss is simply given by $g(S) = |S|$.
+One then defines a joint loss function, which is often merely a function of the set of mispredictions, meaning we may write $\ell^g(r)_y = g(\{i \in [k] : r_i \neq y_i\})$ for some set function $g:2^{[k]}\to\reals$.
+For example, Hamming loss is given by $g(S) = |S|$.
 In an effort to provide a general convex surrogate for these settings when $g$ is a submodular function, Yu and Blaschko~\cite{yu2018lovasz} introduce the \emph{Lov\'asz hinge}, which leverages the well-known convex Lov\'asz extension of submodular functions.
 While the authors provide theoretical justification and experiments, consistency of the Lov\'asz hinge is left open, which we resolve.
 
@@ -703,8 +703,8 @@ Assuming $g$ is normalized and increasing (meaning $g_{1,2} \geq \{g_1,g_2\} \ge
 where $(x)_+ = \max\{x,0\}$.
 We will explore the range of values of $g$ for which $L^g$ is consistent, where the link function $\psi:\reals^2\to\{-1,1\}^2$ is fixed as $\psi(u)_i = \sgn(u_i)$, with ties broken arbitrarily.
 
-Let us consider $g_\emptyset = 0$, $g_1 = g_2 = g_{1,2} = 1$, for which $\ell^g$ is merely 0-1 loss on $\Y$.
-For consistency, then, for any distribution $p\in\simplex$, we must have that whenever $u \in \argmin_{u'\in\reals^2} p\cdot L^g(u')$, then $\psi(u)$ must be the most likely outcome, in $\argmax_{y\in\Y} p(y)$.
+Let us consider the coefficients $g_\emptyset = 0$, $g_1 = g_2 = g_{1,2} = 1$, for which $\ell^g$ is merely 0-1 loss on $\Y$.
+For consistency, for any distribution $p\in\simplex$, we must have that whenever $u \in \argmin_{u'\in\reals^2} \inprod{p}{L^g(u')}$, the outcome $\psi(u)$ must be the most likely, i.e., in $\argmax_{y\in\Y} p(y)$.
 Simplifying eq.~\eqref{eq:lovasz-hinge}, however, we have
 \begin{equation}
   \label{eq:lovasz-hinge-abstain}
@@ -712,10 +712,10 @@ Simplifying eq.~\eqref{eq:lovasz-hinge}, however, we have
 \end{equation}
 which is exactly the abstain surrogate~\eqref{eq:abstain-surrogate} for $d=2$.
 We immediately conclude that $L^g$ cannot be consistent with $\ell^g$, as the origin will be the unique optimal report for $L^g$ under distributions with $p_y < 0.5$ for all $y$, and one can simply take a distribution which disagrees with the way ties are broken in $\psi$.
-For example, if we take $\sgn(0) = 1$, then under $p((1,1)) = p((1,-1)) = p((-1,1)) = 0.2$ and $p((-1,-1)) = 0.4$, we have $\{0\} = \argmin_{u\in\reals^2} p\cdot L^g(u)$, yet $\psi(0) = (1,1) \notin \{(-1,-1)\} = \argmin_{r\in\R} p\cdot\ell^g(r)$.
+For example, if we take $\sgn(0) = 1$, then under $p((1,1)) = p((1,-1)) = p((-1,1)) = 0.2$ and $p((-1,-1)) = 0.4$, we have $\{0\} = \argmin_{u\in\reals^2} \inprod{p}{L^g(u)}$, yet we also have $\psi(0) = (1,1) \notin \{(-1,-1)\} = \argmin_{r\in\R} \inprod{p}{\ell^g(r)}$.
 
 In fact, this example is typical: using our embedding framework, and characterizing when $0\in\reals^2$ is an embedded point, one can show that $L^g$ is consistent if and only if $g_{1,2} = g_1 + g_2$.
-Moreover, in the linear case, which corresponds to $g$ being \emph{modular}, the Lov\'asz hinge reduces to weighted Hamming loss, which is trivially consistent from the consistency of hinge loss for 0-1 loss.
+Moreover, in this linear case, which corresponds to $g$ being \emph{modular}, the Lov\'asz hinge reduces to weighted Hamming loss, which is trivially consistent from the consistency of hinge loss for 0-1 loss.
 In the full version of the paper~\cite{finocchiaro2019embedding}, we generalize this observation for all $k$: $L^g$ is consistent if and only if $g$ is modular.
 In other words, even for $k>2$, the only consistent Lov\'asz hinge is weighted Hamming loss.
 These results cast doubt on the effectiveness of the Lov\'asz hinge in practice.
@@ -874,7 +874,7 @@ More generally, $L^2$ cannot be consistent because the property it embeds does n
 \section{Conclusion and Future Directions} \label{sec:conclusion}
 % \paragraph{Summary.}
 This paper formalizes an intuitive way to design convex surrogate losses for classification-like problems---by embedding the reports into $\reals^d$.
-We establish a close relationship between embedding and polyhedral surrogates, showing both that every polyhedral loss embeds a discrete loss (Theorem~\ref{thm:poly-embeds-discrete}) and that every discrete loss is embedded by some polyhedral loss (Theorem~\ref{thm:discrete-loss-poly-embeddable}).
+We establish a close relationship between embeddings and polyhedral surrogates, showing both that every polyhedral loss embeds a discrete loss (Theorem~\ref{thm:poly-embeds-discrete}) and that every discrete loss is embedded by some polyhedral loss (Theorem~\ref{thm:discrete-loss-poly-embeddable}).
 We then construct a calibrated link function from any polyhedral loss to the discrete loss it embeds, giving consistency for all such losses (Theorem~\ref{thm:eps-thick-calibrated}).
 We conclude with examples of how the embedding framework presented can be applied to understand existing surrogates in the literature, including those for the abstain loss, top-$k$ loss, and Lov\'asz hinge.
 In particular, our link construction recovers the link function proposed by~\citet{ramaswamy2018consistent} for abstain loss, as well as another simpler link based on the $L_1$ norm.
@@ -898,8 +898,8 @@ In particular, our link construction recovers the link function proposed by~\cit
 %This yields new lower bounds in particular for the abstain loss.
 
 % \paragraph{Directions.}
-One open question of particular interest involves the dimension of the input to a surrogate; given a discrete loss, can we construct the surrogate that embeds it \emph{of minimal dimension}?
-If we na\"ively embed the reports into an $n$-dimensional space, the dimensionality of the problem scales with the number of possible labels $n$.
+One open question of particular interest involves the dimension of the surrogate prediction space; given a discrete loss, can we construct a surrogate that embeds it \emph{of minimal dimension}?
+If we na\"ively embed the reports into an $n$-dimensional space, the dimensionality of the problem scales linearly in the number of possible labels $n$.
 As the dimension of the optimization problem is a function of this \emph{embedding dimension} $d$, a promising direction is to leverage tools from elicitation complexity~\cite{lambert2008eliciting,frongillo2015elicitation} and convex calibration dimension~\cite{ramaswamy2016convex} to understand when we can take $d <\!\!< n$.
 %There are several direct open questions involving the dimension of the surrogate loss.
 %It would be interesting and perhaps practically useful to develop further techniques for upper bounds: automatically constructing embeddings in $\reals^d$ and associated polyhedral losses from a given property, with $d$ as small as possible.
