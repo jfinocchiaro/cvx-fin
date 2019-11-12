@@ -38,7 +38,7 @@
 \newcommand{\proposedadd}[1]{\mynote{orange}{[PROPOSED ADDITION: #1]}}
 \newcommand{\bo}[1]{\mynote{blue}{[Bo: #1]}}
 \newcommand{\botodo}[1]{\mytodo{blue!20!white}{[Bo: #1]}}
-\newcommand{\btw}[1]{}%TURN OFF FOR NOW \mytodo{gray}{#1}}
+\newcommand{\btw}[1]{\mytodo{gray!20!white}{[BTW: #1]}}%TURN OFF FOR NOW \mytodo{gray}{#1}}
 \ifnum\Comments=1               % fix margins for todonotes
   \setlength{\marginparwidth}{1in}
 \fi
@@ -67,10 +67,13 @@
 \newcommand{\E}{\mathbb{E}}
 \newcommand{\F}{\mathcal{F}}
 \newcommand{\I}{\mathcal{I}}
+\newcommand{\N}{\mathcal{N}}
 \newcommand{\R}{\mathcal{R}}
+\renewcommand{\S}{\mathcal{S}}
 \newcommand{\U}{\mathcal{U}}
 \newcommand{\X}{\mathcal{X}}
 \newcommand{\Y}{\mathcal{Y}}
+
 
 \newcommand{\risk}[1]{\underline{#1}}
 \newcommand{\inprod}[2]{\langle #1, #2 \rangle}%\mathrm{int}(#1)}
@@ -187,7 +190,7 @@ A notable addition to this literature is~\citet{ramaswamy2018consistent}, who ar
 Their surrogate is a natural example of an embedding (cf.~Section~\ref{sec:abstain}), and serves as inspiration for our work.
 
 While property elicitation has by now an extensive literature~\cite{savage1971elicitation,osband1985information-eliciting,lambert2008eliciting,gneiting2011making,steinwart2014elicitation,frongillo2015vector-valued,fissler2016higher,lambert2018elicitation}\raft{others? already a bit much...}, these works are mostly concerned with point estimation problems.
-Literature directly connecting property elicitation to consistency is sparse, with the main reference being~\citet{agarwal2015consistent}; note however that they consider single-valued properties, whereas properties elicited by general convex losses are necessarily set-valued.
+Literature directly connecting property elicitation to consistency is sparse, with the main reference being~\citet{agarwal2015consistent}; note however that they consider single-valued properties, whereas properties elicited by general convex losses are necessarily set-valued.\jessiet{It might be a little more subtle than that; \cite{agarwal2015consistent} does have a section on set-valued properties IIRC}
 
 % \citet{agarwal2015consistent} and~\citet{ramaswamy2016convex} study the existence of convex surrogates; the latter proves lower bounds on dimensionality of hypothesis spaces for e.g.~0-1 loss via their notion of feasible subspace dimension.
 %   These works are generally not directly comparable to our results, as they do not consider the embedding method.
@@ -208,7 +211,7 @@ Let $\Y$ be a finite outcome (label) space, and throughout let $n=|\Y|$.
 The set of probability distributions on $\Y$ is denoted $\simplex\subseteq\reals^{\Y}$, represented as vectors of probabilities.
 We write $p_y$ for the probability of outcome $y \in \Y$ drawn from $p \in \simplex$.
 \raft{ADDED}
-We first discuss the conditional setting, with just labels $\Y$ and no features $\X$, and show in \S~\ref{sec:links-embeddings} how these notions relate to the usual $\X\times\Y$ setting.
+We first discuss the conditional setting, with just labels $\Y$ and no features $\X$, and show in Section~\ref{sec:links-embeddings} how these notions relate to the usual $\X\times\Y$ setting.
 
 We assume that a given discrete prediction problem, such as classification, is given in the form of a \emph{discrete loss} $\ell:\R\to\reals^\Y_+$, which maps a report (prediction) $r$ from a finite set $\R$ to the vector of loss values $\ell(r) = (\ell(r)_y)_{y\in\Y}$ for each possible outcome $y\in\Y$.
 We will assume throughout that the given discrete loss is \emph{non-redundant}, meaning every report is uniquely optimal (minimizes expected loss) for some distribution $p\in\simplex$.
@@ -233,7 +236,7 @@ A convex function $f:\reals^d\to\reals$ is \emph{polyhedral} if its epigraph is 
 %
 For example, hinge loss is polyhedral, whereas logistic loss is not.
 \raft{ADDED}
-To motivate our focus on polyhedral losses, we echo Ramaswamy et al.~\cite[Section 1.2]{ramaswamy2018consistent}, who note that smooth surrogates often encode much more information than necessary, and in these cases non-smooth surrogates are the only candidates to achieve a low dimension $d$ above.
+To motivate our focus on polyhedral losses, we echo Ramaswamy et al.~\cite[Section 1.2]{ramaswamy2018consistent}, who note that smooth surrogates often encode much more information than necessary, and in these cases non-smooth surrogates are the only candidates to achieve a low input dimension $d$ above.
 
 \subsection{Property Elicitation}
 \label{sec:property-elicitation}
@@ -241,7 +244,7 @@ To motivate our focus on polyhedral losses, we echo Ramaswamy et al.~\cite[Secti
 To make headway, we will appeal to concepts and results from the property elicitation literature, which elevates the \emph{property}, or map from distributions to optimal reports, as a central object to study in its own right.
 In our case, this map will often be multivalued, meaning a single distribution could yield multiple optimal reports.
 (For example, when $p=(1/2,1/2)$, both $r=1$ and $r=-1$ optimize 0-1 loss.)
-To this end, we will use double arrow notation to mean a mapping to all nonempty subsets, so that $\gamma: \simplex \toto \R$ is shorthand for $\Gamma: \simplex \to 2^{\R} \setminus \emptyset$.
+To this end, we will use double arrow notation to mean a mapping to all nonempty subsets, so that $\Gamma: \simplex \toto \R$ is shorthand for $\Gamma: \simplex \to 2^{\R} \setminus \emptyset$.
 See the discussion following Definition~\ref{def:elicits} for conventions regarding $\R$, $\Gamma$, $\gamma$, $L$, $\ell$, etc.
 
 \begin{definition}[Property, level set]\label{def:property}
@@ -249,9 +252,6 @@ See the discussion following Definition~\ref{def:elicits} for conventions regard
   The \emph{level set} of $\Gamma$ for report $r$ is the set $\Gamma_r := \{p : r \in \Gamma(p)\}$.
 \end{definition}
 
-% \raf{I am not sure this is the place to clarify these connections.  I added a forward reference to \S~\ref{sec:links-embeddings} at the top of this section, saying we'll move to the $\X\times\Y$ setting then, and I wonder if that's all we need to do.  If we want to do more, I think \S~\ref{sec:links-embeddings} would be the place to do it.  E.g.\ we can discuss $\Gamma(\Pr[Y\mid X=x])$ and $\gamma$, etc., using the notation at the end of \S~\ref{sec:property-elicitation}.  Jessie, feel free to give it a shot.}
-% \jessie{I think the forward reference is enough.  We told a reviewer we would clarify what reports are, but that also might be as simple as clarifying report = prediction.}
-% \proposedadd{When we discuss \emph{reports}, we are talking about the prediction yielded by $h(x)$ for the learned hypothesis function $h : \X \to \R$ over the input space $\X$.  In this case, we can think of $p$ as the conditional probability $p = Pr[Y = y | X = x]$ when the true distribution is over $\X \times\Y$.  Throughout, we abstract away the input $X \sim \X$ and can work with these conditional probabilities $p \in \simplex$.}
 Intuitively, $\Gamma(p)$ is the set of reports which should be optimal for a given distribution $p$, and $\Gamma_r$ is the set of distributions for which the report $r$ should be optimal.
 \btw{Finite property note commented out}%(Note that our definitions align such that discrete losses elicit finite properties; both are non-redundant in the correct senses.)
 For example, the \emph{mode} is the %finite
@@ -539,7 +539,7 @@ In this section, we give a construction to generate calibrated links for \emph{a
 
 \bo{Removed comments to point to appendix, since that creates more links...}
 
-The full version~\cite[Appendix~\ref{app:calibration}]{finocchiaro2019embedding} contains the full proof; this section provides a sketch along with the main construction and result.
+Appendix~\ref{app:calibration} contains the full proof; this section provides a sketch along with the main construction and result.
 The first step is to give a link $\psi$ such that exactly minimizing expected surrogate loss $L$, followed by applying $\psi$, always exactly minimizes expected original loss $\ell$.
 The existence of such a link is somewhat subtle, because in general some point $u$ that is far from any embedding point can minimize expected loss for two very different distributions $p,p'$, making it unclear whether there exists a choice $\psi(u)\in\R$ that is $\ell$-optimal for both distributions.
 We show that as we vary $p$ over $\simplex$, there are only finitely many sets of the form $U = \argmin_{u \in \reals^d} \inprod{p}{L(u)}$ (Lemma~\ref{lem:polyhedral-range-gamma}).
@@ -609,7 +609,7 @@ A key step in the following definition will be to narrow down a ``link envelope'
 
 Note that the construction given above in Definition~\ref{def:eps-thick-link} is not necessarily computationally efficient as the number of labels $n$ grows.
 In practice this potential inefficiency is not typically a concern, as the family of losses typically has some closed form expression in terms of $n$, and thus the construction can proceed at the symbolic level.
-We illustrate this formulaic approach in \S~\ref{sec:abstain}.
+We illustrate this formulaic approach in Section~\ref{sec:abstain}.
 % \proposedadd{In general, we are not overly concerned with the computational complexity of computing the surrogate and link, since these calculations only need to be computed once.  They are generally derived mathematically, rather than computationally.  These symbolic calculations typically tend to be straightforward, but can sometimes be tricky.}
 
 
@@ -984,13 +984,20 @@ We extend Aurenhammer's result to a weighted sum of convex functions, showing th
 
 \section{Embedding properties}\label{app:embed-props}
 
+While Definition~\ref{def:loss-embed} gives the notion of one \emph{loss} embedding another, we now define the notion of one \emph{property} embedding another.
+\begin{definition}\label{def:prop-embed}
+	A property $\Gamma : \simplex \toto \reals^d$ embeds a property $\gamma:\simplex \toto \R$ if there exists some injective embedding $\varphi:\R \to \reals^d$ such that for all $p \in \simplex$ and $r \in \R$, we have $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p)$.
+\end{definition}
+
+By condition (ii.) of Definition~\ref{def:loss-embed}, we then have $L$ embedding $\ell$ implies $\prop{L}$ embeds $\prop{\ell}$.
+
+
 It is often convenient to work directly with properties and set aside the losses which elicit them.
 To this end, we say a property to embeds another if eq.~\eqref{eq:embed-loss} holds.
 We begin with the notion of redundancy.
 \begin{definition}[Finite property, non-redundant]
-  A property $\Gamma:\simplex\toto\R$ is \emph{redundant} if for some $r,r'\in\R$ we have $\Gamma_r \subseteq \Gamma_{r'}$, and \emph{non-redundant} otherwise.
-  $\Gamma$ is \emph{finite} if it is non-redundant and $\R$ is a finite set.
-  We typically write finite properties in lower case, as $\gamma$.
+  A property $\gamma:\simplex\toto\R$ is \emph{redundant} if for some $r,r'\in\R$ with $r \neq r'$, we have $\gamma_r \subseteq \gamma_{r'}$, and \emph{non-redundant} otherwise.
+  $\gamma$ is \emph{finite} if it is non-redundant and $\R$ is a finite set.
 \end{definition}
 
 %With the terminology of properties in hand, we can restate our definition of embedding.
@@ -1009,8 +1016,69 @@ We capture this transformation as the trim operator presented below.
   Given an elicitable property $\Gamma:\simplex \toto\R$, we define $\trim(\Gamma) = \{\Gamma_u : u \in \R \text{ s.t. } \neg\exists u'\in\R,u'\neq u,\, \Gamma_u \subsetneq \Gamma_{u'}\}$ as the set of maximal level sets of $\Gamma$.
 \end{definition}
 
-\btw{RF: Note for later: should be able to show that the union of trim is the simplex.}
+\btw{RF: Note for later: should be able to show that the union of trim is the simplex.\jessie{This is part of the proposition statement 2 now.}}
 Take note that the unlabeled property $\trim(\Gamma)$ is non-redundant, meaning that for any $\theta \in \trim(\Gamma)$, there is no level set $\theta' \in \trim(\Gamma)$ such that $\theta \subset \theta'$.
+
+\hrule
+\bigskip
+\jessie{Add results (subsection?) relating trim and positive normal sets.  From here until the hrule}
+
+
+\proposedadd{The concept of $\trim$ is closely related to the \emph{positive normal set} of Ramaswamy et al.~\cite{ramaswamy2016convex}.
+However, they define positive normal sets in terms of the loss vector, agnostic to the report yielding such a loss vector.
+In constructing the $\trim$ of a property, we yield the positive normal sets of the loss eliciting such a property, without the attachment to loss vectors.
+This allows us to frame necessary and sufficient conditions for constructing a calibrated surrogate in terms of finite properties.}
+
+
+\begin{definition}
+	Let $L:\reals^d \to \reals^n_+$, and define $\S_L := \conv(L(\reals^d))$ as in~\cite[Definition 8]{ramaswamy2016convex}.
+	For $z \in \S_L$, we define the \emph{positive normal set} of $L$ at $z$ as
+	\begin{equation}
+	\N^L(z) = \left\{ p \in \simplex: \inprod{p}{z} = \inf_{z' \in \S_L} \inprod{p}{z} \right\}~.~
+	\end{equation}
+\end{definition}
+
+\begin{conjecture}
+	For $L$ convex and $p \in \simplex$, we have $\inf_{z' \in \S_L} \inprod{p}{z'} = \inf_{z' \in L(\reals^d)}\inprod{p}{z'}$.
+\end{conjecture}
+\begin{proof}
+	First, we have $\inf_{z' \in \S_L} \inprod{p}{z'} \leq \inf_{z' \in L(\reals^d)}\inprod{p}{z'}$ since $L(\reals^d) \subseteq \S_L$.
+	
+	Now, we want to show $\inf_{z' \in \S_L} \inprod{p}{z'} \geq \inf_{z' \in L(\reals^d)}\inprod{p}{z'}$.
+	Consider that for all $z \in \S_L$, we have $z \in \inter{\S_L} \implies z \not \in \arginf_{z' \in \S_L}\inprod{p}{z'}$.
+	Therefore, we have $\inf_{z' \in \S_L}\inprod{p}{z'} = \inf_{z' \in \partial\S_L}\inprod{p}{z'}$.
+	
+	If we can then show $L(\reals^d) \supseteq \partial \S_L$, then we have $\inf_{z' \in \S_L} \inprod{p}{z'} \geq \inf_{z' \in L(\reals^d)}\inprod{p}{z'}$.
+
+	\jessie{??? Not sure why this should be true, so it probably isn't, but I can't think of a counterexample.}
+\end{proof}
+
+\begin{proposition}
+	Consider the loss $L:\reals^d \to \reals^n_+$ and $\Gamma := \prop{L}$ nondegenerate.
+	Fix a finite set of $\{z_i\}_{i=1}^k$ so that each $z_i \in \S_L$ and $\cup_{z_i} \N^L(z_i) = \simplex$.
+	Then $\N^L(\mathcal{Z}) = \{\N^L(z_i)\}_{i=1}^k = \trim(\Gamma)$.
+\end{proposition}
+\begin{proof}
+  \jessie{still a conjecture.}
+  Take $\theta \in \N^L(\mathcal{Z})$.
+  For all $p \in \theta$, we then have 
+  \begin{align*}
+  p \in \theta \iff \inprod{p}{z} &= \inf_{z' \in \S_L} \inprod{p}{z'}\\
+  &= \inf_{z' \in L(\reals^d)} \inprod{p}{z'}\\
+  &= \inf_{u \in \reals^d} \inprod{p}{L(u)}\\
+  &= \inf_{u\in \reals^d} \E_p L(u, Y)\\
+  &\iff p \in \Gamma_u~.~
+  \end{align*}
+  \jessie{Not quite... we have $\inf_{z' \in \S_L} \inprod{p}{z'} \leq \inf_{z' \in L(\reals^d)} \inprod{p}{z'}$, by $L(\reals^d) \subseteq \S_L$, but we need the fact that $\N^L(z) = \emptyset$ for all $z \in \inter{\S_L}$ or something similar for the first to second lines of equality.  Otherwise we just have $\Gamma_u \subseteq \N^L(z)$.  i.e. we need Conjecture 1.
+  }
+  Since this is true for all $p \in \theta$, we have $\theta = \Gamma_u$.
+  As this is true for a finite set of $\mathcal{Z}$ whose positive normal sets union to the simplex, we have $\N^L(\mathcal{Z}) = \trim(\prop{L})$.
+\end{proof}
+
+\begin{corollary}
+	The necessary and sufficient conditions for calibrated surrogates from Ramaswamy, but in terms of the unlabeled property.
+\end{corollary}
+\hrule
 
 Before we state the Proposition needed to prove many of the statements in Section~\ref{sec:poly-loss-embed}, we will need to general lemmas about properties and their losses.
 The first follows from standard results relating finite properties to power diagrams (see Theorem~\ref{thm:aurenhammer} in the appendix), and its proof is omitted.
@@ -1019,7 +1087,7 @@ The second is closely related to the trim operator: it states that if some subse
 \begin{lemma}\label{lem:finite-full-dim}
   Let $\gamma$ be a finite (non-redundant) property elicited by a loss $L$.
   Then the negative Bayes risk $G$ of $L$ is polyhedral, and the level sets of $\gamma$ are the projections of the facets of the epigraph of $G$ onto $\simplex$, and thus form a power diagram.
-  In particular, the level sets $\gamma$ are full-dimensional in $\simplex$ (i.e.,\ of dimension $n-1$).
+  In particular, the level sets of $\gamma$ are full-dimensional in $\simplex$ (i.e.,\ of dimension $n-1$).
 \end{lemma}
 
 \begin{lemma}\label{lem:loss-restrict}
@@ -1089,6 +1157,86 @@ Finally, we have an important converse: if $\Gamma$ has finitely many full-dimen
   By construction, we have $\gamma_i = \theta_i = \Gamma_{u_i}$ for all $i$, so letting $\varphi(i) = u_i$ we satisfy the definition of embedding, namely statement 1.
 \end{proof}
 
+\jessie{Everything below here is added from the COLT version}
+
+\begin{definition}
+	We say a link $\psi:\reals^d \to \R$ is \emph{calibrated from $\Gamma$ to $\gamma$} if there is a calibrated link from $L$ to $\ell$, where $\Gamma := \prop{L}$ and $\gamma:= \prop{\ell}$.
+\end{definition}
+
+\begin{proposition}
+	Let $L$ elicit $\Gamma:\simplex \toto \reals^d$ which embeds a finite property $\gamma$.
+	Then there is a calibrated link from $\Gamma$ to $\gamma$.
+\end{proposition}
+\begin{proof}
+	Let $\gamma: \simplex \toto \R$.
+	Proposition~\ref{prop:embed-trim} gives us that $\trim(\Gamma) = \{\gamma_r : r \in \R\}$.
+	We conclude that for any $u \in \reals^d$, there is a calibrated link from $\Gamma$ to $\gamma$.\jessie{define calibrated link for properties?}
+	\jessie{TODO}
+\end{proof}
+
+\jessie{It looks like this was in the body of the NeurIPS paper ot one point.  Not sure if we want to move it back there.}
+The following result emphasizes the significance and sufficiency of polyhedral losses in the context of studying embedding.
+\begin{theorem}
+	Let $\gamma$ be a finite property.  
+	The following are equivalent.
+	\begin{enumerate}
+		\item $\gamma$ is elicitable.
+		\item $\gamma$ is embeddable.
+		\item $\gamma$ is embeddable by a polyhedral loss.
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	Trivially, we have $3 \implies 2$, and $2 \implies 1$ follows as a result of Proposition~\ref{prop:embed-trim}.
+	We then show $1 \implies 3$.
+	For any non-redundant property $\gamma'$, even if not finite, elicited by a loss with a Bayes Risk which is a closed function, is embeddable in $d = n-1$ dimensions.
+	By Lemma \jessie{ref}, the (negative) Bayes risk $G$ of the given finite elicitable property $\gamma$ is polyhedral and therefore closed.
+	Take $L(u) = C(u)\ones - u$, where $C = G^*$ is the convex conjugate of $G$, which is also polyhedral by~\cite[Theorem 19.2]{rockafellar1997convex}.
+	Therefore, $L$ is polyhedral.
+\end{proof}
+
+\subsection{Refining properties}
+
+\begin{definition}
+	Let $\Gamma:\simplex \toto \R$ and $\Gamma':\simplex\toto \R'$.
+	Then $\Gamma'$ \emph{refines} $\Gamma$ if for all $r' \in \R'$, we have $\Gamma'_{r'} \subseteq \Gamma_r$ for some $r \in \R$.
+	That is, the cells of $\Gamma'$ are all contained in the cells of $\Gamma$.
+\end{definition}
+
+\begin{theorem}
+	Every polyhedral loss embeds a finite elicitable property.
+	Moreover, a polyhedral loss $L$ indirectly elicits a finite elicitable property $\gamma$ if and only if $\gamma$ is finite and $L$ embeds a property which refines $\gamma$.
+\end{theorem}
+\begin{proof}
+	Let $L:\reals^d\to\reals^\Y_+$ be a polyhedral loss.
+	For all $p$, let $P(p)$ be the epigraph of the convex function $u\mapsto \inprod{p}{L(u)}$.
+	From Lemma~\ref{lem:polyhedral-pd-same}, we have that the power diagram induced by the projection of $P(p)$ onto $\reals^d$ is constant whenever $p\in\inter\simplex$.
+	Let $q\in\inter\simplex$ be the uniform distribution on $\Y$, and $V_\Y$ be the set of vertices of $P(q)$ projected onto $\reals^d$.
+	By the above, this set is the same had we replaced $q$ by any $p\in\inter\simplex$.
+	
+	Now let $\Gamma := \Gamma[L]$.
+	We claim for all $p\in\inter\simplex$, that $\Gamma(p) \cap V_\Y \neq \emptyset$.
+	To see this, let $u \in \Gamma(p)$, and $u' = (u,\inprod{p}{L(u)}) \in P(p)$.
+	The optimality of $u$ is equivalent to $u$ being contained in the face exposed by the normal $(0,\ldots,0,-1)\in\reals^{d+1}$, which is a face of $P(p)$.
+	Let $v'\in\reals^{d+1}$ be a vertex on such a face, and $v\in V_\Y$ its projection onto $\reals^d$.
+	Then $v$ is also optimal, and therefore $v\in\Gamma(p)$.
+	
+	Now consider $\Y'\subset \Y$.
+	Applying the above argument on distributions $p$ with support exactly $\Y'$, we have a similar guarantee: a finite set $V_{\Y'}$ such that $\Gamma(p) \cap V_{\Y'} \neq \emptyset$ for all $p$ with support exactly $\Y'$.
+	(When $\Y' = \{y\}$ is a singleton, we simply take the projected vertices of $L(\cdot)_y$.)
+	
+	Thus, taking $V = \bigcup_{\Y'\subseteq\Y} V_{\Y'}$, we have for all $p\in\simplex$ that $\Gamma(p) \cap V \neq \emptyset$.
+	This implies that $\trim(\Gamma) \subseteq \{\Gamma_v : v\in V\}$, which is finite, so Proposition~\ref{prop:embed-trim} now gives the conclusion.
+	\jessiet{Do we need to show the preimage of $\Gamma$ is $V$?}
+	
+	\raft{I might be delusional, but this second part ended up being much slicker than I'd thought, by essentially chaining definitions and maps.  Please check!}
+	For the second part, let $\gamma':\simplex\toto\R'$ be the finite elicitable property embedded by $L$, with embedding $\varphi:\R'\to\reals^d$, and let $\psi$ be a calibrated link to a non-redundant elicitable property $\gamma:\simplex\toto\R$.
+	Then letting $\psi' = (\psi \circ \varphi):\R'\to\R$, we see that $\psi'$ is a calibrated link from $\gamma'$ to $\gamma$:
+	for all $r'\in\R'$, we have $\gamma'_{r'} = \prop{L}_{\varphi(r')} \subseteq \gamma_{\psi(\varphi(r'))}$.
+	In particular, $\gamma'$ refines $\gamma$, and as $\gamma'$ is finite, $\gamma$ must be finite.
+\end{proof}
+
+\jessie{Other results on refined properties?}
+
 \section{Polyhedral losses}\label{app:polyhedral-losses}
 \begin{lemma}
   \label{lem:polyhedral-range-gamma}
@@ -1122,6 +1270,7 @@ Finally, we have an important converse: if $\Gamma$ has finitely many full-dimen
   Then for all $p\in\simplex$ we have $\Gamma(p) \cap U' \neq \emptyset$, so Lemma~\ref{lem:loss-restrict} gives us $\risk{L} = \risk{L|_{U'}}$, which is polyhedral as $U'$ is finite.
   \btw{RF: interesting: we didn't need Proposition~\ref{prop:embed-risk-poly} after all.  This already gives the discrete loss $L$ embeds!}
 \end{proof}
+
 
 %\raft{The following statement is true I believe, but low priority: ``An elicitable property $\Gamma:\simplex\toto\reals$ is convex elicitable (elicited by a convex $L : \reals \to \reals^\Y$) if and only if it is monotone.''  Start of the proof commented out.  Just need to show that $b$ is the upper limit of $a$ and $a$ the lower of $b$; should follow from elicitability of $\Gamma$.}
 %\begin{lemma}\label{lem:prop-L-monotone}
@@ -1478,6 +1627,8 @@ Observe $L^k$ can be written as the pointwise max of $\binom{n}{k} +1$ terms, wh
 %   We can verify $\ell'(r) = L'(\varphi(r))$ for all $r \subseteq [n]$ and $\varphi(r)$ being its conversion from a set to binary vector, so $\varphi(\R) = \{ u \in \{0,1\}^n : \|u\|_1 \leq k \}$.
 %   Moreover, by Lemma~\ref{lem:top-k-optimal-corners} and the above equality, respectively, we know that $\inf_{u \in \reals^n} \inprod{p}{L'(u)} = \min_{u \in \varphi(\R)} \inprod{p}{L'(u)} = \min_{r \in \R}\inprod{p}{\ell'(r)}$ for all $p \in \simplex$, and so we conclude that $L'$ embeds $\ell'$.
 % \end{proof}
+
+
 
 
 \end{document}
