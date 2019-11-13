@@ -136,8 +136,8 @@ Then, using this form of the expected loss, we are able to find a finite set of 
 We say $u_{[i]}$ is the $i^{th}$ largest element of the $u$ vector.
 Let $\bar{u} = \frac 1 k \sum_{i = 1}^k u_{[i]}$ and similarly, $\bar{u}_{-i} = \frac{1}{k-1} (k \bar u - u_{[i]})$ be the averages of the first $k$ sorted elements of $u$ and the average of the first $k-1$ sorted elements of $u$ besides the $i^{th}$ element, respectively.
 $u[y]$ refers to the order of the $y^{th}$ component of $u$.
-For example, if $u = (1,2,0)$, then $[2] = 1$. 
-If $u$ is understand from context, we abuse notation to omit the $u$ and write $u[y] = [y]$.
+For example, if $u = (1,2,0)$, then $u[2] = 1$. 
+If $u$ is understood from context, we abuse notation to omit the $u$ and write $u[y] = [y]$.
 
 Let $\min(\vec w, \vec v) \in \reals^d$ denote the element-wise minimum of vectors $\vec w, \vec v \in \reals^d$.
 
@@ -183,7 +183,7 @@ We set $u_{[k+1]} = 0$, and then show weak dominance of the nonnegative $u'$ ove
 	
 	If $[y] \geq k+1$, then 
 	\begin{align*}
-	L^{top-k}(u)_y &= (1 - u_y + \frac 1 k \sum_{i=1}^k (u - e_y)_{[i]})_+ \\
+	L^{top-k}(u)_y &= \left(1 - u_y + \frac 1 k \sum_{i=1}^k (u - e_y)_{[i]}\right)_+ \\
 %	&= 1 - u_y + \frac 1 k \sum_{i=1}^k (u - e_y)_{[i]}\\
 	&\geq \left(1 + \frac {1}{k} \sum_{i=1}^k (u' - e_y)_{[i]}\right)_+\\
 	&= L^{top-k}(u')_y~.~
@@ -530,6 +530,22 @@ Look at this convex region.
 Since $L^{top-k}$ is polyhedral, we know that one of its minimizers must be on a vertex.
 We want to claim that all vertices are in $\hat\U$, which is a finite set of our own construction.
 Since all vertices are in $\hat\U$, and all minimizers must be vertices (if not, there is also a vertex that is a minimizer), we then have that $\argmin_u \inprod{p}{L^{top-k}(u)} \cap \hat\U \neq \emptyset$.
+
+
+\section{Constructing a calibrated surrogate}
+Here, we use the surrogate constructed in Proposition 2 of the paper to construct a calibrated surrogate for top $k$.
+\subsection{$k=2$ and $n=3$}
+First, we have $\risk{\ell}(p) = 1 - \min_y p_y$, and so $-\risk{\ell}(p) = \min_y p_y - 1$.
+Taking the conjugate $(-\ell^*)(q) = \sup_{p \in \simplex} \{\inprod p q + 1 - \min_y p_y\}$, we see this is maximized by putting weight $1$ on $\argmax_y q_y$ and weight $0$ on every other element for $q \in \simplex$.
+Since $n \neq 1$, we then have $\min_y p_y = 0$, so the conjugate of the negative risk reduces to $C(u) = 1 + \max_y u_y$.
+
+Then, plugging this into our given loss yields $L(u)_y = 1 + u_{[1]} - u_y$.
+
+\subsection{Generalizing $k$ and $n$}
+Generalizing the above calibrated surrogate, we observe that $\risk(\ell) = 1 - \sum_{i=k+1}^n p_{[i]}$, and so $(-\risk{\ell})^*(q) = \sup_{p \in \simplex} \{\inprod p q + 1 - \sum_{i=k+1}^n p_{[i]}\}$.
+This is maximized in the same way as above, and so we reduce this to $(-\risk{\ell})^*(q) = 1 - q_{[1]}$.
+
+Again, we yield $L(u)_y = 1 + u_{[1]} - u_y$.
 
 \end{document}
 %%% Local Variables:
