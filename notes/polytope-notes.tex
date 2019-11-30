@@ -1,0 +1,331 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{lmodern}
+\usepackage{hyperref}       % hyperlinks  %[implicit=false, bookmarks=false]
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage[margin=1.0in]{geometry}
+
+\usepackage{mathtools, amsmath, amssymb, amsthm, graphicx, verbatim}
+%\usepackage[thmmarks, thref, amsthm]{ntheorem}
+\usepackage{color}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.2}
+\hypersetup{colorlinks,breaklinks,
+            linkcolor=darkblue,urlcolor=darkblue,
+            anchorcolor=darkblue,citecolor=darkblue}
+\usepackage{wrapfig}
+\usepackage{subcaption}
+\usepackage[colorinlistoftodos,textsize=tiny]{todonotes} % need xargs for below
+%\usepackage{accents}
+\usepackage{bbm}
+\usepackage{xspace}
+
+\usetikzlibrary{calc}
+\newcommand{\Comments}{1}
+\newcommand{\mynote}[2]{\ifnum\Comments=1\textcolor{#1}{#2}\fi}
+\newcommand{\mytodo}[2]{\ifnum\Comments=1%
+  \todo[linecolor=#1!80!black,backgroundcolor=#1,bordercolor=#1!80!black]{#2}\fi}
+\newcommand{\raf}[1]{\mynote{green}{[RF: #1]}}
+\newcommand{\raft}[1]{\mytodo{green!20!white}{RF: #1}}
+\newcommand{\jessie}[1]{\mynote{purple}{[JF: #1]}}
+\newcommand{\jessiet}[1]{\mytodo{purple!20!white}{JF: #1}}
+\newcommand{\bo}[1]{\mynote{blue}{[Bo: #1]}}
+\newcommand{\botodo}[1]{\mytodo{blue!20!white}{[Bo: #1]}}
+\newcommand{\btw}[1]{\mytodo{orange!20!white}{BTW: #1}}
+\ifnum\Comments=1               % fix margins for todonotes
+  \setlength{\marginparwidth}{1in}
+\fi
+
+
+\newcommand{\reals}{\mathbb{R}}
+\newcommand{\posreals}{\reals_{>0}}%{\reals_{++}}
+\newcommand{\dom}{\mathrm{dom}}
+\newcommand{\epi}{\text{epi}}
+\newcommand{\relint}{\mathrm{relint}}
+\newcommand{\prop}[1]{\Gamma[#1]}
+\newcommand{\eliccts}{\mathrm{elic}_\mathrm{cts}}
+\newcommand{\eliccvx}{\mathrm{elic}_\mathrm{cvx}}
+\newcommand{\elicpoly}{\mathrm{elic}_\mathrm{pcvx}}
+\newcommand{\elicembed}{\mathrm{elic}_\mathrm{embed}}
+
+\newcommand{\cell}{\mathrm{cell}}
+
+\newcommand{\abstain}[1]{\mathrm{abstain}_{#1}}
+\newcommand{\mode}{\mathrm{mode}}
+
+\newcommand{\simplex}{\Delta_\Y}
+
+% alphabetical order, by convention
+\newcommand{\C}{\mathcal{C}}
+\newcommand{\D}{\mathcal{D}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\F}{\mathcal{F}}
+\renewcommand{\H}{\mathcal{H}}
+\newcommand{\N}{\mathcal{N}}
+\newcommand{\I}{\mathcal{I}}
+\newcommand{\R}{\mathcal{R}}
+\newcommand{\T}{\mathcal{T}}
+\newcommand{\U}{\mathcal{U}}
+\newcommand{\V}{\mathcal{V}}
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\Y}{\mathcal{Y}}
+\renewcommand{\P}{\mathcal{P}}
+
+\newcommand{\risk}[1]{\underline{#1}}
+\newcommand{\inprod}[2]{\langle #1, #2 \rangle}%\mathrm{int}(#1)}
+\newcommand{\inter}[1]{\mathrm{int}(#1)}%\mathrm{int}(#1)}
+%\newcommand{\expectedv}[3]{\overline{#1}(#2,#3)}
+\newcommand{\expectedv}[3]{\E_{Y\sim{#3}} {#1}(#2,Y)}
+\newcommand{\toto}{\rightrightarrows}
+\newcommand{\strip}{\mathrm{strip}}
+\newcommand{\trim}{\mathrm{trim}}
+\newcommand{\fplc}{finite-piecewise-linear and convex\xspace} %xspace for use in text
+\newcommand{\conv}{\mathrm{conv}}
+\newcommand{\indopp}{\bar{\mathbbm{1}}}
+\newcommand{\ones}{\mathbbm{1}}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+
+\newcommand{\Ind}[1]{\mathbf{1}\{#1\}}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\arginf}{arg\,inf}
+\DeclareMathOperator*{\sgn}{sgn}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{definition}{Definition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{claim}{Claim}
+
+
+\title{Polytope notes}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Preliminaries}
+\begin{definition}
+	A \emph{polyhedra} in $\reals^d$ is defined by the intersection of a finite number of half-spaces.
+	A \emph{polytope} is a bounded polyhedra.
+\end{definition}
+
+\begin{definition}[Valid inequality]
+	Let $S$ be a set in $\reals^d$.
+	A \emph{valid inequality} for $S$ is an inequality that holds for all vectors in $S$.
+	That is, the pair $(a,\beta)$ is a valid inequality for $S$ if and only if 
+	\begin{align*}
+	\inprod{a}{x} &\leq \beta \; \; \forall x \in S~.~
+	\end{align*}
+\end{definition}
+
+\begin{definition}[Face]
+	For any valid inequality of a polytope, the subset of the polytope of vectors which are tight for the inequality is called a \emph{face} of the polytope.
+	That is, the set $F$ is a face of the polytope $P$ if and only if 
+	\begin{align*}
+	F &= \{x \in P : \inprod{a}{x} = \beta \}
+	\end{align*}
+	for some valid inequality $(a, \beta)$ of $P$.
+\end{definition}
+
+\begin{definition}[Supporting function]
+	Let $S$ be a nonempty bounded set in $\reals^d$.
+	We call the \emph{supporting function} of $S$ the function $H_S:\reals^d \to \reals$ by
+	\begin{align*}
+	H_S(a) := \sup_{x \in S}\inprod{a}{x}~.~
+	\end{align*} 
+\end{definition}
+
+\begin{definition}[Maximizers]
+  Let $S \subseteq \reals^d$, and $a \in \reals^d$.
+  The \emph{set of maximizers} of $a$ over $S$ is defined as
+  \begin{align*}
+    \mathcal{S}(S;a) &= \{x \in S : \inprod a x = H_S(a)\}
+  \end{align*}
+\end{definition}
+
+\begin{definition}[Normal cones]
+  Let $P$ be a polytope in $\reals^d$.
+  For any face $F$ of $P$, we define its \emph{normal cone} $\N(F;P)$ as the set of vectors for which $F$ is the maximizer set over $P$.
+  That is,
+  \begin{align*}
+    \N(F;P) = \left\{a : F = \mathcal{S}(P; a) \right\}~.~
+  \end{align*}
+\end{definition}
+
+  It is worth noting that normal cones are generally not closed by this definition, so sometimes we want to think about the closure of the normal cone.
+
+\begin{definition}[Minkowski sum]
+	Let $S_1, S_2, \ldots, S_n$ be sets of vectors.
+	We can define their \emph{Minkowski sum} as the set of vectors which can be written as the sum of a vector in each set.
+	Namely,
+	\begin{align*}
+	S_1 \oplus \ldots \oplus S_n &= \{x_1 + \ldots + x_n : x_i \in S_i \; \forall i \}
+	\end{align*}
+\end{definition}
+
+\begin{theorem}[EPFL Thesis Theorem 3.1.2]
+	Let $P_1, \ldots, P_n$ be polytopes in $\reals^d$ and let $F$ be a face of the Minkowski sum $P := P_1 \oplus \ldots \oplus P_n$.
+	Then there are faces $F_1, \ldots, F_n$ of $P_1, \ldots, P_n$ respectively such that $F = F_1 \oplus \ldots \oplus F_n$.
+	Moreover, this decomposition is unique.
+\end{theorem}
+
+\jessie{Not sure if we'll need this next corollary yet, but seems like it might be useful.}
+\begin{corollary}[EPFL Cor 3.1.3]
+  Let $P = P_1 \oplus \ldots \oplus P_n$ be a Minkowski sum of polytopes in $\reals^d$, let $F$ be a nonempty face of $P$ , and let $F_1, \ldots, F_n$ be its decomposition.
+  Then $\N(F;P) = \N(F_1;P_1) \cap \ldots \cap \N(F_n; P_n)$.
+\end{corollary}
+
+\begin{corollary}[EPFL Cor 3.1.4]
+  Let $F_1, \ldots, F_n$ be nonempty faces of the polytopes $P_1, \ldots, P_n$ respectively, then $F_1 \oplus \ldots \oplus F_n$ is a face of $P_1 \oplus \ldots \oplus P_n$ if and only if the intersection of their normal cones is nonempty.
+\end{corollary}
+
+\begin{theorem}[EPFL Th 3.1.6]\label{thm:support-minksum}
+  The supporting function of a Minkowski sum is the sum of the supporting functions of its summands.
+\end{theorem}
+
+\begin{definition}[Weighted Minkowski sum]
+  If $P_1, \ldots, P_n$ are polytopes in $\reals^d$, we can call $P(\vec \lambda)$ their \emph{weighted} Minkoski sum for $\vec \lambda \in \reals^n_+$
+  \begin{align*}
+    P(\lambda_1, \ldots, \lambda_n) = \lambda_1 P_1 \oplus \ldots \oplus \lambda_n P_n
+  \end{align*}
+\end{definition}
+
+  From the thesis:  \emph{``It is easy to see that the normal fan (undefinedhere, but consequently normal cones) of $\lambda_i P_i$ does not change as long as $\lambda_i$ is positive.  Since the normal fan of a Minkowski sum can be deduced from that of its summands, we can deduce from this that the conbimatorial properties of $P(\lambda_1, \ldots, \lambda_n)$ stay the same as long as all $\lambda_i$ are positive.''}
+
+  \section{Starting with polytopes}\label{sec:start-polytope}
+  In this section, we will suppose we start with a finite set of $n$ polytopes $\T := \{T_1, \ldots, T_n\}$, and we will call $T := T_1 \oplus \ldots \oplus T_n$ their Minkowski sum.
+  We know that every polytope has both a halfspace and vertex representation ($\H$-representation and $\V$ representation, respectively.)
+  In order to construct the $\H$-representation, we know there must be a matrix $V$ and vector $e$ such that $T = \{x : Vx \leq e\}$, but it is unclear how to find such a set, which we discuss later.
+
+  \begin{definition}
+    Suppose we are given a polytope $T \in \reals^d$ and set of vectors $V \in \reals^{k \times d}$.
+    Call $e \in \reals^k$ the vector such that $e_i = \max_{x \in T}\inprod{v_i}{x}$.  
+    We say a set of normals $V$ is \emph{complete} with respect to a polytope $T_y$ if $T_y = \{x \in \reals^d: Vx \leq E_{;y}\}$, where $E_{;y}$ is the $y^{th}$ column of $E$.
+
+    Moreover, $V$ is complete with respect to a set of polytopes $\T$ if and only if $V$ is complete with respect to each $T \in \T$.
+  \end{definition}
+
+  \subsection{Finding $V$}
+  \btw{Not sure if we want to go this far, or just argue that a complete set of normals exists.  This would be where Corollaries 1 and 2 come in though.}
+  In order to find a $V$ that is complete with respect to $T$, we can look at the normal cones for each $T_i$ and find a vector in the normal cone $\N(F_y, T_y)$ in the decomposition of $F$ in $T$ for each face $F$.
+  Since we know $T_1, \ldots, T_n$ are polytopes with $\H$-representations, one of the first natural steps is to find a (possibly minimal) set of valid inequalities describing each $T_i$.
+  For each face $F_j$ of a given polytope $T$, we can choose a normal $v_j \in \N(F_j; T)$ and describe the face $F$ by $\{x \in T:  \inprod{v_j}{x} = \sup_{x \in T} \inprod{v_j}{x} =: e_j\}$.
+  For each face $F_{jy}$ that is in the decomposition of the face $F_j$, we have $\inprod {v_j}{x} \leq e_j$ forming a tight bound on $F_j$. 
+  If we do this over each $T_y$, we can call $E_y$ the vector of such $e_j$ vectors for each face of $T_y$.
+  We then stack these $E_y$ vectors to form the matrix $E$.
+  
+%  Therefore, if we take a matrix $V$ that is a finite set of the elements of the normal cones for each face in $T$, such a matrix can also be used to define the $\H$-representation for not only $T$, but each $T_y$.
+%  For each face $F_i$ of $T$ with $\N(F_i, T) \neq \emptyset$, we can choose one normal $v_i$ so that the face $F_i = \{x : \inprod{v_i}{x} = \sup_{x\in T}\inprod{v_i}{x} =: e_i\}$.
+%  As this happens for each face with a nonempty normal cone, we can repeat this for each $T_y \in \T$.
+%  This yields the matrix $E := (e_{yj})$ where $e_{yj} = \sup_{x \in T_y}\inprod{v_j}{x}$.
+%  
+  
+  \begin{conjecture}
+  	The set of normals $V$ and vectors $E$ constructed by taking an element of the normal cone is complete for both $T$ and each $T_y \in \T$.
+  \end{conjecture}
+  
+
+  
+  \subsection{Once we have $V$}
+  Now, for a given polytope $T(p) := \oplus p_y T_y$, we will later want to ask when a given $z \in \reals^d$ is in the polytope $T(p)$.
+  First, we can claim $T(p) = \{x : Vx \leq E p \}$, where $V$ is complete for $\T$.
+  To see this, first observe that $p_y T_y = \{x : Vx \leq p_y E_{;y}\}$.
+  Now in taking the Minkowski sum of polytopes described by the same set of normals, we can take 
+  \begin{align*}
+  \oplus_y p_y T_y &= \{x_1 : Vx_1 \leq p_1 E_{;1}\} \oplus \ldots \oplus \{x_n : Vx_n \leq p_n E_{;n}\} \\
+  &= \{x : Vx \leq p_1 E_{;1} + \ldots + p_n E_{;n}\}\\
+  &= \{x : Vx \leq E p\}
+  \end{align*}
+  Observe the first to second line follows from Theorem~\ref{thm:support-minksum}.
+  
+  Now, we have $z \in T(p) \iff \inprod{v_i}{z} \leq (Ep)_i$ for all $i \in [k]$.
+  We are particularly interested in when $\vec 0 \in T(p)$.  \btw{For later, common result to say $T(p) = \partial \inprod p {L(\cdot)}$, so if $0 \in T(p)$, we have a minimizer of the loss.}
+  Plugging in $\vec 0$, we have $\vec 0 \in T(p)$ if and only if $E p \geq 0$
+
+  As we assume $p \in \simplex$, we now describe the cell $D := \{p \in \simplex : Ep \geq \vec 0\}$ as the set of distributions such that $\vec 0 \in T(p)$.
+
+
+  \section{Starting at the cell}\label{sec:start-cell}
+  
+  Now let us consider some cell $C \subseteq \simplex$.
+  Let $A$ be the affine span of the simplex, $A := \{p \in reals^n : \sum_y p_y = 1\}$.
+  By existence of its $\H$-representation, we can represent the cell $C := \{p \in A : Bp \geq c\}$.
+  In fact, we can set $c := \vec 0$ in order to enforce a unique representation of $B$, up to row reordering and scaling.
+  \jessiet{Later: Talk about why $c = \vec 0$ and not some other vector.}
+
+  \section{Equivalences; moving from polytopes to cells and back}
+  
+  In the big picture, we want to know if we are given a cell $C$, how we can come up with a finite set of polytopes $\T = \{T_1, \ldots, T_n\}$ where $T(p) = \oplus_y p_y T_y$ such that $\vec 0 \in T(p) \iff p \in C$, or vice versa: starting from $\T$, can we derive the cell $C \subseteq \simplex$ where $\vec 0 \in T(p)$ for all $p \in C$.
+  
+  We know that if we are given $\T$ and a complete set of normals $V$, we can describe $D = \{p \in \simplex : Ep \geq \vec 0\}$ as in Section~\ref{sec:start-polytope}.
+  However, we do not necessarily have $D' := \{p \in A : Ep \geq \vec 0\} \subseteq \simplex$, and this poses some issues given the construction of the cell $C$ only assuming that we are in the affine span of the simplex, but not necessarily in the simplex.
+  
+  \begin{lemma}\label{lem:describe-D}
+    Suppose we have polytopes $\T = \{T_1, \ldots, T_n\}$ and a set of normals $V$ that is complete for $\T$.
+ 	Take $E = (e_{iy})$ where $e_{iy} = \max_{x \in T_y} \inprod{v_i}{x}$, and $D = \{p \in \simplex : Ep \geq \vec 0\}$.
+ 	
+ 	Then $\{p \in \simplex : \vec 0 \in \oplus_y p_y T_y\} = \{p \in \simplex: Ep \geq \vec 0\}$.\btw{``stuff about $E$ and $D$.''}
+  \end{lemma}
+  \begin{proof}
+    First, let us fix a distribution $p \in \simplex$.
+    We define $T(p) := \oplus_y p_y T_y$ to be the $p$-weighted Minkowski sum over the polytopes in $\T$.
+    By Theorem~\ref{thm:support-minksum}, we have the support of the (weighted) Minkowski sum is the (weighted) sum of the support of each polytope.
+    
+    As each halfspace is bounded by the support by construction of $E$, then the support of the weighted polytope defined by an inequality on $v_i$ can be described as $\inprod{v_i}{z} \leq \inprod{E_i}{p}$.
+    Since we this is true for all $v_i$, we then have $T(p) = \oplus_y p_y T_y = \{x \in \reals^d : Vx \leq Ep\}$.
+    	
+    Therefore, for fixed $p$, we have $\vec 0 \in \oplus_y p_y T_y \iff Ep \geq \vec 0$.
+    Since this is true for all $p \in \simplex$, we observe the stated set equality.
+  \end{proof}
+  
+  \begin{proposition}\label{prop:relate-E-B}
+    Suppose we have polytopes $\T = \{T_1, \ldots, T_n\}$ and a set of normals $V$ that is complete for $\T$.
+    Take $E = (e_{iy})$ where $e_{iy} = \max_{x \in T_y} \inprod{v_i}{x}$, and take $D = \{p \in \simplex : Ep \geq \vec 0\}$ and $C = \{p \in A : Bp \geq \vec 0\}$.
+    
+    Then $\{p \in \simplex : \vec 0 \in \oplus_y p_y T_y\} = C$	if and only if $C = D$.
+    \btw{``stuff about $E$ and $B$.''}
+  \end{proposition}
+  \begin{proof}
+  	By Lemma~\ref{lem:describe-D}, we have $D = \{p \in \simplex : \vec 0 \in \oplus_y p_y T_y\}$ by construction, so the double implication follows from substitution.
+  \end{proof}
+
+
+  \begin{proposition}
+  	Suppose we have polytopes $\T = \{T_1, \ldots, T_n\}$ and a set of normals $V$ that is complete for $\T$.
+  	Take $E = (e_{iy})$ where $e_{iy} = \max_{x \in T_y} \inprod{v_i}{x}$, and take $D = \{p \in \simplex : Ep \geq \vec 0\}$ and $C = \{p \in A : Bp \geq \vec 0\}$.
+  	
+  	Then $\{p \in \simplex : \vec 0 \in \oplus_y p_y T_y\} = C$	if and only if non-simplex rows of $B$ appear in $E$ (possibly scaled) and every other row of $E$ is redundant with respect to $B$.
+  	\btw{``replace prop 1 statement with `non-simplex rows of $B$ appear in $E$ (possible scaled) and every other row of $E$ is redundant with respect to $B$.'''}
+  \end{proposition}
+  \begin{proof}
+	\begin{itemize}
+		\item [$\implies$] First, assume $C = \{p \in \simplex: \vec 0 \in \oplus_y p_y T_y\}$.
+		By Proposition~\ref{prop:relate-E-B}, we know that $C = D := \{p \in \simplex : Ep \geq \vec 0\}$.
+		We can re-write $D$ as $\{p \in A : [E;I] p \geq \vec 0\}$, building simplex constraints into the inequality rather than the domain assumption.
+		By the assumed equality, every row of $B$ must then appear in $[E;I]$, where $I$ is the $n$-element identity matrix.
+		As $\{p \in A : I p \geq \vec 0\}$ strictly defines the simplex constraints, any non-simplex constraint of $B$ must then be described by a row of $E$, up to rescaling.
+		
+		What's more is that since the polytopes are the same, they have a unique minimal $\H$-representation (up to rescaling) since they are defined by an inequality on $\vec 0$.
+		As $D$ is defined by distributions on the simplex and $C$ on the affine span of the simplex, and $\simplex \subset A$, we have the rest of the rows in $E$ necessarily being redundant with respect to $B$.  \jessie{revisit.}
+		
+		\item [$\impliedby$] Now, suppose that any non-simplex rows of $B$ appear in $E$, and every other row of $E$ is redundant with respect to $B$.
+		By adding simplex constraints to the affine span of the simplex, we then have $\{p \in A : Bp \geq \vec 0\} = \{p \in A : [E; I] \geq \vec 0 \}$. \jessiet{Double check we can claim this at this point...}
+		The latter set is equal to $D$ once we change the domain of $p$, so that we have $D = \{p \in \simplex : Ep \geq \vec 0\} = \{p \in A : [E;I] p \geq \vec 0\}$.
+		
+		Then $D = C$, and therefore, by Proposition~\ref{prop:relate-E-B}, we have $C = \{p \in \simplex : \vec 0 \in \oplus_y p_y T_y\}$.
+	\end{itemize}
+  \end{proof}
+  
+\end{document}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
