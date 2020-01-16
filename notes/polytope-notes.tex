@@ -143,6 +143,7 @@
 	\end{align*} 
 \end{definition}
 
+\iffalse
 \begin{definition}[Maximizers]
   Let $S \subseteq \reals^d$, and $a \in \reals^d$.
   The \emph{set of maximizers} of $a$ over $S$ is defined as
@@ -161,6 +162,7 @@
 \end{definition}
 
   It is worth noting that normal cones are generally not closed by this definition, but sometimes we may want to think about the closure of the normal cone.
+\fi
 
 \begin{definition}[Minkowski sum]
 	Let $S_1, S_2, \ldots, S_n$ be sets of vectors.
@@ -177,14 +179,18 @@
 	Moreover, this decomposition is unique.
 \end{theorem}
 
+\iffalse 
+%used in the construction of V
 \begin{corollary}[EPFL Cor 3.1.3]\label{cor:face-decomp-normal-cones}
   Let $T = T_1 \oplus \ldots \oplus T_n$ be a Minkowski sum of polytopes in $\reals^d$, let $F$ be a nonempty face of $T$ , and let $F_1, \ldots, F_n$ be its decomposition.
   Then $\N(F;T) = \N(F_1;T_1) \cap \ldots \cap \N(F_n; T_n)$.
 \end{corollary}
 
+%used in proving completeness of constructed V
 \begin{corollary}[EPFL Cor 3.1.4]
   Let $F_1, \ldots, F_n$ be nonempty faces of the polytopes $T_1, \ldots, T_n$ respectively, then $F_1 \oplus \ldots \oplus F_n$ is a face of $T_1 \oplus \ldots \oplus T_n$ if and only if the intersection of their normal cones is nonempty.
 \end{corollary}
+\fi
 
 \begin{theorem}[EPFL Th 3.1.6]\label{thm:support-minksum}
   The supporting function of a Minkowski sum is the sum of the supporting functions of its summands.
@@ -199,10 +205,6 @@
 
   From the thesis:  \emph{``It is easy to see that the normal fan (undefined here, but consequently normal cones) of $p_i T_i$ does not change as long as $p_i$ is positive.  Since the normal fan of a Minkowski sum can be deduced from that of its summands, we can deduce from this that the conbimatorial properties of $\oplus_y p_y T_y$ stay the same as long as all $p_i$ are positive.''}
 
-  \section{Starting with polytopes}\label{sec:start-polytope}
-  In this section, we will suppose we start with a finite set of $n$ polytopes $\T := \{T_1, \ldots, T_n\}$, and we will call $T := T_1 \oplus \ldots \oplus T_n \in \reals^d$ their Minkowski sum.
-  We know that every polytope has both a halfspace and vertex representation ($\H$-representation and $\V$-representation, respectively.)
-  In order to construct the $\H$-representation, we know there must be a matrix $V \in \reals^{k \times d}$ and vector $e \in \reals^k$ such that $T = \{x \in \reals^d : Vx \leq e\}$, but it is unclear how to find such a set, which we discuss in Section~\ref{sec:find-V}.
 
   \subsection{Notation and new definitions}
   We will use the following notation throughout the rest of this section.
@@ -214,6 +216,7 @@
   \end{definition}
   Moreover, we say $V$ is complete with respect to the set of polytopes $\T$ if and only if $V$ is complete with respect to each $T_y \in \T$.
 
+  \iffalse
   \subsection{Finding $V$}\label{sec:find-V}
   \btw{Not sure if we want to go this far, or just argue that a complete set of normals exists.  This would be where Corollaries 1 and 2 come in though.}
   In order to find a matrix of normals $V$ that is complete with respect to $T := \oplus_y T_y$, we can look at the normal cones for each $T_y$ and find a vector in the normal cone $\N(F_y, T_y)$ in the decomposition of $F$ in $T$ for each face $F$.
@@ -263,8 +266,31 @@
   The construction of $V$ in Proposition~\ref{prop:complete-V} is typically not the minimal $V$ that is complete for $\T$.
   By minimal, we mean that the number of normals $k$ is minimized while still being complete.
   It is unclear at the current moment how to find such a minimal set of normals, so we proceed to understanding what we can say once we have $V$.
+  \fi
   
-  \subsection{Once we have $V$}
+  \section{Starting at the cell $C$}\label{sec:start-cell}
+  
+  Now let us consider some cell $C \subseteq \simplex$.
+  Let $A$ be the affine span of the simplex, $A := \{p \in \reals^n : \sum_y p_y = 1\}$.
+  We can represent the cell $C := \{p \in A : Bp \geq c\}$.
+  In fact, we can set $c := \vec 0$ in order to enforce a unique representation of $B$, up to row reordering and scaling.
+  This also allows us to use the same matrix for the $\H$-representation even as we scale the simplex by a positive constant.
+  
+  Here, unlike the matrix $E$ when given $V$, the matrix $B$ is not unique.
+  In a similar manner, we can simply add redundant constraints in $A$ and yield the same cell $C$.
+  
+  \subsection{Notes post NeurIPS} 
+  Still not sure if we can construct $B$ with the assumption that $p \in \simplex$ rather than $p \in A$, but gathering from our conversations at NeurIPS, that question seems worth investigating, just maybe after COLT.
+  I mean that in the sense that this $B$ matrix captures our necessary condition.
+  The vertex representation seems to capture our sufficient condition, possibly rendering the simplex halfspace constraints unnecessary when we think of them as necessary conditions.
+  With the results below (that nonsimplex constraints must appear in both $E$ and $B$), being able to assume the simplex for $B$ would simplify a bit... but doesn't give us a polytope construction by any means.
+
+  \section{From polytopes to cells}\label{sec:start-polytope}
+  In this section, we will suppose we start with a finite set of $n$ polytopes $\T := \{T_1, \ldots, T_n\}$, and we will call $T := T_1 \oplus \ldots \oplus T_n \in \reals^d$ their Minkowski sum.
+  We know that every polytope has both a halfspace and vertex representation ($\H$-representation and $\V$-representation, respectively.)
+  In order to construct the $\H$-representation, we know there must be a matrix $V \in \reals^{k \times d}$ and vector $e \in \reals^k$ such that $T = \{x \in \reals^d : Vx \leq e\}$, but it is unclear how to construct such a set.
+  
+  \subsection{Given normals $V$}
   Now, for a given polytope $T(p)$, we will later want to ask when a given $z \in \reals^d$ is in the polytope $T(p)$.
   We will then use this to understand the set of $p \in \simplex$ for which $z \in T(p)$, later substituting $z=0$.
   Throughout, assume we have $V$ which is complete for $\T$ and $E$ defined by the support of each normal in $V$ for all $T_y \in \T$.
@@ -281,36 +307,18 @@
   Now, we have $z \in T(p) \iff \inprod{v_i}{z} \leq (Ep)_i$ for all $v_i \in V$.
   
   We are particularly interested in when $\vec 0 \in T(p)$, we have $\vec 0 \in T(p)$ if and only if $E p \geq 0$ by substitution.  \btw{For later, common result to say $T(p) = \partial \inprod p {L(\cdot)}$, so if $0 \in T(p)$, we have a minimizer of the loss.}
-
+  
   We assume $p \in \simplex$, so we now describe the cell $D^\T := \{p \in \simplex : Ep \geq \vec 0\}$ as the set of distributions such that $\vec 0 \in T(p)$.
   In cases where $\T$ is obvious from context, we omit the subscript and just write $D$.
-
+  
   Given the complete set of normals $V$ and constructing the support matrix for $V$ and $\T$, $E$, we observe that $E$ is unique up to rescaling.
   However, as discussed earlier, there are always multiple complete sets of normals for $\T$, and so in that sense, $E$ is not unique.
   
-
-  \section{Starting at the cell $C$}\label{sec:start-cell}
-  
-  Now let us consider some cell $C \subseteq \simplex$.
-  Let $A$ be the affine span of the simplex, $A := \{p \in \reals^n : \sum_y p_y = 1\}$.
-  We can represent the cell $C := \{p \in A : Bp \geq c\}$.
-  In fact, we can set $c := \vec 0$ in order to enforce a unique representation of $B$, up to row reordering and scaling.
-  This also allows us to use the same matrix for the $\H$-representation even as we scale the simplex by a positive constant.
-  
-  Here, unlike the matrix $E$ when given $V$, the matrix $B$ is not unique.
-  In a similar manner, we can simply add redundant constraints in $A$ and yield the same cell $C$.
- 
-  \subsection{Notes post NeurIPS} 
-  Still not sure if we can construct $B$ with the assumption that $p \in \simplex$ rather than $p \in A$, but gathering from our conversations at NeurIPS, that question seems worth investigating, just maybe after COLT.
-  I mean that in the sense that this $B$ matrix captures our necessary condition.
-  The vertex representation seems to capture our sufficient condition, possibly rendering the simplex halfspace constraints unnecessary when we think of them as necessary conditions.
-  With the results below (that nonsimplex constraints must appear in both $E$ and $B$), being able to assume the simplex for $B$ would simplify a bit... but doesn't give us a polytope construction by any means.
-
-  \section{Equivalences; moving from polytopes to cells and back}
-  
+  \subsection{Equivalences}
   In the big picture, we want to know two things.
-  First, if we are given a cell $C$, how we can come up with a finite set of polytopes $\T = \{T_1, \ldots, T_n\}$ such that $\vec 0 \in T(p) \iff p \in C$.
+  First, if we are given a cell $C$, how we can construct a finite set of polytopes $\T = \{T_1, \ldots, T_n\}$ such that $\vec 0 \in T(p) \iff p \in C$.
   Second, we want to know the opposite case: starting from $\T$, can we derive the cell $C \subseteq \simplex$ where $\vec 0 \in T(p)$ for all $p \in C$?
+  We start with the latter, leaving the former for future work.
   
   We know that if we are given $\T$ and a complete set of normals $V$, we can describe $D = \{p \in \simplex : Ep \geq \vec 0\}$ as in Section~\ref{sec:start-polytope}.
   However, we do not necessarily have $D' := \{p \in A : Ep \geq \vec 0\} \subseteq \simplex$, and this poses some issues given the construction of the cell $C$ only assuming that we are in the affine span of the simplex, but not necessarily in the simplex.
@@ -341,7 +349,7 @@
     \btw{whiteboard: ``stuff about $E$ and $B$.''}
   \end{proposition}
   \begin{proof}
-  	By Lemma~\ref{lem:describe-D}, we have $D = \{p \in \simplex : \vec 0 \in \oplus_y p_y T_y\}$ by construction, so the result follows from substitution.
+  	By Lemma~\ref{lem:describe-D}, we have $D = \{p \in \simplex : \vec 0 \in \oplus_y p_y T_y\}$ by construction of $E$, so the result follows from substitution.
   \end{proof}
   
   \begin{definition}
