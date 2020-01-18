@@ -102,7 +102,6 @@
 \newtheorem{definition}{Definition}
 \newtheorem{corollary}{Corollary}
 \newtheorem{conjecture}{Conjecture}
-\newtheorem{condition}{Condition}
 \newtheorem{claim}{Claim}
 
 
@@ -217,18 +216,74 @@
   \end{definition}
   Moreover, we say $V$ is complete with respect to the set of polytopes $\T$ if and only if $V$ is complete with respect to each $T_y \in \T$.
 
-  \subsubsection*{Optimality Condition}
-  In general, we know that $\vec 0$ in the subgradient of $f(r)$ if and only if $r$ is an optimum of convex $f$ in general dimensions.
+  \iffalse
+  \subsection{Finding $V$}\label{sec:find-V}
+  \btw{Not sure if we want to go this far, or just argue that a complete set of normals exists.  This would be where Corollaries 1 and 2 come in though.}
+  In order to find a matrix of normals $V$ that is complete with respect to $T := \oplus_y T_y$, we can look at the normal cones for each $T_y$ and find a vector in the normal cone $\N(F_y, T_y)$ in the decomposition of $F$ in $T$ for each face $F$.
+  Since we know $T_1, \ldots, T_n$ are polytopes and therefore have $\H$-representations, one of the first natural steps is to find a set of valid inequalities describing each $T_y$.
+  For each face $F_j$ of the Minkowski sum polytope 
+  $T$, we can choose a normal $v_j \in \N(F_j; T)$ and describe the face $F$ by $\{x \in T:  \inprod{v_j}{x} = \sup_{x \in T} \inprod{v_j}{x} =: e_j\}$ by Theorem~\ref{thm:unique-face-decomp} and Definition~\ref{def:face}.
+  For each face $F_{j}^{y}$ that is in the decomposition of the face $F_j$, we have $\inprod {v_j}{x} \leq e^y_j$ forming a tight bound on $F_j$ by Theorem~\ref{thm:support-minksum}. 
+
+  For ease of notation, we concatenate the $e^y$ vectors corresponding to the support of each normal defining the polytope $T_y$ to form the matrix $E$ according to a consistent ordering on $\Y$.
+  Note that as we assume $V$ is complete with respect to $\T$, we have $e^y$ having the same dimensions for all $y$, and thus $E$ is a matrix. 
   
-  For nice\footnote{for reports on the relative interior of the domain, and something else} conditions, we have $\vec 0 \in \oplus_i f_i$ if and only if $\vec 0 \in \oplus_i \partial f_i(r)$.
-  This allows us to consider the following optimality condition:
-  \begin{definition}[Optimality]
-  	For all $r \in \R$ and $y \in \Y$, we have $r \in \gamma_r \iff \vec 0 \in \oplus_y p_y T_y(r)$.
-  \end{definition}
-  The polytope $T_y(r)$ can be thought of as $\partial L_y(\varphi(r))$.
-
-   
-
+%  Therefore, if we take a matrix $V$ that is a finite set of the elements of the normal cones for each face in $T$, such a matrix can also be used to define the $\H$-representation for not only $T$, but each $T_y$.
+%  For each face $F_i$ of $T$ with $\N(F_i, T) \neq \emptyset$, we can choose one normal $v_i$ so that the face $F_i = \{x : \inprod{v_i}{x} = \sup_{x\in T}\inprod{v_i}{x} =: e_i\}$.
+%  As this happens for each face with a nonempty normal cone, we can repeat this for each $T_y \in \T$.
+%  This yields the matrix $E := (e_{yj})$ where $e_{yj} = \sup_{x \in T_y}\inprod{v_j}{x}$.
+%  
+  
+  \begin{proposition}\label{prop:complete-V}
+  	The normals $V$ constructed by taking an element of the normal cone $\N(F, T)$ for each face $F$ in $T$ is complete for both $T$ and each $T_y \in \T$.
+  \end{proposition}
+  \begin{proof}
+  	First, to see this constructed $V$ is complete for $T$, consider that the normals to the facets (in the affine span of $T$) of $T$ is complete for $T$.
+  	Moreover, each additional normal is a redundant constraint, so
+%   since the inner product of elements of the normal cone is less than or equal to the support for the polytope for every element of $T$.
+%  	Thus, 
+  	$V$ is complete for $T$.
+  	
+  	To see why $V$ is complete with respect to each $T_y$, consider each case of subset inclusion.
+  	We will let $\bar T_y := \{ x : Vx \leq e^y\}$ be the polytope described by $V$ and $E$, and $T_y$ be the given polytope.
+  	
+  	First,  to see $T_y \subseteq \bar T_y$, take $x \in T_y$.
+  	For all $i \in [k]$, we then have $\inprod{v_i}{x} \leq H_{T_y}(v_i) = e^y_i$.
+  	By definition, this holds for all $v_i$ such that $v_i \in \N(F, T_y)$ for some $F$ a face of $T_y$.
+  	We then want to claim that, for all $v_i \in V$, there is some face $F_y$ of $T_y$ such that $v_i \in \N(F_y, T_y)$, and thus the previous statement holds.
+  	This follows from Corollary~\ref{cor:face-decomp-normal-cones}, since we know that we must have $v_i \in \N(F, T)$ for some face $F$ of $T$ by construction.
+  	We necessarily have $v_i \in \N(F_y, T_y)$, where $F_y$ is the face of $T_y$ in the decomposition of $F$.
+  	
+  	Now to see $\bar T_y \subseteq T_y$, we use a contradiction.
+  	Suppose there was some $x \in \bar T_y$ such that $x \not \in T_y$.
+  	Then there must be some $v_i \in V$ so that $\inprod {v_i}{x} > \sup_{y \in T_y} \inprod{v_i}{y}$.
+  	This implies that for all faces $F_{j}^y$ of $T_y$, we have $v_i \not \in \N(F_{j}^y, T_y)$.
+  	However, by construction of $V$, we can consider the face $F$ of $T$ such that $v_i \in \N(F,T) = \cap_y \N(F_y, T_y)$ by Corollary~\ref{cor:face-decomp-normal-cones}.
+  	We necessarily have $v_i \in \N(F_y, T_y)$, yielding a contradiction.
+  	Thus, we have $v_k \in \N(F_y, T_y)$, so we conclude $\bar T_y \subseteq T_y$, yielding the equality of each $\bar T_y = T_y$, which is the statement.
+  \end{proof}
+  
+  The construction of $V$ in Proposition~\ref{prop:complete-V} is typically not the minimal $V$ that is complete for $\T$.
+  By minimal, we mean that the number of normals $k$ is minimized while still being complete.
+  It is unclear at the current moment how to find such a minimal set of normals, so we proceed to understanding what we can say once we have $V$.
+  \fi
+  
+  \section{Starting at the cell $C$}\label{sec:start-cell}
+  
+  Now let us consider some cell $C \subseteq \simplex$.
+  Let $A$ be the affine span of the simplex, $A := \{p \in \reals^n : \sum_y p_y = 1\}$.
+  We can represent the cell $C := \{p \in A : Bp \geq c\}$.
+  In fact, we can set $c := \vec 0$ in order to enforce a unique representation of $B$, up to row reordering and scaling.
+  This also allows us to use the same matrix for the $\H$-representation even as we scale the simplex by a positive constant.
+  
+  Here, unlike the matrix $E$ when given $V$, the matrix $B$ is not unique.
+  In a similar manner, we can simply add redundant constraints in $A$ and yield the same cell $C$.
+  
+  \subsection{Notes post NeurIPS} 
+  Still not sure if we can construct $B$ with the assumption that $p \in \simplex$ rather than $p \in A$, but gathering from our conversations at NeurIPS, that question seems worth investigating, just maybe after COLT.
+  I mean that in the sense that this $B$ matrix captures our necessary condition.
+  The vertex representation seems to capture our sufficient condition, possibly rendering the simplex halfspace constraints unnecessary when we think of them as necessary conditions.
+  With the results below (that nonsimplex constraints must appear in both $E$ and $B$), being able to assume the simplex for $B$ would simplify a bit... but doesn't give us a polytope construction by any means.
 
   \section{From polytopes to cells}\label{sec:start-polytope}
   In this section, we will suppose we start with a finite set of $n$ polytopes $\T := \{T_1, \ldots, T_n\}$, and we will call $T := T_1 \oplus \ldots \oplus T_n \in \reals^d$ their Minkowski sum.
@@ -239,7 +294,7 @@
   Now, for a given polytope $T(p)$, we will later want to ask when a given $z \in \reals^d$ is in the polytope $T(p)$.
   We will then use this to understand the set of $p \in \simplex$ for which $z \in T(p)$, later substituting $z=0$.
   Throughout, assume we have $V$ which is complete for $\T$ and $E$ defined by the support of each normal in $V$ for all $T_y \in \T$.
-  As a reminder, we denote $e^y = E_{;y}$ as the $y^{th}$ column of $E$, or equivalently, the support vector for $T_y$ given $V$.
+  As a reminder, we denote $e^y = E_{;y}$ as the $y^th$ column of $E$, or equivalently, the support vector for $T_y$ given $V$.
   
   Since we define $T_y = \{x : Vx \leq e^y\}$, we can multiply the right side of the inequality by the constant $p_y \geq  0$ to yield $p_y T_y = \{x : Vx \leq p_y e^y\}$.
   Now in taking the Minkowski sum of polytopes described by the same set of normals, we can take 
@@ -269,8 +324,8 @@
   However, we do not necessarily have $D' := \{p \in A : Ep \geq \vec 0\} \subseteq \simplex$, and this poses some issues given the construction of the cell $C$ only assuming that we are in the affine span of the simplex, but not necessarily in the simplex.
   
   \begin{lemma}\label{lem:describe-D}
-    Suppose we are given polytopes $\T = \{T_1, \ldots, T_n\}$ and a set of normals $V$ that is complete for $\T$.
- 	Take $E = (e_{i}^y)$ where $e_{i}^y = \max_{x \in T_y} \inprod{v_i}{x}$, and $D^\T = \{p \in \simplex : Ep \geq \vec 0\}$.
+    Suppose we have polytopes $\T = \{T_1, \ldots, T_n\}$ and a set of normals $V$ that is complete for $\T$.
+ 	Take $E = (e_{i}^y)$ where $e_{i}^y = \max_{x \in T_y} \inprod{v_i}{x}$, and $D = \{p \in \simplex : Ep \geq \vec 0\}$.
  	
  	Then $\{p \in \simplex : \vec 0 \in \oplus_y p_y T_y\} = \{p \in \simplex: Ep \geq \vec 0\}$.\btw{on the whiteboard: ``stuff about $E$ and $D$.''}
   \end{lemma}
@@ -287,8 +342,8 @@
   \end{proof}
   
   \begin{proposition}\label{prop:relate-E-B}
-    Suppose we are given polytopes $\T = \{T_1, \ldots, T_n\}$ and a set of normals $V$ that is complete for $\T$.
-    Take $E = (e_{iy})$ where $e_{iy} = \max_{x \in T_y} \inprod{v_i}{x}$, and take $D = \{p \in \simplex : Ep \geq \vec 0\}$ and take the minimal rank $B \in \reals^{k \times n}$ such that $C = \{p \in \simplex : Bp \geq \vec 0\}$.
+    Suppose we have polytopes $\T = \{T_1, \ldots, T_n\}$ and a set of normals $V$ that is complete for $\T$.
+    Take $E = (e_{iy})$ where $e_{iy} = \max_{x \in T_y} \inprod{v_i}{x}$, and take $D = \{p \in \simplex : Ep \geq \vec 0\}$ and $C = \{p \in A : Bp \geq \vec 0\}$.
     
     Then $\{p \in \simplex : \vec 0 \in \oplus_y p_y T_y\} = C$	if and only if $C = D$.
     \btw{whiteboard: ``stuff about $E$ and $B$.''}
@@ -296,107 +351,53 @@
   \begin{proof}
   	By Lemma~\ref{lem:describe-D}, we have $D = \{p \in \simplex : \vec 0 \in \oplus_y p_y T_y\}$ by construction of $E$, so the result follows from substitution.
   \end{proof}
-
+  
   \begin{definition}
-  	We say a vector $v$ is \emph{redundant} with respect to matrix $Y$ if we have $\{z \in \simplex : Yz \geq \vec 0\} = \{z \in \simplex : [Y;v]z \geq \vec 0\}$.
-  	\jessiet{Should generalize this...}
+  	We say a vector $v$ is \emph{redundant} with respect to matrix $Y$ if we have $\{z \in A : Yz \geq \vec 0\} = \{z \in A : [Y;v]z \geq \vec 0\}$.
   \end{definition}
 
   \begin{proposition}\label{prop:relate-rows}
   	Suppose we have polytopes $\T = \{T_1, \ldots, T_n\}$ and a set of normals $V$ that is complete for $\T$.
-  	Take $E = (e_{i}^y)$ where $e_{i}^y = \max_{x \in T_y} \inprod{v_i}{x}$, and take $D = \{p \in \simplex : Ep \geq \vec 0\}$ and take the minimal matrix $B$ such that a given cell $C = \{p \in \simplex : Bp \geq \vec 0\}$.
+  	Take $E = (e_{i}^y)$ where $e_{i}^y = \max_{x \in T_y} \inprod{v_i}{x}$, and take $D = \{p \in \simplex : Ep \geq \vec 0\}$ and $C = \{p \in A : Bp \geq \vec 0\}$.
   	
-  	Then $\{p \in \simplex : \vec 0 \in \oplus_y p_y T_y\} = C$	if and only the rows of $B$ appear in $E$ (possibly scaled) and every other row of $E$ is redundant with respect to $B$.
+  	Then $\{p \in \simplex : \vec 0 \in \oplus_y p_y T_y\} = C$	if and only if non-simplex rows of $B$ appear in $E$ (possibly scaled) and every other row of $E$ is redundant with respect to $B$.
   	\btw{``replace prop 1 statement with `non-simplex rows of $B$ appear in $E$ (possible scaled) and every other row of $E$ is redundant with respect to $B$.'''}
   \end{proposition}
   \begin{proof}
 	\begin{itemize}
 		\item [$\implies$] First, assume $C = \{p \in \simplex: \vec 0 \in \oplus_y p_y T_y\}$.
 		By Proposition~\ref{prop:relate-E-B}, we know that $C = D := \{p \in \simplex : Ep \geq \vec 0\}$.
-		Then we have $\{p \in \simplex : Bp \geq \vec 0\} = \{p \in \simplex : Ep \geq \vec 0\}$.
-		As $B$ is minimal, we must have that every row of $B$ appears (possibly scaled) in $E$.
-		Otherwise, we would contradict equality of the polytopes $C$ and $D$.
+		We can re-write $D$ as $\{p \in A : [E;I_n] p \geq \vec 0\}$, building simplex constraints into the inequality rather than the domain assumption.
+		By the assumed equality, every row of $B$ must then appear in $[E;I_n]$, where $I_n$ is the $n$-element identity matrix.
+		As $\{p \in A : I_n p \geq \vec 0\}$ strictly defines the simplex, any non-simplex row of $B$ must then be described by a row of $E$, up to rescaling.
 		
-		All rows in $E$ not in $B$ are redundant with respect to $B$ by equality of the polytopes.
-		
+		What's more is that since the polytopes are the same, they have a unique minimal $\H$-representation (up to rescaling) since they are defined by an inequality on $\vec 0$.
+		\btw{Elaborated this justification in the comment below ``As $D$ is defined... yielding a contradiction.''}
 %		As $D$ is defined by distributions on $\simplex$ and $C$ on $A$, and $\simplex \subset A$, we have the rest of the rows in $E$ necessarily being redundant with respect to $B$.
 %		To see this, suppose there was a row of $E$ that was not redundant with respect to $B$.
 %		If such a row did not partition the simplex, it would necessarily be redundant by the restriction that $C \subseteq \simplex$.
 %		Thus, such a row much partition the simplex, but not appear in $B$ up to rescaling.
 %		Again, if the constraint does not partition the cell, the constraint is redundant, and if it does, then $C \neq D$, yielding a contradiction.
 		
-		\item [$\impliedby$] Suppose that all rows of $B$ appear in $E$, and every other row of $E$ is redundant with respect to $B$.
-		Then we have $D = \{p\in \simplex : Ep \geq \vec 0\} = \{p \in \simplex : Bp \geq \vec 0\} = C$.
+		\item [$\impliedby$] Suppose that any non-simplex rows of $B$ appear in $E$, and every other row of $E$ is redundant with respect to $B$.
+		Then we have $D = \{p\in \simplex : Ep \geq \vec 0\} = \{p \in \simplex : Bp \geq \vec 0\}$.
+		This polytope is equal to $\{p \in A : Bp \geq \vec 0\} = C$ since we require $C\subseteq \simplex$, so $B$ encapsulates any non-redundant simplex constraints.
 				
 		Then $D = C$, and therefore, by Proposition~\ref{prop:relate-E-B}, we have $C = \{p \in \simplex : \vec 0 \in \oplus_y p_y T_y\}$.
 	\end{itemize}
   \end{proof}
 
-  \section{Necessary and sufficient conditions for optimality}
-  \subsection{Necessary conditions}
-    With the above results, we actually realize that the matrix $B$ captures a necessary condition for optimality.
-    As we showed earlier, we derive the support matrix $E$ such that $\vec 0 \in \oplus_y p_y T_y \iff Ep \geq \vec 0$ by substitution, and in Proposition~\ref{prop:relate-rows}, derive necessary and sufficient conditions on the matrix $B$ such that the optimality condition ($\vec 0$ in the weighted Monkowski sum) holds.
-    
-    \begin{condition}[$\H$-condition]\label{cond:H-condition}
-    	Given polytopes $\T$ and the cell $C = \{p \in \simplex : Bp \geq \vec 0\}$, there exist normals $v_1, \ldots, v_k$ such that $\max_{z \in T_y} \inprod{v_i}{z} = B_{iy}$ for all $i \in [k]$ and $y \in [n]$.
-    \end{condition}
+%  \bigskip
+%  \hrule
+%  \bigskip
+%
+%  \section{Necessary and sufficient conditions}
+%  \btw{This probably shouldn't be in this document... let's move it later.}
+%  \subsection{Necessary conditions}
+%    Halfspace representation
+%  \subsection{Sufficient conditions}
+%    Vertex representation
   
-
-  \subsection{Sufficient conditions}
-    Now in order to think about sufficient conditions on optimality, consider that convex polytopes all have $\V$-representations.
-    Therefore, we can define the cell $C = \{p \in \simplex : Bp \geq \vec 0\} := \conv(\{p^1, \ldots, p^\ell\})$ for distributions $p^j \in \simplex$, indexing with $j \in [\ell]$.
-    Any distribution $p \in C$ can then be written as a convex combination of $p^j$ making up the convex hull, so $\vec 0$ being in those Minkowski sums implies that $\vec 0$ is also in the weighted Minkowski sum of any convex combination. \jessiet{Too hand wavy}
-    \begin{condition}[$\V$-condition]\label{cond:V-condition}
-    	Given $\T$ and $C = \conv(\{p^1, \ldots, p^\ell\})$, there exist $x_{jy} \in T_y$ such that $\oplus_y p^j_y x_{jy} = \vec 0$ for all $j \in [\ell]$.
-    \end{condition}
-
-  These two conditions together give us necessary and sufficient conditions for optimality.
-  
-  \begin{theorem}
-  	Consider $B \in \reals^{k \times n}$ minimally describing $C = \{p \in \simplex : Bp \geq \vec 0\} = \conv(\{p^1, \ldots, p^\ell\})$ for a given convex cell $C$.
-  	There exists $\T = \{T_1, \ldots, T_n\}$ such that $D^\T = C$ if and only if there exist normals $v_1, \ldots, v_k$, and points $x_{jy}$ such that the Conditions~\ref{cond:H-condition} and~\ref{cond:V-condition} hold.
-  \end{theorem}
-  \begin{proof}
-  	$\implies$
-    First, let there exist polytopes $\T$ so that $D^\T = C$.
-    Take $v_1, \ldots, v_k$ to be the normals corresponding to the nonredundant rows of $E$.
-    Each entry of the support matrix $E$ is equal to $B$ for these nonredundant normals by Proposition~\ref{prop:relate-rows}.
-    
-    Moreover, as $\{ p : Ep \geq \vec 0\} \subseteq \{p : Bp \geq 0\}$ (since rows of $E$ are either in $B$ or redundant), we apply Lemma~\ref{lem:describe-D} to observe that there is a witness $x_y \in T_y$ for all $p \in D^\T$ such that $\oplus_y p_y x_y = \vec 0$.
-    In particular, this is true for every distribution $p^j \in \{p^1, \ldots, p^\ell\}$, thus Condition~\ref{cond:V-condition} is satisfied.
-    
-    Condition~\ref{cond:H-condition} is satisfied by the existence of a halfspace representation of the polytopes $T_y$, which requires a superset $V^*$ of $V$ such that $V^*$ is complete for $\T$ and reduction of redundant rows from the support matrix $E$, which make up $B$.
-    
-    \bigskip
-    $\impliedby$
-    
-    Consider the set of polytopes $\T$ and cell $C$ given so that there are normals $v_i$ and witnesses $x_{jy}$ satisfying Conditions~\ref{cond:H-condition} and~\ref{cond:V-condition}.
-    With these polytopes, we want to show that $D^\T = C$.    
-
-    \bigskip
-    $D^\T \subseteq C$.
-    \bigskip
-    
-    We have $D^\T = \{p \in \simplex : \vec 0 \in \oplus_y p_y T_y\}$, and $C = \{p \in \simplex : Bp \geq \vec 0\}$.
-    Take $p \not \in C$, and therefore $Bp < \vec 0$, and we will show $p \not \in D^\T$.
-    For some row $\bar i$ of $B$, we must have $\inprod{B_{\bar i}}{p} = b < 0$.
-    
-    By Condition~\ref{cond:H-condition}, we can write polytopes as $T_y = \{x : Vx \leq B_y\}$, since the $max$ being equal $B_{iy}$ implies an inequality on all $x \in T_y$.
-    Moreover, by Theorem~\ref{thm:support-minksum}, we know the support of the weighted Minkowski sum is $Bp$, so the Minkowski sum can be written $\oplus_y p_y T_y = \{x : Vx \leq Bp\}$.
-    As $(Bp)_{\bar i} < 0$, we have that $\vec 0$ is not in $T(p)$, so we have $p \not \in D^\T$.
-    Thus, we have shown the contrapositive and have $D^\T \subseteq C$.
-    
-    \bigskip
-    $C \subseteq D^\T$.
-    \bigskip
-    
-    Take $p \in C$ so that $Bp \geq \vec 0$.
-    Observe that $D^\T$ is a convex polytope, as there is a complete set of normals $V^*$ for $\T$, and we know that the support matrix $E$ can be constructed so that $D = \{p \in \simplex : Ep \geq \vec 0\}$, which is convex as it is the intersection of a finite number of halfspaces, bounded by simplex constraints, and closed by the weak inequality.
-%    it is bounded by simplex constraints, closed by definition, and convex by \jessie{ARGUE}.
-    By Condition~\ref{cond:V-condition}, we have that $p^1, \ldots, p^\ell$ are all in $D^\T$, since such witnesses imply $\vec 0$ is in the weighted Minkowski sum.
-    Moreover, as $C = \conv(\{p^1, \ldots, p^\ell\})$, we have $C \subseteq D^\T$.
-    
-  \end{proof}
 \end{document}
 %%% Local Variables:
 %%% mode: latex
