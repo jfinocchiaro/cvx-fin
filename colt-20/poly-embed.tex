@@ -1,0 +1,190 @@
+\documentclass[anon]{colt2020} % Anonymized submission
+% \documentclass{colt2020} % Include author names
+
+% The following packages will be automatically loaded:
+% amsmath, amssymb, natbib, graphicx, url, algorithm2e
+
+\title[Embedding dimension]{Embedding Dimension of Polyhedral Losses}
+\usepackage{times}
+
+\usepackage{lmodern}
+\usepackage{hyperref}       % hyperlinks  %[implicit=false, bookmarks=false]
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+%\usepackage[margin=1.0in]{geometry}
+
+\usepackage{mathtools, amsmath, amssymb, graphicx, verbatim}
+%\usepackage{amsthm}
+%\usepackage[thmmarks, thref, amsthm]{ntheorem}
+\usepackage{color}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.2}
+\hypersetup{colorlinks,breaklinks,
+	linkcolor=darkblue,urlcolor=darkblue,
+	anchorcolor=darkblue,citecolor=darkblue}
+\usepackage{wrapfig}
+\usepackage{subcaption}
+%\usepackage[colorinlistoftodos,textsize=tiny]{todonotes} % need xargs for below
+%\usepackage{accents}
+\usepackage{bbm}
+\usepackage{xspace}
+
+%\usetikzlibrary{calc}
+\newcommand{\Comments}{1}
+\newcommand{\mynote}[2]{\ifnum\Comments=1\textcolor{#1}{#2}\fi}
+\newcommand{\mytodo}[2]{\ifnum\Comments=1%
+	\todo[linecolor=#1!80!black,backgroundcolor=#1,bordercolor=#1!80!black]{#2}\fi}
+\newcommand{\raf}[1]{\mynote{green}{[RF: #1]}}
+\newcommand{\raft}[1]{\mytodo{green!20!white}{RF: #1}}
+\newcommand{\jessie}[1]{\mynote{purple}{[JF: #1]}}
+\newcommand{\jessiet}[1]{\mytodo{purple!20!white}{JF: #1}}
+\newcommand{\bo}[1]{\mynote{blue}{[Bo: #1]}}
+\newcommand{\botodo}[1]{\mytodo{blue!20!white}{[Bo: #1]}}
+\newcommand{\btw}[1]{\mytodo{orange!20!white}{BTW: #1}}
+\ifnum\Comments=1               % fix margins for todonotes
+\setlength{\marginparwidth}{1in}
+\fi
+
+
+\newcommand{\reals}{\mathbb{R}}
+\newcommand{\posreals}{\reals_{>0}}%{\reals_{++}}
+\newcommand{\dom}{\mathrm{dom}}
+\newcommand{\epi}{\text{epi}}
+\newcommand{\relint}{\mathrm{relint}}
+\newcommand{\prop}[1]{\Gamma[#1]}
+\newcommand{\eliccts}{\mathrm{elic}_\mathrm{cts}}
+\newcommand{\eliccvx}{\mathrm{elic}_\mathrm{cvx}}
+\newcommand{\elicpoly}{\mathrm{elic}_\mathrm{pcvx}}
+\newcommand{\elicembed}{\mathrm{elic}_\mathrm{embed}}
+
+\newcommand{\cell}{\mathrm{cell}}
+
+\newcommand{\abstain}[1]{\mathrm{abstain}_{#1}}
+\newcommand{\mode}{\mathrm{mode}}
+
+\newcommand{\simplex}{\Delta_\Y}
+
+% alphabetical order, by convention
+\newcommand{\C}{\mathcal{C}}
+\newcommand{\D}{\mathcal{D}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\F}{\mathcal{F}}
+\renewcommand{\H}{\mathcal{H}}
+\newcommand{\N}{\mathcal{N}}
+\newcommand{\I}{\mathcal{I}}
+\newcommand{\R}{\mathcal{R}}
+\newcommand{\T}{\mathcal{T}}
+\newcommand{\U}{\mathcal{U}}
+\newcommand{\V}{\mathcal{V}}
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\Y}{\mathcal{Y}}
+\renewcommand{\P}{\mathcal{P}}
+
+\newcommand{\risk}[1]{\underline{#1}}
+\newcommand{\inprod}[2]{\langle #1, #2 \rangle}%\mathrm{int}(#1)}
+\newcommand{\inter}[1]{\mathrm{int}(#1)}%\mathrm{int}(#1)}
+%\newcommand{\expectedv}[3]{\overline{#1}(#2,#3)}
+\newcommand{\expectedv}[3]{\E_{Y\sim{#3}} {#1}(#2,Y)}
+\newcommand{\toto}{\rightrightarrows}
+\newcommand{\strip}{\mathrm{strip}}
+\newcommand{\trim}{\mathrm{trim}}
+\newcommand{\fplc}{finite-piecewise-linear and convex\xspace} %xspace for use in text
+\newcommand{\conv}{\mathrm{conv}}
+\newcommand{\indopp}{\bar{\mathbbm{1}}}
+\newcommand{\ones}{\mathbbm{1}}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+
+\newcommand{\Ind}[1]{\mathbf{1}\{#1\}}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\arginf}{arg\,inf}
+\DeclareMathOperator*{\sgn}{sgn}
+
+%\newtheorem{theorem}{Theorem}
+%\newtheorem{lemma}{Lemma}
+%\newtheorem{proposition}{Proposition}
+%\newtheorem{definition}{Definition}
+%\newtheorem{corollary}{Corollary}
+%\newtheorem{conjecture}{Conjecture}
+\newtheorem{condition}{Condition}
+\newtheorem{claim}{Claim}
+% Use \Name{Author Name} to specify the name.
+% If the surname contains spaces, enclose the surname
+% in braces, e.g. \Name{John {Smith Jones}} similarly
+% if the name has a "von" part, e.g \Name{Jane {de Winter}}.
+% If the first letter in the forenames is a diacritic
+% enclose the diacritic in braces, e.g. \Name{{\'E}louise Smith}
+
+% Two authors with the same address
+% \coltauthor{\Name{Author Name1} \Email{abc@sample.com}\and
+%  \Name{Author Name2} \Email{xyz@sample.com}\\
+%  \addr Address}
+
+% Three or more authors with the same address:
+% \coltauthor{\Name{Author Name1} \Email{an1@sample.com}\\
+%  \Name{Author Name2} \Email{an2@sample.com}\\
+%  \Name{Author Name3} \Email{an3@sample.com}\\
+%  \addr Address}
+
+% Authors with different addresses:
+\coltauthor{%
+ \Name{Jessie Finocchiaro} \Email{jefi8453@colorado.edu}\\
+ \addr CU Boulder
+ \AND
+ \Name{Rafael Frongillo} \Email{Raf@colorado.edu}\\
+ \addr CU Boulder
+ \AND
+ \Name{Bo Waggoner} \Email{bwag@colorado.edu}\\
+ \addr CU Boulder%
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}%
+  We far away from this.%
+\end{abstract}
+
+\begin{keywords}%
+  Calibrated surrogates, convex surrogates, proper scoring rules%
+\end{keywords}
+
+\section{Introduction}
+To do...
+
+\section{Related work and background}
+
+\section{Property elicitation tools}
+
+\section{Embedding dimension}
+
+\section{1d-characterization}
+
+\section{Higher dimensions}
+
+\subsection{Polytope fun}
+
+\subsection{Quadratic feasibility program}
+
+
+% Acknowledgments---Will not appear in anonymized version
+\acks{We thank a bunch of people.}
+
+\bibliography{refs}
+
+\newpage
+\appendix
+
+\section{My Proof of Theorem 1}
+
+This is a boring technical proof.
+
+\section{My Proof of Theorem 2}
+
+This is a complete version of a proof sketched in the main text.
+
+\end{document}
