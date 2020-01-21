@@ -1,6 +1,6 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{colt2020}[2020/02/01 v1.0 COLT 2019 Proceedings]
-\newcommand{\todo}{\color{red}}
+%\newcommand{\todo}{\color{red}}
 
 \@ifundefined{ifanonsubmission}{
   \newif\ifanonsubmission
@@ -35,6 +35,3 @@
   \jmlrworkshop{33rd Annual Conference on Learning Theory}
  \fi
 \fi
-
-
-
