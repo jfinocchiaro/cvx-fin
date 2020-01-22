@@ -327,7 +327,7 @@
   \section{Necessary and sufficient conditions for optimality}
   \subsection{Necessary conditions}
     With the above results, we actually realize that the matrix $B$ captures a necessary condition for optimality.
-    As we showed earlier, we derive the support matrix $E$ such that $\vec 0 \in \oplus_y p_y T_y \iff Ep \geq \vec 0$ by substitution, and in Proposition~\ref{prop:relate-rows}, derive necessary and sufficient conditions on the matrix $B$ such that the optimality condition ($\vec 0$ in the weighted Monkowski sum) holds, and these conditions are in relation to the support matrix $E$.
+    As we showed earlier, we derive the support matrix $E$ such that $\vec 0 \in \oplus_y p_y T_y \iff Ep \geq \vec 0$ by substitution, and in Proposition~\ref{prop:relate-rows}, derive necessary and sufficient conditions on the matrix $B$ such that the optimality condition ($\vec 0$ in the weighted Minkowski sum) holds, and these conditions are in relation to the support matrix $E$.
     
     \begin{condition}[$\H$-condition]\label{cond:H-condition}
     	Given polytopes $\T$ and the cell $C = \{p \in \simplex : Bp \geq \vec 0\}$, there exist normals $v_1, \ldots, v_k$ such that $\max_{z \in T_y} \inprod{v_i}{z} = B_{iy}$ for all $i \in [k]$ and $y \in [n]$.
@@ -345,7 +345,7 @@
 
   These two conditions together give us necessary and sufficient conditions for optimality.
   
-  \begin{theorem}
+  \begin{theorem}\label{thm:nasc-optimality-conditions}
   	Consider $B \in \reals^{k \times n}$ minimally describing $C = \{p \in \simplex : Bp \geq \vec 0\} = \conv(\{p^1, \ldots, p^\ell\})$ for a given convex cell $C$.
   	There exists $\T = \{T_1, \ldots, T_n\}$ such that $D^\T = C$ if and only if there exist normals $v_1, \ldots, v_k$, and points $x_{jy}$ such that the Conditions~\ref{cond:H-condition} and~\ref{cond:V-condition} hold.
   \end{theorem}
@@ -392,6 +392,56 @@
     Moreover, as $C = \conv(\{p^1, \ldots, p^\ell\})$, we have $C \subseteq D^\T$.
     
   \end{proof}
+
+  \section{Quadratic program}
+  Let us generalize our Conditions~\ref{cond:H-condition} and~\ref{cond:V-condition} into a quadratic feasibility program without given polytopes $\T$.
+  
+  \begin{theorem}[Quadratic Program]
+  	Given a cell $C = \{p \in \simplex : Bp \geq \vec 0\} = \conv(\{p^1, \ldots, p^\ell\}) \subseteq \simplex$, we aim to find normals $v_i$ and witnesses $x_{jy}$ such that
+  	\begin{align*}
+  	\inprod{v_i}{x_{jy}} \leq B_{iy} && \forall i \in [k], j \in [\ell], y \in [n]\\
+  	\sum_y p_y^j x_{jy} = 0 && \forall j \in [\ell]\\
+  	v_i, x_{jy} \in \reals^d && \forall i \in [k], j \in [\ell], y \in [n]
+ 	\end{align*}
+  \end{theorem}
+
+  \begin{theorem}
+  	Suppose we are given a convex polytope $C \subseteq \simplex$.
+  	There exist polytopes $\T$ such that $\{p \in \simplex : \vec 0 \in \oplus_y p_y T_y\} = C$ iff there is a feasible solution to the above quadratic program.
+  \end{theorem}
+  \begin{proof}
+  	$\implies$
+    First, suppose there were polytopes $\T$ such that $\{p \in \simplex : \vec 0 \in \oplus_y p_y T_y\} = C$.
+        
+    We know that since each $\{p^1, \ldots, p^\ell\} \in C$, and therefore $\vec 0 \in \oplus_y p_y T_y$ for each $p \in \{p^1, \ldots, p^\ell\}$, there is a set of witnesses $x_{jy}$ yielding that sum of zero, satisfying the second constraint.
+    
+    To see these witnesses satisfy the first constraint when their inner product is taken with some set of normals, consider each $v_i$ to be the normal of $\oplus_y T_y$ corresponding to the $i^{th}$ row of $B$.
+    We know that every row of $B$ appears in the support matrix of the polytopes $E$ by Proposition~\ref{prop:relate-rows}, and therefore, we have $\inprod{v_i}{x_j} \leq B_{iy}$ for all $x_j \in T_y$, thus the first constraint holds.
+
+    \bigskip
+    $\impliedby$
+    Suppose there was a feasible solution to the quadratic program above.
+    We claim that $\T$ such that $T_y = \conv(\{x_{1y}, \ldots, x_{\ell y} \})$ \jessiet{Tried with these polytopes since they guarantee polytopes, but I can't see where $\{x : Vx \leq B_{;y}\}$ guarantees boundedness...} forms a valid set of polytopes so that $D^\T = C$, and therefore we satisfy our optimality condition by Proposition~\ref{prop:relate-E-B}.
+    
+    To see $C \subseteq D^\T$, take some $p \not \in D^\T$.
+    We then have $\vec 0 \not \in \oplus_y p_y T_y$, which in turn implies that, for al\jessiet{this quantifier seems really important, but I'm not confident it's correct.} $j \in [\ell]$, there are no witnesses $\bar x_{jy}$ so that $\sum_y p^j_y \bar x_{jy} = 0$.
+    If $p \in C$, then we contradict our feasibility constraints, so we conclude that we must have $p \not \in C$.
+    Thus, we have $C \subseteq D^\T$.
+        
+    To see $D^\T \subseteq C$, take some $p \in D^\T$.
+    We know that $p \in D^\T \iff \vec 0 \in \oplus_y p_y T_y$.  
+    In particular, $\vec 0$ is in the Minkowski sum for all $p^j$, demonstrated by the witnesses $x_{jy}$ for all $y$.
+    By construction, each polytope $T_y$ contains $x_{jy}$, and any $p\in C$ is some convex combination of the $p^j$s, so there is a witness that is a convex combination of the $x_{j}$ witnesses for each $y$ so that $\vec 0$ is in the Minkowski sum.
+    Such a witness is in the convex hull of the other witnesses, as the new witness can simply be written as a reweighted sum.
+    Therefore, we have $D^\T \subseteq C$
+    
+  \end{proof}
+
+  \begin{corollary}
+  	The minimum dimension $d$ such that the QP has a feasible solution is a lower bound on the embedding dimension of loss $\ell$ eliciting $\gamma$. 
+  \end{corollary}
+  
+  
 \end{document}
 %%% Local Variables:
 %%% mode: latex
