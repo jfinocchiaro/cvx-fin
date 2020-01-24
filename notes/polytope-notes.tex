@@ -331,135 +331,184 @@
   Given a vector $p \in \reals^n$ (for us, always a probability distribution), we write the $p$-weighted Minkowski sum of $\T^r$ as
     \[ \oplus_p \T^r := \left\{ \sum_{y \in \Y} p(y) x^r_y ~\Big|~ x^r_1 \in T^r_1, \dots, x^r_y \in T^r_y \right\} , \]
   in other words, the Minkowski sum of sets obtained by scaling each point in $T^r_y$ by $p(y)$.
+  Finally, we define $D(\T^r) = \{ p : \vec{0} \in \oplus_p \T^r\}$.
 
-  Recall the optimality condition:
-  \begin{definition}[Optimality of subgradients for a level set]
-    Given a collection of polytopes $\T^r = \{T_y^r \subseteq \reals^d : y \in \Y\}$ and a polytope $C \subseteq \simplex$, the \emph{optimality condition $\Opt(\T^r, C)$ holds} if $p \in C \iff \vec{0} \in \oplus_p T^r$.
-  \end{definition}
+%  Recall the optimality condition:
+%  \begin{definition}[Optimality of subgradients for a level set]
+%    Given a collection of polytopes $\T^r = \{T_y^r \subseteq \reals^d : y \in \Y\}$ and a polytope $C \subseteq \simplex$, the \emph{optimality condition $\Opt(\T^r, C)$ holds} if $p \in C \iff \vec{0} \in \oplus_p T^r$.
+%  \end{definition}
 
   Recall the main characterization theorem:
   \begin{theorem}
     Let $\ell: \R \to \reals_{\geq 0}^{\Y}$ be a discrete loss with, for each $r \in \R$, $\gamma_r = \{p : r \in \argmin_{r'} p \cdot \ell(r)\}$.
     Then $\ell$ is $d$-embeddable if and only if there exist polytopes $\{T^r_y \subseteq \reals^d : r \in \R, y \in \Y\}$ such that both of the following hold:
     \begin{enumerate}
-      \item (Optimality) For all $r \in \R$, we have $\Opt(\T^r, \gamma_r)$.
+      \item (Optimality) For all $r \in \R$, we have $D(\T^r) = \gamma_r$. %$\Opt(\T^r, \gamma_r)$.
       \item (Monotonicity) (TODO)
     \end{enumerate}
   \end{theorem}
 
-  \paragraph{Necessary conditions}
-    With the above results, we actually realize that the matrix $B$ captures a necessary condition for optimality.
-    As we showed earlier, we derive the support matrix $E$ such that $\vec 0 \in \oplus_y p_y T_y \iff Ep \geq \vec 0$ by substitution, and in Proposition~\ref{prop:relate-rows}, derive necessary and sufficient conditions on the matrix $B$ such that the optimality condition ($\vec 0$ in the weighted Minkowski sum) holds, and these conditions are in relation to the support matrix $E$.
-    
-    \begin{condition}[Halfspace condition]\label{cond:H-condition}
-    	A collection of polytopes $\T^r$ and a polytope $C$ in the simplex defined by $C = \{p \in \simplex : Bp \geq \vec 0\}$ \emph{satisfy the halfspace condition} if there exist $v_1, \ldots, v_k \in \reals^d$ such that, for all $i \in [k]$ and $y \in \Y$, for all $x \in T^r_y$, we have $\inprod{v_i}{x} \leq B_{iy}$.
-    \end{condition}
-  
-
-  \paragraph{Sufficient conditions}
-    Now in order to think about sufficient conditions for optimality, consider that convex polytopes all have $\V$-representations.
-    Therefore, we can equivalently define the cell $C = \{p \in \simplex : Bp \geq \vec 0\} := \conv(\{p^1, \ldots, p^\ell\})$ for a finite set of distributions $p^j \in \simplex$, indexing with $j \in [\ell]$.
-    Any distribution $p \in C$ can then be written as a convex combination of $p^j$ making up the convex hull.
-%    , so $\vec 0$ being in those Minkowski sums implies that $\vec 0$ is also in the weighted Minkowski sum of any convex combination. \jessiet{Too hand wavy}
-    \begin{condition}[Vertex condition]\label{cond:V-condition}
-    	A collection of polytopes $\T^r$ and a polytope $C$ in the simplex defined by $C = \conv(\{p^1, \ldots, p^\ell\})$ \emph{satisfy the vertex condition} if for all $j \in [\ell]$, $0 \in \oplus_{p^j} \T^r$. %% Equivalent: there exist $\{x_{jy} \in T_y : j \in [\ell]\}$ such that, for all $j \in [\ell]$, $\sum_{y \in \Y} p^j_y x_{jy} = \vec 0$.
-    \end{condition}
-
-  These two conditions together give us necessary and sufficient conditions for optimality.
-
-  First, useful lemmas:
-  \begin{lemma}  \label{lemma:minkowski-support-all}
-    The condition $\vec 0 \in \oplus_p \T^r$ holds if and only if, for all $w \in \reals^d$, $\sum_{y \in \Y} p(y) \max_{x \in T^r_y} \inprod{w,x} \geq 0$.
-  \end{lemma}
+  \begin{proposition} \label{prop:halfspace-opt}
+    Let the polytopes $\T^r = \{T^r_y \subseteq \reals^d : y \in \Y\}$ and $C$ be given, with $C = \{p: Bp \geq \vec 0\}$ for $B \in \reals^{k \times n}$.
+    Then $D(\T^r) \subseteq C$ if and only if there exist $v_1,\dots,v_k \in \reals^d$ with $\inprod{v_i}{x} \leq B_{iy}$ for all $i \in [k], y \in \Y, x \in T^r_y$.
+  \end{proposition}
   \begin{proof}
-    Recall by definition, the notation $\oplus_p \T^r = \{\sum_y p(y) x^r_y : x^r_y \in T^r_y (\forall y)\}$.
-    In particular, by the halfspace representation of this set, $x \in \oplus_p \T^r$ if and only if, for all $w$, $\inprod{w}{x} \leq \max_{x' \in \oplus_p \T^r} \inprod{w}{x'}$.
-    Now, $\max_{x' \in \oplus_p \T^r} \inprod{w}{x'} = \sum_y p(y) \max_{x' \in T^r_y} \inprod{w}{x'}$.
-    Plugging in $x = \vec{0}$ completes the proof.
-  \end{proof}
-  \begin{lemma} \label{lemma:minkowski-support-finite}
-    Given $\T^r$, there exists a finite collection $w_1,\ldots,w_K \in \reals^d$ for some $K$ such that $\vec 0 \in \oplus_p \T^r$ if and only if, for all $i \in [K]$, $\sum_{y \in \Y} p(y) \max_{x \in T^r_y} \inprod{w_i}{x} \geq 0$.
-  \end{lemma}
-  \begin{proof}
-    [Bo: TODO! The point: If we fix the support of $p$, there are only a finite number of normals that matter, regardless of which $p$ we pick. Varying over all finitely many choices of the support still gives a finite number of normals.]
-  \end{proof}
-  \begin{lemma} \label{lemma:E-to-B}
-    Let $C = \{p : Bp \geq \vec 0 \}$ where $B$ has the minimum possible number of rows to capture $C$, and suppose $C = \{p : Ep \geq \vec 0 \}$.
-    Then for each row in $B$ there is some (unique) row in $E$ that is equal to $\alpha B$ for some positive $\alpha$.
-  \end{lemma}
-  \begin{proof}
-    [Bo: ?? We seem to use this above, but is there a citation?]
-  \end{proof}
-
-  \begin{theorem}\label{thm:nasc-optimality-conditions}
-    $\Opt(\T^r, C)$ holds if and only if $\T^r$ and $C$ satisfy both the halfspace condition (\ref{cond:H-condition}) and the vertex condition (\ref{cond:V-condition}).
-%  	Consider $B \in \reals^{k \times n}$ minimally describing $C = \{p \in \simplex : Bp \geq \vec 0\} = \conv(\{p^1, \ldots, p^\ell\})$ for a given convex cell $C$.
-%  	There exists $\T = \{T_1, \ldots, T_n\}$ such that $D^\T = C$ if and only if there exist normals $v_1, \ldots, v_k$, and points $x_{jy}$ such that the Conditions~\ref{cond:H-condition} and~\ref{cond:V-condition} hold.
-  \end{theorem}
-  \begin{proof}
-    [Bo: rewritten, needs a look.]
     ($\implies$)
-    First, we note that the vertex condition is immediately implied by $\Opt(\T^r,C)$.
-
-    [Bo: feel this is a bit shaky where it cites $E$ and $B$ stuff.] To show the halfspace condition is satisfied, we first construct a matrix $E$ such that $Ep \geq 0 \iff Bp \geq 0$, then use our construction to pick out the necessary vectors $v_1,\dots,v_k$.
-
-    By Lemma \ref{lemma:minkowski-support-finite}, there is a finite collection of vectors $w_1,\dots,w_{K} \in \reals^d$ where $\vec 0 \in \oplus_p \T^r$ if and only if, for all $w_i$, $\sum_y p(y) \max_{x \in T^r_y} \inprod{w_i}{x} \geq 0$.
-    Hence, each vector $w_i$ generates a row of a matrix $E \in \reals^{K \times n}$ with $E_{iy} = \max_{x \in T^r_y} \inprod{w_i}{x}$, and we have $0 \in \oplus_p \T^r \iff Ep \geq 0$.
-    By assumption of $\Opt(\T^r,C)$, then, we have $Ep \geq 0 \iff Bp \geq 0$.
-    By Lemma \ref{lemma:E-to-B}, because $B$ has the minimum possible number of rows, each row of $B$ appears (scaled by some positive constant) as a different row of $E$. Taking the collection of $w_i$ corresponding to these rows and rescaling them by that positive constant, we get a collection of $k$ vectors $v_1,\ldots,v_k \in \reals^d$ with $\max_{x \in T^r_y} \inprod{v_i}{x} = B_{iy}$, hence the halfspace condition is satisfied.
+    We are supposing that if $Bp \geq \vec{0}$, then $\vec{0} \in \oplus_p \T^r$.
+    In particular, for all vectors $v \in \reals^d$, $0 \leq \sum_{y \in \Y} p(y) \max_{x \in T^r_y} \inprod{v}{x}$.
+    \bo{Not sure how to argue from here, unless we get into E matrix stuff. Raf?}
 
     ($\impliedby$)
-    The vertex condition gives that for all $j \in [\ell]$, there exist witnesses $\{X^j_y \in T^r_y : y \in \Y\}$ such that $\vec 0 = \sum_y p^j(y) X^j_y$.
-    Every $p \in C$ is a convex combination of $\{p^1,\ldots,p^{\ell}\}$, so taking the corresponding convex combination of the witnesses proves that $\vec 0 \in \oplus_p \T^r$.
-
-    It remains to show that if $\vec 0 \in \oplus_p \T^r$, then $p \in C$.
-    By Lemma \ref{lemma:minkowski-support-all}, $\vec 0 \in \oplus_p \T^r$ implies that for all $v$, $\sum_y p(y) \max_{x \in T^r_y} \inprod{v}{x} \geq 0$.
-    By the halfspace condition, there exist $v_1,\dots,v_k$ with $\max_{x \in T^r_y} \inprod{v_i}{x} \leq B_{iy}$, which implies $Bp \geq 0$, so $p \in C$.
-    %% Bo: QED
-
+    Let $p \in D(\T^r)$; we show $p \in C$.
+    By definition, we have $\vec{0} \in \oplus_p \T^r$.
+    This implies in particular that for each of the vectors $v_i$,
+    \begin{align*}
+      0 &\leq \max_{x \in \oplus_p \T^r} \inprod{v}{x}  \\
+        &=    \sum_{y \in \Y} p(y) \max_{x \in T^r_y} \inprod{v_i}{x}  \\
+        &\leq \sum_{y \in \Y} p(y) B_{iy} .
+    \end{align*}
+    This proves $Bp \geq 0$, so $p \in C$.
+  \end{proof}
+  
+  \begin{proposition} \label{prop:vertex-opt}
+    Let the polytopes $\T^r = \{T^r_y \subseteq \reals^d : y \in \Y\}$ and $C$ be given, with $C = \conv(\{p^1,\ldots,p^{\ell}\})$.
+    Then $D(\T^r) \supseteq C$ if and only if $\vec 0 \in \oplus_{p^j} \T^r$ for all $j \in [\ell]$.
+  \end{proposition}
+  \begin{proof}
+    ($\implies$)
+    Because each $p^j \in C$, we have $p^j \in D(\T^r)$, and by definition, this gives $\vec{0} \in \oplus_{p^j} \T^r$.
     
-%    Suppose $V^*$ is complete for $\T$.
-%    Take $V = [v_1, \ldots, v_k]^T$ to be the normals corresponding to the nonredundant rows of $E$ with respect to $B$.
-%    Each entry of the support matrix $E$ is equal to $B$ for these nonredundant normals by Proposition~\ref{prop:relate-rows}.
-%    Therefore, Condition~\ref{cond:H-condition} is satisfied with the constructed set of normals $V$.    
-%%    Condition~\ref{cond:H-condition} is satisfied by the existence of a halfspace representation of the polytopes $T_y$, which requires a superset $V^*$ of $V = [v_1, \ldots, v_k]^T$ such that $V^*$ is complete for $\T$ and reduction of redundant rows from the support matrix $E$, which make up $B$.
-%    
-%    Moreover, as $\{ p : Ep \geq \vec 0\} \subseteq \{p : Bp \geq \vec 0\}$ (since rows of $E$ are either in $B$ or redundant), we apply Lemma~\ref{lem:describe-D} to observe that there is a witness $x_y \in T_y$ for all $p \in D^\T$ such that $\oplus_y p_y x_y = \vec 0$, as this is a corollary of our optimality condition.
-%    In particular, this is true for every distribution $p^j \in \{p^1, \ldots, p^\ell\}$, thus Condition~\ref{cond:V-condition} is satisfied.
-%    
-%    \bigskip
-%    $\impliedby$
-%    
-%    Consider the set of polytopes $\T$ given so that there are normals $v_i$ and witnesses $x_{jy}$ satisfying Conditions~\ref{cond:H-condition} and~\ref{cond:V-condition}.
-%    With these polytopes, we want to show that $D^\T = C$.    
-%
-%    \bigskip
-%    $D^\T \subseteq C$.
-%    \bigskip
-%    
-%    We have $D^\T = \{p \in \simplex : \vec 0 \in \oplus_y p_y T_y\}$, and $C = \{p \in \simplex : Bp \geq \vec 0\}$.
-%    Take $p \not \in C$, and therefore $Bp < \vec 0$, and we will show $p \not \in D^\T$.
-%    For some row $\bar i$ of $B$, we must have $\inprod{B_{\bar i}}{p} = b < 0$.
-%    
-%    By Condition~\ref{cond:H-condition}, we can write polytopes as $T_y = \{x : \inprod{v_i}{x} \leq B_{iy} \; \forall i \in [k]\}$, since the $max$ being equal $B_{iy}$ implies an inequality on all $x \in T_y$.
-%    Moreover, by Theorem~\ref{thm:support-minksum}, we know the support of the weighted Minkowski sum is $Bp$, so the Minkowski sum can be written $\oplus_y p_y T_y = \{x : \inprod{v_i}{x} \leq (Bp)_i \; \forall i \in [k] \}$.
-%    As $(Bp)_{\bar i} < 0$, we have that $\vec 0$ is not in $T(p)$, so we have $p \not \in D^\T$.
-%    Thus, we have shown the contrapositive and have $D^\T \subseteq C$.
-%    
-%    \bigskip
-%    $C \subseteq D^\T$.
-%    \bigskip
-%    
-%    Take $p \in C$ so that $Bp \geq \vec 0$.
-%    Observe that $D^\T$ is a convex polytope, as there is a complete set of normals $V^*$ for $\T$,\jessiet{haven't shown this in this doc, but doesld be easy enough to argue.} and we know that the support matrix $E$ can be constructed so that $D = \{p \in \simplex : Ep \geq \vec 0\}$, which is convex as it is the intersection of a finite number of halfspaces, bounded by simplex constraints, and closed by the weak inequality.
-%%    it is bounded by simplex constraints, closed by definition, and convex by \jessie{ARGUE}.
-%    By Condition~\ref{cond:V-condition}, we have that $p^1, \ldots, p^\ell$ are all in $D^\T$, since such witnesses imply $\vec 0$ is in the weighted Minkowski sum.
-%    Moreover, as $C = \conv(\{p^1, \ldots, p^\ell\})$, we have $C \subseteq D^\T$.
-%    
+    ($\impliedby$)
+    Let $p \in C$; we show $p \in D(\T^r)$.
+    For each $j$, there exist $\{X^j_y \in T^r_y : y \in \Y\}$ with $\vec{0} = \sum_{y \in \Y} p^j(y) X^j_y$.
+    Write $p$ as a convex combination of $p^1,\ldots,p^{\ell}$.
+    Let $x_y$ be the corresponding convex combination of $X^1_y,\ldots,X^{\ell}_y$.
+    Because $X^1_y,\ldots,X^{\ell}_y \in T^r_y$, a convex set, so is $x_y$.
+    And $\vec{0} = \sum_{y \in \Y} p(y) x_y$, so $p \in D(\T^r)$.
   \end{proof}
 
+  \begin{corollary} \label{cor:vertex-halfspace-opt}
+    Let the polytopes $\T^r = \{T^r_y \subseteq \reals^d : y \in \Y\}$ and $C$ be given, with $C = \conv(\{p^1,\ldots,p^{\ell}\}) = \{p: Bp \geq \vec 0\}$ for $B \in \reals^{k \times n}$.
+    We have $D(\T^r) = C$ if and only if both of the following hold:
+    \begin{enumerate}
+      \item (Halfspace condition) There exist $v_1,\ldots,v_k \in \reals^d$ with $\inprod{v_i}{x} \leq B_{iy}$ for all $i \in [k], y \in \Y, x \in T^r_y$.
+      \item (Vertex condition) For all $j \in [\ell]$, $\vec{0} \in \oplus_{p^j} \T^r$.
+    \end{enumerate}
+  \end{corollary}
+
+
+%%  \paragraph{Necessary conditions}
+%%    With the above results, we actually realize that the matrix $B$ captures a necessary condition for optimality.
+%%    As we showed earlier, we derive the support matrix $E$ such that $\vec 0 \in \oplus_y p_y T_y \iff Ep \geq \vec 0$ by substitution, and in Proposition~\ref{prop:relate-rows}, derive necessary and sufficient conditions on the matrix $B$ such that the optimality condition ($\vec 0$ in the weighted Minkowski sum) holds, and these conditions are in relation to the support matrix $E$.
+%%    
+%%    \begin{condition}[Halfspace condition]\label{cond:H-condition}
+%%    	A collection of polytopes $\T^r$ and a polytope $C$ in the simplex defined by $C = \{p \in \simplex : Bp \geq \vec 0\}$ \emph{satisfy the halfspace condition} if there exist $v_1, \ldots, v_k \in \reals^d$ such that, for all $i \in [k]$ and $y \in \Y$, for all $x \in T^r_y$, we have $\inprod{v_i}{x} \leq B_{iy}$.
+%%    \end{condition}
+%%  
+%%
+%%  \paragraph{Sufficient conditions}
+%%    Now in order to think about sufficient conditions for optimality, consider that convex polytopes all have $\V$-representations.
+%%    Therefore, we can equivalently define the cell $C = \{p \in \simplex : Bp \geq \vec 0\} := \conv(\{p^1, \ldots, p^\ell\})$ for a finite set of distributions $p^j \in \simplex$, indexing with $j \in [\ell]$.
+%%    Any distribution $p \in C$ can then be written as a convex combination of $p^j$ making up the convex hull.
+%%%    , so $\vec 0$ being in those Minkowski sums implies that $\vec 0$ is also in the weighted Minkowski sum of any convex combination. \jessiet{Too hand wavy}
+%%    \begin{condition}[Vertex condition]\label{cond:V-condition}
+%%    	A collection of polytopes $\T^r$ and a polytope $C$ in the simplex defined by $C = \conv(\{p^1, \ldots, p^\ell\})$ \emph{satisfy the vertex condition} if for all $j \in [\ell]$, $0 \in \oplus_{p^j} \T^r$. %% Equivalent: there exist $\{x_{jy} \in T_y : j \in [\ell]\}$ such that, for all $j \in [\ell]$, $\sum_{y \in \Y} p^j_y x_{jy} = \vec 0$.
+%%    \end{condition}
+%%
+%%  These two conditions together give us necessary and sufficient conditions for optimality.
+%%
+%%  First, useful lemmas:
+%%  \begin{lemma}  \label{lemma:minkowski-support-all}
+%%    The condition $\vec 0 \in \oplus_p \T^r$ holds if and only if, for all $w \in \reals^d$, $\sum_{y \in \Y} p(y) \max_{x \in T^r_y} \inprod{w,x} \geq 0$.
+%%  \end{lemma}
+%%  \begin{proof}
+%%    Recall by definition, the notation $\oplus_p \T^r = \{\sum_y p(y) x^r_y : x^r_y \in T^r_y (\forall y)\}$.
+%%    In particular, by the halfspace representation of this set, $x \in \oplus_p \T^r$ if and only if, for all $w$, $\inprod{w}{x} \leq \max_{x' \in \oplus_p \T^r} \inprod{w}{x'}$.
+%%    Now, $\max_{x' \in \oplus_p \T^r} \inprod{w}{x'} = \sum_y p(y) \max_{x' \in T^r_y} \inprod{w}{x'}$.
+%%    Plugging in $x = \vec{0}$ completes the proof.
+%%  \end{proof}
+%%  \begin{lemma} \label{lemma:minkowski-support-finite}
+%%    Given $\T^r$, there exists a finite collection $w_1,\ldots,w_K \in \reals^d$ for some $K$ such that $\vec 0 \in \oplus_p \T^r$ if and only if, for all $i \in [K]$, $\sum_{y \in \Y} p(y) \max_{x \in T^r_y} \inprod{w_i}{x} \geq 0$.
+%%  \end{lemma}
+%%  \begin{proof}
+%%    [Bo: TODO! The point: If we fix the support of $p$, there are only a finite number of normals that matter, regardless of which $p$ we pick. Varying over all finitely many choices of the support still gives a finite number of normals.]
+%%  \end{proof}
+%%  \begin{lemma} \label{lemma:E-to-B}
+%%    Let $C = \{p : Bp \geq \vec 0 \}$ where $B$ has the minimum possible number of rows to capture $C$, and suppose $C = \{p : Ep \geq \vec 0 \}$.
+%%    Then for each row in $B$ there is some (unique) row in $E$ that is equal to $\alpha B$ for some positive $\alpha$.
+%%  \end{lemma}
+%%  \begin{proof}
+%%    [Bo: ?? We seem to use this above, but is there a citation?]
+%%  \end{proof}
+%%
+%%  \begin{theorem}\label{thm:nasc-optimality-conditions}
+%%    $\Opt(\T^r, C)$ holds if and only if $\T^r$ and $C$ satisfy both the halfspace condition (\ref{cond:H-condition}) and the vertex condition (\ref{cond:V-condition}).
+%%%  	Consider $B \in \reals^{k \times n}$ minimally describing $C = \{p \in \simplex : Bp \geq \vec 0\} = \conv(\{p^1, \ldots, p^\ell\})$ for a given convex cell $C$.
+%%%  	There exists $\T = \{T_1, \ldots, T_n\}$ such that $D^\T = C$ if and only if there exist normals $v_1, \ldots, v_k$, and points $x_{jy}$ such that the Conditions~\ref{cond:H-condition} and~\ref{cond:V-condition} hold.
+%%  \end{theorem}
+%%  \begin{proof}
+%%    [Bo: rewritten, needs a look.]
+%%    ($\implies$)
+%%    First, we note that the vertex condition is immediately implied by $\Opt(\T^r,C)$.
+%%
+%%    [Bo: feel this is a bit shaky where it cites $E$ and $B$ stuff.] To show the halfspace condition is satisfied, we first construct a matrix $E$ such that $Ep \geq 0 \iff Bp \geq 0$, then use our construction to pick out the necessary vectors $v_1,\dots,v_k$.
+%%
+%%    By Lemma \ref{lemma:minkowski-support-finite}, there is a finite collection of vectors $w_1,\dots,w_{K} \in \reals^d$ where $\vec 0 \in \oplus_p \T^r$ if and only if, for all $w_i$, $\sum_y p(y) \max_{x \in T^r_y} \inprod{w_i}{x} \geq 0$.
+%%    Hence, each vector $w_i$ generates a row of a matrix $E \in \reals^{K \times n}$ with $E_{iy} = \max_{x \in T^r_y} \inprod{w_i}{x}$, and we have $0 \in \oplus_p \T^r \iff Ep \geq 0$.
+%%    By assumption of $\Opt(\T^r,C)$, then, we have $Ep \geq 0 \iff Bp \geq 0$.
+%%    By Lemma \ref{lemma:E-to-B}, because $B$ has the minimum possible number of rows, each row of $B$ appears (scaled by some positive constant) as a different row of $E$. Taking the collection of $w_i$ corresponding to these rows and rescaling them by that positive constant, we get a collection of $k$ vectors $v_1,\ldots,v_k \in \reals^d$ with $\max_{x \in T^r_y} \inprod{v_i}{x} = B_{iy}$, hence the halfspace condition is satisfied.
+%%
+%%    ($\impliedby$)
+%%    The vertex condition gives that for all $j \in [\ell]$, there exist witnesses $\{X^j_y \in T^r_y : y \in \Y\}$ such that $\vec 0 = \sum_y p^j(y) X^j_y$.
+%%    Every $p \in C$ is a convex combination of $\{p^1,\ldots,p^{\ell}\}$, so taking the corresponding convex combination of the witnesses proves that $\vec 0 \in \oplus_p \T^r$.
+%%
+%%    It remains to show that if $\vec 0 \in \oplus_p \T^r$, then $p \in C$.
+%%    By Lemma \ref{lemma:minkowski-support-all}, $\vec 0 \in \oplus_p \T^r$ implies that for all $v$, $\sum_y p(y) \max_{x \in T^r_y} \inprod{v}{x} \geq 0$.
+%%    By the halfspace condition, there exist $v_1,\dots,v_k$ with $\max_{x \in T^r_y} \inprod{v_i}{x} \leq B_{iy}$, which implies $Bp \geq 0$, so $p \in C$.
+%%    %% Bo: QED
+%%
+%%    
+%%%    Suppose $V^*$ is complete for $\T$.
+%%%    Take $V = [v_1, \ldots, v_k]^T$ to be the normals corresponding to the nonredundant rows of $E$ with respect to $B$.
+%%%    Each entry of the support matrix $E$ is equal to $B$ for these nonredundant normals by Proposition~\ref{prop:relate-rows}.
+%%%    Therefore, Condition~\ref{cond:H-condition} is satisfied with the constructed set of normals $V$.    
+%%%%    Condition~\ref{cond:H-condition} is satisfied by the existence of a halfspace representation of the polytopes $T_y$, which requires a superset $V^*$ of $V = [v_1, \ldots, v_k]^T$ such that $V^*$ is complete for $\T$ and reduction of redundant rows from the support matrix $E$, which make up $B$.
+%%%    
+%%%    Moreover, as $\{ p : Ep \geq \vec 0\} \subseteq \{p : Bp \geq \vec 0\}$ (since rows of $E$ are either in $B$ or redundant), we apply Lemma~\ref{lem:describe-D} to observe that there is a witness $x_y \in T_y$ for all $p \in D^\T$ such that $\oplus_y p_y x_y = \vec 0$, as this is a corollary of our optimality condition.
+%%%    In particular, this is true for every distribution $p^j \in \{p^1, \ldots, p^\ell\}$, thus Condition~\ref{cond:V-condition} is satisfied.
+%%%    
+%%%    \bigskip
+%%%    $\impliedby$
+%%%    
+%%%    Consider the set of polytopes $\T$ given so that there are normals $v_i$ and witnesses $x_{jy}$ satisfying Conditions~\ref{cond:H-condition} and~\ref{cond:V-condition}.
+%%%    With these polytopes, we want to show that $D^\T = C$.    
+%%%
+%%%    \bigskip
+%%%    $D^\T \subseteq C$.
+%%%    \bigskip
+%%%    
+%%%    We have $D^\T = \{p \in \simplex : \vec 0 \in \oplus_y p_y T_y\}$, and $C = \{p \in \simplex : Bp \geq \vec 0\}$.
+%%%    Take $p \not \in C$, and therefore $Bp < \vec 0$, and we will show $p \not \in D^\T$.
+%%%    For some row $\bar i$ of $B$, we must have $\inprod{B_{\bar i}}{p} = b < 0$.
+%%%    
+%%%    By Condition~\ref{cond:H-condition}, we can write polytopes as $T_y = \{x : \inprod{v_i}{x} \leq B_{iy} \; \forall i \in [k]\}$, since the $max$ being equal $B_{iy}$ implies an inequality on all $x \in T_y$.
+%%%    Moreover, by Theorem~\ref{thm:support-minksum}, we know the support of the weighted Minkowski sum is $Bp$, so the Minkowski sum can be written $\oplus_y p_y T_y = \{x : \inprod{v_i}{x} \leq (Bp)_i \; \forall i \in [k] \}$.
+%%%    As $(Bp)_{\bar i} < 0$, we have that $\vec 0$ is not in $T(p)$, so we have $p \not \in D^\T$.
+%%%    Thus, we have shown the contrapositive and have $D^\T \subseteq C$.
+%%%    
+%%%    \bigskip
+%%%    $C \subseteq D^\T$.
+%%%    \bigskip
+%%%    
+%%%    Take $p \in C$ so that $Bp \geq \vec 0$.
+%%%    Observe that $D^\T$ is a convex polytope, as there is a complete set of normals $V^*$ for $\T$,\jessiet{haven't shown this in this doc, but doesld be easy enough to argue.} and we know that the support matrix $E$ can be constructed so that $D = \{p \in \simplex : Ep \geq \vec 0\}$, which is convex as it is the intersection of a finite number of halfspaces, bounded by simplex constraints, and closed by the weak inequality.
+%%%%    it is bounded by simplex constraints, closed by definition, and convex by \jessie{ARGUE}.
+%%%    By Condition~\ref{cond:V-condition}, we have that $p^1, \ldots, p^\ell$ are all in $D^\T$, since such witnesses imply $\vec 0$ is in the weighted Minkowski sum.
+%%%    Moreover, as $C = \conv(\{p^1, \ldots, p^\ell\})$, we have $C \subseteq D^\T$.
+%%%    
+%%  \end{proof}
+
   \section{Quadratic program}
-  Let us generalize our Conditions~\ref{cond:H-condition} and~\ref{cond:V-condition} into a quadratic feasibility program without given polytopes $\T$.
   
   \begin{definition}[Quadratic Feasibility Program] ~ \\
     \indent \textbf{Given:} a polytope $C = \{p \in \simplex : Bp \geq \vec 0\} = \conv(\{p^1, \ldots, p^\ell\}) \subseteq \simplex$, where $B \in \reals^{k \times n}$.
@@ -477,10 +526,10 @@
   \end{definition}
 
   \begin{theorem}
-  	Given a convex polytope $C \subseteq \simplex$, there exist polytopes $\T^r$ such that $\Opt(\T^r, C)$ if and only if there is a feasible solution to the above quadratic program.
+  	Given a convex polytope $C \subseteq \simplex$, there exist polytopes $\T^r$ in dimension $d$ such that $D(\T^r) = C$ if and only if there is a feasible solution to the above quadratic program with parameter $d$.
   \end{theorem}
   \begin{proof}
-    By Theorem \ref{thm:nasc-optimality-conditions}, it suffices to show that there exist $\T^r$ such that the halfspace and vertex conditions (\ref{cond:H-condition}, \ref{cond:V-condition}) hold if and only if the program is feasible.
+    By Corollary \ref{cor:vertex-halfspace-opt}, it suffices to show that $\T^r$ satisfying the halfspace and vertex conditions exist if and only if the program is feasible.
 
     ($\implies$) 
     By the vertex condition, for each $j \in [\ell]$, there exist witnesses $\{X^j_y \in T^r_y : y \in \Y\}$ satisfying the second constraint of the quadratic program (Inequality \ref{eqn:qp-constr-2}).
