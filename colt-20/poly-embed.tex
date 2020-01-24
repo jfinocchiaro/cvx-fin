@@ -214,7 +214,7 @@ These are associated with embedding points, where $u_r \in \reals^d$ is linked b
 To settle the question of whether a consistent surrogate exists in $d$ dimensions, it turns out to be necessary and sufficient to consider the possible sets of subgradients of $L$ at the embedding points.
 This is useful in particular because a convex function is minimized at a point if and only if $\vec{0}$ is in its subgradient set at that point.
 
-We will therefore abstract the relevant subgradient sets -- namely, the subgradients of $L$ at the embedding points $u_r$, given observed outcome $y$ -- as closed polytopes $T^r_y$. (The subgradient sets are bounded polytopes, because $L$ is polyhedral and defined on all of $\reals^d$.)
+We will therefore abstract the relevant subgradient sets -- namely, the subgradients of $L$ at the embedding points $u_r$, given observed outcome $y$ -- as bounded, closed polytopes $T^r_y$. (The subgradient sets are bounded closed polytopes because $L$ is polyhedral and defined on all of $\reals^d$.)
 
 \begin{definition}[$\T$, $\T^r$, $D(\T^r)$]
   We use the following notation for a collection of polytopes, with implicit parameter $d$: $\T = \{T^r_y \subseteq \reals^d : r \in \R, y \in \Y\}$.
@@ -274,15 +274,15 @@ Monotonicity says that these individual polytopes can actually be glued together
 
 We now investigate the optimality condition of Theorem \ref{thm:general-char}, for two purposes.
 First, we aim to greatly narrow the search space for constructing low-dimensional surrogate loss functions for a given discrete loss.
-The tools we construct in this section may aid in guiding or automating this task by constraining or constructing feasible subgradient sets $\T^r$ given a level set $\gamma_r$.
+The tools we construct in this section aid in this task by constraining or constructing feasible subgradient sets $\T^r$ given a level set $\gamma_r$.
 Second, we wish to prove impossibilities, i.e. lower bounds on the embedding dimension of a given discrete loss (an apparently hard problem).
 
 By dropping monotonicity from Theorem \ref{thm:general-char}, we obtain $|\R|$ independent optimality conditions, $D(\T^r) = \gamma_r$, that must be satisfied in order to have a $d$-dimensional embedding.
 For upper bounds, one must construct a $\T^r$ satisfying $D(\T^r) = \gamma_r$ for all $r$ (and then turn to satisfying monotonicity).
 For lower bounds, it suffices to prove nonexistence of any such $\T^r$, for any $r$.
 
-We next focus on constructing a feasibility program (QFP, Definition \ref{def:qfp}) that takes as input a polytope $C \subseteq \simplex$ and a parameter $d \in \mathbb{N}$ and (roughly) attempts to construct $\T^r$.
-We prove the following main results.
+To accomplish these, we construct a quadratic feasibility program (QFP, Definition \ref{def:qfp}) that takes as input a polytope $C \subseteq \simplex$ and a parameter $d \in \mathbb{N}$ and (roughly) attempts to construct $\T^r$.
+We will prove the following main results.
 \begin{theorem} \label{thm:opt-iff-qfp}
   Given a convex polytope $C \subseteq \simplex$, there exist polytopes $\T^r$ in $\reals^d$ such that $D(\T^r) = C$ if and only if there is a feasible solution to the QFP (Definition \ref{def:qfp}) with parameter $d$.
 \end{theorem}
@@ -322,23 +322,65 @@ In particular, for $d=n-1$ a solution always exists (e.g. \bo{cite}), found by t
 
 \subsubsection{Developing the proof}
 
-To prove Theorem \ref{thm:opt-iff-qfp}, it is useful to develop a less-constructive intermediate characterization.
-The following proposition formalizes the halfspace representation of $C$ as leading to a necessary condition on $D(\T^r)$; the subsequent one formalizes the vertex representation as a sufficient condition.
+To prove Theorem \ref{thm:opt-iff-qfp}, it is useful to develop a less-constructive intermediate characterization of when $D(\T^r) = C$.
+The following condition formalizes a necessary condition on $\T^r$ in terms of the halfspace representation of $C$; the subsequent one formalizes a sufficient condition using the vertex representation.
 
-\begin{proposition} \label{prop:halfspace-opt}
-  Let the polytopes $\T^r = \{T^r_y \subseteq \reals^d : y \in \Y\}$ and $C$ be given, with $C = \{p: Bp \geq \vec 0\}$ for $B \in \reals^{k \times n}$.
-  Then $D(\T^r) \subseteq C$ if and only if there exist $v_1,\dots,v_k \in \reals^d$ with $\inprod{v_i}{x} \leq B_{iy}$ for all $i \in [k], y \in \Y, x \in T^r_y$.
-\end{proposition}
+
+\begin{condition}[Halfspace condition]\label{cond:H-condition}
+	A collection of polytopes $\T^r$ and a polytope $C$ in the simplex defined by $C = \{p \in \simplex : Bp \geq \vec 0\}$ \emph{satisfy the halfspace condition} if there exist $v_1, \ldots, v_k \in \reals^d$ such that, for all $i \in [k]$ and $y \in \Y$, for all $x \in T^r_y$, we have $\inprod{v_i}{x} \leq B_{iy}$.
+\end{condition}
+\begin{condition}[Vertex condition]\label{cond:V-condition}
+	A collection of polytopes $\T^r$ and a polytope $C$ in the simplex defined by $C = \conv(\{p^1, \ldots, p^\ell\})$ \emph{satisfy the vertex condition} if for all $j \in [\ell]$, $0 \in \oplus_{p^j} \T^r$. %% Equivalent: there exist $\{x_{jy} \in T_y : j \in [\ell]\}$ such that, for all $j \in [\ell]$, $\sum_{y \in \Y} p^j_y x_{jy} = \vec 0$.
+\end{condition}
+
+Useful lemmas:
+\begin{lemma} \label{lemma:D-polytope}
+  For any $\T^r$, $D(\T^r)$ is a polytope (in particular, is convex).
+\end{lemma}
+\begin{proof}
+   Recall by definition, the notation $\oplus_p \T^r = \{\sum_y p(y) x^r_y : x^r_y \in T^r_y (\forall y)\}$.
+   Each $T^r_y$ is a polytope, so $p(y) T^r_y$ is a polytope.
+   The Minkowski sum of polytopes is a polytope, so $\oplus_p \T^r$ is a polytope.
+  \bo{TODO}
+\end{proof}
+\begin{lemma}  \label{lemma:minkowski-support}
+  Given polytopes $\T^r$, there exists a finite set of normal vectors $w_1,\ldots,w_K \in \reals^d$ such that, for all $p \in \simplex$, $\oplus_p \T^r = \{x : \inprod{w_i}{x} \leq \sum_{y \in \Y} p(y) \max_{x \in T^r_y} \inprod{w_i}{x} \}$.
+\end{lemma}
+\begin{proof}
+   For each $p$, $\oplus_p \T^r$ is a polytope.
+
+  \bo{TODO: it turns out that $p$ doesn't matter, only its support; and there are only finitely many possible supports (or even better, the normals that are complete for the uniform minkowski sum turn out to be complete for all other $p$-combinations).}
+\end{proof}
+\begin{lemma} \label{lemma:E-to-B}
+  Let $C = \{p : Bp \geq \vec 0 \}$ where $B$ has the minimum possible number of rows to capture $C$, and suppose $C = \{p : Ep \geq \vec 0 \}$.
+  Then for each row in $B$ there is some (unique) row in $E$ that is equal to $\alpha B$ for some positive $\alpha$.
+\end{lemma}
+\begin{proof}
+  \bo{? Cite}
+\end{proof}
+
+
+\begin{theorem} \label{thm:vertex-halfspace-opt}
+  Let the polytopes $\T^r = \{T^r_y \subseteq \reals^d : y \in \Y\}$ and $C$ be given, with $C = \conv(\{p^1,\ldots,p^{\ell}\}) = \{p: Bp \geq \vec 0\}$ for $B \in \reals^{k \times n}$.
+  We have $D(\T^r) = C$ if and only if both the halfspace and vertex conditions hold.
+\end{theorem}
 \begin{proof}
   ($\implies$)
-  We are supposing that if $Bp \geq \vec{0}$, then $\vec{0} \in \oplus_p \T^r$.
-  In particular, for all vectors $v \in \reals^d$, $0 \leq \sum_{y \in \Y} p(y) \max_{x \in T^r_y} \inprod{v}{x}$.
-  \bo{Not sure how to argue from here, unless we get into E matrix stuff. Raf?}
+  Suppose $D(\T^r) = C$.
+  First, we note that the vertex condition is immediate: For all $j \in [\ell]$, $p^j \in C$ which gives $p^j \in D(\T^r)$.
+  To show the halfspace condition is satisfied, we first construct a matrix $E$ such that $Ep \geq 0 \iff Bp \geq 0$, then use this construction to pick out the necessary vectors $v_1,\dots,v_k$.
+
+  By Lemma \ref{lemma:minkowski-support}, there is a finite collection of vectors $w_1,\dots,w_{K} \in \reals^d$ and such that $\vec 0 \in \oplus_p \T^r$ if and only if, for all $w_i$, $\sum_y p(y) \max_{x \in T^r_y} \inprod{w_i}{x} \geq 0$.
+  Hence, each vector $w_i$ generates a row of a matrix $E \in \reals^{K \times n}$ with $E_{iy} = \max_{x \in T^r_y} \inprod{w_i}{x}$, and we have $p \in D(\T^r) \iff Ep \geq 0$.
+  By assumption of $D(\T^r) = C$, then, we have $Ep \geq 0 \iff Bp \geq 0$.
+  By Lemma \ref{lemma:E-to-B}, because $B$ has the minimum possible number of rows, each row of $B$ appears (scaled by some positive constant) as a different row of $E$. Taking the collection of $w_i$ corresponding to these rows and rescaling them by that positive constant, we get a collection of $k$ vectors that we can rename $v_1,\ldots,v_k \in \reals^d$, with $\max_{x \in T^r_y} \inprod{v_i}{x} = B_{iy}$, hence the halfspace condition is satisfied.
 
   ($\impliedby$)
-  Let $p \in D(\T^r)$; we show $p \in C$.
-  By definition, we have $\vec{0} \in \oplus_p \T^r$.
-  This implies in particular that for each of the vectors $v_i$,
+  Suppose Conditions \ref{cond:H-condition} and \ref{cond:V-condition} hold.
+  Then by the vertex condition, $p^j \in D(\T^r)$ for all $j \in [\ell]$.
+  Because $D(\T^r)$ is convex (Lemma \ref{lemma:D-polytope}), this implies $C \subseteq D(\T^r)$.
+  To show $D(\T^r) \subseteq C$, let $p \in D(\T^r)$; by definition, $0 \in \oplus_p \T^r$.
+  Then in particular for each vector $v_1,\ldots,v_k$ guaranteed by the halfspace condition, we have
   \begin{align*}
     0 &\leq \max_{x \in \oplus_p \T^r} \inprod{v}{x}  \\
       &=    \sum_{y \in \Y} p(y) \max_{x \in T^r_y} \inprod{v_i}{x}  \\
@@ -347,38 +389,12 @@ The following proposition formalizes the halfspace representation of $C$ as lead
   This proves $Bp \geq 0$, so $p \in C$.
 \end{proof}
 
-\begin{proposition} \label{prop:vertex-opt}
-  Let the polytopes $\T^r = \{T^r_y \subseteq \reals^d : y \in \Y\}$ and $C$ be given, with $C = \conv(\{p^1,\ldots,p^{\ell}\})$.
-  Then $D(\T^r) \supseteq C$ if and only if $\vec 0 \in \oplus_{p^j} \T^r$ for all $j \in [\ell]$.
-\end{proposition}
-\begin{proof}
-  ($\implies$)
-  Because each $p^j \in C$, we have $p^j \in D(\T^r)$, and by definition, this gives $\vec{0} \in \oplus_{p^j} \T^r$.
-  
-  ($\impliedby$)
-  Let $p \in C$; we show $p \in D(\T^r)$.
-  For each $j$, there exist $\{X^j_y \in T^r_y : y \in \Y\}$ with $\vec{0} = \sum_{y \in \Y} p^j(y) X^j_y$.
-  Write $p$ as a convex combination of $p^1,\ldots,p^{\ell}$.
-  Let $x_y$ be the corresponding convex combination of $X^1_y,\ldots,X^{\ell}_y$.
-  Because $X^1_y,\ldots,X^{\ell}_y \in T^r_y$, a convex set, so is $x_y$.
-  And $\vec{0} = \sum_{y \in \Y} p(y) x_y$, so $p \in D(\T^r)$.
-\end{proof}
-
-\begin{corollary} \label{cor:vertex-halfspace-opt}
-  Let the polytopes $\T^r = \{T^r_y \subseteq \reals^d : y \in \Y\}$ and $C$ be given, with $C = \conv(\{p^1,\ldots,p^{\ell}\}) = \{p: Bp \geq \vec 0\}$ for $B \in \reals^{k \times n}$.
-  We have $D(\T^r) = C$ if and only if both of the following hold:
-  \begin{enumerate}
-    \item (Halfspace condition) There exist $v_1,\ldots,v_k \in \reals^d$ with $\inprod{v_i}{x} \leq B_{iy}$ for all $i \in [k], y \in \Y, x \in T^r_y$.
-    \item (Vertex condition) For all $j \in [\ell]$, $\vec{0} \in \oplus_{p^j} \T^r$.
-  \end{enumerate}
-\end{corollary}
-
 Given this characterization, we prove the main result on when a solution to the quadratic program exists.
 \bo{Should note that the program's solution does give candidates $\T^r$, although their usefulness is unclear...}
 \bo{Actually, I guess one could run this, then use monotonicity to add constraints and find the next subgradient sets, etc.}
 
 \begin{proof}[Proof of Theorem \ref{thm:opt-iff-qfp}]
-    By Corollary \ref{cor:vertex-halfspace-opt}, it suffices to show that $\T^r$ satisfying the halfspace and vertex conditions exist if and only if the program is feasible.
+    By Theorem \ref{thm:vertex-halfspace-opt}, it suffices to show that $\T^r$ satisfying the halfspace and vertex conditions exist if and only if the program is feasible.
 
   ($\implies$) 
   By the vertex condition, for each $j \in [\ell]$, there exist witnesses $\{X^j_y \in T^r_y : y \in \Y\}$ satisfying the second constraint of the quadratic program (Inequality \ref{eqn:qp-constr-2}).
@@ -407,5 +423,9 @@ Given this characterization, we prove the main result on when a solution to the 
 \appendix
 
 \section{Additional proofs}
+
+
+\section{Feasible subspace dimension}
+
 
 \end{document}
