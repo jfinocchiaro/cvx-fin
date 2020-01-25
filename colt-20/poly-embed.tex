@@ -9,15 +9,12 @@
 
 \usepackage{lmodern}
 \usepackage{hyperref}       % hyperlinks  %[implicit=false, bookmarks=false]
-\usepackage{url}            % simple URL typesetting
 \usepackage{booktabs}       % professional-quality tables
 \usepackage{amsfonts}       % blackboard math symbols
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
-%\usepackage[margin=1.0in]{geometry}
 
-\usepackage{mathtools, amsmath, amssymb, graphicx, verbatim}
-%\usepackage{amsthm}
+\usepackage{mathtools, verbatim}
 %\usepackage[thmmarks, thref, amsthm]{ntheorem}
 \usepackage{color}
 \definecolor{darkblue}{rgb}{0.0,0.0,0.2}
@@ -50,6 +47,7 @@
 
 \newcommand{\reals}{\mathbb{R}}
 \newcommand{\posreals}{\reals_{>0}}%{\reals_{++}}
+\newcommand{\nonnegreals}{\reals_{\geq 0}}%{\reals_{++}}
 \newcommand{\dom}{\mathrm{dom}}
 \newcommand{\epi}{\text{epi}}
 \newcommand{\relint}{\mathrm{relint}}
@@ -164,25 +162,32 @@
   Calibrated surrogates, convex surrogates, proper scoring rules%
 \end{keywords}
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 To do...
 
-\section{Related work and background}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Setting}
 
 \subsection{Discrete losses and embeddings}
 
-\jessie{A lot fo this is taken from the NeurIPS paper}
-Let $\Y$ be a finite outcome (label) space, and throughout let $n=|\Y|$.
-The set of probability distributions on $\Y$ is denoted $\simplex\subseteq\reals_+^{\Y}$, represented as vectors of probabilities.
-We write $p_y$ for the probability of outcome $y \in \Y$ drawn from $p \in \simplex$.
-
+The base object of study is a \emph{discrete loss function} $\ell: \R \to \nonnegreals^{\Y}$ where $\R$ and $\Y$ are finite sets.
+Here $\ell(r)_y$ is the loss of prediction $r \in \R$ (the report space) on $y \in \Y$ (the observation or label space).
+For simplicity we let $\Y = [n]$ throughout (where $[n] = \{1,\ldots,n\}$).
+The set of probability distributions on $\Y$ is denoted $\simplex\subseteq\nonnegreals^{\Y}$, represented as vectors of probabilities.
+We write $p(y)$ for the probability of outcome $y \in \Y$ drawn from $p \in \simplex$.
 As is assumed by~\cite{finocchiaro2019embedding}, we assume the given discrete loss is \emph{non-redundant}, meaning every report is uniquely optimal (minimizes expected loss) for some distribution $p\in\simplex$.
 
-We denote surrogate losses $L:\reals^d\to\reals^\Y_+$, typically with reports written $u\in\reals^d$.
-We write the corresponding expected loss when $Y \sim p$ as $\inprod{p}{\ell(r)}$ and $\inprod{p}{L(u)}$ since we are in the finite outcome setting.
+We denote surrogate losses in dimension $d$ by $L:\reals^d\to\nonnegreals^{\Y}$, with predictions typically written $u\in\reals^d$.
+The expected losses when $Y \sim p$ can be written $\inprod{p}{\ell(r)}$ and $\inprod{p}{L(u)}$.
+In order to capture how the surrogate corresponds to the original loss, we rely on the following notation from property elicitation literature \bo{cite}: $\gamma_r \subseteq \simplex$ represents those distributions where $r$ minimizes expected loss, i.e. $\gamma_r = \{p : \inprod{p}{\ell(r)} \leq \inprod{p}{\ell(r')} ~ (\forall r' \in \R) \}$.
+Similarly, $\Gamma_u = \{ p : \inprod{p}{L(u)} \leq \inprod{p}{L(u')} ~ (\forall u' \in \reals^d) \}$.
 
 For example, 0-1 loss is a discrete loss with $\R = \Y = \{-1,1\}$
-given by $\ellzo(r)_y = \Ind{r \neq y}$, with Bayes risk $\risk{\ellzo}(p) = 1-\max_{y\in\Y} p_y$.
+given by $\ellzo(r)_y = \Ind{r \neq y}$.%, with Bayes risk $\risk{\ellzo}(p) = 1-\max_{y\in\Y} p_y$.
 Two important surrogates for $\ellzo$ are hinge loss $\hinge(u)_y = (1-yu)_+$, where $(x)_+ = \max(x,0)$, and logistic loss $L(u)_y = \log(1+\exp(-yu))$ for $u\in\reals$.
 
 Most of the surrogates $L$ we consider will be \emph{polyhedral}, meaning piecewise linear and convex; we therefore briefly recall the relevant definitions.
@@ -191,33 +196,130 @@ A \emph{polytope} is a bounded polyhedral set.
 A convex function $f:\reals^d\to\reals$ is \emph{polyhedral} if its epigraph is polyhedral, or equivalently, if it can be written as a pointwise maximum of a finite set of affine functions~\citep{rockafellar1997convex}.
 %
 \begin{definition}[Polyhedral loss]
-	A loss $L: \reals^d \to \reals^{\Y}_+$ is \emph{polyhedral} if $L(u)_y$ is a polyhedral (convex) function of $u$ for each $y\in\Y$.
+	A loss $L: \reals^d \to \reals^{\Y}_+$ is \emph{polyhedral} if $L(u)_y$ is a polyhedral (piecewise linear convex) function of $u$ for each $y\in\Y$.
 \end{definition}
 %
 For example, hinge loss is polyhedral, whereas logistic loss is not.
 
-We specifically study polyhedral functions in part because they have high-dimensional subgradient sets at points of nondifferentiability, which will be of interest to us later.
+%We specifically study polyhedral functions in part because they have high-dimensional subgradient sets at points of nondifferentiability, which will be of interest to us later.
+Polyhedral losses are motivated partly because they correspond to a natural surrogate construction technique: embedding the discrete predictions $\R$ as points in $\reals^d$.
+The key condition is that $r \in \R$ should minimize expected $\ell$-loss if and only if its embedding point minimizes expected surrogate loss.
+%
+\begin{definition}[Embedding of a loss]
+  A loss $L: \reals^d \to \nonnegreals^{\Y}$ \emph{embeds} a loss $\ell: \R \to \nonnegreals^{\Y}$ \emph{in dimension $d$} with \emph{embedding function $\phi: \R \to \reals^d$} if: (i) $\phi$ is injective; (ii) for all $r \in \R$, $\ell(r) = L(\phi(r))$; and (iii) for all $r \in \R$, $\gamma_r = \Gamma_{\phi(r)}$.
+  We simply say $L$ \emph{embeds} $\ell$ (in dimension $d$) if some such embedding function exists.
+\end{definition}
+%
+Note that embedding does not immediately imply another important property, calibration.
+\begin{definition}[Calibrated surrogate]
+  A surrogate loss $L: \reals^d \to \nonnegreals^{\Y}$ and \emph{link function} $\psi: \reals^d \to \R$ are \emph{calibrated} for a loss $\ell: \R \to \nonnegreals^{\Y}$ if for all $p \in \simplex$,
+    \[ u \in \argmin_{u' \in \reals^d} \inprod{p}{L(u')} \implies \psi(u) \in \argmin_{r' \in \R} \inprod{p}{\ell(r)} . \]
+  We simply say $L$ can be \emph{calibrated} to $\ell$ if such a link function exists.
+\end{definition}
+Polyhedral surrogates are motivated by the following results.
+\begin{theorem}[\cite{finocchiaro2019embedding}] \label{thm:embed-iff-poly}
+  If a discrete loss $\ell$ is embedded by some surrogate $L$, then (1) $L$ must be a polyhedral loss; and (2) there exists a link function calibrating $L$ to $\ell$.
+\end{theorem}
+It therefore suffices for us to investigate when an embedding of $\ell$ exists.
+We will get calibration for free.
+The next question is what desirable properties would be of a surrogate $L: \reals^d \to \nonnegreals^{\Y}$ (which we know must be polyhedral).
+The most immediate is the dimensionality $d$ required.
+This is the question investigated in this paper.
 
-\section{Embedding dimension}
+\subsection{Embedding dimension}
 
-\section{1d-characterization}
+In this paper, we study the following quantity.
+\begin{definition}[Embedding dimension]
+  The \emph{embedding dimension} of a discrete loss $\ell: \R \to \nonnegreals^{\Y}$ is the smallest $d$ such that $\ell$ can be embedded into $d$ dimensions, i.e. where there exists a calibrated polyhedral surrogate $L: \reals^d \to \nonnegreals^{\Y}$.
+  In this case, we say $\ell$ is \emph{$d$-embeddable}.
+\end{definition}
+
+A number of things are already known about embedding dimension.
+Many surrogates in the literature provide upper bounds; we highlight in particular the \emph{abstain loss} \bo{cite, describe}.
+A known convex-conjugate construction generically embeds any discrete loss on $\Y = [n]$ into $n-1$ dimensions, giving a flat upper bound of $n-1$ on embedding dimension.
+
+Lower bounds exist but are rare.
+In particular, a lower bound on the dimensionality of \emph{any} calibrated convex surrogate $L$ implies in particular a lower bound on polyhedral surrogates.
+\bo{cite} give such a lower bound via the technique of \emph{feasible subspace dimension}, which is able to e.g. prove that embedding $0-1$ loss on $n$ labels requires dimension $n-1$.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{One-dimensional embeddings}
 \label{sec:1d}
 
+In this section, we completely characterize when a discrete loss can be embedded into the real line.
+Perhaps, surprisingly, we also show that $1$-embeddability is equivalent to the existence of \emph{any} convex calibrated $1$-dimensional surrogate.
+We do not expect this fact to extend to higher dimensions, where separating the power of polyhedral from more general convex surrogates is an interesting open problem.
 
+We leverage recent results in \emph{property elicitation}, which formalize the property (or statistic) of a conditional distribution $p$ that is obtained by minimizing loss.
+\begin{definition}[Property, finite, level set, elicited]
+  A \emph{property} is a function $g: \simplex \to 2^{R}$ where $g(p) \neq \emptyset$ for all $p$.
+  It is \emph{finite} if $|\R| < \infty$.
+  The \emph{level set} of $r$ is the set $g_r = \{p \in \simplex : r \in g(p)\}$.
+  A loss function $f: R \to \nonnegreals^{\Y}$ \emph{elicits} the property if $g(p) = \argmin_{r \in R} \inprod{p}{f(r)}$.
+  We assume all properties are non-redundant, i.e. each $g_r$ contains a $p$ not in any other $g_{r'}$.
+\end{definition}
+In particular, in this paper we write $\gamma$ for the property elicited by $\ell$ and $\Gamma$ for the property elicited by $L$.
+For example, $0-1$ loss elicits the mode, which is formalized as a property on report space $\R = \Y$ via $g(p) = \argmax_{y \in \Y} p(y)$.
+
+\bo{This definition actually makes sense if $g$ is not finite; do we want to only define it for finite properties?}
+\begin{definition}[Intersection graph, orderable]
+  Given a finite property $g: \simplex \to 2^{\R}$, the \emph{intersection graph} has vertices labeled by $\R$ with an edge $(r,r')$ if $g_r \cap g_{r'} \neq \emptyset$.
+  A finite property $g$ is \emph{orderable} if its intersection graph is a path, i.e. a connected graph where every vertex has either one or two neighbors.
+\end{definition}
+
+%\begin{observation}
+%  A property $g$ is orderable if and only if the set $g_r \cap g_{r'}$, for $r \neq r'$, is always the intersection of a hyperplane with the simplex.
+%\end{observation}
+
+The main result of this section is Theorem \ref{thm:orderable-1-embed}.
+\begin{theorem} \label{thm:orderable-1-embed}
+  Given a discrete loss $\ell: \R \to \nonnegreals^{\Y}$, the following are equivalent:
+  \begin{enumerate}
+    \item The property elicited by $\ell$ is orderable.
+    \item $\ell$ is $1$-embeddable.
+    \item $\ell$ has some polyhedral calibrated surrogate loss $L: \reals \to \nonnegreals^{\Y}$.
+    \item $\ell$ has some convex calibrated surrogate loss $L: \reals \to \nonnegreals^{\Y}$.
+  \end{enumerate}
+\end{theorem}
+This theorem implies that one can directly test if a property is $1$-embeddable via the orderable criterion.
+Orderability can be tested using the Bayes risk of $\ell$, a polyhedral function defined by $p \mapsto \max_{r \in \R} \inprod{p}{\ell(r)}$.
+A direct approach is to project this function down to the simplex to give the level sets $\gamma_r$ \bo{figure?}.
+Another approach is to note that the intersection graph is directly given by finding those pairs $r,r'$ that simultaneously maximize the Bayes risk, i.e. cases where for some $p$, we have $r,r' \in \argmax_{r'' \in \R} \inprod{p}{\ell(r)}$.
+
+\subsection{Proof approach: monotonicity}
+\bo{Depending on space, we can give full definitions and proof sketches here, or less.}
+
+The key idea of the proof is to define \emph{monotonicity} of a general property $g: \simplex \to 2^{R}$.
+This generalizes orderability to the case where the report space $R$ is not necessarily finite
+We show a finite property is orderable if and only if it is monotone.
+From the definition of monotonicity, we are able to directly construct a polyhedral surrogate $L$, proving (1) $\implies$ (2) in Theorem \ref{thm:orderable-1-embed}.
+The equivalence of embedding and polyhedral surrogates of \cite{finocchiaro2019embedding} (Theorem \ref{thm:embed-iff-poly}) gives (2) $\implies$ (3), and the fact that polyhedral functions are convex gives (3) $\implies$ (4).
+Then, we show that monotone properties with report space $\reals$ are precisely those elicited by convex loss functions $L$.
+This, along with a result that calibrated link functionss must also be in a sense ``ordered'', proves (4) $\implies$ (1).
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Higher dimensions}
+\bo{blurb about the purpose of this section and the layout.}
 
-\paragraph{Background and notation.}
-Recall that we have a loss function $\ell: \R \to \reals^{\Y}_{\geq 0}$, and for any prediction $r \in \R$ of the algorithm, we write $\gamma_r = \{ p : \inprod{p}{\ell(r)} \leq \inprod{p}{\ell(r')} (\forall r')\}$.
-We are interested in potential polyhedral surrogates $L: \reals^d \to \reals^{\Y}_{\geq 0}$.
-These are associated with embedding points, where $u_r \in \reals^d$ is linked back to the discrete prediction $r$.
+\subsection{Setup: subgradient sets at embedding points.}
+%Recall that we have a loss function $\ell: \R \to \reals^{\Y}_{\geq 0}$, and for any prediction $r \in \R$ of the algorithm, we write $\gamma_r = \{ p : \inprod{p}{\ell(r)} \leq \inprod{p}{\ell(r')} (\forall r')\}$.
+%We are interested in potential polyhedral surrogates $L: \reals^d \to \reals^{\Y}_{\geq 0}$.
+%These are associated with embedding points, where $u_r \in \reals^d$ is linked back to the discrete prediction $r$.
 
-To settle the question of whether a consistent surrogate exists in $d$ dimensions, it turns out to be necessary and sufficient to consider the possible sets of subgradients of $L$ at the embedding points.
-This is useful in particular because a convex function is minimized at a point if and only if $\vec{0}$ is in its subgradient set at that point.
+Recall that if $\ell: \R \to \nonnegreals^{\Y}$ is embedded by $L: \reals^d \to \nonnegreals^{\Y}$, then each $r \in \R$ is embedded at some point $u_r \in \reals^d$.
+The key to our approach is to study as first-class objects the sets of all subgradients\footnote{Recall that a subgradient of e.g. the convex function $L(\cdot)_y: \reals^d \to \reals$ at a point $u$ is a vector $v \in \reals^d$ such that $L(u') \geq L(u) + \inprod{v}{u'-u}$ for all $u'$. The set of subgradients at $u$ is sometimes called the subdifferential.} of $L$ at these embedding points.
+To settle the question of whether a consistent surrogate exists in $d$ dimensions, it surprisingly turns out to be necessary and sufficient to consider conditions on these sets alone.
+In particular, we use heavily that a convex function is minimized at a point if and only if $\vec{0}$ is in its subgradient set at that point.
 
-We will therefore abstract the relevant subgradient sets -- namely, the subgradients of $L$ at the embedding points $u_r$, given observed outcome $y$ -- as bounded, closed polytopes $T^r_y$. (The subgradient sets are bounded closed polytopes because $L$ is polyhedral and defined on all of $\reals^d$.)
+Therefore, we abstract to consider collections of sets $T^r_y$, which aspire to be the subgradient sets of a calibrated polyhedral surrogate $L(\cdot)_y$ at $u_r$.
+Note that if $L(\cdot)_y$ is a polyhedral function on $\reals^d$, then all of its subgradient sets are (bounded) closed polytopes.\bo{cite}
 
 \begin{definition}[$\T$, $\T^r$, $D(\T^r)$]
-  We use the following notation for a collection of polytopes, with implicit parameter $d$: $\T = \{T^r_y \subseteq \reals^d : r \in \R, y \in \Y\}$.
+  We use the following notation for a collection of closed polytopes, with implicit parameter $d$: $\T = \{T^r_y \subseteq \reals^d : r \in \R, y \in \Y\}$.
   For each fixed $r$, we write $\T^r := \{T^r_y : y \in \Y\}$.
 
   Given a distribution $p \in \simplex$, we write the $p$-weighted Minkowski sum of $\T^r$ as
@@ -227,22 +329,19 @@ We will therefore abstract the relevant subgradient sets -- namely, the subgradi
   Finally, we associate with $\T^r$ a set of distributions $D(\T^r) = \{ p : \vec 0 \in \oplus_p \T^r\}$.
 \end{definition}
 
-\begin{observation} \label{obs:subdiff-minkowski}
-  Let $T^r_y$ be the subgradient set of $L(u_r)_y$.
-  Then the subgradient set of the expected loss $\inprod{p}{L(u_r)}$ is $\oplus_p \T^r$.
-\end{observation}
-\begin{proof}
-  \bo{TODO}
-\end{proof}
-\begin{corollary} \label{cor:minkowski-0-opt}
+The importance of the $p$-weighted Minkowski sum and of $D(\T^r)$ are that they capture the distributions $p$ for which $u_r$ minimizes expected loss, assuming that $\T$ correspond to some polyhedral $L$.
+\begin{proposition} \label{prop:minkowski-0-opt}
   If $T^r_y$ is the subgradient set of each $L(u_r)_y$, then $D(\T^r)$ is the set of distributions $p \in \simplex$ for which the embedding point $u_r$ minimizes expected $L$-loss.
-\end{corollary}
+\end{proposition}
 \begin{proof}
   Any convex function $f$ is minimized at $u$ if and only if $\vec 0$ is a subgradient of $f$ at $u$.
-  By Observation \ref{obs:subdiff-minkowski}, $\vec 0$ is a subgradient of $\inprod{p}{L(u_r)}$ if and only if $\vec 0 \in \oplus_p \T^r$, which by definition occurs if and only if $p \in D(\T^r)$.
+  Let $f(u) = \inprod{p}{L(u)}$.
+  Then the subgradient set of $f$ at $u$ is $\oplus_p \T^r$.
+  This follows from the basic properties that if $f_1,f_2$ are convex with subgradient sets $T_1,T_2$ at $u$, then $\alpha f_1$ has subgradient set $\alpha T_1$ and $f_1 + f_2$ has subgradient set $T_1 \oplus T_2$, the Minkowski sum.
+  So $\vec 0$ is a subgradient of $\inprod{p}{L(u_r)}$ if and only if $\vec 0 \in \oplus_p \T^r$, which by definition occurs if and only if $p \in D(\T^r)$.
 \end{proof}
-This corollary is vital because a discrete loss $\ell$ has a corresponding set of distributions $\gamma_r$ for which $r$ minimizes expected loss; and for calibration, it is necessary that these sets be the same: $\gamma_r = D(\T^r)$.
-We expand on this next.
+This fact will be vital for characterizing when $\ell$ is correctly embedded by some $L$ whose subgradient sets are $\T$.
+We leverage it next.
 
 \subsection{General characterization}
 
@@ -250,7 +349,7 @@ We now give a general characterization of when a discrete loss $\ell$ can be emb
 
 Two conditions are required: \emph{optimality} and \emph{monotonicity}.
 Optimality enforces that the surrogate is minimized precisely when and where it should be.
-It says that for each discrete prediction $r$ and set of distributions $\gamma_r$ for which it is optimal, there exists a collection of polytopes $\T^r$ (presumably the subgradient sets of $L(u_r)_y$ for each $y$) realizing Corollary \ref{cor:minkowski-0-opt}.
+It says that for each discrete prediction $r$ and set of distributions $\gamma_r$ for which it is optimal, there exists a collection of polytopes $\T^r$ (presumably the subgradient sets of $L(u_r)_y$ for each $y$) realizing Proposition \ref{prop:minkowski-0-opt}.
 Monotonicity says that these individual polytopes can actually be glued together to form the subgradients of some convex loss function $L$.
 
 %\begin{definition}[Optimality of subgradients for a level set] \label{def:opt}
@@ -298,7 +397,7 @@ The feasibility program intuitively contains one set of necessary and one set of
 The necessary conditions are derived from the representation of the polytope $C$ as an intersection of halfspaces.
 The sufficient conditions are derived from its dual representation as a convex hull of vertices.
 
-The variables are a set of normal vectors $\{v_i \in \reals^d : i \in [k]\}$ and a set of vertices $\{X^j_y \in \reals^d : j \in [\ell], y \in \Y\}$.
+The variables are a set of normal vectors $\{v_i \in \reals^d : i \in [k]\}$ and a set of vertices $\{x^j_y \in \reals^d : j \in [\ell], y \in \Y\}$.
 These correspond to a (possibly relaxed) halfspace representation and (possibly incomplete) vertex representation of the subgradient polytopes $\T^r$.
 
 \begin{definition}[Quadratic Feasibility Program] \label{def:qfp} ~ \\
@@ -306,12 +405,12 @@ These correspond to a (possibly relaxed) halfspace representation and (possibly 
 
   \textbf{Given:} a polytope $C = \{p \in \simplex : Bp \geq \vec 0\} = \conv(\{p^1, \ldots, p^\ell\}) \subseteq \simplex$, where $B \in \reals^{k \times n}$ has a minimum number of rows.
 
-  \textbf{Variables:} a matrix $V \in \reals^{k \times d}$, each row representing a normal vector; and a collection of matrices $X^1,\ldots,X^{\ell} \in \reals^{d \times n}$, with $X^j$ intuitively corresponding to $p^j$ with columns $X^j_y$ representing witness points.
+  \textbf{Variables:} a matrix $V \in \reals^{k \times d}$, each row representing a normal vector; and a collection of matrices $X^1,\ldots,X^{\ell} \in \reals^{d \times n}$, with $X^j$ intuitively corresponding to $p^j$ with columns $x^j_y$ representing witness points.
 
   \textbf{Constraints:}
     \begin{align}
       V X^j                     &\leq B    & \text{(pointwise, $\forall j \in [\ell]$)}  \label{eqn:qp-constr-1} \\
-      \sum_{y=1}^n p^j(y) X^j_y &= \vec 0  & \text{($\forall j \in [\ell]$)}    \label{eqn:qp-constr-2} 
+      \sum_{y=1}^n p^j(y) x^j_y &= \vec 0  & \text{($\forall j \in [\ell]$)}    \label{eqn:qp-constr-2} 
     \end{align}
 \end{definition}
 
@@ -397,20 +496,24 @@ Given this characterization, we prove the main result on when a solution to the 
     By Theorem \ref{thm:vertex-halfspace-opt}, it suffices to show that $\T^r$ satisfying the halfspace and vertex conditions exist if and only if the program is feasible.
 
   ($\implies$) 
-  By the vertex condition, for each $j \in [\ell]$, there exist witnesses $\{X^j_y \in T^r_y : y \in \Y\}$ satisfying the second constraint of the quadratic program (Inequality \ref{eqn:qp-constr-2}).
-  By the halfspace condition, there exist normals $v_1, \dots, v_k$ such that, for all $i$, for all $x \in T^r_y$, $\inprod{v_i}{x} \leq B_{iy}$; in particular, this applies to the above witnesses $X^j_y \in T^r_y$.
+  By the vertex condition, for each $j \in [\ell]$, there exist witnesses $\{x^j_y \in T^r_y : y \in \Y\}$ satisfying the second constraint of the quadratic program (Inequality \ref{eqn:qp-constr-2}).
+  By the halfspace condition, there exist normals $v_1, \dots, v_k$ such that, for all $i$, for all $x \in T^r_y$, $\inprod{v_i}{x} \leq B_{iy}$; in particular, this applies to the above witnesses $x^j_y \in T^r_y$.
   Collecting $v_1,\dots,v_k$ as the columns of $V$, this shows that the first constraint (Inequality \ref{eqn:qp-constr-1}) is satisfied.
 
   \bigskip
   ($\impliedby$)
-  We construct $T^r_y = \conv(\{X^1_y, \ldots, X^{\ell}_y\})$.
+  We construct $T^r_y = \conv(\{x^1_y, \ldots, x^{\ell}_y\})$.
   The second constraint of the quadratic program immediately implies the vertex condition.
-  Taking $v_1,\dots,v_k$ as the columns of $V$, the first constraint implies that for each $X^j_y$, we have $\inprod{v_i}{X^j_y} \leq B_{iy}$ for all $i,j,y$.
-  Any point $x \in T^r_y$ is a convex combination of $X^1_y,\ldots,X^{\ell}_y$, so it satisfies $\inprod{v_i}{x} \leq B_{iy}$.
+  Taking $v_1,\dots,v_k$ as the columns of $V$, the first constraint implies that for each $x^j_y$, we have $\inprod{v_i}{x^j_y} \leq B_{iy}$ for all $i,j,y$.
+  Any point $x \in T^r_y$ is a convex combination of $x^1_y,\ldots,x^{\ell}_y$, so it satisfies $\inprod{v_i}{x} \leq B_{iy}$.
   This implies the halfspace condition.  % Bo: QED
 \end{proof}
 
   
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Examples}
 
 
 
