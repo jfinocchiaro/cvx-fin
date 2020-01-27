@@ -296,8 +296,15 @@ The main result of this section is Theorem \ref{thm:orderable-1-embed}.
 \end{theorem}
 This theorem implies that one can directly test if a property is $1$-embeddable via the orderable criterion.
 Orderability can be tested using the Bayes risk of $\ell$, a polyhedral function defined by $p \mapsto \max_{r \in \R} \inprod{p}{\ell(r)}$.
-A direct approach is to project this function down to the simplex to give the level sets $\gamma_r$ \bo{figure?}.
+A direct approach is to project this function down to the simplex to give the level sets $\gamma_r$, as in Figure~\ref{fig:intersection-graph}.
 Another approach is to note that the intersection graph is directly given by finding those pairs $r,r'$ that simultaneously maximize the Bayes risk, i.e. cases where for some $p$, we have $r,r' \in \argmax_{r'' \in \R} \inprod{p}{\ell(r'')}$.
+
+\begin{figure}\label{fig:intersection-graph}
+	\centering
+	\includegraphics[width = 0.6\linewidth]{tikz/intersection-graph.pdf}
+	\caption{Intersection graph for the [truncated] expected value property on outcomes $\Y = \{1,2,3\}$.}
+\end{figure}
+
 
 \subsection{Proof approach: monotonicity}
 \bo{Depending on space, we can give full definitions and proof sketches here, or less.}
@@ -315,8 +322,18 @@ This, along with a result that calibrated link functionss must also be in a sens
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Higher dimensions}
 \bo{blurb about the purpose of this section and the layout.}
+\jessie{Taking a crack at it:}
+Our newfound understanding of the 1-dimensional embedding characterization leads us to realize that a large class of properties are not $1$-embeddable.
+\cite{finocchiaro2019embedding} have shown a trivial upper bound that every property is $(n-1)$-embeddable, but it is an open question as to how tight we can get the bounds on embedding dimension.
+Reducing embedding dimension significantly below $(n-1)$ can help provide a computational speedup in the optimization problem, which is a function of the surrogate loss dimension.
+This is especially important as the number of possible outcomes $n$ grows large. 
 
-\subsection{Setup: subgradient sets at embedding points.}
+Below, we generalize our characterization to $d$-embeddability for $d \geq 2$.
+Having a finite number of embedding points and restricting to polyhedral functions allows us to study the subgradient sets of the loss at embedding points, which we formalize in Section~\ref{subsec:sub-sets}.
+Using a general theory of polytopes, we can then present our general $d$-dimensional characterization in terms of optimality and monotonicity conditions.
+In Section~\ref{subsec:opt-conditions}, we present a quadratic feasibility program in order to understand necessary conditions for $d$-embeddability by satisfying optimality conditions, yielding new lower bounds for embedding dimension in Corollary~\ref{cor:d-embeddable-char}.
+
+\subsection{Setup: subgradient sets at embedding points.}\label{subsec:sub-sets}
 %Recall that we have a loss function $\ell: \R \to \reals^{\Y}_{\geq 0}$, and for any prediction $r \in \R$ of the algorithm, we write $\gamma_r = \{ p : \inprod{p}{\ell(r)} \leq \inprod{p}{\ell(r')} (\forall r')\}$.
 %We are interested in potential polyhedral surrogates $L: \reals^d \to \reals^{\Y}_{\geq 0}$.
 %These are associated with embedding points, where $u_r \in \reals^d$ is linked back to the discrete prediction $r$.
@@ -372,7 +389,7 @@ Monotonicity says that these individual polytopes can actually be glued together
   Then $\ell$ is $d$-embeddable if and only if there exist polytopes $\T = \{T^r_y \subseteq \reals^d : r \in \R, y \in \Y\}$ such that both of the following hold:
   \begin{enumerate}
     \item (Optimality) For all $r \in \R$, we have $D(\T^r) = \gamma_r$.
-    \item (Monotonicity) (TODO)
+    \item (Monotonicity) There exists an injective embedding function $\phi : \R \to \reals^d$ and loss functions $\{L_y : \reals^d \to \reals^\Y_{\geq 0}\}_{y \in \Y}$ such that for all $y \in \Y$ and $r \in \R$, we have $T^r_y = \partial L_y(\phi(r))$.
   \end{enumerate}
 \end{theorem}
 \begin{proof}
@@ -380,7 +397,7 @@ Monotonicity says that these individual polytopes can actually be glued together
 \end{proof}
 
 
-\subsection{Characterizing optimality}
+\subsection{Characterizing optimality}\label{subsec:opt-conditions}
 
 We now investigate the optimality condition of Theorem \ref{thm:general-char}, for two purposes.
 First, we aim to greatly narrow the search space for constructing low-dimensional surrogate loss functions for a given discrete loss.
@@ -397,7 +414,7 @@ We will prove the following main results.
   Given a convex polytope $C \subseteq \simplex$, there exist polytopes $\T^r$ in $\reals^d$ such that $D(\T^r) = C$ if and only if there is a feasible solution to the QFP (Definition \ref{def:qfp}) with parameter $d$.
 \end{theorem}
 
-\begin{corollary}
+\begin{corollary}\label{cor:d-embeddable-char}
   If a discrete loss $\ell$ has any level set $C = \gamma_r = \{p : r \in \argmin_{r'} \inprod{p}{\ell(r')} \}$ for which the quadratic program is infeasible with parameter $d$, then $\ell$ is not $d$-embeddable.
 \end{corollary}
 
