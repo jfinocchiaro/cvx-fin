@@ -172,23 +172,21 @@ To do...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Setting}
 
-\subsection{Discrete losses and embeddings}
+\paragraph{Discrete losses and (polyhedral) surrogates.}
 
 The base object of study is a \emph{discrete loss function} $\ell: \R \to \nonnegreals^{\Y}$ where $\R$ and $\Y$ are finite sets.
 Here $\ell(r)_y$ is the loss of prediction $r \in \R$ (the report space) on $y \in \Y$ (the observation or label space).
 For simplicity we let $\Y = [n]$ throughout (where $[n] = \{1,\ldots,n\}$).
 The set of probability distributions on $\Y$ is denoted $\simplex\subseteq\nonnegreals^{\Y}$, represented as vectors of probabilities.
-We write $p(y)$ for the probability of outcome $y \in \Y$ drawn from $p \in \simplex$.
-As is assumed by~\cite{finocchiaro2019embedding}, we assume the given discrete loss is \emph{non-redundant}, meaning every report is uniquely optimal (minimizes expected loss) for some distribution $p\in\simplex$.
+We write $p(y)$ \bo{check/decide} for the probability of outcome $y \in \Y$ drawn from $p \in \simplex$.
+As is assumed by~\cite{finocchiaro2019embedding}, we assume the given discrete loss is \emph{non-redundant}, meaning every report $r$ uniquely minimizes expected loss for some distribution $p\in\simplex$.
 
-We denote surrogate losses in dimension $d$ by $L:\reals^d\to\nonnegreals^{\Y}$, with predictions typically written $u\in\reals^d$.
+We similarly denote surrogate losses in dimension $d$ by $L:\reals^d\to\nonnegreals^{\Y}$, with predictions typically written $u\in\reals^d$.
 The expected losses when $Y \sim p$ can be written $\inprod{p}{\ell(r)}$ and $\inprod{p}{L(u)}$.
-In order to capture how the surrogate corresponds to the original loss, we rely on the following notation from property elicitation literature \bo{cite}: $\gamma_r \subseteq \simplex$ represents those distributions where $r$ minimizes expected loss, i.e. $\gamma_r = \{p : \inprod{p}{\ell(r)} \leq \inprod{p}{\ell(r')} ~ (\forall r' \in \R) \}$.
-Similarly, $\Gamma_u = \{ p : \inprod{p}{L(u)} \leq \inprod{p}{L(u')} ~ (\forall u' \in \reals^d) \}$.
 
 For example, 0-1 loss is a discrete loss with $\R = \Y = \{-1,1\}$
 given by $\ellzo(r)_y = \Ind{r \neq y}$.%, with Bayes risk $\risk{\ellzo}(p) = 1-\max_{y\in\Y} p_y$.
-Two important surrogates for $\ellzo$ are hinge loss $\hinge(u)_y = (1-yu)_+$, where $(x)_+ = \max(x,0)$, and logistic loss $L(u)_y = \log(1+\exp(-yu))$ for $u\in\reals$.
+Two important surrogates for $\ellzo$ are hinge loss $\hinge(u)_y = \max\{ 0 ~,~ 1-yu \}$ and logistic loss $L(u)_y = \log(1+\exp(-yu))$ for $u\in\reals$.
 
 Most of the surrogates $L$ we consider will be \emph{polyhedral}, meaning piecewise linear and convex; we therefore briefly recall the relevant definitions.
 In $\reals^d$, a \emph{polyhedral set} or \emph{polyhedron} is the intersection of a finite number of closed halfspaces.
@@ -201,30 +199,45 @@ A convex function $f:\reals^d\to\reals$ is \emph{polyhedral} if its epigraph is 
 %
 For example, hinge loss is polyhedral, whereas logistic loss is not.
 
+\paragraph{Properties of distributions.}
+In order to study calibration of surrogates (defined below), it is useful to formalize the following functions that describe the reports that minimize expected $\ell$-loss and $L$-loss under $p$.
+\begin{definition}[(Finite) property, level set, elicited]
+  A \emph{property} is a function $g: \simplex \to 2^{R}$ for some set $R$ where $g(p) \neq \emptyset$ for all $p$.
+  It is \emph{finite} if $|R| < \infty$.
+  The \emph{level set} of $r \in R$ is the set $g_r = \{p \in \simplex : r \in g(p)\}$.
+  A loss function $f: R \to \nonnegreals^{\Y}$ \emph{elicits} $g$ if $g(p) = \argmin_{r \in R} \inprod{p}{f(r)}$.
+  We assume all properties are non-redundant, i.e. each $g_r$ contains a $p$ not in any other $g_{r'}$.
+\end{definition}
+For example, $0-1$ loss elicits the mode, which is formalized as a property on report space $R = \Y$ via $g(p) = \argmax_{y \in \Y} p(y)$.
+Notice in this example $g(p)$ is a singleton set when the mode of $p$ is unique and e.g. is $\Y$ when $p$ is uniform.
+%Another example of a finite property is ranking, in which $\R$ is the set of permutations of $\Y$, and $g(p)$ consists of all permutations that order $\Y$ from most to least probable (i.e. ties must be broken in all possible ways).
+In this paper we write $\gamma$ for the property elicited by $\ell$ and $\Gamma$ for the property elicited by $L$.
+
+\paragraph{Embeddings.}
 %We specifically study polyhedral functions in part because they have high-dimensional subgradient sets at points of nondifferentiability, which will be of interest to us later.
 Polyhedral losses are motivated partly because they correspond to a natural surrogate construction technique: embedding the discrete predictions $\R$ as points in $\reals^d$.
-The key condition is that $r \in \R$ should minimize expected $\ell$-loss if and only if its embedding point minimizes expected surrogate loss.
+The key condition required on the embedding and surrogate loss $L$ is that a discrete prediction $r \in \R$ should minimize expected $\ell$-loss if and only if its embedding point minimizes expected $L$-loss.
 %
 \begin{definition}[Embedding of a loss]
   A loss $L: \reals^d \to \nonnegreals^{\Y}$ \emph{embeds} a loss $\ell: \R \to \nonnegreals^{\Y}$ \emph{in dimension $d$} with \emph{embedding function $\phi: \R \to \reals^d$} if: (i) $\phi$ is injective; (ii) for all $r \in \R$, $\ell(r) = L(\phi(r))$; and (iii) for all $r \in \R$, $\gamma_r = \Gamma_{\phi(r)}$.
   We simply say $L$ \emph{embeds} $\ell$ (in dimension $d$) if some such embedding function exists.
 \end{definition}
 %
-Note that embedding does not immediately imply another important property, calibration.
+Note that embedding does not immediately imply a key desirable property, calibration.
+Informally, calibration means that if one minimizes expected surrogate loss arbitrarily well over $\reals^d$, then applies the link function to obtain a discrete prediction $r$, then $r$ exactly minimizes $\ell$-loss.
 \begin{definition}[Calibrated surrogate]
   A surrogate loss $L: \reals^d \to \nonnegreals^{\Y}$ and \emph{link function} $\psi: \reals^d \to \R$ are \emph{calibrated} for a loss $\ell: \R \to \nonnegreals^{\Y}$ if for all $p \in \simplex$,
-    \[ u \in \argmin_{u' \in \reals^d} \inprod{p}{L(u')} \implies \psi(u) \in \argmin_{r' \in \R} \inprod{p}{\ell(r)} . \]
+    \[ \inf_{u \in \reals^d ~:~ \psi(u) \not\in \gamma(p)} \inprod{p}{L(u)}  > \inf_{u \in \reals^d} \inprod{p}{L(u)}  .\]
   We simply say $L$ can be \emph{calibrated} to $\ell$ if such a link function exists.
 \end{definition}
+\bo{More on why calibration is desirable?}
+
 Polyhedral surrogates are motivated by the following results.
 \begin{theorem}[\cite{finocchiaro2019embedding}] \label{thm:embed-iff-poly}
   If a discrete loss $\ell$ is embedded by some surrogate $L$, then (1) $L$ must be a polyhedral loss; and (2) there exists a link function calibrating $L$ to $\ell$.
 \end{theorem}
-It therefore suffices for us to investigate when an embedding of $\ell$ exists.
-We will get calibration for free.
-The next question is what desirable properties would be of a surrogate $L: \reals^d \to \nonnegreals^{\Y}$ (which we know must be polyhedral).
-The most immediate is the dimensionality $d$ required.
-This is the question investigated in this paper.
+In other words, polyhedral surrogates are equivalent to embeddings of discrete losses $\ell$ in $\reals^d$; and they come with a guarantee of calibration.
+This raises the question studied in this paper: in what dimension $d$ does such a surrogate exist?
 
 \subsection{Embedding dimension}
 
@@ -236,8 +249,6 @@ In this paper, we study the following quantity.
 
 A number of things are already known about embedding dimension.
 Many surrogates in the literature provide upper bounds; we highlight in particular the \emph{abstain loss} given by \cite{ramaswamy2018consistent}, in which one wants to predict the most likely outcome \emph{only if} they are confident in the outcome, and otherwise \emph{abstain} from predicting an outcome for a lesser punishment than if they give a prediction and were incorrect. 
-A known convex-conjugate construction generically embeds any discrete loss on $\Y = [n]$ into $n-1$ dimensions, giving a flat upper bound of $n-1$ on embedding dimension.
-
 \begin{equation}\label{eq:abstain}
 \ellabs{\alpha}(r,y) = \begin{cases}
 0 & r = y\\
@@ -245,14 +256,14 @@ A known convex-conjugate construction generically embeds any discrete loss on $\
 1 & r \not \in \{y, \bot\}
 \end{cases}
 \end{equation}
+Here $\R = \Y \cup \{\bot\}$.
+For $\alpha=1/2$, \cite{ramaswamy2018consistent} give an elegant embedding of this loss on $n$ outcomes into $d = \lceil \log_2 n \rceil$ dimensions, where each $y \in \Y$ is embedded at a corner of the Boolean hypercube $\{-1,1\}^n$ while $\bot$ is embedded at the origin.
 
-
+In general, a known convex-conjugate construction generically embeds any discrete loss on $\Y = [n]$ into $n-1$ dimensions, giving a flat upper bound of $n-1$ on embedding dimension.
 Lower bounds exist but are rare.
-In particular, a lower bound on the dimensionality of \emph{any} calibrated convex surrogate $L$ implies in particular a lower bound on polyhedral surrogates. \jessie{Is it this or vice versa?}
+In particular, a lower bound on the dimensionality of \emph{any} calibrated convex surrogate $L$ implies in particular a lower bound on polyhedral surrogates. \jessie{Is it this or vice versa?} \bo{I think this is the correct statement. If we cannot have any convex cal. surrogate in $d$ dimensions, then we definitely can't have a polyhedral one.}
 \cite{ramaswamy2016convex} give such a lower bound via the technique of \emph{feasible subspace dimension}, which is able to e.g. prove that embedding $0-1$ loss on $n$ labels requires dimension $n-1$.
-However, their bounds do not work well for the $\abstain{1/2}$ property because of its geometric structure.
-Their construction of lower bounds simply give $1 \leq \abstain{1/2}$.
-
+However, this technique gives only the trivial $d \geq 1$ for the abstain family of losses above, e.g. $\ell_{1/2}$, because of their geometric structure.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -260,23 +271,13 @@ Their construction of lower bounds simply give $1 \leq \abstain{1/2}$.
 \label{sec:1d}
 
 In this section, we completely characterize when a discrete loss can be embedded into the real line.
+For example, we will immediately obtain that the abstain losses on $n \geq 3$ outcomes require $d \geq 2$.
 Perhaps, surprisingly, we also show that $1$-embeddability is equivalent to the existence of \emph{any} convex calibrated $1$-dimensional surrogate.
-We do not expect this fact to extend to higher dimensions, where separating the power of polyhedral from more general convex surrogates is an interesting open problem.
+In other words, general convex surrogates are no more powerful than polyhedral surrogates in one dimension.
+We conjecture that this fact may extend to higher dimensions, an open problem.
 
-We leverage recent results in \emph{property elicitation}, which formalize the property (or statistic) of a conditional distribution $p$ that is obtained by minimizing loss.
-\begin{definition}[Property, finite, level set, elicited]
-  A \emph{property} is a function $g: \simplex \to 2^{R}$ where $g(p) \neq \emptyset$ for all $p$.
-  It is \emph{finite} if $|\R| < \infty$.
-  The \emph{level set} of $r$ is the set $g_r = \{p \in \simplex : r \in g(p)\}$.
-  A loss function $f: R \to \nonnegreals^{\Y}$ \emph{elicits} the property if $g(p) = \argmin_{r \in R} \inprod{p}{f(r)}$.
-  We assume all properties are non-redundant, i.e. each $g_r$ contains a $p$ not in any other $g_{r'}$.
-\end{definition}
-In particular, in this paper we write $\gamma$ for the property elicited by $\ell$ and $\Gamma$ for the property elicited by $L$.
-For example, $0-1$ loss elicits the mode, which is formalized as a property on report space $\R = \Y$ via $g(p) = \argmax_{y \in \Y} p(y)$.
-
-\bo{This definition actually makes sense if $g$ is not finite; do we want to only define it for finite properties?}
 \begin{definition}[Intersection graph, orderable]
-  Given a finite property $g: \simplex \to 2^{\R}$, the \emph{intersection graph} has vertices labeled by $\R$ with an edge $(r,r')$ if $g_r \cap g_{r'} \neq \emptyset$.
+  Given a finite property $g: \simplex \to 2^{\R}$, the \emph{intersection graph} has vertices labeled by $\R$ with an edge $(r,r')$ if $g_r \cap g_{r'} \cap \relint(\simplex) \neq \emptyset$, where $\relint(\simplex)$ equals the set of distributions with positive weight on all outcomes.
   A finite property $g$ is \emph{orderable} if its intersection graph is a path, i.e. a connected graph where every vertex has either one or two neighbors.
 \end{definition}
 
@@ -323,6 +324,7 @@ This, along with a result that calibrated link functionss must also be in a sens
 \section{Higher dimensions}
 \bo{blurb about the purpose of this section and the layout.}
 \jessie{Taking a crack at it:}
+\bo{Nice job!}
 Our newfound understanding of the 1-dimensional embedding characterization leads us to realize that a large class of properties are not $1$-embeddable.
 \cite{finocchiaro2019embedding} have shown a trivial upper bound that every property is $(n-1)$-embeddable, but it is an open question as to how tight we can get the bounds on embedding dimension.
 Reducing embedding dimension significantly below $(n-1)$ can help provide a computational speedup in the optimization problem, which is a function of the surrogate loss dimension.
@@ -339,6 +341,8 @@ In Section~\ref{subsec:opt-conditions}, we present a quadratic feasibility progr
 %These are associated with embedding points, where $u_r \in \reals^d$ is linked back to the discrete prediction $r$.
 
 Recall that if $\ell: \R \to \nonnegreals^{\Y}$ is embedded by $L: \reals^d \to \nonnegreals^{\Y}$, then each $r \in \R$ is embedded at some point $u_r \in \reals^d$.
+In particular, $u_r$ must minimize $\inprod{p}{L(u)}$ if and only if $r$ minimizes $\inprod{p}{\ell(r')}$.
+
 The key to our approach is to study as first-class objects the sets of all subgradients\footnote{Recall that a subgradient of e.g. the convex function $L(\cdot)_y: \reals^d \to \reals$ at a point $u$ is a vector $v \in \reals^d$ such that $L(u') \geq L(u) + \inprod{v}{u'-u}$ for all $u'$. The set of subgradients at $u$ is sometimes called the subdifferential.} of $L$ at these embedding points.
 To settle the question of whether a consistent surrogate exists in $d$ dimensions, it surprisingly turns out to be necessary and sufficient to consider conditions on these sets alone.
 In particular, we use heavily that a convex function is minimized at a point if and only if $\vec{0}$ is in its subgradient set at that point.
