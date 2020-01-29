@@ -167,7 +167,21 @@
 \section{Introduction}
 To do...
 
+\subsection{Related works}
+In the heuristic of \emph{empirical risk minimization}, the optimization of a loss function measuring error is canon in the design of machine learning algorithms designed for prediction tasks.
+As the optimization of discrete problems is computationally hard, we typically resort to optimizing a \emph{surrogate loss} that yields desirable statistical guarantees such as the existence of excess risk bounds given by \emph{consistency}.
 
+In particular,~\cite{bartlett2006convexity} study when a convex, calibrated surrogate exists for a given discrete loss, and in a finite-outcome setting,~\cite{tewari2007consistency} show that calibration (Definition~\ref{def:calibration}) is necessary and sufficient for consistency, meaning that there is a link mapping surrogate reports to discrete reports so that converging to the optimal prediction in the surrogate space implies the linked surrogate prediction converges to the optimal prediction for the original loss.
+
+In order to decrease the dimension of the optimization problem,~\cite{frongillo2015elicitation} propose \emph{elicitation complexity}, which is the minimum dimension input to a loss such that, for all beliefs $p$ over the outcomes, the ``correct report,'' a function of the distribution $p$, minimizes the expected loss over the distribution $p$.
+In the more specific case on constructing \emph{convex, calibrated} surrogates for discrete losses,~\cite{ramaswamy2016convex} propose the notion of \emph{convex calibration dimension}, which is the minimum dimension input to a convex surrogate loss that is calibrated with respect to a given discrete loss.
+While~\cite{ramaswamy2016convex} present methods for obtaining lower bounds on convex calibration dimension for any discrete loss, their method does not always work well, as demonstrated by the $\abstain{\alpha}$ loss in Equation~\eqref{eq:abstain}.
+\cite{ramaswamy2018consistent} present upper bounds on the convex calibration of $\abstain{\alpha}$ loss of $\ceil{\log_2(n)}$, but their characterization of lower bounds leave the tightness of these bounds as an open question.
+
+\cite{finocchiaro2019embedding} propose the notion of \emph{embedding losses} in order to construct polyhedral, calibrated surrogate losses for a given discrete loss.
+Their work constructively shows that every discrete loss is embeddable, but it is unclear how efficient an embedding can get.
+In this paper, we propose the notion of embedding dimension in order to study the minimum dimension of a \emph{polyhedral calibrated} surrogate loss with respect to a discrete loss.
+In order to concisely discuss embedding dimension, we appeal to notation and terminology from the field of property elicitation(\cite{frongillo2015vector-valued, gneiting2007strictly, lambert2009eliciting, osband1985information-eliciting, savage1971elicitation}), relating it to the language of calibrated surrogates as needed.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Setting}
@@ -225,7 +239,7 @@ The key condition required on the embedding and surrogate loss $L$ is that a dis
 %
 Note that embedding does not immediately imply a key desirable property, calibration.
 Informally, calibration means that if one minimizes expected surrogate loss arbitrarily well over $\reals^d$, then applies the link function to obtain a discrete prediction $r$, then $r$ exactly minimizes $\ell$-loss.
-\begin{definition}[Calibrated surrogate]
+\begin{definition}[Calibrated surrogate]\label{def:calibration}
   A surrogate loss $L: \reals^d \to \nonnegreals^{\Y}$ and \emph{link function} $\psi: \reals^d \to \R$ are \emph{calibrated} for a loss $\ell: \R \to \nonnegreals^{\Y}$ if for all $p \in \simplex$,
     \[ \inf_{u \in \reals^d ~:~ \psi(u) \not\in \gamma(p)} \inprod{p}{L(u)}  > \inf_{u \in \reals^d} \inprod{p}{L(u)}  .\]
   We simply say $L$ can be \emph{calibrated} to $\ell$ if such a link function exists.
@@ -261,7 +275,7 @@ For $\alpha=1/2$, \cite{ramaswamy2018consistent} give an elegant embedding of th
 
 In general, a known convex-conjugate construction generically embeds any discrete loss on $\Y = [n]$ into $n-1$ dimensions, giving a flat upper bound of $n-1$ on embedding dimension.
 Lower bounds exist but are rare.
-In particular, a lower bound on the dimensionality of \emph{any} calibrated convex surrogate $L$ implies in particular a lower bound on polyhedral surrogates. \jessie{Is it this or vice versa?} \bo{I think this is the correct statement. If we cannot have any convex cal. surrogate in $d$ dimensions, then we definitely can't have a polyhedral one.}
+In particular, a lower bound on the dimensionality of \emph{any} calibrated convex surrogate $L$ implies in particular a lower bound on polyhedral surrogates. 
 \cite{ramaswamy2016convex} give such a lower bound via the technique of \emph{feasible subspace dimension}, which is able to e.g. prove that embedding $0-1$ loss on $n$ labels requires dimension $n-1$.
 However, this technique gives only the trivial $d \geq 1$ for the abstain family of losses above, e.g. $\ell_{1/2}$, because of their geometric structure.
 
@@ -320,9 +334,17 @@ A direct approach is to project this function down to the simplex to give the le
 Another approach is to note that the intersection graph is directly given by finding those pairs $r,r'$ that simultaneously maximize the Bayes risk, i.e. cases where for some $p$, we have $r,r' \in \argmax_{r'' \in \R} \inprod{p}{\ell(r'')}$.
 
 \begin{figure}\label{fig:intersection-graph}
+	\begin{minipage}{0.48\linewidth}
 	\centering
-	\includegraphics[width = 0.6\linewidth]{tikz/intersection-graph.pdf}
+	\includegraphics[width = 0.8\linewidth]{tikz/intersection-graph.pdf}
 	\caption{Intersection graph for the [truncated] expected value property on outcomes $\Y = \{1,2,3\}$.}
+	\end{minipage}
+\hfill
+	\begin{minipage}{0.48\linewidth}
+	\centering
+	\includegraphics[width = 0.9\linewidth]{tikz/abstain-alpha-half.pdf}
+	\caption{Intersection graph for the $\abstain{1/2}$ property on $\Y = \{1,2,3\}$.}
+\end{minipage}
 \end{figure}
 
 
