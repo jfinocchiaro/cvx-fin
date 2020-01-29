@@ -594,6 +594,7 @@ Given this characterization, we prove the main result on when a solution to the 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Examples}\label{sec:examples}
+\bo{I suggest we don't use the notation $\elicembed$ at all and just write out $d$-embeddable every time. But don't feel strongly.}
 \subsection{Abstain property, $\alpha \leq 1/2$}\label{subsec:example-abstain}
 One classification-like problem that is of particular interest is the abstain property, elicited by the loss $\ellabs{1/2}$ given in Equation~\ref{eq:abstain}.
 The property $\abstain{\alpha}$ can be verified:
@@ -609,23 +610,40 @@ However, it is unclear if this bound is tight, as the previously studied lower b
 
 With our $1$-dimensional characterization, we already observe a tighter lower bound.
 \begin{proposition}
-	For $n \geq 3$ and $\alpha \leq 1/2$, we have $\elicembed(\abstain{1/2}) \geq 2$.
+	For $n \geq 3$ and $\alpha \leq 1/2$, the abstain loss $\ell_{\alpha}$ is not $1$-embeddable. \bo{In fact, for any $\alpha < 1$...}
 \end{proposition}
 \begin{proof}
 	Consider the intersection graph of $\gamma := \abstain{\alpha}$: the node associated with $\gamma_\bot$ has $n$ edges, and since we assume $n \geq 3$, we fail to observe the requirement that every node of the intersection graph has degree at most $2$.
 \end{proof}
 
-\begin{proposition}
-	$\gamma := \abstain{1/2}$ with $n=5$ is not $2$-embeddable.
-\end{proposition}
+\begin{lemma} \label{lemma:abstain-v-h}
+  For the abstain loss $\ell_{1/2}$, the level set of abstain satisfies $\gamma_{\bot} = \conv\{(\delta_y + \delta_{y'})/2 : y,y' \in \Y, y\neq y'\} = \{p : Bp \geq \vec{0}\}$ where $\delta_y$ puts probability one on $y$ and $B = \ones \ones^{\intercal} - 2I \in \reals^{5 \times 5}$, i.e. has entries $-1$ on the diagonal and $1$ everywhere else.
+\end{lemma}
 \begin{proof}
-  We use the results from Section~\ref{sec:d-dim} and show that the optimality condition is not met for the level set $\gamma_\bot$.
-  First, we represent the cell $\gamma_\bot = \{p \in \simplex : Bp \geq \vec 0\} = \conv(\{(1/2, 1/2, 0,0,0), \ldots, (0,0,0,1/2, 1/2)\})$, where $B = \ones \ones^T - 2I_5 \in \reals^{5 \times 5}$ has entry $-1$ on the diagonal, and entry $1$ everywhere else.
-	
-  We make an argument on the permissible angles between normals $v_1, \ldots, v_5$ in $\reals^2$ and show there is no feasible solution to the QFP in Definition~\ref{def:qfp}.
-  In particular, we argue that for any cone strictly $ < 180^\circ$, we can have no more than two vectors $v_i$ and $v_j$; otherwise we yield a contradiction.
+  Recall that $\gamma_{\bot}$ is the set of distributions $p$ with $\max_y p(y) = 1/2$.
+  First, note that each distribution of the form $(1/2, 1/2, 0, 0, 0)$ and so on is in $\gamma_{\bot}$.
+  Meanwhile, every such $p$ can be written as a convex combination of these corners.
+  Second, note that if $p \in \gamma_{\bot}$, then $p(y) \leq 1/2$ for all $y \in \Y$.
+  These constraints can be rewritten as $\inprod{p}{b} \geq 0$ where $b_y = -1$ and $b_{y'} = 1$ for all $y' \neq y$, literally requiring $p(y) \leq \sum_{y' \neq y} p(y')$.\bo{Check notation $p_y$ versus $p(y)$.}
+\end{proof}
+
+\begin{proposition}
+	The abstain loss $\ell_{1/2}$ with $n=5$ is not $2$-embeddable.
+\end{proposition}
+\begin{proof}[Geometric proof]
+  We apply Corollary \ref{cor:d-embeddable-char}: We consider the level set $\gamma_{\bot}$ (the distributions whose modal mass is at most $1/2$).
+  We show that the quadratic program (Definition \ref{def:qfp}) is not feasible for this polytope with dimension $d=2$, which implies by Corollary \ref{cor:d-embeddable-char} that $\ell$ is not $2$-embeddable.
+
+  We obtain the vertex and halfspace representations of $\gamma_{\bot}$ from Lemma \ref{lemma:abstain-v-h}.
+  We proceed by narrowing the space of feasible normals $v_1, \ldots, v_5$, until we reach a contradiction.
+  %We make an argument on the permissible angles between normals $v_1, \ldots, v_5$ in $\reals^2$ and show there is no feasible solution to the QFP in Definition~\ref{def:qfp}.
+  In particular, we argue that in any cone strictly $ < 180^\circ$, we can have no more than two vectors $v_i$ and $v_j$; otherwise we yield a contradiction.
+
+  We index the vertices and witnesses as follows: For $y < y'$, we write $p^{yy'} = (\delta_y + \delta_{y'})/2$ and $X^{yy'}$ for the corresponding matrix variable, with columns (witness points) $x^{yy'}_{y''}$.
+  In particular, the vertex constraints can all be rearranged to yield the following: $\{x^{yy'}_y = -x^{yy'}_{y'} ~ (\forall y < y')\}$.
+  Our proof will ignore all other points, i.e. $x^{yy'}_{y''}$ for $y'' \neq y,y'$, which appear only with coefficient zero in the vertex constraints.
   
-  Without loss of generality, we let $v_1 = (0,1)$, and have $v_2$ with $\|v_2\|^2 \leq \|v_1\|^2$ and the angle $\theta_{12} < 180^\circ$ the angle between $v_1$ and $v_2$.
+  Without loss of generality, we let $v_1 = (0,1)$, and have $v_2$ with $\|v_2\|^2 \leq \|v_1\|^2$ and the angle $\theta_{12} < 180^\circ$ the angle between $v_1$ and $v_2$. \bo{Need to justify why choice of $v_1$ is WLOG.}
   
   We then have the feasible regions $F_y = \{x \in \reals^2 : \inprod{v_i} {x} \leq B_{iy} \; \forall i\}$, which means to this point, we have $F_1 = \{x \in \reals^2 : \inprod{v_1}{x} \leq -1 \text{ and } \inprod{v_2}{x} \leq 1 \}$, and $F_2 = \{x \in \reals^2 : \inprod{v_1}{x} \leq 1 \text{ and } \inprod{v_2}{x} \leq -1 \}$.
   By requirement of the existence of a set of witnesses for the distribution $(1/2, 1/2, 0,0,0)$, we must have some $x^{12}_1 \in F_1$ and $x^{12}_2 \in F_2$ so that $x^{12}_1 = -x^{12}_2$ in order for $\vec 0$ to be in the Minkowski sum.
