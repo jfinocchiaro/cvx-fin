@@ -229,17 +229,19 @@ For example, hinge loss is polyhedral, whereas logistic loss is not.
 
 \paragraph{Properties of distributions.}
 In order to study calibration of surrogates (Definition~\ref{def:calibration} below), it is useful to formalize the following functions that describe the reports that minimize expected $\ell$-loss and $L$-loss under $p$.
+%% Bo: since we use \gamma and \R for \ell, and we use \Gamma and \reals^d for L,
+%% I figured generic properties could use notation g and R for f
 \begin{definition}[(Finite) property, level set, elicited]
-  A \emph{property} is a function $g: \simplex \to 2^{\R}$ for some set $\R$ where $g(p) \neq \emptyset$ for all $p$.
-  It is \emph{finite} if $|\R| < \infty$.
-  The \emph{level set} of $r \in \R$ is the set $g_r = \{p \in \simplex : r \in g(p)\}$.
-  A loss function $f: \R \to \nonnegreals^{\Y}$ \emph{elicits} $g$ if $g(p) = \argmin_{r \in \R} \inprod{p}{f(r)}$.
+  A \emph{property} is a function $g: \simplex \to 2^{R}$ for some set $R$ where $g(p) \neq \emptyset$ for all $p$.
+  It is \emph{finite} if $|R| < \infty$.
+  The \emph{level set} of $r \in R$ is the set $g_r = \{p \in \simplex : r \in g(p)\}$.
+  A loss function $f: R \to \nonnegreals^{\Y}$ \emph{elicits} $g$ if $g(p) = \argmin_{r \in R} \inprod{p}{f(r)}$.
   We assume all properties are non-redundant, i.e. each $g_r$ contains a distribution $p$ not in any other $g_{r'}$.
 \end{definition}
 For example, $0-1$ loss elicits the mode, which is formalized as a property on report space $R = \Y$ via $g(p) = \argmax_{y \in \Y} p(y)$.
 Notice in this example $g(p)$ is a singleton set when the mode of $p$ is unique and e.g. is $\Y$ when $p$ is uniform.
 %Another example of a finite property is ranking, in which $\R$ is the set of permutations of $\Y$, and $g(p)$ consists of all permutations that order $\Y$ from most to least probable (i.e. ties must be broken in all possible ways).
-In this paper we write $\gamma$ for the property elicited by $\ell$ and $\Gamma$ for the property elicited by $L$.
+In this paper we write $\gamma$ for the property elicited by $\ell$ with report space $\R$; and we use $\Gamma$ for the property elicited by $L$ with report space $\reals^d$.
 
 \paragraph{Embeddings.}
 %We specifically study polyhedral functions in part because they have high-dimensional subgradient sets at points of nondifferentiability, which will be of interest to us later.
@@ -282,7 +284,8 @@ In this paper, we study the following quantity.
 \end{definition}
 
 A number of things are already known about embedding dimension.
-Many surrogates in the literature provide upper bounds; we highlight in particular the \emph{abstain loss} given by \cite{ramaswamy2018consistent} and seen in Equation~\eqref{eq:abstain}, in which one wants to predict the most likely outcome \emph{only if} they are confident in the outcome, and otherwise \emph{abstain} from predicting an outcome for a lesser punishment than if they give a prediction and were incorrect. 
+Many surrogates in the literature provide upper bounds; we highlight in particular the \emph{abstain loss} given by \cite{ramaswamy2018consistent} and seen in Equation~\eqref{eq:abstain}, in which one wants to predict the most likely outcome \emph{only if} they are confident in the outcome, and otherwise \emph{abstain} from predicting an outcome for a lesser punishment than if they give a prediction and were incorrect.
+
 \begin{equation}\label{eq:abstain}
 \ellabs{\alpha}(r)_y = \begin{cases}
 0 & r = y\\
@@ -293,11 +296,11 @@ Many surrogates in the literature provide upper bounds; we highlight in particul
 Here $\R = \Y \cup \{\bot\}$.
 For $\alpha=1/2$, \cite{ramaswamy2018consistent} give an elegant embedding of this loss on $n$ outcomes into $d = \lceil \log_2 (n) \rceil$ dimensions, where each $y \in \Y$ is embedded at a corner of the Boolean hypercube $\{-1,1\}^n$ while $\bot$ is embedded at the origin.
 
-In general, a known convex-conjugate construction generically embeds any discrete loss on $\Y = [n]$ into $n-1$ dimensions, giving a flat upper bound of $n-1$ on embedding dimension.
+In general (e.g. \cite{finocchiaro2019embedding}), a known convex-conjugate construction generically embeds any discrete loss on $\Y = [n]$ into $n-1$ dimensions, giving a flat upper bound of $n-1$ on embedding dimension.
 Lower bounds exist but are rare.
-In particular, a lower bound on the dimensionality of \emph{any} calibrated convex surrogate $L$ implies in particular a lower bound on polyhedral surrogates. 
+A lower bound on the dimensionality of \emph{any} calibrated convex surrogate $L$ implies in particular a lower bound on polyhedral surrogates.
 \cite{ramaswamy2016convex} give such a lower bound via the technique of \emph{feasible subspace dimension}, which is able to e.g. prove that embedding $0-1$ loss on $n$ labels requires dimension $n-1$.
-However, this technique gives only the trivial $d \geq 1$ for the abstain family of losses above, e.g. $\ell_{1/2}$, because of their geometric structure.
+However, this technique gives only the trivial $d \geq 1$ for the abstain family of losses above when $\alpha \leq 1/2$ because of their geometric structure.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -311,7 +314,7 @@ In other words, general convex surrogates are no more powerful than polyhedral s
 We conjecture that this fact may extend to higher dimensions, an open problem.
 
 \begin{definition}[Intersection graph, orderable]
-  Given a finite property $\gamma: \simplex \to 2^{\R}$, the \emph{intersection graph} has vertices labeled by $\R$ with an edge $(r,r')$ if $\gamma_r \cap \gamma_{r'} \cap \relint(\simplex) \neq \emptyset$, where $\relint(\simplex)$ equals the set of distributions with positive weight on all outcomes.
+Given a finite property $\gamma: \simplex \to 2^{\R}$, the \emph{intersection graph} has vertices labeled by $\R$ with an edge $(r,r')$ if $\gamma_r \cap \gamma_{r'} \cap \relint(\simplex) \neq \emptyset$, where $\relint(\simplex)$ equals the set of distributions with full support.
   A finite property $\gamma$ is \emph{orderable} if its intersection graph is a path, i.e. a connected graph where every vertex has either one or two neighbors.
 \end{definition}
 \jessie{Probably for appendix: compare this definition of orderable to level set intersections on hyperplane definition}
@@ -319,13 +322,12 @@ We conjecture that this fact may extend to higher dimensions, an open problem.
 %  A property $g$ is orderable if and only if the set $g_r \cap g_{r'}$, for $r \neq r'$, is always the intersection of a hyperplane with the simplex.
 %\end{observation}
 
-
 \begin{theorem}
   Let $\ell: \R \to \nonnegreals^{\Y}$ be a discrete loss.
   Then $\ell$ is $1$-embeddable if and only if there is an ordering $\R = \{r_1,\ldots,r_k\}$ of the reports such that the following two conditions hold, where $v(i)_y := : \ell(r_{i+1})_y - \ell(r_i)_y$:
   \begin{enumerate}
   \item For all $y\in\Y$, the sequence $\sgn(v(i)_y)$ is monotone in
-    $i\in\{1,\ldots,k-1\}$, 
+    $i\in\{1,\ldots,k-1\}$,
   \item For all $i\in\{1,\ldots,k-2\}$, we have
     \begin{equation}
       \label{eq:1}
@@ -390,7 +392,7 @@ This, along with a result that calibrated link functionss must also be in a sens
 Our newfound understanding of the 1-dimensional embedding characterization leads us to realize that a large class of properties are not $1$-embeddable.
 \cite{finocchiaro2019embedding} have shown a trivial upper bound that every property is $(n-1)$-embeddable\jessie{already mentioned earlier}, but it is an open question as to how tight we can get the bounds on embedding dimension.
 Reducing embedding dimension significantly below $(n-1)$ can help provide a computational speedup in the optimization problem, which is a function of the surrogate loss dimension.
-This is especially important as the number of possible outcomes $n$ grows large. 
+This is especially important as the number of possible outcomes $n$ grows large.
 
 Below, we generalize our characterization to $d$-embeddability for $d \geq 2$.
 Having a finite number of embedding points and restricting to polyhedral functions allows us to study the subgradient sets of the loss at embedding points, which we formalize in Section~\ref{subsec:sub-sets}.
@@ -410,7 +412,7 @@ To settle the question of whether a consistent surrogate exists in $d$ dimension
 In particular, we use heavily that a convex function is minimized at a point if and only if the origin $\vec{0}$ is in its subgradient set at that point.
 
 Therefore, we abstract to consider collections of sets $T^r_y$, which aspire to be the subgradient sets of a calibrated polyhedral surrogate $L(\cdot)_y$ at $u_r$.
-Note that if $L(\cdot)_y$ is a polyhedral function on $\reals^d$, then all of its subgradient sets are (bounded) closed polytopes.\bo{cite}\jessie{\cite{rockafellar1997convex} ? in my notes, but I don't have the exact theorem number.} 
+Note that if $L(\cdot)_y$ is a polyhedral function on $\reals^d$, then all of its subgradient sets are (bounded) closed polytopes.\bo{cite}\jessie{\cite{rockafellar1997convex} ? in my notes, but I don't have the exact theorem number.}
 
 \begin{definition}[$\T$, $\T^r$, $D(\T^r)$]
   We use the following notation for a collection of closed polytopes, with implicit parameter $d$: $\T = \{T^r_y \subseteq \reals^d : r \in \R, y \in \Y\}$.
@@ -504,7 +506,7 @@ These correspond to a (possibly relaxed) halfspace representation and (possibly 
   \textbf{Constraints:}
     \begin{align}
       V X^j                     &\leq B    & \text{(pointwise, $\forall j \in [\ell]$)}  \label{eqn:qp-constr-1} \\
-      \sum_{y=1}^n p^j(y) x^j_y &= \vec 0  & \text{($\forall j \in [\ell]$)}    \label{eqn:qp-constr-2} 
+      \sum_{y=1}^n p^j(y) x^j_y &= \vec 0  & \text{($\forall j \in [\ell]$)}    \label{eqn:qp-constr-2}
     \end{align}
 \end{definition}
 
@@ -590,7 +592,7 @@ Given this characterization, we prove the main result on when a solution to the 
 	\jessie{Move to appendix?}
     By Theorem \ref{thm:vertex-halfspace-opt}, it suffices to show that $\T^r$ satisfying the halfspace and vertex conditions exist if and only if the program is feasible.
 
-  ($\implies$) 
+  ($\implies$)
   By the vertex condition, for each $j \in [\ell]$, there exist witnesses $\{x^j_y \in T^r_y : y \in \Y\}$ satisfying the second constraint of the quadratic program (Inequality \ref{eqn:qp-constr-2}).
   By the halfspace condition, there exist normals $v_1, \dots, v_k$ such that, for all $i$, for all $x \in T^r_y$, $\inprod{v_i}{x} \leq B_{iy}$; in particular, this applies to the above witnesses $x^j_y \in T^r_y$.
   Collecting $v_1,\dots,v_k$ as the columns of $V$, this shows that the first constraint (Inequality \ref{eqn:qp-constr-1}) is satisfied.
@@ -604,17 +606,18 @@ Given this characterization, we prove the main result on when a solution to the 
   This implies the halfspace condition.  % Bo: QED
 \end{proof}
 
-  
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Examples}\label{sec:examples}
+\bo{I suggest we don't use the notation $\elicembed$ at all and just write out $d$-embeddable every time. But don't feel strongly.}
 \subsection{Abstain property, $\alpha \leq 1/2$}\label{subsec:example-abstain}
 One classification-like problem that is of particular interest is the abstain property, elicited by the loss $\ellabs{1/2}$ given in Equation~\ref{eq:abstain}.
 The property $\abstain{\alpha}$ can be verified:
 \begin{equation}\label{eq:abstain-prop}
      \abstain{\alpha} = \begin{cases}
-     \argmax_{y \in \Y} p(y) & \max_y p(y) \geq 1 - \alpha\\ 
+     \argmax_{y \in \Y} p(y) & \max_y p(y) \geq 1 - \alpha\\
      \bot & \text{otherwise}
      \end{cases}~.~
 \end{equation}
@@ -624,34 +627,51 @@ However, it is unclear if this bound is tight, as the previously studied lower b
 
 With our $1$-dimensional characterization, we already observe a tighter lower bound.
 \begin{proposition}
-	For $n \geq 3$ and $\alpha \leq 1/2$, we have $\elicembed(\abstain{1/2}) \geq 2$.
+	For $n \geq 3$ and $\alpha \leq 1/2$, the abstain loss $\ell_{\alpha}$ is not $1$-embeddable. \bo{In fact, for any $\alpha < 1$...}
 \end{proposition}
 \begin{proof}
 	Consider the intersection graph of $\gamma := \abstain{\alpha}$: the node associated with $\gamma_\bot$ has $n$ edges, and since we assume $n \geq 3$, we fail to observe the requirement that every node of the intersection graph has degree at most $2$.
 \end{proof}
 
-\begin{proposition}
-	$\gamma := \abstain{1/2}$ with $n=5$ is not $2$-embeddable.
-\end{proposition}
+\begin{lemma} \label{lemma:abstain-v-h}
+  For the abstain loss $\ell_{1/2}$, the level set of abstain satisfies $\gamma_{\bot} = \conv\{(\delta_y + \delta_{y'})/2 : y,y' \in \Y, y\neq y'\} = \{p : Bp \geq \vec{0}\}$ where $\delta_y$ puts probability one on $y$ and $B = \ones \ones^{\intercal} - 2I \in \reals^{5 \times 5}$, i.e. has entries $-1$ on the diagonal and $1$ everywhere else.
+\end{lemma}
 \begin{proof}
-  We use the results from Section~\ref{sec:d-dim} and show that the optimality condition is not met for the level set $\gamma_\bot$.
-  First, we represent the cell $\gamma_\bot = \{p \in \simplex : Bp \geq \vec 0\} = \conv(\{(1/2, 1/2, 0,0,0), \ldots, (0,0,0,1/2, 1/2)\})$, where $B = \ones \ones^T - 2I_5 \in \reals^{5 \times 5}$ has entry $-1$ on the diagonal, and entry $1$ everywhere else.
-	
-  We make an argument on the permissible angles between normals $v_1, \ldots, v_5$ in $\reals^2$ and show there is no feasible solution to the QFP in Definition~\ref{def:qfp}.
-  In particular, we argue that for any cone strictly $ < 180^\circ$, we can have no more than two vectors $v_i$ and $v_j$; otherwise we yield a contradiction.
-  
-  Without loss of generality, we let $v_1 = (0,1)$, and have $v_2$ with $\|v_2\|^2 \leq \|v_1\|^2$ and the angle $\theta_{12} < 180^\circ$ the angle between $v_1$ and $v_2$.
-  
+  Recall that $\gamma_{\bot}$ is the set of distributions $p$ with $\max_y p(y) = 1/2$.
+  First, note that each distribution of the form $(1/2, 1/2, 0, 0, 0)$ and so on is in $\gamma_{\bot}$.
+  Meanwhile, every such $p$ can be written as a convex combination of these corners.
+  Second, note that if $p \in \gamma_{\bot}$, then $p(y) \leq 1/2$ for all $y \in \Y$.
+  These constraints can be rewritten as $\inprod{p}{b} \geq 0$ where $b_y = -1$ and $b_{y'} = 1$ for all $y' \neq y$, literally requiring $p(y) \leq \sum_{y' \neq y} p(y')$.\bo{Check notation $p_y$ versus $p(y)$.}
+\end{proof}
+
+\begin{proposition}
+	The abstain loss $\ell_{1/2}$ with $n=5$ is not $2$-embeddable.
+\end{proposition}
+\begin{proof}[Geometric proof]
+  We apply Corollary \ref{cor:d-embeddable-char}: We consider the level set $\gamma_{\bot}$ (the distributions whose modal mass is at most $1/2$).
+  We show that the quadratic program (Definition \ref{def:qfp}) is not feasible for this polytope with dimension $d=2$, which implies by Corollary \ref{cor:d-embeddable-char} that $\ell$ is not $2$-embeddable.
+
+  We obtain the vertex and halfspace representations of $\gamma_{\bot}$ from Lemma \ref{lemma:abstain-v-h}.
+  We proceed by narrowing the space of feasible normals $v_1, \ldots, v_5$, until we reach a contradiction.
+  %We make an argument on the permissible angles between normals $v_1, \ldots, v_5$ in $\reals^2$ and show there is no feasible solution to the QFP in Definition~\ref{def:qfp}.
+  In particular, we argue that in any cone strictly $ < 180^\circ$, we can have no more than two vectors $v_i$ and $v_j$; otherwise we yield a contradiction.
+
+  We index the vertices and witnesses as follows: For $y < y'$, we write $p^{yy'} = (\delta_y + \delta_{y'})/2$ and $X^{yy'}$ for the corresponding matrix variable, with columns (witness points) $x^{yy'}_{y''}$.
+  In particular, the vertex constraints can all be rearranged to yield the following: $\{x^{yy'}_y = -x^{yy'}_{y'} ~ (\forall y < y')\}$.
+  Our proof will ignore all other points, i.e. $x^{yy'}_{y''}$ for $y'' \neq y,y'$, which appear only with coefficient zero in the vertex constraints.
+
+  Without loss of generality, we let $v_1 = (0,1)$, and have $v_2$ with $\|v_2\|^2 \leq \|v_1\|^2$ and the angle $\theta_{12} < 180^\circ$ the angle between $v_1$ and $v_2$. \bo{Need to justify why choice of $v_1$ is WLOG.}
+
   We then have the feasible regions $F_y = \{x \in \reals^2 : \inprod{v_i} {x} \leq B_{iy} \; \forall i\}$, which means to this point, we have $F_1 = \{x \in \reals^2 : \inprod{v_1}{x} \leq -1 \text{ and } \inprod{v_2}{x} \leq 1 \}$, and $F_2 = \{x \in \reals^2 : \inprod{v_1}{x} \leq 1 \text{ and } \inprod{v_2}{x} \leq -1 \}$.
   By requirement of the existence of a set of witnesses for the distribution $(1/2, 1/2, 0,0,0)$, we must have some $x^{12}_1 \in F_1$ and $x^{12}_2 \in F_2$ so that $x^{12}_1 = -x^{12}_2$ in order for $\vec 0$ to be in the Minkowski sum.
   In particular, we know that, since $\theta_{12} < 180^\circ$, $x^{12}_1$ and $x^{12}_2$ are unique given $v_1$ and $v_2$.
-  
+
   We then want to show that we cannot add a $v_3$ such that $\max(\theta_{12}, \theta_{13}, \theta_{23}) < 180^\circ$ without yielding a contradiction, which then gives our result, as any arrangement of $5$ normals in $\reals^2$ must have some cone that is less than $180^\circ$ containing three normals.
 
-  In general, observe that $x^{12}_1$ and $x^{13}_1$ must both be on the line $\inprod{v_1}{x} = -1$. \jessie{More detail}  
+  In general, observe that $x^{12}_1$ and $x^{13}_1$ must both be on the line $\inprod{v_1}{x} = -1$. \jessie{More detail}
   Therefore, our three cases proceed as follows: $(i.) \|x^{13}_1\| > \|x^{12}_1\|$, $(ii.) \|x^{13}_1\| = \|x^{12}_1\|$, and $(iii.) \|x^{12}_1\| > \|x^{13}_1\|$.
   As the labels on normals $v_2$ and $v_3$ (and therefore, the respective witnesses) are arbitrary, it suffices to just show cases $(i.)$ and $(ii.)$.
-  
+
   \begin{enumerate}
   \item [$(i.)$] First, suppose $\|x^{13}_1\| < \|x^{12}_1\|$.
   This in turn implies that $\|v_3\| > \|v_2\|$ since both witnesses are on the line $\inprod{v_1}{x^{1i}_1} = -1$.
@@ -668,26 +688,26 @@ With our $1$-dimensional characterization, we already observe a tighter lower bo
     Therefore, we conclude that we cannot have $\|x^{12}_1\| > \|x^{13}\|$.
   	\item [$(ii.)$] Suppose that we have $\|x^{12}_1\| = \|x^{13}_1\|$.
   	As both witnesses are on the same halfspace $\{x : \inprod{v_1}{x} = -1\}$, we must have $x^{12}_1 = x^{13}_1$.
-  	
-  \end{enumerate}  
-  
+
+  \end{enumerate}
+
 %  We do this by arguing that in all three cases of the argmax, we either restrict $F_1$ so that $x_1 \not \in F_1$, restrict $F_2$ so that $x_2 \not \in F_2$, or have $x_3 \not \in F_3$.
 %  We merge the latter two cases without loss of generality as we can relabel these normals pretty easily because of the structure of $B$.
 %
 
-%  
+%
 %  \begin{enumerate}
-%  	\item [$\theta_{23} = \argmax$] 
+%  	\item [$\theta_{23} = \argmax$]
 %  	Since $\theta_{23} < 180^\circ$ and $v_1$ is in the middle of $v_2$ and $v_3$, we have that $x^{12}_1 \neq x^{13}_1$.
 %  	Without loss of generality, suppose $\|v_2\|^2 \leq \|v_3\|^2$.
 %  	Then we claim that $x^{13}_1 \not \in F_1$, since we have $x^{13}_1 = \{x : \inprod{v_1}{x} = -1 \text{ and } \inprod{v_3}{x} = 1\}$.
 %  \end{enumerate}
-  
+
 \end{proof}
 \begin{proof}[Matrix rank proof]
   We can understand the QFP given in Section~\ref{sec:d-dim} for $\abstain{1/2}$ as a matrix rank problem.
   \jessie{Fill in explanation}
-  
+
   With $n=4$, we observe the following matrix rank problem:
   \[
   \begin{bmatrix}
@@ -697,9 +717,9 @@ With our $1$-dimensional characterization, we already observe a tighter lower bo
   	\cdot & \cdot & 1 & \cdot & 1 & 1 \\
   \end{bmatrix}
   \]
-  
+
   Since this matrix is a submatrix of the matrix rank problem for $n=5$, any solution of this above problem must also be a solution in the large matrix given below.
-  
+
   \[
   \begin{bmatrix}
   {\color{red} -1} & {\color{red} -1} & {\color{red} -1} & {\color{red} \cdot} & {\color{red} \cdot} & {\color{red} \cdot} & -1 & \cdot & \cdot & \cdot \\
@@ -709,7 +729,7 @@ With our $1$-dimensional characterization, we already observe a tighter lower bo
   \cdot & \cdot & \cdot & \cdot & \cdot & \cdot & 1 & 1 & 1 & 1\\
   \end{bmatrix}
   \]
-  
+
   In characterizing the solutions to the smaller matrix rank problem, let us establish the linear equality of the first two rows and second two rows.
   (Note that any combination of row pairs works without loss of generality.)
   The first column containing $[-1 \; 1]^T$ implies that we must have the two rows being the negation of each other, and similarly for the third and fourth rows with the final column.
@@ -733,7 +753,7 @@ With our $1$-dimensional characterization, we already observe a tighter lower bo
   \cdot & \cdot & \cdot & \cdot & \cdot & \cdot & 1 & 1 & 1 & 1\\
   \end{bmatrix}
   \]
-  
+
   In order for the $5^{th}$ row to be linearly dependent with the first two rows, we must have $r_5 = -r_1$ by the column $c_7$, and $r_5 = r_2$ by column $c_8$, yielding a contradiction.
   Similarly, we cannot establish linear independence with the last two rows because of restrictions imposed by columns $c_9$ and $c_{10}$.
   Therefore, the matrix completion problem given above has no solution of rank 3, and we conclude that $\abstain{1/2}$ is not $2$-embeddable with $n=5$.
