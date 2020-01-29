@@ -172,8 +172,16 @@ This problem naturally lines up with predicting the canonical classification pro
 Since the optimization of discrete problems is computationally hard, we typically resort to optimizing a \emph{surrogate loss} that yields desirable statistical guarantees such as the existence of excess risk bounds given by \emph{consistency}.
 In the finite outcome setting, we know that calibration implies consistency, so we study the design of calibrated, convex losses-- specifically polyhedral (piecewise linear and convex) losses.
 
-In this work, we propose a notion of measuring the efficiency of this specific class of calibrated surrogate losses, which~\cite{finocchiaro2019embedding} show are well-equipped to be surrogates for discrete losses.
-Additionally, we present new techniques for finding lower bounds on this efficiency notion for a given discrete loss.
+
+\cite{finocchiaro2019embedding} propose the notion of \emph{embedding losses} in order to construct polyhedral, calibrated surrogate losses for a given discrete loss.
+Their work constructively shows that every discrete loss is embeddable, but it is unclear how efficient an embedding can get.
+In this work, we propose a notion of measuring the efficiency called \emph{embedding dimension} of this specific class of calibrated surrogate losses , which~\cite{finocchiaro2019embedding} show are well-equipped to be surrogates for discrete losses.
+This notion of efficiency is measured by the dimension of the input to the surrogate, and in Section~\ref{sec:1d}, we characterize \jessie{and construct surrogates/links?} discrete losses that have a surrogate that takes input on the real line.
+In Section~\ref{sec:d-dim}, we generalize our characterization to a general $d$-dimensional input for $d \geq 2$, presenting conditions on optimality and monotonicity that are necessary and sufficient for being able to construct a calibrated polyhedral surrogate taking $d$-dimensional input.
+Moreover, we present a Quadratic Feasibility Program (Definition~\ref{def:qfp}) that has a solution if and only if the optimality condition of our general characterization is satisfied.
+This feasibility program yields new techniques for finding lower bounds on this efficiency notion for a given discrete loss.
+In Section~\ref{sec:examples}, we apply our characterizations to show new lower bounds on the embedding dimension for a problem whose convex calibration dimension (\cite{ramaswamy2016convex, ramaswamy2018consistent}) has been well-studied.
+These results suggest that \emph{if} the convex calibration dimension of the same problems were lower than the embedding dimension, constructing a calibrated surrogate for such problems would require a new approach than previous works have taken.
 
 
 \subsection{Related works}
@@ -185,9 +193,8 @@ While~\cite{ramaswamy2016convex} present methods for obtaining lower bounds on c
 \cite{ramaswamy2018consistent} present upper bounds on the convex calibration of $\abstain{\alpha}$ loss of $\ceil{\log_2(n)}$, but their characterization of lower bounds leave the tightness of these bounds as an open question.
 These upper bounds are, however, much tighter than the previous upper bounds of $(n-1)$ given by the different surrogates presented by~\cite{crammer2001algorithmic} and~\cite{rifkin2004defense}, and it is unclear what characteristics of the abstain loss allow us to exponentially reduce dimension of the input.
 
-\cite{finocchiaro2019embedding} propose the notion of \emph{embedding losses} in order to construct polyhedral, calibrated surrogate losses for a given discrete loss.
-Their work constructively shows that every discrete loss is embeddable, but it is unclear how efficient an embedding can get.
-In this paper, we propose the notion of embedding dimension in order to study the minimum dimension of a \emph{polyhedral calibrated} surrogate loss with respect to a discrete loss.
+In this work, we study \emph{embedding dimension}, which is the minimum dimension of input to a polyhedral surrogate that is calibrated with respect to the given discrete loss.
+Moreover, we use this tool to characterize \emph{how} embeddable a given discrete loss is, showing necessary conditions for embedding a given loss into $d$ dimensions.
 In order to concisely discuss embedding dimension, we appeal to notation and terminology from the field of property elicitation (\cite{frongillo2015vector-valued, gneiting2007strictly, lambert2009eliciting, osband1985information-eliciting, savage1971elicitation}), relating it to the language of calibrated surrogates as needed.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -244,15 +251,21 @@ The key condition required on the embedding and surrogate loss $L$ is that a dis
   We simply say $L$ \emph{embeds} $\ell$ (in dimension $d$) if some such embedding function exists.
 \end{definition}
 %
-Note that embedding does not immediately imply a key desirable property, calibration.
-Informally, calibration means that if one minimizes expected surrogate loss arbitrarily well over $\reals^d$, then applies the link function to obtain a discrete prediction $r$, then $r$ exactly minimizes $\ell$-loss.
+Note that embedding does not immediately imply a key desirable property, consistency, which is equivalent to calibration in finite-outcome settings.
+Informally, calibration means that if one minimizes the expected surrogate loss arbitrarily well over $\reals^d$, then applies the link function to obtain a discrete prediction $r$, then $r$ exactly minimizes $\ell$-loss.
 \begin{definition}[Calibrated surrogate]\label{def:calibration}
   A surrogate loss $L: \reals^d \to \nonnegreals^{\Y}$ and \emph{link function} $\psi: \reals^d \to \R$ are \emph{calibrated} for a loss $\ell: \R \to \nonnegreals^{\Y}$ if for all $p \in \simplex$,
     \[ \inf_{u \in \reals^d ~:~ \psi(u) \not\in \gamma(p)} \inprod{p}{L(u)}  > \inf_{u \in \reals^d} \inprod{p}{L(u)}  .\]
   We simply say $L$ can be \emph{calibrated} to $\ell$ if such a link function exists.
 \end{definition}
 \bo{More on why calibration is desirable?}
+\jessie{Taking a crack at this:}
+As we alluded to above, calibration is not actually the trait we desire of a surrogate; rather, we seek consistency.
+\cite{tewari2007consistency} show that, in a finite-outcome setting, the presence of calibration and consistency are equivalent conditions.
+By consistency, we mean the standard notion where the expected loss over $\X \times \Y$ for a sequence of hypotheses $h_m$ converging to the optimal expected surrogate loss implies the expected discrete loss over the linked hypotheses $\psi \circ h_m$ converges to the optimal discrete loss by applying the link function.
+The equivalence of these conditions allows us to focus on calibration, so we can abstract away the input space $\X$ and simply focus on probability distributions over the outcomes $\Y$.
 
+\jessie{Not a smooth transition here...}
 Polyhedral surrogates are motivated by the following results.
 \begin{theorem}[\cite{finocchiaro2019embedding}] \label{thm:embed-iff-poly}
   If a discrete loss $\ell$ is embedded by some surrogate $L$, then (1) $L$ must be a polyhedral loss; and (2) there exists a link function calibrating $L$ to $\ell$.
@@ -269,7 +282,7 @@ In this paper, we study the following quantity.
 \end{definition}
 
 A number of things are already known about embedding dimension.
-Many surrogates in the literature provide upper bounds; we highlight in particular the \emph{abstain loss} given by \cite{ramaswamy2018consistent}, in which one wants to predict the most likely outcome \emph{only if} they are confident in the outcome, and otherwise \emph{abstain} from predicting an outcome for a lesser punishment than if they give a prediction and were incorrect. 
+Many surrogates in the literature provide upper bounds; we highlight in particular the \emph{abstain loss} given by \cite{ramaswamy2018consistent} and seen in Equation~\eqref{eq:abstain}, in which one wants to predict the most likely outcome \emph{only if} they are confident in the outcome, and otherwise \emph{abstain} from predicting an outcome for a lesser punishment than if they give a prediction and were incorrect. 
 \begin{equation}\label{eq:abstain}
 \ellabs{\alpha}(r)_y = \begin{cases}
 0 & r = y\\
@@ -278,7 +291,7 @@ Many surrogates in the literature provide upper bounds; we highlight in particul
 \end{cases}
 \end{equation}
 Here $\R = \Y \cup \{\bot\}$.
-For $\alpha=1/2$, \cite{ramaswamy2018consistent} give an elegant embedding of this loss on $n$ outcomes into $d = \lceil \log_2 n \rceil$ dimensions, where each $y \in \Y$ is embedded at a corner of the Boolean hypercube $\{-1,1\}^n$ while $\bot$ is embedded at the origin.
+For $\alpha=1/2$, \cite{ramaswamy2018consistent} give an elegant embedding of this loss on $n$ outcomes into $d = \lceil \log_2 (n) \rceil$ dimensions, where each $y \in \Y$ is embedded at a corner of the Boolean hypercube $\{-1,1\}^n$ while $\bot$ is embedded at the origin.
 
 In general, a known convex-conjugate construction generically embeds any discrete loss on $\Y = [n]$ into $n-1$ dimensions, giving a flat upper bound of $n-1$ on embedding dimension.
 Lower bounds exist but are rare.
@@ -298,15 +311,14 @@ In other words, general convex surrogates are no more powerful than polyhedral s
 We conjecture that this fact may extend to higher dimensions, an open problem.
 
 \begin{definition}[Intersection graph, orderable]
-  Given a finite property $g: \simplex \to 2^{\R}$, the \emph{intersection graph} has vertices labeled by $\R$ with an edge $(r,r')$ if $g_r \cap g_{r'} \cap \relint(\simplex) \neq \emptyset$, where $\relint(\simplex)$ equals the set of distributions with positive weight on all outcomes.
-  A finite property $g$ is \emph{orderable} if its intersection graph is a path, i.e. a connected graph where every vertex has either one or two neighbors.
+  Given a finite property $\gamma: \simplex \to 2^{\R}$, the \emph{intersection graph} has vertices labeled by $\R$ with an edge $(r,r')$ if $\gamma_r \cap \gamma_{r'} \cap \relint(\simplex) \neq \emptyset$, where $\relint(\simplex)$ equals the set of distributions with positive weight on all outcomes.
+  A finite property $\gamma$ is \emph{orderable} if its intersection graph is a path, i.e. a connected graph where every vertex has either one or two neighbors.
 \end{definition}
-
+\jessie{Probably for appendix: compare this definition of orderable to level set intersections on hyperplane definition}
 %\begin{observation}
 %  A property $g$ is orderable if and only if the set $g_r \cap g_{r'}$, for $r \neq r'$, is always the intersection of a hyperplane with the simplex.
 %\end{observation}
 
-\raf{Why using $g$ instead of $\gamma$?}
 
 \begin{theorem}
   Let $\ell: \R \to \nonnegreals^{\Y}$ be a discrete loss.
@@ -337,20 +349,22 @@ The main result of this section is Theorem \ref{thm:orderable-1-embed}.
 \end{theorem}
 This theorem implies that one can directly test if a property is $1$-embeddable via the orderable criterion.
 Orderability can be tested using the Bayes risk of $\ell$, a polyhedral function defined by $p \mapsto \max_{r \in \R} \inprod{p}{\ell(r)}$.
-A direct approach is to project this function down to the simplex to give the level sets $\gamma_r$, as in Figure~\ref{fig:intersection-graph}.
+A direct approach is to project this function down to the simplex to give the level sets $\gamma_r$, as in Figure~\ref{fig:intersection-graph-ex}.
 Another approach is to note that the intersection graph is directly given by finding those pairs $r,r'$ that simultaneously maximize the Bayes risk, i.e. cases where for some $p$, we have $r,r' \in \argmax_{r'' \in \R} \inprod{p}{\ell(r'')}$.
 
-\begin{figure}\label{fig:intersection-graph}
+\begin{figure}
 	\begin{minipage}{0.48\linewidth}
 	\centering
 	\includegraphics[width = 0.8\linewidth]{tikz/intersection-graph.pdf}
 	\caption{Intersection graph for the [truncated] expected value property on outcomes $\Y = \{1,2,3\}$.}
+	\label{fig:intersection-graph-ex}
 	\end{minipage}
 \hfill
 	\begin{minipage}{0.48\linewidth}
 	\centering
 	\includegraphics[width = 0.9\linewidth]{tikz/abstain-alpha-half.pdf}
 	\caption{Intersection graph for the $\abstain{1/2}$ property on $\Y = \{1,2,3\}$.}
+	\label{fig:abstain-alpha-half}
 \end{minipage}
 \end{figure}
 
@@ -358,8 +372,8 @@ Another approach is to note that the intersection graph is directly given by fin
 \subsection{Proof approach: monotonicity}
 \bo{Depending on space, we can give full definitions and proof sketches here, or less.}
 
-The key idea of the proof is to define \emph{monotonicity} of a general property $g: \simplex \to 2^{R}$.
-This generalizes orderability to the case where the report space $R$ is not necessarily finite
+The key idea of the proof is to define \emph{monotonicity} of a general property $g: \simplex \to 2^{\R}$.
+This generalizes orderability to the case where the report space $\R$ is not necessarily finite.
 We show a finite property is orderable if and only if it is monotone.
 From the definition of monotonicity, we are able to directly construct a polyhedral surrogate $L$, proving (1) $\implies$ (2) in Theorem \ref{thm:orderable-1-embed}.
 The equivalence of embedding and polyhedral surrogates of \cite{finocchiaro2019embedding} (Theorem \ref{thm:embed-iff-poly}) gives (2) $\implies$ (3), and the fact that polyhedral functions are convex gives (3) $\implies$ (4).
@@ -374,7 +388,7 @@ This, along with a result that calibrated link functionss must also be in a sens
 \jessie{Taking a crack at it:}
 \bo{Nice job!}
 Our newfound understanding of the 1-dimensional embedding characterization leads us to realize that a large class of properties are not $1$-embeddable.
-\cite{finocchiaro2019embedding} have shown a trivial upper bound that every property is $(n-1)$-embeddable, but it is an open question as to how tight we can get the bounds on embedding dimension.
+\cite{finocchiaro2019embedding} have shown a trivial upper bound that every property is $(n-1)$-embeddable\jessie{already mentioned earlier}, but it is an open question as to how tight we can get the bounds on embedding dimension.
 Reducing embedding dimension significantly below $(n-1)$ can help provide a computational speedup in the optimization problem, which is a function of the surrogate loss dimension.
 This is especially important as the number of possible outcomes $n$ grows large. 
 
@@ -393,10 +407,10 @@ In particular, $u_r$ must minimize $\inprod{p}{L(u)}$ if and only if $r$ minimiz
 
 The key to our approach is to study as first-class objects the sets of all subgradients\footnote{Recall that a subgradient of e.g. the convex function $L(\cdot)_y: \reals^d \to \reals$ at a point $u$ is a vector $v \in \reals^d$ such that $L(u') \geq L(u) + \inprod{v}{u'-u}$ for all $u'$. The set of subgradients at $u$ is sometimes called the subdifferential.} of $L$ at these embedding points.
 To settle the question of whether a consistent surrogate exists in $d$ dimensions, it surprisingly turns out to be necessary and sufficient to consider conditions on these sets alone.
-In particular, we use heavily that a convex function is minimized at a point if and only if $\vec{0}$ is in its subgradient set at that point.
+In particular, we use heavily that a convex function is minimized at a point if and only if the origin $\vec{0}$ is in its subgradient set at that point.
 
 Therefore, we abstract to consider collections of sets $T^r_y$, which aspire to be the subgradient sets of a calibrated polyhedral surrogate $L(\cdot)_y$ at $u_r$.
-Note that if $L(\cdot)_y$ is a polyhedral function on $\reals^d$, then all of its subgradient sets are (bounded) closed polytopes.\bo{cite}
+Note that if $L(\cdot)_y$ is a polyhedral function on $\reals^d$, then all of its subgradient sets are (bounded) closed polytopes.\bo{cite}\jessie{\cite{rockafellar1997convex} ? in my notes, but I don't have the exact theorem number.} 
 
 \begin{definition}[$\T$, $\T^r$, $D(\T^r)$]
   We use the following notation for a collection of closed polytopes, with implicit parameter $d$: $\T = \{T^r_y \subseteq \reals^d : r \in \R, y \in \Y\}$.
@@ -406,7 +420,7 @@ Note that if $L(\cdot)_y$ is a polyhedral function on $\reals^d$, then all of it
     \[ \oplus_p \T^r := \left\{ \sum_{y \in \Y} p(y) x^r_y ~\Big|~ x^r_1 \in T^r_1, \dots, x^r_y \in T^r_y \right\} , \]
   in other words, the Minkowski sum of the scaled sets $\{p(y) T^r_y : y \in \Y\}$.
 
-  Finally, we associate with $\T^r$ a set of distributions $D(\T^r) = \{ p : \vec 0 \in \oplus_p \T^r\}$.
+  Finally, we associate with $\T^r$ a set of distributions $D(\T^r) = \{ p \in \simplex : \vec 0 \in \oplus_p \T^r\}$.
 \end{definition}
 
 The importance of the $p$-weighted Minkowski sum and of $D(\T^r)$ are that they capture the distributions $p$ for which $u_r$ minimizes expected loss, assuming that $\T$ correspond to some polyhedral $L$.
@@ -437,7 +451,7 @@ Monotonicity says that these individual polytopes can actually be glued together
 %\end{definition}
 
 \begin{theorem} \label{thm:general-char}
-  Let $\ell: \R \to \reals_{\geq 0}^{\Y}$ be a discrete loss with, for each $r \in \R$, $\gamma_r = \{p : r \in \argmin_{r'} p \cdot \ell(r)\}$.
+  Let $\ell: \R \to \reals_{\geq 0}^{\Y}$ be a discrete loss with, for each $r \in \R$, $\gamma_r = \{p : r \in \argmin_{r'} \inprod{p}{\ell(r)}\}$.
   Then $\ell$ is $d$-embeddable if and only if there exist polytopes $\T = \{T^r_y \subseteq \reals^d : r \in \R, y \in \Y\}$ such that both of the following hold:
   \begin{enumerate}
     \item (Optimality) For all $r \in \R$, we have $D(\T^r) = \gamma_r$.
@@ -495,8 +509,8 @@ These correspond to a (possibly relaxed) halfspace representation and (possibly 
 \end{definition}
 
 The feasibility program can be viewed as a low-rank matrix problem, namely: do there exist a set of rank-$d$ matrices that are pointwise dominated by $B$, sharing the left factor $V$, whose right factors $X^j$ respectively satisfy a subspace constraint?
-We will see \bo{in which section?} that for the important example of abstain loss, the constraints simplify into a more pure low-rank matrix problem.
-In particular, for $d=n-1$ a solution always exists (e.g. \bo{cite}), found by taking the convex conjugate of the Bayes risk of $\ell$ \bo{and then what?}.
+We will see in Section~\ref{subsec:example-abstain}\bo{in which section?} that for the important example of abstain loss, the constraints simplify into a more pure low-rank matrix problem.
+In particular, for $d=n-1$ a solution always exists (e.g. \bo{cite} \cite[Theorem 2]{finocchiaro2019embedding}), found by taking the convex conjugate of the negative Bayes risk of $\ell$ for each outcome and subtracting the report $u$ \bo{and then what?} \jessie{Everything I just added is for $n$ dimensions, but I don't know where the $n-1$ dim is}.
 
 
 \subsubsection{Developing the proof}
@@ -512,7 +526,7 @@ The following condition formalizes a necessary condition on $\T^r$ in terms of t
 	A collection of polytopes $\T^r$ and a polytope $C$ in the simplex defined by $C = \conv(\{p^1, \ldots, p^\ell\})$ \emph{satisfy the vertex condition} if for all $j \in [\ell]$, $0 \in \oplus_{p^j} \T^r$. %% Equivalent: there exist $\{x_{jy} \in T_y : j \in [\ell]\}$ such that, for all $j \in [\ell]$, $\sum_{y \in \Y} p^j_y x_{jy} = \vec 0$.
 \end{condition}
 
-Useful lemmas:
+To gain a better understanding about the QFP in Definition~\ref{def:qfp}, we prove the following:
 \begin{lemma} \label{lemma:D-polytope}
   For any $\T^r$, $D(\T^r)$ is a polytope (in particular, is convex).
 \end{lemma}
@@ -573,6 +587,7 @@ Given this characterization, we prove the main result on when a solution to the 
 \bo{Actually, I guess one could run this, then use monotonicity to add constraints and find the next subgradient sets, etc.}
 
 \begin{proof}[Proof of Theorem \ref{thm:opt-iff-qfp}]
+	\jessie{Move to appendix?}
     By Theorem \ref{thm:vertex-halfspace-opt}, it suffices to show that $\T^r$ satisfying the halfspace and vertex conditions exist if and only if the program is feasible.
 
   ($\implies$) 
@@ -724,6 +739,8 @@ With our $1$-dimensional characterization, we already observe a tighter lower bo
   Therefore, the matrix completion problem given above has no solution of rank 3, and we conclude that $\abstain{1/2}$ is not $2$-embeddable with $n=5$.
 \end{proof}
 
+\section{Conclusions and future work}
+\jessie{TODO, tonight probably.}
 
 \newpage
 % Acknowledgments---Will not appear in anonymized version
