@@ -167,7 +167,7 @@
 \section{Introduction}
 In empirical risk minimization, the optimization of a loss function measuring error is canon in the design of algorithms designed for prediction tasks.
 For many categorical tasks (e.g. classification, ranking, top-$k$, set inclusion), one can often use their intuition to design a discrete loss that models the question they want to answer about their data.
-For example, $0-1$ loss $\ell(r,y) = \Ind{r \neq y}$ gives punishment $1$ for a misprediction and $0$ for a correct prediction.
+For example, $0-1$ loss $\ell(r)_y = \Ind{r \neq y}$ gives punishment $1$ for a misprediction and $0$ for a correct prediction.
 This problem naturally lines up with predicting the canonical classification problem.
 Since the optimization of discrete problems is computationally hard, we typically resort to optimizing a \emph{surrogate loss} that yields desirable statistical guarantees such as the existence of excess risk bounds given by \emph{consistency}.
 In the finite outcome setting, we know that calibration implies consistency, so we study the design of calibrated, convex losses-- specifically polyhedral (piecewise linear and convex) losses.
@@ -177,18 +177,18 @@ Additionally, we present new techniques for finding lower bounds on this efficie
 
 
 \subsection{Related works}
-~\cite{bartlett2006convexity} study when a convex, calibrated surrogate exists for a given discrete loss, and in a finite-outcome setting,~\cite{tewari2007consistency} show that calibration (Definition~\ref{def:calibration}) is necessary and sufficient for consistency, meaning that there is a link mapping surrogate reports to discrete reports so that converging to the optimal prediction in the surrogate space implies the linked surrogate prediction converges to the optimal prediction for the original loss.
+\cite{bartlett2006convexity} study when a convex, calibrated surrogate exists for a given discrete loss, and in a finite-outcome setting,~\cite{tewari2007consistency} show that calibration (Definition~\ref{def:calibration}) is necessary and sufficient for consistency, meaning that there is a link mapping surrogate reports to discrete reports so that converging to the optimal prediction in the surrogate space implies the linked surrogate prediction converges to the optimal prediction for the original loss.
 
-In order to decrease the dimension of the optimization problem,~\cite{frongillo2015elicitation} propose \emph{elicitation complexity}, which is the minimum dimension input to a loss such that, for all beliefs $p$ over the outcomes, the ``correct report,'' a function of the distribution $p$, minimizes the expected loss over the distribution $p$.
+In order to decrease the dimension of the optimization problem,~\cite{frongillo2015elicitation} propose \emph{elicitation complexity}, which is the minimum dimension input to a loss such that, for all distributions $p$ over the outcomes $\Y$, the ``correct report,'' a function of the distribution $p$, minimizes the expected loss over the distribution $p$.
 In the more specific case on constructing \emph{convex} calibrated surrogates for discrete losses,~\cite{ramaswamy2016convex} propose the notion of \emph{convex calibration dimension}, which is the minimum dimension input to a convex surrogate loss that is calibrated with respect to a given discrete loss.
-While~\cite{ramaswamy2016convex} present methods for obtaining lower bounds on convex calibration dimension for any discrete loss, their method does not always work well, as demonstrated by the $\abstain{\alpha}$ loss in Equation~\eqref{eq:abstain}.
+While~\cite{ramaswamy2016convex} present methods for obtaining lower bounds on convex calibration dimension for any discrete loss, their method does not always work well, as demonstrated by the $\ellabs{\alpha}$ loss in Equation~\eqref{eq:abstain}.
 \cite{ramaswamy2018consistent} present upper bounds on the convex calibration of $\abstain{\alpha}$ loss of $\ceil{\log_2(n)}$, but their characterization of lower bounds leave the tightness of these bounds as an open question.
 These upper bounds are, however, much tighter than the previous upper bounds of $(n-1)$ given by the different surrogates presented by~\cite{crammer2001algorithmic} and~\cite{rifkin2004defense}, and it is unclear what characteristics of the abstain loss allow us to exponentially reduce dimension of the input.
 
 \cite{finocchiaro2019embedding} propose the notion of \emph{embedding losses} in order to construct polyhedral, calibrated surrogate losses for a given discrete loss.
 Their work constructively shows that every discrete loss is embeddable, but it is unclear how efficient an embedding can get.
 In this paper, we propose the notion of embedding dimension in order to study the minimum dimension of a \emph{polyhedral calibrated} surrogate loss with respect to a discrete loss.
-In order to concisely discuss embedding dimension, we appeal to notation and terminology from the field of property elicitation(\cite{frongillo2015vector-valued, gneiting2007strictly, lambert2009eliciting, osband1985information-eliciting, savage1971elicitation}), relating it to the language of calibrated surrogates as needed.
+In order to concisely discuss embedding dimension, we appeal to notation and terminology from the field of property elicitation (\cite{frongillo2015vector-valued, gneiting2007strictly, lambert2009eliciting, osband1985information-eliciting, savage1971elicitation}), relating it to the language of calibrated surrogates as needed.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Setting}
@@ -221,13 +221,13 @@ A convex function $f:\reals^d\to\reals$ is \emph{polyhedral} if its epigraph is 
 For example, hinge loss is polyhedral, whereas logistic loss is not.
 
 \paragraph{Properties of distributions.}
-In order to study calibration of surrogates (defined below), it is useful to formalize the following functions that describe the reports that minimize expected $\ell$-loss and $L$-loss under $p$.
+In order to study calibration of surrogates (Definition~\ref{def:calibration} below), it is useful to formalize the following functions that describe the reports that minimize expected $\ell$-loss and $L$-loss under $p$.
 \begin{definition}[(Finite) property, level set, elicited]
-  A \emph{property} is a function $g: \simplex \to 2^{R}$ for some set $R$ where $g(p) \neq \emptyset$ for all $p$.
-  It is \emph{finite} if $|R| < \infty$.
-  The \emph{level set} of $r \in R$ is the set $g_r = \{p \in \simplex : r \in g(p)\}$.
-  A loss function $f: R \to \nonnegreals^{\Y}$ \emph{elicits} $g$ if $g(p) = \argmin_{r \in R} \inprod{p}{f(r)}$.
-  We assume all properties are non-redundant, i.e. each $g_r$ contains a $p$ not in any other $g_{r'}$.
+  A \emph{property} is a function $g: \simplex \to 2^{\R}$ for some set $\R$ where $g(p) \neq \emptyset$ for all $p$.
+  It is \emph{finite} if $|\R| < \infty$.
+  The \emph{level set} of $r \in \R$ is the set $g_r = \{p \in \simplex : r \in g(p)\}$.
+  A loss function $f: \R \to \nonnegreals^{\Y}$ \emph{elicits} $g$ if $g(p) = \argmin_{r \in \R} \inprod{p}{f(r)}$.
+  We assume all properties are non-redundant, i.e. each $g_r$ contains a distribution $p$ not in any other $g_{r'}$.
 \end{definition}
 For example, $0-1$ loss elicits the mode, which is formalized as a property on report space $R = \Y$ via $g(p) = \argmax_{y \in \Y} p(y)$.
 Notice in this example $g(p)$ is a singleton set when the mode of $p$ is unique and e.g. is $\Y$ when $p$ is uniform.
@@ -236,7 +236,7 @@ In this paper we write $\gamma$ for the property elicited by $\ell$ and $\Gamma$
 
 \paragraph{Embeddings.}
 %We specifically study polyhedral functions in part because they have high-dimensional subgradient sets at points of nondifferentiability, which will be of interest to us later.
-Polyhedral losses are motivated partly because they correspond to a natural surrogate construction technique: embedding the discrete predictions $\R$ as points in $\reals^d$.
+Polyhedral losses are motivated partly because they correspond to a natural surrogate construction technique: embedding the discrete predictions $\R$ as points in $\reals^d$ \jessie{and linearly interpolating between embedded reports}.
 The key condition required on the embedding and surrogate loss $L$ is that a discrete prediction $r \in \R$ should minimize expected $\ell$-loss if and only if its embedding point minimizes expected $L$-loss.
 %
 \begin{definition}[Embedding of a loss]
@@ -271,7 +271,7 @@ In this paper, we study the following quantity.
 A number of things are already known about embedding dimension.
 Many surrogates in the literature provide upper bounds; we highlight in particular the \emph{abstain loss} given by \cite{ramaswamy2018consistent}, in which one wants to predict the most likely outcome \emph{only if} they are confident in the outcome, and otherwise \emph{abstain} from predicting an outcome for a lesser punishment than if they give a prediction and were incorrect. 
 \begin{equation}\label{eq:abstain}
-\ellabs{\alpha}(r,y) = \begin{cases}
+\ellabs{\alpha}(r)_y = \begin{cases}
 0 & r = y\\
 \alpha & r = \bot\\
 1 & r \not \in \{y, \bot\}
