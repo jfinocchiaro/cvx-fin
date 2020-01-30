@@ -506,7 +506,7 @@ Monotonicity says that these individual polytopes can actually be glued together
   Then $\ell$ is $d$-embeddable if and only if there exist polytopes $\T = \{T_y \subseteq \reals^d : y \in \Y\}$ for each $r \in \R$ such that both of the following hold:
   \begin{enumerate}
     \item (Optimality) We have $D(\T) = \gamma_r$.
-    \item (Monotonicity) There exists an injective embedding function $\varphi : \R \to \reals^d$ and loss functions $\{L_y : \reals^d \to \reals^\Y_{\geq 0}\}_{y \in \Y}$ such that for all $y \in \Y$, we have $T_y = \partial L_y(\varphi(r))$.
+    \item (Monotonicity) There exists an injective embedding function $\varphi : \R \to \reals^d$ and loss functions $\{L_y : \reals^d \to \reals^\Y_{\geq 0}\}_{y \in \Y}$ such that for all $y \in \Y$, we have $T_y = \partial L_y(\varphi(r))$ and for all $r \in \R$, we have $L_y(\varphi(r)) = \ell_y(r)$.
   \end{enumerate}
 \end{theorem}
 \begin{proof}
@@ -519,8 +519,7 @@ Monotonicity says that these individual polytopes can actually be glued together
   \bigskip
   $(\impliedby)$ The first embedding condition holds by the assumption of $\varphi$ in the monotonicity condition.
   Now consider that $\gamma_r = D(\T) = \{p \in \simplex : \vec 0 \in \oplus_p T_y \} = \{p \in \simplex : 0 \in \oplus_p \partial L(\varphi(r))_y \} = \{p : r \in \Gamma(p) \} =  \Gamma_{\varphi(r)}$.
-  Therefore, as this holds for all $r \in \R$, we have that the Bayes Risks of the two losses match, and by~\cite[Proposition 1]{finocchiaro2019embedding}, we have $L$ embedding $\ell$. 
-  \jessiet{This is a hole, since the subgradients of the level sets match, but the values do not.  Need to bake matching losses into monotonicity condition}
+  Therefore, as this holds for all $r \in \R$, and we have matching losses on the embedding points by monotonicity, we have that the Bayes Risks of the two losses match, and by~\cite[Proposition 1]{finocchiaro2019embedding}, we have $L$ embedding $\ell$. 
 \end{proof}
 
 
@@ -591,17 +590,27 @@ To gain a better understanding about the QFP in Definition~\ref{def:qfp}, we pro
   For any $\T$, $D(\T)$ is a polytope (in particular, is convex).
 \end{lemma}
 \begin{proof}
-   Recall by definition, the notation $\oplus_p \T = \{\sum_y p(y) x^r_y : x^r_y \in T_y (\forall y)\}$.
+  \jessie{Appendix}
+   Recall by definition, the notation $\oplus_p \T = \{\sum_y p(y) x_y : x_y \in T_y (\forall y)\}$.
    Each $T_y$ is a polytope, so $p(y) T_y$ is a polytope.
    The Minkowski sum of polytopes is a polytope, so $\oplus_p \T$ is a polytope by~\cite[Section 1.2]{weibel2007minkowski}.
-  \bo{TODO}
+  \bo{TODO}\jessie{Taking a try}
+  Since $\oplus_p \T$ is a polytope for all $p \in \simplex$, we know there is a halfspace representation of normals $V$ so that for all $y \in \Y$, we have $x \in p(y)T_y \iff \inprod{V}{x} \leq p(y) e^y$ for some matrix $V$ and the support vector $e^y$, where $e^y_i = H_{T_y}(V_i)$.
+  Adding redundant constraints for the $e^y$ as necessary, we know that the support of the Minkowski sum for a given normal is the sum of the normals~\cite[Theorem 3.1.6]{weibel2007minkowski}.
+  Concatenating the vectors $e^y$ into $E$, we have $x \in \oplus_p \T \iff \inprod{V^*}{x} \leq E^*p$, where $V^*$ has redundant rows added as necessary. \jessie{Hand wavy... not a fan.}
+  Substituting $x = \vec 0$, we see $\vec 0 \in \oplus_p \T \iff Ep \geq \vec 0$, which defines a polytope by construction of $E$.
 \end{proof}
 \begin{lemma}  \label{lemma:minkowski-support}
   Given polytopes $\T$, there exists a finite set of normal vectors $w_1,\ldots,w_K \in \reals^d$ such that, for all $p \in \simplex$, $\oplus_p \T = \{x : \inprod{w_i}{x} \leq \sum_{y \in \Y} p(y) \max_{x \in T_y} \inprod{w_i}{x} \}$.
 \end{lemma}
 \begin{proof}
+  \jessie{Appendix}
    For each $p$, $\oplus_p \T$ is a polytope.
   \bo{TODO: it turns out that $p$ doesn't matter, only its support; and there are only finitely many possible supports (or even better, the normals that are complete for the uniform minkowski sum turn out to be complete for all other $p$-combinations).}
+  For each of the finitely many supports ($2^n - 1$), we know $\oplus_p \T$ is a polytope, and every polytope can be uniquely defined by an enumeration of vectors normal to its facets.
+  As a two polytopes with the same support can be defined by the same facet enumeration, we can simply concatenate these finite set of normals for the finite polytope supports.
+  Vectors that are not normal to a facet simply become redundant constraints.
+  This yields finitely many normals defining the weighted Minkowski sum $\oplus_p \T$ for all $p \in \simplex$.
 \end{proof}
 \begin{lemma} \label{lemma:E-to-B}
   Let $C = \{p : Bp \geq \vec 0 \}$ where $B$ has the minimum possible number of rows to capture $C$, and suppose $C = \{p : Ep \geq \vec 0 \}$.
@@ -710,7 +719,7 @@ This reduces the QFP to the following problem:
   Given a real-valued matrix $M$ in which some entries are missing, but have bounds of the form $[a,b]$, do there exist legal values for these entries such that $M$ is rank $d$?
 \end{quotation}
 The second proof is a direct geometric one utilizing the same observations.
-We show that packing too many normal vectors into a half-circle yields contradictions, implying that a $5$-outcome embedding into $2$ dimensions is impossible (and incidentally characterizing the structure of all possible $4$-dimensional embeddings).
+We show that packing too many normal vectors into a half-circle yields contradictions, implying that a $5$-outcome embedding into $2$ dimensions is impossible (and incidentally characterizing the structure of all possible $4$-outcome\jessie{dimensional $\to$ outcome} embeddings).
 
 
 \section{Conclusions and future work}
