@@ -206,7 +206,7 @@ The base object of study is a \emph{discrete loss function} $\ell: \R \to \nonne
 Here $\ell(r)_y$ is the loss of prediction $r \in \R$ (the report space) on $y \in \Y$ (the observation or label space).
 For simplicity we let $\Y = [n]$ throughout (where $[n] = \{1,\ldots,n\}$).
 The set of probability distributions on $\Y$ is denoted $\simplex\subseteq\nonnegreals^{\Y}$, represented as vectors of probabilities.
-We write $p(y)$ \bo{check/decide} for the probability of outcome $y \in \Y$ drawn from $p \in \simplex$.
+We write $p(y)$ \bo{check/decide}\jessie{Fine with this, and I think it's consistently in the paper like this already} for the probability of outcome $y \in \Y$ drawn from $p \in \simplex$.
 As is assumed by~\cite{finocchiaro2019embedding}, we assume the given discrete loss is \emph{non-redundant}, meaning every report $r$ uniquely minimizes expected loss for some distribution $p\in\simplex$.
 
 We similarly denote surrogate losses in dimension $d$ by $L:\reals^d\to\nonnegreals^{\Y}$, with predictions typically written $u\in\reals^d$.
@@ -264,7 +264,7 @@ Informally, calibration means that if one minimizes the expected surrogate loss 
 \jessie{Taking a crack at this:}
 As we alluded to above, calibration is not actually the trait we desire of a surrogate; rather, we seek consistency.
 \cite{tewari2007consistency} show that, in a finite-outcome setting, the presence of calibration and consistency are equivalent conditions.
-By consistency, we mean the standard notion where the expected loss over $\X \times \Y$ for a sequence of hypotheses $h_m$ converging to the optimal expected surrogate loss implies the expected discrete loss over the linked hypotheses $\psi \circ h_m$ converges to the optimal discrete loss by applying the link function.
+By consistency, we mean the standard notion where the expected loss over $\X \times \Y$ for a sequence of hypotheses $h_m$ converging to the optimal expected surrogate loss implies the expected discrete loss over the linked hypotheses $\psi \circ h_m$ converges to the optimal discrete loss.
 The equivalence of these conditions allows us to focus on calibration, so we can abstract away the input space $\X$ and simply focus on probability distributions over the outcomes $\Y$.
 
 \jessie{Not a smooth transition here...}
@@ -461,7 +461,16 @@ Monotonicity says that these individual polytopes can actually be glued together
   \end{enumerate}
 \end{theorem}
 \begin{proof}
-  TODO
+  \jessie{An attempt:}
+  $(\implies)$ If $\ell$ is $d$-embeddable, say that $L:\reals^d \to \reals^\Y_{\geq 0}$ embeds $\ell$.
+  Take $T^r_y$ to be $\partial L(\phi(r))_y$ for each $r \in \R$ and $y \in \Y$.
+  Clearly this set of polytopes $\T$ satisfies the monotonicity condition.
+  To see the optimality condition is satisfied, consider for each $r \in \R$ that $\gamma_r = \Gamma_{\phi(r)} = \{p \in \simplex : \vec 0 \in \oplus_p \partial L(\phi(r))_y \} = \{p : \vec 0 \in \oplus_p T^r_y \} = D(\T^r)$.
+  
+  \bigskip
+  $(\impliedby)$ The first embedding condition holds by the assumption of $\phi$ in the monotonicity condition.
+  Now consider that $\gamma_r = D(\T^r) = \{p \in \simplex : \vec 0 \in \oplus_p T^r_y \} = \{p \in \simplex : 0 \in \oplus_p \partial L(\phi(r))_y \} = \{p : r \in \Gamma(p) \} =  \Gamma_{\phi(r)}$.
+  Therefore, as this holds for all $r \in \R$, we have that the Bayes Risks of the two losses match, and by~\cite[Proposition 1]{finocchiaro2019embedding}, we have $L$ embedding $\ell$. 
 \end{proof}
 
 
@@ -535,8 +544,8 @@ To gain a better understanding about the QFP in Definition~\ref{def:qfp}, we pro
 \begin{proof}
    Recall by definition, the notation $\oplus_p \T^r = \{\sum_y p(y) x^r_y : x^r_y \in T^r_y (\forall y)\}$.
    Each $T^r_y$ is a polytope, so $p(y) T^r_y$ is a polytope.
-   The Minkowski sum of polytopes is a polytope, so $\oplus_p \T^r$ is a polytope.
-  \bo{TODO}
+   The Minkowski sum of polytopes is a polytope, so $\oplus_p \T^r$ is a polytope by~\cite[Section 1.2]{weibel2007minkowski}.
+  \bo{TODO}\jessie{Done?}
 \end{proof}
 \begin{lemma}  \label{lemma:minkowski-support}
   Given polytopes $\T^r$, there exists a finite set of normal vectors $w_1,\ldots,w_K \in \reals^d$ such that, for all $p \in \simplex$, $\oplus_p \T^r = \{x : \inprod{w_i}{x} \leq \sum_{y \in \Y} p(y) \max_{x \in T^r_y} \inprod{w_i}{x} \}$.
@@ -611,7 +620,7 @@ Given this characterization, we prove the main result on when a solution to the 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Examples}\label{sec:examples}
-\bo{I suggest we don't use the notation $\elicembed$ at all and just write out $d$-embeddable every time. But don't feel strongly.}
+\bo{I suggest we don't use the notation $\elicembed$ at all and just write out $d$-embeddable every time. But don't feel strongly.}\jessie{Changed :)}
 \subsection{Abstain property, $\alpha \leq 1/2$}\label{subsec:example-abstain}
 One classification-like problem that is of particular interest is the abstain property, elicited by the loss $\ellabs{\alpha}$ given in Equation~\ref{eq:abstain}.
 The property $\abstain{\alpha}$ can be verified:
@@ -627,7 +636,7 @@ However, it is unclear if this bound is tight, as the previously studied lower b
 
 With our $1$-dimensional characterization, we already observe a tighter lower bound.
 \begin{proposition}
-	For $n \geq 3$ and $\alpha \leq 1/2$, the abstain loss $\ell_{\alpha}$ is not $1$-embeddable. \bo{In fact, for any $\alpha < 1$...}
+	For $n \geq 3$ and $\alpha < 1$, the abstain loss $\ell_{\alpha}$ is not $1$-embeddable. \bo{In fact, for any $\alpha < 1$...}\jessie{Changed.  (Was $\alpha \leq 1/2$)}
 \end{proposition}
 \begin{proof}
 	Consider the intersection graph of $\gamma := \abstain{\alpha}$: the node associated with $\gamma_\bot$ has $n$ edges, and since we assume $n \geq 3$, we fail to observe the requirement that every node of the intersection graph has degree at most $2$.
@@ -864,7 +873,18 @@ We now use our $d$-dimensional characterization and some observations about the 
 \end{proof}
 
 \section{Conclusions and future work}
-\jessie{TODO, tonight probably.}
+\paragraph{Future Work}
+There are a few threads of future work: the first is to utilize monotonicity to see if we can construct even tighter lower bounds on embedding dimension.
+Second, we hope to understand when, if ever, embedding dimension is not equal to convex calibration dimension.
+Moreover, the restriction that we are calibrated over the entire simplex may be tighter than necessary in some contexts, and would be useful to understand the tradeoff between calibration and dimension of a surrogate loss.
+For one example where we can reduce surrogate dimension with a low-entropy assumption on the simplex, see~\cite[Example 6]{agarwal2015consistent}.
+
+\paragraph{Conclusion}
+\jessie{Not a fan, but a placeholder if we get too close to deadline.}
+In this paper, we present the notion of \emph{embedding dimension} in order to measure the efficiency of a surrogate loss function.
+While similar notions of surrogate efficiency have been studied before, we propose a characterization in $1$ dimension that generalizes to the construction of any calibrated convex surrogate.
+In higher dimensions, our characterization can only be applied to understanding the minimal dimension of a calibrated \emph{polyhedral} surrogate, although we conjecture that embedding dimension is equal to convex calibration dimension in general.
+In order to demonstrate our characterizations, we show an improved lower bound from previous work on the convex calibration dimension of $\abstain{\alpha}$, and a new lower bound on embedding dimension of $\abstain{1/2}$.
 
 \newpage
 % Acknowledgments---Will not appear in anonymized version
