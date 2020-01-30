@@ -668,9 +668,9 @@ Given this characterization, we prove the main result on when a solution to the 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Example: Abstain loss}\label{sec:examples}
-\subsection{Abstain, $\alpha \leq 1/2$, $d=1$}\label{subsec:abstain-d1}
-One classification-like problem that is of particular interest is the abstain property, elicited by the loss $\ellabs{\alpha}$ given in Equation~\ref{eq:abstain}.
-The property $\gamma = \abstain{\alpha}$ can be verified:
+\subsection{Abstain, $d=1$}\label{subsec:abstain-d1}
+One classification-like problem that is of particular interest is the abstain property, elicited by the loss $\ellabs{\alpha}$ given in Equation~\eqref{eq:abstain}.
+The property $\gamma = \abstain{\alpha}$ for $\alpha \in (0,1)$ can be verified:
 \begin{equation}\label{eq:abstain-prop}
      \abstain{\alpha}(p) = \begin{cases}
      \argmax_{y \in \Y} p(y) & \max_y p(y) \geq 1 - \alpha\\
@@ -679,7 +679,7 @@ The property $\gamma = \abstain{\alpha}$ can be verified:
 \end{equation}
 
 \cite{ramaswamy2018consistent} study the abstain property in depth, presenting a $\ceil {\log_2(n)}$ dimensional embedding of the abstain property.
-However, it is unclear if this bound is tight, as the previously studied lower bounds of~\cite{ramaswamy2016convex} do not work well for this property, failing to give any lower bound tighter than the trivial $1$.
+However, it is unclear if this bound is tight, as the previously studied lower bounds of~\cite{ramaswamy2016convex} do not work well for this property, failing to give any lower bound tighter than the trivial dimension $1$.
 
 With our $1$-dimensional characterization, we already observe a tighter lower bound.
 \begin{proposition}
@@ -687,65 +687,95 @@ With our $1$-dimensional characterization, we already observe a tighter lower bo
 \end{proposition}
 \begin{proof}
 	Consider the intersection graph of $\gamma := \abstain{\alpha}$: the node associated with $\gamma_\bot$ has $n$ edges, and since we assume $n \geq 3$, it cannot be a path graph.
-	For an example with $n=3$, see Figure~\ref{fig:abstain-alpha-half}.
+	In fact, the incidence graph for this property is a star graph.
+	For an example with $n=3$ and $\alpha = 1/2$, see Figure~\ref{fig:abstain-alpha-half}.
 \end{proof}
 
 \subsection{Abstain, $\alpha = 1/2$, $d=2$}
 We now use our $d$-dimensional characterization and some observations about the $\abstain{1/2}$ property to improve lower bounds from those given by~\cite{ramaswamy2016convex}.
 
-\begin{proposition}
+\begin{proposition}\label{prop:qfp-fails-abstain}
   The quadratic feasibility program (Definition \ref{def:qfp}) with input $C = \gamma_{\bot} = \{p \in \simplex: \max_y p(y) \leq 1/2\}$, $n=5$, and dimension parameter $d=2$, is infeasible.
 \end{proposition}
 \begin{corollary}
   The abstain loss with $\alpha=1/2$ on $5$ outcomes is not $2$-embeddable.
 \end{corollary}
 
-\bo{Am assuming that we will have to move almost everything to the appendix, wrote this blurb instead.}
+\bo{Am assuming that we will have to move almost everything to the appendix, wrote this blurb instead.}\jessie{Looks good to me.}
 We have two proofs, both delegated to the appendix.
 The first is to directly obtain from mathematical software that the QFP is infeasible.
 We use observations about $\ell_{1/2}$ to make a number of simplifications to the program first.
-This reduces the QFP to the following problem:
+This reduces the QFP to the following problem: 
 \begin{quotation}
   Given a real-valued matrix $M$ in which some entries are missing, but have bounds of the form $[a,b]$, do there exist legal values for these entries such that $M$ is rank $d$?
 \end{quotation}
-The second proof is a direct geometrical one utilizing the same observations.
+The second proof is a direct geometric one utilizing the same observations.
 We show that packing too many normal vectors into a half-circle yields contradictions, implying that a $5$-outcome embedding into $2$ dimensions is impossible (and incidentally characterizing the structure of all possible $4$-dimensional embeddings).
 
-\bo{Assuming everything after this will go to the appendix.}
+
+\section{Conclusions and future work}
+\paragraph{Future Work}
+There are a few threads of future work: the first is to utilize monotonicity to see if we can construct even tighter lower bounds on embedding dimension.
+Second, we hope to understand when, if ever, embedding dimension is not equal to convex calibration dimension.
+Moreover, the restriction that we are calibrated over the entire simplex may be tighter than necessary in some contexts, and would be useful to understand the tradeoff between calibration and dimension of a surrogate loss.
+For one example where we can reduce surrogate dimension with a low-entropy assumption on the simplex, see~\cite[Example 6]{agarwal2015consistent}.
+
+\paragraph{Conclusion}
+\jessie{Not a fan, but a placeholder if we get too close to deadline.}
+In this paper, we present the notion of \emph{embedding dimension} in order to measure the efficiency of a surrogate loss function.
+While similar notions of surrogate efficiency have been studied before, we propose a characterization in $1$ dimension that generalizes to the construction of any calibrated convex surrogate.
+In higher dimensions, our characterization can only be applied to understanding the minimal dimension of a calibrated \emph{polyhedral} surrogate, although we conjecture that embedding dimension is equal to convex calibration dimension in general.
+In order to demonstrate our characterizations, we show an improved lower bound from previous work on the convex calibration dimension of $\abstain{\alpha}$, and a new lower bound on embedding dimension of $\abstain{1/2}$.
+
+\newpage
+% Acknowledgments---Will not appear in anonymized version
+\acks{JF- Need that GRFP acknowledgement}
+
+\bibliography{diss,extra}
+
+\newpage
+\appendix
+
+\section{$1$-dimensional characterization omitted proofs}
+
+\section{$d$-dimensional omitted proofs}
+
+\section{Simplifying the QFP for $\abstain{1/2}$, $d=2$}
+In order to prove Proposition~\ref{prop:qfp-fails-abstain}, we take some simplifying steps to the quadratic feasibility program for this specific problem.
 The strategy is to consider the level set $\gamma_{\bot}$, the set of distributions with modal mass at most $1/2$.
 We show that the quadratic feasibility program with this input cannot be satisfied with dimension $2$ for $n=5$.
 
 \begin{lemma} \label{lemma:abstain-v-h}
-  For the abstain loss $\ell_{1/2}$, the level set of abstain satisfies $\gamma_{\bot} = \conv\{(\delta_y + \delta_{y'})/2 : y,y' \in \Y, y < y'\} = \{p : Bp \geq \vec{0}\}$ where $\delta_y$ puts probability one on $y$ and $B = \ones \ones^{\intercal} - 2I \in \reals^{5 \times 5}$, i.e. has entries $-1$ on the diagonal and $1$ everywhere else.
+	For the abstain loss $\ell_{1/2}$, the level set of abstain satisfies $\gamma_{\bot} = \conv\{(\delta_y + \delta_{y'})/2 : y,y' \in \Y, y < y'\} = \{p : Bp \geq \vec{0}\}$ where $\delta_y$ puts probability one on $y$ and $B = \ones \ones^{\intercal} - 2I \in \reals^{5 \times 5}$, i.e. has entries $-1$ on the diagonal and $1$ everywhere else.
 \end{lemma}
 \begin{proof}
-  Recall that $\gamma_{\bot}$ is the set of distributions $p$ with $\max_y p(y) = 1/2$.
-  First, note that each distribution of the form $(1/2, 1/2, 0, 0, 0)$ and so on is in $\gamma_{\bot}$.
-  Meanwhile, every such $p$ can be written as a convex combination of these corners.
-  Second, note that if $p \in \gamma_{\bot}$, then $p(y) \leq 1/2$ for all $y \in \Y$.
-  These constraints can be rewritten as $\inprod{p}{b} \geq 0$ where $b_y = -1$ and $b_{y'} = 1$ for all $y' \neq y$, literally requiring $p(y) \leq \sum_{y' \neq y} p(y')$.\bo{Check notation $p_y$ versus $p(y)$.}
+	Recall that $\gamma_{\bot}$ is the set of distributions $p$ with $\max_y p(y) = 1/2$.
+	First, note that each distribution of the form $(1/2, 1/2, 0, 0, 0)$ and so on is in $\gamma_{\bot}$.
+	Meanwhile, every such $p$ can be written as a convex combination of these corners.
+	Second, note that if $p \in \gamma_{\bot}$, then $p(y) \leq 1/2$ for all $y \in \Y$.
+	These constraints can be rewritten as $\inprod{p}{b} \geq 0$ where $b_y = -1$ and $b_{y'} = 1$ for all $y' \neq y$, literally requiring $p(y) \leq \sum_{y' \neq y} p(y')$.
 \end{proof}
 
 \begin{observation} \label{obs:qfp-invariant-lin}
-  For any invertible $A \in \reals^{d \times d}$, if $V,\{X^j : j \in [\ell]\}$ is a feasible solution to the quadratic feasibility program, then so is $(VA),\{A^{-1}X^j : j \in [\ell]\}$.
+	For any invertible $A \in \reals^{d \times d}$, if $V,\{X^j : j \in [\ell]\}$ is a feasible solution to the quadratic feasibility program, then so is $(VA),\{A^{-1}X^j : j \in [\ell]\}$.
 \end{observation}
 \begin{proof}
-  The halfspace constraints are $(VA)(A^{-1}X^j) \leq B \iff VX^{j} \leq B$.
-  The $j^{th}$ vertex constraint is a vector equality $\sum_{y \in \Y} p^j(y) (A^{-1}X^j)_y = \vec{0}$.
-  If we let $a_m$ be the $m$th row of $A^{-1}$, then the $m^{th}$ row of the vector equality is
-  \begin{align*}
-    0 &= \sum_{y \in \Y} p^j(y) \inprod{a_m}{x^j_y}  \\
-      &= \inprod{a_m}{\sum_{y \in \Y} p^j(y) x^j_y}  \\
-      &= 0
-  \end{align*}
-  so the program is feasible.
+	The halfspace constraints are $(VA)(A^{-1}X^j) \leq B \iff VX^{j} \leq B$.
+	The $j^{th}$ vertex constraint is a vector equality $\sum_{y \in \Y} p^j(y) (A^{-1}X^j)_y = \vec{0}$.
+	If we let $a_m$ be the $m^{th}$ row of $A^{-1}$, then the $m^{th}$ row of the vector equality is
+	\begin{align*}
+	0 &= \sum_{y \in \Y} p^j(y) \inprod{a_m}{x^j_y}  \\
+	&= \inprod{a_m}{\sum_{y \in \Y} p^j(y) x^j_y}  \\
+	&= 0
+	\end{align*}
+	so the program is feasible.
 \end{proof}
 
 \begin{corollary} \label{cor:qfp-wlog-v1}
-  If there is a feasible solution to the quadratic feasibility program, then there is a feasible solution where $v_1$ is the first standard basis vector and $\|v_i\| \leq \|v_1\| = 1$ for all $i$.
+	If there is a feasible solution to the quadratic feasibility program, then there is a feasible solution where $v_1$ is the first standard basis vector and $\|v_i\| \leq \|v_1\| = 1$ for all $i$.
 \end{corollary}
 \begin{proof}
-  In particular, we can take a series of matrices $A$ in Observation \ref{obs:qfp-invariant-lin} that permutate the rows of $V$, scale\footnote{Note one can show $V = 0$ is not feasible unless $B$ is a trivial property, i.e. essentially has no rows at all.} all rows by $\frac{1}{\|v_1\|}$, and linearly map $v_1$ to $(1,0,\dots,0)$.
+	In particular, we can take a series of matrices $A$ in Observation \ref{obs:qfp-invariant-lin} that permute the rows of $V$, scale\footnote{Note one can show $V = 0$ is not feasible unless $B$ is a trivial property, i.e. essentially has no rows at all.} all rows by $\frac{1}{\|v_1\|}$, and linearly map $v_1$ to $(1,0,\dots,0)$.
 \end{proof}
 
 \paragraph{Notation for the quadratic program.}
@@ -759,84 +789,90 @@ The $y$th column of this matrix is denoted $x^{ij}_y \in \reals^d$.
 %\jessie{With how I wrote this, might be helpful to index the QFP with $m$.  Feel free to change though.}
 
 \begin{lemma} \label{lemma:xiji-minus-xijj}
-  In any feasible solution to the QFP for $\gamma_{\bot}$ and $\ell_{1/2}$, we have $x^{ij}_i = -x^{ij}_j$ for all $i<j$ in $\Y$.
+	In any feasible solution to the QFP for $\gamma_{\bot}$ and $\ell_{1/2}$, we have $x^{ij}_i = -x^{ij}_j$ for all $i<j$ in $\Y$.
 \end{lemma}
 \begin{proof}
-  Directly from the vertex constraints: $p^{ij} = \frac{1}{2}\delta_i + \frac{1}{2}\delta_j$, so the $ij$ constraint reduces to $\frac{1}{2}x^{ij}_i + \frac{1}{2}x^{ij}_j = \vec 0$.
+	Directly from the vertex constraints: $p^{ij} = \frac{1}{2}\delta_i + \frac{1}{2}\delta_j$, so the $ij$ constraint reduces to $\frac{1}{2}x^{ij}_i + \frac{1}{2}x^{ij}_j = \vec 0$.
 \end{proof}
 
 \begin{lemma} \label{lemma:vi-neq-cvj}
-  There is no feasible solution to the QFP for $\gamma_{\bot}$ and $\ell_{1/2}$ where $v_i = c v_j$ for $c > 0$ and any $i \neq j$.
+	There is no feasible solution to the QFP for $\gamma_{\bot}$ and $\ell_{1/2}$ where $v_i = c v_j$ for $c > 0$ and any $i \neq j$.
 \end{lemma}
 \begin{proof}
-  There is an open halfspace through the origin strictly containing both the feasible regions $F_i = \{x : \inprod{v_i}{x} \leq -1, \inprod{v_j}{x} \leq 1 \forall j \neq i\}$ and $F_j$, so there is no set of witnesses such that $x^{ij}_i \in F_i$ and $x^{ij}_j \in F_j$, as this would contradict Lemma \ref{lemma:xiji-minus-xijj}.
+	There is an open halfspace through the origin strictly containing both the feasible regions $F_i = \{x : \inprod{v_i}{x} \leq -1, \inprod{v_j}{x} \leq 1 \; \forall j \neq i\}$ and $F_j$, so there is no set of witnesses such that $x^{ij}_i \in F_i$ and $x^{ij}_j \in F_j$, as this would contradict Lemma \ref{lemma:xiji-minus-xijj}.
 \end{proof}
 
 \begin{lemma} \label{lemma:unique-spot-xiji}
-  For $d=2$ and the level set $\gamma_\bot$ for $\ell_{1/2}$, any pair of linearly independent $v_i,v_j$ rule out all except for a unique feasible value for $x^{ij}_i$ and also for $x^{ij}_j$.
+	For $d=2$ and the level set $\gamma_\bot$ for $\ell_{1/2}$, any pair of linearly independent $v_i,v_j$ rule out all except for a unique feasible value for $x^{ij}_i$ and also for $x^{ij}_j$.
 \end{lemma}
 \begin{proof}
-  From the halfspace constraints, we must have $\inprod{v_i}{x^{ij}_i} \leq -1$ and $\inprod{v_i}{x^{ij}_j} \leq 1$, which combines with Lemma \ref{lemma:xiji-minus-xijj} to give $\inprod{v_i}{x^{ij}_i} = 1$.
-  This immediately also gives $\inprod{v_j}{x^{ij}_i} = -1$.
-  This system of two inequalities in two dimensions has exactly one solution if $v_i,v_j$ are linearly independent.
+	From the halfspace constraints, we must have $\inprod{v_i}{x^{ij}_i} \leq -1$ and $\inprod{v_i}{x^{ij}_j} \leq 1$, which combines with Lemma \ref{lemma:xiji-minus-xijj} to give $\inprod{v_i}{x^{ij}_i} = 1$.
+	This immediately also gives $\inprod{v_j}{x^{ij}_i} = -1$.
+	This system of two inequalities in two dimensions has exactly one solution if $v_i,v_j$ are linearly independent.
 \end{proof}
 
 \begin{figure}
-	\begin{minipage}{0.3\linewidth}
+	\begin{minipage}{0.45\linewidth}
 		\centering
 		\includegraphics[width=0.9\linewidth]{tikz/v1}
 		\caption{Example of $v_1$.}
 		\label{fig:v1}
 	\end{minipage}
 	\hfill
-	\begin{minipage}{0.3\linewidth}
+	\begin{minipage}{0.45\linewidth}
 		\centering
 		\includegraphics[width=0.9\linewidth]{tikz/qp-must-intersect-line-same-spot}
 		\caption{If $x^{12}_1 \neq x^{13}_1$, we have a contradiction.}
 		\label{fig:qp-must-intersect-line-same-spot}
 	\end{minipage}
-	\begin{minipage}{0.3\linewidth}
-	\centering
-	\includegraphics[width=0.9\linewidth]{tikz/qp-line-intersect-contradiction}
-	\caption{The intersection of $\inprod{v_2}{x} = -1$ and $\inprod{v_3}{x} = 1$ occurs outside the region $\inprod{v_1}{x} \in [-1,1]$.}
-	\label{fig:qp-line-intersect-contradiction}
-\end{minipage}
+\end{figure}
+\begin{figure}
+		\begin{minipage}{0.4\linewidth}
+		\centering
+		\includegraphics[width=0.9\linewidth]{tikz/qp-intuition-contradiction.pdf}
+		\caption{Reducing to the case where $x^{12}_1 = x^{13}_1$.}
+		\label{fig:qp-line-intersect-contradiction}
+	\end{minipage}
 \hfill
-
+	\begin{minipage}{0.59\linewidth}
+	\centering
+	\includegraphics[width=0.9\linewidth]{tikz/qp-intuition-contradiction-with-intersection.pdf}
+	\caption{The intersection of $\inprod{v_2}{x} = -1$ and $\inprod{v_3}{x} = 1$ occurs outside the region $\inprod{v_1}{x} \in [-1,1]$.}
+	\label{fig:qp-line-intersect-contradiction-with-intersection}
+	\end{minipage}
 \end{figure}
 
-
 \begin{lemma} \label{lemma:180-degree-no-three}
-  There is no feasible solution to the QFP for $\gamma_{\bot}$ and $\ell_{1/2}$ where three vectors $v_i,v_j,v_m$ lie strictly within a halfspace through the origin (i.e. all within $180^{\circ}$ of each other).
+	There is no feasible solution to the QFP for $\gamma_{\bot}$ and $\ell_{1/2}$ where three vectors $v_i,v_j,v_m$ lie strictly within a halfspace through the origin (i.e. all within $180^{\circ}$ of each other).
 \end{lemma}
 \begin{proof}
-  Let three of the vectors be given, lying strictly inside a halfspace, and label them clockwise as $v_1,v_2,v_3$.
-  WLOG suppose $v_1$ points vertically ``up'', as in Figure \ref{fig:v1}.
-  By Lemma \ref{lemma:unique-spot-xiji}, the possible locations of the following points are all uniquely determined: $x^{ij}_i, x^{ij}_j$ for $(i,j) \in \{(1,2),(1,3),(2,3)\}$.
-  Both points $x^{12}_1$ and $x^{13}_1$ lie on the line $\inprod{v_1}{x} = -1$, i.e. a horizontal line below the origin.
-  We have constraints $\inprod{v_2}{x^{12}_1} = 1$ and $\inprod{v_2}{x^{13}_1} \leq 1$.
-  This implies $x^{13}_1$ is left of $x^{12}_1$ on the horizontal line $\inprod{v_1}{x} = 1$. 
-  But the symmetric constraints $\inprod{v_3}{x^{13}_1} = 1$ and $\inprod{v_3}{x^{12}_1} \leq 1$ imply symmetrically that $x^{12}_1$ is left of $x^{13}_1$ on the line.
-  This implies we must have $x^{12}_1 = x^{13}_1$.
-
-  If we consider the four lines $\inprod{v_2}{x}=1, \inprod{v_2}{x}=-1, \inprod{v_3}{x}=1, \inprod{v_3}{x}=-1$, we therefore have three points of intersection with the line $\inprod{v_1}{x}=1$ and three with the line $\inprod{v_1}{x}=-1$. 
-  WLOG, these points from top left to top right are: $x^{12}_2$ (which equals $x^{13}_3$), the intersection with $\inprod{v_2}{x}=1$, and the intersection with $\inprod{v_3}{x}=1$; and therefore from bottom left to bottom right are: the intersection with $\inprod{v_3}{x}=-1$, the intersection with $\inprod{v_2}{x}=-1$, and the intersection with $x^{12}_1$ (which equals $x^{13}_1$).
-  \bo{Needs more justification why these points are always in this order (up to renaming of $v_2$ and $v_3$).}
-
-  This implies that the lines $\inprod{v_2}{x}=-1$ and $\inprod{v_3}{x}=1$, in particular, do not intersect anywhere within the bounds of $\inprod{v_1}{x} \in [-1,1]$.
-  Therefore, either their intersection point $x^{23}_2$ or its negative $x^{23}_3$ violates the feasibility constraint $\inprod{v_1}{x} \leq 1$.
-  This proves there is no feasible solution with three normals lying strictly in the same halfspace through the origin.
+	Let three of the vectors be given, lying strictly inside a halfspace, and label them clockwise as $v_1,v_2,v_3$.
+	WLOG suppose $v_1$ points vertically ``up'', as in Figure \ref{fig:v1}.
+	By Lemma \ref{lemma:unique-spot-xiji}, the possible locations of the following points are all uniquely determined: $x^{ij}_i, x^{ij}_j$ for $(i,j) \in \{(1,2),(1,3),(2,3)\}$.
+	Both points $x^{12}_1$ and $x^{13}_1$ lie on the line $\inprod{v_1}{x} = -1$, i.e. a horizontal line below the origin.
+	We have constraints $\inprod{v_2}{x^{12}_1} = 1$ and $\inprod{v_2}{x^{13}_1} \leq 1$.
+	This implies $x^{13}_1$ is left of $x^{12}_1$ on the horizontal line $\inprod{v_1}{x} = 1$. 
+	But the symmetric constraints $\inprod{v_3}{x^{13}_1} = 1$ and $\inprod{v_3}{x^{12}_1} \leq 1$ imply symmetrically that $x^{12}_1$ is left of $x^{13}_1$ on the line.
+	This implies we must have $x^{12}_1 = x^{13}_1$.
+	
+	If we consider the four lines $\inprod{v_2}{x}=1, \inprod{v_2}{x}=-1, \inprod{v_3}{x}=1, \inprod{v_3}{x}=-1$, we therefore have three points of intersection with the line $\inprod{v_1}{x}=1$ and three with the line $\inprod{v_1}{x}=-1$. 
+	WLOG, these points from top left to top right are: $x^{12}_2$ (which equals $x^{13}_3$), the intersection with $\inprod{v_2}{x}=1$, and the intersection with $\inprod{v_3}{x}=1$; and therefore from bottom left to bottom right are: the intersection with $\inprod{v_3}{x}=-1$, the intersection with $\inprod{v_2}{x}=-1$, and the intersection with $x^{12}_1$ (which equals $x^{13}_1$).
+	\bo{Needs more justification why these points are always in this order (up to renaming of $v_2$ and $v_3$).}\jessie{Should we be able to take these to be in clockwise order WLOG in the grand scheme of trying to pack 5 normals into 180 degrees?  The order of the intersections follows from the clockwise order of the normals.  (ex: if the order was $v_2, v_1, v_3$, we would still get a contradiction, but in the first case like Figure~\ref{fig:intersection-graph-ex} I think)}
+	
+	This implies that the lines $\inprod{v_2}{x}=-1$ and $\inprod{v_3}{x}=1$, in particular, do not intersect anywhere within the bounds of $\inprod{v_1}{x} \in [-1,1]$.
+	Therefore, either their intersection point $x^{23}_2$ or its negative $x^{23}_3$ violates the feasibility constraint $\inprod{v_1}{x} \leq 1$.
+	This proves there is no feasible solution with three normals lying strictly in the same halfspace through the origin.
 \end{proof}
 
 \begin{proposition}
 	The abstain loss $\ell_{1/2}$ with $n=5$ is not $2$-embeddable.
 \end{proposition}
 \begin{proof}
-  Let any $5$ vectors be given, numbered clockwise.
-  $v_1,v_2,v_3$ cannot lie in a cone of strictly less than $180^{\circ}$, as this would contradict Lemma~\ref{lemma:180-degree-no-three}.
-  So the clockwise angle between $v_1$ and $v_3$ is at least $180^{\circ}$.
-  Since there are no duplicate angles (Lemma \ref{lemma:vi-neq-cvj}), this implies that the clockwise angle between $v_4$ and $v_1$, which includes $v_5$, is strictly less than $180^{\circ}$.
-  This contradicts Lemma~\ref{lemma:180-degree-no-three}.
+	Let any $5$ vectors be given, numbered clockwise.
+	$v_1,v_2,v_3$ cannot lie in a cone of strictly less than $180^{\circ}$, as this would contradict Lemma~\ref{lemma:180-degree-no-three}.
+	So the clockwise angle between $v_1$ and $v_3$ is at least $180^{\circ}$.
+	Since there are no duplicate angles (Lemma \ref{lemma:vi-neq-cvj}), this implies that the clockwise angle between $v_4$ and $v_1$, which includes $v_5$, is strictly less than $180^{\circ}$.
+	This contradicts Lemma~\ref{lemma:180-degree-no-three}.
 \end{proof}
 
 %\begin{proposition}
@@ -899,113 +935,89 @@ The $y$th column of this matrix is denoted $x^{ij}_y \in \reals^d$.
 %%  \end{enumerate}
 %
 %\end{proof}
-\begin{proof}[Matrix rank proof]
-  We can formulate the QFP given in Section~\ref{sec:d-dim} for $\abstain{1/2}$ as a matrix rank problem.
-  \jessie{Fill in explanation} \bo{attempted}
-  First, as observed in Lemma \ref{lemma:xiji-minus-xijj}, the vertex constraints are exactly equivalent to requiring that, in our notation, $x^{ij}_i = - x^{ij}_j$ for all $i<j$.
-  Therefore, we can substitute in for all variables of the form $x^{ij}_j$ and eliminate them from the problem.
-  Second, we can observe that the program is only easier to satisfy if one drops the halfspace constraints on all variables of the form $x^{ij}_m$, $i < j$, $m \not\in \{i,j\}$.
-  This allows us to drop all such variables, and we are now left with only the variables $v_1,\ldots,v_k$ and $\{x^{ij}_i : i<j\}$, with the understanding that $x^{ij}_j = -x^{ij}_i$.
-  We can therefore simplify the following constraints of the QFP:
-  \begin{align*}
-    \inprod{v_i}{x^{ij}_i} &\leq B_{ii} = -1   \\
-    \inprod{v_i}{x^{ij}_j} &\leq B_{ij} = 1  \\
-    \implies \inprod{v_i}{x^{ij}_i} = -1  \\
-    \inprod{v_i}{x^{ji}_i} &\leq B_{ii} = -1  \\
-    \inprod{v_i}{x^{ji}_j} &\leq B_{ij} = 1  \\
-    \implies \inprod{v_i}{x^{ji}_j} = 1  \\
-    \inprod{v_i}{x^{jm}_j} &\leq B_{ij} = 1  \\
-    \inprod{v_i}{x^{jm}_m} &\leq B_{im} = 1  \\
-    \implies \inprod{v_i}{x^{jm}_j} \in [-1,1] .
-  \end{align*}
-    
-  This gives us the following simplified feasibility problem.
-  \begin{align*}
-    \inprod{v_i}{x^{ij}_i} &= -1     & (\forall i<j)  \\
-    \inprod{v_i}{x^{ji}_j} &= 1      & (\forall i<j)  \\
-    \inprod{v_i}{x^{jm}_j} &\in [-1,1]   & (\forall j<m, i\not\in\{j,m\}) .
-  \end{align*}
-  If we consider the matrix $V$ and construct $Y$ whose columns are $\{x^{ij}_i : i<j\}$, this problem asks us to find such a $V$ and $Y$ whose product $M = VY$ is a matrix with certain fixed entries and others bounded.
-
-  In particular, with $n=4$, we obtain the following matrix rank problem: does there exist
-  \[
-  M_4 = 
-  \begin{bmatrix}
-  	-1 & -1 & -1 & \cdot & \cdot & \cdot \\
-  	1 & \cdot & \cdot & -1 & -1 & \cdot \\
-  	\cdot & 1 & \cdot & 1 & \cdot & -1 \\
-  	\cdot & \cdot & 1 & \cdot & 1 & 1 \\
-  \end{bmatrix}
-  \]
-  where each unknown entry $\cdot$ is in $[-1,1]$, of rank $d=2$?
-
-  Since $M_4$ is a submatrix of the matrix obtained when $n=5$, any rank-$2$ solution for the large matrix given below must also solve the above problem.
-
-  \[
-  M_5 =
-  \begin{bmatrix}
-  {\color{red} -1} & {\color{red} -1} & {\color{red} -1} & {\color{red} \cdot} & {\color{red} \cdot} & {\color{red} \cdot} & -1 & \cdot & \cdot & \cdot \\
-  {\color{red} 1} & {\color{red} \cdot} & {\color{red} \cdot} & {\color{red} -1} & {\color{red} -1} & {\color{red} \cdot} & \cdot & -1 & \cdot & \cdot \\
-  {\color{red} \cdot} & {\color{red} 1} & {\color{red} \cdot} & {\color{red} 1} & {\color{red} \cdot} & {\color{red} -1} & \cdot & \cdot & -1 & \cdot \\
-  {\color{red} \cdot} & {\color{red} \cdot} & {\color{red} 1} & {\color{red} \cdot} & {\color{red} 1} & {\color{red} 1} & \cdot & \cdot & \cdot & -1 \\
-  \cdot & \cdot & \cdot & \cdot & \cdot & \cdot & 1 & 1 & 1 & 1\\
-  \end{bmatrix}
-  \]
-
-  \bo{I'm not sure the below is a proof, because you could have linear combinations with any coefficients, so I don't think this proves that the only solutions are negating rows. I think we have to appeal to Mathematica from here on out.}
-  In characterizing the solutions to the smaller matrix rank problem, let us establish the linear equality of the first two rows and second two rows.
-  (Note that any combination of row pairs works without loss of generality.)
-  The first column containing $[-1 \; 1]^T$ implies that we must have the two rows being the negation of each other, and similarly for the third and fourth rows with the final column.
-  This gives a matrix of rank 2 as follows:
-  \[
-    \begin{bmatrix}
-  -1 & -1 & -1 & 1 & 1 & a \\
-  1 & 1 & 1 & -1 & -1 & -a \\
-  b & 1 & -1 & 1 & -1 & -1 \\
-  -b & -1 & 1 & -1 & 1 & 1 \\
-  \end{bmatrix}
-  \] with $a, b \in [-1,1]$.
-  One can verify that we cannot obtain a matrix of rank $1$, regardless of the choice of $a$ and $b$.
-  Plugging in this solution set into the larger matrix yields
-  \[
-  \begin{bmatrix}
-  {\color{red} -1} & {\color{red} -1} & {\color{red} -1} & {\color{red} 1} & {\color{red} 1} & {\color{red} a} & -1 & \cdot & \cdot & \cdot \\
-  {\color{red} 1} & {\color{red} 1} & {\color{red} 1} & {\color{red} -1} & {\color{red} -1} & {\color{red} a} & \cdot & -1 & \cdot & \cdot \\
-  {\color{red} b} & {\color{red} 1} & {\color{red} -1} & {\color{red} 1} & {\color{red} -1} & {\color{red} -1} & \cdot & \cdot & -1 & \cdot \\
-  {\color{red} -b} & {\color{red} -1} & {\color{red} 1} & {\color{red} -1} & {\color{red} 1} & {\color{red} 1} & \cdot & \cdot & \cdot & -1 \\
-  \cdot & \cdot & \cdot & \cdot & \cdot & \cdot & 1 & 1 & 1 & 1\\
-  \end{bmatrix}
-  \]
-
-  In order for the $5^{th}$ row to be linearly dependent with the first two rows, we must have $r_5 = -r_1$ by the column $c_7$, and $r_5 = r_2$ by column $c_8$, yielding a contradiction.
-  Similarly, we cannot establish linear independence with the last two rows because of restrictions imposed by columns $c_9$ and $c_{10}$.
-  Therefore, the matrix completion problem given above has no solution of rank 3, and we conclude that $\abstain{1/2}$ is not $2$-embeddable with $n=5$.
+\begin{proof}[Matrix rank proof of Proposition~\ref{prop:qfp-fails-abstain}]
+	We can formulate the QFP given in Section~\ref{sec:d-dim} for $\abstain{1/2}$ as a matrix rank problem.
+	First, as observed in Lemma \ref{lemma:xiji-minus-xijj}, the vertex constraints are exactly equivalent to requiring that, in our notation, $x^{ij}_i = - x^{ij}_j$ for all $i<j$.
+	Therefore, we can substitute in for all variables of the form $x^{ij}_j$ and eliminate them from the problem.
+	Second, we can observe that the program is only easier to satisfy if one drops the halfspace constraints on all variables of the form $x^{ij}_m$, $i < j$, $m \not\in \{i,j\}$.
+	This allows us to drop all such variables, and we are now left with only the variables $v_1,\ldots,v_k$ and $\{x^{ij}_i : i<j\}$, with the understanding that $x^{ij}_j = -x^{ij}_i$.
+	We can therefore simplify the following constraints of the QFP:
+	\begin{align*}
+	\inprod{v_i}{x^{ij}_i} &\leq B_{ii} = -1   \\
+	\inprod{v_i}{x^{ij}_j} &\leq B_{ij} = 1  \\
+	\implies \inprod{v_i}{x^{ij}_i} &= -1  \\
+	\inprod{v_i}{x^{ji}_i} &\leq B_{ii} = -1  \\
+	\inprod{v_i}{x^{ji}_j} &\leq B_{ij} = 1  \\
+	\implies \inprod{v_i}{x^{ji}_j} &= 1  \\
+	\inprod{v_i}{x^{jm}_j} &\leq B_{ij} = 1  \\
+	\inprod{v_i}{x^{jm}_m} &\leq B_{im} = 1  \\
+	\implies \inprod{v_i}{x^{jm}_j} &\in [-1,1] .
+	\end{align*}
+	
+	This gives us the following simplified feasibility problem.
+	\begin{align*}
+	\inprod{v_i}{x^{ij}_i} &= -1     & (\forall i<j)  \\
+	\inprod{v_i}{x^{ji}_j} &= 1      & (\forall i<j)  \\
+	\inprod{v_i}{x^{jm}_j} &\in [-1,1]   & (\forall j<m, i\not\in\{j,m\}) .
+	\end{align*}
+	If we consider the matrix $V$ and construct $Y$ whose columns are $\{x^{ij}_i : i<j\}$, this problem asks us to find such a $V$ and $Y$ whose product $M = VY$ is a matrix with certain fixed entries and others bounded.
+	
+	In particular, with $n=4$, we obtain the following matrix rank problem: does there exist
+	\[
+	M_4 = 
+	\begin{bmatrix}
+	-1 & -1 & -1 & \cdot & \cdot & \cdot \\
+	1 & \cdot & \cdot & -1 & -1 & \cdot \\
+	\cdot & 1 & \cdot & 1 & \cdot & -1 \\
+	\cdot & \cdot & 1 & \cdot & 1 & 1 \\
+	\end{bmatrix}
+	\]
+	where each unknown entry $\cdot$ is in $[-1,1]$, of rank $d=2$?
+	
+	Since $M_4$ is a submatrix of the matrix obtained when $n=5$, any rank-$2$ solution for the large matrix given below must also solve the above problem.
+	
+	\[
+	M_5 =
+	\begin{bmatrix}
+	{\color{red} -1} & {\color{red} -1} & {\color{red} -1} & {\color{red} \cdot} & {\color{red} \cdot} & {\color{red} \cdot} & -1 & \cdot & \cdot & \cdot \\
+	{\color{red} 1} & {\color{red} \cdot} & {\color{red} \cdot} & {\color{red} -1} & {\color{red} -1} & {\color{red} \cdot} & \cdot & -1 & \cdot & \cdot \\
+	{\color{red} \cdot} & {\color{red} 1} & {\color{red} \cdot} & {\color{red} 1} & {\color{red} \cdot} & {\color{red} -1} & \cdot & \cdot & -1 & \cdot \\
+	{\color{red} \cdot} & {\color{red} \cdot} & {\color{red} 1} & {\color{red} \cdot} & {\color{red} 1} & {\color{red} 1} & \cdot & \cdot & \cdot & -1 \\
+	\cdot & \cdot & \cdot & \cdot & \cdot & \cdot & 1 & 1 & 1 & 1\\
+	\end{bmatrix}
+	\]
+	
+	\bo{I'm not sure the below is a proof, because you could have linear combinations with any coefficients, so I don't think this proves that the only solutions are negating rows. I think we have to appeal to Mathematica from here on out.}
+	\jessie{Yeah definitely.  I hadn't touched this since before yesterday.}
+	In characterizing the solutions to the smaller matrix rank problem, let us establish the linear equality of the first two rows and second two rows.
+	(Note that any combination of row pairs works without loss of generality.)
+	The first column containing $[-1 \; 1]^T$ implies that we must have the two rows being the negation of each other, and similarly for the third and fourth rows with the final column.
+	\jessie{One can verify with mathematical software that $M_4$ has rank $2$ if it is in the following form:}
+	\[
+	\begin{bmatrix}
+	-1 & -1 & -1 & 1 & 1 & a \\
+	1 & 1 & 1 & -1 & -1 & -a \\
+	b & 1 & -1 & 1 & -1 & -1 \\
+	-b & -1 & 1 & -1 & 1 & 1 \\
+	\end{bmatrix}
+	\] with $a, b \in [-1,1]$.
+	Plugging in this solution set into the larger matrix yields
+	\[
+	\begin{bmatrix}
+	{\color{red} -1} & {\color{red} -1} & {\color{red} -1} & {\color{red} 1} & {\color{red} 1} & {\color{red} a} & -1 & \cdot & \cdot & \cdot \\
+	{\color{red} 1} & {\color{red} 1} & {\color{red} 1} & {\color{red} -1} & {\color{red} -1} & {\color{red} a} & \cdot & -1 & \cdot & \cdot \\
+	{\color{red} b} & {\color{red} 1} & {\color{red} -1} & {\color{red} 1} & {\color{red} -1} & {\color{red} -1} & \cdot & \cdot & -1 & \cdot \\
+	{\color{red} -b} & {\color{red} -1} & {\color{red} 1} & {\color{red} -1} & {\color{red} 1} & {\color{red} 1} & \cdot & \cdot & \cdot & -1 \\
+	\cdot & \cdot & \cdot & \cdot & \cdot & \cdot & 1 & 1 & 1 & 1\\
+	\end{bmatrix}
+	\]
+	
+	\jessie{Take this out?}
+	In order for the $5^{th}$ row to be linearly dependent with the first two rows, we must have $r_5 = -r_1$ by the column $c_7$, and $r_5 = r_2$ by column $c_8$, yielding a contradiction.
+	Similarly, we cannot establish linear independence with the last two rows because of restrictions imposed by columns $c_9$ and $c_{10}$.
+	Therefore, the matrix completion problem given above has no solution of rank 3, and we conclude that $\abstain{1/2}$ is not $2$-embeddable with $n=5$.
 \end{proof}
 
-\section{Conclusions and future work}
-\paragraph{Future Work}
-There are a few threads of future work: the first is to utilize monotonicity to see if we can construct even tighter lower bounds on embedding dimension.
-Second, we hope to understand when, if ever, embedding dimension is not equal to convex calibration dimension.
-Moreover, the restriction that we are calibrated over the entire simplex may be tighter than necessary in some contexts, and would be useful to understand the tradeoff between calibration and dimension of a surrogate loss.
-For one example where we can reduce surrogate dimension with a low-entropy assumption on the simplex, see~\cite[Example 6]{agarwal2015consistent}.
-
-\paragraph{Conclusion}
-\jessie{Not a fan, but a placeholder if we get too close to deadline.}
-In this paper, we present the notion of \emph{embedding dimension} in order to measure the efficiency of a surrogate loss function.
-While similar notions of surrogate efficiency have been studied before, we propose a characterization in $1$ dimension that generalizes to the construction of any calibrated convex surrogate.
-In higher dimensions, our characterization can only be applied to understanding the minimal dimension of a calibrated \emph{polyhedral} surrogate, although we conjecture that embedding dimension is equal to convex calibration dimension in general.
-In order to demonstrate our characterizations, we show an improved lower bound from previous work on the convex calibration dimension of $\abstain{\alpha}$, and a new lower bound on embedding dimension of $\abstain{1/2}$.
-
-\newpage
-% Acknowledgments---Will not appear in anonymized version
-\acks{JF- Need that GRFP acknowledgement}
-
-\bibliography{diss,extra}
-
-\newpage
-\appendix
-
-\section{Additional proofs}
 
 
 \section{Feasible subspace dimension}
