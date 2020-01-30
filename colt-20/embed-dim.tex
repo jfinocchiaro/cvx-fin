@@ -354,11 +354,10 @@ Given a finite property $\gamma: \simplex \to 2^{\R}$, the \emph{intersection gr
       \\
       \lambda^+(i) &= \max \left\{\frac{v(i)_y}{v({i+1})_y} : y\in\Y, v(i)_y, v({i+1})_y > 0\right\}~,
     \end{align*}
-    we have $\lambda^-(i) \geq \lambda^+(i)$. \jessie{Do we need to be more careful defining these when the sets are empty?}
+    we have $\lambda^-(i) \geq \lambda^+(i)$.
+    (We adopt the convention $\max\emptyset = -\infty$, $\min\emptyset = +\infty$.)
   \end{enumerate}
 
-  \raf{Still need to double check, but it will be something like this:}
-  
   Moreover, when these conditions hold, the loss $L:\reals\to\reals^\Y$ embeds $\ell$ with $\varphi:\R\to\reals$, \jessiet{Have been using $\phi$ instead of $\varphi$ for embeddings in this paper so far. I have a slight preference for $\varphi$ since it matches the last paper, but I don't care too much... just need to pick one.}\raft{Why switch to $\phi$ if you prefer $\varphi$?}
   where
   \begin{align*}
@@ -367,11 +366,11 @@ Given a finite property $\gamma: \simplex \to 2^{\R}$, the \emph{intersection gr
     L(u) &= \begin{cases}
       \ell(r_1) - u K \ones & u \leq \varphi(r_1) = 0 \\
       \ell(r_i) + \Lambda_i \cdot (u - \varphi(r_i)) \cdot  (\ell(r_{i+1})-\ell(r_i)) & u \in [\varphi(r_i),\varphi(r_{i+1})] \\
-      \ell(r_k) + (u - \varphi(r_k))\cdot K \ones & u \geq \varphi(r_k)
+      \ell(r_k) + \Lambda_k \cdot (u - \varphi(r_k))\cdot K \ones & u \geq \varphi(r_k)
     \end{cases}~,
   \end{align*}
-  where $\lambda(i) = \tfrac 1 2 (\lambda^-(i)+\lambda^+(i))$, $\Lambda_i := \prod_{j=2}^i \lambda(j)$, and $K=1+\max_{r\in\R,y\in\Y} |\ell(r)_y|$.
-  \jessie{In the cases: what if $\varphi(r_1) < 0$?}\raf{I set $\varphi(r_1)=0$; updated to something hopefully clearer}
+  \jessiet{In the cases: what if $\varphi(r_1) < 0$?}\raft{I set $\varphi(r_1)=0$; updated to something hopefully clearer}
+  where $\lambda(i) = \min(\lambda^+(i),\max(\lambda^-(i),1))$, $\Lambda_i := \prod_{j=2}^i \lambda(j)$, $\Lambda_1=1$, and $K=$ \raf{TBD; was $1+\max_{r\in\R,y\in\Y} |\ell(r)_y|$}.
 \end{theorem}
 \begin{proof}
   Actually, the easiest proof given what we have is:
@@ -385,6 +384,85 @@ Given a finite property $\gamma: \simplex \to 2^{\R}$, the \emph{intersection gr
   monotone
   $\implies$
   orderable
+
+  \noindent\textbf{orderable $\implies$ conditions:}
+
+  Let $\gamma:\simplex\toto\R$ be finite and orderable.
+  From~\cite[Theorem 4]{lambert2018elicitation}, we have positively-oriented normals $v_i\in\reals^\Y$ for all $i \in \{1,\ldots,k-1\}$ such that $\gamma_{r_i} \cap \gamma_{r_{i+1}} = \{p\in\simplex : \inprod{v_i}{p} = 0\}$, and moreover, for all $i \in \{2,\ldots,k-1\}$, we have $\gamma_{r_i} = \{p\in\simplex : \inprod{v_{i-1}}{p} \leq 0 \leq \inprod{v_i}{p}\}$, while $\gamma_{r_1} = \{p\in\simplex : \inprod{v_1}{p} \leq 0\}$ and $\gamma_{r_k} = \{p\in\simplex : \inprod{v_{k-1}}{p} \leq 0\}$.
+  From the positive orientation of the $v_i$, we have for all $p\in\simplex$ that $\sgn(\inprod{v_i}{p})$ is monotone in $i$.
+  In particular, it must be that for all $y$, $\sgn((v_i)_y)$ is monotone in $i$, taking the distribution with all weight on outcome $y$, thus establishing the first condition.
+  % (Similarly, if $\gamma(\ones_y) = \{r_j,r_{j+1}\}$, then $(v_i)_y = v_i \cdot \ones_y < 0$ for $i < j$, $(v_j)_y = 0$, and $(v_i)_y > 0$ for $i > j$.)
+  % \raft{This observation could use a better proof.}
+
+  For the second condition, suppose we had $\lambda^-(i) < \lambda^+(i)$.
+  Then we would have $y,y' \in \Y$ such that $v(i)_y < 0$, $v({i+1})_y < 0$, $v(i)_{y'} >0$, $v({i+1})_{y'} > 0$, and $0 < \frac{v(i)_y}{v({i+1})_y} < \frac{v(i)_{y'}}{v({i+1})_{y'}}$, which would in turn imply $|v(i)_y|/v(i)_{y'} < |v(i+1)_y| / v(i+1)_{y'}$.
+  Letting $c = \tfrac 1 2 \left(|v(i+1)_y| / v(i+1)_{y'} + |v(i)_y|/v(i)_{y'}\right)$ and taking $p$ to be the distribution with weight $1/(1+c)$ on $y$ and $c/(1+c)$ on $y'$, we see that
+  \begin{align*}
+    \inprod{v}{p} &= \frac 1 {1+c} \left(v(i)_y + \tfrac 1 2 (|v(i+1)_y| / v(i+1)_{y'} + |v(i)_y|/v(i)_{y'})v(i)_{y'}\right)
+    \\ &> \frac 1 {1+c} \left(v(i)_y + (|v(i)_y|/v(i)_{y'})v(i)_{y'}\right) = 0
+    \\
+    \inprod{w}{p} &= \frac 1 {1+c} \left(v(i+1)_y + \tfrac 1 2 (|v(i+1)_y| / v(i+1)_{y'} + |v(i)_y|/v(i)_{y'})v(i)_{y'}\right)
+    \\ &< \frac 1 {1+c} \left(v(i+1)_y + (|v(i+1)_y|/v(i+1)_{y'})v(i+1)_{y'}\right) = 0~,
+  \end{align*}
+  thus violating the observation that $\sgn(\inprod{v(i)}{p})$ is monotone in $i$.
+
+  
+  \noindent\textbf{conditions $\implies$ 1-embeddable:} (correctness of construction)
+
+  First, observe that that $\lambda(i)$ satisfies $\lambda^+(i) \leq \lambda(i) \leq \lambda^-(i)$, and by the second condition, $\lambda(i) > 0$ even when either bound is infinite.
+  Thus, $\Lambda_i > 0$ for all $i$, and it is then clear from our construction that $L(\varphi(r_i)) = \ell(r_i)$ for all $i$.
+  It remains therefore to show convexity of $L$ and the optimality conditions.
+
+  For convexity, note that $L$ is piecewise linear with nondifferentiable points at precisely the embedding points $\varphi(r_1),\ldots,\varphi(r_k)$.
+  Let us denote the left and right derivative operators for real-valued functions by $\partial^-$ and $\partial^+$, respectively, and write $\partial^- \ell(u) = (\partial^- \ell(u)_y)_{y\in\Y} \in \reals^\Y$, and similarly for $\partial^+\ell(u)$.
+  To show convexity, then, we need only show $\partial^-\ell(\varphi(r_i)) \leq \partial^+\ell(\varphi(r_i))$ for all $i\in\{1,\ldots,k\}$, where the inequality holds coordinate-wise.
+  By construction, we have $\partial^-\ell(\varphi(r_1)) = -K\ones$ and $\partial^+\ell(\varphi(r_1)) = \Lambda_k K\ones$, and for $i\in\{1,\ldots,k-1\}$ we have $\partial^+\ell(\varphi(r_i)) = \partial^-\ell(\varphi(r_{i+1})) = \Lambda_i v(i+1)$.  
+  \raf{Take $K > \max_{i\in\{1,\ldots,k-1\}} \Lambda_i\|v(i+1)\|_\infty$, show why it works for endpoints.}
+
+  It remains to show that for all $i\in\{2,\ldots,k-1\}$ and all $y\in\Y$, we have $\Lambda_{i-1} v(i)_y \leq \Lambda_i v(i+1)_y$, which by definition of $\Lambda$ is equivalent to $v(i)_y \leq \lambda(i) v(i+1)_y$.
+  By our first condition, the possible pairs $(\sgn(v(i)_y),\sgn(v(i+1)_y))$ are $(-,-),(-,0),(-,+),(0,0),(0,+),(+,+)$, and given that $\lambda(i)>0$, all are trivial except $(-,-)$ and $(+,+)$.
+  In the $(-,-)$ case, we have by definition of $\lambda^-(i)$ that $\lambda(i) \leq \lambda^-(i) \leq v(i)_y/v(i+1)_y$.
+  Recalling that both $v(i)_y$ and $v(i+1)_y$ are negative, we conclude $v(i)_y \leq \lambda(i)v(i+1)_y$.
+  In the $(+,+)$ case, we have $\lambda(i) \geq \lambda^+(i) \geq v(i)_y/v(i+1)_y$, and again $v(i)_y \leq \lambda(i)v(i+1)_y$.
+
+  For optimality, consider a distribution $p\in\Delta(\Y)$, and the subgradient of $\inprod{p}{L(\varphi(r_i))}$ for some $i\in\{2,\ldots,k-1\}$.
+  We have
+  \begin{align*}
+    0\in\partial\inprod{p}{L(\varphi(r_i))}
+    &\iff \partial^-\inprod{p}{\ell(\varphi(r_i))} \leq 0 \leq \partial^+\inprod{p}{\ell(\varphi(r_i))}
+    \\
+    &\iff \inprod{p}{\partial^-\ell(\varphi(r_i))} \leq 0 \leq \inprod{p}{\partial^+\ell(\varphi(r_i))}
+    \\
+    &\iff \inprod{p}{\Lambda_{i-1} v(i)} \leq 0 \leq \inprod{p}{\Lambda_i v(i+1)}
+    \\
+    &\iff \inprod{p}{v(i)} \leq 0 \leq \inprod{p}{v(i+1)}
+    \\
+    &\iff \inprod{p}{\ell(r_i)-\ell(r_{i-1})} \leq 0 \leq \inprod{p}{\ell(r_{i+1})-\ell(r_i)}
+    \\
+    &\iff \inprod{p}{\ell(r_i)} \leq \inprod{p}{\ell(r_{i-1})} \text{ and } \inprod{p}{\ell(r_i)} \leq \inprod{p}{\ell(r_{i+1})}~.
+  \end{align*}
+  \raf{MISSING: corner cases (easy?) and why we only need to look at two reports at once.}
+
+
+  \noindent\textbf{embedding $\implies$ monotone:}
+
+  \raf{STALE}
+
+  The above establishes the second condition of monotone properties in Definition~\ref{def:monotone-prop}.
+  To see the first condition, note that we have already established it for $i\in\{2,\ldots,k-1\}$.
+  For $i=1,k$, we merely observe that $\inprod{a(r_1)}{p} \leq 0$ and $\inprod{b(r_k)}{p} \geq 0$ for all $p\in\simplex$.
+
+  
+
+  \noindent\textbf{monotone $\implies$ orderable:}
+  
+  Let $\gamma:\simplex\toto\R$ be finite and monotone.
+  Then we can use the total ordering of $\R$ to write $\R = \{r_1,\ldots,r_k\}$ such that $r_i < r_{i+1}$ for all $i \in \{1,\ldots,k-1\}$.
+  We now have $\gamma_{r_i} \cap \gamma_{r_{i+1}} = \{p\in\simplex : \inprod{a(r_{i+1})}{p} \leq 0 \leq \inprod{b(r_i)}{p} \}$.
+  If this intersection is empty, then there must be some $p$ with $\inprod{b(r_i)}{p} < 0$ and $\inprod{a(r_{i+1})}{p} > 0$; by monotonicity, no earlier or later reports can be in $\gamma(p)$, so we see that $\gamma(p) = \emptyset$, a contradiction.
+  Thus the intersection is nonempty, and as we also know $b(r_i) \leq a(r_{i+1})$ we conclude $b(r_i) = a(r_{i+1})$, and the intersection is the hyperplane defined by $b(r_i) = a(r_{i+1})$.
+
+
 \end{proof}
 
 The main result of this section is Theorem \ref{thm:orderable-1-embed}.
