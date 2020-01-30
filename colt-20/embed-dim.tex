@@ -569,9 +569,8 @@ These correspond to a (possibly relaxed) halfspace representation and (possibly 
 \end{definition}
 
 The feasibility program can be viewed as a low-rank matrix problem, namely: do there exist a set of rank-$d$ matrices that are pointwise dominated by $B$, sharing the left factor $V$, whose right factors $X^j$ respectively satisfy a subspace constraint?
-We will see in Section~\ref{subsec:example-abstain}\bo{in which section?} that for the important example of abstain loss, the constraints simplify into a more pure low-rank matrix problem.
-In particular, for $d=n-1$ a solution always exists (e.g. \bo{cite} \cite[Theorem 2]{finocchiaro2019embedding}), found by taking the convex conjugate of the negative Bayes risk of $\ell$ for each outcome and subtracting the report $u$ \bo{and then what?} \jessie{Everything I just added is for $n$ dimensions, but I don't know where the $n-1$ dim is... possibly~\cite{abernethy2013efficient}?}.
-
+We will see in Section~\ref{sec:examples} that for the important example of abstain loss, the constraints simplify into a more pure low-rank matrix problem.
+In particular, for $d=n-1$ a solution always exists (e.g. \bo{cite} \cite[Theorem 2]{finocchiaro2019embedding}), found by taking the convex conjugate of the negative Bayes risk of $\ell$ for each outcome and subtracting the report $u$, after which one can project down to $n-1$ dimensions (because $\simplex$ is $n-1$ dimensional to begin with).
 
 \subsubsection{Developing the proof}
 
@@ -667,31 +666,53 @@ Given this characterization, we prove the main result on when a solution to the 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Examples}\label{sec:examples}
-\bo{I suggest we don't use the notation $\elicembed$ at all and just write out $d$-embeddable every time. But don't feel strongly.}\jessie{Changed :)}
-\subsection{Abstain property, $\alpha \leq 1/2$}\label{subsec:example-abstain}
+\section{Example: Abstain loss}\label{sec:examples}
+\subsection{Abstain, $\alpha \leq 1/2$, $d=1$}\label{subsec:abstain-d1}
 One classification-like problem that is of particular interest is the abstain property, elicited by the loss $\ellabs{\alpha}$ given in Equation~\ref{eq:abstain}.
-The property $\abstain{\alpha}$ can be verified:
+The property $\gamma = \abstain{\alpha}$ can be verified:
 \begin{equation}\label{eq:abstain-prop}
-     \abstain{\alpha} = \begin{cases}
+     \abstain{\alpha}(p) = \begin{cases}
      \argmax_{y \in \Y} p(y) & \max_y p(y) \geq 1 - \alpha\\
      \bot & \text{otherwise}
      \end{cases}~.~
 \end{equation}
 
-\cite{ramaswamy2018consistent} study the abstain property in great length, presenting a $\ceil {\log_2(n)}$ dimension embedding of the abstain property.
-However, it is unclear if this bound is tight, as the previously studied lower bounds of~\cite{ramaswamy2016convex} do not work well for this property, failing to give any lower bound tighter than the trivial $1 \leq d$ for $\alpha \leq 1/2$, where $\abstain{\alpha}$ is $d$-embeddable.
+\cite{ramaswamy2018consistent} study the abstain property in depth, presenting a $\ceil {\log_2(n)}$ dimensional embedding of the abstain property.
+However, it is unclear if this bound is tight, as the previously studied lower bounds of~\cite{ramaswamy2016convex} do not work well for this property, failing to give any lower bound tighter than the trivial $1$.
 
 With our $1$-dimensional characterization, we already observe a tighter lower bound.
 \begin{proposition}
-	For $n \geq 3$ and $\alpha < 1$, the abstain loss $\ell_{\alpha}$ is not $1$-embeddable. \bo{In fact, for any $\alpha < 1$...}\jessie{Changed.  (Was $\alpha \leq 1/2$)}
+	For $n \geq 3$ and $\alpha < 1$, the abstain loss $\ell_{\alpha}$ is not $1$-embeddable.
 \end{proposition}
 \begin{proof}
-	Consider the intersection graph of $\gamma := \abstain{\alpha}$: the node associated with $\gamma_\bot$ has $n$ edges, and since we assume $n \geq 3$, we fail to observe the requirement that every node of the intersection graph has degree at most $2$.
+	Consider the intersection graph of $\gamma := \abstain{\alpha}$: the node associated with $\gamma_\bot$ has $n$ edges, and since we assume $n \geq 3$, it cannot be a path graph.
 	For an example with $n=3$, see Figure~\ref{fig:abstain-alpha-half}.
 \end{proof}
 
+\subsection{Abstain, $\alpha = 1/2$, $d=2$}
 We now use our $d$-dimensional characterization and some observations about the $\abstain{1/2}$ property to improve lower bounds from those given by~\cite{ramaswamy2016convex}.
+
+\begin{proposition}
+  The quadratic feasibility program (Definition \ref{def:qfp}) with input $C = \gamma_{\bot} = \{p \in \simplex: \max_y p(y) \leq 1/2\}$, $n=5$, and dimension parameter $d=2$, is infeasible.
+\end{proposition}
+\begin{corollary}
+  The abstain loss with $\alpha=1/2$ on $5$ outcomes is not $2$-embeddable.
+\end{corollary}
+
+\bo{Am assuming that we will have to move almost everything to the appendix, wrote this blurb instead.}
+We have two proofs, both delegated to the appendix.
+The first is to directly obtain from mathematical software that the QFP is infeasible.
+We use observations about $\ell_{1/2}$ to make a number of simplifications to the program first.
+This reduces the QFP to the following problem:
+\begin{quotation}
+  Given a real-valued matrix $M$ in which some entries are missing, but have bounds of the form $[a,b]$, do there exist legal values for these entries such that $M$ is rank $d$?
+\end{quotation}
+The second proof is a direct geometrical one utilizing the same observations.
+We show that packing too many normal vectors into a half-circle yields contradictions, implying that a $5$-outcome embedding into $2$ dimensions is impossible (and incidentally characterizing the structure of all possible $4$-dimensional embeddings).
+
+\bo{Assuming everything after this will go to the appendix.}
+The strategy is to consider the level set $\gamma_{\bot}$, the set of distributions with modal mass at most $1/2$.
+We show that the quadratic feasibility program with this input cannot be satisfied with dimension $2$ for $n=5$.
 
 \begin{lemma} \label{lemma:abstain-v-h}
   For the abstain loss $\ell_{1/2}$, the level set of abstain satisfies $\gamma_{\bot} = \conv\{(\delta_y + \delta_{y'})/2 : y,y' \in \Y, y < y'\} = \{p : Bp \geq \vec{0}\}$ where $\delta_y$ puts probability one on $y$ and $B = \ones \ones^{\intercal} - 2I \in \reals^{5 \times 5}$, i.e. has entries $-1$ on the diagonal and $1$ everywhere else.
@@ -719,22 +740,6 @@ We now use our $d$-dimensional characterization and some observations about the 
   so the program is feasible.
 \end{proof}
 
-\bo{I think around here we want a setup of the QFP where we introduce our specific notation like $x^{ij}_i$.}
-\jessie{Pass here:}
-In studying the Quadratic Feasibility Program (QFP) for specific examples, we find it helpful to think of $X$ as a set of vectors, rather than a matrix.
-Specifically, for the $\ellabs{\alpha}$, we denote $X^m$ by $x^{ij}$, where $p^m$ is the distribution of support $2$ putting weight $1-\alpha$ on outcome $i$, and weight $\alpha$ on outcome $j$.
-As the convex hull of a finite number of these distributions can be used to describe the abstain cell, we can simplify our QFP by studying these elements of the $X$ matrix, and getting rid of each other $x^{ij}_q$, for $q \neq i,j$, since these do not appear in the constraints.
-Observe that each $x^{ij}$ is a matrix, and we denote $x^{ij}_i$ as the $i^{th}$ column\jessie{?} of the matrix $x^{ij}$.
-When we look at a specific inner product, then we have $\inprod{v_i}{x^{ij}_y} \leq B_{iy}$.
-\jessie{With how I wrote this, might be helpful to index the QFP with $m$.  Feel free to change though.}
-
-
-\bo{We need to prove the dumb case that it won't be feasible to set $v_i = v_j$.}
-\jessie{Pass here:}
-For the QFP applied to the $\abstain{1/2}$ property and cell $\gamma_\bot$, we want to claim that for any two $v_i$, $v_j$, we cannot set $v_i = c v_j$ for $c > 0$.
-To see this, consider that there is an open halfspace through the origin strictly containing the feasible regions $F_i = \{x : \inprod{v_i}{x} \leq -1, \inprod{v_j}{x} \leq 1 \forall j \neq i\}$ and $F_j$, so there is no set of witnesses such that $x^{ij}_i = -x^{ij}_j$, and therefore the vertex condition is not satisfied for $p^{ij}$.
-Thus we cannot have normals $v_i = c v_j$ for $c > 0$.
-
 \begin{corollary} \label{cor:qfp-wlog-v1}
   If there is a feasible solution to the quadratic feasibility program, then there is a feasible solution where $v_1$ is the first standard basis vector and $\|v_i\| \leq \|v_1\| = 1$ for all $i$.
 \end{corollary}
@@ -742,15 +747,32 @@ Thus we cannot have normals $v_i = c v_j$ for $c > 0$.
   In particular, we can take a series of matrices $A$ in Observation \ref{obs:qfp-invariant-lin} that permutate the rows of $V$, scale\footnote{Note one can show $V = 0$ is not feasible unless $B$ is a trivial property, i.e. essentially has no rows at all.} all rows by $\frac{1}{\|v_1\|}$, and linearly map $v_1$ to $(1,0,\dots,0)$.
 \end{proof}
 
+\paragraph{Notation for the quadratic program.}
+Recall that in the quadratic program, each vertex $p$ in the convex-hull representation corresponds to a matrix variable $X$.
+Here, the vertices are indexed by a pair of distributions, so for each $i < j$, we refer to that vertex of $\gamma_{\bot}$ by $p^{ij} = (\delta_i + \delta_j)/2$, with corresponding variable $X^{ij}$.
+The $y$th column of this matrix is denoted $x^{ij}_y \in \reals^d$.
+%Specifically, for the $\ellabs{\alpha}$, we denote $X^m$ by $x^{ij}$, where $p^m$ is the distribution of support $2$ putting weight $1-\alpha$ on outcome $i$, and weight $\alpha$ on outcome $j$.
+%As the convex hull of a finite number of these distributions can be used to describe the abstain cell, we can simplify our QFP by studying these elements of the $X$ matrix, and getting rid of each other $x^{ij}_q$, for $q \neq i,j$, since these do not appear in the constraints.
+%Observe that each $x^{ij}$ is a matrix, and we denote $x^{ij}_i$ as the $i^{th}$ column\jessie{?} of the matrix $x^{ij}$.
+%When we look at a specific inner product, then we have $\inprod{v_i}{x^{ij}_y} \leq B_{iy}$.
+%\jessie{With how I wrote this, might be helpful to index the QFP with $m$.  Feel free to change though.}
+
 \begin{lemma} \label{lemma:xiji-minus-xijj}
   In any feasible solution to the QFP for $\gamma_{\bot}$ and $\ell_{1/2}$, we have $x^{ij}_i = -x^{ij}_j$ for all $i<j$ in $\Y$.
 \end{lemma}
 \begin{proof}
-  Directly from the vertex constraints: $p^{ij} = \frac{1}{2}\delta_i + \frac{1}{2}\delta_j$, so the $ij$ constraint reduces to $\frac{1}{2}x^{ij}_i + \frac{1}{2}x^{ij}_j = 0$.
+  Directly from the vertex constraints: $p^{ij} = \frac{1}{2}\delta_i + \frac{1}{2}\delta_j$, so the $ij$ constraint reduces to $\frac{1}{2}x^{ij}_i + \frac{1}{2}x^{ij}_j = \vec 0$.
+\end{proof}
+
+\begin{lemma} \label{lemma:vi-neq-cvj}
+  There is no feasible solution to the QFP for $\gamma_{\bot}$ and $\ell_{1/2}$ where $v_i = c v_j$ for $c > 0$ and any $i \neq j$.
+\end{lemma}
+\begin{proof}
+  There is an open halfspace through the origin strictly containing both the feasible regions $F_i = \{x : \inprod{v_i}{x} \leq -1, \inprod{v_j}{x} \leq 1 \forall j \neq i\}$ and $F_j$, so there is no set of witnesses such that $x^{ij}_i \in F_i$ and $x^{ij}_j \in F_j$, as this would contradict Lemma \ref{lemma:xiji-minus-xijj}.
 \end{proof}
 
 \begin{lemma} \label{lemma:unique-spot-xiji}
-  For $d=2$ and the level set $\gamma_\bot$ for $\ell_{1/2}$, any pair of linearly independent $v_i,v_j$ rule out all except for a unique set of points $x^{ij}_i$ and $x^{ij}_j$ from being feasible.
+  For $d=2$ and the level set $\gamma_\bot$ for $\ell_{1/2}$, any pair of linearly independent $v_i,v_j$ rule out all except for a unique feasible value for $x^{ij}_i$ and also for $x^{ij}_j$.
 \end{lemma}
 \begin{proof}
   From the halfspace constraints, we must have $\inprod{v_i}{x^{ij}_i} \leq -1$ and $\inprod{v_i}{x^{ij}_j} \leq 1$, which combines with Lemma \ref{lemma:xiji-minus-xijj} to give $\inprod{v_i}{x^{ij}_i} = 1$.
@@ -787,13 +809,13 @@ Thus we cannot have normals $v_i = c v_j$ for $c > 0$.
   There is no feasible solution to the QFP for $\gamma_{\bot}$ and $\ell_{1/2}$ where three vectors $v_i,v_j,v_m$ lie strictly within a halfspace through the origin (i.e. all within $180^{\circ}$ of each other).
 \end{lemma}
 \begin{proof}
-  Let three of the vectors be given, lying strictly inside a halfspace, and label them clockwise clockwise as $v_1,v_2,v_3$.
+  Let three of the vectors be given, lying strictly inside a halfspace, and label them clockwise as $v_1,v_2,v_3$.
   WLOG suppose $v_1$ points vertically ``up'', as in Figure \ref{fig:v1}.
   By Lemma \ref{lemma:unique-spot-xiji}, the possible locations of the following points are all uniquely determined: $x^{ij}_i, x^{ij}_j$ for $(i,j) \in \{(1,2),(1,3),(2,3)\}$.
   Both points $x^{12}_1$ and $x^{13}_1$ lie on the line $\inprod{v_1}{x} = -1$, i.e. a horizontal line below the origin.
   We have constraints $\inprod{v_2}{x^{12}_1} = 1$ and $\inprod{v_2}{x^{13}_1} \leq 1$.
-  This implies $x^{13}_1$ is left of $x^{12}_1$ on the line $\inprod{v_1}{x} = 1$. 
-  But the symmetric constraints $\inprod{v_3}{x^{13}_1} \leq \jessie{=?} 1$ and $\inprod{v_3}{x^{12}_1} \leq 1$ imply that $x^{12}_1$ is left of $x^{13}_1$ on the line.
+  This implies $x^{13}_1$ is left of $x^{12}_1$ on the horizontal line $\inprod{v_1}{x} = 1$. 
+  But the symmetric constraints $\inprod{v_3}{x^{13}_1} = 1$ and $\inprod{v_3}{x^{12}_1} \leq 1$ imply symmetrically that $x^{12}_1$ is left of $x^{13}_1$ on the line.
   This implies we must have $x^{12}_1 = x^{13}_1$.
 
   If we consider the four lines $\inprod{v_2}{x}=1, \inprod{v_2}{x}=-1, \inprod{v_3}{x}=1, \inprod{v_3}{x}=-1$, we therefore have three points of intersection with the line $\inprod{v_1}{x}=1$ and three with the line $\inprod{v_1}{x}=-1$. 
@@ -802,8 +824,7 @@ Thus we cannot have normals $v_i = c v_j$ for $c > 0$.
 
   This implies that the lines $\inprod{v_2}{x}=-1$ and $\inprod{v_3}{x}=1$, in particular, do not intersect anywhere within the bounds of $\inprod{v_1}{x} \in [-1,1]$.
   Therefore, either their intersection point $x^{23}_2$ or its negative $x^{23}_3$ violates the feasibility constraint $\inprod{v_1}{x} \leq 1$.
-  This proves there is no feasible solution.
-  \jessie{No feasible solution with three normals lying strictly in the same halfspace through the origin?}
+  This proves there is no feasible solution with three normals lying strictly in the same halfspace through the origin.
 \end{proof}
 
 \begin{proposition}
@@ -813,76 +834,101 @@ Thus we cannot have normals $v_i = c v_j$ for $c > 0$.
   Let any $5$ vectors be given, numbered clockwise.
   $v_1,v_2,v_3$ cannot lie in a cone of strictly less than $180^{\circ}$, as this would contradict Lemma~\ref{lemma:180-degree-no-three}.
   So the clockwise angle between $v_1$ and $v_3$ is at least $180^{\circ}$.
-  Since there are no duplicates, this implies that the clockwise angle between $v_4$ and $v_1$, which includes $v_5$, is strictly less than $180^{\circ}$.
+  Since there are no duplicate angles (Lemma \ref{lemma:vi-neq-cvj}), this implies that the clockwise angle between $v_4$ and $v_1$, which includes $v_5$, is strictly less than $180^{\circ}$.
   This contradicts Lemma~\ref{lemma:180-degree-no-three}.
 \end{proof}
 
-\begin{proposition}
-	The abstain loss $\ell_{1/2}$ with $n=5$ is not $2$-embeddable.
-\end{proposition}
-\begin{proof}[Geometric proof]
-  We apply Corollary \ref{cor:d-embeddable-char}: We consider the level set $\gamma_{\bot}$ (the distributions whose modal mass is at most $1/2$).
-  We show that the quadratic program (Definition \ref{def:qfp}) is not feasible for this polytope with dimension $d=2$, which implies by Corollary \ref{cor:d-embeddable-char} that $\ell$ is not $2$-embeddable.
-
-  We obtain the vertex and halfspace representations of $\gamma_{\bot}$ from Lemma \ref{lemma:abstain-v-h}.
-  We proceed by narrowing the space of feasible normals $v_1, \ldots, v_5$, until we reach a contradiction.
-  %We make an argument on the permissible angles between normals $v_1, \ldots, v_5$ in $\reals^2$ and show there is no feasible solution to the QFP in Definition~\ref{def:qfp}.
-  In particular, we argue that in any cone strictly $ < 180^\circ$, we can have no more than two vectors $v_i$ and $v_j$; otherwise we yield a contradiction.
-
-  We index the vertices and witnesses as follows: For $y < y'$, we write $p^{yy'} = (\delta_y + \delta_{y'})/2$ and $X^{yy'}$ for the corresponding matrix variable, with columns (witness points) $x^{yy'}_{y''}$.
-  In particular, the vertex constraints can all be rearranged to yield the following: $\{x^{yy'}_y = -x^{yy'}_{y'} ~ (\forall y < y')\}$.
-  Our proof will ignore all other points, i.e. $x^{yy'}_{y''}$ for $y'' \neq y,y'$, which appear only with coefficient zero in the vertex constraints.
-
-  Without loss of generality, we let $v_1 = (0,1)$, and have $v_2$ with $\|v_2\|^2 \leq \|v_1\|^2$ and the angle $\theta_{12} < 180^\circ$ the angle between $v_1$ and $v_2$. \bo{Need to justify why choice of $v_1$ is WLOG.}
-
-  We then have the feasible regions $F_y = \{x \in \reals^2 : \inprod{v_i} {x} \leq B_{iy} \; \forall i\}$, which means to this point, we have $F_1 = \{x \in \reals^2 : \inprod{v_1}{x} \leq -1 \text{ and } \inprod{v_2}{x} \leq 1 \}$, and $F_2 = \{x \in \reals^2 : \inprod{v_1}{x} \leq 1 \text{ and } \inprod{v_2}{x} \leq -1 \}$.
-  By requirement of the existence of a set of witnesses for the distribution $(1/2, 1/2, 0,0,0)$, we must have some $x^{12}_1 \in F_1$ and $x^{12}_2 \in F_2$ so that $x^{12}_1 = -x^{12}_2$ in order for $\vec 0$ to be in the Minkowski sum.
-  In particular, we know that, since $\theta_{12} < 180^\circ$, $x^{12}_1$ and $x^{12}_2$ are unique given $v_1$ and $v_2$.
-
-  We then want to show that we cannot add a $v_3$ such that $\max(\theta_{12}, \theta_{13}, \theta_{23}) < 180^\circ$ without yielding a contradiction, which then gives our result, as any arrangement of $5$ normals in $\reals^2$ must have some cone that is less than $180^\circ$ containing three normals.
-
-  In general, observe that $x^{12}_1$ and $x^{13}_1$ must both be on the line $\inprod{v_1}{x} = -1$. \jessie{More detail}
-  Therefore, our three cases proceed as follows: $(i.) \|x^{13}_1\| > \|x^{12}_1\|$, $(ii.) \|x^{13}_1\| = \|x^{12}_1\|$, and $(iii.) \|x^{12}_1\| > \|x^{13}_1\|$.
-  As the labels on normals $v_2$ and $v_3$ (and therefore, the respective witnesses) are arbitrary, it suffices to just show cases $(i.)$ and $(ii.)$.
-
-  \begin{enumerate}
-  \item [$(i.)$] First, suppose $\|x^{13}_1\| < \|x^{12}_1\|$.
-  This in turn implies that $\|v_3\| > \|v_2\|$ since both witnesses are on the line $\inprod{v_1}{x^{1i}_1} = -1$.
-  Consider that in order for $x^{12}_1 \in F_1$, we must have both $\inprod{v_2}{x^{12}_1} = 1$ and $\inprod{v_3}{x^{12}_1} \leq 1$.
-    \begin{align*}
-    \inprod{v_2}{x^{12}_1} = 1 &\iff \|v_2\| \cos(\theta(v_2, x^{12}_1)) = \frac 1 {\|x^{12}_2\|}\\
-    \inprod{v_3}{x^{12}_1} \leq 1 &\iff \|v_3\| \cos(\theta(v_3, x^{12}_1)) \leq \frac 1 {\|x^{12}_2\|}\\
-\implies \|v_3\| \cos(\theta(v_3, x^{12}_1)) &\leq \|v_2\| \cos(\theta(v_2, x^{12}_1))\\
-\implies 1 < \frac{\|v_3\|}{\|v_2\|} &\leq \frac{\cos(\theta(v_2, x^{12}_1))}{\cos(\theta(v_3, x^{12}_1))}\\
-\implies \theta(v_3, x^{12}_1) &> \theta(v_2, x^{12}_1)\\
-\implies \theta_{13} < \theta_{12}
-    \end{align*}
-    This yields a contradiction, as we must have $\theta_{12} < \theta_{13}$ in order to have $\inprod{v_3}{x^{13}_1} = \inprod{v_2}{x^{12}_1} = 1$.
-    Therefore, we conclude that we cannot have $\|x^{12}_1\| > \|x^{13}\|$.
-  	\item [$(ii.)$] Suppose that we have $\|x^{12}_1\| = \|x^{13}_1\|$.
-  	As both witnesses are on the same halfspace $\{x : \inprod{v_1}{x} = -1\}$, we must have $x^{12}_1 = x^{13}_1$.
-
-  \end{enumerate}
-
-%  We do this by arguing that in all three cases of the argmax, we either restrict $F_1$ so that $x_1 \not \in F_1$, restrict $F_2$ so that $x_2 \not \in F_2$, or have $x_3 \not \in F_3$.
-%  We merge the latter two cases without loss of generality as we can relabel these normals pretty easily because of the structure of $B$.
+%\begin{proposition}
+%	The abstain loss $\ell_{1/2}$ with $n=5$ is not $2$-embeddable.
+%\end{proposition}
+%\begin{proof}[Geometric proof]
+%  We apply Corollary \ref{cor:d-embeddable-char}: We consider the level set $\gamma_{\bot}$ (the distributions whose modal mass is at most $1/2$).
+%  We show that the quadratic program (Definition \ref{def:qfp}) is not feasible for this polytope with dimension $d=2$, which implies by Corollary \ref{cor:d-embeddable-char} that $\ell$ is not $2$-embeddable.
 %
-
+%  We obtain the vertex and halfspace representations of $\gamma_{\bot}$ from Lemma \ref{lemma:abstain-v-h}.
+%  We proceed by narrowing the space of feasible normals $v_1, \ldots, v_5$, until we reach a contradiction.
+%  %We make an argument on the permissible angles between normals $v_1, \ldots, v_5$ in $\reals^2$ and show there is no feasible solution to the QFP in Definition~\ref{def:qfp}.
+%  In particular, we argue that in any cone strictly $ < 180^\circ$, we can have no more than two vectors $v_i$ and $v_j$; otherwise we yield a contradiction.
+%
+%  We index the vertices and witnesses as follows: For $y < y'$, we write $p^{yy'} = (\delta_y + \delta_{y'})/2$ and $X^{yy'}$ for the corresponding matrix variable, with columns (witness points) $x^{yy'}_{y''}$.
+%  In particular, the vertex constraints can all be rearranged to yield the following: $\{x^{yy'}_y = -x^{yy'}_{y'} ~ (\forall y < y')\}$.
+%  Our proof will ignore all other points, i.e. $x^{yy'}_{y''}$ for $y'' \neq y,y'$, which appear only with coefficient zero in the vertex constraints.
+%
+%  Without loss of generality, we let $v_1 = (0,1)$, and have $v_2$ with $\|v_2\|^2 \leq \|v_1\|^2$ and the angle $\theta_{12} < 180^\circ$ the angle between $v_1$ and $v_2$. \bo{Need to justify why choice of $v_1$ is WLOG.}
+%
+%  We then have the feasible regions $F_y = \{x \in \reals^2 : \inprod{v_i} {x} \leq B_{iy} \; \forall i\}$, which means to this point, we have $F_1 = \{x \in \reals^2 : \inprod{v_1}{x} \leq -1 \text{ and } \inprod{v_2}{x} \leq 1 \}$, and $F_2 = \{x \in \reals^2 : \inprod{v_1}{x} \leq 1 \text{ and } \inprod{v_2}{x} \leq -1 \}$.
+%  By requirement of the existence of a set of witnesses for the distribution $(1/2, 1/2, 0,0,0)$, we must have some $x^{12}_1 \in F_1$ and $x^{12}_2 \in F_2$ so that $x^{12}_1 = -x^{12}_2$ in order for $\vec 0$ to be in the Minkowski sum.
+%  In particular, we know that, since $\theta_{12} < 180^\circ$, $x^{12}_1$ and $x^{12}_2$ are unique given $v_1$ and $v_2$.
+%
+%  We then want to show that we cannot add a $v_3$ such that $\max(\theta_{12}, \theta_{13}, \theta_{23}) < 180^\circ$ without yielding a contradiction, which then gives our result, as any arrangement of $5$ normals in $\reals^2$ must have some cone that is less than $180^\circ$ containing three normals.
+%
+%  In general, observe that $x^{12}_1$ and $x^{13}_1$ must both be on the line $\inprod{v_1}{x} = -1$. \jessie{More detail}
+%  Therefore, our three cases proceed as follows: $(i.) \|x^{13}_1\| > \|x^{12}_1\|$, $(ii.) \|x^{13}_1\| = \|x^{12}_1\|$, and $(iii.) \|x^{12}_1\| > \|x^{13}_1\|$.
+%  As the labels on normals $v_2$ and $v_3$ (and therefore, the respective witnesses) are arbitrary, it suffices to just show cases $(i.)$ and $(ii.)$.
 %
 %  \begin{enumerate}
-%  	\item [$\theta_{23} = \argmax$]
-%  	Since $\theta_{23} < 180^\circ$ and $v_1$ is in the middle of $v_2$ and $v_3$, we have that $x^{12}_1 \neq x^{13}_1$.
-%  	Without loss of generality, suppose $\|v_2\|^2 \leq \|v_3\|^2$.
-%  	Then we claim that $x^{13}_1 \not \in F_1$, since we have $x^{13}_1 = \{x : \inprod{v_1}{x} = -1 \text{ and } \inprod{v_3}{x} = 1\}$.
+%  \item [$(i.)$] First, suppose $\|x^{13}_1\| < \|x^{12}_1\|$.
+%  This in turn implies that $\|v_3\| > \|v_2\|$ since both witnesses are on the line $\inprod{v_1}{x^{1i}_1} = -1$.
+%  Consider that in order for $x^{12}_1 \in F_1$, we must have both $\inprod{v_2}{x^{12}_1} = 1$ and $\inprod{v_3}{x^{12}_1} \leq 1$.
+%    \begin{align*}
+%    \inprod{v_2}{x^{12}_1} = 1 &\iff \|v_2\| \cos(\theta(v_2, x^{12}_1)) = \frac 1 {\|x^{12}_2\|}\\
+%    \inprod{v_3}{x^{12}_1} \leq 1 &\iff \|v_3\| \cos(\theta(v_3, x^{12}_1)) \leq \frac 1 {\|x^{12}_2\|}\\
+%\implies \|v_3\| \cos(\theta(v_3, x^{12}_1)) &\leq \|v_2\| \cos(\theta(v_2, x^{12}_1))\\
+%\implies 1 < \frac{\|v_3\|}{\|v_2\|} &\leq \frac{\cos(\theta(v_2, x^{12}_1))}{\cos(\theta(v_3, x^{12}_1))}\\
+%\implies \theta(v_3, x^{12}_1) &> \theta(v_2, x^{12}_1)\\
+%\implies \theta_{13} < \theta_{12}
+%    \end{align*}
+%    This yields a contradiction, as we must have $\theta_{12} < \theta_{13}$ in order to have $\inprod{v_3}{x^{13}_1} = \inprod{v_2}{x^{12}_1} = 1$.
+%    Therefore, we conclude that we cannot have $\|x^{12}_1\| > \|x^{13}\|$.
+%  	\item [$(ii.)$] Suppose that we have $\|x^{12}_1\| = \|x^{13}_1\|$.
+%  	As both witnesses are on the same halfspace $\{x : \inprod{v_1}{x} = -1\}$, we must have $x^{12}_1 = x^{13}_1$.
+%
 %  \end{enumerate}
-
-\end{proof}
+%
+%%  We do this by arguing that in all three cases of the argmax, we either restrict $F_1$ so that $x_1 \not \in F_1$, restrict $F_2$ so that $x_2 \not \in F_2$, or have $x_3 \not \in F_3$.
+%%  We merge the latter two cases without loss of generality as we can relabel these normals pretty easily because of the structure of $B$.
+%%
+%
+%%
+%%  \begin{enumerate}
+%%  	\item [$\theta_{23} = \argmax$]
+%%  	Since $\theta_{23} < 180^\circ$ and $v_1$ is in the middle of $v_2$ and $v_3$, we have that $x^{12}_1 \neq x^{13}_1$.
+%%  	Without loss of generality, suppose $\|v_2\|^2 \leq \|v_3\|^2$.
+%%  	Then we claim that $x^{13}_1 \not \in F_1$, since we have $x^{13}_1 = \{x : \inprod{v_1}{x} = -1 \text{ and } \inprod{v_3}{x} = 1\}$.
+%%  \end{enumerate}
+%
+%\end{proof}
 \begin{proof}[Matrix rank proof]
-  We can understand the QFP given in Section~\ref{sec:d-dim} for $\abstain{1/2}$ as a matrix rank problem.
-  \jessie{Fill in explanation}
+  We can formulate the QFP given in Section~\ref{sec:d-dim} for $\abstain{1/2}$ as a matrix rank problem.
+  \jessie{Fill in explanation} \bo{attempted}
+  First, as observed in Lemma \ref{lemma:xiji-minus-xijj}, the vertex constraints are exactly equivalent to requiring that, in our notation, $x^{ij}_i = - x^{ij}_j$ for all $i<j$.
+  Therefore, we can substitute in for all variables of the form $x^{ij}_j$ and eliminate them from the problem.
+  Second, we can observe that the program is only easier to satisfy if one drops the halfspace constraints on all variables of the form $x^{ij}_m$, $i < j$, $m \not\in \{i,j\}$.
+  This allows us to drop all such variables, and we are now left with only the variables $v_1,\ldots,v_k$ and $\{x^{ij}_i : i<j\}$, with the understanding that $x^{ij}_j = -x^{ij}_i$.
+  We can therefore simplify the following constraints of the QFP:
+  \begin{align*}
+    \inprod{v_i}{x^{ij}_i} &\leq B_{ii} = -1   \\
+    \inprod{v_i}{x^{ij}_j} &\leq B_{ij} = 1  \\
+    \implies \inprod{v_i}{x^{ij}_i} = -1  \\
+    \inprod{v_i}{x^{ji}_i} &\leq B_{ii} = -1  \\
+    \inprod{v_i}{x^{ji}_j} &\leq B_{ij} = 1  \\
+    \implies \inprod{v_i}{x^{ji}_j} = 1  \\
+    \inprod{v_i}{x^{jm}_j} &\leq B_{ij} = 1  \\
+    \inprod{v_i}{x^{jm}_m} &\leq B_{im} = 1  \\
+    \implies \inprod{v_i}{x^{jm}_j} \in [-1,1] .
+  \end{align*}
+    
+  This gives us the following simplified feasibility problem.
+  \begin{align*}
+    \inprod{v_i}{x^{ij}_i} &= -1     & (\forall i<j)  \\
+    \inprod{v_i}{x^{ji}_j} &= 1      & (\forall i<j)  \\
+    \inprod{v_i}{x^{jm}_j} &\in [-1,1]   & (\forall j<m, i\not\in\{j,m\}) .
+  \end{align*}
+  If we consider the matrix $V$ and construct $Y$ whose columns are $\{x^{ij}_i : i<j\}$, this problem asks us to find such a $V$ and $Y$ whose product $M = VY$ is a matrix with certain fixed entries and others bounded.
 
-  With $n=4$, we observe the following matrix rank problem:
+  In particular, with $n=4$, we obtain the following matrix rank problem: does there exist
   \[
+  M_4 = 
   \begin{bmatrix}
   	-1 & -1 & -1 & \cdot & \cdot & \cdot \\
   	1 & \cdot & \cdot & -1 & -1 & \cdot \\
@@ -890,10 +936,12 @@ Thus we cannot have normals $v_i = c v_j$ for $c > 0$.
   	\cdot & \cdot & 1 & \cdot & 1 & 1 \\
   \end{bmatrix}
   \]
+  where each unknown entry $\cdot$ is in $[-1,1]$, of rank $d=2$?
 
-  Since this matrix is a submatrix of the matrix rank problem for $n=5$, any solution of this above problem must also be a solution in the large matrix given below.
+  Since $M_4$ is a submatrix of the matrix obtained when $n=5$, any rank-$2$ solution for the large matrix given below must also solve the above problem.
 
   \[
+  M_5 =
   \begin{bmatrix}
   {\color{red} -1} & {\color{red} -1} & {\color{red} -1} & {\color{red} \cdot} & {\color{red} \cdot} & {\color{red} \cdot} & -1 & \cdot & \cdot & \cdot \\
   {\color{red} 1} & {\color{red} \cdot} & {\color{red} \cdot} & {\color{red} -1} & {\color{red} -1} & {\color{red} \cdot} & \cdot & -1 & \cdot & \cdot \\
@@ -903,6 +951,7 @@ Thus we cannot have normals $v_i = c v_j$ for $c > 0$.
   \end{bmatrix}
   \]
 
+  \bo{I'm not sure the below is a proof, because you could have linear combinations with any coefficients, so I don't think this proves that the only solutions are negating rows. I think we have to appeal to Mathematica from here on out.}
   In characterizing the solutions to the smaller matrix rank problem, let us establish the linear equality of the first two rows and second two rows.
   (Note that any combination of row pairs works without loss of generality.)
   The first column containing $[-1 \; 1]^T$ implies that we must have the two rows being the negation of each other, and similarly for the third and fourth rows with the final column.
