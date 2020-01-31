@@ -151,12 +151,12 @@
 \maketitle
 
 \begin{abstract}%
-  A common technique in supervised learning with discrete losses, such as $0-1$ loss, is to optimize a convex surrogate loss over $\reals^d$, calibrated with respect to the original loss.
-  In particular, recent work has investigated embedding the original predictions (e.g. labels) as points in $\reals^d$.
+  A common technique in supervised learning with discrete losses, such as 0-1 loss, is to optimize a convex surrogate loss over $\reals^d$, calibrated with respect to the original loss.
+  In particular, recent work has investigated embedding the original predictions (e.g. labels) as points in $\reals^d$, showing an equivalence to using polyhedral surrogates.
   %Recent work has proposed the notion of designing calibrated surrogate losses for classification-like problems through the lens of \emph{embedding} the original problem into $\reals^d$ and optimizing a polyhedral loss that is calibrated with respect to the original loss.
-  In this work, we study the notion of \emph{embedding dimension} for given discrete losses.
-  We characterize when a given discrete loss can be embedded into the real line, as well as when a higher-dimensional input to the surrogate loss is required.
-  Moreover, we give a quadratic feasibility program that yields lower bounds on the embedding dimension of a given discrete loss.
+  In this work, we study the notion of the \emph{embedding dimension} of a given discrete loss: the minimum dimension $d$ such that an embedding exists.
+  We characterize $d$-embeddability for all $d$, with a particularly tight characterization for $d=1$ (embedding into the real line), and useful necessary conditions for $d>1$ in the form of a quadratic feasibility program.
+  We illustrate our results with novel lower bounds for abstain loss.
 \end{abstract}
 
 \begin{keywords}%
@@ -166,77 +166,71 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
-In supervised machine learning, the dominant paradigm is to measure performance of a model using some loss function $\ell($prediction, observation$)$.
+In supervised machine learning, one typically measures performance of a model using some loss function $\ell($prediction, observation$)$.
 In particular, this paper studies \emph{discrete} losses, in which the predictions lie in a finite set.
 These are popular for many categorical tasks such as classification, ranking, top-$k$, set inclusion, and other structured prediction tasks.
 %Models are trained using some variant of empirical risk minimization, i.e. minimization of loss on a training data set.
 %For many categorical tasks (e.g. classification, ranking, top-$k$, set inclusion), one can often use intuition to design a discrete loss $\ell$ that models the question one wants to answer about one's data.
 %For example, $0-1$ loss $\ell(r)_y = \Ind{r \neq y}$ gives punishment $1$ for a misprediction and $0$ for a correct prediction, and is used for classification problems over possibly large finite category sets.
 
-However, the optimization of discrete losses over a dataset (i.e. empirical risk minimization) is typically computationally hard.
+Optimizing such discrete losses over a dataset (i.e. empirical risk minimization), however, is typically computationally hard.
 One therefore generally resorts to optimizing a computationally-nice \emph{surrogate loss} $L$.
 The key requirement is \emph{calibration}, namely that optimizing surrogate loss allows one to recover the discrete prediction that optimizes the original $\ell$-loss.
 Calibrated surrogate losses yields desirable statistical guarantees such as the existence of excess risk bounds given by consistency~\citep{tewari2007consistency}.
 %In the finite outcome setting, we know that calibration implies consistency, so we study the design of calibrated, convex losses-- specifically polyhedral (piecewise linear and convex) losses.
 
 The question therefore becomes: Given a discrete loss $\ell$, how do we design such calibrated surrogates $L$? 
-The class of surrogates studied in this paper are \emph{polyhedral}, meaning piece-wise linear convex functions over prediction space $\reals^d$.
-\cite{finocchiaro2019embedding} show that polyhedral surrogates are equivalent to the following recipe: \emph{embedding} the discrete loss $\ell$ into $\reals^d$ by letting each discrete prediction $r$ correspond to some point $\varphi(r) \in \reals^d$, which optimizes $L$-loss if and only if $r$ optimizes $\ell$-loss.
-\cite{finocchiaro2019embedding} show that every discrete loss $\ell$ can be embedded into \emph{some} dimension $d$.
-But in the worst case $d=n-1$ where $n$ is the number of possible observations $y$, e.g. a number of classification categories.
+In this paper we study \emph{polyhedral} surrogates, meaning piecewise-linear convex functions over prediction space $\reals^d$.
+\cite{finocchiaro2019embedding} show that polyhedral surrogates are in a strong sense equivalent to an \emph{embedding}: % \emph{embedding} the discrete loss $\ell$ into $\reals^d$ by 
+mapping each discrete prediction $r$ to some point $\varphi(r) \in \reals^d$, which optimizes $L$-loss if and only if $r$ optimizes $\ell$-loss.
+While the authors show that every discrete loss $\ell$ can be so embedded, in the worst case the dimension required is $d=n-1$ where $n$ is the number of possible observations.
+As a surrogate dimension $d$ significantly below $n$, such as $O(\log n)$ for classification with an abstain option~\citep{ramaswamy2018consistent}, can lead to faster downstream optimization and computation, an effect that grows with $n$, we would like to understand when this dimension can be low.
+
 
 %\emph{embedding losses} in order to construct polyhedral, calibrated surrogate losses for a given discrete loss.
 %Their work constructively shows that every discrete loss is embeddable, but it is unclear how efficient an embedding can get.
-In this work, we define and investigate the \emph{embedding dimension} of discrete losses.
-A loss $\ell$ is $d$-embeddable if it can be embedded in $\reals^d$, equivalently, has some calibrated polyhedral surrogate $L$ over $\reals^d$.
-Given $\ell$, it is desirable for computational and statistical reasons to construct a surrogate in as few dimensions as possible; it is also interesting to prove lower bounds, i.e. that no calibrated surrogate exists unless $d$ is large enough.
-
-\paragraph{Contributions.}
-In particular, $1$-embeddings have the simplest possible convex surrogate space, the real line.
-In Section~\ref{sec:1d}, we characterize $1$-embeddability of a discrete loss $\ell$ via a variety of conceptual and testable conditions.
-We give an efficient algorithm that, given the loss matrix of $\ell$, either proves that $\ell$ is not $1$-embeddable, or else constructs a calibrated $1$-dimensional polyhedral surrogate.
+In this work, we define and investigate the embedding dimension of discrete losses, and characterize the $d$-embeddable losses for each $d$.
+%(A loss $\ell$ is $d$-embeddable if it can be embedded in $\reals^d$, equivalently, has some calibrated polyhedral surrogate $L$ over $\reals^d$.)
+% Given $\ell$, it is desirable for computational and statistical reasons to construct a surrogate in as few dimensions as possible; it is also interesting to prove lower bounds, i.e. that no calibrated surrogate exists unless $d$ is large enough.
+Beginning with $d=1$, i.e., embedding into the real line, we offer a complete characterization via a variety of conceptual and testable/constructive conditions (\S~\ref{sec:1d}).
 We also show that, perhaps surprisingly, for $d=1$, if \emph{any} convex calibrated surrogate exists, then in particular a polyhedral one does.
-We conjecture that this continues to hold in higher dimensions.\bo{Formalize conjecture later?}
-In other words, we conjecture that embedding dimension is actually always equal to the more permissive \emph{convex calibration dimension} of \cite{ramaswamy2016convex}.
-
-In Section~\ref{sec:d-dim}, we observe a general characterization for $d \geq 2$, presenting conditions called optimality and monotonicity that are necessary and sufficient for $d$-embeddability.
-A particular contribution is to isolate and investigate the optimality condition, which reduces to a finite set of conditions on the halfspace and vertex representations of a set of polytopes related to $\ell$ and $L$.
-This allows us to construct a Quadratic Feasibility Program (Definition~\ref{def:qfp}) that has a solution if and only if the optimality condition can be satisfied.
-In addition to providing a possible avenue toward automating the search for calibrated surrogate losses, this feasibility program yields new techniques for lower bounds on the embedding dimension of a given discrete loss.
-
-In Section~\ref{sec:examples}, we apply our characterizations to show new lower bounds on the embedding dimension for a problem, classification with an abstain option, whose convex calibration dimension has been well-studied (\cite{ramaswamy2016convex, ramaswamy2018consistent}).
+In higher dimensions, we observe a general characterization for $d$-embeddability in terms of certain optimality and monotonicity conditions (\S~\ref{sec:d-dim}).
+A particular contribution is to isolate and investigate the optimality condition, which we significantly reduce from a search over sets of polytopes to a quadratic feasibility program (Definition~\ref{def:qfp}), yielding a new technique to prove lower bounds on the embedding dimension.
+% In addition to providing a possible avenue toward automating the search for calibrated surrogate losses, this feasibility program yields new techniques for lower bounds on the embedding dimension of a given discrete loss.
+Finally, we apply our characterizations to show new lower bounds on the embedding dimension for abstain loss, whose convex calibration dimension has been well-studied \citep{ramaswamy2016convex, ramaswamy2018consistent} (\S~\ref{sec:examples}).
 %These results suggest that \emph{if} the convex calibration dimension of the same problems were lower than the embedding dimension, constructing a calibrated surrogate for such problems would require a new approach than previous works have taken.
 In particular we apply both our $1$-dimension characterization and higher-dimensional quadratic program to obtain previously-unknown lower bounds.
+We conclude with discussion and open questions (\S~\ref{sec:conclusion}).
+
+
+
 
 \subsection{Related work}
 \cite{bartlett2006convexity} study when a convex, calibrated surrogate exists for a given discrete loss, and in a finite-outcome setting,~\cite{tewari2007consistency} show that calibration (Definition~\ref{def:calibration}) is necessary and sufficient for consistency.
 %, meaning that there is a link mapping surrogate reports to discrete reports so that converging to the optimal prediction in the surrogate space implies the linked surrogate prediction converges to the optimal prediction for the original loss.
 
 Several works have investigated the problem of reducing the dimensionality of a surrogate loss.
-\cite{frongillo2015elicitation} propose \emph{elicitation complexity}, which roughly captures the minimum dimension $d$ of any surrogate loss $L$ (not necessarily convex or calibrated) for a given loss $\ell$ (not necessarily discrete).
-In the more specific case of convex calibrated surrogates for discrete losses,~\cite{ramaswamy2016convex} propose the notion of \emph{convex calibration dimension}, which is the minimum dimension input to a convex surrogate loss that is calibrated with respect to a given discrete loss.
-The difference in this paper is that our definition of embedding dimension requires the surrogate loss to additionally be polyhedral.
-\cite{ramaswamy2016convex} present a condition for obtaining lower bounds on convex calibration dimension for any discrete loss, \emph{feasible subspace dimension}.
-However, there are important examples, such as the $\ellabs{\alpha}$ loss in Equation~\eqref{eq:abstain}, for which feasible subspace dimension gives only trivial bounds.
-A contribution of this work is to provide the first nontrivial lower bounds for this loss (see also discussion in Section \ref{sec:conclusion}).
+\cite{frongillo2015elicitation} propose \emph{elicitation complexity}, which roughly captures the minimum dimension $d$ of a surrogate loss $L$ in a particular class (not necessarily convex or calibrated) for a given loss $\ell$ (not necessarily discrete).
+In the more specific case of convex calibrated surrogates for discrete losses, \cite{ramaswamy2016convex} propose the notion of \emph{convex calibration dimension}, which is the minimum dimension of a convex surrogate loss (not necessarily polyhedral) that is calibrated with respect to a given discrete loss.
+While \cite{ramaswamy2016convex} present a condition for obtaining lower bounds on convex calibration dimension for any discrete loss, called \emph{feasible subspace dimension}, it yields vacuous bounds for important examples such as the abstain loss $\ellabs{\alpha}$ loss (eq.~\eqref{eq:abstain}), where we only know the convex calibration to be in the range $1\leq d\leq \ceil{\log_2(n)}$~\citep{ramaswamy2018consistent}.
+An important contribution of this work is to provide the first nontrivial lower bounds for this loss (see also \S~\ref{sec:conclusion}).
 
-\cite{ramaswamy2018consistent} present upper bounds on the convex calibration of $\abstain{\alpha}$ loss of $\ceil{\log_2(n)}$, but their characterization of lower bounds leave the tightness of these bounds as an open question.
-These upper bounds are, however, much tighter than the previous upper bounds of $(n-1)$ given by the different surrogates presented by~\cite{crammer2001algorithmic} and~\cite{rifkin2004defense}, and it is unclear what characteristics of the abstain loss allow us to exponentially reduce dimension of the input.
+% These upper bounds are, however, much tighter than the previous upper bounds of $(n-1)$ given by the different surrogates presented by~\cite{crammer2001algorithmic} and~\cite{rifkin2004defense}, and it is unclear what characteristics of the abstain loss allow us to exponentially reduce dimension of the input.
 
 %In this work, we study \emph{embedding dimension}, which is the minimum dimension of input to a polyhedral surrogate that is calibrated with respect to the given discrete loss.
 %Moreover, we use this tool to characterize \emph{how} embeddable a given discrete loss is, showing necessary conditions for embedding a given loss into $d$ dimensions.
-In order to concisely discuss embedding dimension, we appeal to notation and terminology from the field of property elicitation (\cite{frongillo2015vector-valued, gneiting2007strictly, lambert2009eliciting, osband1985information-eliciting, savage1971elicitation}), relating it to the language of calibrated surrogates as needed.
+In order to concisely discuss embedding dimension, we appeal to notation and terminology from the field of property elicitation (\cite{savage1971elicitation, osband1985information-eliciting, gneiting2007strictly, lambert2009eliciting, lambert2018elicitation}), relating it to the language of calibrated surrogates as needed.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Setting}
 
-\paragraph{Discrete losses and (polyhedral) surrogates.}
+% \paragraph{Discrete losses and (polyhedral) surrogates.}
 
 The base object of study is a \emph{discrete loss function} $\ell: \R \to \nonnegreals^{\Y}$ where $\R$ and $\Y$ are finite sets.
 Here $\ell(r)_y$ is the loss of prediction $r \in \R$ (the report space) on $y \in \Y$ (the observation or label space).
 For simplicity we let $\Y = [n]$ throughout (where $[n] = \{1,\ldots,n\}$).
 The set of probability distributions on $\Y$ is denoted $\simplex\subseteq\nonnegreals^{\Y}$, represented as vectors of probabilities.
-We write $p_y$ \bo{check/decide}\jessie{Fine with this, and I think it's consistently in the paper like this already} for the probability of outcome $y \in \Y$ drawn from $p \in \simplex$.
+We write $p_y$ for the probability of outcome $y \in \Y$ drawn from $p \in \simplex$.
 As is assumed by~\cite{finocchiaro2019embedding}, we assume the given discrete loss is \emph{non-redundant}, meaning every report $r$ uniquely minimizes expected loss for some distribution $p\in\simplex$.
 
 We similarly denote surrogate losses in dimension $d$ by $L:\reals^d\to\nonnegreals^{\Y}$, with predictions typically written $u\in\reals^d$.
@@ -245,7 +239,7 @@ For example, 0-1 loss on two labels is a discrete loss with $\R = \Y = \{-1,1\}$
 given by $\ellzo(r)_y = \Ind{r \neq y}$.
 Two important surrogates for $\ellzo$ are hinge loss $\hinge(u)_y = \max\{ 0 ~,~ 1-yu \}$ and logistic loss $L(u)_y = \log(1+\exp(-yu))$ for $u\in\reals$.
 
-Most of the surrogates $L$ we consider will be \emph{polyhedral}, meaning piecewise linear and convex; we therefore briefly recall the relevant definitions.
+Most of the surrogates $L$ we consider will be \emph{polyhedral}, meaning piecewise linear and convex.
 In $\reals^d$, a \emph{polyhedral set} or \emph{polyhedron} is the intersection of a finite number of closed halfspaces.
 A \emph{polytope} is a bounded polyhedral set.
 A convex function $f:\reals^d\to\reals$ is \emph{polyhedral} if its epigraph is polyhedral, or equivalently, if it can be written as a pointwise maximum of a finite set of affine functions~\citep{rockafellar1997convex}.
@@ -256,23 +250,22 @@ A convex function $f:\reals^d\to\reals$ is \emph{polyhedral} if its epigraph is 
 %
 For example, hinge loss is polyhedral, whereas logistic loss is not.
 
-\paragraph{Properties of distributions.}
+% \paragraph{Properties of distributions.}
 In order to study calibration of surrogates (Definition~\ref{def:calibration} below), it is useful to formalize the following functions that describe the reports that minimize expected $\ell$-loss and $L$-loss under $p$.
 %% Bo: since we use \gamma and \R for \ell, and we use \Gamma and \reals^d for L,
 %% I figured generic properties could use notation g and R for f
 \begin{definition}[(Finite) property, level set, elicited]
-  A \emph{property} is a function $g: \simplex \to 2^{R}$ for some set $R$ where $g(p) \neq \emptyset$ for all $p$.
-  It is \emph{finite} if $|R| < \infty$.
-  The \emph{level set} of $r \in R$ is the set $g_r = \{p \in \simplex : r \in g(p)\}$.
-  A loss function $f: R \to \nonnegreals^{\Y}$ \emph{elicits} $g$ if $g(p) = \argmin_{r \in R} \inprod{p}{f(r)}$.
-  We assume all properties are non-redundant, i.e. each $g_r$ contains a distribution $p$ not in any other $g_{r'}$.\jessiet{$R$ or $\R$?}
+  A \emph{property} is a function $\Gamma: \simplex \to 2^{R}$ for some set $\R$ where $\Gamma(p) \neq \emptyset$ for all $p$.
+  It is \emph{finite} if $|\R| < \infty$.
+  The \emph{level set} of $r \in R$ is the set $\Gamma_r = \{p \in \simplex : r \in \Gamma(p)\}$.
+  A loss function $L: \R \to \nonnegreals^{\Y}$ \emph{elicits} $\Gamma$ if $\Gamma(p) = \argmin_{r \in \R} \inprod{p}{L(r)}$.
 \end{definition}
-For example, $0-1$ loss elicits the mode, which is formalized as a property on report space $R = \Y$ via $g(p) = \argmax_{y \in \Y} p_y$.
-Notice in this example $g(p)$ is a singleton set when the mode of $p$ is unique and e.g. is $\Y$ when $p$ is uniform.
+In this paper we write $\ell$ for discrete losses (i.e., when $|\R|$ is finite), and $\gamma$ instead of $\Gamma$ for the property elicited by $\ell$, reserving $\Gamma$ and $L$ for properties and losses on report space $\R=\reals^d$.
+For example, $0-1$ loss elicits the mode, which is formalized as a property on report space $\R = \Y$ via $\gamma(p) = \argmax_{y \in \Y} p_y$.
+Notice in this example $\gamma(p)$ is a singleton set when the mode of $p$ is unique and e.g. is $\Y$ when $p$ is uniform.
 %Another example of a finite property is ranking, in which $\R$ is the set of permutations of $\Y$, and $g(p)$ consists of all permutations that order $\Y$ from most to least probable (i.e. ties must be broken in all possible ways).
-In this paper we write $\gamma$ for the property elicited by $\ell$ with report space $\R$; and we use $\Gamma$ for the property elicited by $L$ with report space $\reals^d$.
 
-\paragraph{Embeddings.}
+% \paragraph{Embeddings.}
 %We specifically study polyhedral functions in part because they have high-dimensional subgradient sets at points of nondifferentiability, which will be of interest to us later.
 Polyhedral losses are motivated partly because they correspond to a natural surrogate construction technique: embedding the discrete predictions $\R$ as points in $\reals^d$ and linearly interpolating between embedded reports.
 The key condition required on the embedding and surrogate loss $L$ is that a discrete prediction $r \in \R$ should minimize expected $\ell$-loss if and only if its embedding point minimizes expected $L$-loss.
@@ -299,12 +292,10 @@ Polyhedral surrogates are motivated by the following results.
 \begin{theorem}[\cite{finocchiaro2019embedding}] \label{thm:embed-iff-poly}
   If a discrete loss $\ell$ is embedded by some surrogate $L$, then (1) $L$ must be a polyhedral loss; and (2) there exists a link function calibrating $L$ to $\ell$.
 \end{theorem}
-In other words, polyhedral surrogates are equivalent to embeddings of discrete losses $\ell$ in $\reals^d$; and they come with a guarantee of calibration.
-This raises the question studied in this paper: in what dimension $d$ does such a surrogate exist?
+In other words, polyhedral surrogates are equivalent to embeddings of discrete losses $\ell$ in $\reals^d$, and they come with a guarantee of calibration.
+This raises the question studied in this paper: for a given discrete loss, in what dimension $d$ does such a surrogate exist?
+This question is captured by the following quantity.
 
-\subsection{Embedding dimension}
-
-In this paper, we study the following quantity.
 \begin{definition}[Embedding dimension]
   We say a discrete loss $\ell: \R \to \nonnegreals^{\Y}$ is \emph{$d$-embeddable} if it can be embedded into $d$ dimensions, i.e. if there exists a calibrated polyhedral surrogate $L: \reals^d \to \nonnegreals^{\Y}$.
   The \emph{embedding dimension} of $\ell$ is the smallest $d$ such that $\ell$ is $d$-embeddable.
@@ -594,9 +585,8 @@ Our program will consist of variables for the normal vectors $\{v_i \in \reals^d
 % These correspond to a (possibly relaxed) halfspace representation and (possibly incomplete) vertex representation of the subgradient polytopes $\T$.
 
 \begin{definition}[Quadratic Feasibility Program] \label{def:qfp} ~ \\
-  \indent \textbf{Parameter:} $d \in \mathbb{N}$.
-
-  \textbf{Given:} a polytope $C = \{p \in \simplex : Bp \geq \vec 0\} = \conv(\{p^1, \ldots, p^\ell\}) \subseteq \simplex$, where $B \in \reals^{k \times n}$ has a minimum number of rows.
+  \indent 
+  \textbf{Given:} $d \in \mathbb{N}$, a polytope $C = \{p \in \simplex : Bp \geq \vec 0\} = \conv(\{p^1, \ldots, p^\ell\}) \subseteq \simplex$, where $B \in \reals^{k \times n}$ has a minimum number of rows.
 
   \textbf{Variables:} a matrix $V \in \reals^{k \times d}$, each row representing a normal vector; and a collection of matrices $X^1,\ldots,X^{\ell} \in \reals^{d \times n}$, with $X^j$ intuitively corresponding to $p^j$ with columns $x^j_y$ representing witness points.
 
@@ -610,7 +600,7 @@ Our program will consist of variables for the normal vectors $\{v_i \in \reals^d
 Our main result of this section is that our quadratic program is feasibile if and only if there exist some set of $d$-dimensional polytopes satisfing the optimality condition in Theorem~\ref{thm:general-char}.
 As an immediate corollary, if some input $C=\gamma_r$ and $d$ yields an infeasible program, then the embedding dimension of the loss $\ell$ is at least $d+1$.
 \begin{theorem} \label{thm:opt-iff-qfp}
-  Given a convex polytope $C \subseteq \simplex$, there exist polytopes $\T$ in $\reals^d$ such that $D(\T) = C$ if and only if there is a feasible solution to the QFP (Definition \ref{def:qfp}) with parameter $d$.
+  Given a convex polytope $C \subseteq \simplex$, there exist polytopes $\T$ in $\reals^d$ such that $D(\T) = C$ if and only if the above quadratic program (Definition~\ref{def:qfp}) is a feasible.
 \end{theorem}
 \begin{proof}
     By Theorem \ref{thm:vertex-halfspace-opt}, it suffices to show that $\T$ satisfying the halfspace and vertex conditions exist if and only if the program is feasible.
@@ -730,6 +720,10 @@ This reduces the quadratic program to the problem:
 
 
 \section{Discussion} \label{sec:conclusion}
+\raf{
+We conjecture that this continues to hold in higher dimensions.\bo{Formalize conjecture later?}
+In other words, we conjecture that embedding dimension is actually always equal to the more permissive \emph{convex calibration dimension} of \cite{ramaswamy2016convex}.}
+
 \paragraph{Comparison to feasible subspace dimension.}
 Essentially the only other known lower-bound technique for dimensionality of calibrated surrogates is the \emph{feasible subspace dimension} of \cite{ramaswamy2016convex}.
 \bo{TMI?}
