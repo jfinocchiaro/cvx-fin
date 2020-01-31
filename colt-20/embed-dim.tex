@@ -335,41 +335,80 @@ We discuss further in Section \ref{sec:conclusion}.
 \label{sec:1d}
 
 In this section, we completely characterize when a discrete loss can be embedded into the real line.
-For example, we will immediately obtain that the abstain losses on $n \geq 3$ outcomes require $d \geq 2$.
-Perhaps, surprisingly, we also show that $1$-embeddability is equivalent to the existence of \emph{any} convex calibrated $1$-dimensional surrogate.
-In other words, general convex surrogates are no more powerful than polyhedral surrogates in one dimension.
-We conjecture that this fact may extend to higher dimensions, an open problem.
+For example, this will immediately imply (see Section \ref{sec:examples}) that the abstain losses on $n \geq 3$ outcomes require $d \geq 2$.
+We will also give a constructive algorithm for testing $1$-embeddability and constructing a $1$-dimensional polyhedral surrogate.
+Finally, we show that $1$-embeddability is equivalent to the existence of \emph{any} convex calibrated $1$-dimensional surrogate.
+After presenting and discussing this sequence of results, we observe that they can be collected as a set of five or six conditions on $\ell$ that are all pairwise equivalent, and in particular, are equivalent to $1$-embeddability.
 
+\subsection{General characterization}
+
+A condition from the literature~\citep{lambert2018elicitation} turns out to be key to $1$-dimensional embeddings.
 \begin{definition}[Orderable]\label{def:orderable-hyperplane}
 	A finite property $\gamma:\simplex \to 2^\R$ is \emph{orderable} if there is an enumeration of $\R = \{r_1, \ldots, r_{|\R|}\}$ such that for all $i \leq |\R| - 1$, we have $\gamma_{r_i} \cap \gamma_{r_{i+1}}$ is a hyperplane intersected with $\simplex$.
 \end{definition}
 This definition follows from~\cite[Theorem 3]{lambert2018elicitation}.
 
+Before investigating the usefulness of this condition, we give an equivalent condition which may be more intuitive.
+Given a finite property $\gamma$, elicited by a discrete loss $\ell$, a common technique particularly in information elicitation is to visualize the level sets as a power diagram (generalization of Voronoi diagram) in the simplex\bo{cite}.
+See Figures \ref{fig:intersection-graph-ex} and \ref{fig:abstain-alpha-half}.
+We can formalize the adjacency relationships of these level sets, giving a visual test for orderability.
+
 \begin{definition}[Intersection graph]\label{def:intersection-graph}
-Given a finite property $\gamma: \simplex \to 2^{\R}$, the \emph{intersection graph} has vertices labeled by $\R$ with an edge $(r,r')$ if $\gamma_r \cap \gamma_{r'} \cap \relint(\simplex) \neq \emptyset$, where $\relint(\simplex)$ equals the set of distributions with full support.
+  Given a discrete loss $\ell$ and associated finite property $\gamma: \simplex \to 2^{\R}$ elicited by $\ell$, the \emph{intersection graph} has vertices labeled by $\R$ with an edge $(r,r')$ if $\gamma_r \cap \gamma_{r'} \cap \relint(\simplex) \neq \emptyset$, where $\relint(\simplex)$ equals the set of distributions with full support.
 \end{definition}
-\begin{proposition}
+\begin{proposition} \label{prop:orderable-iff-path}
   A finite property $\gamma$ is \emph{orderable} if and only if its intersection graph is a path, i.e. a connected graph where every vertex has either one or two neighbors.
 \end{proposition}
 \begin{proof}
   $(\implies)$The intersection graph is constructed by adding an edge for each halfspace, which connects only two nodes.
-  If three level sets intersected on $\relint(\simplex)$, then the level boundary for any two would not be a halfspace.
+  If three level sets intersected on $\relint(\simplex)$, then the level boundary for any two would not be a halfspace (this follows because the level sets form a power diagram, e.g. \bo{cite}).
   This yields a path for the intersection graph.
   
   \bigskip
+  \bo{This one needs a bit of work.}
   $(\impliedby)$ If the intersection graph forms a path, then each level set has at most two neighbors.
+  The level sets are convex polytopes, as they form a power diagram\dots.
+  
   As each path has a source, take the corresponding report to be $r_1$, and proceed in order through the path to enumerate the ordering.
   As the property is well-defined on the simplex, the boundaries of the level sets cannot intersect on $\relint(\simplex)$ without adding an edge.
   Combining this fact with the fact that level sets of finite elicitable properties are convex polytopes (and therefore defined as the intersection of a finite number of halfspaces), the level set boundaries must be hyperplanes intersected with $\simplex$. 
 \end{proof}
 
-\jessie{Probably for appendix: compare this definition of orderable to level set intersections on hyperplane definition}
-\raf{Actually, it occurred to me that we really should use the original definition, since that's from Lambert, but we can also define the incidence graph and state (proof in appendix) that they are equivalent.}
-%\begin{observation}
-%  A property $g$ is orderable if and only if the set $g_r \cap g_{r'}$, for $r \neq r'$, is always the intersection of a hyperplane with the simplex.
-%\end{observation}
+\begin{figure}
+	\begin{minipage}{0.48\linewidth}
+	\centering
+	\includegraphics[width = 0.8\linewidth]{tikz/intersection-graph.pdf}
+	\caption{The simplex on $3$ outcomes, with the level sets and intersection graph for the [truncated] expected value property on outcomes $\Y = \{1,2,3\}$.}
+	\label{fig:intersection-graph-ex}
+	\end{minipage}
+\hfill
+	\begin{minipage}{0.48\linewidth}
+	\centering
+	\includegraphics[width = 0.9\linewidth]{tikz/abstain-alpha-half.pdf}
+	\caption{Level sets and intersection graph for the $\abstain{1/2}$ property on $\Y = \{1,2,3\}$.}
+	\label{fig:abstain-alpha-half}
+\end{minipage}
+\end{figure}
 
-\begin{theorem}
+Our first main result is the following; we defer discussion of its proof to the end of the section.
+\begin{theorem} \label{thm:orderable-iff-1d}
+  A discrete loss $\ell$ is $1$-embeddable if and only if the property it elicits is orderable.
+\end{theorem}
+In other words, to know whether a one-dimensional polyhedral surrogate for $\ell$ exists, it suffices to check whether the intersection graph is a path.
+We give an example of a direct application in Section \ref{sec:examples}.
+
+\subsection{Constructing a surrogate}
+Theorem \ref{thm:orderable-iff-1d} is only somewhat constructive.
+Next, we give a more constructive test for $1$-embeddability.
+In fact, in the event that $\ell$ is $1$-embeddable, we will actually build a $1$-dimensional polyhedral calibrated surrogate.
+
+%\begin{algorithm}
+%  \SetAlgoLined
+%  \KwInput{discrete loss $\ell: \R \to \nonnegreals^{\Y}$}
+%  Let $v_i(y) = \ell(r_i)$
+%\end{algorithm}
+
+\begin{theorem} \label{thm:construct-1d-loss}
   Let $\ell: \R \to \nonnegreals^{\Y}$ be a discrete loss.
   Then $\ell$ is $1$-embeddable if and only if there is an ordering $\R = \{r_1,\ldots,r_k\}$ of the reports such that the following two conditions hold, where $v(i)_y := \ell(r_i)_y - \ell(r_{i-1})_y$:
   \begin{enumerate}
@@ -399,159 +438,26 @@ Given a finite property $\gamma: \simplex \to 2^{\R}$, the \emph{intersection gr
   \jessiet{In the cases: what if $\varphi(r_1) < 0$?}\raft{I set $\varphi(r_1)=0$; updated to something hopefully clearer}
   where $\lambda(i) = \min(\lambda^+(i),\max(\lambda^-(i),1))$, $\Lambda_i := \prod_{j=2}^i \lambda(j)$, $\Lambda_1=1$, and $K = \max_{i\in\{2,\ldots,k\},y\in\Y} |v(i)_y|$.
 \end{theorem}
-\begin{proof}
-  \raf{Actually, the easiest proof given what we have is:
-    \\
-  orderable
-  $\implies$
-  these $\ell$ conditions
-  $\implies$
-  1-embeddable
-  $\implies$
-  monotone
-  $\implies$
-  orderable
-  \\
-  Note: need $\gamma$ and $\Gamma$ in a few places}
+Note that a calibrated surrogate should also specify a link function $\psi: \reals^d \to \R$.
+We have been omitting it because of the guarantee of Theorem \ref{thm:embed-iff-poly}, from \cite{finocchiaro2019embedding}, which guarantees its existence.
+But in the case of $d=1$, we observe that one can simply use the midpoints between the embedding points as cutoffs for the link function, i.e. $\psi(u) = \argmin_{r \in \R} |u - \phi(r)|$, breaking ties arbitrarily.
 
-  \noindent\textbf{orderable $\implies$ conditions:}
-
-  Let $\gamma:\simplex\toto\R$ be finite and orderable.
-  From~\cite[Theorem 4]{lambert2018elicitation}, we have positively-oriented normals $v_i\in\reals^\Y$ for all $i \in \{1,\ldots,k-1\}$ such that $\gamma_{r_i} \cap \gamma_{r_{i+1}} = \{p\in\simplex : \inprod{v_i}{p} = 0\}$, and moreover, for all $i \in \{2,\ldots,k-1\}$, we have $\gamma_{r_i} = \{p\in\simplex : \inprod{v_{i-1}}{p} \leq 0 \leq \inprod{v_i}{p}\}$, while $\gamma_{r_1} = \{p\in\simplex : \inprod{v_1}{p} \leq 0\}$ and $\gamma_{r_k} = \{p\in\simplex : \inprod{v_{k-1}}{p} \leq 0\}$.
-  From the positive orientation of the $v_i$, we have for all $p\in\simplex$ that $\sgn(\inprod{v_i}{p})$ is monotone in $i$.
-  In particular, it must be that for all $y$, $\sgn((v_i)_y)$ is monotone in $i$, taking the distribution with all weight on outcome $y$, thus establishing the first condition.
-  % (Similarly, if $\gamma(\ones_y) = \{r_j,r_{j+1}\}$, then $(v_i)_y = v_i \cdot \ones_y < 0$ for $i < j$, $(v_j)_y = 0$, and $(v_i)_y > 0$ for $i > j$.)
-  % \raft{This observation could use a better proof.}
-
-  For the second condition, suppose we had $\lambda^-(i) < \lambda^+(i)$.
-  Then we would have $y,y' \in \Y$ such that $v(i)_y < 0$, $v({i+1})_y < 0$, $v(i)_{y'} >0$, $v({i+1})_{y'} > 0$, and $0 < \frac{v(i)_y}{v({i+1})_y} < \frac{v(i)_{y'}}{v({i+1})_{y'}}$, which would in turn imply $|v(i)_y|/v(i)_{y'} < |v(i+1)_y| / v(i+1)_{y'}$.
-  Letting $c = \tfrac 1 2 \left(|v(i+1)_y| / v(i+1)_{y'} + |v(i)_y|/v(i)_{y'}\right)$ and taking $p$ to be the distribution with weight $1/(1+c)$ on $y$ and $c/(1+c)$ on $y'$, we see that
-  \begin{align*}
-    \inprod{v}{p} &= \frac 1 {1+c} \left(v(i)_y + \tfrac 1 2 (|v(i+1)_y| / v(i+1)_{y'} + |v(i)_y|/v(i)_{y'})v(i)_{y'}\right)
-    \\ &> \frac 1 {1+c} \left(v(i)_y + (|v(i)_y|/v(i)_{y'})v(i)_{y'}\right) = 0
-    \\
-    \inprod{w\jessie{?}}{p} &= \frac 1 {1+c} \left(v(i+1)_y + \tfrac 1 2 (|v(i+1)_y| / v(i+1)_{y'} + |v(i)_y|/v(i)_{y'})v(i)_{y'}\right)
-    \\ &< \frac 1 {1+c} \left(v(i+1)_y + (|v(i+1)_y|/v(i+1)_{y'})v(i+1)_{y'}\right) = 0~,
-  \end{align*}
-  thus violating the observation that $\sgn(\inprod{v(i)}{p})$ is monotone in $i$.
-
-  
-  \noindent\textbf{conditions $\implies$ 1-embeddable:} (correctness of construction)
-
-  First, observe that that $\lambda(i)$ satisfies $\lambda^+(i) \leq \lambda(i) \leq \lambda^-(i)$, and by the second condition, $\lambda(i) > 0$ even when either bound is infinite.
-  Thus, $\Lambda_i > 0$ for all $i$, and so $\varphi(r_1) < \ldots < \varphi(r_k)$.
-  By definition of $L$, we have $L(\varphi(r_1)) = \ell(r_1)$, and $L(\varphi(r_{i+1})) = \ell(r_i) + \Lambda_i \cdot (\varphi(r_{i+1})-\varphi(r_i)) \cdot (\ell(r_{i+1}) - \ell(r_i))$ for all $i \geq 2$.
-  Since $\varphi(r_{i+1})-\varphi(r_i) = 1/\Lambda_i$ by our construction, we have $L(\varphi(r_{i+1})) = \ell(r_{i+1})$, so that $\ell(r) = L(\varphi(r))$ for all $r\in\R$.
-  It remains therefore to show convexity of $L$ and the optimality conditions.
-
-  For convexity, note that $L$ is piecewise linear with the only possible nondifferentiable points being the embedding points $\varphi(r_1),\ldots,\varphi(r_k)$.
-  Let us denote the left and right derivative operators for real-valued functions by $\partial^-$ and $\partial^+$, respectively, and write $\partial^- \ell(u) = (\partial^- \ell(u)_y)_{y\in\Y} \in \reals^\Y$, and similarly for $\partial^+\ell(u)$.
-  To show convexity, then, we need only show $\partial^-\ell(\varphi(r_i)) \leq \partial^+\ell(\varphi(r_i))$ for all $i\in\{1,\ldots,k\}$, where the inequality holds coordinate-wise.
-  By construction, we have $\partial^-\ell(\varphi(r_1)) = -K\ones$ and $\partial^+\ell(\varphi(r_k)) = \Lambda_{k-1} K\ones$, and for $i\in\{1,\ldots,k-1\}$ we have $\partial^+\ell(\varphi(r_i)) = \partial^-\ell(\varphi(r_{i+1})) = \Lambda_i v(i+1)$.
-  By definition of $K$, we have $\partial^-\ell(\varphi(r_1)) = -K \ones \leq v(2) = \partial^+\ell(\varphi(r_1))$ and $\partial^-\ell(\varphi(r_k)) = \Lambda_{k-1} v(k) \leq \Lambda_{k-1} K \ones = \partial^+\ell(\varphi(r_k))$.
-
-  It remains to show that for all $i\in\{2,\ldots,k-1\}$ and all $y\in\Y$, we have $\Lambda_{i-1} v(i)_y \leq \Lambda_i v(i+1)_y$, which by definition of $\Lambda$ is equivalent to $v(i)_y \leq \lambda(i) v(i+1)_y$.
-  By our first condition, the possible pairs $(\sgn(v(i)_y),\sgn(v(i+1)_y))$ are $(-,-),(-,0),(-,+),(0,0),(0,+),(+,+)$, and given that $\lambda(i)>0$, all are trivial except $(-,-)$ and $(+,+)$.
-  In the $(-,-)$ case, we have by definition of $\lambda^-(i)$ that $\lambda(i) \leq \lambda^-(i) \leq v(i)_y/v(i+1)_y$.
-  Recalling that both $v(i)_y$ and $v(i+1)_y$ are negative, we conclude $v(i)_y \leq \lambda(i)v(i+1)_y$.
-  In the $(+,+)$ case, we have $\lambda(i) \geq \lambda^+(i) \geq v(i)_y/v(i+1)_y$, and again $v(i)_y \leq \lambda(i)v(i+1)_y$.
-
-  For optimality, consider any $r\in\R$ and any $p\in\Gamma_{\varphi(r)}$.
-  By the matching of loss values, for every $r'\in\R$ we have  $\inprod{p}{\ell(r)} = \inprod{p}{L(\varphi(r))} \leq \inprod{p}{L(\varphi(r'))} = \inprod{p}{\ell(r')}$, which implies $p\in\gamma_r$.
-  For the other direction, consider a distribution $p\in\Delta(\Y)$, and the subgradient of $\inprod{p}{L(\varphi(r_i))}$ for some $i\in\{2,\ldots,k-1\}$.
-  We have
-  \begin{align*}
-    0\in\partial\inprod{p}{L(\varphi(r_i))}
-    &\iff \partial^-\inprod{p}{\ell(\varphi(r_i))} \leq 0 \leq \partial^+\inprod{p}{\ell(\varphi(r_i))}
-    \\
-    &\iff \inprod{p}{\partial^-\ell(\varphi(r_i))} \leq 0 \leq \inprod{p}{\partial^+\ell(\varphi(r_i))}
-    \\
-    &\iff \inprod{p}{\Lambda_{i-1} v(i)} \leq 0 \leq \inprod{p}{\Lambda_i v(i+1)}
-    \\
-    &\iff \inprod{p}{v(i)} \leq 0 \leq \inprod{p}{v(i+1)}
-    \\
-    &\iff \inprod{p}{\ell(r_i)-\ell(r_{i-1})} \leq 0 \leq \inprod{p}{\ell(r_{i+1})-\ell(r_i)}
-    \\
-    &\iff \inprod{p}{\ell(r_i)} \leq \inprod{p}{\ell(r_{i-1})} \text{ and } \inprod{p}{\ell(r_i)} \leq \inprod{p}{\ell(r_{i+1})}~.
-  \end{align*}
-  For $i=1$, similar reasoning gives that optimality is equivalent to the condition $\inprod{p}{\ell(r_1)} \leq \inprod{p}{\ell(r_{2})}$, and for $i=k$, $\inprod{p}{\ell(r_k)} \leq \inprod{p}{\ell(r_{k-1})}$.
-  (Note that the other conditions, $-K \leq 0$ or $0 \leq \Lambda_{k-1} K$, are true regardless of $p$.)
-  In particular, if $p \in \gamma_{r_i}$, then we have $\inprod{p}{\ell(r_i)} \leq \inprod{p}{\ell(r_{i-1})}$ for $i \geq 2$, and $\inprod{p}{\ell(r_i)} \leq \inprod{p}{\ell(r_{i+1})}$ for $i \leq k-1$, so for all $i$ we have $0\in\partial\inprod{p}{L(\varphi(r_i))}$ and thus $p \in \Gamma_{\varphi(r_i)}$.
-
-  \noindent\textbf{embedding $\implies$ monotone:}
-
-  \raf{FINISH AFTER MOVE}
-
-  The above establishes the second condition of monotone properties in Definition~\ref{def:monotone-prop}.
-  To see the first condition, note that we have already established it for $i\in\{2,\ldots,k-1\}$.
-  For $i=1,k$, we merely observe that $\inprod{a(r_1)}{p} \leq 0$ and $\inprod{b(r_k)}{p} \geq 0$ for all $p\in\simplex$.
-
-  
-
-  \noindent\textbf{monotone $\implies$ orderable:}
-  
-  \raf{FINISH AFTER MOVE}
-
-  Let $\gamma:\simplex\toto\R$ be finite and monotone.
-  Then we can use the total ordering of $\R$ to write $\R = \{r_1,\ldots,r_k\}$ such that $r_i < r_{i+1}$ for all $i \in \{1,\ldots,k-1\}$.
-  We now have $\gamma_{r_i} \cap \gamma_{r_{i+1}} = \{p\in\simplex : \inprod{a(r_{i+1})}{p} \leq 0 \leq \inprod{b(r_i)}{p} \}$.
-  If this intersection is empty, then there must be some $p$ with $\inprod{b(r_i)}{p} < 0$ and $\inprod{a(r_{i+1})}{p} > 0$; by monotonicity, no earlier or later reports can be in $\gamma(p)$, so we see that $\gamma(p) = \emptyset$, a contradiction.
-  Thus the intersection is nonempty, and as we also know $b(r_i) \leq a(r_{i+1})$ we conclude $b(r_i) = a(r_{i+1})$, and the intersection is the hyperplane defined by $b(r_i) = a(r_{i+1})$.
-
-
-\end{proof}
-
-The main result of this section is Theorem \ref{thm:orderable-1-embed}.
-\begin{theorem} \label{thm:orderable-1-embed}
+\subsection{Proof techniques and general convex surrogates}
+We collect the above results, and add one more, in the following summary theorem.
+\begin{theorem} \label{thm:1d-tfae}
   Let $\ell: \R \to \nonnegreals^{\Y}$ be a discrete loss eliciting a finite property $\gamma$.
-  The following are equivalent:
-  \begin{enumerate}
-    \item $\gamma$ is orderable.
-    \item $\ell$ is $1$-embeddable.
-    \item $\ell$ has some polyhedral calibrated surrogate loss $L: \reals \to \nonnegreals^{\Y}$.
-    \item $\ell$ has some convex calibrated surrogate loss $L: \reals \to \nonnegreals^{\Y}$.
-  \end{enumerate}
+  The following are equivalent: (1) $\gamma$ is orderable; (2) the intersection graph of $\gamma$ is a path; (3) the two conditions of Theorem \ref{thm:construct-1d-loss} are satisfied; (4) $\ell$ is $1$-embeddable; (5) $\ell$ has some polyhedral calibrated surrogate loss $L: \reals \to \nonnegreals^{\Y}$; (6) $\ell$ has some convex calibrated surrogate loss $L: \reals \to \nonnegreals^{\Y}$.
 \end{theorem}
-This theorem implies that one can directly test if a property is $1$-embeddable via the orderable criterion.
-Orderability can be tested using the Bayes risk of $\ell$, a polyhedral function defined by $p \mapsto \max_{r \in \R} \inprod{p}{\ell(r)}$.
-A direct approach is to project this function down to the simplex to give the level sets $\gamma_r$, as in Figures~\ref{fig:intersection-graph-ex} and~\ref{fig:abstain-alpha-half}.
-Another approach is to note that the intersection graph is directly given by finding those pairs $r,r'$ that simultaneously maximize the Bayes risk, i.e. cases where for some $p$, we have $r,r' \in \argmax_{r'' \in \R} \inprod{p}{\ell(r'')}$.
 
-\begin{figure}
-	\begin{minipage}{0.48\linewidth}
-	\centering
-	\includegraphics[width = 0.8\linewidth]{tikz/intersection-graph.pdf}
-	\caption{Intersection graph for the [truncated] expected value property on outcomes $\Y = \{1,2,3\}$.}
-	\label{fig:intersection-graph-ex}
-	\end{minipage}
-\hfill
-	\begin{minipage}{0.48\linewidth}
-	\centering
-	\includegraphics[width = 0.9\linewidth]{tikz/abstain-alpha-half.pdf}
-	\caption{Intersection graph for the $\abstain{1/2}$ property on $\Y = \{1,2,3\}$.}
-	\label{fig:abstain-alpha-half}
-\end{minipage}
-\end{figure}
-
-
-\subsection{Proof approach: monotonicity}
-\bo{Depending on space, we can give full definitions and proof sketches here, or less.}
-
-The key idea of the proof is to define \emph{monotonicity} of a general property $g: \simplex \to 2^{\R}$.
-This generalizes orderability to the case where the report space $\R$ is not necessarily finite.
-We show a finite property is orderable if and only if it is monotone.
-From the definition of monotonicity, we are able to directly construct a polyhedral surrogate $L$, proving (1) $\implies$ (2) in Theorem \ref{thm:orderable-1-embed}.
-The equivalence of embedding and polyhedral surrogates of \cite{finocchiaro2019embedding} (Theorem \ref{thm:embed-iff-poly}) gives (2) $\implies$ (3), and the fact that polyhedral functions are convex gives (3) $\implies$ (4).
-Then, we show that monotone properties with report space $\reals$ are precisely those elicited by convex loss functions $L$.
-This, along with a result that calibrated link functionss must also be in a sense ``ordered'', proves (4) $\implies$ (1).
-
+We summarize the proof ideas here.
+(1) $\iff$ (2) was shown in Proposition \ref{prop:orderable-iff-path}.
+(4) $\iff$ (5) was shown in \cite{finocchiaro2019embedding}, which we summarized in Theorem \ref{thm:embed-iff-poly}.
+We therefore prove (1) $\implies$ (3) $\implies$ (4) $\implies$ (6) $\implies$ (1).
+\bo{What else to say?}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Higher dimensions}\label{sec:d-dim}
-\bo{blurb about the purpose of this section and the layout.}
-\jessie{Taking a crack at it:}
-\bo{Nice job!}
 Our newfound understanding of the 1-dimensional embedding characterization leads us to realize that a large class of properties are not $1$-embeddable.
 \cite{finocchiaro2019embedding} have shown a trivial upper bound that every property is $(n-1)$-embeddable\jessie{already mentioned earlier}, but it is an open question as to how tight we can get the bounds on embedding dimension.
 Reducing embedding dimension significantly below $(n-1)$ can help provide a computational speedup in the optimization problem, which is a function of the surrogate loss dimension.
@@ -878,6 +784,141 @@ For one example where we can reduce surrogate dimension with a low-entropy assum
 \appendix
 
 \section{$1$-dimensional characterization omitted proofs}
+
+\bo{TODO: prove a gigantic TFAE here}
+\begin{theorem} \label{thm:construct-1d-loss}
+  Let $\ell: \R \to \nonnegreals^{\Y}$ be a discrete loss.
+  Then $\ell$ is $1$-embeddable if and only if there is an ordering $\R = \{r_1,\ldots,r_k\}$ of the reports such that the following two conditions hold, where $v(i)_y := \ell(r_i)_y - \ell(r_{i-1})_y$:
+  \begin{enumerate}
+  \item For all $y\in\Y$, the sequence $\sgn(v(i)_y)$ is monotone in
+    $i\in\{1,\ldots,k-1\}$,
+  \item For all $i\in\{2,\ldots,k-1\}$
+    \begin{align*}
+      \lambda^-(i) &= \min \left\{\frac{v(i)_y}{v({i+1})_y} : y\in\Y, v(i)_y, v({i+1})_y < 0\right\}
+      \\
+      \lambda^+(i) &= \max \left\{\frac{v(i)_y}{v({i+1})_y} : y\in\Y, v(i)_y, v({i+1})_y > 0\right\}~,
+    \end{align*}
+    we have $\lambda^-(i) \geq \lambda^+(i)$.
+    (We adopt the convention $\max\emptyset = -\infty$, $\min\emptyset = +\infty$.)
+  \end{enumerate}
+
+  Moreover, when these conditions hold, the loss $L:\reals\to\reals^\Y$ embeds $\ell$ with $\varphi:\R\to\reals$, \jessiet{Have been using $\phi$ instead of $\varphi$ for embeddings in this paper so far. I have a slight preference for $\varphi$ since it matches the last paper, but I don't care too much... just need to pick one.}\raft{Why switch to $\phi$ if you prefer $\varphi$?}
+  where
+  \begin{align*}
+    \varphi(r_i) &= \sum_{j=2}^i 1/\Lambda_j~, \quad \text{(where $\varphi(r_1)=0$)}
+    \\
+    L(u) &= \begin{cases}
+      \ell(r_1) - u K \ones & u \leq \varphi(r_1) = 0 \\
+      \ell(r_i) + \Lambda_i \cdot (u - \varphi(r_i)) \cdot  (\ell(r_{i+1})-\ell(r_i)) & u \in [\varphi(r_i),\varphi(r_{i+1})] \\
+      \ell(r_k) + \Lambda_{k-1} \cdot (u - \varphi(r_k))\cdot K \ones & u \geq \varphi(r_k)
+    \end{cases}~,
+  \end{align*}
+  \jessiet{In the cases: what if $\varphi(r_1) < 0$?}\raft{I set $\varphi(r_1)=0$; updated to something hopefully clearer}
+  where $\lambda(i) = \min(\lambda^+(i),\max(\lambda^-(i),1))$, $\Lambda_i := \prod_{j=2}^i \lambda(j)$, $\Lambda_1=1$, and $K = \max_{i\in\{2,\ldots,k\},y\in\Y} |v(i)_y|$.
+\end{theorem}
+\begin{proof}
+  \raf{Actually, the easiest proof given what we have is:
+    \\
+  orderable
+  $\implies$
+  these $\ell$ conditions
+  $\implies$
+  1-embeddable
+  $\implies$
+  monotone
+  $\implies$
+  orderable
+  \\
+  Note: need $\gamma$ and $\Gamma$ in a few places}
+
+  \noindent\textbf{orderable $\implies$ conditions:}
+
+  Let $\gamma:\simplex\toto\R$ be finite and orderable.
+  From~\cite[Theorem 4]{lambert2018elicitation}, we have positively-oriented normals $v_i\in\reals^\Y$ for all $i \in \{1,\ldots,k-1\}$ such that $\gamma_{r_i} \cap \gamma_{r_{i+1}} = \{p\in\simplex : \inprod{v_i}{p} = 0\}$, and moreover, for all $i \in \{2,\ldots,k-1\}$, we have $\gamma_{r_i} = \{p\in\simplex : \inprod{v_{i-1}}{p} \leq 0 \leq \inprod{v_i}{p}\}$, while $\gamma_{r_1} = \{p\in\simplex : \inprod{v_1}{p} \leq 0\}$ and $\gamma_{r_k} = \{p\in\simplex : \inprod{v_{k-1}}{p} \leq 0\}$.
+  From the positive orientation of the $v_i$, we have for all $p\in\simplex$ that $\sgn(\inprod{v_i}{p})$ is monotone in $i$.
+  In particular, it must be that for all $y$, $\sgn((v_i)_y)$ is monotone in $i$, taking the distribution with all weight on outcome $y$, thus establishing the first condition.
+  % (Similarly, if $\gamma(\ones_y) = \{r_j,r_{j+1}\}$, then $(v_i)_y = v_i \cdot \ones_y < 0$ for $i < j$, $(v_j)_y = 0$, and $(v_i)_y > 0$ for $i > j$.)
+  % \raft{This observation could use a better proof.}
+
+  For the second condition, suppose we had $\lambda^-(i) < \lambda^+(i)$.
+  Then we would have $y,y' \in \Y$ such that $v(i)_y < 0$, $v({i+1})_y < 0$, $v(i)_{y'} >0$, $v({i+1})_{y'} > 0$, and $0 < \frac{v(i)_y}{v({i+1})_y} < \frac{v(i)_{y'}}{v({i+1})_{y'}}$, which would in turn imply $|v(i)_y|/v(i)_{y'} < |v(i+1)_y| / v(i+1)_{y'}$.
+  Letting $c = \tfrac 1 2 \left(|v(i+1)_y| / v(i+1)_{y'} + |v(i)_y|/v(i)_{y'}\right)$ and taking $p$ to be the distribution with weight $1/(1+c)$ on $y$ and $c/(1+c)$ on $y'$, we see that
+  \begin{align*}
+    \inprod{v}{p} &= \frac 1 {1+c} \left(v(i)_y + \tfrac 1 2 (|v(i+1)_y| / v(i+1)_{y'} + |v(i)_y|/v(i)_{y'})v(i)_{y'}\right)
+    \\ &> \frac 1 {1+c} \left(v(i)_y + (|v(i)_y|/v(i)_{y'})v(i)_{y'}\right) = 0
+    \\
+    \inprod{w\jessie{?}}{p} &= \frac 1 {1+c} \left(v(i+1)_y + \tfrac 1 2 (|v(i+1)_y| / v(i+1)_{y'} + |v(i)_y|/v(i)_{y'})v(i)_{y'}\right)
+    \\ &< \frac 1 {1+c} \left(v(i+1)_y + (|v(i+1)_y|/v(i+1)_{y'})v(i+1)_{y'}\right) = 0~,
+  \end{align*}
+  thus violating the observation that $\sgn(\inprod{v(i)}{p})$ is monotone in $i$.
+
+  
+  \noindent\textbf{conditions $\implies$ 1-embeddable:} (correctness of construction)
+
+  First, observe that that $\lambda(i)$ satisfies $\lambda^+(i) \leq \lambda(i) \leq \lambda^-(i)$, and by the second condition, $\lambda(i) > 0$ even when either bound is infinite.
+  Thus, $\Lambda_i > 0$ for all $i$, and so $\varphi(r_1) < \ldots < \varphi(r_k)$.
+  By definition of $L$, we have $L(\varphi(r_1)) = \ell(r_1)$, and $L(\varphi(r_{i+1})) = \ell(r_i) + \Lambda_i \cdot (\varphi(r_{i+1})-\varphi(r_i)) \cdot (\ell(r_{i+1}) - \ell(r_i))$ for all $i \geq 2$.
+  Since $\varphi(r_{i+1})-\varphi(r_i) = 1/\Lambda_i$ by our construction, we have $L(\varphi(r_{i+1})) = \ell(r_{i+1})$, so that $\ell(r) = L(\varphi(r))$ for all $r\in\R$.
+  It remains therefore to show convexity of $L$ and the optimality conditions.
+
+  For convexity, note that $L$ is piecewise linear with the only possible nondifferentiable points being the embedding points $\varphi(r_1),\ldots,\varphi(r_k)$.
+  Let us denote the left and right derivative operators for real-valued functions by $\partial^-$ and $\partial^+$, respectively, and write $\partial^- \ell(u) = (\partial^- \ell(u)_y)_{y\in\Y} \in \reals^\Y$, and similarly for $\partial^+\ell(u)$.
+  To show convexity, then, we need only show $\partial^-\ell(\varphi(r_i)) \leq \partial^+\ell(\varphi(r_i))$ for all $i\in\{1,\ldots,k\}$, where the inequality holds coordinate-wise.
+  By construction, we have $\partial^-\ell(\varphi(r_1)) = -K\ones$ and $\partial^+\ell(\varphi(r_k)) = \Lambda_{k-1} K\ones$, and for $i\in\{1,\ldots,k-1\}$ we have $\partial^+\ell(\varphi(r_i)) = \partial^-\ell(\varphi(r_{i+1})) = \Lambda_i v(i+1)$.
+  By definition of $K$, we have $\partial^-\ell(\varphi(r_1)) = -K \ones \leq v(2) = \partial^+\ell(\varphi(r_1))$ and $\partial^-\ell(\varphi(r_k)) = \Lambda_{k-1} v(k) \leq \Lambda_{k-1} K \ones = \partial^+\ell(\varphi(r_k))$.
+
+  It remains to show that for all $i\in\{2,\ldots,k-1\}$ and all $y\in\Y$, we have $\Lambda_{i-1} v(i)_y \leq \Lambda_i v(i+1)_y$, which by definition of $\Lambda$ is equivalent to $v(i)_y \leq \lambda(i) v(i+1)_y$.
+  By our first condition, the possible pairs $(\sgn(v(i)_y),\sgn(v(i+1)_y))$ are $(-,-),(-,0),(-,+),(0,0),(0,+),(+,+)$, and given that $\lambda(i)>0$, all are trivial except $(-,-)$ and $(+,+)$.
+  In the $(-,-)$ case, we have by definition of $\lambda^-(i)$ that $\lambda(i) \leq \lambda^-(i) \leq v(i)_y/v(i+1)_y$.
+  Recalling that both $v(i)_y$ and $v(i+1)_y$ are negative, we conclude $v(i)_y \leq \lambda(i)v(i+1)_y$.
+  In the $(+,+)$ case, we have $\lambda(i) \geq \lambda^+(i) \geq v(i)_y/v(i+1)_y$, and again $v(i)_y \leq \lambda(i)v(i+1)_y$.
+
+  For optimality, consider any $r\in\R$ and any $p\in\Gamma_{\varphi(r)}$.
+  By the matching of loss values, for every $r'\in\R$ we have  $\inprod{p}{\ell(r)} = \inprod{p}{L(\varphi(r))} \leq \inprod{p}{L(\varphi(r'))} = \inprod{p}{\ell(r')}$, which implies $p\in\gamma_r$.
+  For the other direction, consider a distribution $p\in\Delta(\Y)$, and the subgradient of $\inprod{p}{L(\varphi(r_i))}$ for some $i\in\{2,\ldots,k-1\}$.
+  We have
+  \begin{align*}
+    0\in\partial\inprod{p}{L(\varphi(r_i))}
+    &\iff \partial^-\inprod{p}{\ell(\varphi(r_i))} \leq 0 \leq \partial^+\inprod{p}{\ell(\varphi(r_i))}
+    \\
+    &\iff \inprod{p}{\partial^-\ell(\varphi(r_i))} \leq 0 \leq \inprod{p}{\partial^+\ell(\varphi(r_i))}
+    \\
+    &\iff \inprod{p}{\Lambda_{i-1} v(i)} \leq 0 \leq \inprod{p}{\Lambda_i v(i+1)}
+    \\
+    &\iff \inprod{p}{v(i)} \leq 0 \leq \inprod{p}{v(i+1)}
+    \\
+    &\iff \inprod{p}{\ell(r_i)-\ell(r_{i-1})} \leq 0 \leq \inprod{p}{\ell(r_{i+1})-\ell(r_i)}
+    \\
+    &\iff \inprod{p}{\ell(r_i)} \leq \inprod{p}{\ell(r_{i-1})} \text{ and } \inprod{p}{\ell(r_i)} \leq \inprod{p}{\ell(r_{i+1})}~.
+  \end{align*}
+  For $i=1$, similar reasoning gives that optimality is equivalent to the condition $\inprod{p}{\ell(r_1)} \leq \inprod{p}{\ell(r_{2})}$, and for $i=k$, $\inprod{p}{\ell(r_k)} \leq \inprod{p}{\ell(r_{k-1})}$.
+  (Note that the other conditions, $-K \leq 0$ or $0 \leq \Lambda_{k-1} K$, are true regardless of $p$.)
+  In particular, if $p \in \gamma_{r_i}$, then we have $\inprod{p}{\ell(r_i)} \leq \inprod{p}{\ell(r_{i-1})}$ for $i \geq 2$, and $\inprod{p}{\ell(r_i)} \leq \inprod{p}{\ell(r_{i+1})}$ for $i \leq k-1$, so for all $i$ we have $0\in\partial\inprod{p}{L(\varphi(r_i))}$ and thus $p \in \Gamma_{\varphi(r_i)}$.
+
+  \noindent\textbf{embedding $\implies$ monotone:}
+
+  \raf{FINISH AFTER MOVE}
+
+  The above establishes the second condition of monotone properties in Definition~\ref{def:monotone-prop}.
+  To see the first condition, note that we have already established it for $i\in\{2,\ldots,k-1\}$.
+  For $i=1,k$, we merely observe that $\inprod{a(r_1)}{p} \leq 0$ and $\inprod{b(r_k)}{p} \geq 0$ for all $p\in\simplex$.
+
+  
+
+  \noindent\textbf{monotone $\implies$ orderable:}
+  
+  \raf{FINISH AFTER MOVE}
+
+  Let $\gamma:\simplex\toto\R$ be finite and monotone.
+  Then we can use the total ordering of $\R$ to write $\R = \{r_1,\ldots,r_k\}$ such that $r_i < r_{i+1}$ for all $i \in \{1,\ldots,k-1\}$.
+  We now have $\gamma_{r_i} \cap \gamma_{r_{i+1}} = \{p\in\simplex : \inprod{a(r_{i+1})}{p} \leq 0 \leq \inprod{b(r_i)}{p} \}$.
+  If this intersection is empty, then there must be some $p$ with $\inprod{b(r_i)}{p} < 0$ and $\inprod{a(r_{i+1})}{p} > 0$; by monotonicity, no earlier or later reports can be in $\gamma(p)$, so we see that $\gamma(p) = \emptyset$, a contradiction.
+  Thus the intersection is nonempty, and as we also know $b(r_i) \leq a(r_{i+1})$ we conclude $b(r_i) = a(r_{i+1})$, and the intersection is the hyperplane defined by $b(r_i) = a(r_{i+1})$.
+
+
+\end{proof}
+
+
 
 \section{$d$-dimensional omitted proofs}
 
