@@ -473,64 +473,70 @@ We therefore prove (1) $\implies$ (3) $\implies$ (4) $\implies$ (6) $\implies$ (
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Higher dimensions}\label{sec:d-dim}
-Our newfound understanding of the 1-dimensional embedding characterization leads us to realize that a large class of properties are not $1$-embeddable.
-\cite{finocchiaro2019embedding} have shown a trivial upper bound that every property is $(n-1)$-embeddable\jessie{already mentioned earlier}, but it is an open question as to how tight we can get the bounds on embedding dimension.
-Reducing embedding dimension significantly below $(n-1)$ can help provide a computational speedup in the optimization problem, which is a function of the surrogate loss dimension.
-This is especially important as the number of possible outcomes $n$ grows large.
+Our characteriation of 1-embeddable losses reveals a large class of properties are not $1$-embeddable.
+On the other hand, previous work has shown that every discrete loss is $(n-1)$-embeddable
+\citep{finocchiaro2019embedding}.
+A natural next question, therefore, is to characterize $d$-embeddable losses for $2 \leq d \leq n-2$, or failing that, to develop tighter bounds on the embedding dimension of various losses.
+An embedding dimension significantly below $(n-1)$, such as $O(\log n)$ as with abstain loss, can lead to faster downstream optimization, as rates and computation times can both depend on the surrogate loss dimension.
+This dependence is especially important as the number of possible outcomes $n$ grows large.
 
-Below, we generalize our characterization to $d$-embeddability for $d \geq 2$.
-Having a finite number of embedding points and restricting to polyhedral functions allows us to study the subgradient sets of the loss at embedding points, which we formalize in Section~\ref{subsec:sub-sets}.
-Using a general theory of polytopes, we can then present our general $d$-dimensional characterization in terms of optimality and monotonicity conditions.
-In Section~\ref{subsec:opt-conditions}, we present a quadratic feasibility program in order to understand necessary conditions for $d$-embeddability by satisfying optimality conditions, yielding new lower bounds for embedding dimension in Corollary~\ref{cor:d-embeddable-char}.
+In this section, we develop a characterization of $d$-embeddable discrete losses for $d \geq 2$.
+We begin with some basic facts and definitions about polytopes and their Minkowski sums, which naturally arise when considering the subgradients of a polyhedral surrogate loss (\S~\ref{subsec:sub-sets}).
+From these definitions, we can state a somewhat immediate characterization of $d$-embeddable losses in terms of polytopes that satisfy certain optimality and monotonicity conditions (\S~\ref{subsec:gener-char}).
+We then explore the optimality condition further, and through facts about Minkowski sums, slowly remove mentions of polytopes from the condition until we arrive at a quadratic feasibility program to test whether such polytopes exist (\S~\ref{subsec:opt-conditions}).
+Finally, we discuss the proof of correctness of our feasibility program together with intuition.
+
+\raf{Orphaned; add back:} necessary conditions for $d$-embeddability by satisfying optimality conditions, yielding new lower bounds for embedding dimension in Corollary~\ref{cor:d-embeddable-char}.
 
 \subsection{Setup: subgradient sets at embedding points.}\label{subsec:sub-sets}
 %Recall that we have a loss function $\ell: \R \to \reals^{\Y}_{\geq 0}$, and for any prediction $r \in \R$ of the algorithm, we write $\gamma_r = \{ p : \inprod{p}{\ell(r)} \leq \inprod{p}{\ell(r')} (\forall r')\}$.
 %We are interested in potential polyhedral surrogates $L: \reals^d \to \reals^{\Y}_{\geq 0}$.
 %These are associated with embedding points, where $u_r \in \reals^d$ is linked back to the discrete prediction $r$.
 
-Recall that if $\ell: \R \to \nonnegreals^{\Y}$ is embedded by $L: \reals^d \to \nonnegreals^{\Y}$, then each $r \in \R$ is embedded at some point $u_r \in \reals^d$.
-In particular, $u_r$ must minimize $\inprod{p}{L(u)}$ if and only if $r$ minimizes $\inprod{p}{\ell(r')}$.
-
+Recall that if $\ell: \R \to \nonnegreals^{\Y}$ is embedded by $L: \reals^d \to \nonnegreals^{\Y}$, then each $r \in \R$ is embedded at some point $\varphi(r) \in \reals^d$.
+In particular, $\varphi(r)$ must minimize $\inprod{p}{L(u)}$ if and only if $r$ minimizes $\inprod{p}{\ell(r')}$.
 The key to our approach is to study as first-class objects the sets of all subgradients\footnote{Recall that a subgradient of e.g. the convex function $L(\cdot)_y: \reals^d \to \reals$ at a point $u$ is a vector $v \in \reals^d$ such that $L(u')_y \geq L(u)_y + \inprod{v}{u'-u}$ for all $u'$.} of $L$ at these embedding points.
-To settle the question of whether a consistent surrogate exists in $d$ dimensions, it surprisingly turns out to be necessary and sufficient to consider conditions on these sets alone.
-In particular, we use heavily that a convex function is minimized at a point if and only if the origin $\vec{0}$ is in its subgradient set at that point.
+The question of whether a calibrated polyhedral surrogate exists in $d$ dimensions essentially reduces to conditions on these sets alone.
+\raft{The ``essentially'' is because we need loss values to match.  It's not clear if that comes for free, i.e., if you embed the correct property, can you always modify the loss to match $\ell$?}
+In particular, we use the fact that a convex function is minimized at $u$ if and only if $\vec{0}$ is in its subgradient set at $u$.
 
-Therefore, we abstract to consider collections of sets $T^r_y$, which aspire to be the subgradient sets of a calibrated polyhedral surrogate $L(\cdot)_y$ at $u_r$.
-Throughout, we fix $r$ and remove it from the subscript for ease of exposition.
+Therefore, we consider collections of sets $T^r_y$, which intuitively aspire to be the subgradient sets of a calibrated polyhedral surrogate $L(\cdot)_y$ at $\varphi(r)$, denoted $\partial L(\varphi(r))_y$.
+Throughout, we often take $r$ as implicit and suppress it from our notation for ease of exposition.
 Note that if $L(\cdot)_y$ is a polyhedral function on $\reals^d$, then all of its subgradient sets are (bounded) closed polytopes.\bo{cite}\jessie{\cite{rockafellar1997convex} ? in my notes, but I don't have the exact theorem number.}
 
 \begin{definition}[$\T$, $D(\T)$]
-  We use the following notation for a collection of closed polytopes, with implicit parameters $d$ and $r$: $\T = \{T_y \subseteq \reals^d : y \in \Y\}$.
-
+  We write $\T = \{T_y \subseteq \reals^d : y \in \Y\}$ to denote a collection of closed polytopes, with implicit parameter $d$.
   Given a distribution $p \in \simplex$, we write the $p$-weighted Minkowski sum of $\T$ as
-    \[ \oplus_p \T := \left\{ \sum_{y \in \Y} p_y x_y ~\Big|~ x_1 \in T_1, \dots, x_y \in T_y \right\} , \]
-  in other words, the Minkowski sum of the scaled sets $\{p_y T_y : y \in \Y\}$.
-
+  \begin{equation*}
+    \oplus_p \T := \mathop{\bigoplus}\limits_{y\in\Y} p_yT_y = \left\{ \sum_{y \in \Y} p_y x_y ~\Big|~ x_y \in T_y \; \forall y\in\Y \right\}~,
+  \end{equation*}
+  or in other words, the Minkowski sum of the scaled sets $\{p_y T_y : y \in \Y\}$.
   Finally, we associate with $\T$ a set of distributions $D(\T) = \{ p \in \simplex : \vec 0 \in \oplus_p \T\}$.
 \end{definition}
 
-The importance of the $p$-weighted Minkowski sum and of $D(\T)$ are that they capture the distributions $p$ for which $u_r$ minimizes expected loss, assuming that $\T$ correspond to some polyhedral $L$.
-\begin{proposition} \label{prop:minkowski-0-opt}
-  If $T_y$ is the subgradient set of each $L(u_r)_y$, then $D(\T)$ is the set of distributions $p \in \simplex$ for which the embedding point $u_r$ minimizes expected $L$-loss.
-\end{proposition}
+The importance of the $p$-weighted Minkowski sum and of $D(\T)$ are that they capture the distributions $p$ for which a point $u$ minimizes expected loss, whenever $\T$ corresponds to the subgradient sets of some polyhedral $L$ at $u$.
+In other words, under these conditions, we have $D(\T) = \Gamma_u$, the level set for $u$ of the property $\Gamma$ elicited by $L$.
+\begin{lemma} \label{lem:minkowski-0-opt}
+  Let $L: \reals^d \to \nonnegreals^{\Y}$ be a polyhedral loss eliciting a property $\Gamma$.
+  If for all $y\in\Y$ we have $T_y = \partial L(u)_y$ at some point $u\in\reals^d$, then $D(\T) = \Gamma_u$.
+\end{lemma}
 \begin{proof}
-  Any convex function $f$ is minimized at $u$ if and only if $\vec 0$ is a subgradient of $f$ at $u$.
-  Let $f(u) = \inprod{p}{L(u)}$.
-  Then the subgradient set of $f$ at $u$ is $\oplus_p \T$.
-  This follows from the basic properties that if $f_1,f_2$ are convex with subgradient sets $T_1,T_2$ at $u$, then $\alpha f_1$ has subgradient set $\alpha T_1$ and $f_1 + f_2$ has subgradient set $T_1 \oplus T_2$, the Minkowski sum.
-  So $\vec 0$ is a subgradient of $\inprod{p}{L(u_r)}$ if and only if $\vec 0 \in \oplus_p \T$, which by definition occurs if and only if $p \in D(\T)$.
+  Recall that a convex function $f$ is minimized at $u$ if and only if $\vec 0 \in \partial f(u)$.
+  % Let $f(u) = \inprod{p}{L(u)}$.
+  We thus have $p\in\Gamma_u \iff u \in \argmin_{u'} \inprod{p}{L(u')} \iff \vec 0 \in \partial\inprod{p}{L(u)} = \mathop{\bigoplus}_{y\in\Y} p_y \partial L(u)_y = \oplus_p \T \iff p\in D(\T)$.
+  Here we used the basic fact that if $f_1,f_2$ are convex with subgradient sets $T_1,T_2$ at $u$, then $\alpha f_1 + \beta f_2$ has subgradient set $\alpha T_1 \oplus \beta T_2$, the Minkowski sum of the scaled sets.
+  % So $\vec 0$ is a subgradient of $\inprod{p}{L(\varphi(r))}$ if and only if $\vec 0 \in \oplus_p \T$, which by definition occurs if and only if $p \in D(\T)$.
 \end{proof}
-This fact will be vital for characterizing when $\ell$ is correctly embedded by some $L$ whose subgradient sets are $\T$ for each $r \in \R$.
-We leverage it next.
+This fact will be vital for characterizing when $\ell$ is correctly embedded by some $L$ whose subgradient sets are $\T^r$ for each $r \in \R$.
 
 \subsection{General characterization}
+\label{subsec:gener-char}
 
 We now give a general characterization of when a discrete loss $\ell$ can be embedded into $d$ dimensions, i.e. when a consistent polyhedral surrogate $L: \reals^d \to \reals^{\Y}_{\geq 0}$ exists.
-
 Two conditions are required: \emph{optimality} and \emph{monotonicity}.
 Optimality enforces that the surrogate is minimized precisely when and where it should be.
-It says that for each discrete prediction $r$ and set of distributions $\gamma_r$ for which it is optimal, there exists a collection of polytopes $\T$ (presumably the subgradient sets of $L(u_r)_y$ for each $y$) realizing Proposition~\ref{prop:minkowski-0-opt}.
-Monotonicity says that these individual polytopes can actually be glued together to form the subgradients of some convex loss function $L$.
+It says that for each discrete prediction $r$ and set of distributions $\gamma_r$ for which it is $\ell$-optimal, there exists a collection of polytopes $\T^r$ such that, were they the subgradients of some polyhedral surrogate $L$ at some point $\varphi(r)$, then $\varphi(r)$ would be $L$-optimal at the same set of distributions $\gamma_r$; more succinctly in light of Lemma~\ref{lem:minkowski-0-opt}, we require $D(\T^r)=\gamma_r$.
+Monotonicity says that these individual polytopes can indeed be glued together to form the subgradients of some convex loss function $L$.
 
 %\begin{definition}[Optimality of subgradients for a level set] \label{def:opt}
 %  Given a collection of polytopes $\T^r = \{T_y^r \subseteq \reals^d : y \in \Y\}$ and a polytope $C \subseteq \simplex$, the \emph{optimality condition $\Opt(\T^r, C)$ holds} if $p \in C \iff \vec{0} \in \oplus_p T^r$.
@@ -560,16 +566,62 @@ Monotonicity says that these individual polytopes can actually be glued together
 
 \subsection{Characterizing optimality}\label{subsec:opt-conditions}
 
-We now investigate the optimality condition of Theorem \ref{thm:general-char}, for two purposes.
+We now focus entirely on the optimality condition of Theorem \ref{thm:general-char}, for two purposes.
 First, we aim to greatly narrow the search space for constructing low-dimensional surrogate loss functions for a given discrete loss.
 The tools we construct in this section aid in this task by constraining or constructing feasible subgradient sets $\T$ given a level set $\gamma_r$.
-Second, we wish to prove impossibilities, i.e. lower bounds on the embedding dimension of a given discrete loss (an apparently hard problem).
+Second, we wish to prove impossibilities, i.e., lower bounds on the embedding dimension of a given discrete loss (an apparently hard problem).
+For such lower bounds, it suffices to drop monotonicity from Theorem \ref{thm:general-char}, leaving us with an independent optimality condition for each $r\in\R$, and show that for any one $r\in\R$, we could not have $d$-dimensional polytopes $\T$ satisfying $D(\T) = \gamma_r$.
+% (For upper bounds, one must additionally show monotonicity.)
 
-By dropping monotonicity from Theorem \ref{thm:general-char}, we obtain $|\R|$ independent optimality conditions, $D(\T) = \gamma_r$, that must be satisfied in order to have a $d$-dimensional embedding.
-For upper bounds, one must construct a $\T$ satisfying $D(\T) = \gamma_r$ for all $r$ (and then turn to satisfying monotonicity).
-For lower bounds, it suffices to prove nonexistence of any such $\T$, for any $r$.
+At first glance, the optimality condition seems difficult to operationalize, as it involves the existence of polytopes, and even if said polytopes are given, it is unclear how to test whether $D(\T)=\gamma_r$.
+To begin, consider the latter problem, of understanding the set $D(\T)$ in terms of descriptions of $\T$, and in particular, of writing conditions on $\T$ such that $D(\T)$ is equal to a given polytope $C\subseteq\simplex$.
+We now that, by writing $C$ in its halfspace and vertex representations, respectively, we can give two such conditions.
 
-To accomplish these, we construct a quadratic feasibility program (QFP, Definition \ref{def:qfp}) that takes as input a polytope $C \subseteq \simplex$ and a parameter $d \in \mathbb{N}$ and (roughly) attempts to construct $\T$.
+\begin{condition}[Halfspace condition]\label{cond:H-condition}
+	A collection of polytopes $\T$ and a polytope $C\subseteq\simplex$ defined by $C = \{p \in \simplex : Bp \geq \vec 0\}$ \emph{satisfy the halfspace condition} if there exist $v_1, \ldots, v_k \in \reals^d$ such that, for all $i \in [k]$ and $y \in \Y$, for all $x \in T_y$, we have $\inprod{v_i}{x} \leq B_{iy}$.
+\end{condition}
+\begin{condition}[Vertex condition]\label{cond:V-condition}
+	A collection of polytopes $\T$ and a polytope $C\subseteq\simplex$ defined by $C = \conv(\{p^1, \ldots, p^\ell\})$ \emph{satisfy the vertex condition} if for all $j \in [\ell]$, $0 \in \oplus_{p^j} \T$. %% Equivalent: there exist $\{x_{jy} \in T_y : j \in [\ell]\}$ such that, for all $j \in [\ell]$, $\sum_{y \in \Y} p^j_y x_{jy} = \vec 0$.
+\end{condition}
+
+\begin{theorem} \label{thm:vertex-halfspace-opt}
+  Let the polytopes $\T = \{T_y \subseteq \reals^d : y \in \Y\}$ and $C$ be given, with $C = \conv(\{p^1,\ldots,p^{\ell}\}) = \{p: Bp \geq \vec 0\}$ for $B \in \reals^{k \times n}$.
+  We have $D(\T) = C$ if and only if both the halfspace and vertex conditions hold.
+\end{theorem}
+
+The two conditions above give us a much better understanding of when a given set of polytopes $\T$ satisfies the optimality condition.
+We are still left with the problem, however, of understanding when such a set $\T$ exists.
+Intuitively, the biggest hurdle that remains is the quantification over sets of polytopes, a massive search space.
+Surprisingly, one can reduce this search to a simple quadratic feasibility program, which we now give.
+
+Our program will consist of variables
+
+are a set of normal vectors $\{v_i \in \reals^d : i \in [k]\}$ and a set of vertices $\{x^j_y \in \reals^d : j \in [\ell], y \in \Y\}$.
+These correspond to a (possibly relaxed) halfspace representation and (possibly incomplete) vertex representation of the subgradient polytopes $\T$.
+
+\begin{definition}[Quadratic Feasibility Program] \label{def:qfp} ~ \\
+  \indent \textbf{Parameter:} $d \in \mathbb{N}$.
+
+  \textbf{Given:} a polytope $C = \{p \in \simplex : Bp \geq \vec 0\} = \conv(\{p^1, \ldots, p^\ell\}) \subseteq \simplex$, where $B \in \reals^{k \times n}$ has a minimum number of rows.
+
+  \textbf{Variables:} a matrix $V \in \reals^{k \times d}$, each row representing a normal vector; and a collection of matrices $X^1,\ldots,X^{\ell} \in \reals^{d \times n}$, with $X^j$ intuitively corresponding to $p^j$ with columns $x^j_y$ representing witness points.
+
+  \textbf{Constraints:}
+    \begin{align}
+      V X^j                     &\leq B    & \text{(pointwise, $\forall j \in [\ell]$)}  \label{eqn:qp-constr-1} \\
+      \sum_{y=1}^n p^j(y) x^j_y &= \vec 0  & \text{($\forall j \in [\ell]$)}    \label{eqn:qp-constr-2}
+    \end{align}
+\end{definition}
+
+The feasibility program can be viewed as a low-rank matrix problem, namely: do there exist a set of rank-$d$ matrices that are pointwise dominated by $B$, sharing the left factor $V$, whose right factors $X^j$ respectively satisfy a subspace constraint?
+We will see in Section~\ref{sec:examples} that for the important example of abstain loss, the constraints simplify into a more pure low-rank matrix problem.
+In particular, for $d=n-1$ a solution always exists (e.g. \bo{cite} \cite[Theorem 2]{finocchiaro2019embedding}), found by taking the convex conjugate of the negative Bayes risk of $\ell$ for each outcome and subtracting the report $u$, after which one can project down to $n-1$ dimensions (because $\simplex$ is $n-1$ dimensional to begin with).
+
+
+\section{OLD / TO MOVE}
+
+
+To accomplish our goal, we construct a quadratic feasibility program (QFP, Definition \ref{def:qfp}) that takes as input a polytope $C \subseteq \simplex$ and a parameter $d \in \mathbb{N}$ and (roughly) attempts to construct $\T$.
 We will prove the following main results.
 \begin{theorem} \label{thm:opt-iff-qfp}
   Given a convex polytope $C \subseteq \simplex$, there exist polytopes $\T$ in $\reals^d$ such that $D(\T) = C$ if and only if there is a feasible solution to the QFP (Definition \ref{def:qfp}) with parameter $d$.
