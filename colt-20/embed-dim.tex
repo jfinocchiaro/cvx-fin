@@ -235,7 +235,7 @@ The base object of study is a \emph{discrete loss function} $\ell: \R \to \nonne
 Here $\ell(r)_y$ is the loss of prediction $r \in \R$ (the report space) on $y \in \Y$ (the observation or label space).
 For simplicity we let $\Y = [n]$ throughout (where $[n] = \{1,\ldots,n\}$).
 The set of probability distributions on $\Y$ is denoted $\simplex\subseteq\nonnegreals^{\Y}$, represented as vectors of probabilities.
-We write $p(y)$ \bo{check/decide}\jessie{Fine with this, and I think it's consistently in the paper like this already} for the probability of outcome $y \in \Y$ drawn from $p \in \simplex$.
+We write $p_y$ \bo{check/decide}\jessie{Fine with this, and I think it's consistently in the paper like this already} for the probability of outcome $y \in \Y$ drawn from $p \in \simplex$.
 As is assumed by~\cite{finocchiaro2019embedding}, we assume the given discrete loss is \emph{non-redundant}, meaning every report $r$ uniquely minimizes expected loss for some distribution $p\in\simplex$.
 
 We similarly denote surrogate losses in dimension $d$ by $L:\reals^d\to\nonnegreals^{\Y}$, with predictions typically written $u\in\reals^d$.
@@ -266,7 +266,7 @@ In order to study calibration of surrogates (Definition~\ref{def:calibration} be
   A loss function $f: R \to \nonnegreals^{\Y}$ \emph{elicits} $g$ if $g(p) = \argmin_{r \in R} \inprod{p}{f(r)}$.
   We assume all properties are non-redundant, i.e. each $g_r$ contains a distribution $p$ not in any other $g_{r'}$.\jessiet{$R$ or $\R$?}
 \end{definition}
-For example, $0-1$ loss elicits the mode, which is formalized as a property on report space $R = \Y$ via $g(p) = \argmax_{y \in \Y} p(y)$.
+For example, $0-1$ loss elicits the mode, which is formalized as a property on report space $R = \Y$ via $g(p) = \argmax_{y \in \Y} p_y$.
 Notice in this example $g(p)$ is a singleton set when the mode of $p$ is unique and e.g. is $\Y$ when $p$ is uniform.
 %Another example of a finite property is ranking, in which $\R$ is the set of permutations of $\Y$, and $g(p)$ consists of all permutations that order $\Y$ from most to least probable (i.e. ties must be broken in all possible ways).
 In this paper we write $\gamma$ for the property elicited by $\ell$ with report space $\R$; and we use $\Gamma$ for the property elicited by $L$ with report space $\reals^d$.
@@ -502,8 +502,8 @@ Note that if $L(\cdot)_y$ is a polyhedral function on $\reals^d$, then all of it
   We use the following notation for a collection of closed polytopes, with implicit parameters $d$ and $r$: $\T = \{T_y \subseteq \reals^d : y \in \Y\}$.
 
   Given a distribution $p \in \simplex$, we write the $p$-weighted Minkowski sum of $\T$ as
-    \[ \oplus_p \T := \left\{ \sum_{y \in \Y} p(y) x_y ~\Big|~ x_1 \in T_1, \dots, x_y \in T_y \right\} , \]
-  in other words, the Minkowski sum of the scaled sets $\{p(y) T_y : y \in \Y\}$.
+    \[ \oplus_p \T := \left\{ \sum_{y \in \Y} p_y x_y ~\Big|~ x_1 \in T_1, \dots, x_y \in T_y \right\} , \]
+  in other words, the Minkowski sum of the scaled sets $\{p_y T_y : y \in \Y\}$.
 
   Finally, we associate with $\T$ a set of distributions $D(\T) = \{ p \in \simplex : \vec 0 \in \oplus_p \T\}$.
 \end{definition}
@@ -540,7 +540,7 @@ Monotonicity says that these individual polytopes can actually be glued together
   Then $\ell$ is $d$-embeddable if and only if there exists a collection of polytopes $\T^r = \{T^r_y : y \in \Y\}$ for each $r \in \R$ such that both of the following hold:
   \begin{enumerate}
     \item (Optimality) For each $r$, we have $D(\T^r) = \gamma_r$.
-    \item (Monotonicity) There exists an injective embedding function $\varphi : \R \to \reals^d$ and loss functions $\{L_y : \reals^d \to \reals^\Y_{\geq 0}\}_{y \in \Y}$ such that for all $r \in \R$ and $y \in \Y$, we have $T^r_y = \partial L_y(\varphi(r))$ and for all $r \in \R$, we have $L_y(\varphi(r)) = \ell_y(r)$.
+    \item (Monotonicity) There exists an injective embedding function $\varphi : \R \to \reals^d$ and loss functions $\{L_y : \reals^d \to \reals^\Y_{\geq 0}\}_{y \in \Y}$ such that for all $r \in \R$ and $y \in \Y$, we have $T^r_y = \partial L(\varphi(r))_y$ and for all $r \in \R$, we have $L(\varphi(r))_y = \ell(r)_y$.
   \end{enumerate}
 \end{theorem}
 \begin{proof}
@@ -619,40 +619,22 @@ The following condition formalizes a necessary condition on $\T$ in terms of the
 	A collection of polytopes $\T$ and a polytope $C$ in the simplex defined by $C = \conv(\{p^1, \ldots, p^\ell\})$ \emph{satisfy the vertex condition} if for all $j \in [\ell]$, $0 \in \oplus_{p^j} \T$. %% Equivalent: there exist $\{x_{jy} \in T_y : j \in [\ell]\}$ such that, for all $j \in [\ell]$, $\sum_{y \in \Y} p^j_y x_{jy} = \vec 0$.
 \end{condition}
 
-To gain a better understanding about the QFP in Definition~\ref{def:qfp}, we prove the following:
+To gain a better understanding about the QFP in Definition~\ref{def:qfp}, we prove the following in Appendix~\ref{app:omitted-d-dim}:
+\begin{lemma}  \label{lemma:minkowski-support}
+	Given polytopes $\T$, there exists a finite set of normal vectors $w_1,\ldots,w_K \in \reals^d$ such that, for all $p \in \simplex$, $\oplus_p \T = \{x : \inprod{w_i}{x} \leq \sum_{y \in \Y} p_y \max_{x \in T_y} \inprod{w_i}{x} \}$.
+\end{lemma}
+
+
 \begin{lemma} \label{lemma:D-polytope}
   For any $\T$, $D(\T)$ is a polytope (in particular, is convex).
 \end{lemma}
-\begin{proof}
-  \jessie{Appendix}
-   Recall by definition, the notation $\oplus_p \T = \{\sum_y p(y) x_y : x_y \in T_y (\forall y)\}$.
-   Each $T_y$ is a polytope, so $p(y) T_y$ is a polytope.
-   The Minkowski sum of polytopes is a polytope, so $\oplus_p \T$ is a polytope by~\cite[Section 1.2]{weibel2007minkowski}.
-  \bo{TODO}\jessie{Taking a try}
-  Since $\oplus_p \T$ is a polytope for all $p \in \simplex$, we know there is a halfspace representation of normals $V$ so that for all $y \in \Y$, we have $x \in p(y)T_y \iff \inprod{V}{x} \leq p(y) e^y$ for some matrix $V$ and the support vector $e^y$, where $e^y_i = H_{T_y}(V_i)$.
-  Adding redundant constraints for the $e^y$ as necessary, we know that the support of the Minkowski sum for a given normal is the sum of the normals~\cite[Theorem 3.1.6]{weibel2007minkowski}.
-  Concatenating the vectors $e^y$ into $E$, we have $x \in \oplus_p \T \iff \inprod{V^*}{x} \leq E^*p$, where $V^*$ has redundant rows added as necessary. \jessie{Hand wavy... not a fan.}
-  Substituting $x = \vec 0$, we see $\vec 0 \in \oplus_p \T \iff Ep \geq \vec 0$, which defines a polytope by construction of $E$.
-\end{proof}
-\begin{lemma}  \label{lemma:minkowski-support}
-  Given polytopes $\T$, there exists a finite set of normal vectors $w_1,\ldots,w_K \in \reals^d$ such that, for all $p \in \simplex$, $\oplus_p \T = \{x : \inprod{w_i}{x} \leq \sum_{y \in \Y} p(y) \max_{x \in T_y} \inprod{w_i}{x} \}$.
-\end{lemma}
-\begin{proof}
-  \jessie{Appendix}
-   For each $p$, $\oplus_p \T$ is a polytope.
-  \bo{TODO: it turns out that $p$ doesn't matter, only its support; and there are only finitely many possible supports (or even better, the normals that are complete for the uniform minkowski sum turn out to be complete for all other $p$-combinations).}
-  For each of the finitely many supports ($2^n - 1$), we know $\oplus_p \T$ is a polytope, and every polytope can be uniquely defined by an enumeration of vectors normal to its facets.
-  As a two polytopes with the same support can be defined by the same facet enumeration, we can simply concatenate these finite set of normals for the finite polytope supports.
-  Vectors that are not normal to a facet simply become redundant constraints.
-  This yields finitely many normals defining the weighted Minkowski sum $\oplus_p \T$ for all $p \in \simplex$.
-\end{proof}
+
+
 \begin{lemma} \label{lemma:E-to-B}
   Let $C = \{p : Bp \geq \vec 0 \}$ where $B$ has the minimum possible number of rows to capture $C$, and suppose $C = \{p : Ep \geq \vec 0 \}$.
   Then for each row in $B$ there is some (unique) row in $E$ that is equal to $\alpha B$ for some positive $\alpha$.
 \end{lemma}
-\begin{proof}
-  \bo{? Cite} \jessie{Is left as an exercise in the following text:} \cite[Exercise 2.15]{ziegler2012lectures}
-\end{proof}
+
 
 
 \begin{theorem} \label{thm:vertex-halfspace-opt}
@@ -665,7 +647,7 @@ To gain a better understanding about the QFP in Definition~\ref{def:qfp}, we pro
   First, we note that the vertex condition is immediate: For all $j \in [\ell]$, $p^j \in C$ which gives $p^j \in D(\T)$.
   To show the halfspace condition is satisfied, we first construct a matrix $E$ such that $Ep \geq 0 \iff Bp \geq 0$, then use this construction to pick out the necessary vectors $v_1,\dots,v_k$.
 
-  By Lemma \ref{lemma:minkowski-support}, there is a finite collection of vectors $w_1,\dots,w_{K} \in \reals^d$ and such that $\vec 0 \in \oplus_p \T$ if and only if, for all $w_i$, $\sum_y p(y) \max_{x \in T_y} \inprod{w_i}{x} \geq 0$.
+  By Lemma \ref{lemma:minkowski-support}, there is a finite collection of vectors $w_1,\dots,w_{K} \in \reals^d$ and such that $\vec 0 \in \oplus_p \T$ if and only if, for all $w_i$, $\sum_y p_y \max_{x \in T_y} \inprod{w_i}{x} \geq 0$.
   Hence, each vector $w_i$ generates a row of a matrix $E \in \reals^{K \times n}$ with $E_{iy} = \max_{x \in T_y} \inprod{w_i}{x}$, and we have $p \in D(\T) \iff Ep \geq 0$.
   By assumption of $D(\T) = C$, then, we have $Ep \geq 0 \iff Bp \geq 0$.
   By Lemma \ref{lemma:E-to-B}, because $B$ has the minimum possible number of rows, each row of $B$ appears (scaled by some positive constant) as a different row of $E$. Taking the collection of $w_i$ corresponding to these rows and rescaling them by that positive constant, we get a collection of $k$ vectors that we can rename $v_1,\ldots,v_k \in \reals^d$, with $\max_{x \in T_y} \inprod{v_i}{x} = B_{iy}$, hence the halfspace condition is satisfied.
@@ -678,8 +660,8 @@ To gain a better understanding about the QFP in Definition~\ref{def:qfp}, we pro
   Then in particular for each vector $v_1,\ldots,v_k$ guaranteed by the halfspace condition, we have
   \begin{align*}
     0 &\leq \max_{x \in \oplus_p \T} \inprod{v}{x}  \\
-      &=    \sum_{y \in \Y} p(y) \max_{x \in T_y} \inprod{v_i}{x}  \\
-      &\leq \sum_{y \in \Y} p(y) B_{iy} .
+      &=    \sum_{y \in \Y} p_y \max_{x \in T_y} \inprod{v_i}{x}  \\
+      &\leq \sum_{y \in \Y} p_y B_{iy} .
   \end{align*}
   This proves $Bp \geq 0$, so $p \in C$.
 \end{proof}
@@ -715,7 +697,7 @@ One classification-like problem that is of particular interest is the abstain pr
 The property $\gamma = \abstain{\alpha}$ for $\alpha \in (0,1)$ can be verified:
 \begin{equation}\label{eq:abstain-prop}
      \abstain{\alpha}(p) = \begin{cases}
-     \argmax_{y \in \Y} p(y) & \max_y p(y) \geq 1 - \alpha\\
+     \argmax_{y \in \Y} p_y & \max_y p_y \geq 1 - \alpha\\
      \bot & \text{otherwise}
      \end{cases}~.~
 \end{equation}
@@ -737,7 +719,7 @@ With our $1$-dimensional characterization, we already observe a tighter lower bo
 We now use our $d$-dimensional characterization and some observations about the $\abstain{1/2}$ property to improve lower bounds from those given by~\cite{ramaswamy2016convex}.
 
 \begin{proposition}\label{prop:qfp-fails-abstain}
-  The quadratic feasibility program (Definition \ref{def:qfp}) with input $C = \gamma_{\bot} = \{p \in \simplex: \max_y p(y) \leq 1/2\}$, $n=5$, and dimension parameter $d=2$, is infeasible.
+  The quadratic feasibility program (Definition \ref{def:qfp}) with input $C = \gamma_{\bot} = \{p \in \simplex: \max_y p_y \leq 1/2\}$, $n=5$, and dimension parameter $d=2$, is infeasible.
 \end{proposition}
 \begin{corollary}
   The abstain loss with $\alpha=1/2$ on $5$ outcomes is not $2$-embeddable.
@@ -970,8 +952,241 @@ The polyhedral loss is then shown in Figure~\ref{fig:real-embed-loss}.
 
 \jessie{If time, write out symbolic calculation}
 
+\section{Polytope notes}
+Here, we recall some standard definitions from the theory of Convex Polytopes.
+\begin{definition}
+	A \emph{polyhedra} in $\reals^d$ is defined by the intersection of a finite number of half-spaces.
+	A \emph{polytope} is a bounded polyhedra.
+\end{definition}
 
-\section{$d$-dimensional omitted proofs}
+\begin{definition}[Valid inequality]
+	Let $S$ be a set in $\reals^d$.
+	A \emph{valid inequality} for $S$ is an inequality that holds for all vectors in $S$.
+	That is, the pair $(a,\beta)$ is a valid inequality for $S$ if and only if 
+	\begin{align*}
+	\inprod{a}{x} &\leq \beta \; \; \forall x \in S~.~
+	\end{align*}
+\end{definition}
+
+\begin{definition}[Face]\label{def:face}
+	For any valid inequality of a polytope, the subset of the polytope of vectors which are tight for the inequality is called a \emph{face} of the polytope.
+	That is, the set $F$ is a face of the polytope $T$ if and only if 
+	\begin{align*}
+	F &= \{x \in T : \inprod{a}{x} = \beta \}
+	\end{align*}
+	for some valid inequality $(a, \beta)$ of $T$.
+\end{definition}
+
+\begin{definition}[Supporting function]
+	Let $S$ be a nonempty bounded set in $\reals^d$.
+	We call the \emph{supporting function} of $S$ the function $H_S:\reals^d \to \reals$ by
+	\begin{align*}
+	H_S(a) := \sup_{x \in S}\inprod{a}{x}~.~
+	\end{align*} 
+\end{definition}
+
+\iffalse
+\begin{definition}[Maximizers]
+	Let $S \subseteq \reals^d$, and $a \in \reals^d$.
+	The \emph{set of maximizers} of $a$ over $S$ is defined as
+	\begin{align*}
+	\mathcal{S}(S;a) &= \{x \in S : \inprod a x = H_S(a)\}
+	\end{align*}
+\end{definition}
+
+\begin{definition}[Normal cones]
+	Let $T$ be a polytope in $\reals^d$.
+	For any face $F$ of $T$, we define its \emph{normal cone} $\N(F;T)$ as the set of vectors for which $F$ is the maximizer set over $T$.
+	That is,
+	\begin{align*}
+	\N(F;T) = \left\{a : F = \mathcal{S}(T; a) \right\}~.~
+	\end{align*}
+\end{definition}
+
+It is worth noting that normal cones are generally not closed by this definition, but sometimes we may want to think about the closure of the normal cone.
+\fi
+
+\begin{definition}[Minkowski sum]
+	Let $S_1, S_2, \ldots, S_n$ be sets of vectors.
+	We can define their \emph{Minkowski sum} as the set of vectors which can be written as the sum of a vector in each set.
+	Namely,
+	\begin{align*}
+	S_1 \oplus \ldots \oplus S_n &= \{x_1 + \ldots + x_n : x_i \in S_i \; \forall i \}
+	\end{align*}
+\end{definition}
+
+%\begin{theorem}[\cite[Theorem 3.1.2]{weibel2007minkowski}] \label{thm:unique-face-decomp}
+%	Let $T_1, \ldots, T_n$ be polytopes in $\reals^d$ and let $F$ be a face of the Minkowski sum $T := T_1 \oplus \ldots \oplus T_n$.
+%	Then there are faces $F_1, \ldots, F_n$ of $T_1, \ldots, T_n$ respectively such that $F = F_1 \oplus \ldots \oplus F_n$.
+%	Moreover, this decomposition is unique.
+%\end{theorem}
+
+\iffalse 
+\begin{corollary}[\cite[Corollary 3.1.3]{weibel2007minkowski}]\label{cor:face-decomp-normal-cones}
+	Let $T = T_1 \oplus \ldots \oplus T_n$ be a Minkowski sum of polytopes in $\reals^d$, let $F$ be a nonempty face of $T$ , and let $F_1, \ldots, F_n$ be its decomposition.
+	Then $\N(F;T) = \N(F_1;T_1) \cap \ldots \cap \N(F_n; T_n)$.
+\end{corollary}
+
+%used in proving completeness of constructed V
+\begin{corollary}[\cite[Corollary 3.1.4]{weibel2007minkowski}]
+	Let $F_1, \ldots, F_n$ be nonempty faces of the polytopes $T_1, \ldots, T_n$ respectively, then $F_1 \oplus \ldots \oplus F_n$ is a face of $T_1 \oplus \ldots \oplus T_n$ if and only if the intersection of their normal cones is nonempty.
+\end{corollary}
+\fi
+
+%\begin{theorem}[\cite[Theorem 3.1.6]{weibel2007minkowski}]\label{thm:support-minksum}
+%	The supporting function of a Minkowski sum is the sum of the supporting functions of its summands.
+%\end{theorem}
+
+\begin{definition}[Weighted Minkowski sum]
+	If $T_1, \ldots, T_n$ are polytopes in $\reals^d$, we can call $T(\vec p)$ their \emph{weighted} Minkowski sum for $\vec p \in \reals^n_{\geq 0}$,
+	\begin{align*}
+	T(\vec p) &:= \oplus_y p_y T_y = p_1 T_1 \oplus \ldots \oplus p_n T_n
+	\end{align*}
+\end{definition}
+
+%From the thesis:  \emph{``It is easy to see that the normal fan (undefined here, but consequently normal cones) of $p_i T_i$ does not change as long as $p_i$ is positive.  Since the normal fan of a Minkowski sum can be deduced from that of its summands, we can deduce from this that the conbimatorial properties of $\oplus_y p_y T_y$ stay the same as long as all $p_i$ are positive.''}
+
+Suppose we are given a polytope $T_y \in \reals^d$ and set of vectors $V \in \reals^{k \times d}$.
+Call $e^y \in \reals^k$ the vector such that $e^y_i = \max_{x \in T_y}\inprod{v_i}{x}$.  
+For a finite set $\T = \{T_1, , \ldots, T_n\}$, let us denote the \emph{support matrix} $E = (e^y)_{y=1}^n$.
+\begin{definition}
+	We say a set of normals $V$ is \emph{complete} with respect to a polytope $T_y$ if $T_y = \{x \in \reals^d: Vx \leq e^y\}$.
+\end{definition}
+Moreover, we say $V$ is complete with respect to the set of polytopes $\T$ if and only if $V$ is complete with respect to each $T_y \in \T$.
+
+\subsubsection*{Optimality Condition}
+In general, we know that $\vec 0$ in the subgradient of $f(r)$ if and only if $r$ is an optimum of convex $f$ in general dimensions.
+
+For nice\footnote{for reports on the relative interior of the domain, and something else} conditions, we have $\vec 0 \in \oplus_i f_i$ if and only if $\vec 0 \in \oplus_i \partial f_i(r)$.
+This allows us to consider the following optimality condition:
+\begin{definition}\label{def:optimality}[Optimality]
+	For all $r \in \R$ and $y \in \Y$, we have $r \in \gamma_r \iff \vec 0 \in \oplus_y p_y T_y(r)$.
+\end{definition}
+The polytope $T_y(r)$ can be thought of as $\partial L_y(\varphi(r))$.
+
+
+We will suppose we start with a finite set of $n$ polytopes $\T := \{T_1, \ldots, T_n\}$, and we will call $T := T_1 \oplus \ldots \oplus T_n \in \reals^d$ their Minkowski sum.
+We know that every polytope has both a halfspace and vertex representation ($\H$-representation and $\V$-representation, respectively.)
+By existence of the $\H$-representation, we know there must be a matrix $V \in \reals^{k \times d}$ and vector $e \in \reals^k$ such that $T = \{x \in \reals^d : Vx \leq e\}$.
+In fact, with a complete set of normals $V$, we know that $e$ can be the support vector of each of the normals.
+However, finding $V$ is not always easy, so we assume that we are given $V$ for now.
+
+\subsection{Given normals $V$}
+Now, for a given polytope $T(p)$, we want to ask when a given $z \in \reals^d$ is in the polytope $T(p)$.
+We will later generalize to finding the set of $p \in \simplex$ for which $\vec 0 \in T(p)$ by substituting $z= \vec 0$.
+Throughout, assume we have $V$ which is complete for $\T$ and $E$ defined by the support of each normal in $V$ for all $T_y \in \T$.
+We denote $e^y = E_{;y}$ as the $y^{th}$ column of $E$, or equivalently, the support vector for $T_y$ given $V$.
+
+Since we define $T_y = \{x : Vx \leq e^y\}$, we can multiply the right side of the inequality by the constant $p_y \geq  0$ to yield $p_y T_y = \{x : Vx \leq p_y e^y\}$.
+Taking the Minkowski sum of polytopes described by the same set of normals, we can take 
+\begin{align*}
+\oplus_y p_y T_y &= \{x : Vx \leq p_1 E_{;1}\} \oplus \ldots \oplus \{x : Vx \leq p_n E_{;n}\} \\
+&= \{x : Vx \leq p_1 E_{;1} + \ldots + p_n E_{;n}\}\\
+&= \{x : Vx \leq E p\}~.~
+\end{align*}
+The first to second line follows from Theorem~\ref{thm:support-minksum} and preservation of inequalities under addition.
+Now, we have $z \in T(p) \iff \inprod{v_i}{z} \leq (Ep)_i$ for all $v_i \in V$.
+
+Observe that we have $\vec 0 \in T(p)$ if and only if $E p \geq 0$ by substitution, which lines up with our optimality condition in Definition~\ref{def:optimality}.  
+
+We assume $p \in \simplex$, so we now describe the cell $D^\T := \{p \in \simplex : Ep \geq \vec 0\}$ as the set of distributions such that $\vec 0 \in T(p)$.
+In cases where $\T$ is obvious from context, we omit the subscript and just write $D$.
+
+Given the complete set of normals $V$ and constructing the support matrix for $V$ and $\T$, $E$, we observe that $E$ is unique up to rescaling.
+However, as discussed earlier, there are always multiple complete sets of normals for $\T$, and so in that sense, $E$ is not unique.
+
+\subsection{Equivalences}
+In the big picture, we want to know two things.
+First, if we are given a cell $C$, how we can construct a finite set of polytopes $\T = \{T_1, \ldots, T_n\}$ such that $\vec 0 \in T(p) \iff p \in C$.
+Second, we want to know the opposite case: starting from $\T$, can we derive the cell $C \subseteq \simplex$ where $\vec 0 \in T(p)$ for all $p \in C$?
+We start with the latter, leaving the former for future work.
+
+We know that if we are given $\T$ and a complete set of normals $V$, we can describe $D = \{p \in \simplex : Ep \geq \vec 0\}$ as in Section~\ref{sec:start-polytope}.
+However, we do not necessarily have $D' := \{p \in A : Ep \geq \vec 0\} \subseteq \simplex$, and this poses some issues given the construction of the cell $C$ only assuming that we are in the affine span of the simplex, but not necessarily in the simplex.
+
+\begin{lemma}\label{lem:describe-D}
+	Suppose we are given polytopes $\T = \{T_1, \ldots, T_n\}$ and a set of normals $V$ that is complete for $\T$.
+	Take $E = (e_{i}^y)$ where $e_{i}^y = \max_{x \in T_y} \inprod{v_i}{x}$, and $D^\T = \{p \in \simplex : Ep \geq \vec 0\}$.
+	
+	Then $\{p \in \simplex : \vec 0 \in \oplus_y p_y T_y\} = \{p \in \simplex: Ep \geq \vec 0\}$.\btw{on the whiteboard: ``stuff about $E$ and $D$.''}
+\end{lemma}
+\begin{proof}
+	First, let us fix a distribution $p \in \simplex$.
+	By Theorem~\ref{thm:support-minksum}, we have the support of the (weighted) Minkowski sum is the (weighted) sum of the support of each polytope, which we can re-write the weighted support as the product $Ep$.
+	
+	Each halfspace is bounded by the support function of the weighted polytope by construction of $E$, so the support of the weighted polytope defined by an inequality on $v_i$ can be described as $\inprod{v_i}{z} \leq \inprod{E_i}{p}$.
+	Taking this for all $v_i$, we then have $\oplus_y p_y T_y = \{x \in \reals^d : Vx \leq Ep\}$.
+	
+	Therefore, for fixed $p$, we have $\vec 0 \in \oplus_y p_y T_y \iff Ep \geq \vec 0$.
+	As $p \in \simplex$ was arbitrary, we observe the stated set equality.
+\end{proof}
+
+\begin{proposition}\label{prop:relate-E-B}
+	Suppose we are given polytopes $\T = \{T_1, \ldots, T_n\}$ and a set of normals $V$ that is complete for $\T$.
+	Take $E = (e_{iy})$ where $e_{iy} = \max_{x \in T_y} \inprod{v_i}{x}$, and take $D = \{p \in \simplex : Ep \geq \vec 0\}$ and take the minimal rank $B \in \reals^{k \times n}$ such that we have the given cell $C = \{p \in \simplex : Bp \geq \vec 0\}$.
+	
+	Then $\{p \in \simplex : \vec 0 \in \oplus_y p_y T_y\} = C$	if and only if $C = D$.
+\end{proposition}
+\begin{proof}
+	By Lemma~\ref{lem:describe-D}, we have $D = \{p \in \simplex : \vec 0 \in \oplus_y p_y T_y\}$, and the result follows.
+\end{proof}
+
+\begin{definition}
+	We say a vector $v$ is \emph{redundant} with respect to matrix $Y$ if we have $\{z: Yz \geq \vec b\} = \{z : [Y;v]z \geq \vec b^*\}$, where $b^* = [b;c]$ for some constant $c \in \reals$.
+\end{definition}
+
+\begin{proposition}\label{prop:relate-rows}
+	Suppose we have polytopes $\T = \{T_1, \ldots, T_n\}$ and a set of normals $V$ that is complete for $\T$.
+	Take $E = (e_{i}^y)$ where $e_{i}^y = \max_{x \in T_y} \inprod{v_i}{x}$, and take $D = \{p \in \simplex : Ep \geq \vec 0\}$ and take the minimal matrix $B$ such that a given cell $C = \{p \in \simplex : Bp \geq \vec 0\}$.
+	
+	Then $\{p \in \simplex : \vec 0 \in \oplus_y p_y T_y\} = C$	if and only the rows of $B$ appear in $E$ (possibly scaled) and every other row of $E$ is redundant with respect to $B$.
+	\btw{``replace prop 1 statement with `non-simplex rows of $B$ appear in $E$ (possible scaled) and every other row of $E$ is redundant with respect to $B$.'''}
+\end{proposition}
+\begin{proof}
+	\begin{itemize}
+		\item [$\implies$] First, assume $C = \{p \in \simplex: \vec 0 \in \oplus_y p_y T_y\}$.
+		By Proposition~\ref{prop:relate-E-B}, we know that $C = D^\T := \{p \in \simplex : Ep \geq \vec 0\}$.
+		Then we have $\{p \in \simplex : Bp \geq \vec 0\} = \{p \in \simplex : Ep \geq \vec 0\}$.
+		As $B$ is minimal, we must have that every row of $B$ appears (possibly scaled) in $E$.
+		Otherwise, we would contradict equality of the polytopes $C$ and $D$.
+		Moreover, all rows in $E$ not in $B$ are redundant with respect to $B$ by equality of the polytopes.
+		
+		
+		\item [$\impliedby$] Suppose that all rows of $B$ appear in $E$, and every other row of $E$ is redundant with respect to $B$.
+		Then we have $D = \{p\in \simplex : Ep \geq \vec 0\} = \{p \in \simplex : Bp \geq \vec 0\} = C$.
+		
+		Then $D = C$, and by Proposition~\ref{prop:relate-E-B}, we have $C = \{p \in \simplex : \vec 0 \in \oplus_y p_y T_y\}$.
+	\end{itemize}
+\end{proof}
+
+
+\section{$d$-dimensional omitted proofs}\label{app:omitted-d-dim}
+\begin{proof}[Proof of Lemma~\ref{lemma:minkowski-support}]
+	\jessie{Appendix}
+	For each $p$, $\oplus_p \T$ is a polytope.
+	\bo{TODO: it turns out that $p$ doesn't matter, only its support; and there are only finitely many possible supports (or even better, the normals that are complete for the uniform minkowski sum turn out to be complete for all other $p$-combinations).}
+	For each of the finitely many supports ($2^n - 1$), we know $\oplus_p \T$ is a polytope, and every polytope can be uniquely defined by an enumeration of vectors normal to its facets.
+	As a two polytopes with the same support can be defined by the same facet enumeration, we can simply concatenate these finite set of normals for the finite polytope supports.
+	Vectors that are not normal to a facet simply become redundant constraints.
+	This yields finitely many normals defining the weighted Minkowski sum $\oplus_p \T$ for all $p \in \simplex$.
+\end{proof}
+
+\begin{proof}[Proof of Lemma~\ref{lemma:D-polytope}]
+	\jessie{Appendix}
+	Recall by definition, the notation $\oplus_p \T = \{\sum_y p_y x_y : x_y \in T_y (\forall y)\}$.
+	Each $T_y$ is a polytope, so $p_y T_y$ is a polytope.
+	The Minkowski sum of polytopes is a polytope, so $\oplus_p \T$ is a polytope by~\cite[Section 1.2]{weibel2007minkowski}.
+	\bo{TODO}\jessie{Taking a try}
+	Since $\oplus_p \T$ is a polytope for all $p \in \simplex$, we know there is a halfspace representation of normals $V$ so that for all $y \in \Y$, we have $x \in p_yT_y \iff \inprod{V}{x} \leq p_y e^y$ for some matrix $V$ and the support vector $e^y$, where $e^y_i = H_{T_y}(V_i)$.
+	Adding redundant constraints for the $e^y$ as necessary, we know that the support of the Minkowski sum for a given normal is the sum of the normals~\cite[Theorem 3.1.6]{weibel2007minkowski}.
+	Concatenating the vectors $e^y$ into $E$, we have $x \in \oplus_p \T \iff \inprod{V^*}{x} \leq E^*p$, where $V^*$ has redundant rows added as necessary. \jessie{Hand wavy... not a fan.}
+	Substituting $x = \vec 0$, we see $\vec 0 \in \oplus_p \T \iff Ep \geq \vec 0$, which defines a polytope by construction of $E$.
+\end{proof}
+
+\begin{proof}[Proof of Lemma~\ref{lemma:E-to-B}]
+	\bo{? Cite} \jessie{Is left as an exercise in the following text:} \cite[Exercise 2.15]{ziegler2012lectures}
+\end{proof}
+
 
 \section{Simplifying the QFP for $\abstain{1/2}$, $d=2$}
 In order to prove Proposition~\ref{prop:qfp-fails-abstain}, we take some simplifying steps to the quadratic feasibility program for this specific problem.
@@ -982,11 +1197,11 @@ We show that the quadratic feasibility program with this input cannot be satisfi
 	For the abstain loss $\ell_{1/2}$, the level set of abstain satisfies $\gamma_{\bot} = \conv\{(\delta_y + \delta_{y'})/2 : y,y' \in \Y, y < y'\} = \{p : Bp \geq \vec{0}\}$ where $\delta_y$ puts probability one on $y$ and $B = \ones \ones^{\intercal} - 2I \in \reals^{5 \times 5}$, i.e. has entries $-1$ on the diagonal and $1$ everywhere else.
 \end{lemma}
 \begin{proof}
-	Recall that $\gamma_{\bot}$ is the set of distributions $p$ with $\max_y p(y) = 1/2$.
+	Recall that $\gamma_{\bot}$ is the set of distributions $p$ with $\max_y p_y = 1/2$.
 	First, note that each distribution of the form $(1/2, 1/2, 0, 0, 0)$ and so on is in $\gamma_{\bot}$.
 	Meanwhile, every such $p$ can be written as a convex combination of these corners.
-	Second, note that if $p \in \gamma_{\bot}$, then $p(y) \leq 1/2$ for all $y \in \Y$.
-	These constraints can be rewritten as $\inprod{p}{b} \geq 0$ where $b_y = -1$ and $b_{y'} = 1$ for all $y' \neq y$, literally requiring $p(y) \leq \sum_{y' \neq y} p(y')$.
+	Second, note that if $p \in \gamma_{\bot}$, then $p_y \leq 1/2$ for all $y \in \Y$.
+	These constraints can be rewritten as $\inprod{p}{b} \geq 0$ where $b_y = -1$ and $b_{y'} = 1$ for all $y' \neq y$, literally requiring $p_y \leq \sum_{y' \neq y} p(y')$.
 \end{proof}
 
 \begin{observation} \label{obs:qfp-invariant-lin}
@@ -1253,7 +1468,7 @@ The $y$th column of this matrix is denoted $x^{ij}_y \in \reals^d$.
 
 
 
-\section{Feasible subspace dimension}
+%\section{Feasible subspace dimension}
 
 
 \end{document}
