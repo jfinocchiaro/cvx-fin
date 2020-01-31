@@ -598,11 +598,11 @@ The two conditions above give us a much better understanding of when a given set
 We are still left with the problem, however, of understanding when such a set $\T$ exists.
 Intuitively, the biggest hurdle that remains is the quantification over sets of polytopes, a massive search space.
 Surprisingly, one can reduce this search to a simple quadratic feasibility program, which we now give.
+The key insight involves the halfspace condition, and observing that given a certain ``complete'' set of normal vectors, one can exactly describe the support function of $\oplus_p\T$ in terms of the support functions of each $T_y$ and each normal vector $v$.
+From here, we use the fact that this description is linear in $p$, and can therefore relate it directly to the given matrix $B$.
 
-Our program will consist of variables
-
-are a set of normal vectors $\{v_i \in \reals^d : i \in [k]\}$ and a set of vertices $\{x^j_y \in \reals^d : j \in [\ell], y \in \Y\}$.
-These correspond to a (possibly relaxed) halfspace representation and (possibly incomplete) vertex representation of the subgradient polytopes $\T$.
+Our program will consist of variables for the normal vectors $\{v_i \in \reals^d : i \in [k]\}$ for the (relaxed) halfspace condition, as described above, and variables for vertices $\{x^j_y \in \reals^d : j \in [\ell], y \in \Y\}$ which witness $0\in\oplus_{p^j} \T$ for the vertex condition.
+% These correspond to a (possibly relaxed) halfspace representation and (possibly incomplete) vertex representation of the subgradient polytopes $\T$.
 
 \begin{definition}[Quadratic Feasibility Program] \label{def:qfp} ~ \\
   \indent \textbf{Parameter:} $d \in \mathbb{N}$.
@@ -618,9 +618,37 @@ These correspond to a (possibly relaxed) halfspace representation and (possibly 
     \end{align}
 \end{definition}
 
+Our main result of this section is that our quadratic program is feasibile if and only if there exist some set of $d$-dimensional polytopes satisfing the optimality condition in Theorem~\ref{thm:general-char}.
+As an immediate corollary, if some input $C=\gamma_r$ and $d$ yields an infeasible program, then the embedding dimension of the loss $\ell$ is at least $d+1$.
+\begin{theorem} \label{thm:opt-iff-qfp}
+  Given a convex polytope $C \subseteq \simplex$, there exist polytopes $\T$ in $\reals^d$ such that $D(\T) = C$ if and only if there is a feasible solution to the QFP (Definition \ref{def:qfp}) with parameter $d$.
+\end{theorem}
+\begin{proof}
+    By Theorem \ref{thm:vertex-halfspace-opt}, it suffices to show that $\T$ satisfying the halfspace and vertex conditions exist if and only if the program is feasible.
+
+  ($\implies$)
+  By the vertex condition, for each $j \in [\ell]$, there exist witnesses $\{x^j_y \in T_y : y \in \Y\}$ satisfying the second constraint of the quadratic program (Inequality \ref{eqn:qp-constr-2}).
+  By the halfspace condition, there exist normals $v_1, \dots, v_k$ such that, for all $i$, for all $x \in T_y$, $\inprod{v_i}{x} \leq B_{iy}$; in particular, this applies to the above witnesses $x^j_y \in T_y$.
+  Collecting $v_1,\dots,v_k$ as the columns of $V$, this shows that the first constraint (Inequality \ref{eqn:qp-constr-1}) is satisfied.
+
+  ($\impliedby$)
+  We construct $T_y = \conv(\{x^1_y, \ldots, x^{\ell}_y\})$.
+  The second constraint of the quadratic program immediately implies the vertex condition.
+  Taking $v_1,\dots,v_k$ as the columns of $V$, the first constraint implies that for each $x^j_y$, we have $\inprod{v_i}{x^j_y} \leq B_{iy}$ for all $i,j,y$.
+  Any point $x \in T_y$ is a convex combination of $x^1_y,\ldots,x^{\ell}_y$, so it satisfies $\inprod{v_i}{x} \leq B_{iy}$.
+  This implies the halfspace condition.  % Bo: QED
+\end{proof}
+
+\begin{corollary}\label{cor:d-embeddable-char}
+  Given a discrete loss $\ell$ eliciting $\gamma$, if there is a report $r\in\R$ such that the quadratic program (Definition~\ref{def:qfp}) is infeasible for input $C = \gamma_r$ and $d$, then the embedding dimension of $\ell$ is at least $d+1$.
+  % = \{p : r \in \argmin_{r'} \inprod{p}{\ell(r')} \}
+\end{corollary}
+
+
+
 The feasibility program can be viewed as a low-rank matrix problem, namely: do there exist a set of rank-$d$ matrices that are pointwise dominated by $B$, sharing the left factor $V$, whose right factors $X^j$ respectively satisfy a subspace constraint?
 We will see in Section~\ref{sec:examples} that for the important example of abstain loss, the constraints simplify into a more pure low-rank matrix problem.
-In particular, for $d=n-1$ a solution always exists (e.g. \bo{cite} \cite[Theorem 2]{finocchiaro2019embedding}), found by taking the convex conjugate of the negative Bayes risk of $\ell$ for each outcome and subtracting the report $u$, after which one can project down to $n-1$ dimensions (because $\simplex$ is $n-1$ dimensional to begin with).
+In particular, for $d=n-1$ a solution always exists \cite[Theorem 2]{finocchiaro2019embedding}, found by taking the convex conjugate of the negative Bayes risk of $\ell$ for each outcome and subtracting the report $u$, after which one can project down to $n-1$ dimensions (because $\simplex$ is $n-1$ dimensional to begin with).
 
 
 \section{OLD / TO MOVE}
