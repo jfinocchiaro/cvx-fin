@@ -154,7 +154,7 @@
   In particular, recent work has investigated embedding the original predictions (e.g. labels) as points in $\reals^d$.
   %Recent work has proposed the notion of designing calibrated surrogate losses for classification-like problems through the lens of \emph{embedding} the original problem into $\reals^d$ and optimizing a polyhedral loss that is calibrated with respect to the original loss.
   In this work, we study the notion of \emph{embedding dimension} for given discrete losses.
-  We characterize when a given discrete loss can be embedded into the real line, as well as when a higher-dimension input to the surrogate loss is required.
+  We characterize when a given discrete loss can be embedded into the real line, as well as when a higher-dimensional input to the surrogate loss is required.
   Moreover, we give a quadratic feasibility program that yields lower bounds on the embedding dimension of a given discrete loss.
 \end{abstract}
 
@@ -165,36 +165,65 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
-In empirical risk minimization, the optimization of a loss function measuring error is canon in the design of algorithms designed for prediction tasks.
-For many categorical tasks (e.g. classification, ranking, top-$k$, set inclusion), one can often use their intuition to design a discrete loss that models the question they want to answer about their data.
-For example, $0-1$ loss $\ell(r)_y = \Ind{r \neq y}$ gives punishment $1$ for a misprediction and $0$ for a correct prediction.
-This problem naturally lines up with predicting the canonical classification problem.
-Since the optimization of discrete problems is computationally hard, we typically resort to optimizing a \emph{surrogate loss} that yields desirable statistical guarantees such as the existence of excess risk bounds given by \emph{consistency}.
-In the finite outcome setting, we know that calibration implies consistency, so we study the design of calibrated, convex losses-- specifically polyhedral (piecewise linear and convex) losses.
+In supervised machine learning, the dominant paradigm is to measure performance of a model using some loss function $\ell($prediction, observation$)$.
+In particular, this paper studies \emph{discrete} losses, in which the predictions lie in a finite set.
+These are popular for many categorical tasks such as classification, ranking, top-$k$, set inclusion, and other structured prediction tasks.
+%Models are trained using some variant of empirical risk minimization, i.e. minimization of loss on a training data set.
+%For many categorical tasks (e.g. classification, ranking, top-$k$, set inclusion), one can often use intuition to design a discrete loss $\ell$ that models the question one wants to answer about one's data.
+%For example, $0-1$ loss $\ell(r)_y = \Ind{r \neq y}$ gives punishment $1$ for a misprediction and $0$ for a correct prediction, and is used for classification problems over possibly large finite category sets.
 
+However, the optimization of discrete losses over a dataset (i.e. empirical risk minimization) is typically computationally hard.
+One therefore generally resorts to optimizing a computationally-nice \emph{surrogate loss} $L$.
+The key requirement is \emph{calibration}, namely that optimizing surrogate loss allows one to recover the discrete prediction that optimizes the original $\ell$-loss.
+Calibrated surrogate losses yields desirable statistical guarantees such as the existence of excess risk bounds given by consistency~\citep{tewari2007consistency}.
+%In the finite outcome setting, we know that calibration implies consistency, so we study the design of calibrated, convex losses-- specifically polyhedral (piecewise linear and convex) losses.
 
-\cite{finocchiaro2019embedding} propose the notion of \emph{embedding losses} in order to construct polyhedral, calibrated surrogate losses for a given discrete loss.
-Their work constructively shows that every discrete loss is embeddable, but it is unclear how efficient an embedding can get.
-In this work, we propose a notion of measuring the efficiency called \emph{embedding dimension} of this specific class of calibrated surrogate losses , which~\cite{finocchiaro2019embedding} show are well-equipped to be surrogates for discrete losses.
-This notion of efficiency is measured by the dimension of the input to the surrogate, and in Section~\ref{sec:1d}, we characterize \jessie{and construct surrogates/links?} discrete losses that have a surrogate that takes input on the real line.
-In Section~\ref{sec:d-dim}, we generalize our characterization to a general $d$-dimensional input for $d \geq 2$, presenting conditions on optimality and monotonicity that are necessary and sufficient for being able to construct a calibrated polyhedral surrogate taking $d$-dimensional input.
-Moreover, we present a Quadratic Feasibility Program (Definition~\ref{def:qfp}) that has a solution if and only if the optimality condition of our general characterization is satisfied.
-This feasibility program yields new techniques for finding lower bounds on this efficiency notion for a given discrete loss.
-In Section~\ref{sec:examples}, we apply our characterizations to show new lower bounds on the embedding dimension for a problem whose convex calibration dimension (\cite{ramaswamy2016convex, ramaswamy2018consistent}) has been well-studied.
-These results suggest that \emph{if} the convex calibration dimension of the same problems were lower than the embedding dimension, constructing a calibrated surrogate for such problems would require a new approach than previous works have taken.
+The question therefore becomes: Given a discrete loss $\ell$, how do we design such calibrated surrogates $L$? 
+The class of surrogates studied in this paper are \emph{polyhedral}, meaning piece-wise linear convex functions over prediction space $\reals^d$.
+\cite{finocchiaro2019embedding} show that polyhedral surrogates are equivalent to the following recipe: \emph{embedding} the discrete loss $\ell$ into $\reals^d$ by letting each discrete prediction $r$ correspond to some point $\phi(r) \in \reals^d$, which optimizes $L$-loss if and only if $r$ optimizes $\ell$-loss.
+\cite{finocchiaro2019embedding} show that every discrete loss $\ell$ can be embedded into \emph{some} dimension $d$.
+But in the worst case $d=n-1$ where $n$ is the number of possible observations $y$, e.g. a number of classification categories.
 
+%\emph{embedding losses} in order to construct polyhedral, calibrated surrogate losses for a given discrete loss.
+%Their work constructively shows that every discrete loss is embeddable, but it is unclear how efficient an embedding can get.
+In this work, we define and investigate the \emph{embedding dimension} of discrete losses.
+A loss $\ell$ is $d$-embeddable if it can be embedded in $\reals^d$, equivalently, has some calibrated polyhedral surrogate $L$ over $\reals^d$.
+Given $\ell$, it is desirable for computational and statistical reasons to construct a surrogate in as few dimensions as possible; it is also interesting to prove lower bounds, i.e. that no calibrated surrogate exists unless $d$ is large enough.
 
-\subsection{Related works}
-\cite{bartlett2006convexity} study when a convex, calibrated surrogate exists for a given discrete loss, and in a finite-outcome setting,~\cite{tewari2007consistency} show that calibration (Definition~\ref{def:calibration}) is necessary and sufficient for consistency, meaning that there is a link mapping surrogate reports to discrete reports so that converging to the optimal prediction in the surrogate space implies the linked surrogate prediction converges to the optimal prediction for the original loss.
+\paragraph{Contributions.}
+In particular, $1$-embeddings have the simplest possible convex surrogate space, the real line.
+In Section~\ref{sec:1d}, we characterize $1$-embeddability of a discrete loss $\ell$ via a variety of conceptual and testable conditions.
+We give an efficient algorithm that, given the loss matrix of $\ell$, either proves that $\ell$ is not $1$-embeddable, or else constructs a calibrated $1$-dimensional polyhedral surrogate.
+We also show that, perhaps surprisingly, for $d=1$, if \emph{any} convex calibrated surrogate exists, then in particular a polyhedral one does.
+We conjecture that this continues to hold in higher dimensions.\bo{Formalize conjecture later?}
+In other words, we conjecture that embedding dimension is actually always equal to the more permissive \emph{convex calibration dimension} of \cite{ramaswamy2016convex}.
 
-In order to decrease the dimension of the optimization problem,~\cite{frongillo2015elicitation} propose \emph{elicitation complexity}, which is the minimum dimension input to a loss such that, for all distributions $p$ over the outcomes $\Y$, the ``correct report,'' a function of the distribution $p$, minimizes the expected loss over the distribution $p$.
-In the more specific case on constructing \emph{convex} calibrated surrogates for discrete losses,~\cite{ramaswamy2016convex} propose the notion of \emph{convex calibration dimension}, which is the minimum dimension input to a convex surrogate loss that is calibrated with respect to a given discrete loss.
-While~\cite{ramaswamy2016convex} present methods for obtaining lower bounds on convex calibration dimension for any discrete loss, their method does not always work well, as demonstrated by the $\ellabs{\alpha}$ loss in Equation~\eqref{eq:abstain}.
+In Section~\ref{sec:d-dim}, we observe a general characterization for $d \geq 2$, presenting conditions called optimality and monotonicity that are necessary and sufficient for $d$-embeddability.
+A particular contribution is to isolate and investigate the optimality condition, which reduces to a finite set of conditions on the halfspace and vertex representations of a set of polytopes related to $\ell$ and $L$.
+This allows us to construct a Quadratic Feasibility Program (Definition~\ref{def:qfp}) that has a solution if and only if the optimality condition can be satisfied.
+In addition to providing a possible avenue toward automating the search for calibrated surrogate losses, this feasibility program yields new techniques for lower bounds on the embedding dimension of a given discrete loss.
+
+In Section~\ref{sec:examples}, we apply our characterizations to show new lower bounds on the embedding dimension for a problem, classification with an abstain option, whose convex calibration dimension has been well-studied (\cite{ramaswamy2016convex, ramaswamy2018consistent}).
+%These results suggest that \emph{if} the convex calibration dimension of the same problems were lower than the embedding dimension, constructing a calibrated surrogate for such problems would require a new approach than previous works have taken.
+In particular we apply both our $1$-dimension characterization and higher-dimensional quadratic program to obtain previously-unknown lower bounds.
+
+\subsection{Related work}
+\cite{bartlett2006convexity} study when a convex, calibrated surrogate exists for a given discrete loss, and in a finite-outcome setting,~\cite{tewari2007consistency} show that calibration (Definition~\ref{def:calibration}) is necessary and sufficient for consistency.
+%, meaning that there is a link mapping surrogate reports to discrete reports so that converging to the optimal prediction in the surrogate space implies the linked surrogate prediction converges to the optimal prediction for the original loss.
+
+Several works have investigated the problem of reducing the dimensionality of a surrogate loss.
+\cite{frongillo2015elicitation} propose \emph{elicitation complexity}, which roughly captures the minimum dimension $d$ of any surrogate loss $L$ (not necessarily convex or calibrated) for a given loss $\ell$ (not necessarily discrete).
+In the more specific case of convex calibrated surrogates for discrete losses,~\cite{ramaswamy2016convex} propose the notion of \emph{convex calibration dimension}, which is the minimum dimension input to a convex surrogate loss that is calibrated with respect to a given discrete loss.
+The difference in this paper is that our definition of embedding dimension requires the surrogate loss to additionally be polyhedral.
+\cite{ramaswamy2016convex} present a condition for obtaining lower bounds on convex calibration dimension for any discrete loss, \emph{feasible subspace dimension}.
+However, there are important examples, such as the $\ellabs{\alpha}$ loss in Equation~\eqref{eq:abstain}, for which feasible subspace dimension gives only trivial bounds.
+A contribution of this work is to provide the first nontrivial lower bounds for this loss (see also discussion in Section \ref{sec:conclusion}).
+
 \cite{ramaswamy2018consistent} present upper bounds on the convex calibration of $\abstain{\alpha}$ loss of $\ceil{\log_2(n)}$, but their characterization of lower bounds leave the tightness of these bounds as an open question.
 These upper bounds are, however, much tighter than the previous upper bounds of $(n-1)$ given by the different surrogates presented by~\cite{crammer2001algorithmic} and~\cite{rifkin2004defense}, and it is unclear what characteristics of the abstain loss allow us to exponentially reduce dimension of the input.
 
-In this work, we study \emph{embedding dimension}, which is the minimum dimension of input to a polyhedral surrogate that is calibrated with respect to the given discrete loss.
-Moreover, we use this tool to characterize \emph{how} embeddable a given discrete loss is, showing necessary conditions for embedding a given loss into $d$ dimensions.
+%In this work, we study \emph{embedding dimension}, which is the minimum dimension of input to a polyhedral surrogate that is calibrated with respect to the given discrete loss.
+%Moreover, we use this tool to characterize \emph{how} embeddable a given discrete loss is, showing necessary conditions for embedding a given loss into $d$ dimensions.
 In order to concisely discuss embedding dimension, we appeal to notation and terminology from the field of property elicitation (\cite{frongillo2015vector-valued, gneiting2007strictly, lambert2009eliciting, osband1985information-eliciting, savage1971elicitation}), relating it to the language of calibrated surrogates as needed.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -211,9 +240,8 @@ As is assumed by~\cite{finocchiaro2019embedding}, we assume the given discrete l
 
 We similarly denote surrogate losses in dimension $d$ by $L:\reals^d\to\nonnegreals^{\Y}$, with predictions typically written $u\in\reals^d$.
 The expected losses when $Y \sim p$ can be written $\inprod{p}{\ell(r)}$ and $\inprod{p}{L(u)}$.
-
-For example, 0-1 loss is a discrete loss with $\R = \Y = \{-1,1\}$
-given by $\ellzo(r)_y = \Ind{r \neq y}$.%, with Bayes risk $\risk{\ellzo}(p) = 1-\max_{y\in\Y} p_y$.
+For example, 0-1 loss on two labels is a discrete loss with $\R = \Y = \{-1,1\}$
+given by $\ellzo(r)_y = \Ind{r \neq y}$.
 Two important surrogates for $\ellzo$ are hinge loss $\hinge(u)_y = \max\{ 0 ~,~ 1-yu \}$ and logistic loss $L(u)_y = \log(1+\exp(-yu))$ for $u\in\reals$.
 
 Most of the surrogates $L$ we consider will be \emph{polyhedral}, meaning piecewise linear and convex; we therefore briefly recall the relevant definitions.
@@ -245,12 +273,12 @@ In this paper we write $\gamma$ for the property elicited by $\ell$ with report 
 
 \paragraph{Embeddings.}
 %We specifically study polyhedral functions in part because they have high-dimensional subgradient sets at points of nondifferentiability, which will be of interest to us later.
-Polyhedral losses are motivated partly because they correspond to a natural surrogate construction technique: embedding the discrete predictions $\R$ as points in $\reals^d$ \jessie{and linearly interpolating between embedded reports}.
+Polyhedral losses are motivated partly because they correspond to a natural surrogate construction technique: embedding the discrete predictions $\R$ as points in $\reals^d$ and linearly interpolating between embedded reports.
 The key condition required on the embedding and surrogate loss $L$ is that a discrete prediction $r \in \R$ should minimize expected $\ell$-loss if and only if its embedding point minimizes expected $L$-loss.
 %
 \begin{definition}[Embedding of a loss]
   A loss $L: \reals^d \to \nonnegreals^{\Y}$ \emph{embeds} a loss $\ell: \R \to \nonnegreals^{\Y}$ \emph{in dimension $d$} with \emph{embedding function $\varphi: \R \to \reals^d$} if: (i) $\varphi$ is injective; (ii) for all $r \in \R$, $\ell(r) = L(\varphi(r))$; and (iii) for all $r \in \R$, $\gamma_r = \Gamma_{\varphi(r)}$.
-  We simply say $L$ \emph{embeds} $\ell$ (in dimension $d$) if some such embedding function exists.
+  We simply say $L$ \emph{embeds} $\ell$ if some such $\phi$ exists.
 \end{definition}
 %
 Note that embedding does not immediately imply a key desirable property, consistency, which is equivalent to calibration in finite-outcome settings.
@@ -260,14 +288,12 @@ Informally, calibration means that if one minimizes the expected surrogate loss 
     \[ \inf_{u \in \reals^d ~:~ \psi(u) \not\in \gamma(p)} \inprod{p}{L(u)}  > \inf_{u \in \reals^d} \inprod{p}{L(u)}  .\]
   We simply say $L$ can be \emph{calibrated} to $\ell$ if such a link function exists.
 \end{definition}
-\bo{More on why calibration is desirable?}
-\jessie{Taking a crack at this:}
 As we alluded to above, calibration is not actually the trait we desire of a surrogate; rather, we seek consistency.
 \cite{tewari2007consistency} show that, in a finite-outcome setting, the presence of calibration and consistency are equivalent conditions.
 By consistency, we mean the standard notion where the expected loss over $\X \times \Y$ for a sequence of hypotheses $h_m$ converging to the optimal expected surrogate loss implies the expected discrete loss over the linked hypotheses $\psi \circ h_m$ converges to the optimal discrete loss.
 The equivalence of these conditions allows us to focus on calibration, so we can abstract away the input space $\X$ and simply focus on probability distributions over the outcomes $\Y$.
 
-\jessie{Not a smooth transition here...}
+%\jessie{Not a smooth transition here...} \bo{I think it's ok...}
 Polyhedral surrogates are motivated by the following results.
 \begin{theorem}[\cite{finocchiaro2019embedding}] \label{thm:embed-iff-poly}
   If a discrete loss $\ell$ is embedded by some surrogate $L$, then (1) $L$ must be a polyhedral loss; and (2) there exists a link function calibrating $L$ to $\ell$.
@@ -279,12 +305,12 @@ This raises the question studied in this paper: in what dimension $d$ does such 
 
 In this paper, we study the following quantity.
 \begin{definition}[Embedding dimension]
-  The \emph{embedding dimension} of a discrete loss $\ell: \R \to \nonnegreals^{\Y}$ is the smallest $d$ such that $\ell$ can be embedded into $d$ dimensions, i.e. where there exists a calibrated polyhedral surrogate $L: \reals^d \to \nonnegreals^{\Y}$.
-  In this case, we say $\ell$ is \emph{$d$-embeddable}.
+  We say a discrete loss $\ell: \R \to \nonnegreals^{\Y}$ is \emph{$d$-embeddable} if it can be embedded into $d$ dimensions, i.e. if there exists a calibrated polyhedral surrogate $L: \reals^d \to \nonnegreals^{\Y}$.
+  The \emph{embedding dimension} of $\ell$ is the smallest $d$ such that $\ell$ is $d$-embeddable.
 \end{definition}
 
 A number of things are already known about embedding dimension.
-Many surrogates in the literature provide upper bounds; we highlight in particular the \emph{abstain loss} given by \cite{ramaswamy2018consistent} and seen in Equation~\eqref{eq:abstain}, in which one wants to predict the most likely outcome \emph{only if} they are confident in the outcome, and otherwise \emph{abstain} from predicting an outcome for a lesser punishment than if they give a prediction and were incorrect.
+Many surrogates in the literature provide upper bounds; we highlight in particular the \emph{abstain loss} given by \cite{ramaswamy2018consistent} and seen in Equation~\eqref{eq:abstain}, in which one wants to predict the most likely outcome \emph{only if} confident in the outcome, and otherwise abstain.
 
 \begin{equation}\label{eq:abstain}
 \ellabs{\alpha}(r)_y = \begin{cases}
@@ -294,13 +320,14 @@ Many surrogates in the literature provide upper bounds; we highlight in particul
 \end{cases}
 \end{equation}
 Here $\R = \Y \cup \{\bot\}$.
-For $\alpha=1/2$, \cite{ramaswamy2018consistent} give an elegant embedding of this loss on $n$ outcomes into $d = \lceil \log_2 (n) \rceil$ dimensions, where each $y \in \Y$ is embedded at a corner of the Boolean hypercube $\{-1,1\}^n$ while $\bot$ is embedded at the origin.
+For $\alpha=1/2$, \cite{ramaswamy2018consistent} give an elegant embedding of this loss on $n$ outcomes into $d = \lceil \log_2 (n) \rceil$ dimensions, where each $y \in \Y$ is embedded at a corner of the Boolean hypercube $\{-1,1\}^d$ while $\bot$ is embedded at the origin.
 
-In general (e.g. \cite{finocchiaro2019embedding}), a known convex-conjugate construction generically embeds any discrete loss on $\Y = [n]$ into $n-1$ dimensions, giving a flat upper bound of $n-1$ on embedding dimension.
+In general (e.g. \cite{finocchiaro2019embedding}), a known convex-conjugate construction generically embeds any discrete loss on $\Y = [n]$ into $d = n-1$ dimensions, giving a flat upper bound of $n-1$ on embedding dimension.
 Lower bounds exist but are rare.
 A lower bound on the dimensionality of \emph{any} calibrated convex surrogate $L$ implies in particular a lower bound on polyhedral surrogates.
 \cite{ramaswamy2016convex} give such a lower bound via the technique of \emph{feasible subspace dimension}, which is able to e.g. prove that embedding $0-1$ loss on $n$ labels requires dimension $n-1$.
 However, this technique gives only the trivial $d \geq 1$ for the abstain family of losses above when $\alpha \leq 1/2$ because of their geometric structure.
+We discuss further in Section \ref{sec:conclusion}.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -348,7 +375,7 @@ Given a finite property $\gamma: \simplex \to 2^{\R}$, the \emph{intersection gr
   \begin{enumerate}
   \item For all $y\in\Y$, the sequence $\sgn(v(i)_y)$ is monotone in
     $i\in\{1,\ldots,k-1\}$,
-  \item For all $i\in\{2,\ldots,k-1\}$\jessie{why 2 to k-1?}, letting
+  \item For all $i\in\{2,\ldots,k-1\}$
     \begin{align*}
       \lambda^-(i) &= \min \left\{\frac{v(i)_y}{v({i+1})_y} : y\in\Y, v(i)_y, v({i+1})_y < 0\right\}
       \\
@@ -366,15 +393,15 @@ Given a finite property $\gamma: \simplex \to 2^{\R}$, the \emph{intersection gr
     L(u) &= \begin{cases}
       \ell(r_1) - u K \ones & u \leq \varphi(r_1) = 0 \\
       \ell(r_i) + \Lambda_i \cdot (u - \varphi(r_i)) \cdot  (\ell(r_{i+1})-\ell(r_i)) & u \in [\varphi(r_i),\varphi(r_{i+1})] \\
-      \ell(r_k) + \Lambda_k \cdot (u - \varphi(r_k))\cdot K \ones & u \geq \varphi(r_k)
+      \ell(r_k) + \Lambda_{k-1} \cdot (u - \varphi(r_k))\cdot K \ones & u \geq \varphi(r_k)
     \end{cases}~,
   \end{align*}
   \jessiet{In the cases: what if $\varphi(r_1) < 0$?}\raft{I set $\varphi(r_1)=0$; updated to something hopefully clearer}
-  where $\lambda(i) = \min(\lambda^+(i),\max(\lambda^-(i),1))$\jessie{Is this backwards on the min/max?}, $\Lambda_i := \prod_{j=2}^i \lambda(j)$, $\Lambda_1=1$, and $K=$ \raf{TBD; was $1+\max_{r\in\R,y\in\Y} |\ell(r)_y|$}.
+  where $\lambda(i) = \min(\lambda^+(i),\max(\lambda^-(i),1))$, $\Lambda_i := \prod_{j=2}^i \lambda(j)$, $\Lambda_1=1$, and $K = \max_{i\in\{2,\ldots,k\},y\in\Y} |v(i)_y|$.
 \end{theorem}
 \begin{proof}
-  Actually, the easiest proof given what we have is:\jessie{change this wording?}
-
+  \raf{Actually, the easiest proof given what we have is:
+    \\
   orderable
   $\implies$
   these $\ell$ conditions
@@ -384,6 +411,8 @@ Given a finite property $\gamma: \simplex \to 2^{\R}$, the \emph{intersection gr
   monotone
   $\implies$
   orderable
+  \\
+  Note: need $\gamma$ and $\Gamma$ in a few places}
 
   \noindent\textbf{orderable $\implies$ conditions:}
 
@@ -410,14 +439,16 @@ Given a finite property $\gamma: \simplex \to 2^{\R}$, the \emph{intersection gr
   \noindent\textbf{conditions $\implies$ 1-embeddable:} (correctness of construction)
 
   First, observe that that $\lambda(i)$ satisfies $\lambda^+(i) \leq \lambda(i) \leq \lambda^-(i)$, and by the second condition, $\lambda(i) > 0$ even when either bound is infinite.
-  Thus, $\Lambda_i > 0$ for all $i$, and it is then clear from our construction that $L(\varphi(r_i)) = \ell(r_i)$ for all $i$.
+  Thus, $\Lambda_i > 0$ for all $i$, and so $\varphi(r_1) < \ldots < \varphi(r_k)$.
+  By definition of $L$, we have $L(\varphi(r_1)) = \ell(r_1)$, and $L(\varphi(r_{i+1})) = \ell(r_i) + \Lambda_i \cdot (\varphi(r_{i+1})-\varphi(r_i)) \cdot (\ell(r_{i+1}) - \ell(r_i))$ for all $i \geq 2$.
+  Since $\varphi(r_{i+1})-\varphi(r_i) = 1/\Lambda_i$ by our construction, we have $L(\varphi(r_{i+1})) = \ell(r_{i+1})$, so that $\ell(r) = L(\varphi(r))$ for all $r\in\R$.
   It remains therefore to show convexity of $L$ and the optimality conditions.
 
-  For convexity, note that $L$ is piecewise linear with nondifferentiable points at precisely the embedding points $\varphi(r_1),\ldots,\varphi(r_k)$.
+  For convexity, note that $L$ is piecewise linear with the only possible nondifferentiable points being the embedding points $\varphi(r_1),\ldots,\varphi(r_k)$.
   Let us denote the left and right derivative operators for real-valued functions by $\partial^-$ and $\partial^+$, respectively, and write $\partial^- \ell(u) = (\partial^- \ell(u)_y)_{y\in\Y} \in \reals^\Y$, and similarly for $\partial^+\ell(u)$.
   To show convexity, then, we need only show $\partial^-\ell(\varphi(r_i)) \leq \partial^+\ell(\varphi(r_i))$ for all $i\in\{1,\ldots,k\}$, where the inequality holds coordinate-wise.
-  By construction, we have $\partial^-\ell(\varphi(r_1)) = -K\ones$ and $\partial^+\ell(\varphi(r_1\jessie{r_k?})) = \Lambda_k K\ones$, and for $i\in\{1,\ldots,k-1\}$ we have $\partial^+\ell(\varphi(r_i)) = \partial^-\ell(\varphi(r_{i+1})) = \Lambda_i v(i+1)$.  
-  \raf{Take $K > \max_{i\in\{1,\ldots,k-1\}} \Lambda_i\|v(i+1)\|_\infty$, show why it works for endpoints.}
+  By construction, we have $\partial^-\ell(\varphi(r_1)) = -K\ones$ and $\partial^+\ell(\varphi(r_k)) = \Lambda_{k-1} K\ones$, and for $i\in\{1,\ldots,k-1\}$ we have $\partial^+\ell(\varphi(r_i)) = \partial^-\ell(\varphi(r_{i+1})) = \Lambda_i v(i+1)$.
+  By definition of $K$, we have $\partial^-\ell(\varphi(r_1)) = -K \ones \leq v(2) = \partial^+\ell(\varphi(r_1))$ and $\partial^-\ell(\varphi(r_k)) = \Lambda_{k-1} v(k) \leq \Lambda_{k-1} K \ones = \partial^+\ell(\varphi(r_k))$.
 
   It remains to show that for all $i\in\{2,\ldots,k-1\}$ and all $y\in\Y$, we have $\Lambda_{i-1} v(i)_y \leq \Lambda_i v(i+1)_y$, which by definition of $\Lambda$ is equivalent to $v(i)_y \leq \lambda(i) v(i+1)_y$.
   By our first condition, the possible pairs $(\sgn(v(i)_y),\sgn(v(i+1)_y))$ are $(-,-),(-,0),(-,+),(0,0),(0,+),(+,+)$, and given that $\lambda(i)>0$, all are trivial except $(-,-)$ and $(+,+)$.
@@ -425,7 +456,9 @@ Given a finite property $\gamma: \simplex \to 2^{\R}$, the \emph{intersection gr
   Recalling that both $v(i)_y$ and $v(i+1)_y$ are negative, we conclude $v(i)_y \leq \lambda(i)v(i+1)_y$.
   In the $(+,+)$ case, we have $\lambda(i) \geq \lambda^+(i) \geq v(i)_y/v(i+1)_y$, and again $v(i)_y \leq \lambda(i)v(i+1)_y$.
 
-  For optimality, consider a distribution $p\in\Delta(\Y)$, and the subgradient of $\inprod{p}{L(\varphi(r_i))}$ for some $i\in\{2,\ldots,k-1\}$.
+  For optimality, consider any $r\in\R$ and any $p\in\Gamma_{\varphi(r)}$.
+  By the matching of loss values, for every $r'\in\R$ we have  $\inprod{p}{\ell(r)} = \inprod{p}{L(\varphi(r))} \leq \inprod{p}{L(\varphi(r'))} = \inprod{p}{\ell(r')}$, which implies $p\in\gamma_r$.
+  For the other direction, consider a distribution $p\in\Delta(\Y)$, and the subgradient of $\inprod{p}{L(\varphi(r_i))}$ for some $i\in\{2,\ldots,k-1\}$.
   We have
   \begin{align*}
     0\in\partial\inprod{p}{L(\varphi(r_i))}
@@ -441,12 +474,13 @@ Given a finite property $\gamma: \simplex \to 2^{\R}$, the \emph{intersection gr
     \\
     &\iff \inprod{p}{\ell(r_i)} \leq \inprod{p}{\ell(r_{i-1})} \text{ and } \inprod{p}{\ell(r_i)} \leq \inprod{p}{\ell(r_{i+1})}~.
   \end{align*}
-  \raf{MISSING: corner cases (easy?) and why we only need to look at two reports at once.}
-
+  For $i=1$, similar reasoning gives that optimality is equivalent to the condition $\inprod{p}{\ell(r_1)} \leq \inprod{p}{\ell(r_{2})}$, and for $i=k$, $\inprod{p}{\ell(r_k)} \leq \inprod{p}{\ell(r_{k-1})}$.
+  (Note that the other conditions, $-K \leq 0$ or $0 \leq \Lambda_{k-1} K$, are true regardless of $p$.)
+  In particular, if $p \in \gamma_{r_i}$, then we have $\inprod{p}{\ell(r_i)} \leq \inprod{p}{\ell(r_{i-1})}$ for $i \geq 2$, and $\inprod{p}{\ell(r_i)} \leq \inprod{p}{\ell(r_{i+1})}$ for $i \leq k-1$, so for all $i$ we have $0\in\partial\inprod{p}{L(\varphi(r_i))}$ and thus $p \in \Gamma_{\varphi(r_i)}$.
 
   \noindent\textbf{embedding $\implies$ monotone:}
 
-  \raf{STALE}
+  \raf{FINISH AFTER MOVE}
 
   The above establishes the second condition of monotone properties in Definition~\ref{def:monotone-prop}.
   To see the first condition, note that we have already established it for $i\in\{2,\ldots,k-1\}$.
@@ -456,6 +490,8 @@ Given a finite property $\gamma: \simplex \to 2^{\R}$, the \emph{intersection gr
 
   \noindent\textbf{monotone $\implies$ orderable:}
   
+  \raf{FINISH AFTER MOVE}
+
   Let $\gamma:\simplex\toto\R$ be finite and monotone.
   Then we can use the total ordering of $\R$ to write $\R = \{r_1,\ldots,r_k\}$ such that $r_i < r_{i+1}$ for all $i \in \{1,\ldots,k-1\}$.
   We now have $\gamma_{r_i} \cap \gamma_{r_{i+1}} = \{p\in\simplex : \inprod{a(r_{i+1})}{p} \leq 0 \leq \inprod{b(r_i)}{p} \}$.
@@ -800,20 +836,38 @@ The second proof is a direct geometric one utilizing the same observations.
 We show that packing too many normal vectors into a half-circle yields contradictions, implying that a $5$-outcome embedding into $2$ dimensions is impossible (and incidentally characterizing the structure of all possible $4$-outcome\jessie{dimensional $\to$ outcome} embeddings).
 
 
-\section{Conclusions and future work}
-\paragraph{Future Work}
+\section{Discussion} \label{sec:conclusion}
+\paragraph{Comparison to feasible subspace dimension.}
+Essentially the only other known lower-bound technique for dimensionality of calibrated surrogates is the \emph{feasible subspace dimension} of \cite{ramaswamy2016convex}.
+\bo{TMI?}
+This crux of this technique is also an optimality condition on a surrogate loss, showing that if $0$ is in the $p$-weighted Minkowski sum of $L$'s subgradient sets, then there is some local ``flat'' (affine set) of dimension $n-d-1$ such that $0$ is also in the $p'$-weighted Minkowski sum for all $p'$ in the flat.
+This implies the flat must be contained in every level set $\gamma_r$ that $p$ is in.
+Therefore, for example, if the intersection of several level sets is a single vertex $v$ (as in e.g. the $0-1$ loss on $n$ outcomes for the uniform distribtion), then the only such flat can be of dimension $0$, which gives a $d \geq n-1$ lower bound.
+
+Thus, although feasible subspace dimension applies to any convex surrogate, the relation to our techniques is an interesting future direction.
+The advantage of our approach for generic-$d$ is that our optimality conditions and quadratic feasibility program consider the structure of the entire level set $\gamma_r$, rather than just a single point.
+This allows us to prove lower bounds on the abstain loss for $\alpha \leq 1/2$, which feasible subspace dimension cannot.
+Proving the following conjecture would even more closely relate the two techniques (a disproof would also be extremely interesting):
+\begin{conjecture}
+  If a discrete loss $\ell$ has a $d$-dimensional calibrated convex surrogate, then it is $d$-embeddable (i.e. has a $d$-dimensional calibrated polyhedral surrogate).
+  In other words, embedding dimension always equals convex calibration dimension~\citep{ramaswamy2016convex}.
+\end{conjecture}
+Our results show the conjecture is true when $d=1$.
+
+\paragraph{Future Work.}
 There are a few threads of future work: the first is to utilize monotonicity to see if we can construct even tighter lower bounds on embedding dimension.
 Second, we hope to understand when, if ever, embedding dimension is not equal to convex calibration dimension.
 Moreover, the restriction that we are calibrated over the entire simplex may be tighter than necessary in some contexts, and would be useful to understand the tradeoff between calibration and dimension of a surrogate loss.
 For one example where we can reduce surrogate dimension with a low-entropy assumption on the simplex, see~\cite[Example 6]{agarwal2015consistent}.
 
-\paragraph{Conclusion}
-\jessie{Not a fan, but a placeholder if we get too close to deadline.}
-In this paper, we present the notion of \emph{embedding dimension} in order to measure the efficiency of a surrogate loss function.
-While similar notions of surrogate efficiency have been studied before, we propose a characterization in $1$ dimension that generalizes to the construction of any calibrated convex surrogate.
-In higher dimensions, our characterization can only be applied to understanding the minimal dimension of a calibrated \emph{polyhedral} surrogate, although we conjecture that embedding dimension is equal to convex calibration dimension in general.
-In order to demonstrate our characterizations, we show an improved lower bound from previous work on the convex calibration dimension of $\abstain{\alpha}$, and a new lower bound on embedding dimension of $\abstain{1/2}$.
-
+%% Bo: I think we can get away with no summary at the end.
+%\paragraph{Conclusion.}
+%\jessie{Not a fan, but a placeholder if we get too close to deadline.}
+%In this paper, we present the notion of \emph{embedding dimension} in order to measure the efficiency of a surrogate loss function.
+%While similar notions of surrogate efficiency have been studied before, we propose a characterization in $1$ dimension that generalizes to the construction of any calibrated convex surrogate.
+%In higher dimensions, our characterization can only be applied to understanding the minimal dimension of a calibrated \emph{polyhedral} surrogate, although we conjecture that embedding dimension is equal to convex calibration dimension in general.
+%In order to demonstrate our characterizations, we show an improved lower bound from previous work on the convex calibration dimension of $\abstain{\alpha}$, and a new lower bound on embedding dimension of $\abstain{1/2}$.
+%
 \newpage
 % Acknowledgments---Will not appear in anonymized version
 \acks{JF- Need that GRFP acknowledgement}
