@@ -393,11 +393,11 @@ Given a finite property $\gamma: \simplex \to 2^{\R}$, the \emph{intersection gr
     L(u) &= \begin{cases}
       \ell(r_1) - u K \ones & u \leq \varphi(r_1) = 0 \\
       \ell(r_i) + \Lambda_i \cdot (u - \varphi(r_i)) \cdot  (\ell(r_{i+1})-\ell(r_i)) & u \in [\varphi(r_i),\varphi(r_{i+1})] \\
-      \ell(r_k) + \Lambda_k \cdot (u - \varphi(r_k))\cdot K \ones & u \geq \varphi(r_k)
+      \ell(r_k) + \Lambda_{k-1} \cdot (u - \varphi(r_k))\cdot K \ones & u \geq \varphi(r_k)
     \end{cases}~,
   \end{align*}
   \jessiet{In the cases: what if $\varphi(r_1) < 0$?}\raft{I set $\varphi(r_1)=0$; updated to something hopefully clearer}
-  where $\lambda(i) = \min(\lambda^+(i),\max(\lambda^-(i),1))$, $\Lambda_i := \prod_{j=2}^i \lambda(j)$, $\Lambda_1=1$, and $K=$ \raf{TBD; was $1+\max_{r\in\R,y\in\Y} |\ell(r)_y|$}.
+  where $\lambda(i) = \min(\lambda^+(i),\max(\lambda^-(i),1))$, $\Lambda_i := \prod_{j=2}^i \lambda(j)$, $\Lambda_1=1$, and $K = \max_{i\in\{2,\ldots,k\},y\in\Y} |v(i)_y|$.
 \end{theorem}
 \begin{proof}
   \raf{Actually, the easiest proof given what we have is:
@@ -439,14 +439,16 @@ Given a finite property $\gamma: \simplex \to 2^{\R}$, the \emph{intersection gr
   \noindent\textbf{conditions $\implies$ 1-embeddable:} (correctness of construction)
 
   First, observe that that $\lambda(i)$ satisfies $\lambda^+(i) \leq \lambda(i) \leq \lambda^-(i)$, and by the second condition, $\lambda(i) > 0$ even when either bound is infinite.
-  Thus, $\Lambda_i > 0$ for all $i$, and it is then clear from our construction that $L(\varphi(r_i)) = \ell(r_i)$ for all $i$.
+  Thus, $\Lambda_i > 0$ for all $i$, and so $\varphi(r_1) < \ldots < \varphi(r_k)$.
+  By definition of $L$, we have $L(\varphi(r_1)) = \ell(r_1)$, and $L(\varphi(r_{i+1})) = \ell(r_i) + \Lambda_i \cdot (\varphi(r_{i+1})-\varphi(r_i)) \cdot (\ell(r_{i+1}) - \ell(r_i))$ for all $i \geq 2$.
+  Since $\varphi(r_{i+1})-\varphi(r_i) = 1/\Lambda_i$ by our construction, we have $L(\varphi(r_{i+1})) = \ell(r_{i+1})$, so that $\ell(r) = L(\varphi(r))$ for all $r\in\R$.
   It remains therefore to show convexity of $L$ and the optimality conditions.
 
-  For convexity, note that $L$ is piecewise linear with nondifferentiable points at precisely the embedding points $\varphi(r_1),\ldots,\varphi(r_k)$.
+  For convexity, note that $L$ is piecewise linear with the only possible nondifferentiable points being the embedding points $\varphi(r_1),\ldots,\varphi(r_k)$.
   Let us denote the left and right derivative operators for real-valued functions by $\partial^-$ and $\partial^+$, respectively, and write $\partial^- \ell(u) = (\partial^- \ell(u)_y)_{y\in\Y} \in \reals^\Y$, and similarly for $\partial^+\ell(u)$.
   To show convexity, then, we need only show $\partial^-\ell(\varphi(r_i)) \leq \partial^+\ell(\varphi(r_i))$ for all $i\in\{1,\ldots,k\}$, where the inequality holds coordinate-wise.
-  By construction, we have $\partial^-\ell(\varphi(r_1)) = -K\ones$ and $\partial^+\ell(\varphi(r_k)) = \Lambda_k K\ones$, and for $i\in\{1,\ldots,k-1\}$ we have $\partial^+\ell(\varphi(r_i)) = \partial^-\ell(\varphi(r_{i+1})) = \Lambda_i v(i+1)$.  
-  \raf{Take $K > \max_{i\in\{1,\ldots,k-1\}} \Lambda_i\|v(i+1)\|_\infty$, show why it works for endpoints.}
+  By construction, we have $\partial^-\ell(\varphi(r_1)) = -K\ones$ and $\partial^+\ell(\varphi(r_k)) = \Lambda_{k-1} K\ones$, and for $i\in\{1,\ldots,k-1\}$ we have $\partial^+\ell(\varphi(r_i)) = \partial^-\ell(\varphi(r_{i+1})) = \Lambda_i v(i+1)$.
+  By definition of $K$, we have $\partial^-\ell(\varphi(r_1)) = -K \ones \leq v(2) = \partial^+\ell(\varphi(r_1))$ and $\partial^-\ell(\varphi(r_k)) = \Lambda_{k-1} v(k) \leq \Lambda_{k-1} K \ones = \partial^+\ell(\varphi(r_k))$.
 
   It remains to show that for all $i\in\{2,\ldots,k-1\}$ and all $y\in\Y$, we have $\Lambda_{i-1} v(i)_y \leq \Lambda_i v(i+1)_y$, which by definition of $\Lambda$ is equivalent to $v(i)_y \leq \lambda(i) v(i+1)_y$.
   By our first condition, the possible pairs $(\sgn(v(i)_y),\sgn(v(i+1)_y))$ are $(-,-),(-,0),(-,+),(0,0),(0,+),(+,+)$, and given that $\lambda(i)>0$, all are trivial except $(-,-)$ and $(+,+)$.
@@ -473,7 +475,7 @@ Given a finite property $\gamma: \simplex \to 2^{\R}$, the \emph{intersection gr
     &\iff \inprod{p}{\ell(r_i)} \leq \inprod{p}{\ell(r_{i-1})} \text{ and } \inprod{p}{\ell(r_i)} \leq \inprod{p}{\ell(r_{i+1})}~.
   \end{align*}
   For $i=1$, similar reasoning gives that optimality is equivalent to the condition $\inprod{p}{\ell(r_1)} \leq \inprod{p}{\ell(r_{2})}$, and for $i=k$, $\inprod{p}{\ell(r_k)} \leq \inprod{p}{\ell(r_{k-1})}$.
-  (Note that the other conditions, $-K \leq 0$ or $0 \leq \Lambda_k K$, are true regardless of $p$.)
+  (Note that the other conditions, $-K \leq 0$ or $0 \leq \Lambda_{k-1} K$, are true regardless of $p$.)
   In particular, if $p \in \gamma_{r_i}$, then we have $\inprod{p}{\ell(r_i)} \leq \inprod{p}{\ell(r_{i-1})}$ for $i \geq 2$, and $\inprod{p}{\ell(r_i)} \leq \inprod{p}{\ell(r_{i+1})}$ for $i \leq k-1$, so for all $i$ we have $0\in\partial\inprod{p}{L(\varphi(r_i))}$ and thus $p \in \Gamma_{\varphi(r_i)}$.
 
   \noindent\textbf{embedding $\implies$ monotone:}
