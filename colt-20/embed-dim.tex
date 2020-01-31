@@ -264,7 +264,7 @@ In order to study calibration of surrogates (Definition~\ref{def:calibration} be
   It is \emph{finite} if $|R| < \infty$.
   The \emph{level set} of $r \in R$ is the set $g_r = \{p \in \simplex : r \in g(p)\}$.
   A loss function $f: R \to \nonnegreals^{\Y}$ \emph{elicits} $g$ if $g(p) = \argmin_{r \in R} \inprod{p}{f(r)}$.
-  We assume all properties are non-redundant, i.e. each $g_r$ contains a distribution $p$ not in any other $g_{r'}$.
+  We assume all properties are non-redundant, i.e. each $g_r$ contains a distribution $p$ not in any other $g_{r'}$.\jessiet{$R$ or $\R$?}
 \end{definition}
 For example, $0-1$ loss elicits the mode, which is formalized as a property on report space $R = \Y$ via $g(p) = \argmax_{y \in \Y} p(y)$.
 Notice in this example $g(p)$ is a singleton set when the mode of $p$ is unique and e.g. is $\Y$ when $p$ is uniform.
@@ -278,7 +278,7 @@ The key condition required on the embedding and surrogate loss $L$ is that a dis
 %
 \begin{definition}[Embedding of a loss]
   A loss $L: \reals^d \to \nonnegreals^{\Y}$ \emph{embeds} a loss $\ell: \R \to \nonnegreals^{\Y}$ \emph{in dimension $d$} with \emph{embedding function $\varphi: \R \to \reals^d$} if: (i) $\varphi$ is injective; (ii) for all $r \in \R$, $\ell(r) = L(\varphi(r))$; and (iii) for all $r \in \R$, $\gamma_r = \Gamma_{\varphi(r)}$.
-  We simply say $L$ \emph{embeds} $\ell$ if some such $\phi$ exists.
+  We simply say $L$ \emph{embeds} $\ell$ if some such $\varphi$ exists.
 \end{definition}
 %
 Note that embedding does not immediately imply a key desirable property, consistency, which is equivalent to calibration in finite-outcome settings.
@@ -334,45 +334,57 @@ We discuss further in Section \ref{sec:conclusion}.
 \section{One-dimensional embeddings}
 \label{sec:1d}
 
-In this section, we completely characterize when a discrete loss can be embedded into the real line.
-For example, this will immediately imply (see Section \ref{sec:examples}) that the abstain losses on $n \geq 3$ outcomes require $d \geq 2$.
-We will also give a constructive algorithm for testing $1$-embeddability and constructing a $1$-dimensional polyhedral surrogate.
-Finally, we show that $1$-embeddability is equivalent to the existence of \emph{any} convex calibrated $1$-dimensional surrogate.
-After presenting and discussing this sequence of results, we observe that they can be collected as a set of five or six conditions on $\ell$ that are all pairwise equivalent, and in particular, are equivalent to $1$-embeddability.
+In this section, we completely characterize when a discrete loss $\ell$ can be embedded into the real line, i.e., when $\ell$ is 1-embeddable.
+Our first characterization is expressed in terms of the property $\gamma$ that $\ell$ elicits, stating that $\ell$ is 1-embeddable if and only if $\gamma$ is \emph{orderable}, meaning the adjacency graph of its level sets is a path.
+For example, this characterization will immediately imply that embedding the abstain losses on $n \geq 3$ outcomes requires $d \geq 2$ dimensions (\S~\ref{sec:examples}).
+While determining these adjacencies can be straightforward when $\ell$ has known symmetries, we also give a more constructive algorithm for testing $1$-embeddability and constructing a $1$-dimensional polyhedral surrogate.
+Finally, we show that the existence of any $1$-dimensional convex calibrated implies $1$-embeddability, showing that embeddings are without loss of generality in dimension 1.
+After presenting and discussing this sequence of results, we observe that they can be collected as a set of six conditions on $\ell$ that are all pairwise equivalent, and in particular, are equivalent to $1$-embeddability.
 
-\subsection{General characterization}
+\subsection{General characterization via property elicitation}
 
-A condition from the literature~\citep{lambert2018elicitation} turns out to be key to $1$-dimensional embeddings.
+We begin with conditions on the property elicited by a discrete loss.
+The following condition of~\citet[Theorem 3]{lambert2018elicitation}, that a finite property is \emph{orderable}, states that any two level sets intersect in a hyperplane, or not at all.
 \begin{definition}[Orderable]\label{def:orderable-hyperplane}
 	A finite property $\gamma:\simplex \to 2^\R$ is \emph{orderable} if there is an enumeration of $\R = \{r_1, \ldots, r_{|\R|}\}$ such that for all $i \leq |\R| - 1$, we have $\gamma_{r_i} \cap \gamma_{r_{i+1}}$ is a hyperplane intersected with $\simplex$.
 \end{definition}
-This definition follows from~\cite[Theorem 3]{lambert2018elicitation}.
 
-Before investigating the usefulness of this condition, we give an equivalent condition which may be more intuitive.
-Given a finite property $\gamma$, elicited by a discrete loss $\ell$, a common technique particularly in information elicitation is to visualize the level sets as a power diagram (generalization of Voronoi diagram) in the simplex\bo{cite}.
-See Figures \ref{fig:intersection-graph-ex} and \ref{fig:abstain-alpha-half}.
-We can formalize the adjacency relationships of these level sets, giving a visual test for orderability.
+In fact, we show that orderability characterizes $1$-embeddability.
+The proof involves several intermediate results which we state later in this section; see \S~\ref{sec:1d-proof-discuss} for more details. 
+\begin{theorem} \label{thm:orderable-iff-1d}
+  A discrete loss $\ell$ is $1$-embeddable if and only if the property it elicits is orderable.
+\end{theorem}
+
+We next give an equivalent condition to orderability which may be more intuitive: the adjacency graph of the level sets of $\gamma$, formed by connecting reports if their level sets intersect, must be a path.
+This graph can be easily established for discrete losses with known symmetries or other facts, such as abstain, the mode, or ranking losses.
 
 \begin{definition}[Intersection graph]\label{def:intersection-graph}
-  Given a discrete loss $\ell$ and associated finite property $\gamma: \simplex \to 2^{\R}$ elicited by $\ell$, the \emph{intersection graph} has vertices labeled by $\R$ with an edge $(r,r')$ if $\gamma_r \cap \gamma_{r'} \cap \relint(\simplex) \neq \emptyset$, where $\relint(\simplex)$ equals the set of distributions with full support.
+  Given a discrete loss $\ell$ and associated finite property $\gamma: \simplex \toto 2^{\R}$ elicited by $\ell$, the \emph{intersection graph} has vertices $\R$ with an edge $(r,r')$ if $\gamma_r \cap \gamma_{r'} \cap \relint(\simplex) \neq \emptyset$, where $\relint(\simplex)$ is the relative interior of $\simplex$.
+  %(distributions with full support).
 \end{definition}
 \begin{proposition} \label{prop:orderable-iff-path}
   A finite property $\gamma$ is \emph{orderable} if and only if its intersection graph is a path, i.e. a connected graph where every vertex has either one or two neighbors.
 \end{proposition}
 \begin{proof}
-  $(\implies)$The intersection graph is constructed by adding an edge for each halfspace, which connects only two nodes.
+  $(\implies)$
+  The intersection graph is constructed by adding an edge for each halfspace, which connects only two nodes.
   If three level sets intersected on $\relint(\simplex)$, then the level boundary for any two would not be a halfspace (this follows because the level sets form a power diagram, e.g. \bo{cite}).
   This yields a path for the intersection graph.
   
-  \bigskip
+
+  $(\impliedby)$
   \bo{This one needs a bit of work.}
-  $(\impliedby)$ If the intersection graph forms a path, then each level set has at most two neighbors.
+  If the intersection graph forms a path, then each level set has at most two neighbors.
   The level sets are convex polytopes, as they form a power diagram\dots.
   
   As each path has a source, take the corresponding report to be $r_1$, and proceed in order through the path to enumerate the ordering.
   As the property is well-defined on the simplex, the boundaries of the level sets cannot intersect on $\relint(\simplex)$ without adding an edge.
   Combining this fact with the fact that level sets of finite elicitable properties are convex polytopes (and therefore defined as the intersection of a finite number of halfspaces), the level set boundaries must be hyperplanes intersected with $\simplex$. 
 \end{proof}
+
+Combining Proposition~\ref{prop:orderable-iff-path} and Theorem~\ref{thm:orderable-iff-1d}, we see that in order for $\ell$ to be embedded onto the real line, it is necessary and sufficient for the intersection graph of the property $\gamma$ to be a path.
+We give an example of a direct application in Section \ref{sec:examples}.
+By visualizing the level sets of $\gamma$ as a power diagram (generalization of Voronoi diagram) in the simplex~\cite{lambert2009eliciting}, we can also use Proposition~\ref{prop:orderable-iff-path} to perform a visual test for orderability, and thus 1-embeddability (Figures~\ref{fig:intersection-graph-ex} and~\ref{fig:abstain-alpha-half}).
 
 \begin{figure}
 	\begin{minipage}{0.48\linewidth}
@@ -390,17 +402,9 @@ We can formalize the adjacency relationships of these level sets, giving a visua
 \end{minipage}
 \end{figure}
 
-Our first main result is the following; we defer discussion of its proof to the end of the section.
-\begin{theorem} \label{thm:orderable-iff-1d}
-  A discrete loss $\ell$ is $1$-embeddable if and only if the property it elicits is orderable.
-\end{theorem}
-In other words, to know whether a one-dimensional polyhedral surrogate for $\ell$ exists, it suffices to check whether the intersection graph is a path.
-We give an example of a direct application in Section \ref{sec:examples}.
-
 \subsection{Constructing a surrogate}
-Theorem \ref{thm:orderable-iff-1d} is only somewhat constructive.
-Next, we give a more constructive test for $1$-embeddability.
-In fact, in the event that $\ell$ is $1$-embeddable, we will actually build a $1$-dimensional polyhedral calibrated surrogate.
+While Theorem~\ref{thm:orderable-iff-1d} and Proposition~\ref{prop:orderable-iff-path} are quite useful for discrete losses with known symmetries, they do not immediately provide an algorithm to test $1$-embeddability of an arbitrary discrete loss $\ell$, nor to construct the convex loss $L$ which embeds it.
+We now turn to a more algorithmic test, which will actually build a real-valued polyhedral calibrated surrogate in the event that $\ell$ is $1$-embeddable.
 
 %\begin{algorithm}
 %  \SetAlgoLined
@@ -424,10 +428,10 @@ In fact, in the event that $\ell$ is $1$-embeddable, we will actually build a $1
     (We adopt the convention $\max\emptyset = -\infty$, $\min\emptyset = +\infty$.)
   \end{enumerate}
 
-  Moreover, when these conditions hold, the loss $L:\reals\to\reals^\Y$ embeds $\ell$ with $\varphi:\R\to\reals$, \jessiet{Have been using $\phi$ instead of $\varphi$ for embeddings in this paper so far. I have a slight preference for $\varphi$ since it matches the last paper, but I don't care too much... just need to pick one.}\raft{Why switch to $\phi$ if you prefer $\varphi$?}
+  Moreover, when these conditions hold, the loss $L:\reals\to\reals^\Y$ embeds $\ell$ with $\varphi:\R\to\reals$,
   where
   \begin{align*}
-    \varphi(r_i) &= \sum_{j=2}^i 1/\Lambda_j~, \quad \text{(where $\varphi(r_1)=0$)}
+    \varphi(r_i) &= \sum_{j=1}^{i-1} 1/\Lambda_j~, \quad \text{(where $\varphi(r_1)=0$)}
     \\
     L(u) &= \begin{cases}
       \ell(r_1) - u K \ones & u \leq \varphi(r_1) = 0 \\
@@ -438,11 +442,21 @@ In fact, in the event that $\ell$ is $1$-embeddable, we will actually build a $1
   \jessiet{In the cases: what if $\varphi(r_1) < 0$?}\raft{I set $\varphi(r_1)=0$; updated to something hopefully clearer}
   where $\lambda(i) = \min(\lambda^+(i),\max(\lambda^-(i),1))$, $\Lambda_i := \prod_{j=2}^i \lambda(j)$, $\Lambda_1=1$, and $K = \max_{i\in\{2,\ldots,k\},y\in\Y} |v(i)_y|$.
 \end{theorem}
+As intuition for the proof, note that the conditions of the theorem ensure the existence of a positive multiplier $\lambda(i)$ making $v(i) \leq \lambda(i) v(i+1)$ hold coordinate-wise; our choice of $\lambda(i)$ is but one option.
+The construction of $L$ sets the left and right derivatives at an embedding point $\varphi(r_i)$ to be positive multiples of $v(i)$ and $v(i+1)$, respectively, using this inequality to maintain monotonicity, and hence convexity of $L$.
+The vectors $v(i),v(i+1)$ are chosen precisely to give the correct optimality conditions, so that for a given distribution, $r_i$ is optimal for $\ell$ if and only if $\varphi(r_i)$ is optimal for $L$.
+The reverse direction, showing that these conditions are necessary for $1$-embeddability, is much more involved (\S~\ref{sec:1d-proof-discuss}).
+
+
 Note that a calibrated surrogate should also specify a link function $\psi: \reals^d \to \R$.
-We have been omitting it because of the guarantee of Theorem \ref{thm:embed-iff-poly}, from \cite{finocchiaro2019embedding}, which guarantees its existence.
-But in the case of $d=1$, we observe that one can simply use the midpoints between the embedding points as cutoffs for the link function, i.e. $\psi(u) = \argmin_{r \in \R} |u - \phi(r)|$, breaking ties arbitrarily.
+As our surrogate is an embedding, Theorem \ref{thm:embed-iff-poly} guarantees the existence of a link achieving calibration.
+We can also easily construct one in the case of $d=1$, by taking the midpoints between the embedding points as cutoffs: $\psi(u) = \argmin_{r \in \R} |u - \varphi(r)|$, breaking ties arbitrarily.
 
 \subsection{Proof techniques and general convex surrogates}
+\label{sec:1d-proof-discuss}
+
+\raf{*much* more to say here...}
+
 We collect the above results, and add one more, in the following summary theorem.
 \begin{theorem} \label{thm:1d-tfae}
   Let $\ell: \R \to \nonnegreals^{\Y}$ be a discrete loss eliciting a finite property $\gamma$.
@@ -675,7 +689,6 @@ Given this characterization, we prove the main result on when a solution to the 
 \bo{Actually, I guess one could run this, then use monotonicity to add constraints and find the next subgradient sets, etc.}
 
 \begin{proof}[Proof of Theorem \ref{thm:opt-iff-qfp}]
-	\jessie{Move to appendix?}
     By Theorem \ref{thm:vertex-halfspace-opt}, it suffices to show that $\T$ satisfying the halfspace and vertex conditions exist if and only if the program is feasible.
 
   ($\implies$)
@@ -751,10 +764,10 @@ This implies the flat must be contained in every level set $\gamma_r$ that $p$ i
 Therefore, for example, if the intersection of several level sets is a single vertex $v$ (as in e.g. the $0-1$ loss on $n$ outcomes for the uniform distribtion), then the only such flat can be of dimension $0$, which gives a $d \geq n-1$ lower bound.
 
 Thus, although feasible subspace dimension applies to any convex surrogate, the relation to our techniques is an interesting future direction.
-The advantage of our approach for generic-$d$ is that our optimality conditions and quadratic feasibility program consider the structure of the entire level set $\gamma_r$, rather than just a single point.
+The advantage of our approach for generic $d$ is that our optimality conditions and quadratic feasibility program consider the structure of the entire level set $\gamma_r$, rather than just a single witness point.
 This allows us to prove lower bounds on the abstain loss for $\alpha \leq 1/2$, which feasible subspace dimension cannot.
 Proving the following conjecture would even more closely relate the two techniques (a disproof would also be extremely interesting):
-\begin{conjecture}
+\begin{conjecture}\label{conj:embed-equals-ccdim}
   If a discrete loss $\ell$ has a $d$-dimensional calibrated convex surrogate, then it is $d$-embeddable (i.e. has a $d$-dimensional calibrated polyhedral surrogate).
   In other words, embedding dimension always equals convex calibration dimension~\citep{ramaswamy2016convex}.
 \end{conjecture}
@@ -762,7 +775,7 @@ Our results show the conjecture is true when $d=1$.
 
 \paragraph{Future Work.}
 There are a few threads of future work: the first is to utilize monotonicity to see if we can construct even tighter lower bounds on embedding dimension.
-Second, we hope to understand when, if ever, embedding dimension is not equal to convex calibration dimension.
+Second, we hope to understand when, if ever, embedding dimension is not equal to convex calibration dimension, as stated in Conjecture~\ref{conj:embed-equals-ccdim}.
 Moreover, the restriction that we are calibrated over the entire simplex may be tighter than necessary in some contexts, and would be useful to understand the tradeoff between calibration and dimension of a surrogate loss.
 For one example where we can reduce surrogate dimension with a low-entropy assumption on the simplex, see~\cite[Example 6]{agarwal2015consistent}.
 
@@ -802,7 +815,7 @@ For one example where we can reduce surrogate dimension with a low-entropy assum
     (We adopt the convention $\max\emptyset = -\infty$, $\min\emptyset = +\infty$.)
   \end{enumerate}
 
-  Moreover, when these conditions hold, the loss $L:\reals\to\reals^\Y$ embeds $\ell$ with $\varphi:\R\to\reals$, \jessiet{Have been using $\phi$ instead of $\varphi$ for embeddings in this paper so far. I have a slight preference for $\varphi$ since it matches the last paper, but I don't care too much... just need to pick one.}\raft{Why switch to $\phi$ if you prefer $\varphi$?}
+  Moreover, when these conditions hold, the loss $L:\reals\to\reals^\Y$ embeds $\ell$ with $\varphi:\R\to\reals$,
   where
   \begin{align*}
     \varphi(r_i) &= \sum_{j=2}^i 1/\Lambda_j~, \quad \text{(where $\varphi(r_1)=0$)}
