@@ -473,20 +473,22 @@ We therefore prove (1) $\implies$ (3) $\implies$ (4) $\implies$ (6) $\implies$ (
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Higher dimensions}\label{sec:d-dim}
+
+\raf{Skim down / move to intro}
+
 Our characteriation of 1-embeddable losses reveals a large class of properties are not $1$-embeddable.
 On the other hand, previous work has shown that every discrete loss is $(n-1)$-embeddable
 \citep{finocchiaro2019embedding}.
 A natural next question, therefore, is to characterize $d$-embeddable losses for $2 \leq d \leq n-2$, or failing that, to develop tighter bounds on the embedding dimension of various losses.
-An embedding dimension significantly below $(n-1)$, such as $O(\log n)$ as with abstain loss, can lead to faster downstream optimization, as rates and computation times can both depend on the surrogate loss dimension.
+An embedding dimension significantly below $n$, such as $O(\log n)$ as with abstain loss, can lead to faster downstream optimization, as rates and computation times can both depend on the surrogate loss dimension.
 This dependence is especially important as the number of possible outcomes $n$ grows large.
 
 In this section, we develop a characterization of $d$-embeddable discrete losses for $d \geq 2$.
 We begin with some basic facts and definitions about polytopes and their Minkowski sums, which naturally arise when considering the subgradients of a polyhedral surrogate loss (\S~\ref{subsec:sub-sets}).
 From these definitions, we can state a somewhat immediate characterization of $d$-embeddable losses in terms of polytopes that satisfy certain optimality and monotonicity conditions (\S~\ref{subsec:gener-char}).
 We then explore the optimality condition further, and through facts about Minkowski sums, slowly remove mentions of polytopes from the condition until we arrive at a quadratic feasibility program to test whether such polytopes exist (\S~\ref{subsec:opt-conditions}).
-Finally, we discuss the proof of correctness of our feasibility program together with intuition.
-
-\raf{Orphaned; add back:} necessary conditions for $d$-embeddability by satisfying optimality conditions, yielding new lower bounds for embedding dimension in Corollary~\ref{cor:d-embeddable-char}.
+% Finally, we discuss the proof of correctness of our feasibility program together with intuition.
+From our main characterization, dropping the monotonicity condition, this program gives a novel necessary condition for $d$-embeddability, yielding new lower bounds for embedding dimension (Corollary~\ref{cor:d-embeddable-char}).
 
 \subsection{Setup: subgradient sets at embedding points.}\label{subsec:sub-sets}
 %Recall that we have a loss function $\ell: \R \to \reals^{\Y}_{\geq 0}$, and for any prediction $r \in \R$ of the algorithm, we write $\gamma_r = \{ p : \inprod{p}{\ell(r)} \leq \inprod{p}{\ell(r')} (\forall r')\}$.
@@ -502,7 +504,7 @@ In particular, we use the fact that a convex function is minimized at $u$ if and
 
 Therefore, we consider collections of sets $T^r_y$, which intuitively aspire to be the subgradient sets of a calibrated polyhedral surrogate $L(\cdot)_y$ at $\varphi(r)$, denoted $\partial L(\varphi(r))_y$.
 Throughout, we often take $r$ as implicit and suppress it from our notation for ease of exposition.
-Note that if $L(\cdot)_y$ is a polyhedral function on $\reals^d$, then all of its subgradient sets are (bounded) closed polytopes.\bo{cite}\jessie{\cite{rockafellar1997convex} ? in my notes, but I don't have the exact theorem number.}
+Note that if $L(\cdot)_y$ is a polyhedral function on $\reals^d$, then all of its subgradient sets are (bounded) closed polytopes~\citep{rockafellar1997convex}.
 
 \begin{definition}[$\T$, $D(\T)$]
   We write $\T = \{T_y \subseteq \reals^d : y \in \Y\}$ to denote a collection of closed polytopes, with implicit parameter $d$.
@@ -651,83 +653,25 @@ We will see in Section~\ref{sec:examples} that for the important example of abst
 In particular, for $d=n-1$ a solution always exists \cite[Theorem 2]{finocchiaro2019embedding}, found by taking the convex conjugate of the negative Bayes risk of $\ell$ for each outcome and subtracting the report $u$, after which one can project down to $n-1$ dimensions (because $\simplex$ is $n-1$ dimensional to begin with).
 
 
-\section{OLD / TO MOVE}
+\subsection{Details for the proof}
 
-
-To accomplish our goal, we construct a quadratic feasibility program (QFP, Definition \ref{def:qfp}) that takes as input a polytope $C \subseteq \simplex$ and a parameter $d \in \mathbb{N}$ and (roughly) attempts to construct $\T$.
-We will prove the following main results.
-\begin{theorem} \label{thm:opt-iff-qfp}
-  Given a convex polytope $C \subseteq \simplex$, there exist polytopes $\T$ in $\reals^d$ such that $D(\T) = C$ if and only if there is a feasible solution to the QFP (Definition \ref{def:qfp}) with parameter $d$.
-\end{theorem}
-
-\begin{corollary}\label{cor:d-embeddable-char}
-  If a discrete loss $\ell$ has any level set $C = \gamma_r = \{p : r \in \argmin_{r'} \inprod{p}{\ell(r')} \}$ for which the quadratic program is infeasible with parameter $d$, then $\ell$ is not $d$-embeddable.
-\end{corollary}
-
-
-\subsubsection{Feasibility program}
-
-The feasibility program intuitively contains one set of necessary and one set of sufficient conditions.
-The necessary conditions are derived from the representation of the polytope $C$ as an intersection of halfspaces.
-The sufficient conditions are derived from its dual representation as a convex hull of vertices.
-
-The variables are a set of normal vectors $\{v_i \in \reals^d : i \in [k]\}$ and a set of vertices $\{x^j_y \in \reals^d : j \in [\ell], y \in \Y\}$.
-These correspond to a (possibly relaxed) halfspace representation and (possibly incomplete) vertex representation of the subgradient polytopes $\T$.
-
-\begin{definition}[Quadratic Feasibility Program] \label{def:qfp} ~ \\
-  \indent \textbf{Parameter:} $d \in \mathbb{N}$.
-
-  \textbf{Given:} a polytope $C = \{p \in \simplex : Bp \geq \vec 0\} = \conv(\{p^1, \ldots, p^\ell\}) \subseteq \simplex$, where $B \in \reals^{k \times n}$ has a minimum number of rows.
-
-  \textbf{Variables:} a matrix $V \in \reals^{k \times d}$, each row representing a normal vector; and a collection of matrices $X^1,\ldots,X^{\ell} \in \reals^{d \times n}$, with $X^j$ intuitively corresponding to $p^j$ with columns $x^j_y$ representing witness points.
-
-  \textbf{Constraints:}
-    \begin{align}
-      V X^j                     &\leq B    & \text{(pointwise, $\forall j \in [\ell]$)}  \label{eqn:qp-constr-1} \\
-      \sum_{y=1}^n p^j_y x^j_y &= \vec 0  & \text{($\forall j \in [\ell]$)}    \label{eqn:qp-constr-2}
-    \end{align}
-\end{definition}
-
-The feasibility program can be viewed as a low-rank matrix problem, namely: do there exist a set of rank-$d$ matrices that are pointwise dominated by $B$, sharing the left factor $V$, whose right factors $X^j$ respectively satisfy a subspace constraint?
-We will see in Section~\ref{sec:examples} that for the important example of abstain loss, the constraints simplify into a more pure low-rank matrix problem.
-In particular, for $d=n-1$ a solution always exists (e.g. \bo{cite} \cite[Theorem 2]{finocchiaro2019embedding}), found by taking the convex conjugate of the negative Bayes risk of $\ell$ for each outcome and subtracting the report $u$, after which one can project down to $n-1$ dimensions (because $\simplex$ is $n-1$ dimensional to begin with).
-
-\subsubsection{Developing the proof}
-
-To prove Theorem \ref{thm:opt-iff-qfp}, it is useful to develop a less-constructive intermediate characterization of when $D(\T) = C$.
 The following condition formalizes a necessary condition on $\T$ in terms of the halfspace representation of $C$; the subsequent one formalizes a sufficient condition using the vertex representation.
 
-
-\begin{condition}[Halfspace condition]\label{cond:H-condition}
-	A collection of polytopes $\T$ and a polytope $C$ in the simplex defined by $C = \{p \in \simplex : Bp \geq \vec 0\}$ \emph{satisfy the halfspace condition} if there exist $v_1, \ldots, v_k \in \reals^d$ such that, for all $i \in [k]$ and $y \in \Y$, for all $x \in T_y$, we have $\inprod{v_i}{x} \leq B_{iy}$.
-\end{condition}
-\begin{condition}[Vertex condition]\label{cond:V-condition}
-	A collection of polytopes $\T$ and a polytope $C$ in the simplex defined by $C = \conv(\{p^1, \ldots, p^\ell\})$ \emph{satisfy the vertex condition} if for all $j \in [\ell]$, $0 \in \oplus_{p^j} \T$. %% Equivalent: there exist $\{x_{jy} \in T_y : j \in [\ell]\}$ such that, for all $j \in [\ell]$, $\sum_{y \in \Y} p^j_y x_{jy} = \vec 0$.
-\end{condition}
-
-To gain a better understanding about the QFP in Definition~\ref{def:qfp}, we prove the following in Appendix~\ref{app:omitted-d-dim}:
+We prove the following in Appendix~\ref{app:omitted-d-dim}.
 \begin{lemma}  \label{lemma:minkowski-support}
 	Given polytopes $\T$, there exists a finite set of normal vectors $w_1,\ldots,w_K \in \reals^d$ such that, for all $p \in \simplex$, $\oplus_p \T = \{x : \inprod{w_i}{x} \leq \sum_{y \in \Y} p_y \max_{x \in T_y} \inprod{w_i}{x} \}$.
 \end{lemma}
 
-
 \begin{lemma} \label{lemma:D-polytope}
   For any $\T$, $D(\T)$ is a polytope (in particular, is convex).
 \end{lemma}
-
 
 \begin{lemma} \label{lemma:E-to-B}
   Let $C = \{p : Bp \geq \vec 0 \}$ where $B$ has the minimum possible number of rows to capture $C$, and suppose $C = \{p : Ep \geq \vec 0 \}$.
   Then for each row in $B$ there is some (unique) row in $E$ that is equal to $\alpha B$ for some positive $\alpha$.
 \end{lemma}
 
-
-
-\begin{theorem} \label{thm:vertex-halfspace-opt}
-  Let the polytopes $\T = \{T_y \subseteq \reals^d : y \in \Y\}$ and $C$ be given, with $C = \conv(\{p^1,\ldots,p^{\ell}\}) = \{p: Bp \geq \vec 0\}$ for $B \in \reals^{k \times n}$.
-  We have $D(\T) = C$ if and only if both the halfspace and vertex conditions hold.
-\end{theorem}
-\begin{proof}
+\begin{proof}[of Theorem~\ref{thm:vertex-halfspace-opt}]
   ($\implies$)
   Suppose $D(\T) = C$.
   First, we note that the vertex condition is immediate: For all $j \in [\ell]$, $p^j \in C$ which gives $p^j \in D(\T)$.
@@ -752,26 +696,9 @@ To gain a better understanding about the QFP in Definition~\ref{def:qfp}, we pro
   This proves $Bp \geq 0$, so $p \in C$.
 \end{proof}
 
-Given this characterization, we prove the main result on when a solution to the quadratic program exists.
 \bo{Should note that the program's solution does give candidates $\T$, although their usefulness is unclear...}
 \bo{Actually, I guess one could run this, then use monotonicity to add constraints and find the next subgradient sets, etc.}
 
-\begin{proof}[Proof of Theorem \ref{thm:opt-iff-qfp}]
-    By Theorem \ref{thm:vertex-halfspace-opt}, it suffices to show that $\T$ satisfying the halfspace and vertex conditions exist if and only if the program is feasible.
-
-  ($\implies$)
-  By the vertex condition, for each $j \in [\ell]$, there exist witnesses $\{x^j_y \in T_y : y \in \Y\}$ satisfying the second constraint of the quadratic program (Inequality \ref{eqn:qp-constr-2}).
-  By the halfspace condition, there exist normals $v_1, \dots, v_k$ such that, for all $i$, for all $x \in T_y$, $\inprod{v_i}{x} \leq B_{iy}$; in particular, this applies to the above witnesses $x^j_y \in T_y$.
-  Collecting $v_1,\dots,v_k$ as the columns of $V$, this shows that the first constraint (Inequality \ref{eqn:qp-constr-1}) is satisfied.
-
-  \bigskip
-  ($\impliedby$)
-  We construct $T_y = \conv(\{x^1_y, \ldots, x^{\ell}_y\})$.
-  The second constraint of the quadratic program immediately implies the vertex condition.
-  Taking $v_1,\dots,v_k$ as the columns of $V$, the first constraint implies that for each $x^j_y$, we have $\inprod{v_i}{x^j_y} \leq B_{iy}$ for all $i,j,y$.
-  Any point $x \in T_y$ is a convex combination of $x^1_y,\ldots,x^{\ell}_y$, so it satisfies $\inprod{v_i}{x} \leq B_{iy}$.
-  This implies the halfspace condition.  % Bo: QED
-\end{proof}
 
 
 
@@ -808,14 +735,14 @@ We now use our $d$-dimensional characterization and some observations about the 
   The quadratic feasibility program (Definition \ref{def:qfp}) with input $C = \gamma_{\bot} = \{p \in \simplex: \max_y p_y \leq 1/2\}$, $n=5$, and dimension parameter $d=2$, is infeasible.
 \end{proposition}
 \begin{corollary}
-  The abstain loss with $\alpha=1/2$ on $5$ outcomes is not $2$-embeddable.
+  The abstain loss with $\alpha=1/2$ on $n\geq 5$ outcomes has embedding dimension at least $3$.
 \end{corollary}
 
 \bo{Am assuming that we will have to move almost everything to the appendix, wrote this blurb instead.}\jessie{Looks good to me.}
 We have two proofs, both delegated to the appendix.
-The first is to directly obtain from mathematical software that the QFP is infeasible.
+The first is to directly obtain from mathematical software that the program is infeasible.
 We use observations about $\ell_{1/2}$ to make a number of simplifications to the program first.
-This reduces the QFP to the following problem: 
+This reduces the quadratic program to the following problem: 
 \begin{quotation}
   Given a real-valued matrix $M$ in which some entries are missing, but have bounds of the form $[a,b]$, do there exist legal values for these entries such that $M$ is rank $d$?
 \end{quotation}
@@ -925,10 +852,10 @@ For one example where we can reduce surrogate dimension with a low-entropy assum
   Then we would have $y,y' \in \Y$ such that $v(i)_y < 0$, $v({i+1})_y < 0$, $v(i)_{y'} >0$, $v({i+1})_{y'} > 0$, and $0 < \frac{v(i)_y}{v({i+1})_y} < \frac{v(i)_{y'}}{v({i+1})_{y'}}$, which would in turn imply $|v(i)_y|/v(i)_{y'} < |v(i+1)_y| / v(i+1)_{y'}$.
   Letting $c = \tfrac 1 2 \left(|v(i+1)_y| / v(i+1)_{y'} + |v(i)_y|/v(i)_{y'}\right)$ and taking $p$ to be the distribution with weight $1/(1+c)$ on $y$ and $c/(1+c)$ on $y'$, we see that
   \begin{align*}
-    \inprod{v}{p} &= \frac 1 {1+c} \left(v(i)_y + \tfrac 1 2 (|v(i+1)_y| / v(i+1)_{y'} + |v(i)_y|/v(i)_{y'})v(i)_{y'}\right)
+    \inprod{v(i)}{p} &= \frac 1 {1+c} \left(v(i)_y + \tfrac 1 2 (|v(i+1)_y| / v(i+1)_{y'} + |v(i)_y|/v(i)_{y'})v(i)_{y'}\right)
     \\ &> \frac 1 {1+c} \left(v(i)_y + (|v(i)_y|/v(i)_{y'})v(i)_{y'}\right) = 0
     \\
-    \inprod{w\jessie{?}}{p} &= \frac 1 {1+c} \left(v(i+1)_y + \tfrac 1 2 (|v(i+1)_y| / v(i+1)_{y'} + |v(i)_y|/v(i)_{y'})v(i)_{y'}\right)
+    \inprod{v(i+1)}{p} &= \frac 1 {1+c} \left(v(i+1)_y + \tfrac 1 2 (|v(i+1)_y| / v(i+1)_{y'} + |v(i)_y|/v(i)_{y'})v(i)_{y'}\right)
     \\ &< \frac 1 {1+c} \left(v(i+1)_y + (|v(i+1)_y|/v(i+1)_{y'})v(i+1)_{y'}\right) = 0~,
   \end{align*}
   thus violating the observation that $\sgn(\inprod{v(i)}{p})$ is monotone in $i$.
