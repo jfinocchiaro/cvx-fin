@@ -512,6 +512,11 @@ Note however that the number of dimensions $d$ required could be as large as $|\
 \end{proof}
 
 \btw{Cut summary for now (Why is this cool?)}
+\jessiet{The commented out section is now in colt-20, but I'm adding a bit to say why this is cool.}
+We will see that embedding implies the existence of a consistent surrogate and link, so this result tells us that, for discrete losses, the embedding framework is sufficient to understand the existence of consistent surrogates for the given loss.
+Even if there is a smooth surrogate for a given discrete loss, there is also a polyhedral loss that is calibrated for the given loss.
+What's more is that there is a polyhedral \emph{embedding} that is calibrated for the discrete loss.
+
 
 %\begin{corollary}\label{cor:finite-elicit-embed}
 %  Let $\gamma$ be a finite property.
@@ -536,8 +541,6 @@ Note however that the number of dimensions $d$ required could be as large as $|\
 We have now seen the tight relationship between polyhedral losses and embeddings; in particular, every polyhedral loss embeds some discrete loss.
 The embedding itself tells us how to link the embedded points back to the discrete reports (map $\varphi(r)$ to $r$), but it is not clear when this link can be extended to the remaining reports, and whether such a link can lead to consistency.
 In this section, we give a construction to generate calibrated links for \emph{any} polyhedral loss.
-
-\bo{Removed comments to point to appendix, since that creates more links...}
 
 Appendix~\ref{app:calibration} contains the full proof; this section provides a sketch along with the main construction and result.
 The first step is to give a link $\psi$ such that exactly minimizing expected surrogate loss $L$, followed by applying $\psi$, always exactly minimizes expected original loss $\ell$.
@@ -621,6 +624,11 @@ Our results give a framework to construct consistent surrogates and link functio
 Below, we illustrate the power of this framework with specific examples from the literature, as well as new examples.
 In some cases we simplify existing proofs, while in others we give new results, such as a new calibrated link for abstain loss, and the inconsistency of the recently proposed Lov\'asz hinge.
 \btw{RF: The top-k and hypercube/set examples (except abstain) have the link built in, e.g.\ as the sign function), and they just work around it.  Our results may suggest that it's worth thinking ``outside the box'' (HAH, genious...) and looking for embeddings which are not the hypercube.}
+\jessie{Adding post COLT-20}
+The examples in Section~\ref{sec:examples}, with the exception of the abstain surrogate given by ~\cite{ramaswamy2018consistent}, all present a surrogate that use the link $\psi: u \mapsto \sgn(u)$.
+While this may sometimes yield a calibrated link, this is not always the case.
+In fact, we will see that most of these examples do not yield calibrated surrogates, although proving that there is \emph{no} calibrated link for a given surrogate is quite difficult.
+Our results suggest that it is possible that some of the given surrogates are calibrated, but perhaps one must use a nontraditional link in order to calibrate the loss, such as the thickening construction given here.
 
 
 \subsection{Consistency of abstain surrogate and link construction}
@@ -1022,7 +1030,7 @@ Take note that the unlabeled property $\trim(\Gamma)$ is non-redundant, meaning 
 \hrule
 \bigskip
 \jessie{Add results (subsection?) relating trim and positive normal sets.  From here until the hrule}
-
+\subsection{Relation to Positive Normal Sets}
 
 \proposedadd{The concept of $\trim$ is closely related to the \emph{positive normal set} of Ramaswamy et al.~\cite{ramaswamy2016convex}.
 However, they define positive normal sets in terms of the loss vector, agnostic to the report yielding such a loss vector.
@@ -1045,7 +1053,7 @@ This allows us to frame necessary and sufficient conditions for constructing a c
 	First, we have $\inf_{z' \in \S_L} \inprod{p}{z'} \leq \inf_{z' \in L(\reals^d)}\inprod{p}{z'}$ since $L(\reals^d) \subseteq \S_L$.
 	
 	Now, we want to show $\inf_{z' \in \S_L} \inprod{p}{z'} \geq \inf_{z' \in L(\reals^d)}\inprod{p}{z'}$.
-	Consider that for all $z \in \S_L$, we have $z \in \inter{\S_L} \implies z \not \in \arginf_{z' \in \S_L}\inprod{p}{z'}$.
+	Consider that for all $z \in \S_L$, we have $z \in \inter{\S_L} \implies z \not \in \arginf_{z' \in \S_L}\inprod{p}{z'}$, where $\partial \S_L$ is the boundary of $\S_L$.
 	Therefore, we have $\inf_{z' \in \S_L}\inprod{p}{z'} = \inf_{z' \in \partial\S_L}\inprod{p}{z'}$.
 	
 	If we can then show $L(\reals^d) \supseteq \partial \S_L$, then we have $\inf_{z' \in \S_L} \inprod{p}{z'} \geq \inf_{z' \in L(\reals^d)}\inprod{p}{z'}$.
@@ -1076,12 +1084,12 @@ This allows us to frame necessary and sufficient conditions for constructing a c
 \end{proof}
 
 \begin{corollary}
-	The necessary and sufficient conditions for calibrated surrogates from Ramaswamy, but in terms of the unlabeled property.
+	\jessie{The necessary and sufficient conditions for calibrated surrogates from Ramaswamy \cite{ramaswamy2016convex}, but in terms of the unlabeled property.}
 \end{corollary}
 \hrule
 
 Before we state the Proposition needed to prove many of the statements in Section~\ref{sec:poly-loss-embed}, we will need to general lemmas about properties and their losses.
-The first follows from standard results relating finite properties to power diagrams (see Theorem~\ref{thm:aurenhammer} in the appendix), and its proof is omitted.
+The first follows from standard results relating finite properties to power diagrams (see Theorem~\ref{thm:aurenhammer}), and its proof is omitted.
 The second is closely related to the trim operator: it states that if some subset of the reports are always represented among the minimizers of a loss, then one may remove all other reports and elicit the same property (with those other reports removed).
 
 \begin{lemma}\label{lem:finite-full-dim}
@@ -1157,7 +1165,7 @@ Finally, we have an important converse: if $\Gamma$ has finitely many full-dimen
   By construction, we have $\gamma_i = \theta_i = \Gamma_{u_i}$ for all $i$, so letting $\varphi(i) = u_i$ we satisfy the definition of embedding, namely statement 1.
 \end{proof}
 
-\jessie{Everything below here is added from the COLT version}
+\jessie{Everything below here is added from the COLT-19 version}
 
 \begin{definition}
 	We say a link $\psi:\reals^d \to \R$ is \emph{calibrated from $\Gamma$ to $\gamma$} if there is a calibrated link from $L$ to $\ell$, where $\Gamma := \prop{L}$ and $\gamma:= \prop{\ell}$.
@@ -1173,26 +1181,7 @@ Finally, we have an important converse: if $\Gamma$ has finitely many full-dimen
 	We conclude that for any $u \in \reals^d$, there is a calibrated link from $\Gamma$ to $\gamma$.\jessie{define calibrated link for properties?}
 	\jessie{TODO}
 \end{proof}
-
-\jessie{It looks like this was in the body of the NeurIPS paper ot one point.  Not sure if we want to move it back there.}
-The following result emphasizes the significance and sufficiency of polyhedral losses in the context of studying embedding.
-\begin{theorem}
-	Let $\gamma$ be a finite property.  
-	The following are equivalent.
-	\begin{enumerate}
-		\item $\gamma$ is elicitable.
-		\item $\gamma$ is embeddable.
-		\item $\gamma$ is embeddable by a polyhedral loss.
-	\end{enumerate}
-\end{theorem}
-\begin{proof}
-	Trivially, we have $3 \implies 2$, and $2 \implies 1$ follows as a result of Proposition~\ref{prop:embed-trim}.
-	We then show $1 \implies 3$.
-	For any non-redundant property $\gamma'$, even if not finite, elicited by a loss with a Bayes Risk which is a closed function, is embeddable in $d = n-1$ dimensions.
-	By Lemma \jessie{ref}, the (negative) Bayes risk $G$ of the given finite elicitable property $\gamma$ is polyhedral and therefore closed.
-	Take $L(u) = C(u)\ones - u$, where $C = G^*$ is the convex conjugate of $G$, which is also polyhedral by~\cite[Theorem 19.2]{rockafellar1997convex}.
-	Therefore, $L$ is polyhedral.
-\end{proof}
+\jessie{Not sure what we want to say about calibrated links, if anything.}
 
 \subsection{Refining properties}
 
@@ -1235,13 +1224,18 @@ The following result emphasizes the significance and sufficiency of polyhedral l
 	In particular, $\gamma'$ refines $\gamma$, and as $\gamma'$ is finite, $\gamma$ must be finite.
 \end{proof}
 
-\jessie{Other results on refined properties?}
+\jessie{Other results on refined properties? Assuming we don't want the embedding dimension conjecture brought up on 02.03.2020 in here.}
+\begin{conjecture}
+	Let $\gamma'$ be a refinement of $\gamma$.
+	Then an embedding for $\gamma'$ can also embed $\gamma$.
+\end{conjecture}
+
 
 \section{Polyhedral losses}\label{app:polyhedral-losses}
 \begin{lemma}
   \label{lem:polyhedral-range-gamma}
   Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss, and let $\Gamma = \prop{L}$.
-  Then the range of $\Gamma$, $\U = \Gamma(\simplex) = \{\Gamma(p) \subseteq \reals^d | p\in\simplex\}$, is a finite set of closed polyhedra.
+  Then the range of $\Gamma$, $\U = \Gamma(\simplex) = \{\Gamma(p) \subseteq \reals^d : p\in\simplex\}$, is a finite set of closed polyhedra.
 \end{lemma}
 \begin{proof}
   For all $p$, let $P(p)$ be the epigraph of the convex function $u\mapsto \inprod{p}{L(u)}$.
@@ -1571,8 +1565,8 @@ In the rest of the section, for shorthand, we write $L(u;p) := \langle p, L(u) \
 \end{proof}
 
 
-\section{Top-$k$ surrogate}
-
+\section{Top-$k$ surrogate} 
+\jessie{Remove this section?}
 Consider the surrogate and discrete loss $L^k(u)_y~=~\left(\frac{1}{k} \sum_{i=1}^k (u + \ones - e_y)_{[i]} - u_y \right)_+$ given in Equation~\ref{eq:L-2-surrogate}.
 
 \begin{lemma}\label{lem:top-k-polyhedral}
