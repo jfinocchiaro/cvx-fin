@@ -29,7 +29,7 @@
 \usepackage{xspace}
 
 %\usetikzlibrary{calc}
-\newcommand{\Comments}{0}
+\newcommand{\Comments}{1}
 \newcommand{\mynote}[2]{\ifnum\Comments=1\textcolor{#1}{#2}\fi}
 \newcommand{\mytodo}[2]{\ifnum\Comments=1%
 	\todo[linecolor=#1!80!black,backgroundcolor=#1,bordercolor=#1!80!black]{#2}\fi}
@@ -166,7 +166,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
-In supervised machine learning, one typically measures performance of a model using some loss function $\ell($prediction, observation$)$.
+In supervised machine learning, one typically measures performance of a model using some loss function $\ell($prediction, observation$)$ assigning a punishment for error comparing one's prediction to the outcome observed in nature.
 In particular, this paper studies \emph{discrete} losses, in which the predictions lie in a finite set.
 These are popular for many categorical tasks such as classification, ranking, top-$k$, set inclusion, and other structured prediction tasks.
 %Models are trained using some variant of empirical risk minimization, i.e. minimization of loss on a training data set.
@@ -174,7 +174,7 @@ These are popular for many categorical tasks such as classification, ranking, to
 %For example, $0-1$ loss $\ell(r)_y = \Ind{r \neq y}$ gives punishment $1$ for a misprediction and $0$ for a correct prediction, and is used for classification problems over possibly large finite category sets.
 
 Optimizing such discrete losses over a dataset (i.e. empirical risk minimization), however, is typically computationally hard.
-One therefore generally resorts to optimizing a computationally-nice \emph{surrogate loss} $L$.
+One therefore generally resorts to optimizing a computationally nice \emph{surrogate loss} $L$.
 The key requirement is \emph{calibration}, namely that optimizing surrogate loss allows one to recover the discrete prediction that optimizes the original $\ell$-loss.
 Calibrated surrogate losses yields desirable statistical guarantees such as the existence of excess risk bounds given by consistency~\citep{tewari2007consistency}.
 %In the finite outcome setting, we know that calibration implies consistency, so we study the design of calibrated, convex losses-- specifically polyhedral (piecewise linear and convex) losses.
@@ -184,7 +184,7 @@ In this paper we study \emph{polyhedral} surrogates, meaning piecewise-linear co
 \cite{finocchiaro2019embedding} show that polyhedral surrogates are in a strong sense equivalent to an \emph{embedding}: % \emph{embedding} the discrete loss $\ell$ into $\reals^d$ by 
 mapping each discrete prediction $r$ to some point $\varphi(r) \in \reals^d$, which optimizes $L$-loss if and only if $r$ optimizes $\ell$-loss.
 While the authors show that every discrete loss $\ell$ can be so embedded, in the worst case the dimension required is $d=n-1$ where $n$ is the number of possible observations.
-As a surrogate dimension $d$ significantly below $n$, such as $O(\log n)$ for classification with an abstain option~\citep{ramaswamy2018consistent}, can lead to faster downstream optimization and computation, an effect that grows with $n$, we would like to understand when this dimension can be low.
+A surrogate dimension $d$ significantly below $n$, such as $O(\log n)$ for classification with an abstain option~\citep{ramaswamy2018consistent}, can lead to faster downstream optimization and computation, an effect that grows with $n$; this motivates us to understand when this dimension can be low.
 
 
 %\emph{embedding losses} in order to construct polyhedral, calibrated surrogate losses for a given discrete loss.
@@ -199,14 +199,14 @@ A particular contribution is to isolate and investigate the optimality condition
 % In addition to providing a possible avenue toward automating the search for calibrated surrogate losses, this feasibility program yields new techniques for lower bounds on the embedding dimension of a given discrete loss.
 Finally, we apply our characterizations to show new lower bounds on the embedding dimension for abstain loss, whose convex calibration dimension has been well-studied \citep{ramaswamy2016convex, ramaswamy2018consistent} (\S~\ref{sec:examples}).
 %These results suggest that \emph{if} the convex calibration dimension of the same problems were lower than the embedding dimension, constructing a calibrated surrogate for such problems would require a new approach than previous works have taken.
-In particular we apply both our $1$-dimension characterization and higher-dimensional quadratic program to obtain previously-unknown lower bounds.
+In particular we apply both our $1$-dimension characterization and higher-dimensional quadratic program to obtain previously unknown lower bounds.
 We conclude with discussion and open questions (\S~\ref{sec:conclusion}).
 
 
 
 
 \subsection{Related work}
-\cite{bartlett2006convexity} study when a convex, calibrated surrogate exists for a given discrete loss, and in a finite-outcome setting,~\cite{tewari2007consistency} show that calibration (Definition~\ref{def:calibration}) is necessary and sufficient for consistency.
+\cite{bartlett2006convexity} study when a convex, calibrated surrogate exists for a given discrete loss, and in a finite-outcome setting,~\cite{tewari2007consistency} show that calibration (Definition~\ref{def:calibration}) is necessary and sufficient for consistency.\jessiet{Do we want more of the canonical consistency papers?}
 %, meaning that there is a link mapping surrogate reports to discrete reports so that converging to the optimal prediction in the surrogate space implies the linked surrogate prediction converges to the optimal prediction for the original loss.
 
 Several works have investigated the problem of reducing the dimensionality of a surrogate loss.
@@ -312,14 +312,14 @@ Many surrogates in the literature provide upper bounds; we highlight in particul
 \end{cases}
 \end{equation}
 Here $\R = \Y \cup \{\bot\}$.
-For $\alpha=1/2$, \cite{ramaswamy2018consistent} give an elegant embedding of this loss on $n$ outcomes into $d = \lceil \log_2 (n) \rceil$ dimensions, where each $y \in \Y$ is embedded at a corner of the Boolean hypercube $\{-1,1\}^d$ while $\bot$ is embedded at the origin.
+For $\alpha \leq 1/2$, \cite{ramaswamy2018consistent} give an elegant embedding of this loss on $n$ outcomes into $d = \lceil \log_2 (n) \rceil$ dimensions, where each $y \in \Y$ is embedded at a corner of the Boolean hypercube $\{-1,1\}^d$ while $\bot$ is embedded at the origin.
 
-In general (e.g. \cite{finocchiaro2019embedding}), a known convex-conjugate construction generically embeds any discrete loss on $\Y = [n]$ into $d = n-1$ dimensions, giving a flat upper bound of $n-1$ on embedding dimension.
+In general (e.g. \cite{finocchiaro2019embedding}\jessiet{Change citation probably.  Possibly to \cite[Corollary 13]{ramaswamy2016convex}}), a known convex-conjugate construction generically embeds any discrete loss on $\Y = [n]$ into $d = n-1$ dimensions, giving a flat upper bound of $n-1$ on embedding dimension.
 Lower bounds exist but are rare.
 A lower bound on the dimensionality of \emph{any} calibrated convex surrogate $L$ implies in particular a lower bound on polyhedral surrogates.
 \cite{ramaswamy2016convex} give such a lower bound via the technique of \emph{feasible subspace dimension}, which is able to e.g. prove that embedding $0-1$ loss on $n$ labels requires dimension $n-1$.
 However, this technique gives only the trivial $d \geq 1$ for the abstain family of losses above when $\alpha \leq 1/2$ because of their geometric structure.
-We discuss further in Section \ref{sec:conclusion}.
+We discuss further in \S~\ref{sec:conclusion}.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -336,7 +336,7 @@ After presenting and discussing this sequence of results, we observe that they c
 \subsection{General characterization via property elicitation}
 
 We begin with conditions on the property elicited by a discrete loss.
-The following condition of~\citet[Theorem 3]{lambert2018elicitation}, that a finite property is \emph{orderable}, states that any two level sets intersect in a hyperplane, or not at all.
+The following condition of~\citet[Theorem 3]{lambert2018elicitation}\jessiet{Should we cite or citet?}, that a finite property is \emph{orderable}, states that any two level sets intersect in a hyperplane, or not at all.
 \begin{definition}[Orderable]\label{def:orderable-hyperplane}
 	A finite property $\gamma:\simplex \to 2^\R$ is \emph{orderable} if there is an enumeration of $\R = \{r_1, \ldots, r_{|\R|}\}$ such that for all $i \leq |\R| - 1$, we have $\gamma_{r_i} \cap \gamma_{r_{i+1}}$ is a hyperplane intersected with $\simplex$.
 \end{definition}
@@ -351,20 +351,20 @@ We next give an equivalent condition to orderability which may be more intuitive
 This graph can be easily established for discrete losses with known symmetries or other facts, such as abstain, the mode, or ranking losses.
 
 \begin{definition}[Intersection graph]\label{def:intersection-graph}
-  Given a discrete loss $\ell$ and associated finite property $\gamma: \simplex \toto 2^{\R}$ elicited by $\ell$, the \emph{intersection graph} has vertices $\R$ with an edge $(r,r')$ if $\gamma_r \cap \gamma_{r'} \cap \relint(\simplex) \neq \emptyset$, where $\relint(\simplex)$ is the relative interior of $\simplex$.
+  Given a discrete loss $\ell$ and associated finite property $\gamma: \simplex \toto 2^{\R}$ elicited by $\ell$, the \emph{intersection graph} has vertices $\R$ with an edge $(r,r')$ if $\gamma_r \cap \gamma_{r'} \cap \relint(\simplex) \neq \emptyset$\jessiet{Is it this or add an edge if $\gamma_r \cap \gamma_{r'}$ is full dimensional in the simplex?}, where $\relint(\simplex)$ is the relative interior of $\simplex$.
   %(distributions with full support).
 \end{definition}
 
 If one can visualize the level sets of a property, constructing the intersection graph yields an intuitive way to conceptualize orderability by the Proposition below, proved in Appendix~\ref{app:1-dim}.
 
 \begin{proposition} \label{prop:orderable-iff-path}
-  A finite property $\gamma$ is \emph{orderable} if and only if its intersection graph is a path, i.e. a connected graph where every vertex has either one or two neighbors.
+  A finite property $\gamma$ is \emph{orderable} if and only if its intersection graph is a path, i.e. a connected graph\jessiet{tree?} where every vertex has either one or two neighbors.
 \end{proposition}
 
 
 Combining Proposition~\ref{prop:orderable-iff-path} and Theorem~\ref{thm:orderable-iff-1d}, we see that in order for $\ell$ to be embedded onto the real line, it is necessary and sufficient for the intersection graph of the property $\gamma$ to be a path.
-We give an example of a direct application in Section \ref{sec:examples}.
-By visualizing the level sets of $\gamma$ as a power diagram (generalization of Voronoi diagram) in the simplex~\cite{lambert2009eliciting}, we can also use Proposition~\ref{prop:orderable-iff-path} to perform a visual test for orderability, and thus 1-embeddability (Figures~\ref{fig:intersection-graph-ex} and~\ref{fig:abstain-alpha-half}).
+We give an example of a direct application in \S~\ref{sec:examples}.
+By visualizing the level sets of $\gamma$ as a power diagram (generalization of Voronoi diagram) in the simplex like~\cite{lambert2009eliciting}, we can also use Proposition~\ref{prop:orderable-iff-path} to perform a visual test for orderability, and thus 1-embeddability (Figures~\ref{fig:intersection-graph-ex} and~\ref{fig:abstain-alpha-half}).
 
 \begin{figure}
 	\begin{minipage}{0.48\linewidth}
@@ -435,11 +435,12 @@ We can easily construct a link function in the case of $d=1$, by taking the midp
 \label{sec:1d-proof-discuss}
 
 We summarize the above results in the following theorem, together with one additional result: if $\ell$ has any calibrated convex surrogate at all, it must have a polyhedral one.
-(See Conjecture~\ref{conj:embed-equals-ccdim}.)
+(See Conjecture~\ref{conj:embed-equals-ccdim} regarding higher dimensional generalizations.)
 \begin{theorem} \label{thm:1d-tfae}
   Let $\ell$ be a discrete loss eliciting a finite property $\gamma$.
   The following are equivalent: (1) $\gamma$ is orderable; (2) the intersection graph of $\gamma$ is a path; (3) the two conditions of Theorem \ref{thm:construct-1d-loss} are satisfied; (4) $\ell$ is $1$-embeddable; (5) $\ell$ has some polyhedral calibrated surrogate loss $L: \reals \to \nonnegreals^{\Y}$; (6) $\ell$ has some convex calibrated surrogate loss $L: \reals \to \nonnegreals^{\Y}$.
 \end{theorem}
+\jessiet{If I understand correctly, different orderings of the reports may yield different embeddings, and these different embeddings should elicit different properties.  How to we reconcile this in the theorem statement?  Or where am I wrong?}
 
 For the proof, note that
 (1) $\iff$ (2) was shown in Proposition \ref{prop:orderable-iff-path}, while
@@ -466,7 +467,7 @@ From our main characterization, dropping the monotonicity condition, this progra
 %These are associated with embedding points, where $u_r \in \reals^d$ is linked back to the discrete prediction $r$.
 
 Recall that if $\ell: \R \to \nonnegreals^{\Y}$ is embedded by $L: \reals^d \to \nonnegreals^{\Y}$, then each $r \in \R$ is embedded at some point $\varphi(r) \in \reals^d$.
-In particular, $\varphi(r)$ must minimize $\inprod{p}{L(u)}$ if and only if $r$ minimizes $\inprod{p}{\ell(r')}$.
+In particular, $\varphi(r)$ must minimize $\inprod{p}{L(\cdot)}$ if and only if $r$ minimizes $\inprod{p}{\ell(\cdot)}$.
 The key to our approach is to study as first-class objects the sets of all subgradients\footnote{Recall that a subgradient of e.g. the convex function $L(\cdot)_y: \reals^d \to \reals$ at a point $u$ is a vector $v \in \reals^d$ such that $L(u')_y \geq L(u)_y + \inprod{v}{u'-u}$ for all $u'$.} of $L$ at these embedding points.
 The question of whether a calibrated polyhedral surrogate exists in $d$ dimensions essentially reduces to conditions on these sets alone.
 \raft{The ``essentially'' is because we need loss values to match.  It's not clear if that comes for free, i.e., if you embed the correct property, can you always modify the loss to match $\ell$?}
@@ -551,7 +552,7 @@ For such lower bounds, it suffices to drop monotonicity from Theorem \ref{thm:ge
 
 At first glance, the optimality condition seems difficult to operationalize, as it involves the existence of polytopes, and even if said polytopes are given, it is unclear how to test whether $D(\T^r)=\gamma_r$.
 To begin, consider the latter problem, of understanding the set $D(\T)$ in terms of descriptions of $\T$, and in particular, of writing conditions on $\T$ such that $D(\T)$ is equal to a given polytope $C\subseteq\simplex$.
-We now that, by writing $C$ in its halfspace and vertex representations, respectively, we can give two such conditions.
+We know that, by writing $C$ in its halfspace and vertex representations, respectively, we can give two such conditions.
 
 \begin{condition}[Halfspace condition]\label{cond:H-condition}
 	A collection of polytopes $\T$ and a polytope $C\subseteq\simplex$ defined by $C = \{p \in \simplex : Bp \geq \vec 0\}$ \emph{satisfy the halfspace condition} if there exist $v_1, \ldots, v_k \in \reals^d$ such that, for all $i \in [k]$ and $y \in \Y$, for all $x \in T_y$, we have $\inprod{v_i}{x} \leq B_{iy}$.
@@ -568,12 +569,13 @@ We now that, by writing $C$ in its halfspace and vertex representations, respect
 The two conditions above give us a much better understanding of when a given set of polytopes $\T$ satisfies the optimality condition.
 We are still left with the problem, however, of understanding when such a set $\T$ exists.
 Intuitively, the biggest hurdle that remains is the quantification over sets of polytopes, a massive search space.
-Surprisingly, one can reduce this search to a simple quadratic feasibility program, which we now give.
+Surprisingly, one can reduce this search to a quadratic feasibility program, which we now give.
 The key insight involves the halfspace condition, and observing that given a certain ``complete'' set of normal vectors, one can exactly describe the support function of $\oplus_p\T$ in terms of the support functions of each $T_y$ and each normal vector $v$.
 From here, we use the fact that this description is linear in $p$, and can therefore relate it directly to the given matrix $B$.
 
 Our program will consist of variables for the normal vectors $\{v_i \in \reals^d : i \in [k]\}$ for the (relaxed) halfspace condition, as described above, and variables for vertices $\{x^j_y \in \reals^d : j \in [\ell], y \in \Y\}$ which witness $0\in\oplus_{p^j} \T$ for the vertex condition.
 % These correspond to a (possibly relaxed) halfspace representation and (possibly incomplete) vertex representation of the subgradient polytopes $\T$.
+\jessiet{Don't really introduce the $x^j_y$ notation in relationship to $X^j$...}
 
 \begin{definition}[Quadratic Feasibility Program] \label{def:qfp} ~ \\
   \indent 
@@ -619,12 +621,12 @@ As an immediate corollary, if some input $C=\gamma_r$ and $d$ yields an infeasib
 
 
 The feasibility program can be viewed as a low-rank matrix problem, namely: do there exist a set of rank-$d$ matrices that are pointwise dominated by $B$, sharing the left factor $V$, whose right factors $X^j$ respectively satisfy a subspace constraint?
-We will see in Section~\ref{sec:examples} that for the important example of abstain loss, the constraints simplify into a more pure low-rank matrix problem.
-In particular, for $d=n-1$ a solution always exists \cite[Theorem 2]{finocchiaro2019embedding}, found by taking the convex conjugate of the negative Bayes risk of $\ell$ for each outcome and subtracting the report $u$, after which one can project down to $n-1$ dimensions (because $\simplex$ is $n-1$ dimensional to begin with).
+We will see in \S~\ref{sec:examples} that for the important example of abstain loss, the constraints simplify into a more pure low-rank matrix problem.
+In particular, for $d=n-1$, a solution always exists \cite[Theorem 2]{finocchiaro2019embedding}\jessiet{Again, probably change ref}, found by taking the convex conjugate of the negative Bayes risk of $\ell$ for each outcome and subtracting the report $u$, after which one can project down to $n-1$ dimensions (because $\simplex$ is $n-1$ dimensional to begin with).
 
 
 
-
+\jessiet{Left off here 2.5.2020}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Example: Abstain loss}\label{sec:examples}
 \subsection{Abstain, $d=1$}\label{subsec:abstain-d1}
