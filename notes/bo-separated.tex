@@ -696,8 +696,8 @@ Bo: this is the proof sketch of the stronger result that Raf and I discussed.
 (Bo, 2019-11-13 and continuing)
 
 \begin{theorem}
-  Let $L(\cdot;p)$ be a polyhedral function with $U^* := \arg\min_{u} L(u;p)$.
-  Then there exists $c > 0$ such that $L(u;p) \geq c \cdot \|U^* - u\|_2$ for all $u$.
+  Let $L(\cdot;p)$ be a polyhedral function with $U^* := \arg\min_{u} L(u;p)$ and $L^* := \min_u L(u;p)$.
+  Then there exists $c > 0$ such that $L(u;p) \geq L^* + c \cdot d(U^*,u)$ for all $u$.
 \end{theorem}
 \begin{proof}
   Consider the epigraph of $L(\cdot;p)$, a polyhedral set (intersection of finitely many halfspaces).
@@ -728,6 +728,54 @@ Bo: this is the proof sketch of the stronger result that Raf and I discussed.
   [To be improved...]
 \end{proof}
 
+(Bo, 2020-02-11, attempt to rigorize previous proof sketch)
+
+\begin{theorem}
+  Let $L(\cdot;p)$ be a polyhedral function with $U^* := \arg\min_{u} L(u;p)$ and $L^* := \min_u L(u;p)$.
+  Then there exists $c > 0$ such that $L(u;p) \geq L^* + c \cdot d(U^*,u)$ for all $u$.
+\end{theorem}
+\begin{proof}
+  Let $U^*$ be the set of minimizers of $L(\cdot;p)$, a polyhedral set in $\reals^d$.
+  Let $S^*$ be the set of constraints defining $U^*$, i.e. a minimal set of halfspaces whose intersection is $U^*$.
+  For $S \subseteq S^*$, let $U_S$ be the face of $U^*$ for which the constraints $S$ are tight.
+  Let $U_S'$ be the relative interior of the face $U_S$.
+
+  Let $u \in U_S'$ and define the following sets.
+  Let $V_S$ be the set of normal vectors exposing $u$.
+  Let $D_S$ be the set of subgradients of $L(\cdot;p)$ at $u$.
+  Assertion 1: These sets are the same for all $u \in U_S'$, justifying the notation.
+
+  Assertion 2: the boundary of $U^*$ is the disjoint union of the relative interiors of the sets $U_S'$ for nonempty $S$.
+
+  Now, for nonempty $S$, let $c_S := \inf_{v \in V_S} \sup_{d \in D_S} v \cdot d$.
+  \textbf{Key claim:} $c_S > 0$.
+  Proof: Write $f(v) := \sup_{d \in D_S} v \cdot d$.
+  We claim $f$ is a continuous function of $v$ (Bo: TODO, justify!).
+  Next, we claim $f(v) > 0$ for all $v \in V_S$.
+  Otherwise, we would be able to obtain a contradiction for $u \in U_S'$ being on the boundary of the optimal set $U^*$ with normal vector $v$ and subgradient set $D_S$. (Bo: TODO actually obtain this contradiction.)
+
+  Assertion 3: $V_S$ is a compact set.
+
+  So $f$, a continuous function on a compact set, attains its infimum.
+  Since $f(v) > 0$ for every $v \in V_S$, we have $c_S = \inf_{v \in V_S} f(v) > 0$.
+  This proves the key claim.
+
+  Now, we prove the theorem.
+  Let $c = \min_{\emptyset \subsetneq S \subsetneq S^*} c_S$, noting that $c > 0$ as the minimum of a finite set of positive numbers.
+
+  Fix any $u$.
+  If $u \in U^*$, then the theorem's conclusion is trivially satisfied.
+  So suppose $u \not\in U^*$.
+  Let $u^*$ be the projection of $u$ onto $U^*$.
+  We have $u^* \in U_S$ for some unique nonempty $S$ (by Assertion 2).
+  We also have, for some $v \in V_S$, the identity $u = u^* + d(U^*,u) v$.
+  Therefore, by definition of subgradients, we have
+  \begin{align*}
+    L(u;p) &\geq L^* + d(U^*,u) \sup_{d \in D_S} v \cdot d  \\
+           &\geq L^* + d(U^*,u) c_S  \\
+           &\geq L^* + d(U^*,u) c .
+  \end{align*}
+\end{proof}
 
 \end{document}
 
