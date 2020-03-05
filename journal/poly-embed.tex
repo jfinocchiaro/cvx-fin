@@ -1113,6 +1113,47 @@ More generally, $L^2$ cannot be consistent because the property it embeds does n
 	\label{fig:top-k-simplices}
 \end{figure}
 
+\proposedadd{New example using hierarchical surrogate}
+\subsection{Embedding hierarchical classifications}
+Our final example comes from Ramaswamy et al.~\cite{ramaswamy2015hierarchical}, who present a convex, calibrated surrogate for the hierarchical classification problem.
+Given a tree $H = ([n], E,W)$ over finite class labels, they consider the discrete loss 
+\begin{equation}\label{eq:tree-loss-discrete}
+	\ell^H(r,y) = \text{shortest path length in $H$ between $r$ and $y$}
+\end{equation}
+In this setting, the outcomes $\Y$ are composed of all nodes in the tree and not just the leaves.
+
+\jessie{TODO: Add in example Tikz tree from tikz/hierarchical-property.tex}
+\begin{figure}
+	\centering
+		\includegraphics[width=0.8\linewidth]{tikz/example-tree-deeper.pdf}
+		\caption{Tree with distribution $\vec p = (0, .2, .1, .4, .3)$. $gamma(\vec p) = 3$.}
+\end{figure}
+
+
+\begin{figure}
+\begin{minipage}{0.45\linewidth}
+	\centering
+	\includegraphics[width=0.9\linewidth]{tikz/3-node-tree.pdf}
+	\caption{3 node tree whose property we evaluate in next image.}
+\end{minipage}
+\hfill
+\begin{minipage}{0.45\linewidth}
+	\centering
+	\includegraphics[width=0.9\linewidth]{tikz/3-node-tree-prop.pdf}
+	\caption{Property elicited by unweighted 3-node tree.}
+\end{minipage}
+\end{figure}
+
+In~\cite[Theorem 1]{ramaswamy2015hierarchical}, they show the property $\gamma := \prop{\ell^H}$ is the deepest node $i$ in the tree $H$ such that the probability that node $i$ or one of its descendants is the outcome is greater than or equal to $1/2$.
+
+In this model, consider $p_i$ to be the probability that node $i$ is the ground truth label, and $S_i(p)$ to be the probability that node $i$ or one of its descendants is the ground truth.
+
+Letting $h$ be the height of the tree $H$, Ramaswamy et al. present an embedding of $\ell^H$ that consists of learning $h$ $\abstain{1/2}$ embeddings, where the outcomes at the $j^{th}$ embedding are the nodes on level $j$ of the tree.
+At each highest level, one proceeds down the path of the tree given by the prediction of the current abstain embedding.
+If one predicts $\bot$ at level $j$, then we predict the node predicted at the $(j-1)^{st}$ level.
+
+Note that the given \emph{Cascade Surrogate} of~\cite[Equation 2]{ramaswamy2015hierarchical} simply requires the use of a surrogate that is calibrated with respect to $\abstain{1/2}$, so we can use the BEP surrogate of~\cite{ramaswamy2018consistent} to concatenate $h$ $\ceil{\log_2(n)}$ dimensional embeddings for the tree loss, yielding an embedding for $\ell^H$.
+
 % \jessie{Don't think we need the below addition for the camera ready, but will eventually want something along these lines for the arXiv version.}
 % \proposedadd{To generalize this result, first consider that Lapin's surrogate is polyhedral, and we propose that each coordinate of an optimal report $u \in \reals_+^n$ must be at one of three points: $0$, $1$, or another ``high'' point that is a function of the number of high points and $M = |\{i : u_i = 1\}|$.  Since there are only a finite number of such optimal reports, $\R$, we know that this embeds a finite loss, namely $L^2_\R$.
 % \begin{align*}
