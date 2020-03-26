@@ -1,0 +1,302 @@
+\documentclass{article}
+
+% if you need to pass options to natbib, use, e.g.:
+%     \PassOptionsToPackage{numbers, compress}{natbib}
+% before loading neurips_2020
+
+% ready for submission
+% \usepackage{neurips_2020}
+
+% to compile a preprint version, e.g., for submission to arXiv, add add the
+% [preprint] option:
+%     \usepackage[preprint]{neurips_2020}
+
+% to compile a camera-ready version, add the [final] option, e.g.:
+%     \usepackage[final]{neurips_2020}
+
+% to avoid loading the natbib package, add option nonatbib:
+\usepackage{neurips_2020}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+
+\usepackage{color}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.2}
+\hypersetup{colorlinks,breaklinks,
+	linkcolor=darkblue,urlcolor=darkblue,
+	anchorcolor=darkblue,citecolor=darkblue}
+\usepackage{wrapfig}
+\usepackage{subcaption}
+\usepackage[colorinlistoftodos,textsize=tiny]{todonotes} % need xargs for below
+%\usepackage{accents}
+\usepackage{bbm}
+\usepackage{xspace}
+
+\newcommand{\Comments}{1}
+\newcommand{\mynote}[2]{\ifnum\Comments=1\textcolor{#1}{#2}\fi}
+\newcommand{\mytodo}[2]{\ifnum\Comments=1%
+	\todo[linecolor=#1!80!black,backgroundcolor=#1,bordercolor=#1!80!black]{#2}\fi}
+\newcommand{\raf}[1]{\mynote{green}{[RF: #1]}}
+\newcommand{\raft}[1]{\mytodo{green!20!white}{RF: #1}}
+\newcommand{\jessie}[1]{\mynote{purple}{[JF: #1]}}
+\newcommand{\jessiet}[1]{\mytodo{purple!20!white}{JF: #1}}
+\newcommand{\proposedadd}[1]{\mynote{orange}{#1}}
+\newcommand{\bo}[1]{\mynote{blue}{[Bo: #1]}}
+\newcommand{\botodo}[1]{\mytodo{blue!20!white}{[Bo: #1]}}
+\newcommand{\btw}[1]{\mytodo{gray!20!white}{[BTW: #1]}}%TURN OFF FOR NOW \mytodo{gray}{#1}}
+\ifnum\Comments=1               % fix margins for todonotes
+\setlength{\marginparwidth}{1in}
+\fi
+
+\newcommand{\reals}{\mathbb{R}}
+\newcommand{\posreals}{\reals_{>0}}%{\reals_{++}}
+\newcommand{\simplex}{\Delta_\Y}
+\newcommand{\prop}[1]{\mathrm{prop}[#1]}
+\newcommand{\eliccvx}{\mathrm{elic}_\mathrm{cvx}}
+\newcommand{\elicpoly}{\mathrm{elic}_\mathrm{pcvx}}
+\newcommand{\elicembed}{\mathrm{elic}_\mathrm{embed}}
+\newcommand{\ccdim}{\mathrm{ccdim}}
+
+\newcommand{\C}{\mathcal{C}}
+\newcommand{\D}{\mathcal{D}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\I}{\mathcal{I}}
+\newcommand{\N}{\mathcal{N}}
+\newcommand{\R}{\mathcal{R}}
+\renewcommand{\S}{\mathcal{S}}
+\newcommand{\U}{\mathcal{U}}
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\Y}{\mathcal{Y}}
+
+
+\newcommand{\risk}[1]{\underline{#1}}
+\newcommand{\inprod}[2]{\langle #1, #2 \rangle}
+\newcommand{\toto}{\rightrightarrows}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{definition}{Definition}
+\newtheorem{assumption}{Assumption}
+
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\arginf}{arg\,inf}
+\DeclareMathOperator*{\sgn}{sgn}
+
+\title{cvx-flats}
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to LaTeX to determine where to break the
+% lines. Using \AND forces a line break at that point. So, if LaTeX puts 3 of 4
+% authors names on the first line, and the last on the second line, try using
+% \AND instead of \And before the third author name.
+
+\author{%
+	Peter Bartlett\\
+	UC Berkeley\\
+	\texttt{bartlett@cs.berkeley.edu}
+	\And
+  Jessie Finocchiaro\\
+%  Department of Computer Science\\
+  CU Boulder\\
+  \texttt{jefi8453@colorado.edu} 
+  % examples of more authors
+  \And
+   Rafael Frongillo\\
+%   Department of Computer Science\\
+   CU Boulder\\
+  % Address \\
+   \texttt{raf@colorado.edu} 
+   \And
+   Bo Waggoner\\
+%   Department of Computer Science\\
+   CU Boulder \\
+  % Address \\
+   \texttt{bwag@colorado.edu} 
+  % \And
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+  % \And
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+}
+
+
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+	For finite prediction tasks, one can often naturally model their specific problem with a discrete loss.
+	However, these discrete losses are often hard to optimize, so one often seeks a surrogate losses yielding desirable statistical guarantees with respect to the original problem.
+	An extensive line of work studying the existence and construction of \emph{consistent} surrogate loss functions has developed.
+	\jessie{...}
+\end{abstract}
+
+\section{Introduction}\label{sec:intro}
+
+In supervised machine learning, one often wants to make a prediction about future outcomes by training a classifier to minimize the average \emph{empirical loss} of a labeled training set, where the loss is determined by the task at hand.
+For example, 0-1 loss is often desired for classification tasks.
+However, discontinuous, finite losses are difficult to optimize, so we typically construct a \emph{surrogate} loss that one can more easily optimize.
+We are specifically interested in \emph{consistent} and \emph{convex} surrogates yielding the same statistical guarantees as optimizing an original, discrete loss.
+\jessie{......}
+
+\subsection{Notation}
+In this paper, we take the outcome set $\Y$ with $|\Y| = n < \infty$.
+Let $\simplex$ be the $(n-1)$ dimensional simplex over the outcomes in $\Y$.
+
+%discrete land
+Let $\R$ be a finite report set and $\Y$ a finite outcome set.
+Note that we do not necessarily have $\Y = \R$.  
+For example, in ranking problems, $\R$ may be all $n!$ permutations over the $n$ outcomes forming $\Y$.
+We consider a discrete loss $\ell : \R \to \reals_+^\Y$ to map a discrete prediction to a real-valued punishment for error on each possible outcome.
+We denote $\ell(r)_y$ as the $y^{th}$ element of the vector $\ell(r)$, and consider this to be the punishment for reporting $r$ if outcome $y$ is realized.
+For a distribution $p \in \simplex$, we denote the expected discrete loss for report $r$ to be $\inprod{p}{\ell(r)}$.
+When considering surrogate losses, we denote the loss by $L : \reals^d \to \reals_+^\Y$, and typically denote a surrogate report with $u$.
+
+We sometimes override the notation $\R$ to refer to a generic report set.
+Throughout this paper, we use tools from \emph{property elicitation} to understand the existence of consistent surrogate functions.
+Introduced in Section~\ref{subsec:properties}, a (set-valued) property $\Gamma: \simplex \to 2^\R \setminus \emptyset$ is denoted $\Gamma:\simplex \toto \R$.
+We denote a finite property elicited by a discrete loss $\ell$ by $\gamma := \prop{\ell}$.
+Additionally, we let $\Gamma := \prop{L}$ be the ``surrogate'' property elicited by the surrogate loss $L$.
+Again, we sometimes override notation to let $\Gamma$ be a generic property; when $\Gamma: \simplex \toto \R$, we refer to both a generic property and report set.
+
+\section{Related work}\label{sec:related-work}
+\subsection{Consistency and calibration for convex losses}\label{subsec:convex-surrogates}
+\cite{bartlett2006convexity,tewari2007consistency} for a characterization of consistent, calibrated surrogates for classification problems.
+
+\begin{definition}[Consistent]
+	Suppose $f_m : \X \to \R$ is the hypothesis function learned by minimizing empirical training loss over $m$ training examples.
+	For a distribution $D$ over input and label spaces $\X \times\Y$, we say $\{f_m\}$ is \emph{consistent} with respect to a loss $L: \R \to \reals^\Y_+$ if
+	\begin{align*}
+	\E_D L(f_n(X), Y) &\to \inf_f \E_D L(f(X), Y)~.~
+	\end{align*}
+	Moreover, we say a loss and link $(L,\psi)$ are consistent with respect to a discrete loss $\ell$ if 
+	\begin{align*}
+		\E_D L(f_n(X), Y) \to \inf_f \E_D L(f(X), Y) &\implies \E_D \ell(\psi \circ f_n(X), Y) \to \inf_f \E_D \ell(\psi \circ f(X), Y)~.~
+	\end{align*}
+\end{definition}
+
+\begin{definition}[Calibrated]
+	Let $\ell : \R \to \reals^\Y_+$ be a discrete loss eliciting the property $\gamma$.
+	A surrogate loss $L : \reals^d \to \reals^\Y_+$ is \emph{calibrated} with respect to $\ell$ if there exists a link function $\psi: \reals^d \to \R$ such that
+	\begin{equation}
+	\forall p \in \simplex: \inf_{u \in \reals^d : \psi(u) \not \in \gamma(p)} \inprod{p}{L(u)} > \inf_{u \in \reals^d} \inprod{p}{L(u)}~.~
+	\end{equation}
+\end{definition}
+
+
+\cite{ramaswamy2016convex} introduces \emph{Convex Calibration Dimension}, which studies the minimal dimension input $d$ to construct a convex surrogate $L : \reals^d \to \reals^\Y_+$ that is calibrated with respect to a given discrete loss $\ell$.
+
+\begin{theorem}[\cite{ramaswamy2016convex}]
+	If $\Y$ is finite, then the surrogate loss $L:\reals^d \to \reals^\Y_+$ is calibrated with respect to $\ell: \R \to \reals^\Y_+$ if and only if there exists a link function $\psi : \reals^d \to \R$ such that for all distributions $D$ on $\X \times\Y$ and all sequences of (vector) functions $f_m : \X \to \reals^d$,
+	\begin{equation*}
+	\E_D L(f_m(X), Y) \to \inf_f \E_P L(f(X), Y) \implies \E_D \ell(\psi  \circ f_m(X), Y) \to \inf_f \E_D \ell(\psi \circ f(X), Y)~.~
+	\end{equation*}
+\end{theorem}
+In words, we have that a surrogate and link are calibrated with respect to a discrete loss if and only if any consistent sequence of hypotheses for the surrogate, when linked, is consistent for the discrete loss.
+
+As calibration does not rely on the representation space $\X$, we can ignore this and focus instead on calibration; we focus on \jessie{marginal} probability distributions $p \in \simplex$, agnostic to $\X$.
+
+\cite{frongillo2015elicitation} introduces \emph{Elicitation Complexity}. \jessie{\ldots}
+
+\cite{finocchiaro2019embedding} presents the notion of a surrogate loss \emph{embedding} a discrete loss-- typically by a polyhedral (piecewise linear and convex) surrogate.
+For all discrete losses, $\eliccvx(\ell) \leq \elicpoly(\ell) \leq \elicembed(\ell)$.
+However, one open question that remains from their work is if these bounds are equal. \jessie{\ldots}
+
+\subsection{Property elicitation}\label{subsec:properties}
+
+\begin{definition}[Property, elicits, level set]
+	\jessiet{Don't like the notation here... fix later.}
+	A \emph{property} is a set-valued function $\Gamma : \simplex \toto \R$ mapping distributions to reports.
+	A loss $L : \R \to \reals_+^\Y$ \emph{elicits} the property $\Gamma$ if,
+	\begin{equation}
+	\forall p \in \simplex, \;\; \Gamma(p) = \argmin_{r \in \R}\inprod{p}{L(r)}
+	\end{equation}
+	Moreover, we call a \emph{level set} $\Gamma_r := \{p \in \simplex : r \in \Gamma(p)\}$ to be the set of distributions for which reporting $u$ minimizes the expected loss of the loss eliciting $\Gamma$.
+\end{definition}
+Note, moreover, that we call a property $\gamma: \simplex \toto \R$ \emph{finite} if $|\R| < \infty$.
+Without much loss of generality, we assume that finite properties are \emph{non-redundant}, meaning that for each $\gamma_r$, there is no $\gamma_{r'}$ such that $\gamma_{r'} \subseteq \gamma_r$.
+
+\begin{definition}\label{def:indirectly-elicits}
+	A loss $L$ \emph{indirectly elicits} a property $\Gamma':\simplex \toto \R'$ if it elicits a property $\Gamma: \simplex \toto \R$ such that there is a function $\psi:\R \to \R'$ such that for all $r \in \R$, we have $\Gamma_r \subseteq \Gamma'_{\psi(r)}$.
+\end{definition}
+
+
+\section{Implications of property elicitation for consistency}
+\begin{proposition}\label{prop:consistent-implies-indir-elic}
+	If a surrogate and link $(L, \varphi)$ is consistent with respect to $\ell$, then $L$ indirectly elicits $\gamma := \prop{\ell}$.
+\end{proposition}
+
+\begin{proposition}
+	Consider the discrete loss $\ell : \R \to \reals^\Y_+$ and $\gamma:= \prop{\ell}$.
+	Then $\eliccvx(\gamma) \leq \ccdim(\ell)$.
+\end{proposition}
+
+
+The following is a statement from~\cite{ramaswamy2016convex} providing an upper bound on the convex calibration dimension of a given discrete loss.
+However, using tools from property elicitation, we can simplify their proof, which relies on considering sequences of losses that approach the infimum and taking $\epsilon$-subdifferentials of the surrogate loss.
+
+\begin{theorem}[\cite{ramaswamy2016convex}]
+	Suppose we are given a discrete loss $\ell:\R \to \reals^\Y_+$ eliciting $\gamma$.
+	Take $p \in \simplex$ and $r \in \R$ such that $p \in \gamma_r$.
+	Then
+	\begin{equation}
+	\ccdim(\ell) \geq \|p\|_0 - \mu_{\gamma_r}(p) - 1~.~
+	\end{equation}
+\end{theorem}
+\begin{proof}
+	\jessie{Abbreviated FSD proof}
+\end{proof}
+
+\section{Characteristics of convex surrogates }
+\begin{definition}[Identifiable]
+	A property $\Gamma: \simplex \to \R$ is \emph{identifiable} if there is a function $V: \R \to \reals^\Y$ such that 
+	\begin{equation*}
+	\forall p \in \simplex, \; r \in \Gamma(p) \iff V(r) = \vec 0~.~
+	\end{equation*}
+\end{definition}
+
+\jessie{Note from 2018 neurips paper that 1-elicitable iff 1-convex elicitable for continuous properties and how this differs.}
+
+\begin{theorem}
+	Convex elicitable properties are kind of identifiable \jessie{Formalize}
+\end{theorem}
+
+\begin{proposition}
+	Fix $p \in \simplex$, and let $r$ be the report such that $p \in \gamma_r$.  
+	In order for $L:\reals^d \to \reals^\Y_+$ to be calibrated with respect to $\ell:\R \to \reals^\Y_+$, there must be a $(n - d - 1)$-dimensional flat $F$ such that $F \subseteq \gamma_r$ and $p \in F$.
+	Moreover, this must hold for all $p \in \simplex$.
+\end{proposition}
+
+
+\section*{Broader Impact}
+\jessie{Now required for NeurIPS, but doesn't count towards page limit.}
+
+\begin{ack}
+All the thanks
+\end{ack}
+
+\bibliographystyle{plainnat}
+\bibliography{diss,extra}
+
+\end{document}
