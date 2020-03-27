@@ -146,10 +146,14 @@
 \maketitle
 
 \begin{abstract}
-	For finite prediction tasks, one can often naturally model their specific problem with a discrete loss.
-	However, these discrete losses are often hard to optimize, so one often seeks a surrogate losses yielding desirable statistical guarantees with respect to the original problem.
-	An extensive line of work studying the existence and construction of \emph{consistent} surrogate loss functions has developed.
-	\jessie{...}
+%	For finite prediction tasks, one can often naturally model their specific problem with a discrete loss.
+%	However, these discrete losses are often hard to optimize, so one often seeks a surrogate losses yielding desirable statistical guarantees with respect to the original problem.
+	In prediction tasks, one typically seeks to minimize \emph{empirical risk} by learning a hypothesis function making predictions from a given feature vector about a desired future outcome.
+	This hypothesis is learned by minimizing a loss function over a set of labeled training data.
+	However, as not all loss functions are easily optimized, one often wishes to optimize a \emph{surrogate loss} yielding the same statistical guarantees as the original.
+	In this paper, we are specifically interested in the construction of \emph{consistent} surrogate losses that are ``efficient'' in the dimension of their input.
+	We observe a connection between consistent surrogates and indirect property elicitation, which allows us to apply property elicitation complexity results to the minimal dimension of a consistent surrogate.
+	In particular, we characterize the minimal input dimension needed in order to construct a \emph{convex}, consistent surrogate using tools from property elicitation.
 \end{abstract}
 
 \section{Introduction}\label{sec:intro}
@@ -196,26 +200,7 @@ Again, we sometimes override notation to let $\Gamma$ be a generic property; whe
 	\end{align*}
 \end{definition}
 
-\begin{definition}[Calibrated]
-	Let $\ell : \R \to \reals^\Y_+$ be a discrete loss eliciting the property $\gamma$.
-	A surrogate loss $L : \reals^d \to \reals^\Y_+$ is \emph{calibrated} with respect to $\ell$ if there exists a link function $\psi: \reals^d \to \R$ such that
-	\begin{equation}
-	\forall p \in \simplex: \inf_{u \in \reals^d : \psi(u) \not \in \gamma(p)} \inprod{p}{L(u)} > \inf_{u \in \reals^d} \inprod{p}{L(u)}~.~
-	\end{equation}
-\end{definition}
 
-
-\cite{ramaswamy2016convex} introduces \emph{Convex Calibration Dimension}, which studies the minimal dimension input $d$ to construct a convex surrogate $L : \reals^d \to \reals^\Y_+$ that is calibrated with respect to a given discrete loss $\ell$.
-
-\begin{theorem}[\cite{ramaswamy2016convex}]
-	If $\Y$ is finite, then the surrogate loss $L:\reals^d \to \reals^\Y_+$ is calibrated with respect to $\ell: \R \to \reals^\Y_+$ if and only if there exists a link function $\psi : \reals^d \to \R$ such that for all distributions $D$ on $\X \times\Y$ and all sequences of (vector) functions $f_m : \X \to \reals^d$,
-	\begin{equation*}
-	\E_D L(f_m(X), Y) \to \inf_f \E_P L(f(X), Y) \implies \E_D \ell(\psi  \circ f_m(X), Y) \to \inf_f \E_D \ell(\psi \circ f(X), Y)~.~
-	\end{equation*}
-\end{theorem}
-In words, we have that a surrogate and link are calibrated with respect to a discrete loss if and only if any consistent sequence of hypotheses for the surrogate, when linked, is consistent for the discrete loss.
-
-As calibration does not rely on the representation space $\X$, we can ignore this and focus instead on calibration; we focus on \jessie{marginal} probability distributions $p \in \simplex$, agnostic to $\X$.
 
 \cite{frongillo2015elicitation} introduces \emph{Elicitation Complexity}. \jessie{\ldots}
 
@@ -253,22 +238,7 @@ Without much loss of generality, we assume that finite properties are \emph{non-
 \end{proposition}
 
 
-The following is a statement from~\cite{ramaswamy2016convex} providing an upper bound on the convex calibration dimension of a given discrete loss.
-However, using tools from property elicitation, we can simplify their proof, which relies on considering sequences of losses that approach the infimum and taking $\epsilon$-subdifferentials of the surrogate loss.
-
-\begin{theorem}[\cite{ramaswamy2016convex}]
-	Suppose we are given a discrete loss $\ell:\R \to \reals^\Y_+$ eliciting $\gamma$.
-	Take $p \in \simplex$ and $r \in \R$ such that $p \in \gamma_r$.
-	Then \jessie{Need to define FSD $\mu_{\gamma_r}$}
-	\begin{equation}
-	\ccdim(\ell) \geq \|p\|_0 - \mu_{\gamma_r}(p) - 1~.~
-	\end{equation}
-\end{theorem}
-\begin{proof}
-	\jessie{Abbreviated FSD proof}
-\end{proof}
-
-\section{Characteristics of convex surrogates }
+\section{Characteristics of convex surrogates}
 \begin{definition}[Identifiable]
 	A property $\Gamma: \simplex \to \R$ is \emph{identifiable} if there is a function $V: \R \to \reals^\Y$ such that 
 	\begin{equation*}
@@ -289,7 +259,47 @@ However, using tools from property elicitation, we can simplify their proof, whi
 	Moreover, this must hold for all $p \in \simplex$ and $r \in \gamma(p)$.
 \end{theorem}
 
+\section{Finite outcome settings and finite properties}
+\begin{definition}[Calibrated]
+	Let $\ell : \R \to \reals^\Y_+$ be a discrete loss eliciting the property $\gamma$.
+	A surrogate loss $L : \reals^d \to \reals^\Y_+$ is \emph{calibrated} with respect to $\ell$ if there exists a link function $\psi: \reals^d \to \R$ such that
+	\begin{equation}
+	\forall p \in \simplex: \inf_{u \in \reals^d : \psi(u) \not \in \gamma(p)} \inprod{p}{L(u)} > \inf_{u \in \reals^d} \inprod{p}{L(u)}~.~
+	\end{equation}
+\end{definition}
 
+
+\cite{ramaswamy2016convex} introduces \emph{Convex Calibration Dimension}, which studies the minimal dimension input $d$ to construct a convex surrogate $L : \reals^d \to \reals^\Y_+$ that is calibrated with respect to a given discrete loss $\ell$.
+
+\begin{theorem}[\cite{ramaswamy2016convex}]
+	If $\Y$ is finite, then the surrogate loss $L:\reals^d \to \reals^\Y_+$ is calibrated with respect to $\ell: \R \to \reals^\Y_+$ if and only if there exists a link function $\psi : \reals^d \to \R$ such that for all distributions $D$ on $\X \times\Y$ and all sequences of (vector) functions $f_m : \X \to \reals^d$,
+	\begin{equation*}
+	\E_D L(f_m(X), Y) \to \inf_f \E_P L(f(X), Y) \implies \E_D \ell(\psi  \circ f_m(X), Y) \to \inf_f \E_D \ell(\psi \circ f(X), Y)~.~
+	\end{equation*}
+\end{theorem}
+In words, we have that a surrogate and link are calibrated with respect to a discrete loss if and only if any consistent sequence of hypotheses for the surrogate, when linked, is consistent for the discrete loss.
+
+As calibration does not rely on the representation space $\X$, we can ignore this and focus instead on calibration; we focus on \jessie{marginal} probability distributions $p \in \simplex$, agnostic to $\X$.
+
+
+The following is a statement from~\cite{ramaswamy2016convex} providing an upper bound on the convex calibration dimension of a given discrete loss.
+However, using tools from property elicitation, we can simplify their proof, which relies on considering sequences of losses that approach the infimum and taking $\epsilon$-subdifferentials of the surrogate loss.
+
+\begin{theorem}[\cite{ramaswamy2016convex}]
+	Suppose we are given a discrete loss $\ell:\R \to \reals^\Y_+$ eliciting $\gamma$.
+	Take $p \in \simplex$ and $r \in \R$ such that $p \in \gamma_r$.
+	Then \jessie{Need to define FSD $\mu_{\gamma_r}$}
+	\begin{equation}
+	\ccdim(\ell) \geq \|p\|_0 - \mu_{\gamma_r}(p) - 1~.~
+	\end{equation}
+\end{theorem}
+\begin{proof}
+	\jessie{Abbreviated FSD proof}
+\end{proof}
+
+\jessie{Abstain example... maybe... hopefully...}
+
+\newpage
 
 \section*{Broader Impact}
 \jessie{Now required for NeurIPS, but doesn't count towards page limit.}
