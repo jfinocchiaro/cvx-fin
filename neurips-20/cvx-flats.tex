@@ -158,23 +158,26 @@
 
 \section{Introduction}\label{sec:intro}
 
-In supervised machine learning, one often wants to make a prediction about future outcomes by training a classifier to minimize the average \emph{empirical loss} of a labeled training set, where the loss is determined by the task at hand.
+In supervised machine learning, one often wants to make a prediction about future outcomes by training a classifier to minimize the average empirical loss of a labeled training set, where the loss is determined by the task at hand.
 For example, 0-1 loss is often desired for classification tasks.
-However, discontinuous, finite losses are difficult to optimize, so we typically construct a \emph{surrogate} loss that one can more easily optimize.
-We are specifically interested in \emph{consistent} and \emph{convex} surrogates yielding the same statistical guarantees as optimizing an original, discrete loss.
-\jessie{......}
+However, discontinuous, finite losses are typically difficult to optimize, so we construct a continuous \emph{surrogate} loss that one can more easily optimize.
+In particular, we want our surrogate loss to yield guarantees so that optimal predictions for the surrogate can be linked to optimal predictions for the original (possibly discrete) loss, regardless of the underlying data distribution. 
+Throughout this paper, the guarantees we desire from the condition of consistency.
+Throughout, we are specifically interested in \emph{consistent} and \emph{convex} surrogates yielding the same statistical guarantees as optimizing an original loss function-- possibly discrete. 
+\jessie{...}
+
+
 
 \subsection{Notation}
-In this paper, we take the outcome set $\Y$ with $|\Y| = n < \infty$.
-Let $\simplex$ be the $(n-1)$ dimensional simplex over the outcomes in $\Y$.
+In this paper, we take the outcome set $\Y$ and consider $\simplex$ to be the simplex over $\Y$.
 
 %discrete land
-Let $\R$ be a finite report set and $\Y$ a finite outcome set.
+Let $\R$ be a (typically finite) report set and $\Y$ a finite outcome set for now.
 Note that we do not necessarily have $\Y = \R$.  
 For example, in ranking problems, $\R$ may be all $n!$ permutations over the $n$ outcomes forming $\Y$.
-We consider a discrete loss $\ell : \R \to \reals_+^\Y$ to map a discrete prediction to a real-valued punishment for error on each possible outcome.
+A loss $\ell : \R \to \reals_+^\Y$ is a \emph{discrete loss} if $|\R| < \infty$, and in general, we use $\ell$ to denote our \emph{original loss} for which we want to construct a consistent surrogate.
 We denote $\ell(r)_y$ as the $y^{th}$ element of the vector $\ell(r)$, and consider this to be the punishment for reporting $r$ if outcome $y$ is realized.
-For a distribution $p \in \simplex$, we denote the expected discrete loss for report $r$ to be $\inprod{p}{\ell(r)}$.
+For a distribution $p \in \simplex$, we denote the expected discrete loss for report $r$ to be $\E_{Y \sim p} \ell(r, Y) := \ell(r; p)$.
 When considering surrogate losses, we denote the loss by $L : \reals^d \to \reals_+^\Y$, and typically denote a surrogate report with $u$.
 
 We sometimes override the notation $\R$ to refer to a generic report set.
@@ -184,31 +187,35 @@ We denote a finite property elicited by a discrete loss $\ell$ by $\gamma := \pr
 Additionally, we let $\Gamma := \prop{L}$ be the ``surrogate'' property elicited by the surrogate loss $L$.
 Again, we sometimes override notation to let $\Gamma$ be a generic property; when $\Gamma: \simplex \toto \R$, we refer to both a generic property and report set.
 
+In Section~\ref{sec:char-convex}, we will focus on characteristics of convex surrogate losses.
+Here, when we say a loss $L(\cdot, \cdot)$ is \emph{convex}, we mean that it is convex in its first argument for every value of its second argument.
+
 \section{Related work}\label{sec:related-work}
 \subsection{Consistency and calibration for convex losses}\label{subsec:convex-surrogates}
-\cite{bartlett2006convexity,tewari2007consistency} for a characterization of consistent, calibrated surrogates for classification problems.
+\cite{bartlett2006convexity,tewari2007consistency} form a characterization of consistent, calibrated surrogates for classification problems.
+The first paper shows that if a convex surrogate is differentiable, minimal at $0$, and nonnegative, there is a consistent surrogate for binary classification problems, and the latter generalizes this result for multiclass classification.
+Now let us formalize what we mean by saying a surrogate is \emph{consistent}:
 
 \begin{definition}[Consistent]
-	Suppose $f_m : \X \to \R$ is the hypothesis function learned by minimizing empirical training loss over $m$ training examples.
+	Suppose $f_m : \X \to \R$ is the hypothesis function learned by minimizing empirical training loss over $m$ labeled examples.
 	For a distribution $D$ over input and label spaces $\X \times\Y$, we say $\{f_m\}$ is \emph{consistent} with respect to a loss $L: \R \to \reals^\Y_+$ if
 	\begin{align*}
-	\E_D L(f_n(X), Y) &\to \inf_f \E_D L(f(X), Y)~.~
+	\E_D L(f_m(X), Y) &\to \inf_f \E_D L(f(X), Y)~.~
 	\end{align*}
 	Moreover, we say a loss and link $(L,\psi)$ are consistent with respect to a discrete loss $\ell$ if 
 	\begin{align*}
-		\E_D L(f_n(X), Y) \to \inf_f \E_D L(f(X), Y) &\implies \E_D \ell(\psi \circ f_n(X), Y) \to \inf_f \E_D \ell(\psi \circ f(X), Y)~.~
+		\E_D L(f_m(X), Y) \to \inf_f \E_D L(f(X), Y) &\implies \E_D \ell(\psi \circ f_m(X), Y) \to \inf_f \E_D \ell(\psi \circ f(X), Y)~.~
 	\end{align*}
 \end{definition}
 
 
 
-\cite{frongillo2015elicitation} introduces \emph{Elicitation Complexity}. \jessie{\ldots}
-
 \cite{finocchiaro2019embedding} presents the notion of a surrogate loss \emph{embedding} a discrete loss-- typically by a polyhedral (piecewise linear and convex) surrogate.
 For all discrete losses, $\eliccvx(\ell) \leq \elicpoly(\ell) \leq \elicembed(\ell)$.
-However, one open question that remains from their work is if these bounds are equal. \jessie{\ldots}
+However, one open question that remains from their work is if these bounds are equal. \jessie{\ldots} \jessie{MOVE}
 
 \subsection{Property elicitation}\label{subsec:properties}
+Informally, a property is a function mapping a probability distribution $p$ over the outcome set $\Y$ to the ``suggested report'' given $p$.
 
 \begin{definition}[Property, elicits, level set]
 	\jessiet{Don't like the notation here... fix later.}
@@ -222,35 +229,70 @@ However, one open question that remains from their work is if these bounds are e
 Note, moreover, that we call a property $\gamma: \simplex \toto \R$ \emph{finite} if $|\R| < \infty$.
 Without much loss of generality, we assume that finite properties are \emph{non-redundant}, meaning that for each $\gamma_r$, there is no $\gamma_{r'}$ such that $\gamma_{r'} \subseteq \gamma_r$.
 
+In particular, when $\R \subseteq \reals^k$ for some $k \in \mathbb{Z}$, \cite{frongillo2015elicitation} introduce the notion of \emph{Elicitation Complexity} and \emph{Identification Complexity}, which uses $k$ to measure the ``efficiency'' of a loss $L$ eliciting $\Gamma$.
+However, their notion of complexity relies not just on the property $\Gamma$, but instead on any property \emph{indirectly elicited} by $L$.
+
 \begin{definition}\label{def:indirectly-elicits}
 	A loss $L$ \emph{indirectly elicits} a property $\Gamma':\simplex \toto \R'$ if it elicits a property $\Gamma: \simplex \toto \R$ such that there is a function $\psi:\R \to \R'$ such that for all $r \in \R$, we have $\Gamma_r \subseteq \Gamma'_{\psi(r)}$.
 \end{definition}
 
+In Proposition~\ref{prop:consistent-implies-indir-elic} below, we relate consistency of a surrogate and link to indirect elicitation.
 
 \section{Implications of property elicitation for consistency}
 \begin{proposition}\label{prop:consistent-implies-indir-elic}
-	If a surrogate and link $(L, \varphi)$ is consistent with respect to $\ell$, then $L$ indirectly elicits $\gamma := \prop{\ell}$.
+	If a surrogate and link pair$(L, \psi)$ is consistent with respect to $\ell$, then $L$ indirectly elicits $\gamma := \prop{\ell}$.
 \end{proposition}
 
 \begin{proposition}
 	Consider the discrete loss $\ell : \R \to \reals^\Y_+$ and $\gamma:= \prop{\ell}$.
 	Then $\eliccvx(\gamma) \leq \ccdim(\ell)$.
+	\jessie{Move this to section 5?}
+	\jessie{Need to define $\eliccvx$ and $\ccdim$.}
 \end{proposition}
+\begin{proof}
+	Let $d$ be the convex calibration dimension of $\ell$, and $(L, \psi)$ be calibrated with respect to $\ell$ with $L$ convex.
+	Then $(L, \psi)$ is also consistent with respect to $\ell$, and therefore $L$ indirectly elicits $\gamma$.
+\end{proof}
 
 
-\section{Characteristics of convex surrogates}
+\section{Characteristics of convex surrogates}\label{sec:char-convex}
+\iffalse
 \begin{definition}[Identifiable]
 	A property $\Gamma: \simplex \to \R$ is \emph{identifiable} if there is a function $V: \R \to \reals^\Y$ such that 
 	\begin{equation*}
 	\forall p \in \simplex, \; r \in \Gamma(p) \iff V(r) = \vec 0~.~
 	\end{equation*}
 \end{definition}
+\fi
+
+If a property is vector-valued (i.e.$\, \Gamma: \simplex \to \reals^d$), then we can consider the notion of \emph{identifiability}.
+
+\begin{definition}[$d$-identifiable]
+	A vector-valued property $\Gamma: \simplex \to \reals^d$ is $d$-identifiable if it holds that $p \in \Gamma_u \iff V(u, p) = \vec 0 \in \reals^d$.
+\end{definition}
+
+Moreover, we define the \emph{identification complexity} of a property $\Gamma$ as the minimum dimension $d$ such that there is a link $phi$ such that $\Gamma = \phi \circ \hat \Gamma$ and $\hat \Gamma$ is $d$-identifiable.
 
 \jessie{Note from 2018 neurips paper that 1-elicitable iff 1-convex elicitable for continuous properties and how this differs.}
 
+
+When one restricts their focus to \emph{convex} surrogates, we know that all minima are global, and we then have $\nabla L(u, y) = \vec 0$ if and only if $u$ minimizes $L$ in its first component.
+
 \begin{theorem}
-	Convex elicitable properties are kind of identifiable \jessie{Formalize}
+	Suppose the property $\Gamma$ is elicited by the convex loss $L : \reals^d \to \reals^\Y_+$ such that the infimum $L(\cdot)_y$ is attained for all $y \in \Y$.
+	Then for all $p \in \simplex$, we have $u \in \Gamma(p) \iff \vec 0 \in \nabla_{u'} \inprod{p}{L(u')}$.
 \end{theorem}
+\begin{proof}[Proof sketch]
+	Since $L$ is convex, we know that all minimizers are global. 
+	This implies that $\vec 0 \in \nabla_{u} L(u; p) \iff u \in \arginf_{u'} L(u';p)$, and the latter is true if and only if $u \in \Gamma(p)$ by definition of elicitation.
+\end{proof}
+
+\begin{corollary}
+	Suppose the property $\Gamma$ is elicited by the convex loss $L : \reals^d \to \reals^\Y_+$ such that the infimum $L(\cdot)_y$ is attained for all $y \in \Y$.
+	Then $\Gamma$ is $d$-identifiable.
+\end{corollary}
+
+Now we can consider specific characteristics of convex losses in order to understand the convex elicitation complexity \jessie{define?} of a given property.
 
 \begin{theorem}
 	Suppose we are given a discrete loss $\ell:\R \to \reals^\Y_+$ eliciting $\gamma:= \prop{\ell}$.
@@ -258,6 +300,9 @@ Without much loss of generality, we assume that finite properties are \emph{non-
 	If there is not $(n - d - 1)$-dimensional flat $F$ such that $F \subseteq \gamma_r$ and $p \in F$, then there is no surrogate loss $L : \reals^d \to \reals^\Y_+$ and link $\psi:\reals^d \to \R$ such that $(L, \psi)$ is calibrated with respect to $\ell$.
 	Moreover, this must hold for all $p \in \simplex$ and $r \in \gamma(p)$.
 \end{theorem}
+\begin{proof}[Proof intuition]
+	\jessie{TODO}
+\end{proof}
 
 \section{Finite outcome settings and finite properties}
 \begin{definition}[Calibrated]
