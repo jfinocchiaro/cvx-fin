@@ -199,11 +199,7 @@ Now let us formalize what we mean by saying a surrogate is \emph{consistent}:
 
 \begin{definition}[Consistent]
 	Suppose $f_m : \X \to \R$ is the hypothesis function learned by minimizing empirical training loss over $m$ labeled examples.
-	For a distribution $D$ over input and label spaces $\X \times\Y$, we say $\{f_m\}$ is \emph{consistent} with respect to a loss $L: \R \times \Y \to \reals_+$ if
-	\begin{align*}
-	\E_D L(f_m(X), Y) &\to \inf_f \E_D L(f(X), Y)~.~
-	\end{align*}
-	Moreover, we say a loss and link $(L,\psi)$ are consistent with respect to a discrete loss $\ell$ if 
+	For all distributions $D$ over input and label spaces $\X \times\Y$, we say a loss and link $(L,\psi)$ are consistent with respect to an original loss $\ell$ if 
 	\begin{align*}
 		\E_D L(f_m(X), Y) \to \inf_f \E_D L(f(X), Y) &\implies \E_D \ell(\psi \circ f_m(X), Y) \to \inf_f \E_D \ell(\psi \circ f(X), Y)~.~
 	\end{align*}
@@ -258,18 +254,20 @@ When properties are vector-valued (i.e.$\, \Gamma: \simplex \to \reals^d$),~\cit
 \end{definition}
 \fi
 
+\iffalse
 Similarly, we can consider the notion of \emph{identifiability} for vector-valued properties.
 
 \begin{definition}[$d$-identifiable, Identification Complexity]
 	A vector-valued property $\Gamma: \simplex \to \reals^d$ is $d$-identifiable if it holds that $p \in \Gamma_u \iff V(u, p) = \vec 0 \in \reals^d$.
 	Like elicitation complexity, we define the \emph{identification complexity} of a property $\Gamma$ as the minimum dimension $d$ such that there is a link $\psi$ such that $\Gamma = \psi \circ \hat \Gamma$ and $\hat \Gamma$ is $d$-identifiable.
 \end{definition}
-
+\fi
 
 \jessie{Note from 2018 neurips paper that 1-elicitable iff 1-convex elicitable for continuous properties and how this differs.}
 
 
-\section{Implications of property elicitation for consistency}
+\section{Characteristics of Consistent Convex Surrogates}\label{sec:char-convex}
+\jessie{Intro text}
 \begin{proposition}\label{prop:consistent-implies-indir-elic}
 	If a surrogate and link pair $(L, \psi)$ is consistent with respect to $\ell$, then $L$ indirectly elicits $\gamma := \prop{\ell}$.
 \end{proposition}
@@ -283,34 +281,48 @@ This result allows us to apply the upper bounds from~\cite{frongillo2015elicitat
 In particular, when $\Y$ is finite and we restrict $L$ to be convex, this translates to applications to \emph{convex calibration dimension} of~\cite{ramaswamy2016convex}.
 
 
-\section{Characteristics of convex surrogates}\label{sec:char-convex}
-When one restricts their focus to \emph{convex} surrogates, we know that all minima are global, and we then have $\nabla L(u, y) = \vec 0$ if and only if $u$ minimizes $L$ in its first component.
+When one restricts their focus to \emph{convex} surrogates, we know that all minima are global, and we then have $\vec 0  \in \partial L(u, y)$ if and only if $u$ minimizes $L$ in its first component.
 
-\begin{theorem}
-	Suppose the property $\Gamma$ is elicited by the convex loss $L : \reals^d \times \Y \to \reals_+$ such that the infimum $L(\cdot)_y$ is attained for all $y \in \Y$.
-	Then for all $p \in \simplex$, we have $u \in \Gamma(p) \iff \vec 0 \in \nabla_{u'} \inprod{p}{L(u')}$.
-\end{theorem}
-\begin{proof}[Proof sketch]
-	Since $L$ is convex, we know that all minimizers are global. 
-	This implies that $\vec 0 \in \nabla_{u} L(u; p) \iff u \in \arginf_{u'} L(u';p)$, and the latter is true if and only if $u \in \Gamma(p)$ by definition of elicitation.
-\end{proof}
-
-In a large sense, this lets us conclude that $d$-convex elicitable properties are also $d$-identifiable, taking the identification function $V(\cdot;p)$ to be $\nabla_u L(\cdot; p)$ for all $p \in \simplex$.
-\begin{corollary}
-	Suppose the property $\Gamma$ is elicited by the convex loss $L : \reals^d \times \Y \to \reals_+$ such that the infimum $L(\cdot, y)$ is attained for all $y \in \Y$.
-	Then $\Gamma$ is $d$-identifiable.
-\end{corollary}
+%\begin{theorem}
+%	Suppose the property $\Gamma$ is elicited by the differentiable, convex loss $L : \reals^d \times \Y \to \reals_+$ such that the infimum $L(\cdot, y)$ is attained for all $y \in \Y$.
+%	Then for all $p \in \simplex$, we have $u \in \Gamma(p) \iff \vec 0 \in \nabla_{u'} \inprod{p}{L(u')}$.
+%\end{theorem}
+%\begin{proof}[Proof sketch]
+%	Since $L$ is convex, we know that all minimizers are global. 
+%	This implies that $\vec 0 \in \nabla_{u} L(u; p) \iff u \in \arginf_{u'} L(u';p)$, and the latter is true if and only if $u \in \Gamma(p)$ by definition of elicitation.
+%\end{proof}
+%
+%In a large sense, this lets us conclude that $d$-convex elicitable properties are also $d$-identifiable, taking the identification function $V(\cdot;p)$ to be $\nabla_u L(\cdot; p)$ for all $p \in \simplex$.
+%\begin{corollary}
+%	Suppose the property $\Gamma$ is elicited by the convex loss $L : \reals^d \times \Y \to \reals_+$ such that the infimum $L(\cdot, y)$ is attained for all $y \in \Y$.
+%	Then $\Gamma$ is $d$-identifiable.
+%\end{corollary}
 
 Now we can consider specific characteristics of convex losses in order to understand the convex elicitation complexity of a given property.
 
-\begin{theorem}
-	Suppose we are given a discrete loss $\ell:\R \times \Y \to \reals_+$ eliciting $\gamma:= \prop{\ell}$.
-	Fix $p \in \simplex$, and let $r$ be the report such that $p \in \gamma_r$.  
-	If there is not $(n - d - 1)$-dimensional flat $F$ such that $F \subseteq \gamma_r$ and $p \in F$, then there is no surrogate loss $L : \reals^d \times \Y \to \reals_+$ and link $\psi:\reals^d \to \R$ such that $(L, \psi)$ is calibrated with respect to $\ell$.
+\begin{theorem}\label{thm:cvx-flats}
+	Suppose we are given an elicitable property $\gamma$.
+	Fix $p \in \simplex$, and let $r$ be a report such that $p \in \gamma_r$.  
+	If there is not $(n - d - 1)$-dimensional flat $F$ such that $F \subseteq \gamma_r$ and $p \in F$, then there is no convex surrogate loss $L : \reals^d \times \Y \to \reals_+$ that indirectly elicits $\gamma$.
 	Moreover, this must hold for all $p \in \simplex$ and $r \in \gamma(p)$.
 \end{theorem}
 \begin{proof}[Proof intuition]
-	\jessie{TODO}
+	We prove the contrapositive; if there is a surrogate loss $L$ indirectly eliciting $\gamma$, then for all $p \in \simplex$ and $r \in \R$ such that $r \in \gamma(p)$, there is an $(n-d-1)$-dimensional flat $F$ such that $F \cap \simplex \subseteq \gamma_r$ and $p \in F$.
+	
+	Suppose we have $L:\reals^d \times \Y \to \reals$ eliciting $\Gamma$ and link $\psi : \reals^d \to \R$ such that for all $u \in \reals^d$, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$.
+	Fix any $p \in \simplex$, and take any $r \in \gamma(p)$.
+	We argue that there must be some $u \in \reals^d \in \Gamma(p)$ so that $r = \psi(u)$, since $\Gamma(p) = \emptyset$ otherwise.
+	We know that $r \in \gamma(p) \iff u \in \Gamma(p) \iff \vec 0 \in \partial L(u; p) \iff \vec 0 \in \oplus_y p_y \partial L(u,y)$, where $\oplus$ denotes the nonnegative weighted Minkowski sum by convex analysis results \jessie{And mild assumptions on the loss?}.
+		
+	The weighted Minkowski sum is in $d$-dimensional space as $L$ is defined on $\reals^d$.
+	We claim there exists a matrix $W \in \reals^{d+1 \times n}$ defining the flat $F = \{q \in \reals^n : Wq = \vec 0 \}$; $F$ is then $(n-(d+1))$-dimensional by the rank-nullity theorem, so we just need to show such a $W$ also keeps $F \cap \simplex \subseteq \gamma_r$.
+	As $\Gamma_u \subseteq \gamma_r$, it is sufficient to show $F \cap \simplex \subset \Gamma_u$.
+	 
+	Construct $W$ by taking each column to describe $\partial L(u, y)$ for each $y \in \Y$.
+	Since $\partial L(u, y)$ is $d$-dimensional, the affine subspace containing each subgradient can be described with $d+1$ constraints. \jessie{??}
+	We can see that $p \in F$ since $\vec 0 \in \oplus_y p_y \partial L(u, y) \implies Wp = \vec 0$ by construction of $W$.
+	Moreover, if there was a $\hat q \in \simplex \setminus \gamma_r$ such that $W \hat q = \vec 0$, then we would contradict the indirect elicitation of $\gamma$ since we would not have $\Gamma_{u} \subseteq \gamma_{\psi(u)}$ since we would have $\hat q \in \Gamma_u$ but $\hat q \not \in \gamma_{\psi(u)}$.
+	Therefore,  we have an $(n - d - 1)$-dimensional flat $F$ such that $F \cap \simplex \subseteq \gamma_r$ and $p \in F$ for all $p \in \simplex$ and $r \in \gamma(p)$.
 \end{proof}
 
 \section{Finite outcome settings and finite properties}
@@ -364,6 +376,10 @@ However, using tools from property elicitation, we can simplify their proof, whi
 \end{proof}
 
 \jessie{Abstain example... maybe... hopefully...}
+
+\section{Continuous Properties}
+Theorem~\ref{thm:} allows us to address one major open question from~\cite{frongillo2015elicitation}: \emph{what are lower bounds on convex elicitation complexity?}
+
 
 \newpage
 
