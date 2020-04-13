@@ -64,6 +64,7 @@
 \newcommand{\elicpoly}{\mathrm{elic}_\mathrm{pcvx}}
 \newcommand{\elicembed}{\mathrm{elic}_\mathrm{embed}}
 \newcommand{\ccdim}{\mathrm{ccdim}}
+\newcommand{\codim}{\mathrm{codim}}
 
 \newcommand{\C}{\mathcal{C}}
 \newcommand{\D}{\mathcal{D}}
@@ -107,10 +108,6 @@
 % \AND instead of \And before the third author name.
 
 \author{%
-	Peter Bartlett\\
-	UC Berkeley\\
-	\texttt{bartlett@cs.berkeley.edu}
-	\And
   Jessie Finocchiaro\\
 %  Department of Computer Science\\
   CU Boulder\\
@@ -207,9 +204,7 @@ Now let us formalize what we mean by saying a surrogate is \emph{consistent}:
 
 
 
-\cite{finocchiaro2019embedding} presents the notion of a surrogate loss \emph{embedding} a discrete loss-- typically by a polyhedral (piecewise linear and convex) surrogate.
-For all discrete losses, $\eliccvx(\ell) \leq \elicpoly(\ell) \leq \elicembed(\ell)$.
-However, one open question that remains from their work is if these bounds are equal. \jessie{\ldots} \jessie{MOVE}
+
 
 \subsection{Property elicitation}\label{subsec:properties}
 Informally, a property is a function mapping a probability distribution $p$ over the outcome set $\Y$ to the ``suggested report'' given $p$.
@@ -301,29 +296,43 @@ When one restricts their focus to \emph{convex} surrogates, we know that all min
 Now we can consider specific characteristics of convex losses in order to understand the convex elicitation complexity of a given property.
 
 \begin{theorem}\label{thm:cvx-flats}
-	Suppose we are given an elicitable property $\gamma$.
+	Suppose we are given a finite elicitable property $\gamma$.
 	Fix $p \in \simplex$, and let $r$ be a report such that $p \in \gamma_r$.  
-	If there is not $(n - d - 1)$-dimensional flat $F$ such that $F \subseteq \gamma_r$ and $p \in F$, then there is no convex surrogate loss $L : \reals^d \times \Y \to \reals_+$ that indirectly elicits $\gamma$.
+	If there is no $(n - d - 1)$-dimensional flat $F$ such that $F \subseteq \gamma_r$ and $p \in F$, then there is no convex surrogate loss $L : \reals^d \times \Y \to \reals_+$ that indirectly elicits $\gamma$.
 	Moreover, this must hold for all $p \in \simplex$ and $r \in \gamma(p)$.
 \end{theorem}
 \begin{proof}[Proof intuition]
+	\jessie{BTW: $n$, or $\|p\|_0$?}
 	We prove the contrapositive; if there is a surrogate loss $L$ indirectly eliciting $\gamma$, then for all $p \in \simplex$ and $r \in \R$ such that $r \in \gamma(p)$, there is an $(n-d-1)$-dimensional flat $F$ such that $F \cap \simplex \subseteq \gamma_r$ and $p \in F$.
 	
-	Suppose we have $L:\reals^d \times \Y \to \reals$ eliciting $\Gamma$ and link $\psi : \reals^d \to \R$ such that for all $u \in \reals^d$, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$.
+	Suppose we have $L:\reals^d \times \Y \to \reals$ eliciting $\Gamma$ and link $\psi : \reals^d \to \R$ such that for all $u \in \reals^d$, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$, i.e. $L$ indirectly elicits $\gamma$.
 	Fix any $p \in \simplex$, and take any $r \in \gamma(p)$.
-	We argue that there must be some $u \in \reals^d \in \Gamma(p)$ so that $r = \psi(u)$, since $\Gamma(p) = \emptyset$ otherwise.
+	We argue that there must be some $u \in \Gamma(p) \cap \reals^d$ such that $r = \psi(u)$, since $\Gamma(p) = \emptyset$ otherwise.
 	We know that $r \in \gamma(p) \iff u \in \Gamma(p) \iff \vec 0 \in \partial L(u; p) \iff \vec 0 \in \oplus_y p_y \partial L(u,y)$, where $\oplus$ denotes the nonnegative weighted Minkowski sum by convex analysis results \jessie{And mild assumptions on the loss?}.
 		
-	The weighted Minkowski sum is in $d$-dimensional space as $L$ is defined on $\reals^d$.
-	We claim there exists a matrix $W \in \reals^{d+1 \times n}$ defining the flat $F = \{q \in \reals^n : Wq = \vec 0 \}$; $F$ is then $(n-(d+1))$-dimensional by the rank-nullity theorem, so we just need to show such a $W$ also keeps $F \cap \simplex \subseteq \gamma_r$.
-	As $\Gamma_u \subseteq \gamma_r$, it is sufficient to show $F \cap \simplex \subset \Gamma_u$.
-	 
-	Construct $W$ by taking each column to describe $\partial L(u, y)$ for each $y \in \Y$.
-	Since $\partial L(u, y)$ is $d$-dimensional, the affine subspace containing each subgradient can be described with $d+1$ constraints. \jessie{??}
-	We can see that $p \in F$ since $\vec 0 \in \oplus_y p_y \partial L(u, y) \implies Wp = \vec 0$ by construction of $W$.
-	Moreover, if there was a $\hat q \in \simplex \setminus \gamma_r$ such that $W \hat q = \vec 0$, then we would contradict the indirect elicitation of $\gamma$ since we would not have $\Gamma_{u} \subseteq \gamma_{\psi(u)}$ since we would have $\hat q \in \Gamma_u$ but $\hat q \not \in \gamma_{\psi(u)}$.
-	Therefore,  we have an $(n - d - 1)$-dimensional flat $F$ such that $F \cap \simplex \subseteq \gamma_r$ and $p \in F$ for all $p \in \simplex$ and $r \in \gamma(p)$.
+	Observe that the weighted Minkowski sum is in $d$-dimensional space as $L$ is defined on $\reals^d$.
+	As $\partial L(u;p)$ is defined in $n$-dimensional space over $\simplex$, the flats of $L(u;p)$ are at least $(n-d-1)$-dimensional as the subgradient is in $d$-dimensional space, and the affineness of being a flat allows us to remove one additional dimension.
+	Let $F$ be an $(n-d-1)$-dimensional flat to $L(u;p)$.
+	For all $q \in F$, we must have $u \in \Gamma(q)$ since \jessie{JUSTIFICATION} there is a bijection from $F \in \partial L(u;p)$ to $\Gamma(p)$. Therefore, $q \in F \implies u \in \Gamma(q)$ as well.
+	Therefore, we have $F \cap \simplex \subseteq \Gamma_u \subseteq \gamma_r$, where the latter follows from indirect elicitation.
+	
+%	We claim there exists a matrix $W \in \reals^{d+1 \times n}$ defining the flat $F = \{q \in \reals^n : Wq = \vec 0 \}$; $F$ is then $(n-(d+1))$-dimensional by the rank-nullity theorem, so we just need to show such a $W$ also keeps $F \cap \simplex \subseteq \gamma_r$.
+%	As $\Gamma_u \subseteq \gamma_r$, it is sufficient to show $F \cap \simplex \subset \Gamma_u$.
+%	 
+%	Construct $W$ by taking each column to describe $\partial L(u, y)$ for each $y \in \Y$.
+%	Since $\partial L(u, y)$ is $d$-dimensional, the affine subspace containing each subgradient can be described with $d+1$ constraints. \jessie{??}
+%	We can see that $p \in F$ since $\vec 0 \in \oplus_y p_y \partial L(u, y) \implies Wp = \vec 0$ by construction of $W$.
+%	Moreover, if there was a $\hat q \in \simplex \setminus \gamma_r$ such that $W \hat q = \vec 0$, then we would contradict the indirect elicitation of $\gamma$ since we would not have $\Gamma_{u} \subseteq \gamma_{\psi(u)}$ since we would have $\hat q \in \Gamma_u$ but $\hat q \not \in \gamma_{\psi(u)}$.
+%	Therefore,  we have an $(n - d - 1)$-dimensional flat $F$ such that $F \cap \simplex \subseteq \gamma_r$ and $p \in F$ for all $p \in \simplex$ and $r \in \gamma(p)$.
 \end{proof}
+
+\begin{theorem}[Generalization to infinite outcomes?]
+	Suppose we are given an elicitable property $\gamma$.
+	Fix $p \in \simplex$, and let $r$ be a report such that $p \in \gamma_r$.  
+	If there is no $\codim(\partial L(r;p))-1$-dimensional flat $F$ such that $F \subseteq \gamma_r$ and $p \in F$, then there is no convex surrogate loss $L : \reals^d \times \Y \to \reals$ that indirectly elicits $\gamma$.
+	Moreover, this must hold for all $p \in \mathcal{P}$ and $r \in \gamma(p)$.
+\end{theorem}
+
 
 \section{Finite outcome settings and finite properties}
 \begin{definition}[Calibrated]
@@ -351,7 +360,6 @@ Theorem~\ref{thm:calib-iff-consistent} allows us to now relate convex elicitatio
 \begin{proposition}
 	Consider the discrete loss $\ell : \R \times \Y \to \reals_+$ and $\gamma:= \prop{\ell}$.
 	Then $\eliccvx(\gamma) \leq \ccdim(\ell)$.
-	\jessie{Move this to section 5?}
 	\jessie{Need to define $\eliccvx$ and $\ccdim$.}
 \end{proposition}
 \begin{proof}
@@ -375,6 +383,11 @@ However, using tools from property elicitation, we can simplify their proof, whi
 	\jessie{Abbreviated FSD proof}
 \end{proof}
 
+\cite{finocchiaro2019embedding} presents the notion of a surrogate loss \emph{embedding} a discrete loss-- typically by a polyhedral (piecewise linear and convex) surrogate.
+If $\gamma$ is the finite property elicited by the discrete loss $\ell$, then for all discrete losses, $\eliccvx(\gamma) \leq \elicpoly(\gamma) \leq \elicembed(\ell)$.
+However, one open question that remains from their work is if these bounds are equal. \jessie{\ldots} 
+
+\subsection{Example: Abstain loss}
 \jessie{Abstain example... maybe... hopefully...}
 
 \section{Continuous Properties}
