@@ -90,6 +90,7 @@
 \newtheorem{conjecture}{Conjecture}
 \newtheorem{definition}{Definition}
 \newtheorem{assumption}{Assumption}
+\newtheorem{remark}{Remark}
 
 
 \DeclareMathOperator*{\argmax}{arg\,max}
@@ -194,14 +195,18 @@ Here, when we say a loss $L(\cdot, \cdot)$ is \emph{convex}, we mean that it is 
 The first paper shows that if a convex surrogate is differentiable, minimal at $0$, and nonnegative, there is a consistent surrogate for binary classification problems, and the latter generalizes this result for multiclass classification.
 Now let us formalize what we mean by saying a surrogate is \emph{consistent}:
 
-\begin{definition}[Consistent]
+\begin{definition}[Consistent: loss]
 	Suppose $f_m : \X \to \R$ is the hypothesis function learned by minimizing empirical training loss over $m$ labeled examples.
-	For all distributions $D$ over input and label spaces $\X \times\Y$, we say a loss and link $(L,\psi)$ are consistent with respect to an original loss $\ell$ if 
+	For all distributions $D$ over input and label spaces $\X \times\Y$, we say a loss and link $(L,\psi)$ \jessiet{change order of this sentence} are consistent with respect to an original loss $\ell$ if 
 	\begin{align*}
 		\E_D L(f_m(X), Y) \to \inf_f \E_D L(f(X), Y) &\implies \E_D \ell(\psi \circ f_m(X), Y) \to \inf_f \E_D \ell(\psi \circ f(X), Y)~.~
 	\end{align*}
 \end{definition}
 
+\begin{definition}[Consistent: property]
+\jessie{TODO}
+\end{definition}
+\jessiet{Excess risk definition on its own}
 
 
 
@@ -272,6 +277,10 @@ Now, instead of focusing on sequences of optimal hypotheses, we can focus on opt
  \jessie{FINISH}
 \end{proof}
 
+\begin{remark}
+	Either definition of consistency ties to indirect elicitation
+\end{remark}
+
 This result allows us to apply the upper bounds from~\cite{frongillo2015elicitation} when trying to find the minimal dimension consistent surrogate for a given loss.
 In particular, when $\Y$ is finite and we restrict $L$ to be convex, this translates to applications to \emph{convex calibration dimension} of~\cite{ramaswamy2016convex}.
 
@@ -293,12 +302,16 @@ When one restricts their focus to \emph{convex} surrogates, we know that all min
 %	Then $\Gamma$ is $d$-identifiable.
 %\end{corollary}
 
+\begin{definition}[Flat]
+	A \emph{flat} $F$ of $\reals^n$ is an affine subspace of $\reals^n$.
+\end{definition}
+
 Now we can consider specific characteristics of convex losses in order to understand the convex elicitation complexity of a given property.
 
 \begin{theorem}\label{thm:cvx-flats}
-	Suppose we are given a finite elicitable property $\gamma$.
+	Suppose we are given a property $\gamma$.
 	Fix $p \in \simplex$, and let $r$ be a report such that $p \in \gamma_r$.  
-	If there is no $(n - d - 1)$-dimensional flat $F$ such that $F \subseteq \gamma_r$ and $p \in F$, then there is no convex surrogate loss $L : \reals^d \times \Y \to \reals_+$ that indirectly elicits $\gamma$.
+	If there is no $(n - d - 1)$-dimensional flat $F$ such that $F \cap \simplex \subseteq \gamma_r$ and $p \in F$, then there is no convex surrogate loss $L : \reals^d \times \Y \to \reals$ that indirectly elicits $\gamma$.
 	Moreover, this must hold for all $p \in \simplex$ and $r \in \gamma(p)$.
 \end{theorem}
 \begin{proof}[Proof intuition]
@@ -307,14 +320,27 @@ Now we can consider specific characteristics of convex losses in order to unders
 	
 	Suppose we have $L:\reals^d \times \Y \to \reals$ eliciting $\Gamma$ and link $\psi : \reals^d \to \R$ such that for all $u \in \reals^d$, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$, i.e. $L$ indirectly elicits $\gamma$.
 	Fix any $p \in \simplex$, and take any $r \in \gamma(p)$.
-	We argue that there must be some $u \in \Gamma(p) \cap \reals^d$ such that $r = \psi(u)$, since $\Gamma(p) = \emptyset$ otherwise.
+	We argue that there must be some $u \in \Gamma(p) \subset \reals^d$ such that $r = \psi(u)$.
 	We know that $r \in \gamma(p) \iff u \in \Gamma(p) \iff \vec 0 \in \partial L(u; p) \iff \vec 0 \in \oplus_y p_y \partial L(u,y)$, where $\oplus$ denotes the nonnegative weighted Minkowski sum by convex analysis results \jessie{And mild assumptions on the loss?}.
+	
+	Observe that the Minkowski sum $\oplus_y p_y \partial L(u,y) = \{p_1 x_1 + \ldots + p_n x_n : x_1 \in \partial L(u,1), \ldots, x_n \in \partial L(u,n) \}$.
+	In order for $\vec 0$ to be in this $p$-weighted Minkowski sum, we then have that each choice of $x_i$ is a flat for $\partial L(u, i)$.
+	Moreover, with $p$ fixed, we know there is a vector of witnesses $W = [x_1, \ldots, x_n]$ such that $\sum_y p_y x_y = \vec 0$.
+	
+	\jessiet{This next paragraph is mostly me spelling it out for myself}
+	Observe that $F := \ker(W)$ is at most $(n-d-1)$ dimensions in probability space and contains $p$ by construction.
+	Moreover, we must have $F \cap \simplex \subseteq \gamma_r$.
+	To see this, consider $q \in F \cap \simplex$, but $q \not \in \gamma_r$.
+	That would mean that $Wq = \vec 0$, which implies $\vec 0 \in \partial L(u;q)$, so $q \not \in \gamma_r$ would contradict $L$ indirectly eliciting $\gamma$.
+
 		
-	Observe that the weighted Minkowski sum is in $d$-dimensional space as $L$ is defined on $\reals^d$.
-	As $\partial L(u;p)$ is defined in $n$-dimensional space over $\simplex$, the flats of $L(u;p)$ are at least $(n-d-1)$-dimensional as the subgradient is in $d$-dimensional space, and the affineness of being a flat allows us to remove one additional dimension.
-	Let $F$ be an $(n-d-1)$-dimensional flat to $L(u;p)$.
-	For all $q \in F$, we must have $u \in \Gamma(q)$ since \jessie{JUSTIFICATION} there is a bijection from $F \in \partial L(u;p)$ to $\Gamma(p)$. Therefore, $q \in F \implies u \in \Gamma(q)$ as well.
-	Therefore, we have $F \cap \simplex \subseteq \Gamma_u \subseteq \gamma_r$, where the latter follows from indirect elicitation.
+		%%COMMENTED 04.16.20
+%	Observe that the weighted Minkowski sum is in $d$-dimensional space as $L$ is defined on $\reals^d$.
+%	As $\partial L(u;p)$ is defined in $n$-dimensional space over $\simplex$, the flats of $L(u;p)$ are at least $(n-d-1)$-dimensional as the subgradient is in $d$-dimensional space, and the affineness of being a flat allows us to remove one additional dimension.
+%	Let $F$ be an $(n-d-1)$-dimensional flat to $L(u;p)$.
+%	For all $q \in F$, we must have $u \in \Gamma(q)$ since \jessie{JUSTIFICATION} there is a bijection from $F \in \partial L(u;p)$ to $\Gamma(p)$. Therefore, $q \in F \implies u \in \Gamma(q)$ as well.
+%	Therefore, we have $F \cap \simplex \subseteq \Gamma_u \subseteq \gamma_r$, where the latter follows from indirect elicitation.
+%%end Commented 4.16.20
 	
 %	We claim there exists a matrix $W \in \reals^{d+1 \times n}$ defining the flat $F = \{q \in \reals^n : Wq = \vec 0 \}$; $F$ is then $(n-(d+1))$-dimensional by the rank-nullity theorem, so we just need to show such a $W$ also keeps $F \cap \simplex \subseteq \gamma_r$.
 %	As $\Gamma_u \subseteq \gamma_r$, it is sufficient to show $F \cap \simplex \subset \Gamma_u$.
@@ -325,13 +351,6 @@ Now we can consider specific characteristics of convex losses in order to unders
 %	Moreover, if there was a $\hat q \in \simplex \setminus \gamma_r$ such that $W \hat q = \vec 0$, then we would contradict the indirect elicitation of $\gamma$ since we would not have $\Gamma_{u} \subseteq \gamma_{\psi(u)}$ since we would have $\hat q \in \Gamma_u$ but $\hat q \not \in \gamma_{\psi(u)}$.
 %	Therefore,  we have an $(n - d - 1)$-dimensional flat $F$ such that $F \cap \simplex \subseteq \gamma_r$ and $p \in F$ for all $p \in \simplex$ and $r \in \gamma(p)$.
 \end{proof}
-
-\begin{theorem}[Generalization to infinite outcomes?]
-	Suppose we are given an elicitable property $\gamma$.
-	Fix $p \in \simplex$, and let $r$ be a report such that $p \in \gamma_r$.  
-	If there is no $\codim(\partial L(r;p))-1$-dimensional flat $F$ such that $F \subseteq \gamma_r$ and $p \in F$, then there is no convex surrogate loss $L : \reals^d \times \Y \to \reals$ that indirectly elicits $\gamma$.
-	Moreover, this must hold for all $p \in \mathcal{P}$ and $r \in \gamma(p)$.
-\end{theorem}
 
 
 \section{Finite outcome settings and finite properties}
