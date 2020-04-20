@@ -159,12 +159,21 @@
 
 In supervised machine learning, one often wants to make a prediction about future outcomes by training a classifier to minimize the average empirical loss of a labeled training set, where the loss is determined by the task at hand.
 For example, 0-1 loss is often desired for classification tasks.
-However, discontinuous, finite losses are typically difficult to optimize, so we construct a continuous \emph{surrogate} loss that one can more easily optimize.
+However, finite losses are typically difficult to optimize, so we construct a continuous \emph{surrogate} loss that one can more easily optimize.
 In particular, we want our surrogate loss to yield guarantees so that optimal predictions for the surrogate can be linked to optimal predictions for the original (possibly discrete) loss, regardless of the underlying data distribution. 
 Throughout this paper, the guarantees we desire from the condition of consistency.
-Throughout, we are specifically interested in \emph{consistent} and \emph{convex} surrogates yielding the same statistical guarantees as optimizing an original loss function-- possibly discrete. 
-\jessie{...}
+We are specifically interested in \emph{consistent} and \emph{convex} surrogates yielding the same statistical guarantees as optimizing an original, possibly discrete, loss function. 
 
+In particular, we typically use surrogate loss functions that take some input $u \in \reals^d$ and measure error against the observed outcome $y \in \Y$.
+The value $d$ provides some notion of efficiency for the surrogate, as low-dimensional convex losses often improve the efficiency of the optimization algorithm.
+We answer open questions from~\cite{frongillo2015elicitation} regarding a general characterization of the efficiency of \emph{convex elicitable properties}, yielding the minimum dimension $d$ for which a consistent loss can be constructed for the task at hand.
+
+In Section~\ref{sec:related-work}, we review previous work and introduce the two main concepts used: \emph{property elicitation} and \emph{consistency}.
+We draw connections between the two in Section~\ref{sec:char-convex}, presenting our main result (Theorem~\ref{thm:cvx-flats}) about the existence of consistent convex surrogates in a given dimension $d$.
+In Section~\ref{sec:finite-calib}, we relate our setting to the study of \emph{convex calibration dimension} introduced by~\cite{ramaswamy2016convex}.
+Our Theorem~\ref{thm:cvx-flats} generalizes the concept of feasible subspace dimension, and we can use it to simplify the proof of~\cite[Theorem \jessie{CHECK}]{ramaswamy2016convex}.
+In continuous settings, one often has a prediction task for which they want to construct a consistent convex loss.
+In Section~\ref{sec:contin-consis}, we address the construction of convex consistent losses by applying the main insights from Theorem~\ref{thm:cvx-flats} to this setting, answering the open question posed by~\cite[Ref?]{frongillo2015elicitation}.
 
 
 \subsection{Notation}
@@ -190,25 +199,12 @@ In Section~\ref{sec:char-convex}, we will focus on characteristics of convex sur
 Here, when we say a loss $L(\cdot, \cdot)$ is \emph{convex}, we mean that it is convex in its first argument for every value of its second argument.
 
 \section{Related work}\label{sec:related-work}
-\subsection{Consistency and calibration for convex losses}\label{subsec:convex-surrogates}
-\cite{bartlett2006convexity,tewari2007consistency} form a characterization of consistent, calibrated surrogates for classification problems.
-The first paper shows that if a convex surrogate is differentiable, minimal at $0$, and nonnegative, there is a consistent surrogate for binary classification problems, and the latter generalizes this result for multiclass classification.
-Now let us formalize what we mean by saying a surrogate is \emph{consistent}:
+In this paper, we use tools from property elicitation to study the construction of consistent surrogate losses.
+We distinguish between finite and infinite outcome settings for prediction tasks.
 
-\begin{definition}[Consistent: loss]
-	Suppose $f_m : \X \to \R$ is the hypothesis function learned by minimizing empirical training loss over $m$ labeled examples.
-	For all distributions $D$ over input and label spaces $\X \times\Y$, we say a loss and link $(L,\psi)$ \jessiet{change order of this sentence} are consistent with respect to an original loss $\ell$ if 
-	\begin{align*}
-		\E_D L(f_m(X), Y) \to \inf_f \E_D L(f(X), Y) &\implies \E_D \ell(\psi \circ f_m(X), Y) \to \inf_f \E_D \ell(\psi \circ f(X), Y)~.~
-	\end{align*}
-\end{definition}
-
-\begin{definition}[Consistent: property]
-\jessie{TODO}
-\end{definition}
-\jessiet{Excess risk definition on its own}
-
-
+Property elicitation of a single property is well-understood through \cite{savage1971elicitation,osband1985information-eliciting,lambert2008eliciting, lambert2009eliciting, lambert2018elicitation}.
+Recently, the elicitation of multiple properties was studied by~\cite{frongillo2015vector-valued,frongillo2015elicitation,fissler2015higher}.
+In particular, these works study the \emph{minimum} dimension of a real-valued loss needed to elicit a property or vector of properties.
 
 
 \subsection{Property elicitation}\label{subsec:properties}
@@ -229,9 +225,11 @@ Without much loss of generality, we assume that finite properties are \emph{non-
 In particular, when $\R \subseteq \reals^d$ for some $d \in \mathbb{Z}$, \cite{frongillo2015elicitation} introduce the notion of \emph{Elicitation Complexity} and \emph{Identification Complexity}, which uses $d$ to measure the ``efficiency'' of a loss $L$ eliciting $\Gamma$.
 However, their notion of complexity relies not just on the property $\Gamma$, but instead on any property \emph{indirectly elicited} by $L$.
 
-\begin{definition}\label{def:indirectly-elicits}
+\begin{definition}[Indirect Elicitation]\label{def:indirectly-elicits}
+\jessiet{Revisit for strongness of definition}
 	A loss $L$ \emph{indirectly elicits} a property $\Gamma':\simplex \toto \R'$ if it elicits a property $\Gamma: \simplex \toto \R$ such that there is a function $\psi:\R \to \R'$ such that for all $r \in \R$, we have $\Gamma_r \subseteq \Gamma'_{\psi(r)}$.
 \end{definition}
+
 
 In Proposition~\ref{prop:consistent-implies-indir-elic}, we relate indirect elicitation to the consistency of a surrogate loss.
 
@@ -265,9 +263,41 @@ Similarly, we can consider the notion of \emph{identifiability} for vector-value
 
 \jessie{Note from 2018 neurips paper that 1-elicitable iff 1-convex elicitable for continuous properties and how this differs.}
 
+\subsection{Consistency and calibration for convex losses}\label{subsec:convex-surrogates}
+\cite{zhang2004statistical,lin2004note,bartlett2006convexity,tewari2007consistency} form a characterization of consistent, calibrated surrogates for classification problems.
+In particular,~\cite{bartlett2006convexity} show that if a convex surrogate is differentiable, minimal at $0$, and nonnegative, there is a consistent surrogate for binary classification problems, and ~\cite{tewari2007consistency} generalizes this result for multiclass classification. \jessie{add \cite{ramaswamy2016convex, ramaswamy2018consistent} notes}
+
+\cite{steinwart2007compare} generalizes the study of consistent losses from the classification setting \ldots \jessie{Need to come back to this.  area exam Jessie looked at this briefly, but current Jessie is a whole different person.}
+
+While the subtleties of \emph{consistency} vary slightly with each work, we use two definitions that have the same implications, but one may be more appropriate in a given context.
+
+\begin{definition}[Consistent: loss]
+	Suppose $f_m : \X \to \R$ is the hypothesis function learned by minimizing empirical training loss over $m$ labeled examples.
+	we say a loss and link $(L,\psi)$ are consistent with respect to an original loss $\ell$ if, for all distributions $D$ over input and label spaces $\X \times\Y$, 
+	\begin{align*}
+	\E_D L(f_m(X), Y) \to \inf_f \E_D L(f(X), Y) &\implies \E_D \ell(\psi \circ f_m(X), Y) \to \inf_f \E_D \ell(\psi \circ f(X), Y)~.~
+	\end{align*}
+\end{definition}
+
+
+For continuous properties, such as the expected value, variance, and entropy, asking for a consistent surrogate with respect to an original \emph{loss} may not make sense.
+In this setting, we also define consistency with respect to a property. 
+\begin{definition}[Consistent: property]
+	We say a loss $L:\reals^d \times\ Y \to \reals$ is consistent with respect to a property $\Gamma : \simplex \toto \R$ if there is a link $\psi : \reals^d \to \R$ such that, for all distributions $D$ over $\X \times \Y$ with $p = Pr[Y |X]$, we have
+	\begin{equation}
+	\Gamma(p) = \psi \circ \arginf_{u} \E_{Y \sim p} L(u,Y)~.~
+	\end{equation}
+\end{definition}
+
+
+\jessiet{Excess risk definition on its own}
+
 
 \section{Characteristics of Consistent Convex Surrogates}\label{sec:char-convex}
-\jessie{Intro text}
+
+Proposition~\ref{prop:consistent-implies-indir-elic} allows us to draw the connection between property elicitation and consistent losses.
+Moreover, combining Proposition~\ref{prop:consistent-implies-indir-elic} and Theorem~\ref{thm:cvx-flats}, we provide new conditions for finding lower bounds on \emph{convex calibration dimension} for finite outcome settings in Section~\ref{sec:finite-calib}.
+
 \begin{proposition}\label{prop:consistent-implies-indir-elic}
 	If a surrogate and link pair $(L, \psi)$ is consistent with respect to $\ell$, then $L$ indirectly elicits $\gamma := \prop{\ell}$.
 \end{proposition}
@@ -352,7 +382,7 @@ Now we can consider specific characteristics of convex losses in order to unders
 \end{proof}
 
 
-\section{Finite outcome settings and finite properties}
+\section{Finite outcome settings and finite properties}\label{sec:finite-calib}
 \begin{definition}[Calibrated]
 	Let $\ell : \R \times \Y \to \reals_+$ be a discrete loss eliciting the property $\gamma$.
 	A surrogate loss $L : \reals^d \times \Y \to \reals_+$ is \emph{calibrated} with respect to $\ell$ if there exists a link function $\psi: \reals^d \to \R$ such that
@@ -408,7 +438,7 @@ However, one open question that remains from their work is if these bounds are e
 \subsection{Example: Abstain loss}
 \jessie{Abstain example... maybe... hopefully...}
 
-\section{Continuous Properties}
+\section{Continuous Properties}\label{sec:contin-consis}
 Theorem~\ref{thm:} allows us to address one major open question from~\cite{frongillo2015elicitation}: \emph{what are lower bounds on convex elicitation complexity?}
 
 
