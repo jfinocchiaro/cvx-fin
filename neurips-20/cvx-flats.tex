@@ -385,7 +385,8 @@ Now we can consider specific characteristics of convex losses in order to unders
 \end{proof}
 
 
-\section{Finite outcome settings and finite properties}\label{sec:finite-calib}
+\section{Finite report and outcome settings}\label{sec:finite-calib}
+\jessie{Note subtle difference between calib and consistent, but formally introduce calibration.}
 \begin{definition}[Calibrated]
 	Let $\ell : \R \times \Y \to \reals_+$ be a discrete loss eliciting the property $\gamma$.
 	A surrogate loss $L : \reals^d \times \Y \to \reals_+$ is \emph{calibrated} with respect to $\ell$ if there exists a link function $\psi: \reals^d \to \R$ such that
@@ -394,8 +395,7 @@ Now we can consider specific characteristics of convex losses in order to unders
 	\end{equation}
 \end{definition}
 
-
-\cite{ramaswamy2016convex} introduces \emph{Convex Calibration Dimension}, which studies the minimal dimension input $d$ to construct a convex surrogate $L : \reals^d \times \Y \to \reals_+$ that is calibrated with respect to a given discrete loss $\ell$.
+\jessie{Thankfully, \cite{ramaswamy2016convex} has swooped in to save the day with below result. (Original for binary and multiclass classification come from~\cite{bartlett2006convexity} and \cite{tewari2007consistency}, respectively.)}
 
 \begin{theorem}[\cite{ramaswamy2016convex}]\label{thm:calib-iff-consistent}
 	If $\Y$ is finite, then the surrogate loss $L:\reals^d \to \reals^\Y_+$ is calibrated with respect to $\ell: \R \times \Y \to \reals_+$ if and only if there exists a link function $\psi : \reals^d \to \R$ such that for all distributions $D$ on $\X \times\Y$ and all sequences of (vector) functions $f_m : \X \to \reals^d$,
@@ -406,6 +406,65 @@ Now we can consider specific characteristics of convex losses in order to unders
 In words, we have that a surrogate and link are calibrated with respect to a discrete loss if and only if any consistent sequence of hypotheses for the surrogate, when linked, is consistent for the discrete loss.
 
 As calibration does not rely on the representation space $\X$, we can ignore this and focus instead on calibration; we focus on \jessie{marginal} probability distributions $p \in \simplex$, agnostic to $\X$.
+
+\hrule 
+\bigskip
+
+\begin{lemma}
+	Suppose we are given a discrete loss $\ell : \R \times\Y \to \reals_+$ eliciting the property $\gamma$.
+	If $(L, \psi)$ is calibrated with respect to $\ell$, then $L$ indirectly elicits $\gamma$.
+\end{lemma}
+The proof follows from observing that Theorem~\ref{thm:calib-iff-consistent} yields consistency of $(L,\psi)$ with respect to $\ell$ from calibration, then applying Proposition~\ref{prop:consistent-implies-indir-elic}.
+
+\iffalse
+\begin{lemma}
+  If a convex loss $L:\reals^d \times\Y \to \reals$ with $|\Y| < \infty$ indirectly elicits a finite property $\gamma$, then for all $p \in \simplex$ and $r \in \gamma(p)$, there is a flat $F$ containing $p$ that is $(n-d-1)$-dimensional such that $F \cap \simplex \subseteq \gamma_r$.
+\end{lemma}
+This is the contrapositive of Theorem~\ref{thm:cvx-flats}, and what is actually proven there.
+\fi
+
+\jessie{Ramaswamy et al introduce FSD as a technique to provide their lower bound...}
+\begin{definition}[Feasible subspace dimension]
+	The \emph{Feasible Subspace Dimension} of a convex set $\C \subseteq \reals^n$ at a point $p \in \C$, denoted by $\mu_\C(p)$ is defined as the dimension of the subspace $\F_\C(p) \cap (-\F_\C(p))$, where $\F_\C(p)$ is the cone of feasible directions of $\C$ at $p$\footnote{The cone of feasible directions is given by $\F_\C(p) = \{ v \in \reals^n : \exists \epsilon_0 \geq 0 $ such that $p + \epsilon v \in \C \; \forall \epsilon \in (0,\epsilon_0) \}$}.
+\end{definition}
+\jessiet{This is the definition from the Ramaswamy paper, but I have a small qualm with this definition... it should be fine if $\C$ is a polytope, but if $\C$ is not a polytope, it's unclear what they want from this definition.  For finite elicitable properties, obviously this doesn't matter, but yeah...}
+\jessiet{I also can't tell if this is a small bug on their end, but I think they define the cone of feasible directions as the open cone, but they really want the closed cone.  I think?}
+
+\begin{lemma}\label{lem:feas-sub-is-a-flat}
+	Suppose we have the finite property $\gamma$ indirectly elicited by the convex loss $L : \reals^d \times \Y \to \reals$ and distribution $p \in \simplex$.
+	The subspace $F := \F_\C(p) \cap (-\F_\C(p))$ is a flat of the loss $L$, contains $p$, and $F \cap \simplex \subseteq \gamma_r$.
+\end{lemma}
+\begin{proof}
+	\jessie{TODO}
+\end{proof}
+
+\iffalse
+\begin{remark}
+	Suppose we are given a finite property $\gamma$ and distribution $p \in \simplex$.
+	If $L :\reals^d \times\Y \to \reals$ indirectly elicits $\gamma$, then
+	For all $r \in \gamma(p)$, we have 
+	\begin{equation}
+	\mu_{\gamma_r}(p) \leq f(p)~,~
+	\end{equation}
+	where $f(p)$ is the maximal dimension of a flat $F$ of $L$ containing $p$ such that $F \cap \simplex \subseteq \gamma_r$. 
+\end{remark}
+\fi
+
+The following is a statement from~\cite{ramaswamy2016convex} providing an upper bound on the convex calibration dimension of a given discrete loss, which now follows as a Corollary of our Theorem~\ref{thm:cvx-flats} and Lemma~\ref{lem:feas-sub-is-a-flat}.
+
+\begin{corollary}[\cite{ramaswamy2016convex}]
+	Suppose we are given a discrete loss $\ell:\R \to \reals^\Y_+$ eliciting $\gamma$.
+	Take $p \in \simplex$ and $r \in \R$ such that $p \in \gamma_r$.
+	\begin{equation}
+	\ccdim(\ell) \geq \|p\|_0 - \mu_{\gamma_r}(p) - 1~.~
+	\end{equation}
+\end{corollary}
+
+
+
+\jessie{Don't worry about this for now.}
+\subsection{Elicitation complexity and convex calibration dimension}
+\cite{ramaswamy2016convex} introduces \emph{Convex Calibration Dimension}, which studies the minimal dimension input $d$ to construct a convex surrogate $L : \reals^d \times \Y \to \reals_+$ that is calibrated with respect to a given discrete loss $\ell$, and is similar to elicitaiton complexity as introduced in Definition~\ref{def:elic:cplx}.
 
 Theorem~\ref{thm:calib-iff-consistent} allows us to now relate convex elicitation complexity and convex calibration dimension introduced by~\cite[Definition 10]{ramaswamy2016convex}.
 \begin{proposition}
@@ -418,25 +477,10 @@ Theorem~\ref{thm:calib-iff-consistent} allows us to now relate convex elicitatio
 	Then $(L, \psi)$ is also consistent with respect to $\ell$, and therefore $L$ indirectly elicits $\gamma$.
 \end{proof}
 
-
-The following is a statement from~\cite{ramaswamy2016convex} providing an upper bound on the convex calibration dimension of a given discrete loss.
-However, using tools from property elicitation, we can simplify their proof, which relies on considering sequences of losses that approach the infimum and taking $\epsilon$-subdifferentials of the surrogate loss.
-
-\begin{theorem}[\cite{ramaswamy2016convex}]
-	Suppose we are given a discrete loss $\ell:\R \to \reals^\Y_+$ eliciting $\gamma$.
-	Take $p \in \simplex$ and $r \in \R$ such that $p \in \gamma_r$.
-	Then \jessie{Need to define FSD $\mu_{\gamma_r}$}
-	\begin{equation}
-	\ccdim(\ell) \geq \|p\|_0 - \mu_{\gamma_r}(p) - 1~.~
-	\end{equation}
-\end{theorem}
-\begin{proof}
-	\jessie{Abbreviated FSD proof}
-\end{proof}
-
 \cite{finocchiaro2019embedding} presents the notion of a surrogate loss \emph{embedding} a discrete loss-- typically by a polyhedral (piecewise linear and convex) surrogate.
 If $\gamma$ is the finite property elicited by the discrete loss $\ell$, then for all discrete losses, $\eliccvx(\gamma) \leq \elicpoly(\gamma) \leq \elicembed(\ell)$.
 However, one open question that remains from their work is if these bounds are equal. \jessie{\ldots} 
+
 
 \subsection{Example: Abstain loss}
 \jessie{Abstain example... maybe... hopefully...}
