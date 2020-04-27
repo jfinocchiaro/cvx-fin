@@ -166,10 +166,10 @@
 
 \begin{definition}[Property, elicits, level set]
 	\jessiet{Don't like the notation here... fix later.}
-	A \emph{property} is a set-valued function $\Gamma : \simplex \toto \R$ mapping distributions to reports.
+	A \emph{property} is a (possibly set-valued) function $\Gamma : \simplex \to \R$ mapping distributions to reports.
 	A loss $L : \R \times \Y \to \reals_+$ \emph{elicits} the property $\Gamma$ if,
 	\begin{equation}
-	\forall p \in \simplex, \;\; \Gamma(p) = \argmin_{r \in \R}\inprod{p}{L(r)}
+	\forall p \in \simplex, \;\; \Gamma(p) = \arginf_{u \in \R}\inprod{p}{L(u)}
 	\end{equation}
 	Moreover, we call a \emph{level set} $\Gamma_r := \{p \in \simplex : r \in \Gamma(p)\}$ to be the set of distributions for which reporting $u$ minimizes the expected loss of the loss eliciting $\Gamma$.
 \end{definition}
@@ -178,14 +178,14 @@
 \jessiet{Revisit for strongness of definition}
 	A loss $L$ \emph{indirectly elicits} a property $\Gamma':\simplex \toto \R'$ if it elicits a property $\Gamma: \simplex \toto \R$ such that there is a function $\psi:\R \to \R'$ such that for all $r \in \R$, we have $\Gamma_r \subseteq \Gamma'_{\psi(r)}$.
 \end{definition}
+\jessie{Explain to reader why this is a good def.}
 
 \subsubsection{Elicitation Complexity}\label{subsec:elic-cplx}
 
-\begin{definition}[$d$-elicitable, Elicitation Complexity]
-	We say a elicitable property $\Gamma:\simplex \to \reals^d$ is $d$-elicitable if there is a loss $L : \reals^d \times \Y \to \reals_+$ eliciting it.
-	The \emph{elicitation complexity} of a property $\Gamma := \elic(\Gamma)$ is the minimum dimension $d$ such that there is a property $\hat \Gamma$ that is $d$-elicitable and link $\psi$ so that $\Gamma = \psi \circ \hat \Gamma$.
-	Moreover, we use $\eliccvx(\Gamma)$ to denote the elicitation complexity of $\Gamma$ when the directly elicited property $\hat \Gamma$ is elicited by a \emph{convex} surrogate loss.
+\begin{definition}[Convex Elicitation Complexity]
+	The \emph{convex elicitation complexity} of a property $\eliccvx(\Gamma)$ is the minimum dimension $d$ such that there is a convex loss $L : \reals^d \times \Y \to \reals$ indirectly eliciting $\Gamma$.
 \end{definition}
+\jessie{Just introduce cvx definitions.  Combine two bracketed lines from Raf's notes.  Just define the convex version.  Want to use def 2 with set-valued properties.}
 
 
 \subsection{Consistency \jessie{and calibration?} for convex losses}\label{subsec:convex-surrogates}
@@ -204,16 +204,31 @@
 	\Gamma(p) = \psi \circ \arginf_{u} \E_{Y \sim p} L(u,Y)~.~
 	\end{equation}
 \end{definition}
-
-
 \jessie{Excess risk definition?  Followed by statement that satisfying excess risk bound implies consistency.}
 
+\begin{definition}[Calibrated]
+	Let $\ell : \R \times \Y \to \reals_+$ be a discrete loss eliciting the property $\gamma$.
+	A surrogate loss $L : \reals^d \times \Y \to \reals_+$ is \emph{calibrated} with respect to $\ell$ if there exists a link function $\psi: \reals^d \to \R$ such that
+	\begin{equation}\label{eq:calibration}
+	\forall p \in \simplex: \inf_{u \in \reals^d : \psi(u) \not \in \gamma(p)} \inprod{p}{L(u)} > \inf_{u \in \reals^d} \inprod{p}{L(u)}~.~
+	\end{equation}
+	\jessie{Fix notation}
+\end{definition}
+
+\begin{definition}[Convex Calibration Dimension]
+The \emph{convex calibration dimension} $\ccdim(\ell)$ of a loss $\ell$ is the minimum dimension $d$ such that there is a convex loss $L: \reals^d \times \Y \to \reals$ and link $\psi$ such that $L$ is calibrated with respect to $\ell$.
+\end{definition}
+
+\jessie{Ramaswamy/Bartlett statement of calibration iff consistent}
+
+
+\jessie{On the backburner: consistency of regression.  Note down references on consistency of regression.}
 
 \section{Characteristics of Consistent Convex Surrogates}\label{sec:char-convex}
 
 
 \begin{proposition}\label{prop:consistent-implies-indir-elic}
-	If a surrogate and link pair $(L, \psi)$ is consistent with respect to $\ell$, then $L$ indirectly elicits $\gamma := \prop{\ell}$.
+	If a surrogate and link pair $(L, \psi)$ is consistent with respect to $\gamma$ or with respect to $\ell$ eliciting $\gamma$, then $L$ indirectly elicits $\gamma$. \jessie{Fix and adjust to include $\gamma$}
 \end{proposition}
 \begin{proof}
 Since consistency must hold for all $D$ over $\X \times \Y$, let us focus on distributions $D$ such that the probability of any $x \in \X$ is a point mass, allowing us to focus on conditional distributions $p \in \simplex$ such that $p = Pr[Y = y | X = x]$, allowing us to be agnostic to $\X$.
@@ -229,15 +244,14 @@ Since this is true for all $p \in \simplex$, then we have $L$ indirectly eliciti
 \begin{definition}[Flat]
 	A \emph{flat} $F$ of $\reals^n$ is an affine subspace of $\reals^n$.
 	In other words, $F\subseteq \reals^n$ can be written $F=\{x\in\reals^n : Wx + b = 0\}$ for some $W\in\reals^{d\times n}$ and $b\in\reals^d$ where $d\leq n$.
-	By the rank-nullity theorem, the dimension of the flat $F$ is the nullity of $W$ by construction, and is given by $f := n - \mathrm{rank}(W)$.
-	If $W$ is full-rank, then $f = n - d$.
+	The dimension of the flat $F$ is given by $f := n - \mathrm{rank}(W)$.
 \end{definition}
 
 \begin{theorem}\label{thm:cvx-flats}
 	Suppose we are given a property $\gamma$ and distribution $p \in \simplex$.
 	For all $r\in\gamma(p)$, if there is no $(n - d-1)$-dimensional flat $F$ containing $p$ so that $F \cap \simplex \subseteq \gamma_r$, then there is no convex surrogate loss $L : \reals^d \times \Y \to \reals$ that indirectly elicits $\gamma$.
 \end{theorem}
-\begin{proof}[Proof intuition]
+\begin{proof}[Proof]
 	We prove the contrapositive: if there is a surrogate loss $L$ indirectly eliciting $\gamma$, then for all $p \in \simplex$ and $r \in \R$ such that $r \in \gamma(p)$, there is an $(n-d-1)$-dimensional flat $F$ such that $F \cap \simplex \subseteq \gamma_r$ and $p \in F$.
 	
 	Suppose we have $L:\reals^d \times \Y \to \reals$ eliciting $\Gamma$ and link $\psi : \reals^d \to \R$ such that for all $u \in \reals^d$, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$, i.e., $L$ indirectly elicits $\gamma$.
@@ -260,23 +274,18 @@ Since this is true for all $p \in \simplex$, then we have $L$ indirectly eliciti
 \end{proof}
 
 
-\section{Finite report and outcome settings}\label{sec:finite-calib}
-
-\begin{definition}[Calibrated]
-	Let $\ell : \R \times \Y \to \reals_+$ be a discrete loss eliciting the property $\gamma$.
-	A surrogate loss $L : \reals^d \times \Y \to \reals_+$ is \emph{calibrated} with respect to $\ell$ if there exists a link function $\psi: \reals^d \to \R$ such that
-	\begin{equation}
-	\forall p \in \simplex: \inf_{u \in \reals^d : \psi(u) \not \in \gamma(p)} \inprod{p}{L(u)} > \inf_{u \in \reals^d} \inprod{p}{L(u)}~.~
-	\end{equation}
-\end{definition}
-
-\jessie{Ramaswamy/Bartlett statement of calibration iff consistent}
+\section{Discrete-valued predictions}\label{sec:finite-calib}
 
 \begin{lemma}
 	Suppose we are given a discrete loss $\ell : \R \times\Y \to \reals_+$ eliciting the property $\gamma$.
 	If $(L, \psi)$ is calibrated with respect to $\ell$, then $L$ indirectly elicits $\gamma$.
 \end{lemma}
-The proof follows from observing that Theorem~\ref{thm:calib-iff-consistent} yields consistency of $(L,\psi)$ with respect to $\ell$ from calibration, then applying Proposition~\ref{prop:consistent-implies-indir-elic}.
+\begin{proof}
+	Fix $p \in \simplex$ and consider $u \in \Gamma(p)$.
+	Since $(L, \psi)$ is calibrated with respect to $\ell$, we have $p \in \Gamma_u$.
+	We simply need to show $\psi(u) \in \gamma(p)$.
+	If $\psi(u) \not \in \gamma(p)$, then the terms in the condition for calibration (Equation~\eqref{eq:calibration}) are equal; hence $L$ would not be calibrated with respect to $\ell$.
+\end{proof}
 
 \begin{definition}[Feasible subspace dimension]
 	The \emph{Feasible Subspace Dimension} of a convex set $\C \subseteq \reals^n$ at a point $p \in \C$, denoted by $\mu_\C(p)$ is defined as the dimension of the subspace $\F_\C(p) \cap (-\F_\C(p))$, where $\F_\C(p)$ is the cone of feasible directions of $\C$ at $p$\footnote{The cone of feasible directions is given by $\F_\C(p) = \{ v \in \reals^n : \exists \epsilon_0 \geq 0 $ such that $p + \epsilon v \in \C \; \forall \epsilon \in (0,\epsilon_0) \}$}.
@@ -314,7 +323,7 @@ The proof follows from observing that Theorem~\ref{thm:calib-iff-consistent} yie
 
 
 
-\section{Continuous Properties}\label{sec:contin-consis}
+\section{Continuous-valued predictions}\label{sec:contin-consis}
 
 
 
