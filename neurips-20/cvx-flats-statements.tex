@@ -1,0 +1,332 @@
+\documentclass{article}
+
+% if you need to pass options to natbib, use, e.g.:
+%     \PassOptionsToPackage{numbers, compress}{natbib}
+% before loading neurips_2020
+
+% ready for submission
+% \usepackage{neurips_2020}
+
+% to compile a preprint version, e.g., for submission to arXiv, add add the
+% [preprint] option:
+%     \usepackage[preprint]{neurips_2020}
+
+% to compile a camera-ready version, add the [final] option, e.g.:
+%     \usepackage[final]{neurips_2020}
+
+% to avoid loading the natbib package, add option nonatbib:
+\usepackage{neurips_2020}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+
+\usepackage{color}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.2}
+\hypersetup{colorlinks,breaklinks,
+	linkcolor=darkblue,urlcolor=darkblue,
+	anchorcolor=darkblue,citecolor=darkblue}
+\usepackage{wrapfig}
+\usepackage{subcaption}
+\usepackage[colorinlistoftodos,textsize=tiny]{todonotes} % need xargs for below
+%\usepackage{accents}
+\usepackage{bbm}
+\usepackage{xspace}
+
+\newcommand{\Comments}{1}
+\newcommand{\mynote}[2]{\ifnum\Comments=1\textcolor{#1}{#2}\fi}
+\newcommand{\mytodo}[2]{\ifnum\Comments=1%
+	\todo[linecolor=#1!80!black,backgroundcolor=#1,bordercolor=#1!80!black]{#2}\fi}
+\newcommand{\raf}[1]{\mynote{green}{[RF: #1]}}
+\newcommand{\raft}[1]{\mytodo{green!20!white}{RF: #1}}
+\newcommand{\jessie}[1]{\mynote{purple}{[JF: #1]}}
+\newcommand{\jessiet}[1]{\mytodo{purple!20!white}{JF: #1}}
+\newcommand{\proposedadd}[1]{\mynote{orange}{#1}}
+\newcommand{\bo}[1]{\mynote{blue}{[Bo: #1]}}
+\newcommand{\botodo}[1]{\mytodo{blue!20!white}{[Bo: #1]}}
+\newcommand{\btw}[1]{\mytodo{gray!20!white}{[BTW: #1]}}%TURN OFF FOR NOW \mytodo{gray}{#1}}
+\ifnum\Comments=1               % fix margins for todonotes
+\setlength{\marginparwidth}{1in}
+\fi
+
+\newcommand{\reals}{\mathbb{R}}
+\newcommand{\posreals}{\reals_{>0}}%{\reals_{++}}
+\newcommand{\simplex}{\Delta_\Y}
+\newcommand{\prop}[1]{\mathrm{prop}[#1]}
+\newcommand{\elic}{\mathrm{elic}}
+\newcommand{\eliccvx}{\mathrm{elic}_\mathrm{cvx}}
+\newcommand{\elicpoly}{\mathrm{elic}_\mathrm{pcvx}}
+\newcommand{\elicembed}{\mathrm{elic}_\mathrm{embed}}
+\newcommand{\ccdim}{\mathrm{ccdim}}
+\newcommand{\codim}{\mathrm{codim}}
+
+\newcommand{\C}{\mathcal{C}}
+\newcommand{\D}{\mathcal{D}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\I}{\mathcal{I}}
+\newcommand{\N}{\mathcal{N}}
+\newcommand{\R}{\mathcal{R}}
+\renewcommand{\S}{\mathcal{S}}
+\newcommand{\U}{\mathcal{U}}
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\Y}{\mathcal{Y}}
+
+
+\newcommand{\risk}[1]{\underline{#1}}
+\newcommand{\inprod}[2]{\langle #1, #2 \rangle}
+\newcommand{\toto}{\rightrightarrows}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{definition}{Definition}
+\newtheorem{assumption}{Assumption}
+\newtheorem{remark}{Remark}
+
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\arginf}{arg\,inf}
+\DeclareMathOperator*{\sgn}{sgn}
+
+\title{cvx-flats}
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to LaTeX to determine where to break the
+% lines. Using \AND forces a line break at that point. So, if LaTeX puts 3 of 4
+% authors names on the first line, and the last on the second line, try using
+% \AND instead of \And before the third author name.
+
+\author{%
+  Jessie Finocchiaro\\
+%  Department of Computer Science\\
+  CU Boulder\\
+  \texttt{jefi8453@colorado.edu} 
+  % examples of more authors
+  \And
+   Rafael Frongillo\\
+%   Department of Computer Science\\
+   CU Boulder\\
+  % Address \\
+   \texttt{raf@colorado.edu} 
+   \And
+   Bo Waggoner\\
+%   Department of Computer Science\\
+   CU Boulder \\
+  % Address \\
+   \texttt{bwag@colorado.edu} 
+  % \And
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+  % \And
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+}
+
+
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+%	For finite prediction tasks, one can often naturally model their specific problem with a discrete loss.
+%	However, these discrete losses are often hard to optimize, so one often seeks a surrogate losses yielding desirable statistical guarantees with respect to the original problem.
+	In prediction tasks, one typically seeks to minimize \emph{empirical risk} by learning a hypothesis function making predictions from a given feature vector about a desired future outcome.
+	This hypothesis is learned by minimizing a loss function over a set of labeled training data.
+	However, as not all loss functions are easily optimized, one often wishes to optimize a \emph{surrogate loss} yielding the same statistical guarantees as the original.
+	In this paper, we are specifically interested in the construction of \emph{consistent} surrogate losses that are ``efficient'' in the dimension of their input.
+	We observe a connection between consistent surrogates and indirect property elicitation, which allows us to apply property elicitation complexity results to the minimal dimension of a consistent surrogate.
+	In particular, we characterize the minimal input dimension needed in order to construct a \emph{convex}, consistent surrogate using tools from property elicitation.
+\end{abstract}
+
+\section{Introduction}\label{sec:intro}
+
+
+\subsection{Notation}
+
+\section{Related work}\label{sec:related-work}
+
+\subsection{Property elicitation}\label{subsec:properties}
+
+\begin{definition}[Property, elicits, level set]
+	\jessiet{Don't like the notation here... fix later.}
+	A \emph{property} is a set-valued function $\Gamma : \simplex \toto \R$ mapping distributions to reports.
+	A loss $L : \R \times \Y \to \reals_+$ \emph{elicits} the property $\Gamma$ if,
+	\begin{equation}
+	\forall p \in \simplex, \;\; \Gamma(p) = \argmin_{r \in \R}\inprod{p}{L(r)}
+	\end{equation}
+	Moreover, we call a \emph{level set} $\Gamma_r := \{p \in \simplex : r \in \Gamma(p)\}$ to be the set of distributions for which reporting $u$ minimizes the expected loss of the loss eliciting $\Gamma$.
+\end{definition}
+
+\begin{definition}[Indirect Elicitation]\label{def:indirectly-elicits}
+\jessiet{Revisit for strongness of definition}
+	A loss $L$ \emph{indirectly elicits} a property $\Gamma':\simplex \toto \R'$ if it elicits a property $\Gamma: \simplex \toto \R$ such that there is a function $\psi:\R \to \R'$ such that for all $r \in \R$, we have $\Gamma_r \subseteq \Gamma'_{\psi(r)}$.
+\end{definition}
+
+\subsubsection{Elicitation Complexity}\label{subsec:elic-cplx}
+
+\begin{definition}[$d$-elicitable, Elicitation Complexity]
+	We say a elicitable property $\Gamma:\simplex \to \reals^d$ is $d$-elicitable if there is a loss $L : \reals^d \times \Y \to \reals_+$ eliciting it.
+	The \emph{elicitation complexity} of a property $\Gamma := \elic(\Gamma)$ is the minimum dimension $d$ such that there is a property $\hat \Gamma$ that is $d$-elicitable and link $\psi$ so that $\Gamma = \psi \circ \hat \Gamma$.
+	Moreover, we use $\eliccvx(\Gamma)$ to denote the elicitation complexity of $\Gamma$ when the directly elicited property $\hat \Gamma$ is elicited by a \emph{convex} surrogate loss.
+\end{definition}
+
+
+\subsection{Consistency \jessie{and calibration?} for convex losses}\label{subsec:convex-surrogates}
+
+\begin{definition}[Consistent: loss]
+	Suppose $f_m : \X \to \R$ is the hypothesis function learned by minimizing empirical training loss over $m$ labeled examples.
+	we say a loss and link $(L,\psi)$ are consistent with respect to an original loss $\ell$ if, for all distributions $D$ over input and label spaces $\X \times\Y$, 
+	\begin{align*}
+	\E_D L(f_m(X), Y) \to \inf_f \E_D L(f(X), Y) &\implies \E_D \ell(\psi \circ f_m(X), Y) \to \inf_f \E_D \ell(\psi \circ f(X), Y)~.~
+	\end{align*}
+\end{definition}
+
+\begin{definition}[Consistent: property]
+	We say a loss $L:\reals^d \times\ Y \to \reals$ is consistent with respect to a property $\Gamma : \simplex \toto \R$ if there is a link $\psi : \reals^d \to \R$ such that, for all distributions $D$ over $\X \times \Y$ with $p = Pr[Y |X]$, we have
+	\begin{equation}
+	\Gamma(p) = \psi \circ \arginf_{u} \E_{Y \sim p} L(u,Y)~.~
+	\end{equation}
+\end{definition}
+
+
+\jessie{Excess risk definition?  Followed by statement that satisfying excess risk bound implies consistency.}
+
+
+\section{Characteristics of Consistent Convex Surrogates}\label{sec:char-convex}
+
+
+\begin{proposition}\label{prop:consistent-implies-indir-elic}
+	If a surrogate and link pair $(L, \psi)$ is consistent with respect to $\ell$, then $L$ indirectly elicits $\gamma := \prop{\ell}$.
+\end{proposition}
+\begin{proof}
+Since consistency must hold for all $D$ over $\X \times \Y$, let us focus on distributions $D$ such that the probability of any $x \in \X$ is a point mass, allowing us to focus on conditional distributions $p \in \simplex$ such that $p = Pr[Y = y | X = x]$, allowing us to be agnostic to $\X$.
+Now, instead of focusing on sequences of optimal hypotheses, we can focus on optimal reports when given $x \in \X$ if the hypothesis class $\F$ is sufficiently rich (i.e. the optimal hypothesis is in the hypothesis class for all $x \in \X$.)
+
+Consider $\Gamma := \prop{L}$ is given by $\Gamma(p) = \arginf_u \E_{Y \sim p} L(u, Y)$, so consistency with respect to $\ell$ yields 
+\begin{align*}
+\inf_u \E_{Y \sim p} L(u, Y) = \E_{Y \sim p} L(\Gamma(p), Y) &\implies \inf_r \E_{Y \sim p} \ell(r, Y) = \E_{Y \sim p} \ell(\psi \circ \Gamma(p), Y)~.~ 
+\end{align*}
+Since this is true for all $p \in \simplex$, then we have $L$ indirectly eliciting the property $\gamma$ by directly eliciting $\Gamma$ and using the link $\psi$.
+\end{proof}
+
+\begin{definition}[Flat]
+	A \emph{flat} $F$ of $\reals^n$ is an affine subspace of $\reals^n$.
+	In other words, $F\subseteq \reals^n$ can be written $F=\{x\in\reals^n : Wx + b = 0\}$ for some $W\in\reals^{d\times n}$ and $b\in\reals^d$ where $d\leq n$.
+	By the rank-nullity theorem, the dimension of the flat $F$ is the nullity of $W$ by construction, and is given by $f := n - \mathrm{rank}(W)$.
+	If $W$ is full-rank, then $f = n - d$.
+\end{definition}
+
+\begin{theorem}\label{thm:cvx-flats}
+	Suppose we are given a property $\gamma$ and distribution $p \in \simplex$.
+	For all $r\in\gamma(p)$, if there is no $(n - d-1)$-dimensional flat $F$ containing $p$ so that $F \cap \simplex \subseteq \gamma_r$, then there is no convex surrogate loss $L : \reals^d \times \Y \to \reals$ that indirectly elicits $\gamma$.
+\end{theorem}
+\begin{proof}[Proof intuition]
+	We prove the contrapositive: if there is a surrogate loss $L$ indirectly eliciting $\gamma$, then for all $p \in \simplex$ and $r \in \R$ such that $r \in \gamma(p)$, there is an $(n-d-1)$-dimensional flat $F$ such that $F \cap \simplex \subseteq \gamma_r$ and $p \in F$.
+	
+	Suppose we have $L:\reals^d \times \Y \to \reals$ eliciting $\Gamma$ and link $\psi : \reals^d \to \R$ such that for all $u \in \reals^d$, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$, i.e., $L$ indirectly elicits $\gamma$.
+	Fix $p \in \simplex$, and take any $u \in \Gamma(p)$ such that $\psi(u) = r \in \gamma(p)$.
+	We know that $u \in \Gamma(p) \iff \vec 0 \in \partial L(u; p) \iff \vec 0 \in \oplus_y p_y \partial L(u,y)$, where $\oplus$ denotes the nonnegative weighted Minkowski sum~\cite[Theorem 4.1.1]{hiriart2012fundamentals}.  (Observe that in order for $L$ to be convex, $L(\cdot, y)$ must be convex for all $y \in \Y$.) \raft{It's a good exercise to look up the necessary results in e.g. Rockafellar (let me know if you don't have a copy; I can send a PDF).  Note that $L(\cdot,y)$ is defined on all of $\reals^d$ for all $y$, which is key.  I'd recommend spelling this out in 2-3 sentences.}.
+	
+	Observe that the Minkowski sum $\oplus_y p_y \partial L(u,y) = \{p_1 x_1 + \ldots + p_n x_n : x_1 \in \partial L(u,1), \ldots, x_n \in \partial L(u,n) \}$.
+	In order for $\vec 0$ to be in this $p$-weighted Minkowski sum, we then have that each choice of $x_i$ is a flat for $\partial L(u, i)$.
+	Moreover, with $p$ fixed, we know there is a vector of witnesses $W' = [x_1, \ldots, x_n] \in \reals^{d\times n}$ such that $\sum_y p_y x_y = \vec 0$.
+
+	Observe that $F' := \ker(W')$ is at most $(n-d)$ dimensions in $\reals^n$ and contains $p$ by construction.
+	Since we are only concerned with a flat intersected with the simplex being a subset of $\gamma_r$, we can reduce the dimension by adding an affine simplex constraint. 
+	That is, take $F := \{x \in \reals^n : W x + b = \vec 0\}$, where we have $W := [W'; \mathbbm{1}^T] \in \reals^{(d+1) \times n}$ and $b \in \reals^{d+1}$.
+	The dimension of $F$ is then $n - \mathrm{rank}(W)$, which is $n - (d+1)$ if $W$ is full rank.
+	We also claim that $F \cap \simplex \subseteq \gamma_r$.
+	To see this, consider $q \in F$, but $q \not \in \gamma_r$.
+	That would mean that $Wq + b = \vec 0 \iff W'q + b' = \vec 0$ (since $q \in \simplex$ satisfies the simplex constraints).
+	This in turn implies $\vec 0 \in \partial L(u;q)$, implying $q \in \Gamma_u$.
+	Therefore, $q \not \in \gamma_r$ would contradict $L$ indirectly eliciting $\gamma$.
+\end{proof}
+
+
+\section{Finite report and outcome settings}\label{sec:finite-calib}
+
+\begin{definition}[Calibrated]
+	Let $\ell : \R \times \Y \to \reals_+$ be a discrete loss eliciting the property $\gamma$.
+	A surrogate loss $L : \reals^d \times \Y \to \reals_+$ is \emph{calibrated} with respect to $\ell$ if there exists a link function $\psi: \reals^d \to \R$ such that
+	\begin{equation}
+	\forall p \in \simplex: \inf_{u \in \reals^d : \psi(u) \not \in \gamma(p)} \inprod{p}{L(u)} > \inf_{u \in \reals^d} \inprod{p}{L(u)}~.~
+	\end{equation}
+\end{definition}
+
+\jessie{Ramaswamy/Bartlett statement of calibration iff consistent}
+
+\begin{lemma}
+	Suppose we are given a discrete loss $\ell : \R \times\Y \to \reals_+$ eliciting the property $\gamma$.
+	If $(L, \psi)$ is calibrated with respect to $\ell$, then $L$ indirectly elicits $\gamma$.
+\end{lemma}
+The proof follows from observing that Theorem~\ref{thm:calib-iff-consistent} yields consistency of $(L,\psi)$ with respect to $\ell$ from calibration, then applying Proposition~\ref{prop:consistent-implies-indir-elic}.
+
+\begin{definition}[Feasible subspace dimension]
+	The \emph{Feasible Subspace Dimension} of a convex set $\C \subseteq \reals^n$ at a point $p \in \C$, denoted by $\mu_\C(p)$ is defined as the dimension of the subspace $\F_\C(p) \cap (-\F_\C(p))$, where $\F_\C(p)$ is the cone of feasible directions of $\C$ at $p$\footnote{The cone of feasible directions is given by $\F_\C(p) = \{ v \in \reals^n : \exists \epsilon_0 \geq 0 $ such that $p + \epsilon v \in \C \; \forall \epsilon \in (0,\epsilon_0) \}$}.
+\end{definition}
+\jessiet{This is the definition from the Ramaswamy paper, but I have a small qualm with this definition... it should be fine if $\C$ is a polytope, but if $\C$ is not a polytope, it's unclear what they want from this definition.  For finite elicitable properties, obviously this doesn't matter, but yeah...}
+\jessiet{I also can't tell if this is a small bug on their end, but I think they define the cone of feasible directions as the open cone, but they really want the closed cone.  I think?}
+
+\begin{lemma}\label{lem:feas-sub-is-a-flat}
+	Suppose we have the finite property $\gamma$ and distribution $p \in \simplex$.
+	For ant $r$ such that $r \in \gamma(p)$, the subspace $F := \F_{\gamma_r}(p) \cap (-\F_{\gamma_r}(p))$ is a flat containing $p$, and $F \cap \simplex \subseteq \gamma_r$.
+\end{lemma}
+\begin{proof}
+	\jessie{TODO}
+\end{proof}
+
+\begin{corollary}[\cite{ramaswamy2016convex}]
+	Suppose we are given a discrete loss $\ell:\R \to \reals^\Y_+$ eliciting $\gamma$.
+	Take $p \in \simplex$ and $r \in \R$ such that $p \in \gamma_r$.
+	\begin{equation}
+	\ccdim(\ell) \geq \|p\|_0 - \mu_{\gamma_r}(p) - 1~.~
+	\end{equation}
+\end{corollary}
+
+\subsection{Elicitation complexity and convex calibration dimension}
+
+\begin{proposition}
+	Consider the discrete loss $\ell : \R \times \Y \to \reals_+$ and $\gamma:= \prop{\ell}$.
+	Then $\eliccvx(\gamma) \leq \ccdim(\ell)$.
+	\jessie{Need to define $\eliccvx$ and $\ccdim$.}
+\end{proposition}
+\begin{proof}
+	Let $d$ be the convex calibration dimension of $\ell$, and $(L, \psi)$ be calibrated with respect to $\ell$ with $L$ convex.
+	Then $(L, \psi)$ is also consistent with respect to $\ell$, and therefore $L$ indirectly elicits $\gamma$.
+\end{proof}
+
+
+
+\section{Continuous Properties}\label{sec:contin-consis}
+
+
+
+\newpage
+
+\section*{Broader Impact}
+
+\begin{ack}
+All the thanks
+\end{ack}
+
+\bibliographystyle{plainnat}
+\bibliography{diss,extra}
+
+\end{document}
