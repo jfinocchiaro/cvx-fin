@@ -166,7 +166,7 @@
 
 \begin{definition}[Property, elicits, level set]
 	\jessiet{Don't like the notation here... fix later.}
-	A \emph{property} is a (possibly set-valued) function $\Gamma : \simplex \to \R$ mapping distributions to reports.
+	A \emph{property} is a (possibly set-valued) function $\Gamma : \simplex \toto \R$ mapping distributions to reports.
 	A loss $L : \R \times \Y \to \reals_+$ \emph{elicits} the property $\Gamma$ if,
 	\begin{equation}
 	\forall p \in \simplex, \;\; \Gamma(p) = \arginf_{u \in \R}\inprod{p}{L(u)}
@@ -175,17 +175,17 @@
 \end{definition}
 
 \begin{definition}[Indirect Elicitation]\label{def:indirectly-elicits}
-\jessiet{Revisit for strongness of definition}
+\jessiet{Explain to reader why this is a good def. Made note in original doc.}
 	A loss $L$ \emph{indirectly elicits} a property $\Gamma':\simplex \toto \R'$ if it elicits a property $\Gamma: \simplex \toto \R$ such that there is a function $\psi:\R \to \R'$ such that for all $r \in \R$, we have $\Gamma_r \subseteq \Gamma'_{\psi(r)}$.
 \end{definition}
-\jessie{Explain to reader why this is a good def.}
+
 
 \subsubsection{Elicitation Complexity}\label{subsec:elic-cplx}
 
 \begin{definition}[Convex Elicitation Complexity]
 	The \emph{convex elicitation complexity} of a property $\eliccvx(\Gamma)$ is the minimum dimension $d$ such that there is a convex loss $L : \reals^d \times \Y \to \reals$ indirectly eliciting $\Gamma$.
 \end{definition}
-\jessie{Just introduce cvx definitions.  Combine two bracketed lines from Raf's notes.  Just define the convex version.  Want to use def 2 with set-valued properties.}
+%\jessie{Just introduce cvx definitions.  Combine two bracketed lines from Raf's notes.  Just define the convex version.  Want to use def 2 with set-valued properties.}
 
 
 \subsection{Consistency \jessie{and calibration?} for convex losses}\label{subsec:convex-surrogates}
@@ -199,20 +199,53 @@
 \end{definition}
 
 \begin{definition}[Consistent: property]
-	We say a loss $L:\reals^d \times\ Y \to \reals$ is consistent with respect to a property $\Gamma : \simplex \toto \R$ if there is a link $\psi : \reals^d \to \R$ such that, for all distributions $D$ over $\X \times \Y$ with $p = Pr[Y |X]$, we have
+	We say a loss $L:\reals^d \times \Y \to \reals$ is consistent with respect to a property $\gamma : \simplex \toto \R$ if there is a link $\psi : \reals^d \to \R$ such that, for all distributions $D$ over $\X \times \Y$ with $p = Pr[Y |X]$, we have
 	\begin{equation}
-	\Gamma(p) = \psi \circ \arginf_{u} \E_{Y \sim p} L(u,Y)~.~
+	\gamma(p) = \psi \circ \arginf_{u} \E_{Y \sim p} L(u,Y)~.~
 	\end{equation}
+\end{definition}\jessie{REVISIT}
+\begin{definition}[Consistent: property]
+	We say a loss $L:\reals^d \times \Y \to \reals$ is consistent with respect to a property $\gamma : \simplex \toto \R$ elicited by the loss $\ell$ if there is a link $\psi : \reals^d \to \R$ such that, for all distributions $p \in \simplex$, we have
+	\begin{equation}
+	\ell( \psi(u); p) - \ell(\gamma(p); p)  \leq \zeta \left(  L(u;p) - L(\Gamma(p); p) \right)
+	\end{equation}
+	for some increasing function $\zeta : \reals \to \reals$ that is continuous at $0$ with $\zeta(0) = 0$.
 \end{definition}
-\jessie{Excess risk definition?  Followed by statement that satisfying excess risk bound implies consistency.}
+
+
+\begin{definition}[Excess risk bound]
+	A surrogate loss and link pair $(L,\psi)$ satisfies the \emph{excess risk bound} with respect to a loss $\ell$ if there exists an increasing function $\zeta : \reals \to \reals$ that is continuous at $0$ with $\zeta(0) = 0$ so that for all $f:\X \to \R$ and data distributions $D$ over $\X \times \Y$, we have
+	\begin{multline}
+	\E_{(X,Y) \sim D} \ell(\psi \circ f(X), Y) - \inf_{f^*} \E_{(X,Y) \sim D} \ell(\psi \circ f^*(X), Y) \\ 
+	\leq \zeta \left( \E_{(X,Y) \sim D} L(f(X), Y) - \inf_{f^*} \E_{(X,Y) \sim D} L(f^*(X), Y) \right)
+	\end{multline}
+\end{definition}
+
+\begin{proposition}
+	A surrogate link pair $(L, \psi)$ is consistent with respect to a loss $\ell$ if and only if it is consistent with respect to the property elicited by $\gamma := \prop{\ell}$.
+\end{proposition}
+\begin{proof}
+	$\implies:$ 
+	If $(L, \psi)$ is consistent with respect to $\ell$, then for all $x \in \X$ with $p = Pr[Y|X]$, we have $L(u; p) \to \inf_{u'} L(u';p) \implies \ell(\psi(u); p) \to \inf_{u'} \ell(\psi(u');p)$.
+	As $\inf_{u'} L(u';p) = L(\Gamma(p); p)$, we then have $L(\Gamma(p); p) - L(u;p) \to 0 \implies \ell(\psi(\Gamma(p)); p) - \ell(\psi(u);p) \to 0$.
+	If $\gamma: p \mapsto \psi(\Gamma(p))$ for all $p \in \simplex$, then we have consistency with respect to $\gamma$, as $\zeta$ being the identity satisfies the requirements on $\zeta$ and yields the bound as the convergence yields $0 \leq 0$ for all $p \in \simplex$.
+	
+	To see $\gamma = \psi \circ \Gamma$, consider that for all $p \in \simplex$, we have $\arginf_{u \in \reals^d} L(u;p) = \arginf_{u \in \reals^d} \ell(\psi(u); p)$ as a corollary of consistency with respect to $\ell$, which implies the statement.
+	
+	$\impliedby:$ 
+	If $(L, \psi)$ is consistent with respect to $\gamma$, then there is a monotonic function $\zeta:\reals \to \reals$ that is continuous at $0$ with $\zeta(0) = 0$ such that, for all $p \in \simplex$, we have $\ell( \psi(u); p) - \ell(\gamma(p); p)  \leq \zeta \left(  L(u;p) - L(\Gamma(p); p) \right)$.
+	
+	As this is true for all $p = Pr[Y|X] \in \simplex$, this also holds in expectation over $X$.
+	This gives the excess risk bound being satisfied, which has been shown implies consistency with respect to $\ell$.\jessiet{In Hari abstain paper, but might be worth proving it here, given the subtleties of consistency definitions...}
+\end{proof}
+
 
 \begin{definition}[Calibrated]
 	Let $\ell : \R \times \Y \to \reals_+$ be a discrete loss eliciting the property $\gamma$.
 	A surrogate loss $L : \reals^d \times \Y \to \reals_+$ is \emph{calibrated} with respect to $\ell$ if there exists a link function $\psi: \reals^d \to \R$ such that
 	\begin{equation}\label{eq:calibration}
-	\forall p \in \simplex: \inf_{u \in \reals^d : \psi(u) \not \in \gamma(p)} \inprod{p}{L(u)} > \inf_{u \in \reals^d} \inprod{p}{L(u)}~.~
+	\forall p \in \simplex: \inf_{u \in \reals^d : \psi(u) \not \in \gamma(p)} L(u;p) > \inf_{u \in \reals^d} L(u;p)~.~
 	\end{equation}
-	\jessie{Fix notation}
 \end{definition}
 
 \begin{definition}[Convex Calibration Dimension]
@@ -222,9 +255,11 @@ The \emph{convex calibration dimension} $\ccdim(\ell)$ of a loss $\ell$ is the m
 \jessie{Ramaswamy/Bartlett statement of calibration iff consistent}
 
 
-\jessie{On the backburner: consistency of regression.  Note down references on consistency of regression.}
+\jessie{On the backburner: consistency/calibration of regression.  Note down references on consistency of regression.}
 
 \section{Characteristics of Consistent Convex Surrogates}\label{sec:char-convex}
+
+
 
 
 \begin{proposition}\label{prop:consistent-implies-indir-elic}
@@ -232,13 +267,14 @@ The \emph{convex calibration dimension} $\ccdim(\ell)$ of a loss $\ell$ is the m
 \end{proposition}
 \begin{proof}
 Since consistency must hold for all $D$ over $\X \times \Y$, let us focus on distributions $D$ such that the probability of any $x \in \X$ is a point mass, allowing us to focus on conditional distributions $p \in \simplex$ such that $p = Pr[Y = y | X = x]$, allowing us to be agnostic to $\X$.
-Now, instead of focusing on sequences of optimal hypotheses, we can focus on optimal reports when given $x \in \X$ if the hypothesis class $\F$ is sufficiently rich (i.e. the optimal hypothesis is in the hypothesis class for all $x \in \X$.)
+Instead of focusing on sequences of optimal hypotheses, we can now focus on optimal reports when given $x \in \X$ if the hypothesis class $\F$ is sufficiently rich (i.e. the optimal hypothesis is in the hypothesis class for all $x \in \X$.)
 
 Consider $\Gamma := \prop{L}$ is given by $\Gamma(p) = \arginf_u \E_{Y \sim p} L(u, Y)$, so consistency with respect to $\ell$ yields 
 \begin{align*}
 \inf_u \E_{Y \sim p} L(u, Y) = \E_{Y \sim p} L(\Gamma(p), Y) &\implies \inf_r \E_{Y \sim p} \ell(r, Y) = \E_{Y \sim p} \ell(\psi \circ \Gamma(p), Y)~.~ 
 \end{align*}
 Since this is true for all $p \in \simplex$, then we have $L$ indirectly eliciting the property $\gamma$ by directly eliciting $\Gamma$ and using the link $\psi$.
+
 \end{proof}
 
 \begin{definition}[Flat]
@@ -256,7 +292,7 @@ Since this is true for all $p \in \simplex$, then we have $L$ indirectly eliciti
 	
 	Suppose we have $L:\reals^d \times \Y \to \reals$ eliciting $\Gamma$ and link $\psi : \reals^d \to \R$ such that for all $u \in \reals^d$, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$, i.e., $L$ indirectly elicits $\gamma$.
 	Fix $p \in \simplex$, and take any $u \in \Gamma(p)$ such that $\psi(u) = r \in \gamma(p)$.
-	We know that $u \in \Gamma(p) \iff \vec 0 \in \partial L(u; p) \iff \vec 0 \in \oplus_y p_y \partial L(u,y)$, where $\oplus$ denotes the nonnegative weighted Minkowski sum~\cite[Theorem 4.1.1]{hiriart2012fundamentals}.  (Observe that in order for $L$ to be convex, $L(\cdot, y)$ must be convex for all $y \in \Y$.) \raft{It's a good exercise to look up the necessary results in e.g. Rockafellar (let me know if you don't have a copy; I can send a PDF).  Note that $L(\cdot,y)$ is defined on all of $\reals^d$ for all $y$, which is key.  I'd recommend spelling this out in 2-3 sentences.}.
+	We know that $u \in \Gamma(p) \iff \vec 0 \in \partial L(u; p) \iff \vec 0 \in \oplus_y p_y \partial L(u,y)$, where $\oplus$ denotes the nonnegative weighted Minkowski sum~\cite[Theorem 4.1.1]{hiriart2012fundamentals}.  (Observe that in order for $L$ to be convex, $L(\cdot, y)$ must be convex for all $y \in \Y$.) 
 	
 	Observe that the Minkowski sum $\oplus_y p_y \partial L(u,y) = \{p_1 x_1 + \ldots + p_n x_n : x_1 \in \partial L(u,1), \ldots, x_n \in \partial L(u,n) \}$.
 	In order for $\vec 0$ to be in this $p$-weighted Minkowski sum, we then have that each choice of $x_i$ is a flat for $\partial L(u, i)$.
@@ -290,15 +326,23 @@ Since this is true for all $p \in \simplex$, then we have $L$ indirectly eliciti
 \begin{definition}[Feasible subspace dimension]
 	The \emph{Feasible Subspace Dimension} of a convex set $\C \subseteq \reals^n$ at a point $p \in \C$, denoted by $\mu_\C(p)$ is defined as the dimension of the subspace $\F_\C(p) \cap (-\F_\C(p))$, where $\F_\C(p)$ is the cone of feasible directions of $\C$ at $p$\footnote{The cone of feasible directions is given by $\F_\C(p) = \{ v \in \reals^n : \exists \epsilon_0 \geq 0 $ such that $p + \epsilon v \in \C \; \forall \epsilon \in (0,\epsilon_0) \}$}.
 \end{definition}
-\jessiet{This is the definition from the Ramaswamy paper, but I have a small qualm with this definition... it should be fine if $\C$ is a polytope, but if $\C$ is not a polytope, it's unclear what they want from this definition.  For finite elicitable properties, obviously this doesn't matter, but yeah...}
-\jessiet{I also can't tell if this is a small bug on their end, but I think they define the cone of feasible directions as the open cone, but they really want the closed cone.  I think?}
 
 \begin{lemma}\label{lem:feas-sub-is-a-flat}
 	Suppose we have the finite property $\gamma$ and distribution $p \in \simplex$.
-	For ant $r$ such that $r \in \gamma(p)$, the subspace $F := \F_{\gamma_r}(p) \cap (-\F_{\gamma_r}(p))$ is a flat containing $p$, and $F \cap \simplex \subseteq \gamma_r$.
+	For ant $r$ such that $r \in \gamma(p)$, the subspace $F := \F_{\gamma_r}(p) \cap (-\F_{\gamma_r}(p))$ is a flat, $(F+p)$ contains $p$, and $(F + p) \cap \simplex \subseteq \gamma_r$.
 \end{lemma}
 \begin{proof}
-	\jessie{TODO}
+	Write the level set $\gamma_r = \{q \in \reals^n : A_1 q \leq b_1, \; A_2 q \leq b_2, \; A_3 q \leq b_3 \}$, where $A_1 p \leq b_1, A_2 p < b_2,$ and $A_3 p = b_3$.
+	
+	We want to show three things: first, $F$ is a flat as it is $\ker([A_1 ; A_3])$ by~\cite{ramaswamy2016convex}.
+	Second, $p \in F + p$ by construction, since $\vec 0 \in F$.
+	(Consider that $p \in \gamma_r$, so with $epsilon_0 = 1$, we have $p + \epsilon\vec 0 = p \in \gamma_r$ for all $\epsilon \in (0, 1)$; thus, $\vec 0 \in F$.)
+	
+	Third, we want to show $(F + p) \cap \simplex \subseteq \gamma_r$.
+	Take some $q := p + \epsilon v$ for $v \in F$.
+	By construction of $F$, we have $q \in F \implies q \in \simplex$, so $F + p \subseteq \simplex \implies F + p \cap \simplex = F + p$.
+	Thus it just remains to be shown that $F + p \subseteq \gamma_r$.
+	Since $v\in F \implies q \in F + p \implies p + \epsilon v \in \gamma_r$ by construction, so we have $F+p \subseteq \gamma_r$.	
 \end{proof}
 
 \begin{corollary}[\cite{ramaswamy2016convex}]
