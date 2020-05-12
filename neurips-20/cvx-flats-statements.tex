@@ -192,32 +192,25 @@
 \subsection{Consistency and calibration for convex losses}\label{subsec:convex-surrogates}
 
 \begin{definition}[Consistent: loss]
-	Suppose $f_m : \X \to \R$ is the hypothesis function learned by minimizing empirical training loss over $m$ labeled examples.
+	Let $\{f_m : \X \to \R\}$ be a sequence of hypothesis functions.
 	A loss and link $(L,\psi)$ are consistent with respect to an original loss $\ell$ if, for all distributions $D$ over input and label spaces $\X \times\Y$, 
 	\begin{align*}
 	\E_D L(f_m(X), Y) \to \inf_f \E_D L(f(X), Y) &\implies \E_D \ell((\psi \circ f_m)(X), Y) \to \inf_f \E_D \ell((\psi \circ f)(X), Y)~.~
 	\end{align*}
 \end{definition}
 
-% \begin{definition}[Consistent: property]
-% 	We say a loss $L:\reals^d \times \Y \to \reals$ is consistent with respect to a property $\gamma : \simplex \toto \R$ if there is a link $\psi : \reals^d \to \R$ such that, for all distributions $D$ over $\X \times \Y$ with $p = Pr[Y |X]$, we have
-% 	\begin{equation}
-% 	\gamma(p) = \psi \circ \arginf_{u} \E_{Y \sim p} L(u,Y)~.~
-% 	\end{equation}
-% \end{definition}\jessie{REVISIT}
-
-\raf{Issues with the definition:
-\begin{enumerate}
-\item Good to clarify $d:\R\times\R\to\reals_+$ -- done
-\item We have two $d$'s so we'll need a new letter... -- changed to $\mu$
-\item $D_X$ is not defined, but I got it -- clarified it was the marginal distribution
-\item You can't take an expectation over $\R$ values (not necessarily a subset of a vector space) and want the expectation over $X$ on the outside
-\end{enumerate}
-At this point I lost the thread. It looks like you're missing the hypothesis function, and $\Gamma(D)$ doesn't seem to type check -- but perhaps $\Gamma(D)$ was meant to depend on $X$ and be the hypothesis? -- and the implication also seems backwards.}
+%\raf{Issues with the definition:
+%\begin{enumerate}
+%\item Good to clarify $d:\R\times\R\to\reals_+$ -- done
+%\item We have two $d$'s so we'll need a new letter... -- changed to $\mu$
+%\item $D_X$ is not defined, but I got it -- clarified it was the marginal distribution
+%\item You can't take an expectation over $\R$ values (not necessarily a subset of a vector space) and want the expectation over $X$ on the outside
+%\end{enumerate}
+%At this point I lost the thread. It looks like you're missing the hypothesis function, and $\Gamma(D)$ doesn't seem to type check -- but perhaps $\Gamma(D)$ was meant to depend on $X$ and be the hypothesis? -- and the implication also seems backwards.}
 \begin{definition}[Consistent: property]
-	A loss $L : \R \times \Y \to \reals$ is \emph{$\mu$-consistent with respect to a property} $\Gamma$ for a metric $\mu:\R \times \R \to \reals_+$ if, for all $D$ over $\X \times \Y$ with marginal distributions $D_x$, we observe
+	A loss $L : \R \times \Y \to \reals$ and link $\psi : \R' \to \R$ pair $(L, \psi)$ is \emph{$\mu$-consistent with respect to a property} $\gamma: \simplex \toto \R'$ for a distance $\mu:\R \times \R \to \reals_+$ if, for all $D$ over $\X \times \Y$ with marginal distributions $D_x$, and sequences of properties $\{\gamma_m\}$ we observe
 	\begin{equation}
-	\E_{(X,Y) \sim D} L( \Gamma(D_X), Y) \to \E_{(X,Y) \sim D} L(f(X), Y) \implies \E_X \mu(\Gamma(D_X), f(X)) \to 0~,~
+	\E_{(X,Y) \sim D} L( \psi \circ \gamma_m(D_X), Y) \to \E_{(X,Y) \sim D} L(f(X), Y) \implies \E_X \mu(\psi \circ \gamma_m(D_X), f(X)) \to 0~,~
 	\end{equation}
 	where $f = \arginf_{f^* \mathrm{msbl}} \E_{(X,Y) \sim D} L(f^*(X), Y)$.
 \end{definition}
@@ -250,8 +243,8 @@ At this point I lost the thread. It looks like you're missing the hypothesis fun
 
 
 \begin{definition}[Calibrated]\label{def:calibrated-general}
-	A loss $L:\reals^d \times \Y \to \reals$ is \emph{calibrated} with respect to a property $\gamma : \simplex \toto \R$ elicited by the loss $\ell$ if there is a link $\psi : \reals^d \to \R$ such that, for all distributions $p \in \simplex$, there exists an increasing function $\zeta : \reals \to \reals$ with $\zeta$ continuous at $0$ and $\zeta(0) = 0$ such that for all $u \in \reals^d$, we have
-	\begin{equation}
+	A loss $L:\reals^d \times \Y \to \reals$ is \emph{calibrated} with respect to a loss $\ell : \R \times \Y \to \reals$ eliciting the property $\gamma$ if there is a link $\psi : \reals^d \to \R$ such that, for all distributions $p \in \simplex$, there exists a strictly increasing function $\zeta : \reals \to \reals$ with $\zeta$ continuous at $0$ and $\zeta(0) = 0$ such that for all $u \in \reals^d$, we have
+	\begin{equation}\label{eq:calibrated-general}
 	\ell( \psi(u); p) - \ell(\gamma(p); p)  \leq \zeta \left(  L(u;p) - L(\Gamma(p); p) \right)~.~
 	\end{equation}
 \end{definition}
@@ -276,34 +269,59 @@ The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$
 
 
 \begin{proposition}\label{prop:consistent-implies-calibrated}
-	If a loss and link $(L, \psi)$ are consistent with respect to a property $\gamma$, then they are calibrated with respect to $\gamma$.
-	\jessie{Probably appendix later.}
+	If a loss and link $(L, \psi)$ are consistent with respect to a loss $\ell$, then they are calibrated with respect to $\ell$.
+	\jessiet{Probably appendix later.}
 \end{proposition}
 \begin{proof}
-	\jessie{ want to commit to definition of consistency first...}
+Since consistency must hold for all $D$ over $\X \times \Y$, let us focus on distributions $D$ such that the probability of any $x \in \X$ is a point mass.
+If consistency implies calibration for the marginal distributions $D_x$ for all $x \in \X$, then it holds for all $D$.
+Now, for such distributions, we have 
+\begin{align*}
+\E_D L(f_m(X), Y) \to \inf_f \E_D L(f(X), Y) &\implies \E_D \ell((\psi \circ f_m)(X), Y) \to \inf_f \E_D \ell((\psi \circ f)(X), Y) \\
+\iff \E_{D_x} L(f_m(x), Y) \to \inf_f \E_{D_x} L(f(x), Y) &\implies \E_{D_x} \ell((\psi \circ f_m)(x), Y) \to \inf_f \E_{D_x} \ell((\psi \circ f)(x), Y) \; \forall x \in \X ~.~
+\end{align*}
+Now, fix $p \in \simplex$, and we will abstract away hypothesis classes to consider general predictions $u$.
+We proceed in two cases; first, when we approach the optimal loss, then when we do not. 
+If $L(u;p) \to \inf_{u'} L(u';p)$, then $\ell(\psi(u); p) \to \inf_{r}\ell(r; p)$.
+Substituting into~\eqref{eq:calibrated-general}, we see the bound is satisfied by any function $\zeta$ satisfying calibration requirements; namely, $\zeta(0) = 0$ and continuity at $0$.
+%adapting tewari proof
+%Suppose $(L, \psi)$ is calibrated with respect to $\ell$ but there exists $\epsilon > 0$ and seequence $\{p_m\}$ such that $\ell(\psi(u_m); p_m) \leq \inf_r\ell(r;p_m) - \epsilon$ and $\left(L(u_m;p_m) - \inf_{u'}L(u'; p_m)\right) \to 0$.
+%Since $\{p_m\}$ comes from a compact set, there is a convergent subsequence that limits to $p$.
+%As $\risk{L}$ is continuous over $\simplex$, we get $L(u_m; p_m) \to \inf_{u'} L(u'; p)$.
+
+\jessie{This is pretty thoroughly spelled out, but I'm not 100\% sure this is the \emph{only} case... this is what isn't covered by Tewari's proof~\cite[Appendix A; pf of thm 2]{tewari2007consistency}}
+Now if $L(u;p) \not \to \inf_{u'}L(u; p)$, we do not know anything about the convergence of $\ell$.
+However, if there was distribution $p \in \simplex$ such that $\ell(\psi(u); p) - \inf_r \ell(r;p) > \zeta(L(u;p) - \inf_{u'} L(u';p))$ for all strictly increasing functions $\zeta$, it must be because there exists a $u'$ so that $L(u';p) > L(u;p), \ell(\psi(u); p) - \inf_r \ell(r;p) = \infty$, and $\ell(\psi(u'); p) - \inf_r \ell(r;p) < \infty$.
+However, we cannot have $\ell(\psi(u); p) - \inf_r \ell(r;p) = \infty$ unless $\ell$ was allowed to take on infinite values, which we do not allow in the definition of $\ell$.
+\end{proof}
+
+\begin{lemma}\label{lem:calib-implies-indir}
+	If a surrogate and link $(L, \psi)$ are calibrated with respect to a loss $\ell:\R \times\Y \to \reals$, then $L$ indirectly elicits the property $\gamma := \prop{\ell}$.
+\end{lemma}
+\begin{proof}
+	Let $\Gamma$ be the unique property elicited by $L$, and fix $p \in \simplex$ such that $u \in \Gamma(p)$.
+	As $u \in \Gamma(p)$, then $L(u;p) - L(\Gamma(p); p) = 0$, and $\zeta(0) = 0$, and we observe the bound $\ell(\psi(u); p) \leq \ell(\gamma(p); p)$.
+	As predicting $\gamma(p)$ yields the other side of the inequality, we must have $\ell(\psi(u);p) = \ell(\gamma(p); p)$, and therefore, $\psi(u) \in \gamma(p)$.
+	Thus, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$, so $L$ indirectly elicits $\gamma$.	
 \end{proof}
 
 \begin{theorem}\label{prop:consistent-implies-indir-elic}
-	If a surrogate and link pair $(L, \psi)$ is consistent with respect to a property $\gamma$ or with respect to a loss $\ell$ eliciting $\gamma$, then $L$ indirectly elicits $\gamma$.
+	If a surrogate and link pair $(L, \psi)$ is consistent with respect to a property $\gamma$ or loss $\ell$ eliciting $\gamma$, then $L$ indirectly elicits $\gamma$.
 \end{theorem}
 \begin{proof}
-Proposition~\ref{prop:consistent-implies-calibrated} shows consistency (w.r.t. a property) implies calibration with respect to the same property.
-Therefore it suffices to show calibration implies indirect elicitation.
-Fix $p \in \simplex$ such that $u \in \Gamma(p)$.
-If $u \in \Gamma(p)$, then $L(u;p) - L(\Gamma(p); p) = 0$, and we observe the bound $\ell(\psi(u); p) \leq \ell(\gamma(p); p)$.
-As predicting $\gamma(p)$ yields the other side of the inequality, we must have $\ell(\psi(u);p) = \ell(\gamma(p); p)$, and therefore, $\psi(u) \in \gamma(p)$.
-Thus, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$, so $L$ indirectly elicits $\gamma$.
+If we are given a loss $\ell$, then we can string together Proposition~\ref{prop:consistent-implies-calibrated} and Lemma~\ref{lem:calib-implies-indir} to observe consistency $\implies$ calibration $\implies$ indirect elicitation.
 
-%Since consistency must hold for all $D$ over $\X \times \Y$, let us focus on distributions $D$ such that the probability of any $x \in \X$ is a point mass, allowing us to focus on conditional distributions $p \in \simplex$ such that $p = Pr[Y = y | X = x]$, allowing us to be agnostic to $\X$.
-%Instead of focusing on sequences of optimal hypotheses, we can now focus on optimal reports when given $x \in \X$ if the hypothesis class $\F$ is sufficiently rich (i.e. the optimal hypothesis is in the hypothesis class for all $x \in \X$.)
-%
-%Consider $\Gamma := \prop{L}$ is given by $\Gamma(p) = \arginf_u \E_{Y \sim p} L(u, Y)$, so consistency with respect to $\ell$ yields 
-%\begin{align*}
-%\inf_u \E_{Y \sim p} L(u, Y) = \E_{Y \sim p} L(\Gamma(p), Y) &\implies \inf_r \E_{Y \sim p} \ell(r, Y) = \E_{Y \sim p} \ell(\psi \circ \Gamma(p), Y)~.~ 
-%\end{align*}
-%Since this is true for all $p \in \simplex$, then we have $L$ indirectly eliciting the property $\gamma$ by directly eliciting $\Gamma$ and using the link $\psi$.
+If we are just given the property $\gamma$ without a loss, assume that we have a sequence of properties $\{\gamma_m\}$ such that $\E_{(X,Y) \sim D} L( \psi \circ \gamma_m(D_X), Y) \to \E_{(X,Y) \sim D} L(f(X), Y)$, where $f$ minimizes $E_D L(f^*(X), Y)$ over hypotheses $f^*$.
+We must then have $\E_x \mu(\gamma_m(D_X), f(X)) \to 0$ by consistency.
+As with losses, this must be true for all $D_x$ for $x \in \X$, so we can abstract to distributions over $\simplex$.
+Now, by consistency, we have the expected losses converging implies $\{\psi \circ \gamma_m\}$ is converging toward the optimal hypothesis for all possible inputs $x \in \X$.
+
+Suppose that $L$ directly elicits $\Gamma$.
+We have $\Gamma(D_x) = f(x)$ for all $x \in \X$, so we can see that the precedent being true implies $\mu(\psi \circ \gamma_m(p), \Gamma(p)) \to 0$ for all $p\in \simplex$; thus, $L$ must indirectly elicit the property $\gamma = \lim_{m \to \infty} \{\gamma_m\}$ via the link $\psi$.
 \end{proof}
 
+
+\subsection{On dimensionality of consistent convex surrogates}
 \begin{definition}[Flat]
 	A \emph{flat} $F$ of $\reals^n$ is an affine subspace of $\reals^n$.
 	In other words, $F\subseteq \reals^n$ can be written $F=\{x\in\reals^n : Wx + b = 0\}$ for some $W\in\reals^{d\times n}$ and $b\in\reals^d$ where $d\leq n$.
