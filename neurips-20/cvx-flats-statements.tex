@@ -208,20 +208,22 @@
 %\end{enumerate}
 %At this point I lost the thread. It looks like you're missing the hypothesis function, and $\Gamma(D)$ doesn't seem to type check -- but perhaps $\Gamma(D)$ was meant to depend on $X$ and be the hypothesis? -- and the implication also seems backwards.}
 \begin{definition}[Consistent: property]
-	A loss $L : \R \times \Y \to \reals$ and link $\psi : \R' \to \R$ pair $(L, \psi)$ is \emph{$\mu$-consistent with respect to a property} $\gamma: \simplex \toto \R'$ for a distance $\mu:\R \times \R \to \reals_+$ if, for all $D$ over $\X \times \Y$ with marginal distributions $D_x$, and sequences of properties $\{\gamma_m\}$ we observe
+	A loss $L : \R \times \Y \to \reals$ and link $\psi : \R' \to \R$ pair $(L, \psi)$ is \emph{$\mu$-consistent with respect to a property} $\gamma: \simplex \toto \R'$ for a distance $\mu:\R \times \R \to \reals_+$ if, for all $D$ over $\X \times \Y$ with marginal distributions $D_x$, and sequences of properties $\{\gamma_m: \simplex \toto \R'\} \to \gamma$, we observe
 	\begin{equation}
 	\E_{(X,Y) \sim D} L( \psi \circ \gamma_m(D_X), Y) \to \E_{(X,Y) \sim D} L(f(X), Y) \implies \E_X \mu(\psi \circ \gamma_m(D_X), f(X)) \to 0~,~
 	\end{equation}
 	where $f = \arginf_{f^* \mathrm{msbl}} \E_{(X,Y) \sim D} L(f^*(X), Y)$.
 \end{definition}
 
-\begin{definition}[Excess risk bound]
-	A surrogate loss and link pair $(L,\psi)$ satisfies the \emph{excess risk bound} with respect to a loss $\ell$ if there exists an increasing function $\zeta : \reals \to \reals$ that is continuous at $0$ with $\zeta(0) = 0$ so that for all $f:\X \to \R$ and data distributions $D$ over $\X \times \Y$, we have
-	\begin{multline}
-	\E_{(X,Y) \sim D} \ell(\psi \circ f(X), Y) - \inf_{f^*} \E_{(X,Y) \sim D} \ell(\psi \circ f^*(X), Y) \\ 
-	\leq \zeta \left( \E_{(X,Y) \sim D} L(f(X), Y) - \inf_{f^*} \E_{(X,Y) \sim D} L(f^*(X), Y) \right)
-	\end{multline}
-\end{definition}
+
+%%I don't think we're going to need this definition...
+%\begin{definition}[Excess risk bound]
+%	A surrogate loss and link pair $(L,\psi)$ satisfies the \emph{excess risk bound} with respect to a loss $\ell$ if there exists an increasing function $\zeta : \reals \to \reals$ that is continuous at $0$ with $\zeta(0) = 0$ so that for all $f:\X \to \R$ and data distributions $D$ over $\X \times \Y$, we have
+%	\begin{multline}
+%	\E_{(X,Y) \sim D} \ell(\psi \circ f(X), Y) - \inf_{f^*} \E_{(X,Y) \sim D} \ell(\psi \circ f^*(X), Y) \\ 
+%	\leq \zeta \left( \E_{(X,Y) \sim D} L(f(X), Y) - \inf_{f^*} \E_{(X,Y) \sim D} L(f^*(X), Y) \right)
+%	\end{multline}
+%\end{definition}
 
 %\begin{proposition}
 %	A surrogate link pair $(L, \psi)$ is consistent with respect to a loss $\ell$ if and only if it is consistent with respect to the property elicited by $\gamma := \prop{\ell}$.
@@ -260,14 +262,10 @@
 The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$ is the minimum dimension $d$ such that there is a convex loss $L: \reals^d \times \Y \to \reals$ and link $\psi$ such that $L$ is calibrated with respect to $\ell$.
 \end{definition}
 
-\jessie{Ramaswamy/Bartlett statement of calibration iff consistent}
-
-
-\jessie{On the backburner: consistency/calibration of regression.  Note down references on consistency of regression.}
 
 \section{Characteristics of Consistent Convex Surrogates}\label{sec:char-convex}
 
-
+\jessie{Should this also be a lemma instead of a proposition?}
 \begin{proposition}\label{prop:consistent-implies-calibrated}
 	If a loss and link $(L, \psi)$ are consistent with respect to a loss $\ell$, then they are calibrated with respect to $\ell$.
 	\jessiet{Probably appendix later.}
@@ -277,10 +275,12 @@ Since consistency must hold for all $D$ over $\X \times \Y$, let us focus on dis
 If consistency implies calibration for the marginal distributions $D_x$ for all $x \in \X$, then it holds for all $D$.
 Now, for such distributions, we have 
 \begin{align*}
-\E_D L(f_m(X), Y) \to \inf_f \E_D L(f(X), Y) &\implies \E_D \ell((\psi \circ f_m)(X), Y) \to \inf_f \E_D \ell((\psi \circ f)(X), Y) \\
-\iff \E_{D_x} L(f_m(x), Y) \to \inf_f \E_{D_x} L(f(x), Y) &\implies \E_{D_x} \ell((\psi \circ f_m)(x), Y) \to \inf_f \E_{D_x} \ell((\psi \circ f)(x), Y) \; \forall x \in \X ~.~
+\E_{D_x} L(f_m(x), Y) \to \inf_f \E_{D_x} L(f(x), Y) &\implies \E_{D_x} \ell((\psi \circ f_m)(x), Y) \to \inf_f \E_{D_x} \ell((\psi \circ f)(x), Y)~,~
 \end{align*}
-Now, fix $p \in \simplex$, and we will abstract away hypothesis classes to consider general predictions $u$.
+for all $x \in \X.$
+This allows us to focus on $p \in \simplex$, abstracting away hypothesis classes to consider general predictions $u$.
+
+Now, fix $p \in \simplex$.
 We proceed in two cases; first, when we approach the optimal loss, then when we do not. 
 If $L(u;p) \to \inf_{u'} L(u';p)$, then $\ell(\psi(u); p) \to \inf_{r}\ell(r; p)$.
 Substituting into~\eqref{eq:calibrated-general}, we see the bound is satisfied by any function $\zeta$ satisfying calibration requirements; namely, $\zeta(0) = 0$ and continuity at $0$.
@@ -289,35 +289,36 @@ Substituting into~\eqref{eq:calibrated-general}, we see the bound is satisfied b
 %Since $\{p_m\}$ comes from a compact set, there is a convergent subsequence that limits to $p$.
 %As $\risk{L}$ is continuous over $\simplex$, we get $L(u_m; p_m) \to \inf_{u'} L(u'; p)$.
 
-\jessie{This is pretty thoroughly spelled out, but I'm not 100\% sure this is the \emph{only} case... this is what isn't covered by Tewari's proof~\cite[Appendix A; pf of thm 2]{tewari2007consistency}}
+\jessie{I'm not 100\% sure this is the \emph{only} case... this is what isn't covered by Tewari's proof~\cite[Appendix A; pf of thm 2]{tewari2007consistency}}
 Now if $L(u;p) \not \to \inf_{u'}L(u; p)$, we do not know anything about the convergence of $\ell$.
-However, if there was distribution $p \in \simplex$ such that $\ell(\psi(u); p) - \inf_r \ell(r;p) > \zeta(L(u;p) - \inf_{u'} L(u';p))$ for all strictly increasing functions $\zeta$, it must be because there exists a $u'$ so that $L(u';p) > L(u;p), \ell(\psi(u); p) - \inf_r \ell(r;p) = \infty$, and $\ell(\psi(u'); p) - \inf_r \ell(r;p) < \infty$.
-However, we cannot have $\ell(\psi(u); p) - \inf_r \ell(r;p) = \infty$ unless $\ell$ was allowed to take on infinite values, which we do not allow in the definition of $\ell$.
+However, if there was distribution $p \in \simplex$ such that $\ell(\psi(u); p) - \inf_r \ell(r;p) > \zeta(L(u;p) - \inf_{u'} L(u';p))$ for all strictly increasing functions $\zeta$, it must be because there exists a $u'$ so that $L(u';p) > L(u;p), \ell(\psi(u); p) = \infty$, and $\ell(\psi(u'); p) < \infty$.
+However, we cannot have $\ell(\psi(u); p) = \infty$ unless $\ell$ was allowed to take on infinite values, which we do not allow in the definition of $\ell$.
 \end{proof}
 
 \begin{lemma}\label{lem:calib-implies-indir}
 	If a surrogate and link $(L, \psi)$ are calibrated with respect to a loss $\ell:\R \times\Y \to \reals$, then $L$ indirectly elicits the property $\gamma := \prop{\ell}$.
 \end{lemma}
 \begin{proof}
-	Let $\Gamma$ be the unique property elicited by $L$, and fix $p \in \simplex$ such that $u \in \Gamma(p)$.
-	As $u \in \Gamma(p)$, then $L(u;p) - L(\Gamma(p); p) = 0$, and $\zeta(0) = 0$, and we observe the bound $\ell(\psi(u); p) \leq \ell(\gamma(p); p)$.
-	As predicting $\gamma(p)$ yields the other side of the inequality, we must have $\ell(\psi(u);p) = \ell(\gamma(p); p)$, and therefore, $\psi(u) \in \gamma(p)$.
-	Thus, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$, so $L$ indirectly elicits $\gamma$.	
+	Let $\Gamma$ be the unique property directly elicited by $L$, and fix $p \in \simplex$ with $u$ such that $p \in \Gamma_u$.
+	As $p \in \Gamma_u$, then $L(u;p) - L(\Gamma(p); p) = 0$, and $\zeta(0) = 0$, we observe the bound $\ell(\psi(u); p) \leq \ell(\gamma(p); p)$.
+	We also have $\ell(\psi(u); p) \geq \ell(\gamma(p); p)$ by definition of $\gamma$, so we must have $\ell(\psi(u);p) = \ell(\gamma(p); p)$, and therefore, $p \in \gamma_{\psi(u)}$.
+	Thus, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$, so $L$ indirectly elicits $\gamma$.
 \end{proof}
 
-\begin{theorem}\label{prop:consistent-implies-indir-elic}
+\begin{theorem}\label{thm:consistent-implies-indir-elic}
 	If a surrogate and link pair $(L, \psi)$ is consistent with respect to a property $\gamma$ or loss $\ell$ eliciting $\gamma$, then $L$ indirectly elicits $\gamma$.
 \end{theorem}
 \begin{proof}
 If we are given a loss $\ell$, then we can string together Proposition~\ref{prop:consistent-implies-calibrated} and Lemma~\ref{lem:calib-implies-indir} to observe consistency $\implies$ calibration $\implies$ indirect elicitation.
 
-If we are just given the property $\gamma$ without a loss, assume that we have a sequence of properties $\{\gamma_m\}$ such that $\E_{(X,Y) \sim D} L( \psi \circ \gamma_m(D_X), Y) \to \E_{(X,Y) \sim D} L(f(X), Y)$, where $f$ minimizes $E_D L(f^*(X), Y)$ over hypotheses $f^*$.
-We must then have $\E_x \mu(\gamma_m(D_X), f(X)) \to 0$ by consistency.
-As with losses, this must be true for all $D_x$ for $x \in \X$, so we can abstract to distributions over $\simplex$.
+If we are just given the property $\gamma$ without a loss, assume that we have a sequence of properties $\{\gamma_m\} \to \gamma$ such that $\E_{(X,Y) \sim D} L( \psi \circ \gamma_m(D_X), Y) \to \E_{(X,Y) \sim D} L(f(X), Y)$, where $f$ minimizes $E_D L(f^*(X), Y)$ over measurable functions $f^*$.
+We must then have $\E_X \mu(\gamma_m(D_X), f(X)) \to 0$ by consistency.
+As in the proof of Proposition~\ref{prop:consistent-implies-calibrated}, this must be true for all $D_x$ for $x \in \X$, so we can abstract to distributions over $\simplex$.
 Now, by consistency, we have the expected losses converging implies $\{\psi \circ \gamma_m\}$ is converging toward the optimal hypothesis for all possible inputs $x \in \X$.
 
 Suppose that $L$ directly elicits $\Gamma$.
 We have $\Gamma(D_x) = f(x)$ for all $x \in \X$, so we can see that the precedent being true implies $\mu(\psi \circ \gamma_m(p), \Gamma(p)) \to 0$ for all $p\in \simplex$; thus, $L$ must indirectly elicit the property $\gamma = \lim_{m \to \infty} \{\gamma_m\}$ via the link $\psi$.
+To see this, observe $\mu(\psi \circ \gamma(p), \Gamma(p)) = 0$ for all $p \in \simplex$, which implies $\Gamma = \psi \circ \gamma$ as $\mu$ is a distance.
 \end{proof}
 
 
