@@ -245,14 +245,14 @@
 
 
 \begin{definition}[Calibrated]\label{def:calibrated-general}
-	A loss $L:\reals^d \times \Y \to \reals$ is \emph{calibrated} with respect to a loss $\ell : \R \times \Y \to \reals$ eliciting the property $\gamma$ if there is a link $\psi : \reals^d \to \R$ such that, for all distributions $p \in \simplex$, there exists a strictly increasing function $\zeta : \reals \to \reals$ with $\zeta$ continuous at $0$ and $\zeta(0) = 0$ such that for all $u \in \reals^d$, we have
+	A loss $L:\reals^d \times \Y \to \reals$ is \emph{calibrated} with respect to a loss $\ell : \R \times \Y \to \reals$ eliciting the property $\gamma$ if there is a link $\psi : \reals^d \to \R$ such that, for all distributions $p \in \simplex$, there exists a function $\zeta : \reals_+ \to \reals_+$ with $\zeta$ continuous at $0^+$ and $\zeta(0) = 0$ such that for all $u \in \reals^d$, we have
 	\begin{equation}\label{eq:calibrated-general}
 	\ell( \psi(u); p) - \ell(\gamma(p); p)  \leq \zeta \left(  L(u;p) - L(\Gamma(p); p) \right)~.~
 	\end{equation}
 \end{definition}
 \begin{definition}[Calibrated: Finite predictions]\label{def:calibrated-finite}
 	Let $\ell : \R \times \Y \to \reals_+$ be a discrete loss eliciting the property $\gamma$.
-	A surrogate loss $L : \reals^d \times \Y \to \reals_+$ is \emph{calibrated} with respect to $\ell$ if there exists a link function $\psi: \reals^d \to \R$ such that
+	A surrogate loss $L : \reals^d \times \Y \to \reals_+$  and link $\psi:\reals^d \to \R$ pair $(L, \psi)$ is \emph{calibrated} with respect to $\ell$ if 
 	\begin{equation}\label{eq:calibration}
 	\forall p \in \simplex: \inf_{u \in \reals^d : \psi(u) \not \in \gamma(p)} L(u;p) > \inf_{u \in \reals^d} L(u;p)~.~
 	\end{equation}
@@ -271,28 +271,42 @@ The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$
 	\jessiet{Probably appendix later.}
 \end{proposition}
 \begin{proof}
-Since consistency must hold for all $D$ over $\X \times \Y$, let us focus on distributions $D$ such that the probability of any $x \in \X$ is a point mass.
-If consistency implies calibration for the marginal distributions $D_x$ for all $x \in \X$, then it holds for all $D$.
-Now, for such distributions, we have 
-\begin{align*}
-\E_{D_x} L(f_m(x), Y) \to \inf_f \E_{D_x} L(f(x), Y) &\implies \E_{D_x} \ell((\psi \circ f_m)(x), Y) \to \inf_f \E_{D_x} \ell((\psi \circ f)(x), Y)~,~
-\end{align*}
-for all $x \in \X.$
-This allows us to focus on $p \in \simplex$, abstracting away hypothesis classes to consider general predictions $u$.
-
-Now, fix $p \in \simplex$.
-We proceed in two cases; first, when we approach the optimal loss, then when we do not. 
-If $L(u;p) \to \inf_{u'} L(u';p)$, then $\ell(\psi(u); p) \to \inf_{r}\ell(r; p)$.
-Substituting into~\eqref{eq:calibrated-general}, we see the bound is satisfied by any function $\zeta$ satisfying calibration requirements; namely, $\zeta(0) = 0$ and continuity at $0$.
-%adapting tewari proof
-%Suppose $(L, \psi)$ is calibrated with respect to $\ell$ but there exists $\epsilon > 0$ and seequence $\{p_m\}$ such that $\ell(\psi(u_m); p_m) \leq \inf_r\ell(r;p_m) - \epsilon$ and $\left(L(u_m;p_m) - \inf_{u'}L(u'; p_m)\right) \to 0$.
-%Since $\{p_m\}$ comes from a compact set, there is a convergent subsequence that limits to $p$.
-%As $\risk{L}$ is continuous over $\simplex$, we get $L(u_m; p_m) \to \inf_{u'} L(u'; p)$.
-
-\jessie{I'm not 100\% sure this is the \emph{only} case... this is what isn't covered by Tewari's proof~\cite[Appendix A; pf of thm 2]{tewari2007consistency}}
-Now if $L(u;p) \not \to \inf_{u'}L(u; p)$, we do not know anything about the convergence of $\ell$.
-However, if there was distribution $p \in \simplex$ such that $\ell(\psi(u); p) - \inf_r \ell(r;p) > \zeta(L(u;p) - \inf_{u'} L(u';p))$ for all strictly increasing functions $\zeta$, it must be because there exists a $u'$ so that $L(u';p) > L(u;p), \ell(\psi(u); p) = \infty$, and $\ell(\psi(u'); p) < \infty$.
-However, we cannot have $\ell(\psi(u); p) = \infty$ unless $\ell$ was allowed to take on infinite values, which we do not allow in the definition of $\ell$.
+	Let $\gamma$ be the property elicited by $\ell$.
+	Suppose $(L,\psi)$ is not calibrated with respect to $\ell$; we will show they are not consistent with respect to $\ell$ either.
+	$(L, \psi)$ not calibrated with respect to $\ell$ means that there is some distribution $p \in \simplex = D_x$ for some $x \in \X$ such that there is no function $\zeta : \reals_+ \to \reals_+$ with $\zeta(0) = 0$ and continuous at $0^+$ such that, for all $u \in \reals^d$, we have $\ell(\psi(u); p) - \ell(\gamma(p);p) \leq \zeta(L(u;p) - L(\Gamma(p);p))$. 
+	In other words, for all $\zeta$ satisfying the assumptions, we have $\ell(\psi(u); p) - \ell(\gamma(p);p) > \zeta(L(u;p) - L(\Gamma(p);p))$.
+	
+	In particular, there must exist a sequence $\{u_m\} \to \Gamma(p)$ so that $\psi(u_m) \not \in \gamma(p)$ for all $m$.
+	Now consider the data distribution $D$ that has a point mass on some $x \in \X$, where $p = D_x$.
+	Moreover, let $f_m$ be any sequence of functions with $f_m(x) = u_m$ for all $m$.
+	We then have $L(f_m(x); p) \to L(\Gamma(p);p)$, so $\lim_{m \to \infty}\zeta(L(u;p) - L(\Gamma(p);p)) \to 0$.
+	This gives $\ell(\psi(u);p) > \ell(\gamma(p);p) + \epsilon$ for some $\epsilon \to 0$, which implies $\ell(\psi(u_m); p) \not \to \ell(\gamma(p);p)$; thus, we do not have consistency.
+	Therefore, if $(L, \psi)$ are consistent with respect to $\ell$, they are also calibrated with respect to $\ell$.
+	
+	
+%commented out May 14, 2020 to adapt Hari/Shivani's proof
+%Since consistency must hold for all $D$ over $\X \times \Y$, let us focus on distributions $D$ such that the probability of any $x \in \X$ is a point mass.
+%If consistency implies calibration for the marginal distributions $D_x$ for all $x \in \X$, then it holds for all $D$.
+%Now, for such distributions, we have 
+%\begin{align*}
+%\E_{D_x} L(f_m(x), Y) \to \inf_f \E_{D_x} L(f(x), Y) &\implies \E_{D_x} \ell((\psi \circ f_m)(x), Y) \to \inf_f \E_{D_x} \ell((\psi \circ f)(x), Y)~,~
+%\end{align*}
+%for all $x \in \X.$
+%This allows us to focus on $p \in \simplex$, abstracting away hypothesis classes to consider general predictions $u$.
+%
+%Now, fix $p \in \simplex$.
+%We proceed in two cases; first, when we approach the optimal loss, then when we do not. 
+%If $L(u;p) \to \inf_{u'} L(u';p)$, then $\ell(\psi(u); p) \to \inf_{r}\ell(r; p)$.
+%Substituting into~\eqref{eq:calibrated-general}, we see the bound is satisfied by any function $\zeta$ satisfying calibration requirements; namely, $\zeta(0) = 0$ and continuity at $0$.
+%%%adapting tewari proof
+%%%Suppose $(L, \psi)$ is calibrated with respect to $\ell$ but there exists $\epsilon > 0$ and seequence $\{p_m\}$ such that $\ell(\psi(u_m); p_m) \leq \inf_r\ell(r;p_m) - \epsilon$ and $\left(L(u_m;p_m) - \inf_{u'}L(u'; p_m)\right) \to 0$.
+%%%Since $\{p_m\}$ comes from a compact set, there is a convergent subsequence that limits to $p$.
+%%%As $\risk{L}$ is continuous over $\simplex$, we get $L(u_m; p_m) \to \inf_{u'} L(u'; p)$.
+%
+%\jessie{I'm not 100\% sure this is the \emph{only} case... this is what isn't covered by Tewari's proof~\cite[Appendix A; pf of thm 2]{tewari2007consistency}}
+%Now if $L(u;p) \not \to \inf_{u'}L(u; p)$, we do not know anything about the convergence of $\ell$.
+%However, if there was distribution $p \in \simplex$ such that $\ell(\psi(u); p) - \inf_r \ell(r;p) > \zeta(L(u;p) - \inf_{u'} L(u';p))$ for all strictly increasing functions $\zeta$, it must be because there exists a $u'$ so that $L(u';p) > L(u;p), \ell(\psi(u); p) = \infty$, and $\ell(\psi(u'); p) < \infty$.
+%However, we cannot have $\ell(\psi(u); p) = \infty$ unless $\ell$ was allowed to take on infinite values, which we do not allow in the definition of $\ell$.
 \end{proof}
 
 \begin{lemma}\label{lem:calib-implies-indir}
@@ -316,9 +330,10 @@ We must then have $\E_X \mu(\gamma_m(D_X), f(X)) \to 0$ by consistency.
 As in the proof of Proposition~\ref{prop:consistent-implies-calibrated}, this must be true for all $D_x$ for $x \in \X$, so we can abstract to distributions over $\simplex$.
 Now, by consistency, we have the expected losses converging implies $\{\psi \circ \gamma_m\}$ is converging toward the optimal hypothesis for all possible inputs $x \in \X$.
 
-Suppose that $L$ directly elicits $\Gamma$.
-We have $\Gamma(D_x) = f(x)$ for all $x \in \X$, so we can see that the precedent being true implies $\mu(\psi \circ \gamma_m(p), \Gamma(p)) \to 0$ for all $p\in \simplex$; thus, $L$ must indirectly elicit the property $\gamma = \lim_{m \to \infty} \{\gamma_m\}$ via the link $\psi$.
-To see this, observe $\mu(\psi \circ \gamma(p), \Gamma(p)) = 0$ for all $p \in \simplex$, which implies $\Gamma = \psi \circ \gamma$ as $\mu$ is a distance.
+Let $\Gamma$ be the property directly elicited by $L$.
+We have $\Gamma(D_x) = f(x)$ for all $x \in \X$, so we can see that the precedent being true implies $\mu(\psi \circ \gamma_m(p), \Gamma(p)) \to 0$ for all $p\in \simplex$.
+As $\mu$ is a distance\jessiet{Maybe need $\mu$ continuous in $\R^2$?}, $\mu(\psi \circ \gamma(p), \Gamma(p)) = 0$ for all $p \in \simplex$, which implies $\Gamma = \psi \circ \gamma$ as $\mu$ is a distance.
+Therefore, $L$ must indirectly elicit the property $\gamma = \lim_{m \to \infty} \{\gamma_m\}$ via the link $\psi$.
 \end{proof}
 
 
@@ -441,7 +456,7 @@ To see this, observe $\mu(\psi \circ \gamma(p), \Gamma(p)) = 0$ for all $p \in \
 \section*{Broader Impact}
 
 \begin{ack}
-All the thanks
+Nishant, Adam
 \end{ack}
 
 \bibliographystyle{plainnat}
@@ -451,8 +466,47 @@ All the thanks
 \appendix
 \section{Omitted proofs}
 \begin{proposition}
-	When $\R$ is finite, calibration of a property via Definition~\ref{calibrated-general} implies calibration via Definition~\ref{def:calibration-finite}.
+	When $\R$ is finite and $L$ continuous in $\reals^d$, calibration of a property via Definition~\ref{def:calibrated-general} implies calibration via Definition~\ref{def:calibrated-finite}.
 \end{proposition}
+\begin{proof}
+	Let $\Gamma$ be the property elicited by $L$.
+	We prove the contrapositive; if $(L, \psi)$ is not calibrated with respect to $\ell$ by Definition~\ref{def:calibrated-finite}, then it is not calibrated via Definition~\ref{def:calibrated-general} either.
+	
+	Suppose there was a distribution $p \in \simplex$ and sequence $\{u_m\} \to u$ so that $\psi(u_m) \not \to \gamma(p)$ but $L(u_m;p) \to L(\Gamma(p);p)$.
+	We would then have $\inf_{u : \psi(u) \not \in \gamma(p)} L(u;p) = \inf_{u} L(u;p)$.
+	
+	We want to show that there is no $\zeta:\reals_+ \to \reals_+$ continuous at $0^+$ with $\zeta(0) = 0$ so that 
+	\begin{align*}
+	\ell(\psi(u);p) - \ell(\gamma(p);p) \leq \zeta(L(u;p) - L(\Gamma(p); p))
+	\end{align*}
+	for all $u \in \reals^d$.
+	We show that if this bound is satisfied, one of the two conditions on $\zeta$ (continuity at $0^+$ and $\zeta(0) = 0$) must be violated.
+	
+	Fix $x \in \X$ and take $u_m = f_m(x)$ \jessie{...}
+
+	
+	First, suppose that $\zeta$ is continuous at $0^+$ and the bound is satisfied.
+	Then for the sequence $\{u_m\} \to \Gamma(p)$, we have 
+	\begin{align*}
+	\lim_{m \to \infty}\ell(\psi(u_m); p) - \ell(\gamma(p);p)&\leq \lim_{m \to \infty} \zeta(L(u_m; p) - L(\Gamma(p);p))\\
+	\lim_{m \to \infty}\ell(\psi(u_m) ; p) &\leq \ell(\gamma(p);p) + \lim_{m \to \infty} \zeta(L(u_m; p) - L(\Gamma(p);p))\\
+	\lim_{m \to \infty}\ell(\psi(u_m) ; p) &\leq \ell(\gamma(p);p) + \lim_{\epsilon \to 0^+} \zeta(\epsilon)
+	\end{align*}
+	and the last inequality can only happen if $\lim_{\epsilon \to 0^+} \zeta(\epsilon) = c > 0$, and by continuity of $\zeta$, we then have $\lim_{\epsilon \to 0} \zeta(\epsilon) = \zeta(0) = c > 0$. 
+	
+	Now, suppose $\zeta(0) = 0$, and take the sequence $\{u_m\} \to \Gamma(p)$ where $\psi(u_m) \neq \gamma(p)$ for all $m$.	
+	We have 
+	\begin{align*}
+	\lim_{m \to \infty}\ell(\psi(u_m); p) - \ell(\gamma(p);p)&\leq \lim_{m \to \infty} \zeta(L(u_m; p) - L(\Gamma(p);p))\\
+	\lim_{m \to \infty}\ell(\psi(u_m); p) &\leq \ell(\gamma(p);p) +  \lim_{\epsilon \to 0^+} \zeta(\epsilon)\\
+%	\ell(\psi(\Gamma(p)); p) - \ell(\gamma(p);p)&\leq \zeta(L(\Gamma(p); p) - L(\Gamma(p);p))\\
+%	\ell(\psi(\Gamma(p)); p) - \ell(\gamma(p);p)&\leq \zeta(0)\\
+%	\ell(\psi(\Gamma(p)); p) &\leq \zeta(0) + \ell(\gamma(p); p)\\
+%	\ell(\psi(\Gamma(p)); p) &\leq \ell(\gamma(p); p)~.~
+	\end{align*}
+	As $\ell(\psi(u_m); p)> \ell(\gamma(p); p)$ (since $\R$ is finite) for all $m$, we then observe that $\lim_{\epsilon \to 0^+} \zeta(\epsilon) = c > 0$.
+	However, since $\zeta(0) = 0$, we violate continuity of $\zeta$ at $0^+$.
+\end{proof}
 
 \end{document}
 
