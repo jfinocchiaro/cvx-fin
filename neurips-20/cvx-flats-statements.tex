@@ -80,7 +80,7 @@
 \newcommand{\Y}{\mathcal{Y}}
 
 
-\newcommand{\risk}[1]{\underline{#1}}
+\newcommand{\risk}[1]{#1^*}
 \newcommand{\inprod}[2]{\langle #1, #2 \rangle}
 \newcommand{\toto}{\rightrightarrows}
 
@@ -208,11 +208,12 @@
 %\end{enumerate}
 %At this point I lost the thread. It looks like you're missing the hypothesis function, and $\Gamma(D)$ doesn't seem to type check -- but perhaps $\Gamma(D)$ was meant to depend on $X$ and be the hypothesis? -- and the implication also seems backwards.}
 \begin{definition}[Consistent: property]
-	A loss $L : \R \times \Y \to \reals$ and link $\psi : \R' \to \R$ pair $(L, \psi)$ is \emph{$\mu$-consistent with respect to a property} $\gamma: \simplex \toto \R'$ for a distance $\mu:\R \times \R \to \reals_+$ if, for all $D$ over $\X \times \Y$ with marginal distributions $D_x$, and sequences of properties $\{\gamma_m: \simplex \toto \R'\} \to \gamma$, we observe
+	Let $\{f_m: \X \to \R\}$ be a sequence of hypothesis functions.
+	A loss $L : \R \times \Y \to \reals$ and link $\psi : \R \to \R'$ pair $(L, \psi)$ is \emph{$\mu$-consistent with respect to a property} $\gamma: \simplex \toto \R'$ for a distance $\mu:\R \times \R \to \reals_+$ if, for all $D$ over $\X \times \Y$ with marginal distributions $D_x$, and 
 	\begin{equation}
-	\E_{(X,Y) \sim D} L( \psi \circ \gamma_m(D_X), Y) \to \E_{(X,Y) \sim D} L(f(X), Y) \implies \E_X \mu(\psi \circ \gamma_m(D_X), f(X)) \to 0~,~
+	\E_{(X,Y) \sim D} L(\psi \circ f_m(X), Y) \to \E_{(X,Y) \sim D} L( \gamma(D_X), Y) \implies \E_X \mu(\gamma(D_X), \psi \circ f_m(X)) \to 0~.~
 	\end{equation}
-	where $f = \arginf_{f^* \mathrm{msbl}} \E_{(X,Y) \sim D} L(f^*(X), Y)$.
+	If $\mu$ has a set as input, define $\mu(S_1, S_2) = \inf_{s_1 \in S_1, s_2 \in S_2} \mu(s_1, s_2)$.
 \end{definition}
 
 
@@ -231,7 +232,7 @@
 %\begin{proof}
 %	$\implies:$ 
 %	If $(L, \psi)$ is consistent with respect to $\ell$, then for all $x \in \X$ with $p = Pr[Y|X]$, we have $L(u; p) \to \inf_{u'} L(u';p) \implies \ell(\psi(u); p) \to \inf_{u'} \ell(\psi(u');p)$.
-%	As $\inf_{u'} L(u';p) = L(\Gamma(p); p)$, we then have $L(\Gamma(p); p) - L(u;p) \to 0 \implies \ell(\psi(\Gamma(p)); p) - \ell(\psi(u);p) \to 0$.
+%	As $\inf_{u'} L(u';p) = \risk{L}(p)$, we then have $\risk{L}(p) - L(u;p) \to 0 \implies \ell(\psi(\Gamma(p)); p) - \ell(\psi(u);p) \to 0$.
 %	If $\gamma: p \mapsto \psi(\Gamma(p))$ for all $p \in \simplex$, then we have consistency with respect to $\gamma$, as $\zeta$ being the identity satisfies the requirements on $\zeta$ and yields the bound as the convergence yields $0 \leq 0$ for all $p \in \simplex$.
 %	
 %	To see $\gamma = \psi \circ \Gamma$, consider that for all $p \in \simplex$, we have $\arginf_{u \in \reals^d} L(u;p) = \arginf_{u \in \reals^d} \ell(\psi(u); p)$ as a corollary of consistency with respect to $\ell$, which implies the statement.
@@ -247,7 +248,7 @@
 \begin{definition}[Calibrated]\label{def:calibrated-general}
 	A loss $L:\reals^d \times \Y \to \reals$ is \emph{calibrated} with respect to a loss $\ell : \R \times \Y \to \reals$ eliciting the property $\gamma$ if there is a link $\psi : \reals^d \to \R$ such that, for all distributions $p \in \simplex$, there exists a function $\zeta : \reals_+ \to \reals_+$ with $\zeta$ continuous at $0^+$ and $\zeta(0) = 0$ such that for all $u \in \reals^d$, we have
 	\begin{equation}\label{eq:calibrated-general}
-	\ell( \psi(u); p) - \ell(\gamma(p); p)  \leq \zeta \left(  L(u;p) - L(\Gamma(p); p) \right)~.~
+	\ell( \psi(u); p) - \ell(\gamma(p); p)  \leq \zeta \left(  L(u;p) - \risk{L}(p) \right)~.~
 	\end{equation}
 \end{definition}
 \begin{definition}[Calibrated: Finite predictions]\label{def:calibrated-finite}
@@ -267,21 +268,22 @@ The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$
 
 \jessie{Should this also be a lemma instead of a proposition?}
 \begin{proposition}\label{prop:consistent-implies-calibrated}
-	If a loss and link $(L, \psi)$ are consistent with respect to a loss $\ell$, then they are calibrated with respect to $\ell$.
+	If a (continuous) loss and link $(L, \psi)$ are consistent with respect to a loss $\ell$, then they are calibrated with respect to $\ell$.
 	\jessiet{Probably appendix later.}
 \end{proposition}
 \begin{proof}
 	Let $\gamma$ be the property elicited by $\ell$.
 	Suppose $(L,\psi)$ is not calibrated with respect to $\ell$; we will show they are not consistent with respect to $\ell$ either.
-	$(L, \psi)$ not calibrated with respect to $\ell$ means that there is some distribution $p \in \simplex = D_x$ for some $x \in \X$ such that there is no function $\zeta : \reals_+ \to \reals_+$ with $\zeta(0) = 0$ and continuous at $0^+$ such that, for all $u \in \reals^d$, we have $\ell(\psi(u); p) - \ell(\gamma(p);p) \leq \zeta(L(u;p) - L(\Gamma(p);p))$. 
-	In other words, for all $\zeta$ satisfying the assumptions, we have $\ell(\psi(u); p) - \ell(\gamma(p);p) > \zeta(L(u;p) - L(\Gamma(p);p))$.
+	$(L, \psi)$ not calibrated with respect to $\ell$ means that there is some distribution $p \in \simplex$ such that there is no function $\zeta : \reals_+ \to \reals_+$ with $\zeta(0) = 0$ and continuous at $0^+$ such that, for all $u \in \reals^d$, we have $\ell(\psi(u); p) - \risk{\ell}(p) \leq \zeta(L(u;p) - \risk{L}(p))$. 
+	In other words, for all $\zeta$ satisfying the assumptions, we have $\ell(\psi(u); p) - \risk{\ell}(p) > \zeta(L(u;p) - \risk{L}(p))$ for some $u \in \reals^d$.
+	In particular, there must exist a sequence $\{u_m\}$ so that $L(u_m;p) \to \risk{L}(p)$.
+		
 	
-	In particular, there must exist a sequence $\{u_m\} \to \Gamma(p)$ so that $\psi(u_m) \not \in \gamma(p)$ for all $m$.
 	Now consider the data distribution $D$ that has a point mass on some $x \in \X$, where $p = D_x$.
 	Moreover, let $f_m$ be any sequence of functions with $f_m(x) = u_m$ for all $m$.
-	We then have $L(f_m(x); p) = L(u_m; p) \to L(\Gamma(p);p)$, so $\lim_{m \to \infty}\zeta(L(u_m;p) - L(\Gamma(p);p)) \to 0$.
-	This gives $\ell(\psi(u_m);p) > \ell(\gamma(p);p) + \epsilon_m$ for all $m$, and $\epsilon_m \to 0$.
-	This in turn implies $\ell(\psi(u_m); p) \not \to \ell(\gamma(p);p)$; thus, we do not have consistency.
+	We then have $L(f_m(x); p) = L(u_m; p) \to \risk{L}(p)$, so $\lim_{m \to \infty}\zeta(L(u_m;p) - \risk{L}(p)) \to 0$.
+	This gives $\ell(\psi(u_m);p) > \risk{\ell}(p) + \epsilon_m$ for all $m$, and $\epsilon_m \to 0$.
+	We can now observe that we do not have consistency as $\ell(\psi(u_m); p) \not \to \risk{\ell}(p)$.
 	Therefore, if $(L, \psi)$ are consistent with respect to $\ell$, they are also calibrated with respect to $\ell$.
 	
 	
@@ -315,8 +317,8 @@ The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$
 \end{lemma}
 \begin{proof}
 	Let $\Gamma$ be the unique property directly elicited by $L$, and fix $p \in \simplex$ with $u$ such that $p \in \Gamma_u$.
-	As $p \in \Gamma_u$, then $L(u;p) - L(\Gamma(p); p) = 0$, and $\zeta(0) = 0$, we observe the bound $\ell(\psi(u); p) \leq \ell(\gamma(p); p)$.
-	We also have $\ell(\psi(u); p) \geq \ell(\gamma(p); p)$ by definition of $\gamma$, so we must have $\ell(\psi(u);p) = \ell(\gamma(p); p)$, and therefore, $p \in \gamma_{\psi(u)}$.
+	As $p \in \Gamma_u$, then $\zeta(L(u;p) - \risk{L}(p)) = \zeta(0) = 0$, we observe the bound $\ell(\psi(u); p) \leq \ell(\gamma(p); p)$.
+	We also have $\ell(\psi(u); p) \geq \risk{\ell}(p)$ by definition of $\risk{\ell}$, so we must have $\ell(\psi(u);p) = \risk{\ell}(p) = \ell(\gamma(p); p)$, and therefore, $p \in \gamma_{\psi(u)}$.
 	Thus, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$, so $L$ indirectly elicits $\gamma$.
 \end{proof}
 
@@ -326,14 +328,15 @@ The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$
 \begin{proof}
 If we are given a loss $\ell$, then we can string together Proposition~\ref{prop:consistent-implies-calibrated} and Lemma~\ref{lem:calib-implies-indir} to observe consistency $\implies$ calibration $\implies$ indirect elicitation.
 
-If we are just given the property $\gamma$ without a loss, assume that we have a sequence of properties $\{\gamma_m\} \to \gamma$ such that $\E_{(X,Y) \sim D} L( \psi \circ \gamma_m(D_X), Y) \to \E_{(X,Y) \sim D} L(f(X), Y)$, where $f$ minimizes $E_D L(f^*(X), Y)$ over measurable functions $f^*$.
-We must then have $\E_X \mu(\gamma_m(D_X), f(X)) \to 0$ by consistency.
+\jessie{Need to redo this}
+If we are just given the property $\gamma$ without a loss, assume that we have a sequence of measurable hypotheses $\{f_m\} \to f$ such that $\E_{(X,Y) \sim D} L(\psi \circ f_m(D_X), Y) \to \E_{(X,Y) \sim D} L(\gamma(D_X), Y)$.
+We must then have $\E_X \mu(\gamma(D_X), \psi \circ f_m(X)) \to 0$ by consistency.
 As in the proof of Proposition~\ref{prop:consistent-implies-calibrated}, this must be true for all $D_x$ for $x \in \X$, so we can abstract to distributions over $\simplex$.
-Now, by consistency, we have the expected losses converging implies $\{\psi \circ \gamma_m\}$ is converging toward the optimal hypothesis for all possible inputs $x \in \X$.
+Now, by consistency, we have the expected losses converging implies $\{\psi \circ f_m\}$ is converging toward the optimal hypothesis for all possible inputs $x \in \X$.
 
 Let $\Gamma$ be the property directly elicited by $L$.
-We have $\Gamma(D_x) = f(x)$ for all $x \in \X$, so we can see that the precedent being true implies $\mu(\psi \circ \gamma_m(p), \Gamma(p)) \to 0$ for all $p\in \simplex$.
-As $\mu$ is a distance\jessiet{Maybe need $\mu$ continuous in $\R^2$?}, $\mu(\psi \circ \gamma(p), \Gamma(p)) = 0$ for all $p \in \simplex$, which implies $\Gamma = \psi \circ \gamma$ as $\mu$ is a distance.
+We have $\Gamma(D_x) = f(x)$ for all $x \in \X$, so we can see that the precedent being true implies $\mu(\psi \circ f_m(x), \gamma(p)) \to 0$ for all $p\in \simplex$.
+As $\mu$ is a distance, $\mu(\psi \circ f(x), \Gamma(p)) = \mu(\psi \circ \Gamma(p), \gamma(p)) = 0$ for all $p \in \simplex$, which implies $\gamma = \psi \circ \Gamma$.
 Therefore, $L$ must indirectly elicit the property $\gamma = \lim_{m \to \infty} \{\gamma_m\}$ via the link $\psi$.
 \end{proof}
 
@@ -468,46 +471,61 @@ Nishant, Adam
 \section{Omitted proofs}
 \begin{proposition}
 	When $\R$ is finite and $L$ continuous in $\reals^d$, calibration of a property via Definition~\ref{def:calibrated-general} implies calibration via Definition~\ref{def:calibrated-finite}.
+	\jessie{eventually want iff}
 \end{proposition}
 \begin{proof}
 	Let $\Gamma$ be the property elicited by $L$.
 	We prove the contrapositive; if $(L, \psi)$ is not calibrated with respect to $\ell$ by Definition~\ref{def:calibrated-finite}, then it is not calibrated via Definition~\ref{def:calibrated-general} either.
 	
-	Suppose there was a distribution $p \in \simplex$ and sequence $\{u_m\} \to u$ so that $\psi(u_m) \not \to \gamma(p)$ but $L(u_m;p) \to L(\Gamma(p);p)$.
+	Suppose there was a distribution $p \in \simplex$ and sequence $\{u_m\} \to u$ so that $\ell(\psi(u_m);p) \not \to \risk{\ell}(p)$ but $L(u_m;p) \to \risk{L}(p)$.
 	We would then have $\inf_{u : \psi(u) \not \in \gamma(p)} L(u;p) = \inf_{u} L(u;p)$.
 	
 	We want to show that there is no $\zeta:\reals_+ \to \reals_+$ continuous at $0^+$ with $\zeta(0) = 0$ so that 
 	\begin{align*}
-	\ell(\psi(u);p) - \ell(\gamma(p);p) \leq \zeta(L(u;p) - L(\Gamma(p); p))
+	\ell(\psi(u);p) - \risk{\ell}(p) \leq \zeta(L(u;p) - \risk{L}(p))
 	\end{align*}
 	for all $u \in \reals^d$.
 	We show that if this bound is satisfied, one of the two conditions on $\zeta$ (continuity at $0^+$ and $\zeta(0) = 0$) must be violated.
 	
-	Fix $x \in \X$ and take $u_m = f_m(x)$ \jessie{...}
-
 	
 	First, suppose that $\zeta$ is continuous at $0^+$ and the bound is satisfied.
 	Then for the sequence $\{u_m\} \to \Gamma(p)$, we have 
 	\begin{align*}
-	\lim_{m \to \infty}\ell(\psi(u_m); p) - \ell(\gamma(p);p)&\leq \lim_{m \to \infty} \zeta(L(u_m; p) - L(\Gamma(p);p))\\
-	\lim_{m \to \infty}\ell(\psi(u_m) ; p) &\leq \ell(\gamma(p);p) + \lim_{m \to \infty} \zeta(L(u_m; p) - L(\Gamma(p);p))\\
-	\lim_{m \to \infty}\ell(\psi(u_m) ; p) &\leq \ell(\gamma(p);p) + \lim_{\epsilon \to 0^+} \zeta(\epsilon)
+	\lim_{m \to \infty}\ell(\psi(u_m); p) - \risk{\ell}(p)&\leq \lim_{m \to \infty} \zeta(L(u_m; p) - \risk{L}(p))\\
+%	\lim_{m \to \infty}\ell(\psi(u_m) ; p) &\leq \risk{\ell}(p) + \lim_{m \to \infty} \zeta(L(u_m; p) - \risk{L}(p)\\
+	\lim_{m \to \infty}\ell(\psi(u_m) ; p) &\leq \risk{\ell}(p) + \lim_{\epsilon \to 0^+} \zeta(\epsilon)~.~
 	\end{align*}
-	and the last inequality can only happen if $\lim_{\epsilon \to 0^+} \zeta(\epsilon) = c > 0$, and by continuity of $\zeta$, we then have $\lim_{\epsilon \to 0} \zeta(\epsilon) = \zeta(0) = c > 0$. 
+	As $\lim_{m \to \infty} \ell(\psi(u_m);p) > \risk{\ell}(p)$, the last inequality can only happen if $\lim_{\epsilon \to 0^+} \zeta(\epsilon) = c > 0$, and by continuity of $\zeta$ at $0^+$, we must then have $\lim_{\epsilon \to 0^+} \zeta(\epsilon) = \zeta(0) = c > 0$. 
 	
-	Now, suppose $\zeta(0) = 0$, and take the sequence $\{u_m\} \to \Gamma(p)$ where $\psi(u_m) \neq \gamma(p)$ for all $m$.	
-	We have 
-	\begin{align*}
-	\lim_{m \to \infty}\ell(\psi(u_m); p) - \ell(\gamma(p);p)&\leq \lim_{m \to \infty} \zeta(L(u_m; p) - L(\Gamma(p);p))\\
-	\lim_{m \to \infty}\ell(\psi(u_m); p) &\leq \ell(\gamma(p);p) +  \lim_{\epsilon \to 0^+} \zeta(\epsilon)\\
-%	\ell(\psi(\Gamma(p)); p) - \ell(\gamma(p);p)&\leq \zeta(L(\Gamma(p); p) - L(\Gamma(p);p))\\
-%	\ell(\psi(\Gamma(p)); p) - \ell(\gamma(p);p)&\leq \zeta(0)\\
-%	\ell(\psi(\Gamma(p)); p) &\leq \zeta(0) + \ell(\gamma(p); p)\\
-%	\ell(\psi(\Gamma(p)); p) &\leq \ell(\gamma(p); p)~.~
-	\end{align*}
-	As $\ell(\psi(u_m); p)> \ell(\gamma(p); p)$ (since $\R$ is finite) for all $m$, we then observe that $\lim_{\epsilon \to 0^+} \zeta(\epsilon) = c > 0$.
-	However, since $\zeta(0) = 0$, we violate continuity of $\zeta$ at $0^+$.
+%	Now, suppose $\zeta(0) = 0$, and take the sequence $\{u_m\} \to \Gamma(p)$ where $\psi(u_m) \neq \gamma(p)$ for all $m$.	
+%	We have 
+%	\begin{align*}
+%	\lim_{m \to \infty}\ell(\psi(u_m); p) - \risk{\ell}(p)&\leq \lim_{m \to \infty} \zeta(L(u_m; p) - \risk{L}(p))\\
+%	\lim_{m \to \infty}\ell(\psi(u_m); p) &\leq \risk{\ell}(p) +  \lim_{\epsilon \to 0^+} \zeta(\epsilon)\\
+%%	\ell(\psi(\Gamma(p)); p) - \risk{\ell}(p)&\leq \zeta(\risk{L}(p) - L(\Gamma(p);p))\\
+%%	\ell(\psi(\Gamma(p)); p) - \risk{\ell}(p)&\leq \zeta(0)\\
+%%	\ell(\psi(\Gamma(p)); p) &\leq \zeta(0) + \ell(\gamma(p); p)\\
+%%	\ell(\psi(\Gamma(p)); p) &\leq \ell(\gamma(p); p)~.~
+%	\end{align*}
+%	As $\ell(\psi(u_m); p)> \risk{\ell}(p)$ (since $\R$ is finite) for all $m$, we then observe that $\lim_{\epsilon \to 0^+} \zeta(\epsilon) = c > 0$.
+%	However, since $\zeta(0) = 0$, we violate continuity of $\zeta$ at $0^+$.
 \end{proof}
+
+\begin{lemma}\label{lem:continuous-iff-limits}
+	A function $\zeta:\reals \to \reals$ is continuous at $0$ and $\zeta(0) = 0$ if and only if the sequence $\{u_m\} \to 0 \implies \zeta(u_m) \to 0$.
+\end{lemma}
+\begin{proof}
+	$\implies$ Suppose we have a sequence $\{u_m\} \to 0$.
+	By continuity, we have $\lim_{u_m \to 0}\zeta(u_m) = \zeta(0) = 0$, so $\zeta(u_m) \to 0$.
+	
+	$\impliedby$ Suppose $\zeta(0) \neq 0$ but $\zeta$ was continuous at $0$.
+	The constant sequence $\{u_m\} = 0$ then converges to $0$, but as $\zeta$ is continuous at $0$, we must have $\lim_{m \to \infty}\zeta(u_m) = \zeta(0) \neq 0$, so $\zeta(u_m) \not \to 0$.
+	
+	Now suppose $\zeta(0) = 0$ but $\zeta$ was not continuous at $0$.
+	There must be a sequence $\{u_m\} \to 0$ so that $\lim_{m \to \infty}\zeta(u_m) \neq \zeta(0) = 0$, so $\zeta(u_m) \not \to 0$.
+\end{proof}
+
+
 
 \end{document}
 
