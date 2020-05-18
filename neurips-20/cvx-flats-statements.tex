@@ -209,11 +209,14 @@
 %At this point I lost the thread. It looks like you're missing the hypothesis function, and $\Gamma(D)$ doesn't seem to type check -- but perhaps $\Gamma(D)$ was meant to depend on $X$ and be the hypothesis? -- and the implication also seems backwards.}
 \begin{definition}[Consistent: property]
 	Let $\{f_m: \X \to \R\}$ be a sequence of hypothesis functions.
-	A loss $L : \R \times \Y \to \reals$ and link $\psi : \R \to \R'$ pair $(L, \psi)$ is \emph{$\mu$-consistent with respect to a property} $\gamma: \simplex \toto \R'$ for a distance $\mu:\R \times \R \to \reals_+$ if, for all $D$ over $\X \times \Y$ with marginal distributions $D_x$, and 
+	Suppose we are given a loss $L : \R \times \Y \to \reals$ and link $\psi : \R \to \R'$.
+	$(L, \psi)$ is \emph{$\mu$-consistent with respect to a property} $\gamma: \simplex \toto \R'$ for a distance $\mu:\R \times \R \to \reals_+$, if for all $D$ over $\X \times \Y$ with marginal distributions $D_x$, and 
 	\begin{equation}
-	\E_{(X,Y) \sim D} L(\psi \circ f_m(X), Y) \to \E_{(X,Y) \sim D} L( \gamma(D_X), Y) \implies \E_X \mu(\gamma(D_X), \psi \circ f_m(X)) \to 0~.~
+	\E_{D} L(f_m(X), Y) \to \inf_f \E_{D} L( f(X), Y) \implies \E_X \mu(\psi \circ f_m(X), \gamma(D_X)) \to 0~.~
 	\end{equation}
 	If $\mu$ has a set as input, define $\mu(S_1, S_2) = \inf_{s_1 \in S_1, s_2 \in S_2} \mu(s_1, s_2)$.
+	
+	We simply say the pair is consistent with respect to $\gamma$ if there is a distance $\mu$ such that $(L,\psi)$ are $\mu$-consistent with respect to $\gamma$.
 \end{definition}
 
 
@@ -248,7 +251,7 @@
 \begin{definition}[Calibrated]\label{def:calibrated-general}
 	A loss $L:\reals^d \times \Y \to \reals$ is \emph{calibrated} with respect to a loss $\ell : \R \times \Y \to \reals$ eliciting the property $\gamma$ if there is a link $\psi : \reals^d \to \R$ such that, for all distributions $p \in \simplex$, there exists a function $\zeta : \reals_+ \to \reals_+$ with $\zeta$ continuous at $0^+$ and $\zeta(0) = 0$ such that for all $u \in \reals^d$, we have
 	\begin{equation}\label{eq:calibrated-general}
-	\ell( \psi(u); p) - \ell(\gamma(p); p)  \leq \zeta \left(  L(u;p) - \risk{L}(p) \right)~.~
+	\ell( \psi(u); p) - \risk{\ell}(p)  \leq \zeta \left(  L(u;p) - \risk{L}(p) \right)~.~
 	\end{equation}
 \end{definition}
 \begin{definition}[Calibrated: Finite predictions]\label{def:calibrated-finite}
@@ -329,15 +332,20 @@ The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$
 If we are given a loss $\ell$, then we can string together Proposition~\ref{prop:consistent-implies-calibrated} and Lemma~\ref{lem:calib-implies-indir} to observe consistency $\implies$ calibration $\implies$ indirect elicitation.
 
 \jessie{Need to redo this}
-If we are just given the property $\gamma$ without a loss, assume that we have a sequence of measurable hypotheses $\{f_m\} \to f$ such that $\E_{(X,Y) \sim D} L(\psi \circ f_m(D_X), Y) \to \E_{(X,Y) \sim D} L(\gamma(D_X), Y)$.
-We must then have $\E_X \mu(\gamma(D_X), \psi \circ f_m(X)) \to 0$ by consistency.
-As in the proof of Proposition~\ref{prop:consistent-implies-calibrated}, this must be true for all $D_x$ for $x \in \X$, so we can abstract to distributions over $\simplex$.
-Now, by consistency, we have the expected losses converging implies $\{\psi \circ f_m\}$ is converging toward the optimal hypothesis for all possible inputs $x \in \X$.
+If we are just given the property $\gamma$ without a loss eliciting it, assume that we have a sequence of measurable hypotheses $\{f_m\} \to f$ such that $\E_{(X,Y) \sim D} L(\psi \circ f_m(D_X), Y) \to \inf_{f^*}\E_{(X,Y) \sim D} L(f^*(X), Y)$.
+We must then have $\E_X \mu(f_m(X), \Gamma(D_X)) \to 0$ by consistency.
+As in the proof of Proposition~\ref{prop:consistent-implies-calibrated}, this must be true for all $D$ with a point mass on one $x \in X$, so we can abstract to distributions over $\simplex$.
 
-Let $\Gamma$ be the property directly elicited by $L$.
-We have $\Gamma(D_x) = f(x)$ for all $x \in \X$, so we can see that the precedent being true implies $\mu(\psi \circ f_m(x), \gamma(p)) \to 0$ for all $p\in \simplex$.
-As $\mu$ is a distance, $\mu(\psi \circ f(x), \Gamma(p)) = \mu(\psi \circ \Gamma(p), \gamma(p)) = 0$ for all $p \in \simplex$, which implies $\gamma = \psi \circ \Gamma$.
-Therefore, $L$ must indirectly elicit the property $\gamma = \lim_{m \to \infty} \{\gamma_m\}$ via the link $\psi$.
+Fix $p \in \simplex = D_x$ and suppose we have $\{u_m\} \to u$ so that $f_m(x) = u_m$, so $\mu(u_m, \Gamma(p)) \to 0$ by consistency.
+As $\mu(x,y) = 0$ if and only if $x$ and $y$ share an element in common (since $\mu$ is a distance), we must have $u \in \Gamma(p)$.
+As $\gamma(p) = \{\psi(u) : u \in \Gamma(p)\}$, we then have $u \in \Gamma(p) \implies \psi(u) \in \gamma(p)$; hence, indirect elicitation.
+\jessie{Definitely missing some crucial details.}
+%Now, by consistency, we have the expected losses converging implies $\{\psi \circ f_m\}$ is converging toward the optimal hypothesis for all possible inputs $x \in \X$.
+%
+%Let $\Gamma$ be the property directly elicited by $L$.
+%We have $\Gamma(D_x) = f(x)$ for all $x \in \X$, so we can see that the precedent being true implies $\mu(\psi \circ f_m(x), \gamma(p)) \to 0$ for all $p\in \simplex$.
+%As $\mu$ is a distance, $\mu(\psi \circ f(x), \Gamma(p)) = \mu(\psi \circ \Gamma(p), \gamma(p)) = 0$ for all $p \in \simplex$, which implies $\gamma = \psi \circ \Gamma$.
+%Therefore, $L$ must indirectly elicit the property $\gamma = \lim_{m \to \infty} \{\gamma_m\}$ via the link $\psi$.
 \end{proof}
 
 
