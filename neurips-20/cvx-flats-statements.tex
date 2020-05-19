@@ -161,61 +161,11 @@
 
 \subsection{Notation}
 
-\section{Related work}\label{sec:related-work}
-
-\subsection{Property elicitation}\label{subsec:properties}
-
-\begin{definition}[Property, elicits, level set]
-	\jessiet{Don't like the notation here... fix later.}
-	A \emph{property} is a (possibly set-valued) function $\Gamma : \simplex \toto \R$ mapping distributions to reports.
-	A loss $L : \R \times \Y \to \reals_+$ \emph{elicits} the property $\Gamma$ if,
-	\begin{equation}
-	\forall p \in \simplex, \;\; \Gamma(p) = \arginf_{u \in \R}\inprod{p}{L(u)}
-	\end{equation}
-	Moreover, we call a \emph{level set} $\Gamma_r := \{p \in \simplex : r \in \Gamma(p)\}$ to be the set of distributions for which reporting $u$ minimizes the expected loss of the loss eliciting $\Gamma$.
-\end{definition}
-
-\begin{definition}[Indirect Elicitation]\label{def:indirectly-elicits}
-\jessiet{Explain to reader why this is a good def. Made note in original doc.}
-	A loss $L$ \emph{indirectly elicits} a property $\gamma:\simplex \toto \R'$ if it elicits a property $\Gamma: \simplex \toto \R$ such that there is a function $\psi:\R \to \R'$ such that for all $r \in \R$, we have $\Gamma_r \subseteq \gamma_{\psi(r)}$.
-\end{definition}
-
-
-\subsubsection{Elicitation Complexity}\label{subsec:elic-cplx}
-
-\begin{definition}[Convex Elicitation Complexity]
-	The \emph{convex elicitation complexity} of a property $\eliccvx(\Gamma)$ is the minimum dimension $d$ such that there is a convex loss $L : \reals^d \times \Y \to \reals$ indirectly eliciting $\Gamma$.
-\end{definition}
-%\jessie{Just introduce cvx definitions.  Combine two bracketed lines from Raf's notes.  Just define the convex version.  Want to use def 2 with set-valued properties.}
-
+\section{Background and Related work}\label{sec:related-work}
 
 \subsection{Consistency and calibration for convex losses}\label{subsec:convex-surrogates}
 
-\begin{definition}[Consistent: loss]
-	Let $\{f_m : \X \to \R\}$ be a sequence of hypothesis functions.
-	A loss and link $(L,\psi)$ are consistent with respect to an original loss $\ell$ if, for all distributions $D$ over input and label spaces $\X \times\Y$, 
-	\begin{align*}
-	\E_D L(f_m(X), Y) \to \inf_f \E_D L(f(X), Y) &\implies \E_D \ell((\psi \circ f_m)(X), Y) \to \inf_f \E_D \ell((\psi \circ f)(X), Y)~.~
-	\end{align*}
-\end{definition}
 
-%\raf{Issues with the definition:
-%\begin{enumerate}
-%\item Good to clarify $d:\R\times\R\to\reals_+$ -- done
-%\item We have two $d$'s so we'll need a new letter... -- changed to $\mu$
-%\item $D_X$ is not defined, but I got it -- clarified it was the marginal distribution
-%\item You can't take an expectation over $\R$ values (not necessarily a subset of a vector space) and want the expectation over $X$ on the outside
-%\end{enumerate}
-%At this point I lost the thread. It looks like you're missing the hypothesis function, and $\Gamma(D)$ doesn't seem to type check -- but perhaps $\Gamma(D)$ was meant to depend on $X$ and be the hypothesis? -- and the implication also seems backwards.}
-\begin{definition}[Consistent: property]
-	Suppose we are given a loss $L : \R \times \Y \to \reals$ and link $\psi : \R \to \R'$.
-	$(L, \psi)$ is \emph{$\mu$-consistent with respect to a property} $\gamma: \simplex \toto \R'$ for a function $\mu^\gamma:\R' \times \simplex \to \reals_+$ with $\mu^\gamma(r,p) = 0 \iff r \in \gamma(p)$, if for all $D$ over $\X \times \Y$ with marginal distributions $D_x$, and sequences $\{f_m: \X \to \R\}$, 
-	\begin{equation}
-	\E_{D} L(f_m(X), Y) \to \inf_f \E_{D} L( f(X), Y) \implies \E_X \mu^\gamma(\psi \circ f_m(X), D_X) \to 0~.~
-	\end{equation}
-	
-	We simply say the pair is consistent with respect to $\gamma$ if there is a distance $\mu^\gamma$ such that $(L,\psi)$ are $\mu$-consistent with respect to $\gamma$.
-\end{definition}
 
 
 %%I don't think we're going to need this definition...
@@ -246,12 +196,7 @@
 %\end{proof}
 
 
-\begin{definition}[Calibrated]\label{def:calibrated-general}
-	A loss $L:\reals^d \times \Y \to \reals$ is \emph{calibrated} with respect to a loss $\ell : \R \times \Y \to \reals$ eliciting the property $\gamma$ if there is a link $\psi : \reals^d \to \R$ such that, for all distributions $p \in \simplex$, there exists a function $\zeta : \reals_+ \to \reals_+$ with $\zeta$ continuous at $0^+$ and $\zeta(0) = 0$ such that for all $u \in \reals^d$, we have
-	\begin{equation}\label{eq:calibrated-general}
-	\ell( \psi(u); p) - \risk{\ell}(p)  \leq \zeta \left(  L(u;p) - \risk{L}(p) \right)~.~
-	\end{equation}
-\end{definition}
+
 \begin{definition}[Calibrated: Finite predictions]\label{def:calibrated-finite}
 	Let $\ell : \R \times \Y \to \reals_+$ be a discrete loss eliciting the property $\gamma$.
 	A surrogate loss $L : \reals^d \times \Y \to \reals_+$  and link $\psi:\reals^d \to \R$ pair $(L, \psi)$ is \emph{calibrated} with respect to $\ell$ if 
@@ -264,8 +209,50 @@
 The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$ is the minimum dimension $d$ such that there is a convex loss $L: \reals^d \times \Y \to \reals$ and link $\psi$ such that $L$ is calibrated with respect to $\ell$.
 \end{definition}
 
+\subsection{Property elicitation}\label{subsec:properties}
 
-\section{Characteristics of Consistent Convex Surrogates}\label{sec:char-convex}
+\begin{definition}[Property, elicits, level set]
+	\jessiet{Don't like the notation here... fix later.}
+	A \emph{property} is a (possibly set-valued) function $\Gamma : \simplex \toto \R$ mapping distributions to reports.
+	A loss $L : \R \times \Y \to \reals_+$ \emph{elicits} the property $\Gamma$ if,
+	\begin{equation}
+	\forall p \in \simplex, \;\; \Gamma(p) = \arginf_{u \in \R}\inprod{p}{L(u)}
+	\end{equation}
+	Moreover, we call a \emph{level set} $\Gamma_r := \{p \in \simplex : r \in \Gamma(p)\}$ to be the set of distributions for which reporting $u$ minimizes the expected loss of the loss eliciting $\Gamma$.
+\end{definition}
+
+\begin{definition}[Indirect Elicitation]\label{def:indirectly-elicits}
+	\jessiet{Explain to reader why this is a good def. Made note in original doc.}
+	A loss $L$ \emph{indirectly elicits} a property $\gamma:\simplex \toto \R'$ if it elicits a property $\Gamma: \simplex \toto \R$ such that there is a function $\psi:\R \to \R'$ such that for all $r \in \R$, we have $\Gamma_r \subseteq \gamma_{\psi(r)}$.
+\end{definition}
+
+
+\subsubsection{Elicitation Complexity}\label{subsec:elic-cplx}
+
+\begin{definition}[Convex Elicitation Complexity]
+	The \emph{convex elicitation complexity} of a property $\eliccvx(\Gamma)$ is the minimum dimension $d$ such that there is a convex loss $L : \reals^d \times \Y \to \reals$ indirectly eliciting $\Gamma$.
+\end{definition}
+%\jessie{Just introduce cvx definitions.  Combine two bracketed lines from Raf's notes.  Just define the convex version.  Want to use def 2 with set-valued properties.}
+
+
+\section{Consistency implies indirect elicitation}\label{sec:consis-implies-indir}
+\begin{definition}[Consistent: loss]
+	Let $\{f_m : \X \to \R\}$ be a sequence of hypothesis functions.
+	A loss and link $(L,\psi)$ are consistent with respect to an original loss $\ell$ if, for all distributions $D$ over input and label spaces $\X \times\Y$, 
+	\begin{align*}
+	\E_D L(f_m(X), Y) \to \inf_f \E_D L(f(X), Y) &\implies \E_D \ell((\psi \circ f_m)(X), Y) \to \inf_f \E_D \ell((\psi \circ f)(X), Y)~.~
+	\end{align*}
+\end{definition}
+
+\begin{definition}[Consistent: property]
+	Suppose we are given a loss $L : \R \times \Y \to \reals$ and link $\psi : \R \to \R'$.
+	$(L, \psi)$ is \emph{$\mu$-consistent with respect to a property} $\gamma: \simplex \toto \R'$ for a function $\mu^\gamma:\R' \times \simplex \to \reals_+$ with $\mu^\gamma(r,p) = 0 \iff r \in \gamma(p)$, if for all $D$ over $\X \times \Y$ with marginal distributions $D_x$, and sequences $\{f_m: \X \to \R\}$, 
+	\begin{equation}
+	\E_{D} L(f_m(X), Y) \to \inf_f \E_{D} L( f(X), Y) \implies \E_X \mu^\gamma(\psi \circ f_m(X), D_X) \to 0~.~
+	\end{equation}
+	
+	We simply say the pair is consistent with respect to $\gamma$ if there is a distance $\mu^\gamma$ such that $(L,\psi)$ are $\mu$-consistent with respect to $\gamma$.
+\end{definition}
 
 \jessie{Should this also be a lemma instead of a proposition?}
 \begin{proposition}\label{prop:consistent-implies-calibrated}
@@ -274,17 +261,17 @@ The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$
 \end{proposition}
 \begin{proof}
 	\jessie{Contrapositive.
-	Not calibrated means there is a sequence $\{u_m\}$ such that $R_L(u_m; p) \to 0$ but $R_\ell(\psi(u_m); p) \not \to 0$ via Lemma~\ref{lem:calib-converging-regrets}.
-	Take $D = D_x = p$ for some $x \in \X$, and any sequence of functions $\{f_m\} \to f$ with $f_m(x) = u_m$ for all $f_m$. 
-	Now we have $\E_D L(f_m(X), Y) \to \inf_f \E_D L(f(X), Y)$, but $\E_D \ell(\psi(f(X)), Y) \not \to \inf_f \E_D \ell(\psi(f(X)), Y)$, and therefore $(L, \psi)$ is not calibrated with respect to $\ell$. 
-}
+		Not calibrated means there is a sequence $\{u_m\}$ such that $R_L(u_m; p) \to 0$ but $R_\ell(\psi(u_m); p) \not \to 0$ via Lemma~\ref{lem:calib-converging-regrets}.
+		Take $D = D_x = p$ for some $x \in \X$, and any sequence of functions $\{f_m\} \to f$ with $f_m(x) = u_m$ for all $f_m$. 
+		Now we have $\E_D L(f_m(X), Y) \to \inf_f \E_D L(f(X), Y)$, but $\E_D \ell(\psi(f(X)), Y) \not \to \inf_f \E_D \ell(\psi(f(X)), Y)$, and therefore $(L, \psi)$ is not calibrated with respect to $\ell$. 
+	}
 	
 	Let $\gamma$ be the property elicited by $\ell$.
 	Suppose $(L,\psi)$ is not calibrated with respect to $\ell$; we will show they are not consistent with respect to $\ell$ either.
 	$(L, \psi)$ not calibrated with respect to $\ell$ means that there is some distribution $p \in \simplex$ such that there is no function $\zeta : \reals_+ \to \reals_+$ with $\zeta(0) = 0$ and continuous at $0^+$ such that, for all $u \in \reals^d$, we have $\ell(\psi(u); p) - \risk{\ell}(p) \leq \zeta(L(u;p) - \risk{L}(p))$. 
 	In other words, for all $\zeta$ satisfying the assumptions, we have $\ell(\psi(u); p) - \risk{\ell}(p) > \zeta(L(u;p) - \risk{L}(p))$ for some $u \in \reals^d$.
 	In particular, there must exist a sequence $\{u_m\}$ so that $L(u_m;p) \to \risk{L}(p)$.
-		
+	
 	
 	Now consider the data distribution $D$ that has a point mass on some $x \in \X$, where $p = D_x$.
 	Moreover, let $f_m$ be any sequence of functions with $f_m(x) = u_m$ for all $m$.
@@ -292,31 +279,6 @@ The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$
 	This gives $\ell(\psi(u_m);p) > \risk{\ell}(p) + \epsilon_m$ for all $m$, and $\epsilon_m \to 0$.
 	We can now observe that we do not have consistency as $\ell(\psi(u_m); p) \not \to \risk{\ell}(p)$.
 	Therefore, if $(L, \psi)$ are consistent with respect to $\ell$, they are also calibrated with respect to $\ell$.
-	
-	
-%commented out May 14, 2020 to adapt Hari/Shivani's proof
-%Since consistency must hold for all $D$ over $\X \times \Y$, let us focus on distributions $D$ such that the probability of any $x \in \X$ is a point mass.
-%If consistency implies calibration for the marginal distributions $D_x$ for all $x \in \X$, then it holds for all $D$.
-%Now, for such distributions, we have 
-%\begin{align*}
-%\E_{D_x} L(f_m(x), Y) \to \inf_f \E_{D_x} L(f(x), Y) &\implies \E_{D_x} \ell((\psi \circ f_m)(x), Y) \to \inf_f \E_{D_x} \ell((\psi \circ f)(x), Y)~,~
-%\end{align*}
-%for all $x \in \X.$
-%This allows us to focus on $p \in \simplex$, abstracting away hypothesis classes to consider general predictions $u$.
-%
-%Now, fix $p \in \simplex$.
-%We proceed in two cases; first, when we approach the optimal loss, then when we do not. 
-%If $L(u;p) \to \inf_{u'} L(u';p)$, then $\ell(\psi(u); p) \to \inf_{r}\ell(r; p)$.
-%Substituting into~\eqref{eq:calibrated-general}, we see the bound is satisfied by any function $\zeta$ satisfying calibration requirements; namely, $\zeta(0) = 0$ and continuity at $0$.
-%%%adapting tewari proof
-%%%Suppose $(L, \psi)$ is calibrated with respect to $\ell$ but there exists $\epsilon > 0$ and seequence $\{p_m\}$ such that $\ell(\psi(u_m); p_m) \leq \inf_r\ell(r;p_m) - \epsilon$ and $\left(L(u_m;p_m) - \inf_{u'}L(u'; p_m)\right) \to 0$.
-%%%Since $\{p_m\}$ comes from a compact set, there is a convergent subsequence that limits to $p$.
-%%%As $\risk{L}$ is continuous over $\simplex$, we get $L(u_m; p_m) \to \inf_{u'} L(u'; p)$.
-%
-%\jessie{I'm not 100\% sure this is the \emph{only} case... this is what isn't covered by Tewari's proof~\cite[Appendix A; pf of thm 2]{tewari2007consistency}}
-%Now if $L(u;p) \not \to \inf_{u'}L(u; p)$, we do not know anything about the convergence of $\ell$.
-%However, if there was distribution $p \in \simplex$ such that $\ell(\psi(u); p) - \inf_r \ell(r;p) > \zeta(L(u;p) - \inf_{u'} L(u';p))$ for all strictly increasing functions $\zeta$, it must be because there exists a $u'$ so that $L(u';p) > L(u;p), \ell(\psi(u); p) = \infty$, and $\ell(\psi(u'); p) < \infty$.
-%However, we cannot have $\ell(\psi(u); p) = \infty$ unless $\ell$ was allowed to take on infinite values, which we do not allow in the definition of $\ell$.
 \end{proof}
 
 \begin{lemma}\label{lem:calib-implies-indir}
@@ -342,20 +304,20 @@ The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$
 	If a surrogate and link pair $(L, \psi)$ is consistent with respect to a property $\gamma$ or loss $\ell$ eliciting $\gamma$, then $L$ indirectly elicits $\gamma$.
 \end{theorem}
 \begin{proof}
-As consistency with respect to $\ell$ implies consistency with respect to $\gamma := \prop{\ell}$ (Lemma~\ref{lem:consistent-loss-implies-prop}), it suffices to show the result for consistency with respect to a property $\gamma$.
-
-We show the contrapositive; suppose $(L, \psi)$ is not consistent with respect to $\gamma$, and take $\Gamma := \prop{L}$.
-Then there is a distribution $p \in \simplex$ so that $u \in \Gamma(p)$ but $\psi(u) \not \in \gamma(p)$.
-Consider the constant sequence $\{u_m\} = u$ for all $m$.
-
-We then consider a distribution $D = D_x = p$ for some $x \in \X$ and any sequence $\{f_m\}$ so that $f_m(x) = u_m$ for all $m$.
-This yields $\E_D L(f_m(X), Y) \to \inf_f L(f(X),Y)$ since $u \in \Gamma(p)$.
-However, we have $\mu(\psi(u_m), \gamma(p)) \not \to 0$ as $\mu(\psi(u), \gamma(p)) \neq 0$, since $\psi(u) \not \in \gamma(p)$ and the sequence is constant.
-Hence, we do not have consistency.
+	As consistency with respect to $\ell$ implies consistency with respect to $\gamma := \prop{\ell}$ (Lemma~\ref{lem:consistent-loss-implies-prop}), it suffices to show the result for consistency with respect to a property $\gamma$.
+	
+	We show the contrapositive; suppose $(L, \psi)$ is not consistent with respect to $\gamma$, and take $\Gamma := \prop{L}$.
+	Then there is a distribution $p \in \simplex$ so that $u \in \Gamma(p)$ but $\psi(u) \not \in \gamma(p)$.
+	Consider the constant sequence $\{u_m\} = u$ for all $m$.
+	
+	We then consider a distribution $D = D_x = p$ for some $x \in \X$ and any sequence $\{f_m\}$ so that $f_m(x) = u_m$ for all $m$.
+	This yields $\E_D L(f_m(X), Y) \to \inf_f L(f(X),Y)$ since $u \in \Gamma(p)$.
+	However, we have $\mu(\psi(u_m), \gamma(p)) \not \to 0$ as $\mu(\psi(u), \gamma(p)) \neq 0$, since $\psi(u) \not \in \gamma(p)$ and the sequence is constant.
+	Hence, we do not have consistency.
 \end{proof}
 
+\section{Characteristics of Consistent Convex Surrogates}\label{sec:char-convex}
 
-\subsection{On dimensionality of consistent convex surrogates}
 \begin{definition}[Flat]
 	A \emph{flat} $F$ of $\reals^n$ is an affine subspace of $\reals^n$.
 	In other words, $F\subseteq \reals^n$ can be written $F=\{x\in\reals^n : Wx + b = 0\}$ for some $W\in\reals^{d\times n}$ and $b\in\reals^d$ where $d\leq n$.
@@ -482,7 +444,16 @@ Nishant, Adam
 
 \newpage
 \appendix
-\section{Omitted proofs}
+\section{A general notion of calibration}
+
+\begin{definition}[Calibrated]\label{def:calibrated-general}
+	A loss $L:\reals^d \times \Y \to \reals$ is \emph{calibrated} with respect to a loss $\ell : \R \times \Y \to \reals$ eliciting the property $\gamma$ if there is a link $\psi : \reals^d \to \R$ such that, for all distributions $p \in \simplex$, there exists a function $\zeta : \reals_+ \to \reals_+$ with $\zeta$ continuous at $0^+$ and $\zeta(0) = 0$ such that for all $u \in \reals^d$, we have
+	\begin{equation}\label{eq:calibrated-general}
+	\ell( \psi(u); p) - \risk{\ell}(p)  \leq \zeta \left(  L(u;p) - \risk{L}(p) \right)~.~
+	\end{equation}
+\end{definition}
+
+Consider the following four conditions:
 \begin{enumerate}
 	\item [A] $\zeta:\reals \to \reals_+$ satisfies $\zeta : 0 \mapsto 0$ and is continuous at $0$.
 	\item [B] $\epsilon_m \to 0 \implies \zeta(\epsilon_m) \to 0$.
@@ -542,21 +513,24 @@ Nishant, Adam
 \end{proof}
 
 \begin{lemma}\label{lem:calib-converging-regrets}
-	A surrogate and link $(L,\psi)$ are calibrated (via definition~\ref{def:calibrated-general}) with respect to $\ell$ if and only if, for all $p \in \simplex$ and sequences $\{u_m\}$ so that $R_L(u_m; p) \to 0$, we have $R_\ell(\psi(u_m); p) \to 0$.
+	A continuous surrogate and link $(L,\psi)$ are calibrated (via definition~\ref{def:calibrated-general}) with respect to $\ell$ if and only if, for all $p \in \simplex$ and sequences $\{u_m\}$ so that $R_L(u_m; p) \to 0$, we have $R_\ell(\psi(u_m); p) \to 0$.
 \end{lemma}
 \begin{proof}
 	$\implies$ Take a sequence $\{u_m\}$ so that $R_L(u_m;p) \to 0$.
 	Since $\zeta(0) = 0$ and $\zeta$ is continuous at $0$, $\zeta(R_L(u_m;p)) \to 0$ by calibration.
 	As regret is nonnegative, we then have $R_\ell(\psi(u_m); p) \to 0$
 	
-	$\impliedby$ Consider $\zeta(c) := \inf_{u: R_L(u;p) \geq c} R_\ell(\psi(u); p)$.for nonnegative values of $c$, and $\zeta(c) = 0$ for $c < 0$.
+	$\impliedby$ Consider $\zeta(c) := \sup_{u: R_L(u;p) \leq c} R_\ell(\psi(u); p)$.for nonnegative values of $c$, and $\zeta(c) = 0$ for $c < 0$.
 	We will show $R_L(u_m; p) \to 0 \implies R_\ell(\psi(u_m); p) \to 0$ gives calibration via the function $\zeta$ constructed above. 
 	
-	\jessie{Outline: 1. $\zeta$ satisfies requirements (A).  2. Verify bound is true as approach $0$ by assumption on regrets. 3. Verify bound is true elsewhere by construction of $\zeta$.}
+	\jessie{Outline: 1. $\zeta$ satisfies requirements (A).  2. Verify bound is true elsewhere by construction of $\zeta$.}
 	
-	First, we can verify that $\zeta$ as constructed maps is continuous at $0$ and $\zeta(0) = 0$.
-	\jessie{continuous: TODO}
-	As $\risk{L}$ and $\risk{\ell}$ are well-defined for all $p \in \simplex$, taking $u = \Gamma(p)$ yields $\zeta(0) = \inf_u (R_\ell(\psi(u); p))$, which is $0$ as long as there is some $u$ so that $\psi(u) = \gamma(p)$ for each $p \in \simplex$.
+	First, we can verify that $\zeta$ as constructed is continuous at $0$ and $\zeta(0) = 0$.
+	As $c < 0 \implies \lim_{c \to 0^-} \zeta(c) = 0$, we need to show first that $\lim_{c \to 0^+} \zeta(c) = 0$ and $\zeta(0) = 0$.
+	Consider $\{u_m\}$ so that $R_L(u_m;p) \to 0$. Since $R_\ell(\psi(u_m); p) \to 0$, we have the supremum of a function continuous (at $0^+$) is also continuous at $0^+$, so we have $\lim_{c \to 0^+} \zeta(c) = 0$. 
+	
+	As $\risk{L}$ and $\risk{\ell}$ are well-defined for all $p \in \simplex$, taking any $\{u_m\} \to u \in \Gamma(p)$ yields $\zeta(0) = \sup_{u':R_L(u;p) = 0} (R_\ell(\psi(u'); p)) = \lim_{m \to \infty} R_\ell(\psi(u_m); p) = 0$, with equality following since $\{u_m\}$ is arbitrary. \jessie{Not super happy with this, but I also think I'm making it more complicated than it needs to be.}
+
 	
 	Second, we want to verify that the bound in Equation~\ref{eq:calibrated-general} holds as regrets approach $0$.
 	Fix $p \in \simplex$.
@@ -564,7 +538,10 @@ Nishant, Adam
 	As $R_\ell(\psi(u_m); p) \to 0$, then $\zeta$ of surrogate regret upper bounds discrete regret as surrogate regret gets arbitrarily close to $0$.
 	
 	Last, we observe that the bound in Equation~\eqref{eq:calibrated-general} is satisfied for $\{u_m\} \not \to 0$ by construction of $\zeta$.	
-	\jessie{TODO}
+	
+	Suppose $R_\ell(\psi(u);p) = c$.
+	For all $u \in \reals^d$, calibration via $\zeta$ yields $R_\ell(\psi(u);p) \leq \sup_{u' : R_L(u';p) \leq R_L(u,p)} R_\ell(\psi(u') ; p)$.
+	As $u$ is in the space of the supremum ($R_L(u;p) \leq R_L(u;p)$), we then have calibration by definition of the supremum.
 \end{proof}
 
 
