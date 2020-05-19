@@ -246,6 +246,8 @@ The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$
 
 \begin{definition}[Consistent: property]
 	Suppose we are given a loss $L : \R \times \Y \to \reals$ and link $\psi : \R \to \R'$.
+  \raft{You have $\mu$ and $\mu^\gamma$; I'd vote just $\mu$.  We'll want to change $\mu$ to something else eventually anyway, so maybe a macro unless we're sure $\mu$ won't show up elsewhere.}
+  \raft{Maybe clearer this way: Introduce $L,\psi,\gamma$.  Then intro $\mu$ as any such function.  Then the def.}
 	$(L, \psi)$ is \emph{$\mu$-consistent with respect to a property} $\gamma: \simplex \toto \R'$ for a function $\mu^\gamma:\R' \times \simplex \to \reals_+$ with $\mu^\gamma(r,p) = 0 \iff r \in \gamma(p)$, if for all $D$ over $\X \times \Y$ with marginal distributions $D_x$, and sequences $\{f_m: \X \to \R\}$, 
 	\begin{equation}
 	\E_{D} L(f_m(X), Y) \to \inf_f \E_{D} L( f(X), Y) \implies \E_X \mu^\gamma(\psi \circ f_m(X), D_X) \to 0~.~
@@ -258,6 +260,7 @@ The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$
 \begin{proposition}\label{prop:consistent-implies-calibrated}
 	If a (continuous) loss and link $(L, \psi)$ are consistent with respect to a loss $\ell$, then they are calibrated with respect to $\ell$.
 	\jessiet{Probably appendix later; also, should this be a lemma instead of a proposition?}
+  \raft{Do we define ``continuous loss''?  Maybe ``(not necessarily discrete)'' is clearer.}
 \end{proposition}
 \begin{proof}
 %	\jessie{Intuition: Contrapositive.
@@ -268,7 +271,8 @@ The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$
 
 	We show the contrapositive.
 	If $(L, \psi)$ are not calibrated with respect to $\ell$, then there is a sequence $\{u_m\}$ such that $R_L(u_m; p) \to 0$ but $R_\ell(\psi(u_m); p) \not \to 0$ via Lemma~\ref{lem:calib-converging-regrets}.
-	Take $D = D_x = p$ for some $x \in \X$, and any sequence of functions $\{f_m\} \to f$ with $f_m(x) = u_m$ for all $f_m$. 
+	Take $D = D_x = p$ for some $x \in \X$, and any sequence of functions $\{f_m\} \to f$ with $f_m(x) = u_m$ for all $f_m$.
+  \raft{Type error with $D=D_x$; see AA15 for how they phrase}
 	Now we have $\E_D L(f_m(X), Y) \to \inf_f \E_D L(f(X), Y)$, but $\E_D \ell(\psi(f(X)), Y) \not \to \inf_f \E_D \ell(\psi(f(X)), Y)$, and therefore $(L, \psi)$ is not calibrated with respect to $\ell$. 
 	
 % Commented 05.19.2020 to simplify with proof of lemma~\ref{lem:calib-converging-regrets}.
@@ -311,6 +315,8 @@ The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$
 	&\iff \E_D \ell(\psi(f_m(X)), Y) - \inf_f \ell(\psi(f(X)), Y) \to 0 \\
 	&\implies \E_X R_\ell(\psi(f_m(X)), D_X) \to 0~.~
 	\end{align*}
+  \raft{Close; missing expectation inside inf, and I think you can skip the first $\iff$ and give the $\implies$ as an $\iff$ (right?), and then follow with a second $\iff$ with $\mu$.}
+  \raft{BTW, I think it's less messy to use $\psi \circ f_m(X)$ as above}
 	As regret defines $\mu^\gamma$ and tends to $0$, we observe consistency with respect to $\gamma$.
 \end{proof}
 
@@ -318,14 +324,19 @@ The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$
 	If a surrogate and link pair $(L, \psi)$ is consistent with respect to a property $\gamma$ or loss $\ell$ eliciting $\gamma$, then $L$ indirectly elicits $\gamma$.
 \end{theorem}
 \begin{proof}
+  \raft{Maybe ref the consistency definition here explicitly, at the top and the end}
 	As consistency with respect to $\ell$ implies consistency with respect to $\gamma := \prop{\ell}$ (Lemma~\ref{lem:consistent-loss-implies-prop}), it suffices to show the result for consistency with respect to a property $\gamma$.
-	
+  
 	We show the contrapositive; suppose $(L, \psi)$ does not indirectly elicit $\gamma$, and take $\Gamma := \prop{L}$.
+  \raft{Oh good!  I was going to say we should use this way of stating indirect elicitation (``$(L, \psi)$ indirectly elicits $\gamma$'') when we define it above, and use it.  We can then also define the version without $\psi$ easily.}
 	Then there is a distribution $p \in \simplex$ so that $u \in \Gamma(p)$ but $\psi(u) \not \in \gamma(p)$.
 
-	Consider the constant sequence $\{u_m\} = u$ for all $m$, a distribution $D$ with point mass on $x$ and $D_x = p$, and any sequence $\{f_m\}$ so that $f_m(x) = u_m$ for all $m$.
+	Consider the constant sequence $\{u_m\} = u$\raft{$\{u_m\}$ with $u_m = u$} for all $m$, a distribution $D$ with point mass on $x$ and $D_x = p$, and any sequence $\{f_m\}$ so that $f_m(x) = u_m$ for all $m$.
+  \raft{Check $D$ wording here too}
 	This yields $\E_D L(f_m(X), Y) \to \inf_f L(f(X),Y)$ since $u \in \Gamma(p)$.
+  \raft{Maybe clearer to first say $\E_D L(f_m(X), Y) = \inf_f L(f(X),Y)$ for all $m$, and then the easy implication of the convergence}
 	However, we have $\mu(\psi(u_m), \gamma(p)) \not \to 0$ as $\mu(\psi(u), \gamma(p)) \neq 0$ (since $\psi(u) \not \in \gamma(p)$) and the sequence is constant.
+  \raft{Almost -- just clarify that this is the expectation over $D$ too by construction}
 	Thus, we do not have consistency.
 \end{proof}
 
