@@ -446,6 +446,62 @@ The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$
 \section{Continuous-valued predictions}\label{sec:contin-consis}
 
 
+\newcommand{\lbar}{\underline{L}} % couldn't do L* while proofreading...
+\newcommand{\iden}{\mathrm{iden}}
+\newcommand{\Var}{\mathrm{Var}}
+
+\begin{lemma}[\cite{frongillo2018elicitation}]
+  \label{lem:elic-complex-bayes-concave}
+  Suppose the loss $L$ elicits $\Gamma:\simplex\to\R$.
+  Let $\lbar$ be the Bayes risk of $L$.
+  Then for any $p,p'\in\simplex$ with $\Gamma(p)\neq\Gamma(p')$, we have $\lbar(\lambda p + (1-\lambda) p') > \lambda \lbar(p) + (1-\lambda) \lbar(p')$ for all $\lambda\in(0,1)$.
+\end{lemma}
+
+\begin{definition}
+  A property $\Gamma:\simplex\to\R$ is \emph{$d$-identifiable} if its level sets are flats of co-dimension at most $d$ intersected with $\simplex$.
+  \raft{Update to be consistent with our definitions / notation / conventions.  I'd vote for using co-dimension since it makes so much of the analysis easier...  Could make more formal too.}
+  We write $\iden(\Gamma) = \min\{d \in \N : \Gamma\text{ is $d$-identifiable}\}$.
+\end{definition}
+
+\raf{A modification of the argument of \citet[Corollary 7]{frongillo2018elicitation}}
+
+\begin{theorem}
+  \label{thm:bayes-risk-lower-bound}
+  Let $L$ elicit some identifiable $\Gamma:\simplex\to\reals^d$ with $\iden(\Gamma)=d$.
+  If $\lbar$ is non-constant on every non-singleton level set of $\Gamma$, then $\eliccvx(\lbar) \geq \min(d+1,n-1)$.
+\end{theorem}
+\begin{proof}
+  Suppose for a contradiction that we have some convex-elicitable property $\hat\Gamma:\simplex\to\reals^d$ and link $\psi : \reals^d \to \reals$ such that $\lbar = \psi \circ \hat\Gamma$.
+  The condition $\elic_\I(\Gamma)=d$ implies that $\Gamma$ is $d$-identifiable but not $(d-1)$-identifiable, and thus there must be some level set $\Gamma_r$ which is a flat of dimension $n-d-1$.
+  \raft{What I mean is you can't describe $\Gamma_r$ using a flat of another dimension; revisit once we settle terminology}
+
+  The proof of \citet[Theorem 4]{frongillo2018elicitation} argues that $\hat\Gamma$ must refine $\Gamma$, in the sense that every level set of $\hat\Gamma$ is contained in a level set of $\Gamma$; for completeness we give the argument here.
+  Suppose for a contradiction that we have $p,p'$ with $\hat\Gamma(p)=\hat\Gamma(p')$ but $\Gamma(p) \neq \Gamma(p')$.
+  As $\lbar = \psi \circ \hat\Gamma$, we also have $\lbar(p) = \lbar(p')$.
+  Letting $p'' = \tfrac 1 2 p +  \tfrac 1 2 p'$, Lemma~\ref{lem:elic-complex-bayes-concave} would then give us $\lbar(p'') >  \tfrac 1 2 \lbar(p) +  \tfrac 1 2 \lbar(p') = \lbar(p)$.
+  By \citet{osband1985providing}, the level sets $\hat\Gamma_{\hat r}$ are convex, giving $\hat\Gamma(p'') = \hat\Gamma(p)$, which would imply $\lbar(p'')=\lbar(p)$, contradicting $\lbar = \psi \circ \hat\Gamma$.
+  We conclude $\hat\Gamma$ must refine $\Gamma$, and in particular, we must have $\hat\Gamma_{\hat r} \subseteq \Gamma_r$ for some $\hat r\in\hat\Gamma(\simplex)$.
+  % The proof of \cite[Theorem 4]{frongillo2018elicitation} argues that $\hat\Gamma$ must refine $\Gamma$, in the sense that for all $\hat r \in \hat\Gamma(\simplex)$ we have $\hat\Gamma_{\hat r} \subseteq \Gamma_r$ for some $r\in\reals^k$.
+  
+  By Theorem~\ref{thm:cvx-flats}, as $\hat\Gamma$ is $d$-convex elicitable $\hat\Gamma_{\hat r}$ is the union of flats of dimension $n-d-1$ interesected with $\simplex$.
+  \raft{Should flesh out this next step; this is the key step}
+  As $\hat\Gamma_{\hat r} \subseteq \Gamma_r$ and $\Gamma_r$ is a flat of dimension $n-d-1$ interesected with $\simplex$, we conclude $\hat\Gamma_{\hat r} = \Gamma_r$.
+  Since by assumption $\lbar$ is non-constant on $\Gamma_r = \hat\Gamma_{\hat r}$, we have distributions $p,p' \in\hat\Gamma_{\hat r}$ with $\lbar(p)\neq\lbar(p')$, which again contradicts $\lbar = \psi \circ \hat\Gamma$.
+  \raft{We actually needed $\Gamma_r$ to be a non-singleton for this last step; otherwise we need to conclude the $n-1$ case; revisit after flat/dimension stuff}
+\end{proof}
+
+
+\subsection{Examples \raf{all informal for now}}
+
+Both these results exactly match what Ian and I showed for the class of identifiable properties, which is super interesting...
+\begin{itemize}
+\item Variance: $\iden(\E Y) = 1$, and over $\simplex$ every non-singleton level set of $\E Y$ has different variances, so the theorem gives $\eliccvx(\Var) \geq 2$.  We then have the matching upper bound since $L(r,y) = (r_1-y)^2 + (r_2-y^2)^2$ is convex in $r$, and we can link to $\Var$ from there.
+\item Entropy and norms: In fact, \emph{any} strictly convex/concave function $G$ of $p$ will do here.  You can write it as the Bayes risk (or negative Bayes risk) of a strictly proper scoring rule, which elicits the full distribution $\Gamma(p) = p$.  Since $\iden(\Gamma) = n-1$ since you don't actually need the $n$th coordinate, you have $\eliccvx(G) = n-1$; the upper bound comes from the fact that you can elicit the full distribution with a convex loss and just compute $G$.
+\end{itemize}
+
+
+
+
 
 \newpage
 
