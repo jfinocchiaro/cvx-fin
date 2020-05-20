@@ -152,9 +152,9 @@
 	In prediction tasks, one typically seeks to minimize \emph{empirical risk} by learning a hypothesis function making predictions from a given feature vector about a desired future outcome.
 	This hypothesis is learned by minimizing a loss function over a set of labeled training data.
 	However, as not all loss functions are easily optimized, one often wishes to optimize a \emph{surrogate loss} yielding the same statistical guarantees as the original.
-	In this paper, we are specifically interested in the construction of \emph{consistent} surrogate losses that are ``efficient'' in the dimension of their input.
+	In this paper, we are specifically interested in the construction of \emph{consistent} surrogate losses; bonus points if they are ``efficient'' in the dimension of their input.
 	We observe a connection between consistent surrogates and indirect property elicitation, which allows us to apply property elicitation complexity results to the minimal dimension of a consistent surrogate.
-	In particular, we characterize the minimal input dimension needed in order to construct a \emph{convex}, consistent surrogate using tools from property elicitation.
+	We also extend the notion of consistency to properties, so that we may understand when one can construct a convex, consistent surrogate without requiring an original loss.
 \end{abstract}
 
 \section{Introduction}\label{sec:intro}
@@ -276,7 +276,8 @@ The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$
 
 	We show the contrapositive.
 	If $(L, \psi)$ are not calibrated with respect to $\ell$, then there is a sequence $\{u_m\}$ such that $R_L(u_m; p) \to 0$ but $R_\ell(\psi(u_m); p) \not \to 0$ via Lemma~\ref{lem:calib-converging-regrets}.
-	Take $D$ to be the distribution with a point mass on one $x \in \X$ so that $p = D_x$, and consider any sequence of functions $\{f_m\} \to f$ with $f_m(x) = u_m$ for all $f_m$.
+	Take $D$ to be the distribution with conditional probability $p_y(x) = Pr[Y = y | X = x]$, and let $p$ be the distribution conditioned on $x$.
+	Consider any sequence of functions $\{f_m\} \to f$ with $f_m(x) = u_m$ for all $f_m$.
   \raft{Type error with $D=D_x$; see AA15 for how they phrase}
 	Now we have $\E_D L(f_m(X), Y) \to \inf_f \E_D L(f(X), Y)$, but $\E_D \ell(\psi \circ f(X), Y) \not \to \inf_f \E_D \ell(\psi \circ f(X), Y)$, and therefore $(L, \psi)$ is not calibrated with respect to $\ell$. 
 \end{proof}
@@ -305,8 +306,8 @@ The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$
 	&\iff \E_X R_\ell(\psi \circ f_m(X), D_X) \to 0\\
 	&\iff \E_X \propdis(\psi \circ f_m(X), D_X) \to 0~.~
 	\end{align*}
-  \raft{Close; missing expectation inside inf, and I think you can skip the first $\iff$ and give the $\implies$ as an $\iff$ (right?), and then follow with a second $\iff$ with $\mu$. \jessie{I had the same doubtful thought, hence the implication, but the iff is true.}}
-  \raft{BTW, I think it's less messy to use $\psi \circ f_m(X)$ as above \jessie{Changed}}
+%  \raft{Close; missing expectation inside inf, and I think you can skip the first $\iff$ and give the $\implies$ as an $\iff$ (right?), and then follow with a second $\iff$ with $\mu$. \jessie{I had the same doubtful thought, hence the implication, but the iff is true.}}
+%  \raft{BTW, I think it's less messy to use $\psi \circ f_m(X)$ as above \jessie{Changed}}
 %	As regret defines $\propdis$ and tends to $0$, we observe consistency with respect to $\gamma$.
 \end{proof}
 
@@ -314,20 +315,20 @@ The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$
 	If a surrogate and link pair $(L, \psi)$ is consistent with respect to a property $\gamma$ or loss $\ell$ eliciting $\gamma$, then $(L, \psi)$ indirectly elicits $\gamma$.
 \end{theorem}
 \begin{proof}
-  \raft{Maybe ref the consistency definition here explicitly, at the top and the end}
+%  \raft{Maybe ref the consistency definition here explicitly, at the top and the end}
 	As consistency with respect to $\ell$ implies consistency with respect to $\gamma := \prop{\ell}$ (Lemma~\ref{lem:consistent-loss-implies-prop}), it suffices to show the result for consistency with respect to a property $\gamma$ (Definition~\ref{def:consistent-prop}).
   
 	We show the contrapositive; suppose $(L, \psi)$ does not indirectly elicit $\gamma$, and take $\Gamma := \prop{L}$.
-  \raft{Oh good!  I was going to say we should use this way of stating indirect elicitation (``$(L, \psi)$ indirectly elicits $\gamma$'') when we define it above, and use it.  We can then also define the version without $\psi$ easily. \jessie{Changed the definition of indirect elicitation and this Theorem statement.}}
+%  \raft{Oh good!  I was going to say we should use this way of stating indirect elicitation (``$(L, \psi)$ indirectly elicits $\gamma$'') when we define it above, and use it.  We can then also define the version without $\psi$ easily. \jessie{Changed the definition of indirect elicitation and this Theorem statement.}}
 	Then there is a distribution $p \in \simplex$ so that $u \in \Gamma(p)$ but $\psi(u) \not \in \gamma(p)$.
 
 	Consider the constant sequence $\{u_m\}$ with $u_m = u$ for all $m$, a distribution $D$ with point mass on $x$ and $D_x = p$, and any sequence $\{f_m\}$ so that $f_m(x) = u_m$ for all $m$.
   \raft{Check $D$ wording here too}
   	Since $\{u_m\}$ is a constant sequence, we observe $\E_D L(f_m(X), Y) = \inf_f L(f(X),Y)$ for all $m$ since $u \in \Gamma(p)$.
 	This yields $\E_D L(f_m(X), Y) \to \inf_f L(f(X),Y)$.
-  \raft{Maybe clearer to first say $\E_D L(f_m(X), Y) = \inf_f L(f(X),Y)$ for all $m$, and then the easy implication of the convergence \jessie{Done}}
+%  \raft{Maybe clearer to first say $\E_D L(f_m(X), Y) = \inf_f L(f(X),Y)$ for all $m$, and then the easy implication of the convergence \jessie{Done}}
 	However, we have $\E_X \propdis(\psi \circ f_m(X), D_X) = \propdis(\psi(u_m), p) \not \to 0$ as $\propdis(\psi(u), p) \neq 0$ (since $\psi(u) \not \in \gamma(p)$) and the sequence is constant.
-  \raft{Almost -- just clarify that this is the expectation over $D$ too by construction \jessie{Kinda done?}}
+%  \raft{Almost -- just clarify that this is the expectation over $D$ too by construction \jessie{Kinda done?}}
 	Thus, we observe $(L, \psi)$ is not consistent with respect to $\gamma$ (Definition~\ref{def:consistent-prop}).
 \end{proof}
 
@@ -475,10 +476,10 @@ Nishant, Adam
 	\item [C] Given $\zeta:\reals \to \reals_+$, for all $u \in \reals^d$, $R_\ell(\psi(u); p) \leq \zeta(R_L(u;p))$.
 	\item [D] For all $p \in \simplex$ and sequences $\{u_m\}$ so that $R_L(u_m; p) \to 0$, we have $R_\ell(\psi(u_m); p) \to 0$.
 \end{enumerate}
-$(A \wedge C)$ define calibration, and we have $A \iff B$ in shown in Lemma~\ref{lem:continuous-iff-limits}.  Lemma~\ref{lem:calib-converging-regrets} shoes calibration iff $D$.}
+$\exists \zeta$ so that $(A \wedge C)$ defines calibration, and we have $A \iff B$ shown in Lemma~\ref{lem:continuous-iff-limits}.  Lemma~\ref{lem:calib-converging-regrets} shoes calibration iff $D$.}
 
 \begin{proposition}
-	When $\R$ is finite and $L$ continuous in $\reals^d$, calibration via Definition~\ref{def:calibrated-general} implies calibration via Definition~\ref{def:calibrated-finite}.
+	When $\R$ is finite, calibration via Definition~\ref{def:calibrated-general} implies calibration via Definition~\ref{def:calibrated-finite}.
 	\jessie{eventually want iff}
 \end{proposition}
 \begin{proof}
@@ -523,25 +524,34 @@ $(A \wedge C)$ define calibration, and we have $A \iff B$ in shown in Lemma~\ref
 \begin{proof}
 \jessie{$(A \wedge C) \implies D$}
 	$\implies$ Take a sequence $\{u_m\}$ so that $R_L(u_m;p) \to 0$.
-	Since $\zeta(0) = 0$ and $\zeta$ is continuous at $0$, $\zeta(R_L(u_m;p)) \to 0$ by calibration.
-	As regret is nonnegative, we then have $R_\ell(\psi(u_m); p) \to 0$
+	Since $\zeta(0) = 0$ and $\zeta$ is continuous at $0$, we have $\zeta(R_L(u_m;p)) \to 0$.
+	As the bound from Equation~\eqref{eq:calibrated-general} is satisfied for all $u \in \reals^d$ by assumption, we observe
+	\begin{align*}
+	\forall m, \; &0 \leq R_\ell(\psi(u_m); p) \leq \zeta(R_L(u_m;p))\\
+	\implies &0 \leq \lim_{m \to \infty} R_\ell(\psi(u_m); p) \leq \lim_{m \to \infty} \zeta(R_L(u_m;p)) = 0\\
+	\implies &0 = \lim_{m\to\infty} R_\ell(\psi(u_m); p) ~.~
+	\end{align*}
 	
-	$\impliedby$ Consider $\zeta(c) := \sup_{u: R_L(u;p) \leq c} R_\ell(\psi(u); p)$.for nonnegative values of $c$, and $\zeta(c) = 0$ for $c < 0$.
+	
+	$\impliedby$ 
+\jessie{$D \implies (A \wedge C)$}
+	Fix $p \in \simplex$, and consider $\zeta(c) := \sup_{u: R_L(u;p) \leq c} R_\ell(\psi(u); p)$.  
 	We will show $R_L(u_m; p) \to 0 \implies R_\ell(\psi(u_m); p) \to 0$ gives calibration via the function $\zeta$ constructed above. 
 	
 \jessie{D $\implies$ A}
 	First, we can verify that $\zeta$ as constructed maps $\zeta(0) = 0$ and is continuous at $0$.	
-	As $\risk{L}$ and $\risk{\ell}$ are well-defined for all $p \in \simplex$, we note that $\zeta(0) = \sup_{u':R_L(u;p) = 0} (R_\ell(\psi(u'); p)) = \sup_{u' \in \Gamma(p)} (R_\ell(\psi(u'); p))$.
-	If there is a $u \in \Gamma(p)$ so that $R_\ell(\psi(u); p) > \risk{\ell}(p)$ (i.e. $\zeta(0) > 0$), then the constant sequence $\{u_m\} = u$ for all $m$ gives $R_L(u_m;p) \to 0$ but $R_\ell(\psi(u_m); p) \not \to 0$, yielding a contradiction; therefore, we must have $\zeta(0) = 0$.
+	As $\risk{L}$ and $\risk{\ell}$ are well-defined for all $p \in \simplex$, we note that $\zeta(0) = \sup_{u':R_L(u;p) = 0} (R_\ell(\psi(u'); p)) = \sup_{u' \in \Gamma(p)} (R_\ell(\psi(u'); p))$, which is finite if $\Gamma$ is non-degenerate (i.e. there is no $p \in \simplex$ so that $\Gamma(p) = \emptyset$).
+	If there is a $u \in \Gamma(p)$ so that $R_\ell(\psi(u); p) > 0$ (i.e. $\zeta(0) > 0$), then the constant sequence $\{u_m\} = u$ for all $m$ gives $R_L(u_m;p) \to 0$ but $R_\ell(\psi(u_m); p) \not \to 0$, yielding a contradiction; therefore, we must have $\zeta(0) = 0$.
 	
 	To see $\zeta$ is continuous at $0$, we just need to show $\lim_{c \to 0^+} \zeta(c) = 0$. 
-	Fix $p \in \simplex$ and take any sequence $\{u_m\}$ so that $R_L(u_m; p) \to 0$, and therefore $R_\ell(\psi(u_m)) \to 0$.
+	Take any sequence $\{u_m\}$ so that $R_L(u_m; p) \to 0$, and therefore $R_\ell(\psi(u_m);p) \to 0$.
 	Since this is true for all sequences, we have the upper bound tending to $0$, and thus $\lim_{c\to 0^+}\zeta(c) = 0$.
 		
 \jessie{D $\implies$ C}
-	Now, we observe that the bound in Equation~\eqref{eq:calibrated-general} is satisfied for all $u \in \reals^d$ by construction of $\zeta$.	
-	For all $u \in \reals^d$, calibration via $\zeta$ yields $R_\ell(\psi(u);p) \leq \sup_{u' : R_L(u';p) \leq R_L(u,p)} R_\ell(\psi(u') ; p)$.
-	As $u$ is in the space of the supremum ($R_L(u;p) \leq R_L(u;p)$), we then have calibration by definition of the supremum.
+	Now, we observe that the bound in Equation~\eqref{eq:calibrated-general} is satisfied for all $u \in \reals^d$ by construction of $\zeta$.
+	Let $S(v) := \{u' \in \reals^d : R_L(u';p) \leq R_L(v,p) \}$.
+	Showing $R_\ell(\psi(u);p) \leq \sup_{u' \in S(u)} R_\ell(\psi(u') ; p)$ for all $u \in \reals^d$ gives the condition $C$.
+	As $u$ is in the space over which the surpremum is being taken (as $R_L(u;p) \leq R_L(u;p)$), we then have calibration by definition of the supremum.
 \end{proof}
 
 
