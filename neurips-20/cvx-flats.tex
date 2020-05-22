@@ -152,9 +152,10 @@
 	In prediction tasks, one typically seeks to minimize \emph{empirical risk} by learning a hypothesis function making predictions from a given feature vector about a desired future outcome.
 	This hypothesis is learned by minimizing a loss function over a set of labeled training data.
 	However, as not all loss functions are easily optimized, one often wishes to optimize a \emph{surrogate loss} yielding the same statistical guarantees as the original.
-	In this paper, we are specifically interested in the construction of \emph{consistent} surrogate losses; bonus points if they are ``efficient'' in the dimension of their input.
-	We observe a connection between consistent surrogates and indirect property elicitation, which allows us to apply property elicitation complexity results to the minimal dimension of a consistent surrogate.
-	We also extend the notion of consistency to properties, so that we may understand when one can construct a convex, consistent surrogate without requiring an original loss.
+	In this paper, we are specifically interested in the construction of \emph{consistent} surrogate losses; particularly those that are  ``efficient'' in the dimension of their input.
+	We extend the general notion of consistency to properties, so that we may understand when one can construct a convex, consistent surrogate without requiring an original loss, which are uncommon for continuous prediction tasks (for example, the median).
+	This allows us to observe that indirect property elicitation is necessary to construct a consistent surrogate, which allows us to apply property elicitation complexity results to the minimal dimension of a consistent surrogate.
+	Moreover, when surrogate losses are convex, we state a new lower bound on the dimension of a convex surrogate by using tools from property elicitation.
 \end{abstract}
 
 \section{Introduction}\label{sec:intro}
@@ -460,8 +461,9 @@ The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$
 \begin{definition}
   A property $\Gamma:\simplex\to\R$ is \emph{$d$-identifiable} if its level sets are flats of co-dimension at most $d$ intersected with $\simplex$.
   \raft{Update to be consistent with our definitions / notation / conventions.  I'd vote for using co-dimension since it makes so much of the analysis easier...  Could make more formal too.}
-  We write $\iden(\Gamma) = \min\{d \in \N : \Gamma\text{ is $d$-identifiable}\}$.
+  We write $\iden(\Gamma) = \min\{d \in \mathbb{N} : \Gamma\text{ is $d$-identifiable}\}$.
 \end{definition}
+\jessiet{Flats or unions of flats?}
 
 \raf{A modification of the argument of \citet[Corollary 7]{frongillo2018elicitation}}
 
@@ -525,9 +527,9 @@ Nishant, Adam
 	\end{equation}
 \end{definition}
 
-\jessie{Consider the following four conditions:
+\jessie{Consider the following four conditions: Suppose we are given $\zeta:\reals_+ \to \reals_+$.
 \begin{enumerate}
-	\item [A] $\zeta:\reals \to \reals_+$ satisfies $\zeta : 0 \mapsto 0$ and is continuous at $0$.
+	\item [A] $\zeta$ satisfies $\zeta : 0 \mapsto 0$ and is continuous at $0$.
 	\item [B] $\epsilon_m \to 0 \implies \zeta(\epsilon_m) \to 0$.
 	\item [C] Given $\zeta:\reals \to \reals_+$, for all $u \in \reals^d$, $R_\ell(\psi(u); p) \leq \zeta(R_L(u;p))$.
 	\item [D] For all $p \in \simplex$ and sequences $\{u_m\}$ so that $R_L(u_m; p) \to 0$, we have $R_\ell(\psi(u_m); p) \to 0$.
@@ -593,14 +595,38 @@ $\exists \zeta$ so that $(A \wedge C)$ defines calibration, and we have $A \iff 
 \jessie{$D \implies (A \wedge C)$}
 	Fix $p \in \simplex$, and consider $\zeta(c) := \sup_{u: R_L(u;p) \leq c} R_\ell(\psi(u); p)$.  
 	We will show $R_L(u_m; p) \to 0 \implies R_\ell(\psi(u_m); p) \to 0$ gives calibration via the function $\zeta$ constructed above. 
+	With $\zeta$ as constructed, we should that the bound in equation~\eqref{eq:calibrated-general} is satisfied for all $u \in \reals^d$ and apply Lemma~\ref{lem:continuous-iff-limits} to observe that if there is a sequence $\{\epsilon_m\} \to 0$ so that $\zeta(\epsilon_m) \not \to 0$, it is because $R_L(u_m, p) \not \to 0 \not \implies R_\ell(\psi(u_m), p) \to 0$.
+	
 
+\jessie{D $\implies$ C}
+Now, we observe that the bound in Equation~\eqref{eq:calibrated-general} is satisfied for all $u \in \reals^d$ by construction of $\zeta$.
+Let $S(v) := \{u' \in \reals^d : R_L(u';p) \leq R_L(v,p) \}$.
+Showing $R_\ell(\psi(u);p) \leq \sup_{u' \in S(u)} R_\ell(\psi(u') ; p)$ for all $u \in \reals^d$ gives the condition $C$.
+As $u$ is in the space over which the surpremum is being taken (as $R_L(u;p) \leq R_L(u;p)$), we then have calibration by definition of the supremum.
 
-\jessie{$D \implies A$, but actually $\lnot B \implies \lnot D$}
-Fix $p \in \simplex$.
-Suppose we have a sequence $\{\epsilon_m\}$ so that $\epsilon_m \to 0$, but $\zeta(\epsilon_m) \not \to 0$.
-If $L$ is continuous over the reals \jessiet{Need this, right?}, then for each $m$, we can construct a subsequence $\{u^j_m\}$ so that $R_L(u^j_m, p) \to \epsilon_m$ for all $m$.
-We can now construct the sequence $\{\epsilon'_m\}$ with $\epsilon'_m = \lim_{j \to \infty} R_L(u^j_m, p)$.
-This sequence converges to $0$, but we have $\lim_{m \to \infty} \zeta(\epsilon'_m) = \lim_{m \to \infty} \lim_{j \to \infty} \zeta(R_L(u^j_m, p)) \not \to 0$. 
+\jessie{Not $B$ leads to contradiction of $D$.}
+Now suppose there exists a sequence $\{\epsilon_m\} \to 0$ so that $\zeta(\epsilon_m) \not \to 0$.
+Consider $S(\epsilon) = \{u \in \reals^d : R_L(u,p) \leq \epsilon\}$.
+
+\begin{align*}
+\epsilon_1 \leq \epsilon_2 &\implies S(\epsilon_1) \subseteq S(\epsilon_2)\\
+&\implies \zeta(\epsilon_1) \leq \zeta(\epsilon_2)~.~
+\end{align*}
+Now suppose there exists a sequence $\{u_m\}$ so that $R_L(u_m, p) \to 0$.
+Then for all $\epsilon > 0$, there exists a $m' \in \mathbb{N}$ so that $R_L(u_m, p) < \epsilon$ for all $m \geq m'$.
+Since this is true for all $\epsilon$, we have $S(\epsilon)$ nonempty for all $\epsilon > 0$, and therefore $\zeta(c)$ is finite for all $c > 0$.
+Now if $\zeta(\epsilon_m) \not \to 0$, it must be because $R_\ell(\psi(u_m), p) \not \to 0$ for some sequence converging to zero surrogate regret, and therefore we contradict the statement $R_L(u_m, p) \to 0 \implies R_\ell(\psi(u_m), p) \to 0$.
+
+Moreover, we argue that such a sequence of $\{u_m\}$ with converging surrogate regret always exists by continuity and boundedness from below \jessiet{really just need lower semi-continuity and boundedness from below} of the surrogate loss, since we can take the constant sequence at the (attained) infimum.
+
+%\jessie{$D \implies A$, but actually $\lnot B \wedge C \implies \lnot D$}
+%Fix $p \in \simplex$.
+%Suppose we have a sequence $\{\epsilon_m\}$ so that $\epsilon_m \to 0$, but $\zeta(\epsilon_m) \not \to 0$.
+%If $L$ is continuous over the reals \jessiet{Need this, right?}, then for each $m$, we can construct a subsequence $\{u^j_m\}$ so that $R_L(u^j_m, p) \to \epsilon_m$ for all $m$.
+%We can now construct the sequence $\{\epsilon'_m\}$ with $\epsilon'_m = \lim_{j \to \infty} R_L(u^j_m, p)$.
+%This sequence converges to $0$, but we have $\lim_{m \to \infty} \zeta(\epsilon'_m) = \lim_{m \to \infty} \lim_{j \to \infty} \zeta(R_L(u^j_m, p)) \not \to 0$. 
+%As $R_\ell(\psi(u_m); p) \leq R_L(u_m; p)$ for all $m$, we then have this being true in the limit.
+%For this sequence, this then gives a loose bound of $0 \leq \lim_{m\to\infty} R_\ell(\psi(u_m); p) \leq c$. 
 	
 %commented out post meeting 05.20.2020
 %\jessie{D $\implies$ B ($\iff$ A)}
@@ -612,11 +638,7 @@ This sequence converges to $0$, but we have $\lim_{m \to \infty} \zeta(\epsilon'
 %	Take any sequence $\{u_m\}$ so that $R_L(u_m; p) \to 0$, and therefore $R_\ell(\psi(u_m);p) \to 0$.
 %	Since this is true for all sequences, we have the upper bound tending to $0$, and thus $\lim_{c\to 0^+}\zeta(c) = 0$.
 %		
-\jessie{D $\implies$ C}
-	Now, we observe that the bound in Equation~\eqref{eq:calibrated-general} is satisfied for all $u \in \reals^d$ by construction of $\zeta$.
-	Let $S(v) := \{u' \in \reals^d : R_L(u';p) \leq R_L(v,p) \}$.
-	Showing $R_\ell(\psi(u);p) \leq \sup_{u' \in S(u)} R_\ell(\psi(u') ; p)$ for all $u \in \reals^d$ gives the condition $C$.
-	As $u$ is in the space over which the surpremum is being taken (as $R_L(u;p) \leq R_L(u;p)$), we then have calibration by definition of the supremum.
+
 \end{proof}
 
 
