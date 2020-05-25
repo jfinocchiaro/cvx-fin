@@ -66,6 +66,8 @@
 \newcommand{\elicembed}{\mathrm{elic}_\mathrm{embed}}
 \newcommand{\ccdim}{\mathrm{ccdim}}
 \newcommand{\codim}{\mathrm{codim}}
+\newcommand{\supp}{\mathrm{supp}}
+\newcommand{\spn}{\mathrm{span}}
 \newcommand{\propdis}{\mu}
 
 \newcommand{\C}{\mathcal{C}}
@@ -100,7 +102,7 @@
 \DeclareMathOperator*{\arginf}{arg\,inf}
 \DeclareMathOperator*{\sgn}{sgn}
 
-\title{cvx-flats}
+\title{Bounds on the dimension of consistent convex surrogates}
 
 % The \author macro works with any number of authors. There are two commands
 % used to separate the names and addresses of multiple authors: \And and \AND.
@@ -426,6 +428,33 @@ The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$
 %	Since $v\in F \implies q \in F + p \implies p + \epsilon v \in \gamma_r$ by construction, so we have $F+p \subseteq \gamma_r$.	
 %\end{proof}
 
+\begin{lemma}\label{lem:p-boundary-fstar}
+	For a given property $\gamma$, fix $p \in \simplex$ and $r \in\R$ so that $r \in \gamma(p)$.
+	Consider the flat $F'$ containing $p$ of dimension at least $n-d-1$.
+	The flat $F^* = F' \cap \spn(\{e_y : y \in \supp(p)\})$ has dimension $\dim(F') - (n - \|p\|_0)$.
+\end{lemma}
+\begin{proof}
+	Consider $P := \spn(\{e_y : y \in \supp(p) \})$.
+	\begin{align*}
+	\dim(F^*) &= \dim(F') + \|p\|_0 - \dim(F' + P)
+	\end{align*}
+	The claim then holds if $n = \dim(F' + P)$.
+	\jessie{This is where I'm stuck??}
+\end{proof}
+
+\begin{lemma}\label{lem:p-boundary-fsd}
+	For any $p \in \simplex$ and $r$ such that $p \in \gamma_r$, we have $\dim(\S_{\gamma_r}(p)) = \dim(\S'_{\gamma_r}(p))$, where $\S_{\gamma_r}(p) := \S_{\gamma_r}(p) \cap \spn(\{e_y : y \in \supp(p) \}$.
+\end{lemma}
+\begin{proof}
+	Consider $P := \spn(\{e_y : y \in \supp(p) \})$.
+	\begin{align*}
+	\dim(\S'_{\gamma_r}(p)) &= \dim(\S_{\gamma_r}(p)) + \dim(P) - \dim(\S_{\gamma_r}(p) + P)
+	\end{align*}
+	If $\dim(P) = \dim(\S_{\gamma_r}(p) + P)$, the claim holds.
+	Be definition of $P$, we know $\dim(P) = \|p\|_0$, so we can show $\dim(\S_{\gamma_r}(p) + P) = \|p\|_0$.		\jessie{This is where I'm stuck??}
+	
+\end{proof}
+
 \begin{corollary}[\cite{ramaswamy2016convex}]
 	Suppose we are given a discrete loss $\ell:\R \to \reals^\Y_+$ eliciting $\gamma$.
 	Take $p \in \simplex$ and $r \in \R$ such that $p \in \gamma_r$.
@@ -433,6 +462,15 @@ The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$
 	\ccdim(\ell) \geq \|p\|_0 - \dim(\S_{\gamma_r}(p)) - 1~.~
 	\end{equation}
 \end{corollary}
+\begin{proof}
+	Let $L : \reals^d \times \Y \to \reals$ be a calibrated surrogate for $\ell$.
+	First, for intuition, consider $p \in \relint{\simplex}$. 
+	Theorem~\ref{thm:cvx-flats} implies that there exists a flat $F'$ of affine dimension at least $n-d-1$.
+	Lemma~\ref{lem:feas-sub-is-a-flat} then says that $\dim(\S_{\gamma_r}(p)) \geq \dim(F') \geq n-d-1 \implies d \geq n - \dim(\S_{\gamma_r}(p)) - 1$.
+	
+	Now, if $p \not \in \relint{\simplex}$, we can apply Lemma~\ref{lem:p-boundary-fstar} to observe the existence of an $F^*$ with dimension $\dim(F') - (n - \|p\|_0)$.
+	Moreover, since projecting to $(\{e_y : y \in \supp(p)\})$ does not change the feasible subspace dimension, so we observe the result.
+\end{proof}
 
 \subsection{Elicitation complexity and convex calibration dimension}
 
