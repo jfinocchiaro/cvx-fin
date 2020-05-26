@@ -161,9 +161,34 @@
 \end{abstract}
 
 \section{Introduction}\label{sec:intro}
+In supervised machine learning, one often wants to make a prediction about future outcomes by training a classifier to minimize the average empirical loss of a labeled training set, where the loss is determined by the task at hand.
+For example, 0-1 loss is often desired for classification tasks.
+However, finite losses are typically difficult to optimize, so we construct a continuous \emph{surrogate} loss that one can more easily optimize.
+In particular, we want our surrogate loss to yield bounds on the excess risk so that optimal predictions for the surrogate can be linked to optimal predictions for an original (possibly discrete) loss with bounded excess error, regardless of the underlying data distribution.
+Moreover, in continuous prediction settings, one often starts with a statistic of the data they would like to estimate, but it is often unclear how to construct a a loss that is consistent for the given statistic, or property.
+For example, if one wants to estimate the $\alpha$-quantile, they can do so by minimizing pinball loss over their data, but it is often unclear \emph{why} pinball loss is good for this prediction task.
+Throughout this paper, the statistical guarantees we desire are \emph{consistency}, as it is the only condition that guarantees good bounds on excess surrogate loss. \jessiet{Raf, maybe fill in here?}
+In particular, we are specifically interested in consistent \emph{and convex} surrogates in which any sequence of hypotheses converging to the optimal prediction can be linked to a sequence that converges to either the correct prediction for the discrete loss or statistic value, depending on the setting. 
+In Theorem~\ref{thm:consistent-implies-indir-elic}, we show indirect property elicitation is a necessary condition for consistency so that we can use a tool based on property elicitation to bound the minimum dimension needed to construct a consistent convex surrogate.
+Previous lower bounds on the dimension of a consistent convex surrogate for a given task have been considered in one of four settings: first, previous results diverge where one are given a target loss or simply a statistic of the data they wish to estimate.
+Second, previous results typically hold only under a finite prediction setting or a continuous estimation setting.
+Theorem~\ref{thm:cvx-flats}, however, is general enough to yield bounds across all four settings.
 
+We typically use convex surrogate loss functions that take some input $u \in \reals^d$ and measure error against the observed outcome $y \in \Y$.
+The value $d$ provides some notion of efficiency for the surrogate, as low-dimensional convex losses can improve the efficiency of the optimization algorithm.
+\cite{frongillo2015elicitation} pose an open question regarding a general characterization of the efficiency of \emph{convex elicitable properties}, which we show is bounded by finding the minimum dimension $d$ for which a consistent, convex loss can be constructed for the task at hand.
+
+In Section~\ref{sec:related-work}, we review previous work and introduce the two main concepts used: \emph{consistency} and \emph{property elicitation}.
+We draw connections between the two in Section~\ref{sec:consis-implies-indir} by showing that if a loss and link are consistent with respect to a target loss or the property it elicits, then it must also indirectly elicit the same property.
+In Section~\ref{sec:char-convex}, we present our main result (Theorem~\ref{thm:cvx-flats}), a corollary of which characterizes the existence of consistent convex surrogates in a given dimension $d$.
+In Section~\ref{sec:finite-calib}, we relate our setting to the study of \emph{convex calibration dimension} introduced by~\cite{ramaswamy2016convex} by focusing on the finite prediction setting.
+Our Theorem~\ref{thm:cvx-flats} generalizes their bound on convex calibration dimension by observing that the \emph{subspace of feasible dimensions} constructed in their bound is just one case of a flat produced by our Theorem~\ref{thm:cvx-flats}.
+To see this we use our results to generalize and simplify the proof of~\cite[Theorem 16]{ramaswamy2016convex}.
+In continuous settings, one often has a prediction task for which they want to construct a consistent convex loss, rather than an original loss.
+In Section~\ref{sec:contin-consis}, we address the construction of convex consistent losses by applying the main insights from Theorem~\ref{thm:cvx-flats} to this setting, answering the open question posed by~\cite[Section 8]{frongillo2018elicitation}.
 
 \subsection{Notation}
+
 
 \section{Background and Related work}\label{sec:related-work}
 
@@ -220,7 +245,7 @@ The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$
 	A \emph{property} is a (possibly set-valued) function $\Gamma : \simplex \toto \R$ mapping distributions to reports.
 	A loss $L : \R \times \Y \to \reals_+$ \emph{elicits} the property $\Gamma$ if,
 	\begin{equation}
-	\forall p \in \simplex, \;\; \Gamma(p) = \arginf_{u \in \R}\inprod{p}{L(u)}
+	\forall p \in \simplex, \;\; \Gamma(p) = \argmin_{u \in \R}L(u;p)
 	\end{equation}
 	Moreover, we call a \emph{level set} $\Gamma_r := \{p \in \simplex : r \in \Gamma(p)\}$ to be the set of distributions for which reporting $u$ minimizes the expected loss of the loss eliciting $\Gamma$.
 \end{definition}
@@ -340,7 +365,7 @@ The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$
 \begin{definition}[Flat]
 	A \emph{flat} $F$ of $\reals^n$ is an affine subspace of $\reals^n$.
 	In other words, $F\subseteq \reals^n$ can be written $F=\{x\in\reals^n : Wx + b = 0\}$ for some $W\in\reals^{d\times n}$ and $b\in\reals^d$ where $d\leq n$.
-	The codimension of the flat $F$ is given by $f := \mathrm{rank}(W)$.
+	The codimension of the flat $F$ relative to $\reals^n$ is given by $\mathrm{rank}(W)$, and the dimension of $F$ is $n - \mathrm{rank}(W)$.
 \end{definition}
 
 \begin{theorem}\label{thm:cvx-flats}
@@ -444,7 +469,7 @@ The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$
 
 \begin{lemma}\label{lem:p-boundary-fsd}
 	For any $p \in \simplex$ and $r$ such that $p \in \gamma_r$, define $\gamma'$ to be $\gamma$ restricted to the simplex $\Delta_{\supp(p)}$.
-	Then $\S_{\gamma_r}(p) = \S_{\gamma'_r}(p)$.
+	Then $\dim(\S_{\gamma_r}(p)) = \dim(\S_{\gamma'_r}(p))$.
 \end{lemma}
 \begin{proof}
 	Consider the ambient space of both $\S_{\gamma_r}(p)$ and $\S_{\gamma'_r}(p)$ to be $\reals^\Y$.
@@ -482,30 +507,35 @@ The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$
 	\end{equation}
 \end{corollary}
 \begin{proof}
-	Let $L : \reals^d \times \Y \to \reals$ be a calibrated surrogate for $\ell$.
-	First, for intuition, consider $p \in \relint{\simplex}$. 
-	Theorem~\ref{thm:cvx-flats} implies that there exists a flat $F'$ of affine dimension at least $n-d-1$.
-	Lemma~\ref{lem:feas-sub-is-a-flat} then says that $\dim(\S_{\gamma_r}(p)) \geq \dim(F') \geq n-d-1 \implies d \geq n - \dim(\S_{\gamma_r}(p)) - 1$.
+	Let $L : \reals^d \times \Y \to \reals$ be a calibrated surrogate for $\ell$, and consider $\Y' := \supp(p)$ and what happens when we restrict $L$ and $\ell$ to only the outcomes in $\Y'$.
+	Take $L' := L|_{\Y'}$ and $\ell' := \ell|_{\Y'}$.
 	
-	Now, consider $\Y' := \supp(p)$ and what happens when we restrict $L$ and $\ell$ to only the outcomes in $\Y'$.
+	First, observe $L'$ (eliciting $\Gamma$) indirectly elicits $\gamma' := \prop{\ell'}$ since, for all $p \in \simplex$, and therefore all $p \in \Delta_{\Y'}$, we have $p \in \Gamma_u \implies p \in \gamma_{\psi(u)}$, and $\Gamma(p) = \Gamma'(p)$ and $\gamma(p) = \gamma'(p)$ for $p \in \Delta_{\Y'}$.
+	This same observation can be used to observe that $L'$ is also calibrated with respect to $\ell'$ as the calibration bound holds for all $p \in \simplex$, and therefore for all $p \in \Delta_{\Y'}$ by equality of $\gamma$ and $\gamma'$ for $p \in \Delta_{\Y'}$.
 	
-	If we can show that $L' := L|_{\Y'}$ is calibrated with respect to $\ell' := \R \times \Y' \to \reals$ with $\ell(r,y) = \ell'(r,y)$ for all $r \in \R$ and $y \in \Y'$ and indirectly elicits $\gamma' := \prop{\ell'}$, then we observe the existence of a flat $F^*$ of codimension $d$ (in $\reals^{\Y'}$) so that $\dim(F^*) = \|p\|_0 - d - 1$ by Theorem~\ref{thm:cvx-flats}.
-	Then we can use Lemma~\ref{lem:p-boundary-fsd} to observe $\dim(\S_{\gamma'_r}(p)) = \dim(\S_{\gamma_r}(p))$, and thus the result holds.
+	As $L'$ is calibrated with respect to $\ell'$ and indirectly elicits $\gamma' := \prop{\ell'}$, then by Theorem~\ref{thm:cvx-flats}, we know there exists a flat $F'$ of codimension $d$ relative to $\reals^{\Y'}$ so that $\dim(F') = \|p\|_0 - d - 1$.
+	Moreover, as $d$ is the maximal codimension of such a flat, we show in Lemma~\ref{lem:feas-sub-is-a-flat} that $\S_{\gamma_r}(p)$ is one such flat, and we have $\dim(\S_{\gamma_r}(p)) \geq \dim(F') = \|p\|_0 - d- 1$.
+	Lemma~\ref{lem:p-boundary-fsd} then states $\dim(\S_{\gamma'_r}(p)) = \dim(\S_{\gamma_r}(p))$, and from there we observe the result.
 	
-	Now to see that $L'$ is calibrated with respect to $\ell'$, consider that $\gamma(p) = \gamma'(p)$ for all $p \in \Delta^{\Y'}$,
-	\begin{align*}
-		\forall p \in \Delta_{\Y'}:  \inf_{u \in \reals^d : \psi(u) \not \in \gamma'(p)} L'(u;p) = \inf_{u \in \reals^d : \psi(u) \not \in \gamma(p)} L(u;p) > \inf_{u \in \reals^d} L(u;p) = \inf_{u \in \reals^d} L'(u;p)~.~
-	\end{align*}
-	Therefore, we have $L'$ calibrated with respect to $\ell'$.
+%	First, for intuition, consider $p \in \relint{\simplex}$. 
+%	Theorem~\ref{thm:cvx-flats} implies that there exists a flat $F'$ of affine dimension at least $n-d-1$.
+%	Lemma~\ref{lem:feas-sub-is-a-flat} then says that $\dim(\S_{\gamma_r}(p)) \geq \dim(F') \geq n-d-1 \implies d \geq n - \dim(\S_{\gamma_r}(p)) - 1$.
 
-	Moreover, we want to show $L'$ indirectly elicits $\gamma'$ so we can apply Theorem~\ref{thm:cvx-flats}.
-	First, observe that $L'$ elicits $\Gamma' : p \mapsto \Gamma(p)$ for all $p \in \Delta_{\Y'}$ 
-	For all $p \in \simplex$, we have $u \in \Gamma(p) \implies \psi(u) \in \gamma(p)$.
-	As $\Delta_{\Y'} \subseteq \simplex$, this is in particular true for all $p \in \Delta_{\Y'}$.
-	Therefore, for all $p \in \Delta_{\Y'}$, we have $\Gamma'_u = \Gamma_u \cap \Delta_{\Y'} \subseteq \gamma_{\psi(u)} \cap \Delta_{\Y'} = \gamma'_{\psi(u)}$, and thus $L'$ indirectly elicits $\gamma'$.
-
-%	Now, if $p \not \in \relint{\simplex}$, we can apply Lemma~\ref{lem:p-boundary-fstar} to observe the existence of an $F^*$ with dimension $\dim(F') - (n - \|p\|_0)$.
-%	Moreover, since projecting to $(\{e_y : y \in \supp(p)\})$ does not change the feasible subspace dimension, so we observe the result.
+	
+%	If we can show that $L' := L|_{\Y'}$ is calibrated with respect to $\ell' := \R \times \Y' \to \reals$ with $\ell(r,y) = \ell'(r,y)$ for all $r \in \R$ and $y \in \Y'$ and indirectly elicits $\gamma' := \prop{\ell'}$, then we observe the existence of a flat $F^*$ of codimension $d$ (in $\reals^{\Y'}$) so that $\dim(F^*) = \|p\|_0 - d - 1$ by Theorem~\ref{thm:cvx-flats}.
+%	Then we can use Lemma~\ref{lem:p-boundary-fsd} to observe $\dim(\S_{\gamma'_r}(p)) = \dim(\S_{\gamma_r}(p))$, and thus the result holds.
+%	
+%	Now to see that $L'$ is calibrated with respect to $\ell'$, consider that $\gamma(p) = \gamma'(p)$ for all $p \in \Delta^{\Y'}$,
+%	\begin{align*}
+%		\forall p \in \Delta_{\Y'}:  \inf_{u \in \reals^d : \psi(u) \not \in \gamma'(p)} L'(u;p) = \inf_{u \in \reals^d : \psi(u) \not \in \gamma(p)} L(u;p) > \inf_{u \in \reals^d} L(u;p) = \inf_{u \in \reals^d} L'(u;p)~.~
+%	\end{align*}
+%	Therefore, we have $L'$ calibrated with respect to $\ell'$.
+%
+%	Moreover, we want to show $L'$ indirectly elicits $\gamma'$ so we can apply Theorem~\ref{thm:cvx-flats}.
+%	First, observe that $L'$ elicits $\Gamma' : p \mapsto \Gamma(p)$ for all $p \in \Delta_{\Y'}$ 
+%	For all $p \in \simplex$, we have $u \in \Gamma(p) \implies \psi(u) \in \gamma(p)$.
+%	As $\Delta_{\Y'} \subseteq \simplex$, this is in particular true for all $p \in \Delta_{\Y'}$.
+%	Therefore, for all $p \in \Delta_{\Y'}$, we have $\Gamma'_u = \Gamma_u \cap \Delta_{\Y'} \subseteq \gamma_{\psi(u)} \cap \Delta_{\Y'} = \gamma'_{\psi(u)}$, and thus $L'$ indirectly elicits $\gamma'$.
 \end{proof}
 
 \subsection{Elicitation complexity and convex calibration dimension}
