@@ -211,15 +211,15 @@ Moreover, the regret of a loss $L(u; p)$ is the excess loss over the optimal; th
 
 \subsection{Consistency and calibration for convex losses}\label{subsec:convex-surrogates}
 
-For discrete prediction problems, one often is able to intuitive start with a target loss $\ell$ in mind: for classification, 0-1 loss comes to mind; for rankings, a borda-like loss that assigns error based on one's difference between the winner's predicted ranking.
+For discrete prediction problems, one often is able to intuitively start with a target loss $\ell$ in mind: for classification, 0-1 loss comes to mind; for rankings, a borda-like loss that assigns error based on one's distance from the winner's predicted ranking.
 However, when one starts with a (often discrete) target loss they want to minimize, it is often a computationally hard problem.
 For this reason, we use surrogate losses, but desire consistency to guarantee the surrogate ``corresponds'' to the original loss, or property we want to predict, as is more common in the the continuous estimation setting.
-However, a surrogate loss is no good on its own; one needs a link function to map from the surrogate prediction space back to the original prediction space.
-In particular, we would like to map back to the \emph{correct} prediction that would have been given if we had directly optimized the original problem.
-This notion of a correct surrogate is captured by two slightly distinct notions: \emph{consistency}, introduced formally in Definitions~\ref{def:consistent-ell} and~\ref{def:consistent-prop}, and \emph{calibration}.
+However, a surrogate loss is no good on its own; one needs a link function to map from the surrogate prediction space back to the \emph{correct} prediction in the original prediction space.
+This notion of a correct surrogate is typically captured by the notion of \emph{consistency}, introduced formally in Definitions~\ref{def:consistent-ell} and~\ref{def:consistent-prop}.
+\emph{Calibration} was the primary tool to study consistency until~\cite{agarwal2015consistent} introduced the use of property elicitation to study consistency in certain situations.
 
 \begin{definition}[Calibrated: Finite predictions]\label{def:calibrated-finite}
-	Let $\ell : \R \times \Y \to \reals_+$ be a discrete loss eliciting the property $\gamma$.
+	Let $\ell : \R \times \Y \to \reals_+$ be a discrete target loss eliciting the property $\gamma$.
 	A surrogate loss $L : \reals^d \times \Y \to \reals_+$  and link $\psi:\reals^d \to \R$ pair $(L, \psi)$ is \emph{calibrated} with respect to $\ell$ if 
 	\begin{equation}\label{eq:calibration}
 	\forall p \in \simplex: \inf_{u \in \reals^d : \psi(u) \not \in \gamma(p)} L(u;p) > \inf_{u \in \reals^d} L(u;p)~.~
@@ -231,14 +231,14 @@ In particular,~\cite{bartlett2006convexity} show that if a convex surrogate is d
 \cite{ramaswamy2016convex} further show necessary and sufficient conditions for finite prediction problems to be consistent that can be applied to general discrete losses.
 \cite{steinwart2007compare} generalizes the study of consistent losses from the finite prediction setting and characterizes different types of loss functions, relating excess risk bounds, consistency, and calibration, giving proofs for various classes of surrogate losses (i.e. margin-based, distance-based, supervised, unsupervised, etc.)
 See~\cite[Chapter 2]{steinwart2008support} for further discussion of these loss functions.
-In Appendix~\ref{app:calibration}, we give a more general definition of calibration which implies this definition in finite outcome settings.
+In Appendix~\ref{app:calibration}, we give a more general definition of calibration which is equivalent to Definition~\ref{def:calibrated-finite} in finite outcome settings, but generalizes to infinite outcome settings.
 
 
 \subsection{Property elicitation}\label{subsec:properties}
-In this paper, we use tools from property elicitation to study the construction of consistent surrogate losses.
+In Section~\ref{sec:consis-implies-indir} we show that indirect property elicitation is a necessary condition for constructing a consistent surrogate loss.
 Property elicitation of a single property is well-understood through \cite{savage1971elicitation,osband1985information-eliciting,lambert2008eliciting, lambert2009eliciting, lambert2018elicitation}.
-Recently, the elicitation of multiple properties was studied by~\cite{frongillo2015vector-valued,fissler2015higher,frongillo2018elicitation}.
-In particular, these works study the \emph{minimum} dimension of a real-valued loss needed to elicit a property or vector of properties.
+Recently, the elicitation of multiple properties simultaneously and of high-dimensional properties was studied by~\cite{frongillo2015vector-valued,fissler2015higher,frongillo2018elicitation}.
+In particular, these works study the \emph{minimum} dimension of a real-valued loss needed to indirectly elicit (see Definition~\ref{def:indirectly-elicits} below) a property or vector of properties by directly eliciting other (possibly vector-valued) properties.
 Moreover,~\cite{agarwal2015consistent} is the first to our knowledge to formally relate property elicitation to the consistency of a surrogate loss.
 
 Informally, a property is a function mapping a probability distribution $p$ over the outcome set $\Y$ to the ``suggested report'' given $p$.
@@ -256,24 +256,21 @@ Note, moreover, that we call a property $\gamma: \simplex \toto \R$ \emph{finite
 Without much loss of generality, we assume that finite properties are \emph{non-redundant}, meaning that for each $\gamma_r$, there is no $\gamma_{r'}$ such that $\gamma_{r'} \subseteq \gamma_r$.
 
 \cite{finocchiaro2018convex} are among the first to consider a characterization of \emph{convex} elicitable properties, in which they find that all continuous, nowhere locally constant elicitable properties (in finite outcome settings) are elicitable by a \emph{convex} loss.
-However, their assumptions are more restrictive than ours; they only consider losses defined on the real line and assume the properties to be identifiable: an assumption we do not need.
+However, their assumptions are more restrictive than ours; they only consider losses defined on the real line.% and assume the properties to be identifiable: an assumption we do not need.
 
 Sometimes we can ``indirectly'' elicit a property by taking a transformation of some other property that might be easier to elicit.
 
 \begin{definition}[Indirect Elicitation]\label{def:indirectly-elicits}
-	\jessiet{Explain to reader why this is a good def. Made note in original doc.}
 	A loss and link $(L, \psi)$ \emph{indirectly elicits} a property $\gamma:\simplex \toto \R'$ if $L$ elicits a property $\Gamma: \simplex \toto \R$ such that for all $r \in \R$, we have $\Gamma_r \subseteq \gamma_{\psi(r)}$.
 	
 	Moreover, $L$ indirectly elicits $\gamma$ if such a link $\psi$ exists.
 \end{definition}
 
 While there are a few possible definitions of indirect elicitation, this one is the most applicable for our setting because when we consider set-valued properties, we do not have that \emph{all} optimal reports for $\Gamma$ must be linked back to \emph{all} optimal reports for $\gamma$.
-Instead, we loosen this restriction to say that any optimal report for $\Gamma$ must be linked to \emph{an} optimal report for $\gamma$, and must be done in a consistent manner.
-
-When properties are vector-valued (i.e.$\, \Gamma: \simplex \to \reals^d$),~\cite{frongillo2015elicitation} introduce the notion of \emph{convex elicitation complexity}.
+Instead, we lighten this restriction to say that any optimal report for $\Gamma$ must be linked to \emph{an} optimal report for $\gamma$, and must be done in a consistent manner.
 
 \subsection{Complexity notions}\label{subsec:complexity}
-When $\R \subseteq \reals^d$ for some $d \in \mathbb{Z}$, \cite{frongillo2018elicitation} introduce the notion of \emph{(convex) elicitation Complexity}, which uses $d$ to measure the ``efficiency'' of a loss $L$ eliciting $\Gamma$.
+When $\R \subseteq \reals^d$ for some $d \in \mathbb{Z}$, \cite{frongillo2018elicitation} introduce the notion of \emph{(convex) elicitation complexity}, which uses $d$ to measure the ``efficiency'' of a loss $L$ eliciting $\Gamma$.
 However, their notion of complexity relies not just on the property $\Gamma$, but instead on any property \emph{indirectly elicited} by $L$.
 \begin{definition}[Convex Elicitation Complexity]
 	The \emph{convex elicitation complexity} of a property $\eliccvx(\Gamma)$ is the minimum dimension $d$ such that there is a convex loss $L : \reals^d \times \Y \to \reals$ indirectly eliciting $\Gamma$.
@@ -281,6 +278,7 @@ However, their notion of complexity relies not just on the property $\Gamma$, bu
 
 \cite{ramaswamy2016convex} additionally introduce a notion of \emph{convex calibration dimension} for discrete losses similar to elicitation complexity mentioned above; we discuss this further in Section~\ref{sec:finite-calib}.
 Their convex calibration dimension results yield consistent surrogates for finite prediction problems such as hierarchical classification from~\cite{ramaswamy2015hierarchical} and classification with an abstain option studied by~\cite{ramaswamy2018consistent}.
+However, we show that our Theorem~\ref{thm:cvx-flats} can be used to derive their convex calibration bounds, and even derive tighter bounds on convex calibration dimension in some instances.
 
 \begin{definition}[Convex Calibration Dimension]
 	The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$ is the minimum dimension $d$ such that there is a convex loss $L: \reals^d \times \Y \to \reals$ and link $\psi$ such that $L$ is calibrated with respect to $\ell$.
@@ -288,6 +286,8 @@ Their convex calibration dimension results yield consistent surrogates for finit
 
 
 \section{Consistency implies indirect elicitation}\label{sec:consis-implies-indir}
+While the subtleties of \emph{consistency} vary slightly within the literature, we use two definitions that have the same implications, but one may be more appropriate than the other in a given context.
+
 \begin{definition}[Consistent: loss]\label{def:consistent-ell}
 	A loss and link $(L,\psi)$ are consistent with respect to an original loss $\ell$ if, for all distributions $D$ over input and label spaces $\X \times\Y$, and for all sequences of measurable hypothesis functions $\{f_m : \X \to \R\}$,
 	\begin{align*}
@@ -296,9 +296,10 @@ Their convex calibration dimension results yield consistent surrogates for finit
 \end{definition}
 \bo{I guess we need the inf to be over a certain class of functions...the left and right side expectations need to be well-defined.}
 
+For continuous properties, such as the expected value, variance, and entropy, asking for a consistent surrogate with respect to an original \emph{loss} may not make sense when we do not have one.
+In this setting, we also define consistency with respect to a property that one wishes to estimate. 
+
 \begin{definition}[Consistent: property]\label{def:consistent-prop}
-%  \raft{You have $\mu$ and $\mu^\gamma$; I'd vote just $\mu$.  We'll want to change $\mu$ to something else eventually anyway, so maybe a macro unless we're sure $\mu$ won't show up elsewhere. \jessie{Changed}}
-%  \raft{Maybe clearer this way: Introduce $L,\psi,\gamma$.  Then intro $\mu$ as any such function.  Then the def. \jessie{Done}}
 	Suppose we are given a loss $L : \R \times \Y \to \reals$, link function $\psi: \R \to \R'$, and property $\gamma:\simplex \toto \R'$.
 	Moreover, let $\propdis : \R' \times \simplex \to \reals_+$ any function where $\propdis(r,p) = 0 \iff r \in \gamma(p)$.
 	
@@ -310,18 +311,16 @@ Their convex calibration dimension results yield consistent surrogates for finit
 	We simply say the pair is consistent with respect to $\gamma$ if there is a $\propdis$ such that $(L,\psi)$ are $\propdis$-consistent with respect to $\gamma$.
 \end{definition}
 
+Theorem~\ref{thm:consistent-implies-indir-elic} shows that consistency, either with respect to a target loss $\ell$ or a property $\gamma$, implies indirect elicitation.
+
+\jessie{This section definitely needs some work because I'm not sure what is staying and what's going to the Appendix.}
+\jessie{This proof uses calibration via Definition~\ref{def:calibrated-general}.}
 \begin{proposition}\label{prop:consistent-implies-calibrated}
 	If a loss and link $(L, \psi)$ are consistent with respect to a loss $\ell$, then they are calibrated with respect to $\ell$.
 	\jessiet{Probably appendix later; also, should this be a lemma instead of a proposition?}
   \raft{Do we define ``continuous loss''?  Maybe ``(not necessarily discrete)'' is clearer.}
 \end{proposition}
 \begin{proof}
-%	\jessie{Intuition: Contrapositive.
-%		Not calibrated means there is a sequence $\{u_m\}$ such that $R_L(u_m; p) \to 0$ but $R_\ell(\psi(u_m); p) \not \to 0$ via Lemma~\ref{lem:calib-converging-regrets}.
-%		Take $D = D_x = p$ for some $x \in \X$, and any sequence of functions $\{f_m\} \to f$ with $f_m(x) = u_m$ for all $f_m$. 
-%		Now we have $\E_D L(f_m(X), Y) \to \inf_f \E_D L(f(X), Y)$, but $\E_D \ell(\psi(f(X)), Y) \not \to \inf_f \E_D \ell(\psi(f(X)), Y)$, and therefore $(L, \psi)$ is not calibrated with respect to $\ell$. 
-%	}
-
 	We show the contrapositive.
 	If $(L, \psi)$ are not calibrated with respect to $\ell$, then there is a sequence $\{u_m\}$ such that $R_L(u_m; p) \to 0$ but $R_\ell(\psi(u_m); p) \not \to 0$ via Lemma~\ref{lem:calib-converging-regrets}.
 	Suppose $D \sim \X \times\Y$ has only one $x \in \X$ with $Pr_D(X = x) > 0$ so that $p := D_x$ and $\E_D f(X,Y) = \E_p f(x, Y)$.
@@ -341,11 +340,12 @@ Their convex calibration dimension results yield consistent surrogates for finit
 \end{proof}
 
 \begin{lemma}\label{lem:consistent-loss-implies-prop}
-	If $(L, \psi)$ are consistent with respect to $\ell$, then they are consistent with respect to $\gamma := \prop{\ell}$.
-	\bo{Change to if and only if. Given $L,\psi$, define $\mu$, then consistent iff consistent.}
+	Suppose we are given a surrogate loss $L$ and link $\psi$, and target loss $\ell$.
+	Consider $\propdis: \R \times \simplex \to \reals_+$ with $\mu(r,p) := R_\ell(r,p)$.
+	$(L, \psi)$ are consistent with respect to $\ell$ if and only if they are $\propdis$-consistent with respect to $\gamma := \prop{\ell}$.
+	\bo{Change to if and only if. Given $L,\psi$, define $\mu$, then consistent iff consistent.}\jessie{Thoughts?}
 \end{lemma}
 \begin{proof}
-	Define $\propdis(r, p) := R_\ell(r;p)$.
 	First, observe that $\propdis(r,p) = 0 \iff r \in \gamma(p)$, since $r \in \gamma(p)$ implies $\ell(r;p) = \risk{\ell}(p)$, and if $r \not \in \gamma(p)$, then $\ell(r;p) > \risk{\ell}(p)$.
 	
 	Now suppose $(L, \psi)$ are consistent with respect to $\ell$, and take any sequence $\{f_m\}$ so that, for all $D$ over $\X \times \Y$, we have $\E_D L(f_m(X)) \to \inf_f \E_D L(f(X), Y)$.
@@ -355,10 +355,10 @@ Their convex calibration dimension results yield consistent surrogates for finit
 	&\iff \E_X R_\ell(\psi \circ f_m(X), D_X) \to 0\\
 	&\iff \E_X \propdis(\psi \circ f_m(X), D_X) \to 0~.~
 	\end{align*}
-%  \raft{Close; missing expectation inside inf, and I think you can skip the first $\iff$ and give the $\implies$ as an $\iff$ (right?), and then follow with a second $\iff$ with $\mu$. \jessie{I had the same doubtful thought, hence the implication, but the iff is true.}}
-%  \raft{BTW, I think it's less messy to use $\psi \circ f_m(X)$ as above \jessie{Changed}}
-%	As regret defines $\propdis$ and tends to $0$, we observe consistency with respect to $\gamma$.
 \end{proof}
+
+This result allows us to conceptualize the relationship between consistency and properties, and it suggests that our consistency with respect to a property is the correct notion to consider.
+
 
 \begin{theorem}\label{thm:consistent-implies-indir-elic}
 	If a surrogate and link pair $(L, \psi)$ is consistent with respect to a property $\gamma$ or loss $\ell$ eliciting $\gamma$, then $(L, \psi)$ indirectly elicits $\gamma$.
@@ -383,11 +383,17 @@ Their convex calibration dimension results yield consistent surrogates for finit
 
 \section{Characteristics of Consistent Convex Surrogates}\label{sec:char-convex}
 
+When one restricts their focus to \emph{convex} surrogates, we know that all minima are global, and we then have $\vec 0  \in \partial L(u, y)$ if and only if $u$ minimizes $L$ in its first component.
+This observation allows us to consider subgradient sets of the loss at a fixed distribution $p$ as the weighted Minkowski sums of subgradient sets for the loss on each outcome.
+We use this observation to construct a flat that is contained in the subgradient set of $L(r;p)$ and contains $\vec 0$ to yield a new bound on convex elicitation complexity.
+
 \begin{definition}[Flat]
 	A \emph{flat} $F$ of $\reals^n$ is an affine subspace of $\reals^n$.
 	In other words, $F\subseteq \reals^n$ can be written $F=\{x\in\reals^n : Wx + b = 0\}$ for some $W\in\reals^{d\times n}$ and $b\in\reals^d$ where $d\leq n$.
 	The codimension of the flat $F$ relative to $\reals^n$ is given by $\mathrm{rank}(W)$, and the dimension of $F$ is $n - \mathrm{rank}(W)$.
 \end{definition}
+
+Now we can consider specific characteristics of convex losses in order to understand the convex elicitation complexity of a given property.
 
 \begin{theorem}\label{thm:cvx-flats}
 	Suppose we are given a property $\gamma$ and distribution $p \in \simplex$.
@@ -405,16 +411,13 @@ Their convex calibration dimension results yield consistent surrogates for finit
 	Moreover, with $p$ fixed, we know there is a vector of witnesses $W = [x_1, \ldots, x_n] \in \reals^{d\times n}$ such that $\sum_y p_y x_y = \vec 0$.
 	Now we can take $F := \ker(W)$, whose rank is at most $d$.
 
-%	Observe that $F' := \ker(W')$ is at most $(n-d)$ dimensions in $\reals^n$ and contains $p$ by construction.
-%	Since we are only concerned with a flat intersected with the simplex being a subset of $\gamma_r$, we can reduce the dimension by adding an affine simplex constraint. 
-%	That is, take $F := \{x \in \reals^n : W x + b = \vec 0\}$, where we have $W := [W'; \mathbbm{1}^T] \in \reals^{(d+1) \times n}$ and $b \in \reals^{d+1}$.
-%	The dimension of $F$ is then $n - \mathrm{rank}(W)$, which is $n - (d+1)$ if $W$ is full rank.
 	We also claim that $F \cap \simplex \subseteq \gamma_r$.
 	To see this, consider $q \in F$, but $q \not \in \gamma_r$.
 	That would mean that $Wq + b = \vec 0$ , which in turn implies $\vec 0 \in \partial L(u;q)$, implying $q \in \Gamma_u$.
 	Therefore, $q \not \in \gamma_r$ would contradict $L$ indirectly eliciting $\gamma$.
 \end{proof}
 
+Since Theorem~\ref{thm:consistent-implies-indir-elic} says that consistency implies indirect elicitation, we then have elicitation complexity greater than $d$ implies no indirect elicitation via a $d$-dimensional property, which in turn implies there is no $d$-dimensional consistent surrogate for a loss or property of interest.
 
 \section{Discrete-valued predictions}\label{sec:finite-calib}
 
@@ -522,6 +525,11 @@ Their convex calibration dimension results yield consistent surrogates for finit
 %	Therefore, $\S_{\gamma_r}(p) \subseteq P$, and $\dim(\S_{\gamma_r}(p) + P) = \dim(P) = \|p\|_0$.
 \end{proof}
 
+The following result from~\cite{ramaswamy2016convex} allows us to use calibration as a tool to study consistency in finite prediction settings, where both $\R$ and $\Y$ are finite sets.
+In finite prediction tasks, we often want a consistent surrogate with respect to an original loss, so we focus on this notion of consistency here.
+
+The following is a statement from~\cite{ramaswamy2016convex} providing an upper bound on the convex calibration dimension of a given discrete loss, which now follows as a Corollary of our Theorem~\ref{thm:cvx-flats} and Lemma~\ref{lem:feas-sub-is-a-flat}.
+
 \begin{corollary}[\cite{ramaswamy2016convex}]
 	Suppose we are given a discrete loss $\ell:\R \to \reals^\Y_+$ eliciting $\gamma$.
 	Take $p \in \simplex$ and $r \in \R$ such that $p \in \gamma_r$.
@@ -561,8 +569,10 @@ Their convex calibration dimension results yield consistent surrogates for finit
 %	Therefore, for all $p \in \Delta_{\Y'}$, we have $\Gamma'_u = \Gamma_u \cap \Delta_{\Y'} \subseteq \gamma_{\psi(u)} \cap \Delta_{\Y'} = \gamma'_{\psi(u)}$, and thus $L'$ indirectly elicits $\gamma'$.
 \end{proof}
 
+
 \subsection{Elicitation complexity and convex calibration dimension}
 
+We can additionally relate convex calibration dimension of a loss to the convex elicitation complexity of the loss it elicits.
 \begin{proposition}
 	Consider the discrete loss $\ell : \R \times \Y \to \reals_+$ and $\gamma:= \prop{\ell}$.
 	Then $\eliccvx(\gamma) \leq \ccdim(\ell)$.
@@ -573,10 +583,19 @@ Their convex calibration dimension results yield consistent surrogates for finit
 	Then $L$ indirectly elicits $\gamma$ by Lemma~\ref{lem:calib-implies-indir}.
 \end{proof}
 
+\cite{finocchiaro2019embedding} presents the notion of a surrogate loss \emph{embedding} a discrete loss, typically by a polyhedral (piecewise linear and convex) surrogate.
+Moreover,~\cite{coltpaper} introduces the notion of \emph{embedding dimension}, which is a lower bound on both convex elicitation complexity of finite properties and convex calibration dimension of discrete losses.
+However, it is an open problem to understand if these efficiency definitions are generally equivalent.
 
 
 \section{Continuous-valued predictions}\label{sec:contin-consis}
 
+We address one major open question from~\cite{frongillo2018elicitation} by a generalization of Theorem~\ref{thm:cvx-flats}: \emph{what are lower bounds on convex elicitation complexity?}
+Proposition~\ref{prop:consistent-implies-indir-elic-prop} allows us to use convex elicitation complexity as a tool to understand efficiency of consistent convex surrogates for a given property, which is more often what is given in a continuous prediction setting.
+
+For example, when one wants to learn an $\alpha$-quantile, we start with the property rather than a loss.
+In the literature, when one wants to learn a quantile, pinball loss $L(r,y) = (r-y)(\mathbbm{1}_{r \geq y} - \alpha)$ typically appears without explanation or justification.
+Elicitation allows us to understand why pinball loss is consistent for learning a quantile as the pinball loss elicits the $\alpha$-quantile.
 
 \newcommand{\lbar}{\underline{L}} % couldn't do L* while proofreading...
 \newcommand{\iden}{\mathrm{iden}}
@@ -633,6 +652,7 @@ Both these results exactly match what Ian and I showed for the class of identifi
 \end{itemize}
 
 
+\section{Conclusions and future work}\label{sec:conclusions}
 
 
 
@@ -649,7 +669,7 @@ Nishant, Adam
 
 \newpage
 \appendix
-\section{A general notion of calibration}
+\section{A general notion of calibration}\label{app:calibration}
 
 \begin{definition}[Calibrated]\label{def:calibrated-general}
 	A loss $L:\reals^d \times \Y \to \reals$ is \emph{calibrated} with respect to a loss $\ell : \R \times \Y \to \reals$ eliciting the property $\gamma$ if there is a link $\psi : \reals^d \to \R$ such that, for all distributions $p \in \simplex$, there exists a function $\zeta : \reals_+ \to \reals_+$ with $\zeta$ continuous at $0^+$ and $\zeta(0) = 0$ such that for all $u \in \reals^d$, we have
@@ -771,6 +791,8 @@ Moreover, we argue that such a sequence of $\{u_m\}$ with converging surrogate r
 %		
 
 \end{proof}
+
+\section{Omitted Proofs}
 
 
 \end{document}
