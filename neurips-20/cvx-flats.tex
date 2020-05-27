@@ -284,6 +284,20 @@ However, we show that our Theorem~\ref{thm:cvx-flats} can be used to derive thei
 	The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$ is the minimum dimension $d$ such that there is a convex loss $L: \reals^d \times \Y \to \reals$ and link $\psi$ such that $L$ is calibrated with respect to $\ell$.
 \end{definition}
 
+We can additionally relate convex calibration dimension of a loss to the convex elicitation complexity of the loss it elicits.
+\begin{proposition}
+	Consider the discrete loss $\ell : \R \times \Y \to \reals_+$ and $\gamma:= \prop{\ell}$.
+	Then $\eliccvx(\gamma) \leq \ccdim(\ell)$.
+\end{proposition}
+\begin{proof}
+	Let $d$ be the convex calibration dimension of $\ell$, and $(L, \psi)$ be calibrated with respect to $\ell$ with $L$ convex.
+	Then $L$ indirectly elicits $\gamma$ by Lemma~\ref{lem:calib-implies-indir}.
+\end{proof}
+
+\cite{finocchiaro2019embedding} presents the notion of a surrogate loss \emph{embedding} a discrete loss, typically by a polyhedral (piecewise linear and convex) surrogate.
+Moreover,~\cite{finocchiaro2020embedding} introduces the notion of \emph{embedding dimension}, which is a lower bound on both convex elicitation complexity of finite properties and convex calibration dimension of discrete losses.
+It is an open problem to understand if these efficiency definitions are generally equivalent. \jessie{Move this sentence to conclusions?}
+
 
 \section{Consistency implies indirect elicitation}\label{sec:consis-implies-indir}
 While the subtleties of \emph{consistency} vary slightly within the literature, we use two definitions that have the same implications, but one may be more appropriate than the other in a given context.
@@ -441,11 +455,11 @@ Since Theorem~\ref{thm:consistent-implies-indir-elic} says that consistency impl
 
 \begin{lemma}\label{lem:feas-sub-is-a-flat}
 	Suppose we have the finite elicitable property $\gamma$ and distribution $p \in \relint{\simplex}$ with $r \in \gamma(p)$.
-	If $F$ is a flat containing $p$ such that $F \cap \simplex \subseteq \gamma_r$, then $F - p$ is a subspace contained in $\S_{\gamma_r}(p)$.
+	If $F$ is a flat in $\mathrm{affhull}(\simplex)$ containing $p$ such that $F \cap \simplex \subseteq \gamma_r$, then $F - p$ is a subspace contained in $\S_{\gamma_r}(p)$.
 %  \raf{I think you want $p$ in the interior of the simplex for now}
 \end{lemma}
 \begin{proof}
-  To spell it out, observe $F-p$ is a subspace as it is a linear shift of $F$, which is a linear subspace by definition of a flat and the fact that it contains $\vec 0$.
+  Observe $F-p$ is a subspace as it is a linear shift of $F$, which is a linear subspace by definition of a flat and the fact that it contains $\vec 0$.
   Now consider $v \in F - p$.
   Since $p \in \relint{\simplex}$, there is an open ball of radius $\epsilon$ in the affine hull of $\simplex$ so that for all $q \in B(p, \epsilon)$, we have $q \in \simplex$.
   In particular, take $\alpha = \epsilon / 2$, and we observe $p \pm \alpha v \in B(p, \epsilon)$, and therefore $p \pm \alpha v \in \simplex$.
@@ -493,17 +507,21 @@ Since Theorem~\ref{thm:consistent-implies-indir-elic} says that consistency impl
 %	\jessie{This is where I'm stuck??}
 %\end{proof}
 
+\newcommand{\simplexp}{\Delta_{\Y'}}
+
 \begin{lemma}\label{lem:p-boundary-fsd}
-	For any $p \in \simplex$ and $r$ such that $p \in \gamma_r$, define $\gamma'$ to be $\gamma$ restricted to the simplex $\Delta_{\supp(p)}$.
+	For any $p \in \simplex$ and $r$ such that $p \in \gamma_r$, take $\Y' := \supp(p)$.
+	Define $\gamma' : \simplex \toto \R$ with $\gamma' : q \mapsto \gamma(q) \cap \simplexp$.
 	Then $\dim(\S_{\gamma_r}(p)) = \dim(\S_{\gamma'_r}(p))$.
 \end{lemma}
 \begin{proof}
-	Consider the ambient space of both $\S_{\gamma_r}(p)$ and $\S_{\gamma'_r}(p)$ to be $\reals^\Y$.
-	We trivially have $\S_{\gamma_r}(p) \supseteq \S_{\gamma'_r}(p)$ since the latter is simply a projection down to an affine subspace of the former.
+	Consider the ambient space of both $\S_{\gamma_r}(p)$ and $\S_{\gamma'_r}(p)$ is $\reals^\Y$.
+	We trivially have $\dim(\S_{\gamma_r}(p)) \geq \dim(\S_{\gamma'_r}(p))$ since $\gamma'$ is simply $\gamma$ projected down to an affine subspace of $\reals^\Y$.
 	
-	Now to see $\S_{\gamma_r}(p) \subseteq \S_{\gamma'_r}(p)$, take some $v \not \in \S_{\gamma'_r}(p)$.
-	Observe that $\gamma'_r = \gamma_r \cap \Delta_{\supp(p)}$, so if $q^\pm := p \pm \epsilon v \not \in \gamma'_r$ for all $\epsilon > 0$, it is either because one of $q^+$ or $q^-$ is not in $\gamma_r$ or because either $q^\pm \not \in \Delta_{\supp(p)}$.
-	The first case can be seen easily by the definition of $\gamma'$, and the latter can be seen because leaving $\Delta_{\supp(p)}$ means one of $q^\pm$ also is not in $\simplex$, and therefore not in $\gamma_r$ and $\gamma_r \subseteq \simplex$.
+	Now to see $\dim(\S_{\gamma_r}(p)) \leq \dim(\S_{\gamma'_r}(p))$, it suffices to show subset inclusion.
+	Take some $v \not \in \S_{\gamma'_r}(p)$.
+	Observe that $\gamma'_r = \gamma_r \cap \simplexp$, so if $q^\pm := p \pm \epsilon v \not \in \gamma'_r$ for all $\epsilon > 0$, it is either because one of $q^+$ or $q^-$ is not in $\gamma_r$ or because either $q^\pm \not \in \simplexp$.
+	The first case can be seen easily by the definition of $\gamma'$, and the latter can be seen because leaving $\simplexp$ means one of $q^\pm$ also is not in $\simplex$, and therefore not in $\gamma_r$ as $\gamma_r \subseteq \simplex$.
 	Thus $\S_{\gamma_r}(p) = \S_{\gamma'_r}(p)$.
 	%commented out 05.26.2020
 	%	For simplicity, consider $\epsilon = \epsilon_0 / 2$.
@@ -570,22 +588,6 @@ The following is a statement from~\cite{ramaswamy2016convex} providing an upper 
 \end{proof}
 
 
-\subsection{Elicitation complexity and convex calibration dimension}
-
-We can additionally relate convex calibration dimension of a loss to the convex elicitation complexity of the loss it elicits.
-\begin{proposition}
-	Consider the discrete loss $\ell : \R \times \Y \to \reals_+$ and $\gamma:= \prop{\ell}$.
-	Then $\eliccvx(\gamma) \leq \ccdim(\ell)$.
-	\jessie{Need to define $\eliccvx$ and $\ccdim$.}
-\end{proposition}
-\begin{proof}
-	Let $d$ be the convex calibration dimension of $\ell$, and $(L, \psi)$ be calibrated with respect to $\ell$ with $L$ convex.
-	Then $L$ indirectly elicits $\gamma$ by Lemma~\ref{lem:calib-implies-indir}.
-\end{proof}
-
-\cite{finocchiaro2019embedding} presents the notion of a surrogate loss \emph{embedding} a discrete loss, typically by a polyhedral (piecewise linear and convex) surrogate.
-Moreover,~\cite{coltpaper} introduces the notion of \emph{embedding dimension}, which is a lower bound on both convex elicitation complexity of finite properties and convex calibration dimension of discrete losses.
-However, it is an open problem to understand if these efficiency definitions are generally equivalent.
 
 
 \section{Continuous-valued predictions}\label{sec:contin-consis}
