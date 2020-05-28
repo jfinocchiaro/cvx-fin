@@ -399,7 +399,8 @@ This result allows us to conceptualize the relationship between consistency and 
 
 When one restricts their focus to \emph{convex} surrogates, we know that all minima are global, and we then have $\vec 0  \in \partial L(u, y)$ if and only if $u$ minimizes $L$ in its first component.
 This observation allows us to consider subgradient sets of the loss at a fixed distribution $p$ as the weighted Minkowski sums of subgradient sets for the loss on each outcome.
-We use this observation to construct a flat that is contained in the subgradient set of $L(r;p)$ and contains $\vec 0$ to yield a new bound on convex elicitation complexity.
+Fixing a distribution $p$, we can then construct a set of $n$ witnesses in $\partial L(u,y)$ for each $y$ whose $p$-weighted minkowski sum is $\vec 0$.
+The nullspace of the matrix of these witnesses yields a flat, formally introduced below, of codimension $d$ intersecting our fixed distribution $p$ and the level set(s) $\gamma_r$ containing $p$.
 
 \begin{definition}[Flat]
 	A \emph{flat} $F$ of $\reals^n$ is an affine subspace of $\reals^n$.
@@ -411,7 +412,7 @@ Now we can consider specific characteristics of convex losses in order to unders
 
 \begin{theorem}\label{thm:cvx-flats}
 	Suppose we are given a property $\gamma$ and distribution $p \in \simplex$.
-	For all $r\in\gamma(p)$, if there is no flat $F$ of codimension at most $d$ containing $p$ so that $F \cap \simplex \subseteq \gamma_r$, then there is no convex surrogate loss $L : \reals^d \times \Y \to \reals$ that indirectly elicits $\gamma$.
+	For all $r\in\gamma(p)$, if there is no flat $F$ of codimension at most $d$ containing $p$ so that $F \cap \simplex \subseteq \gamma_r$, then there is no convex surrogate loss $L : \reals^d \times \Y \to \reals$ that indirectly elicits $\gamma$.\jessie{Do we still want to state it as the contrapositive?  That's where the bound comes from, but we use the original direction for all of the intuitive explanation.}
 \end{theorem}
 \begin{proof}[Proof]
 	We prove the contrapositive: if there is a surrogate loss $L$ indirectly eliciting $\gamma$, then for all $p \in \simplex$ and $r \in \R$ such that $r \in \gamma(p)$, there is an $d$-codimensional flat $F$ such that $F \cap \simplex \subseteq \gamma_r$ and $p \in F$.
@@ -431,28 +432,22 @@ Now we can consider specific characteristics of convex losses in order to unders
 	Therefore, $q \not \in \gamma_r$ would contradict $L$ indirectly eliciting $\gamma$.
 \end{proof}
 
-Since Theorem~\ref{thm:consistent-implies-indir-elic} says that consistency implies indirect elicitation, we then have elicitation complexity greater than $d$ implies no indirect elicitation via a $d$-dimensional property, which in turn implies there is no $d$-dimensional consistent surrogate for a loss or property of interest.
+Since Theorem~\ref{thm:consistent-implies-indir-elic} says that consistency implies indirect elicitation, we can now apply results on convex elicitation complexity, like the result above, to understand the minimal dimension required to construct a consistent surrogate loss.
+Thus, elicitation complexity greater than $d$ implies no indirect elicitation of the property of interest (or target loss eliciting such a property), which in turn implies there is no $d$-dimensional consistent surrogate with respect to a given loss or property of interest.
 
 \section{Discrete-valued predictions}\label{sec:finite-calib}
 
 \bo{Where do we discuss the chain from consistency to indirect elicitation ... how much to talk about our general calibration definition, and general consistency definitions?}
 
-%\begin{lemma}
-%	Suppose we are given a discrete loss $\ell : \R \times\Y \to \reals_+$ eliciting the property $\gamma$.
-%	If $(L, \psi)$ is calibrated with respect to $\ell$, then $L$ indirectly elicits $\gamma$.
-%\end{lemma}
-%\begin{proof}
-%	Fix $p \in \simplex$ and consider $u \in \Gamma(p)$.
-%	Since $(L, \psi)$ is calibrated with respect to $\ell$, we have $p \in \Gamma_u$.
-%	We simply need to show $\psi(u) \in \gamma(p)$.
-%	If $\psi(u) \not \in \gamma(p)$, then the terms in the condition for calibration (Equation~\eqref{eq:calibration}) are equal; hence $L$ would not be calibrated with respect to $\ell$.
-%\end{proof}
-
+When one is given a discrete target loss,~\cite{ramaswamy2016convex} give lower bounds on the convex calibration dimension, or equivalently the dimension of a convex and consistent surrogate, by constructing what they call the subspace of feasible dimensions and giving bounds in terms of its dimension.
 \begin{definition}[Subspace of feasible directions]
 	Define the \emph{subspace of feasible directions} $\S_\C(p)$ of a convex set $\C \subseteq \reals^n$ at a point $p \in \C$ as the subspace $\S_\C(p) = \{ v \in \reals^n : \exists \epsilon_0 > 0 $ such that $p + \epsilon v \in \C \; \forall \epsilon \in (-\epsilon_0,\epsilon_0) \}$.
 %  \raf{Let's simplify to $\epsilon \in (-\epsilon_0,\epsilon_0)$}
 \end{definition}
 
+We regain the bounds provided by~\cite[Theorem 16]{ramaswamy2016convex}, but have to do a little bit of groundwork to translate from our Theorem~\ref{thm:cvx-flats} and their result, restated in Corollary~\ref{cor:fsd-bound}.
+First, in Lemma~\ref{lem:feas-sub-is-a-flat}, we show that, for a fixed $p$ and report $r$ so that $r \in \gamma(p)$, the feasible subspace $\S_{\gamma_r}(p)$ is a flat satisfying the requirements of Theorem~\ref{thm:cvx-flats}.
+Therefore, we have the dimension of $\S_{\gamma_r}(p)$ being upper bounded by $d$, at least for $p \in \relint{\simplex}$. 
 \begin{lemma}\label{lem:feas-sub-is-a-flat}
 	Suppose we have the finite elicitable property $\gamma$ and distribution $p \in \relint{\simplex}$ with $r \in \gamma(p)$.
 	If $F$ is a flat in $\mathrm{affhull}(\simplex)$ containing $p$ such that $F \cap \simplex \subseteq \gamma_r$, then $F - p$ is a subspace contained in $\S_{\gamma_r}(p)$.
@@ -474,41 +469,8 @@ Since Theorem~\ref{thm:consistent-implies-indir-elic} says that consistency impl
 %  Therefore, we have $v \in F - p \implies v \in \S_{\gamma_r}(p)$, so $(F - p) \subseteq \S_{\gamma_r}(p)$.
 \end{proof}
 
-
-%\begin{lemma}\label{lem:feas-sub-is-a-flat}
-%	Suppose we have the finite property $\gamma$ and distribution $p \in \simplex$.
-%	For ant $r$ such that $r \in \gamma(p)$, the subspace $F := \mu_{\gamma_r}(p) + p $ is a flat, $F$ contains $p$, and $F \cap \simplex \subseteq \gamma_r$.
-%\end{lemma}
-%\begin{proof}
-%	Write the level set $\gamma_r = \{q \in \reals^n : A_1 q \leq b_1, \; A_2 q \leq b_2, \; A_3 q \leq b_3 \}$, where $A_1 p \leq b_1, A_2 p < b_2,$ and $A_3 p = b_3$.
-%	
-%	We want to show three things: first, $F$ is a flat as it is $\ker([A_1 ; A_3])$ by~\cite{ramaswamy2016convex}.
-%	Second, $p \in F + p$ by construction, since $\vec 0 \in F$.
-%	(Consider that $p \in \gamma_r$, so with $epsilon_0 = 1$, we have $p + \epsilon\vec 0 = p \in \gamma_r$ for all $\epsilon \in (0, 1)$; thus, $\vec 0 \in F$.)
-%	
-%	Third, we want to show $(F + p) \cap \simplex \subseteq \gamma_r$.
-%	Take some $q := p + \epsilon v$ for $v \in F$.
-%	By construction of $F$, we have $q \in F \implies q \in \simplex$, so $F + p \subseteq \simplex \implies F + p \cap \simplex = F + p$.
-%	Thus it just remains to be shown that $F + p \subseteq \gamma_r$.
-%	Since $v\in F \implies q \in F + p \implies p + \epsilon v \in \gamma_r$ by construction, so we have $F+p \subseteq \gamma_r$.	
-%\end{proof}
-
-%\begin{lemma}\label{lem:p-boundary-fstar}
-%	For a given property $\gamma$, fix $p \in \simplex$ and $r \in\R$ so that $r \in \gamma(p)$.
-%	Consider the flat $F'$ containing $p$ of dimension at least $n-d-1$.
-%	The flat $F^* = F' \cap \spn(\{e_y : y \in \supp(p)\})$ has dimension $\dim(F') - (n - \|p\|_0)$.
-%\end{lemma}
-%\begin{proof}
-%	Consider $P := \spn(\{e_y : y \in \supp(p) \})$.
-%	\begin{align*}
-%	\dim(F^*) &= \dim(F') + \|p\|_0 - \dim(F' + P)
-%	\end{align*}
-%	The claim then holds if $n = \dim(F' + P)$.
-%	\jessie{This is where I'm stuck??}
-%\end{proof}
-
+The next result helps us generalize Lemma~\ref{lem:feas-sub-is-a-flat} to any $p$; not just to $p \in \relint{\simplex}$.
 \newcommand{\simplexp}{\Delta_{\Y'}}
-
 \begin{lemma}\label{lem:p-boundary-fsd}
 	For any $p \in \simplex$ and $r$ such that $p \in \gamma_r$, take $\Y' := \supp(p)$.
 	Define $\gamma' : \simplex \toto \R$ with $\gamma' : q \mapsto \gamma(q) \cap \simplexp$.
@@ -543,9 +505,10 @@ Since Theorem~\ref{thm:consistent-implies-indir-elic} says that consistency impl
 %	Therefore, $\S_{\gamma_r}(p) \subseteq P$, and $\dim(\S_{\gamma_r}(p) + P) = \dim(P) = \|p\|_0$.
 \end{proof}
 
-The following is a statement from~\cite{ramaswamy2016convex} providing an upper bound on the convex calibration dimension of a given discrete loss, which now follows as a Corollary of our Theorem~\ref{thm:cvx-flats} and Lemma~\ref{lem:feas-sub-is-a-flat}.
+We can now understand the subspace of feasible directions as a special case of a flat described by Theorem~\ref{thm:cvx-flats}.
+The following statement from~\cite{ramaswamy2016convex} provides an upper bound on the convex calibration dimension of a given discrete loss, and now follows as a Corollary of our Theorem~\ref{thm:cvx-flats} and Lemma~\ref{lem:feas-sub-is-a-flat}.
 
-\begin{corollary}[\cite{ramaswamy2016convex}]
+\begin{corollary}[\cite{ramaswamy2016convex}]\label{cor:fsd-bound}
 	Suppose we are given a discrete loss $\ell:\R \to \reals^\Y_+$ eliciting $\gamma$.
 	Take $p \in \simplex$ and $r \in \R$ such that $p \in \gamma_r$.
 	\begin{equation}
@@ -582,8 +545,6 @@ The following is a statement from~\cite{ramaswamy2016convex} providing an upper 
 %	As $\Delta_{\Y'} \subseteq \simplex$, this is in particular true for all $p \in \Delta_{\Y'}$.
 %	Therefore, for all $p \in \Delta_{\Y'}$, we have $\Gamma'_u = \Gamma_u \cap \Delta_{\Y'} \subseteq \gamma_{\psi(u)} \cap \Delta_{\Y'} = \gamma'_{\psi(u)}$, and thus $L'$ indirectly elicits $\gamma'$.
 \end{proof}
-
-
 
 
 \section{Continuous-valued predictions}\label{sec:contin-consis}
