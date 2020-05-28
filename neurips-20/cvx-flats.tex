@@ -528,8 +528,8 @@ The following statement from~\cite{ramaswamy2016convex} provides an upper bound 
 %	First, for intuition, consider $p \in \relint{\simplex}$. 
 %	Theorem~\ref{thm:cvx-flats} implies that there exists a flat $F'$ of affine dimension at least $n-d-1$.
 %	Lemma~\ref{lem:feas-sub-is-a-flat} then says that $\dim(\S_{\gamma_r}(p)) \geq \dim(F') \geq n-d-1 \implies d \geq n - \dim(\S_{\gamma_r}(p)) - 1$.
-
-	
+%
+%	
 %	If we can show that $L' := L|_{\Y'}$ is calibrated with respect to $\ell' := \R \times \Y' \to \reals$ with $\ell(r,y) = \ell'(r,y)$ for all $r \in \R$ and $y \in \Y'$ and indirectly elicits $\gamma' := \prop{\ell'}$, then we observe the existence of a flat $F^*$ of codimension $d$ (in $\reals^{\Y'}$) so that $\dim(F^*) = \|p\|_0 - d - 1$ by Theorem~\ref{thm:cvx-flats}.
 %	Then we can use Lemma~\ref{lem:p-boundary-fsd} to observe $\dim(\S_{\gamma'_r}(p)) = \dim(\S_{\gamma_r}(p))$, and thus the result holds.
 %	
@@ -549,8 +549,8 @@ The following statement from~\cite{ramaswamy2016convex} provides an upper bound 
 
 \section{Continuous-valued predictions}\label{sec:contin-consis}
 
-We address one major open question from~\cite{frongillo2018elicitation} by a generalization of Theorem~\ref{thm:cvx-flats}: \emph{what are lower bounds on convex elicitation complexity?}
-Proposition~\ref{prop:consistent-implies-indir-elic-prop} allows us to use convex elicitation complexity as a tool to understand efficiency of consistent convex surrogates for a given property, which is more often what is given in a continuous prediction setting.
+Theorem~\ref{thm:cvx-flats} also addresses one major open question from~\cite{frongillo2015elicitation,frongillo2018elicitation}\jessiet{which citation?}: \emph{what are lower bounds on convex elicitation complexity?}
+Since proposition~\ref{prop:consistent-implies-indir-elic-prop} allows us to use convex elicitation complexity as a tool to understand efficiency of consistent convex surrogates for a given property, which is more often what is given in a continuous prediction setting.
 
 For example, when one wants to learn an $\alpha$-quantile, we start with the property rather than a loss.
 In the literature, when one wants to learn a quantile, pinball loss $L(r,y) = (r-y)(\mathbbm{1}_{r \geq y} - \alpha)$ typically appears without explanation or justification.
@@ -625,6 +625,10 @@ Lastly, the practical reason why consistency is desired is to ensure the guarant
 \newpage
 
 \section*{Broader Impact}
+This work is entirely theoretical, thus the opportunity for broader impacts is indirect, but still present.
+Understanding the complexity and efficiency of consistent, convex surrogates for different target losses and properties we wish to learn can lead to understanding the tradeoffs that are often made in ad-hoc surrogates that are not consistent.
+These ad-hoc surrogates are consistent with respect to \emph{some property}, although it may not be the one we wish to elicit, either directly or indirectly.
+As a general prediction task arises, one might be able to use property elicitation to understand what question they are actually answering (in the best base, with sufficient data that matches the real-world data distribution) by minimizing their surrogate loss and how it differs from the question they are actually trying to answer.
 
 \begin{ack}
 Nishant, Adam
@@ -636,6 +640,9 @@ Nishant, Adam
 \newpage
 \appendix
 \section{A general notion of calibration}\label{app:calibration}
+For general settings, we introduce a new notion of calibration that is a special case of calibration as introduced by~\cite[Chapter 3]{steinwart2008support}.
+We will show that in finite prediction settings, it is equivalent to the more commonplace definition given in Definition~\ref{def:calibrated-finite}.
+Therefore, we use this more general definition of calibration when proving statements about the relationship between consistency, calibration, and indirect elicitation.
 
 \begin{definition}[Calibrated]\label{def:calibrated-general}
 	A loss $L:\reals^d \times \Y \to \reals$ is \emph{calibrated} with respect to a loss $\ell : \R \times \Y \to \reals$ eliciting the property $\gamma$ if there is a link $\psi : \reals^d \to \R$ such that, for all distributions $p \in \simplex$, there exists a function $\zeta : \reals_+ \to \reals_+$ with $\zeta$ continuous at $0^+$ and $\zeta(0) = 0$ such that for all $u \in \reals^d$, we have
@@ -644,27 +651,27 @@ Nishant, Adam
 	\end{equation}
 \end{definition}
 
-\jessie{Consider the following four conditions: Suppose we are given $\zeta:\reals_+ \to \reals_+$.
+Consider the following four conditions: Suppose we are given $\zeta:\reals_+ \to \reals_+$.
 \begin{enumerate}
 	\item [A] $\zeta$ satisfies $\zeta : 0 \mapsto 0$ and is continuous at $0$.
 	\item [B] $\epsilon_m \to 0 \implies \zeta(\epsilon_m) \to 0$.
 	\item [C] Given $\zeta:\reals \to \reals_+$, for all $u \in \reals^d$, $R_\ell(\psi(u); p) \leq \zeta(R_L(u;p))$.
 	\item [D] For all $p \in \simplex$ and sequences $\{u_m\}$ so that $R_L(u_m; p) \to 0$, we have $R_\ell(\psi(u_m); p) \to 0$.
 \end{enumerate}
-$\exists \zeta$ so that $(A \wedge C)$ defines calibration, and we have $A \iff B$ shown in Lemma~\ref{lem:continuous-iff-limits}.  Lemma~\ref{lem:calib-converging-regrets} shoes calibration iff $D$.}
+The existence of a function $\zeta$ so that $(A \wedge C)$ defines calibration as in Definition~\ref{def:calibrated-general}, and we show $A \iff B$ in Lemma~\ref{lem:continuous-iff-limits}.  
+Lemma~\ref{lem:calib-converging-regrets} shows calibration if and only if $D$, which yields a condition equivalent to calibration without dependence the function $\zeta$.
 
 \begin{proposition}
-	When $\R$ is finite, calibration via Definition~\ref{def:calibrated-general} implies calibration via Definition~\ref{def:calibrated-finite}.
-	\jessie{eventually want iff}
+	When $\R$ is finite, a loss and link $(L, \psi)$ are calibrated with respect to a target loss $\ell$ via Definition~\ref{def:calibrated-general} if and only if calibration via Definition~\ref{def:calibrated-finite}.
 \end{proposition}
 \begin{proof}
-	\jessie{Old proof commented out; simplified using Lemma~\ref{lem:calib-converging-regrets}}
-
+	\jessiet{Old proof commented out; simplified using Lemma~\ref{lem:calib-converging-regrets}}
+$\implies$
 	We prove the contrapositive; if $(L, \psi)$ is not calibrated with respect to $\ell$ by Definition~\ref{def:calibrated-finite}, then it is not calibrated via Definition~\ref{def:calibrated-general} either.
 	If $(L, \psi)$ are not calibrated with respect to $\ell$ by Definition~\ref{def:calibrated-finite}, then there is a $p \in \simplex$ so that $\inf_{u : \psi(u) \not \in \gamma(p)} L(u;p) = \inf_u L(u; p)$.
 	Thus there is a sequence $\{u_m\}$ so that $\lim_{m \to \infty} \psi(u_m) \not \in \gamma(p)$ and $L(u_m; p) \to \risk{L}(p)$.  
-	Now we have $R_L(u_m; p \to 0$ but $R_\ell(\psi(u_m); p) \not \to 0$, so by Lemma~\ref{lem:calib-converging-regrets}, we contradict calibration by Def~\ref{def:calibrated-general}.
-
+	Now we have $R_L(u_m; p \to 0$ but $R_\ell(\psi(u_m); p) \not \to 0$, so by Lemma~\ref{lem:calib-converging-regrets}, we contradict calibration by Definition~\ref{def:calibrated-general}.
+%	
 % Commented out 05.19.2020 for easier proof if Lemma 5 is true.
 %	We prove the contrapositive; if $(L, \psi)$ is not calibrated with respect to $\ell$ by Definition~\ref{def:calibrated-finite}, then it is not calibrated via Definition~\ref{def:calibrated-general} either.
 %	
@@ -673,10 +680,16 @@ $\exists \zeta$ so that $(A \wedge C)$ defines calibration, and we have $A \iff 
 %	
 %	This consequently implies $R_L(u_m;p) \to 0$ as $L(u_m; p) \to \risk{L}(p)$, but as $\ell(\psi(u_m); p) \not \to \risk{\ell}(p)$ (if it did converge, then we would have $\psi(u_m) \to r \in \gamma(p)$), so $R_\ell(\psi(u_m); p) \not \to 0$.
 %	Thus, by Lemma~\ref{lem:calib-converging-regrets}, we have no calibration via Definition~\ref{def:calibrated-general}.  
-		
-	
+
+$\impliedby$
+Suppose there was a function $\zeta$ satisfying the bound in Equation~\eqref{eq:calibrated-general} for a fixed distribution $p \in \simplex$.
+Observe the bound in Equation~\eqref{eq:calibration} can be written as $R_L(u,p) > 0$ for all $p \in \simplex$ and $u$ so that $\psi(u)$ is bounded away from $\gamma(p)$. \jessie{details correct??}
+
+By Equation~\eqref{eq:calibrated-general}, for any sequence $\{u_m\}$ so that $\psi(u_m) \not \to \gamma(p)$, we have must have $\zeta(R_\ell(\psi(u_m), p)) \not \to 0$ as we would otherwise contradict the bound in Equation~\eqref{eq:calibrated-general} since $R_\ell(\psi(u), p) \not \to 0$. 
+Therefore $R_L(u_m, p) \not \to 0$; thus, the strict inequality holds.
 \end{proof}
 
+The following Lemma shows that conditions $A$ and $B$ are equivalent, so that we can using condition $B$ in lieu of condition $A$ in the proof of Lemma~\ref{lem:calib-converging-regrets}
 \begin{lemma}\label{lem:continuous-iff-limits}
 	A function $\zeta:\reals \to \reals$ is continuous at $0$ and $\zeta(0) = 0$ if and only if the sequence $\{u_m\} \to 0 \implies \zeta(u_m) \to 0$.
 	\jessie{$A \iff B$}
@@ -692,6 +705,7 @@ $\exists \zeta$ so that $(A \wedge C)$ defines calibration, and we have $A \iff 
 	There must be a sequence $\{u_m\} \to 0$ so that $\lim_{m \to \infty}\zeta(u_m) \neq \zeta(0) = 0$, so $\zeta(u_m) \not \to 0$.
 \end{proof}
 
+Lemma~\ref{lem:calib-converging-regrets} now gives a condition equivalent to calibration without requiring one to already have a function $\zeta$ in mind.
 \begin{lemma}\label{lem:calib-converging-regrets}
 	A continuous surrogate and link $(L,\psi)$ are calibrated (via definition~\ref{def:calibrated-general}) with respect to $\ell$ if and only if, for all $p \in \simplex$ and sequences $\{u_m\}$ so that $R_L(u_m; p) \to 0$, we have $R_\ell(\psi(u_m); p) \to 0$.
 	\jessie{$(A \wedge C) \iff D$}
@@ -735,7 +749,7 @@ Since this is true for all $\epsilon$, we have $S(\epsilon)$ nonempty for all $\
 Now if $\zeta(\epsilon_m) \not \to 0$, it must be because $R_\ell(\psi(u_m), p) \not \to 0$ for some sequence converging to zero surrogate regret, and therefore we contradict the statement $R_L(u_m, p) \to 0 \implies R_\ell(\psi(u_m), p) \to 0$.
 
 Moreover, we argue that such a sequence of $\{u_m\}$ with converging surrogate regret always exists by continuity and boundedness from below \jessiet{really just need lower semi-continuity and boundedness from below} of the surrogate loss, since we can take the constant sequence at the (attained) infimum.
-
+%
 %\jessie{$D \implies A$, but actually $\lnot B \wedge C \implies \lnot D$}
 %Fix $p \in \simplex$.
 %Suppose we have a sequence $\{\epsilon_m\}$ so that $\epsilon_m \to 0$, but $\zeta(\epsilon_m) \not \to 0$.
@@ -744,18 +758,7 @@ Moreover, we argue that such a sequence of $\{u_m\}$ with converging surrogate r
 %This sequence converges to $0$, but we have $\lim_{m \to \infty} \zeta(\epsilon'_m) = \lim_{m \to \infty} \lim_{j \to \infty} \zeta(R_L(u^j_m, p)) \not \to 0$. 
 %As $R_\ell(\psi(u_m); p) \leq R_L(u_m; p)$ for all $m$, we then have this being true in the limit.
 %For this sequence, this then gives a loose bound of $0 \leq \lim_{m\to\infty} R_\ell(\psi(u_m); p) \leq c$. 
-	
-%commented out post meeting 05.20.2020
-%\jessie{D $\implies$ B ($\iff$ A)}
-%	First, we can verify that $\zeta$ as constructed maps $\zeta(0) = 0$ and is continuous at $0$.	
-%	As $\risk{L}$ and $\risk{\ell}$ are well-defined for all $p \in \simplex$, we note that $\zeta(0) = \sup_{u':R_L(u;p) = 0} (R_\ell(\psi(u'); p)) = \sup_{u' \in \Gamma(p)} (R_\ell(\psi(u'); p))$, which is finite if $\Gamma$ is non-degenerate (i.e. there is no $p \in \simplex$ so that $\Gamma(p) = \emptyset$).
-%	If there is a $u \in \Gamma(p)$ so that $R_\ell(\psi(u); p) > 0$ (i.e. $\zeta(0) > 0$), then the constant sequence $\{u_m\} = u$ for all $m$ gives $R_L(u_m;p) \to 0$ but $R_\ell(\psi(u_m); p) \not \to 0$, yielding a contradiction; therefore, we must have $\zeta(0) = 0$.
 %	
-%	To see $\zeta$ is continuous at $0$, we just need to show $\lim_{c \to 0^+} \zeta(c) = 0$. 
-%	Take any sequence $\{u_m\}$ so that $R_L(u_m; p) \to 0$, and therefore $R_\ell(\psi(u_m);p) \to 0$.
-%	Since this is true for all sequences, we have the upper bound tending to $0$, and thus $\lim_{c\to 0^+}\zeta(c) = 0$.
-%		
-
 \end{proof}
 
 \section{Omitted Proofs}
