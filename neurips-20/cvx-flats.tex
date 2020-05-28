@@ -150,43 +150,40 @@
 \maketitle
 
 \begin{abstract}
-%	For finite prediction tasks, one can often naturally model their specific problem with a discrete loss.
-%	However, these discrete losses are often hard to optimize, so one often seeks a surrogate losses yielding desirable statistical guarantees with respect to the original problem.
-	In prediction tasks, one typically seeks to minimize \emph{empirical risk} by learning a hypothesis function making predictions from a given feature vector about a desired future outcome.
-	This hypothesis is learned by minimizing a loss function over a set of labeled training data.
-	However, as not all loss functions are easily optimized, one often wishes to optimize a \emph{surrogate loss} yielding the same statistical guarantees as the original.
-	In this paper, we are specifically interested in the construction of \emph{consistent} surrogate losses; particularly those that are  ``efficient'' in the dimension of their input.
-	We extend the general notion of consistency to properties, so that we may understand when one can construct a convex, consistent surrogate without requiring an original loss, which are uncommon for continuous prediction tasks (for example, the median).
-	This allows us to observe that indirect property elicitation is necessary to construct a consistent surrogate, which allows us to apply property elicitation complexity results to the minimal dimension of a consistent surrogate.
-	Moreover, when surrogate losses are convex, we state a new lower bound on the dimension of a convex surrogate by using tools from property elicitation.
+Given a prediction task, understanding when one can and cannot design a consistent convex surrogate loss, particularly a low-dimensional one, is an important and active area of machine learning research. 
+While calibration has historically been used to reason about consistency, we propose indirect property elicitation as an alternative necessary condition for a surrogate loss to be consistent. 
+Motivated by structured prediction and other domains where the prediction dimension of the surrogate is of central importance, we give a novel lower bound on the prediction dimension. 
+Our lower bound tightens existing results in the case of discrete predictions, namely the feasible subspace dimension, showing that previous work implicitly relied on calibration only via property elicitation. 
+For continuous predictions, our lower bound gives new results for variance estimation as well as the estimation of entropy and norms of the conditional distribution.
 \end{abstract}
 
 \section{Introduction}\label{sec:intro}
 In supervised machine learning, one often wants to make a prediction about future outcomes by training a classifier to minimize the average empirical loss of a labeled training set, where the loss is determined by the task at hand.
 For example, 0-1 loss is often desired for classification tasks.
-However, finite losses are typically difficult to optimize, so we construct a continuous \emph{surrogate} loss that one can more easily optimize.
+However, finite losses are typically difficult to optimize, so we construct a continuous \emph{surrogate} loss to minimize instead.
 In particular, we want our surrogate loss to yield bounds on the excess risk so that optimal predictions for the surrogate can be linked to optimal predictions for an original (possibly discrete) loss with bounded excess error, regardless of the underlying data distribution.
 Moreover, in continuous prediction settings, one often starts with a statistic of the data they would like to estimate, but it is often unclear how to construct a a loss that is consistent for the given statistic, or property.
 For example, if one wants to estimate the $\alpha$-quantile, they can do so by minimizing pinball loss over their data, but it is often unclear \emph{why} pinball loss is good for this prediction task.
-Throughout this paper, the statistical guarantees we desire are \emph{consistency}, as it is the only condition that guarantees good bounds on excess surrogate loss. \jessiet{Raf, maybe fill in here?}
+Throughout this paper, the statistical guarantees we desire are \emph{consistency}, as it is the only condition that guarantees good bounds on excess surrogate loss. \jessiet{Raf, maybe fill in here with ERM bounds?}
 In particular, we are specifically interested in consistent \emph{and convex} surrogates in which any sequence of hypotheses converging to the optimal prediction can be linked to a sequence that converges to either the correct prediction for the discrete loss or statistic value, depending on the setting. 
+We would also like our surrogate losses to be efficient in the dimension of the input, as this is one potential source of significant computational speedup.
+
 In Theorem~\ref{thm:consistent-implies-indir-elic}, we show indirect property elicitation is a necessary condition for consistency so that we can use a tool based on property elicitation to bound the minimum dimension needed to construct a consistent convex surrogate.
-Previous lower bounds on the dimension of a consistent convex surrogate for a given task have been considered in one of four settings: first, previous results diverge where one are given a target loss or simply a statistic of the data they wish to estimate.
-Second, previous results typically hold only under a finite prediction setting or a continuous estimation setting.
-Theorem~\ref{thm:cvx-flats}, however, is general enough to yield bounds across all four settings.
+Previous lower bounds on the dimension of a consistent convex surrogate for a given task have been considered in one of four settings: when one is or is not we are given a target loss and when one is making a continuous or discrete prediction.
+Theorem~\ref{thm:cvx-flats}, however, is general enough to yield bounds across all four settings, and is the first result to our knowledge to handle this generality.
 
-We typically use convex surrogate loss functions that take some input $u \in \reals^d$ and measure error against the observed outcome $y \in \Y$.
-The value $d$ provides some notion of efficiency for the surrogate, as low-dimensional convex losses can improve the efficiency of the optimization algorithm.
-\cite{frongillo2015elicitation} pose an open question regarding a general characterization of the efficiency of \emph{convex elicitable properties}, which we show is bounded by finding the minimum dimension $d$ for which a consistent, convex loss can be constructed for the task at hand.
+%We typically use convex surrogate loss functions that take some input $u \in \reals^d$ and measure error against the observed outcome $y \in \Y$.
+%The value $d$ provides some notion of efficiency for the surrogate, as low-dimensional convex losses can improve the efficiency of the optimization algorithm.
+%\cite{frongillo2015elicitation} pose an open question regarding a general characterization of the efficiency of \emph{convex elicitable properties}, which we show is bounded by finding the minimum dimension $d$ for which a consistent, convex loss can be constructed for the task at hand.
 
-In Section~\ref{sec:related-work}, we review previous work and introduce the two main concepts used: \emph{consistency} and \emph{property elicitation}.
-We draw connections between the two in Section~\ref{sec:consis-implies-indir} by showing that if a loss and link are consistent with respect to a target loss or the property it elicits, then it must also indirectly elicit the same property.
+In Section~\ref{sec:related-work}, we review previous work and introduce the three main concepts used: \emph{consistency}, \emph{calibration}, and \emph{property elicitation}.
+We draw connections between the consistency and property elicitation in Section~\ref{sec:consis-implies-indir} by showing that if a loss and link are consistent with respect to a target loss or the property it elicits, then it must also indirectly elicit the same property.
 In Section~\ref{sec:char-convex}, we present our main result (Theorem~\ref{thm:cvx-flats}), a corollary of which characterizes the existence of consistent convex surrogates in a given dimension $d$.
-In Section~\ref{sec:finite-calib}, we relate our setting to the study of \emph{convex calibration dimension} introduced by~\cite{ramaswamy2016convex} by focusing on the finite prediction setting.
-Our Theorem~\ref{thm:cvx-flats} generalizes their bound on convex calibration dimension by observing that the \emph{subspace of feasible dimensions} constructed in their bound is just one case of a flat produced by our Theorem~\ref{thm:cvx-flats}.
-To see this we use our results to generalize and simplify the proof of~\cite[Theorem 16]{ramaswamy2016convex}.
-In continuous settings, one often has a prediction task for which they want to construct a consistent convex loss, rather than an original loss.
-In Section~\ref{sec:contin-consis}, we address the construction of convex consistent losses by applying the main insights from Theorem~\ref{thm:cvx-flats} to this setting, answering the open question posed by~\cite[Section 8]{frongillo2018elicitation}.
+In Section~\ref{sec:finite-calib}, we relate our setting to the study of \emph{convex calibration dimension} introduced by~\cite{ramaswamy2016convex} by focusing on the finite prediction setting where calibration and consistency are equivalent.
+Theorem~\ref{thm:cvx-flats} generalizes their bound on convex calibration dimension by observing that the \emph{subspace of feasible dimensions} constructed in their bound is just one case of a flat produced by our Theorem~\ref{thm:cvx-flats}.
+To see this, we use our results to generalize and simplify the proof of~\cite[Theorem 16]{ramaswamy2016convex}.
+Moreover, in continuous settings, one often has a prediction task for which they want to construct a consistent convex loss, rather than an original loss.
+In Section~\ref{sec:contin-consis}, we address the construction of convex consistent losses by applying the main insights from Theorem~\ref{thm:cvx-flats} to this setting, answering an open question posed by~\cite[Section 8]{frongillo2018elicitation}.
 
 \subsection{Notation}
 In this paper, we take the outcome set $\Y$ and consider $\simplex$ to be the simplex over $\Y$.
@@ -194,9 +191,9 @@ For $p \in \simplex$, let $\supp(p)$ be the support of $p$.
 %discrete land
 We use $\R$ to denote a report set; it is not necessary for $\Y = \R$.  
 For example, in ranking problems, $\R$ may be all $n!$ permutations over the $n$ outcomes forming $\Y$.
-A loss $\ell : \R \times \Y \to \reals_+$ is \emph{discrete} if $|\R| < \infty$, and in general, we use $\ell$ to denote our \emph{target loss} for which we want to construct a consistent surrogate $L$.
+A loss $\ell : \R \times \Y \to \reals$ is \emph{discrete} if $|\Y|$ and $|\R| < \infty$, and in general, we use $\ell$ to denote our \emph{target loss} for which we want to construct a consistent surrogate $L$.
 For a distribution $p \in \simplex$, we denote the expected discrete loss for report $r$ to be $\E_{Y \sim p} \ell(r, Y) := \ell(r; p)$.
-We denote the surrogate loss $L : \reals^d \times \Y \to \reals_+$, and typically denote a surrogate report with $u$.
+We denote the surrogate loss $L : \reals^d \times \Y \to \reals$, and typically denote a surrogate report with $u$.
 
 Throughout this paper, we use tools from \emph{property elicitation} to understand the existence of consistent surrogate functions; a property is simply a function mapping distributions over the outcome simplex to reports.
 Introduced in Section~\ref{subsec:properties}, a property $\Gamma: \simplex \to 2^\R \setminus \emptyset$ is denoted $\Gamma:\simplex \toto \R$.
@@ -216,7 +213,7 @@ However, when one starts with a (often discrete) target loss they want to minimi
 For this reason, we use surrogate losses, but desire consistency to guarantee the surrogate ``corresponds'' to the original loss, or property we want to predict, as is more common in the the continuous estimation setting.
 However, a surrogate loss is no good on its own; one needs a link function to map from the surrogate prediction space back to the \emph{correct} prediction in the original prediction space.
 This notion of a correct surrogate is typically captured by the notion of \emph{consistency}, introduced formally in Definitions~\ref{def:consistent-ell} and~\ref{def:consistent-prop}.
-\emph{Calibration} was the primary tool to study consistency until~\cite{agarwal2015consistent} introduced the use of property elicitation to study consistency in certain situations.
+Related, and sometimes equivalent, is \emph{calibration}, which was the primary tool to study consistency until~\cite{agarwal2015consistent} introduced the use of property elicitation to study consistency in certain contexts.
 
 \begin{definition}[Calibrated: Finite predictions]\label{def:calibrated-finite}
 	Let $\ell : \R \times \Y \to \reals_+$ be a discrete target loss eliciting the property $\gamma$.
@@ -227,7 +224,8 @@ This notion of a correct surrogate is typically captured by the notion of \emph{
 \end{definition}
 
 \cite{zhang2004statistical,lin2004note,bartlett2006convexity,tewari2007consistency} form a characterization of consistent and calibrated surrogates for classification problems.
-In particular,~\cite{bartlett2006convexity} show that if a convex surrogate is differentiable, minimal at $0$, and nonnegative, there is a consistent surrogate for binary classification problems, and~\cite{tewari2007consistency} generalizes this result for multiclass classification. 
+In finite prediction tasks, the two are in fact equivalent.  
+\cite{bartlett2006convexity} show that if a convex surrogate is differentiable, minimal at $0$, and nonnegative, there is a consistent surrogate for binary classification problems, and~\cite{tewari2007consistency} generalizes this result for multiclass classification. 
 \cite{ramaswamy2016convex} further show necessary and sufficient conditions for finite prediction problems to be consistent that can be applied to general discrete losses.
 \cite{steinwart2007compare} generalizes the study of consistent losses from the finite prediction setting and characterizes different types of loss functions, relating excess risk bounds, consistency, and calibration, giving proofs for various classes of surrogate losses (i.e. margin-based, distance-based, supervised, unsupervised, etc.)
 See~\cite[Chapter 2]{steinwart2008support} for further discussion of these loss functions.
@@ -243,7 +241,6 @@ Moreover,~\cite{agarwal2015consistent} is the first to our knowledge to formally
 
 Informally, a property is a function mapping a probability distribution $p$ over the outcome set $\Y$ to the ``suggested report'' given $p$.
 \begin{definition}[Property, elicits, level set]
-	\jessiet{Don't like the notation here... fix later.}
 	A \emph{property} is a (possibly set-valued) function $\Gamma : \simplex \toto \R$ mapping distributions to reports.
 	A loss $L : \R \times \Y \to \reals_+$ \emph{elicits} the property $\Gamma$ if,
 	\begin{equation}
@@ -267,16 +264,10 @@ Sometimes we can ``indirectly'' elicit a property by taking a transformation of 
 \end{definition}
 
 While there are a few possible definitions of indirect elicitation, this one is the most applicable for our setting because when we consider set-valued properties, we do not have that \emph{all} optimal reports for $\Gamma$ must be linked back to \emph{all} optimal reports for $\gamma$.
-Instead, we lighten this restriction to say that any optimal report for $\Gamma$ must be linked to \emph{an} optimal report for $\gamma$, and must be done in a consistent manner.
+Instead, we lighten this restriction to say that any optimal report for $\Gamma$ must be linked to \emph{an} optimal report for $\gamma$, and must be done consistently. \jessiet{HAA, but also should probably use a different word for clarity...}
 
 \subsection{Complexity notions}\label{subsec:complexity}
-When $\R \subseteq \reals^d$ for some $d \in \mathbb{Z}$, \cite{frongillo2018elicitation} introduce the notion of \emph{(convex) elicitation complexity}, which uses $d$ to measure the ``efficiency'' of a loss $L$ eliciting $\Gamma$.
-However, their notion of complexity relies not just on the property $\Gamma$, but instead on any property \emph{indirectly elicited} by $L$.
-\begin{definition}[Convex Elicitation Complexity]
-	The \emph{convex elicitation complexity} of a property $\eliccvx(\Gamma)$ is the minimum dimension $d$ such that there is a convex loss $L : \reals^d \times \Y \to \reals$ indirectly eliciting $\Gamma$.
-\end{definition}
-
-\cite{ramaswamy2016convex} additionally introduce a notion of \emph{convex calibration dimension} for discrete losses similar to elicitation complexity mentioned above; we discuss this further in Section~\ref{sec:finite-calib}.
+\cite{ramaswamy2016convex} introduce a notion of \emph{convex calibration dimension} for discrete losses similar to elicitation complexity mentioned above; we discuss this further in Section~\ref{sec:finite-calib}.
 Their convex calibration dimension results yield consistent surrogates for finite prediction problems such as hierarchical classification from~\cite{ramaswamy2015hierarchical} and classification with an abstain option studied by~\cite{ramaswamy2018consistent}.
 However, we show that our Theorem~\ref{thm:cvx-flats} can be used to derive their convex calibration bounds, and even derive tighter bounds on convex calibration dimension in some instances.
 
@@ -284,19 +275,25 @@ However, we show that our Theorem~\ref{thm:cvx-flats} can be used to derive thei
 	The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell$ is the minimum dimension $d$ such that there is a convex loss $L: \reals^d \times \Y \to \reals$ and link $\psi$ such that $L$ is calibrated with respect to $\ell$.
 \end{definition}
 
-We can additionally relate convex calibration dimension of a loss to the convex elicitation complexity of the loss it elicits.
+When $\R \subseteq \reals^d$ for some $d \in \mathbb{Z}$, \cite{frongillo2018elicitation} similarly introduce the notion of \emph{(convex) elicitation complexity}, which uses $d$ to measure the ``efficiency'' of a loss $L$ eliciting $\Gamma$.
+However, their notion of complexity relies not just on the property $\Gamma$, but instead on any property \emph{indirectly elicited} by $L$.
+\begin{definition}[Convex Elicitation Complexity]
+	The \emph{convex elicitation complexity} of a property $\eliccvx(\Gamma)$ is the minimum dimension $d$ such that there is a convex loss $L : \reals^d \times \Y \to \reals$ indirectly eliciting $\Gamma$.
+\end{definition}
+
+We can additionally relate convex calibration dimension of a loss to the convex elicitation complexity of the loss it elicits when we are in a finite prediction setting.
 \begin{proposition}
 	Consider the discrete loss $\ell : \R \times \Y \to \reals_+$ and $\gamma:= \prop{\ell}$.
 	Then $\eliccvx(\gamma) \leq \ccdim(\ell)$.
 \end{proposition}
 \begin{proof}
 	Let $d$ be the convex calibration dimension of $\ell$, and $(L, \psi)$ be calibrated with respect to $\ell$ with $L$ convex.
-	Then $L$ indirectly elicits $\gamma$ by Lemma~\ref{lem:calib-implies-indir}.
+	Then $L$ indirectly elicits $\gamma$ by Lemma~\ref{lem:calib-implies-indir}.\jessiet{Ordering of this? Also don't love having a Proposition in Section 2}
 \end{proof}
 
-\cite{finocchiaro2019embedding} presents the notion of a surrogate loss \emph{embedding} a discrete loss, typically by a polyhedral (piecewise linear and convex) surrogate.
+\cite{finocchiaro2019embedding} additionally presents the notion of a surrogate loss \emph{embedding} a discrete loss, which is a special case of calibration.
 Moreover,~\cite{finocchiaro2020embedding} introduces the notion of \emph{embedding dimension}, which is a lower bound on both convex elicitation complexity of finite properties and convex calibration dimension of discrete losses.
-It is an open problem to understand if these efficiency definitions are generally equivalent. \jessie{Move this sentence to conclusions?}
+It is an open problem to understand if these efficiency definitions are generally equivalent. \jessiet{Move this sentence to conclusions?  It's currently in both.}
 
 
 \section{Consistency implies indirect elicitation}\label{sec:consis-implies-indir}
@@ -399,7 +396,7 @@ This result allows us to conceptualize the relationship between consistency and 
 
 When one restricts their focus to \emph{convex} surrogates, we know that all minima are global, and we then have $\vec 0  \in \partial L(u, y)$ if and only if $u$ minimizes $L$ in its first component.
 This observation allows us to consider subgradient sets of the loss at a fixed distribution $p$ as the weighted Minkowski sums of subgradient sets for the loss on each outcome.
-Fixing a distribution $p$, we can then construct a set of $n$ witnesses in $\partial L(u,y)$ for each $y$ whose $p$-weighted minkowski sum is $\vec 0$.
+Fixing a distribution $p$, we can then construct a set of $n$ witnesses in $\partial L(u,y)$ for each $y$ whose $p$-weighted sum is $\vec 0$.
 The nullspace of the matrix of these witnesses yields a flat, formally introduced below, of codimension $d$ intersecting our fixed distribution $p$ and the level set(s) $\gamma_r$ containing $p$.
 
 \begin{definition}[Flat]
@@ -412,7 +409,7 @@ Now we can consider specific characteristics of convex losses in order to unders
 
 \begin{theorem}\label{thm:cvx-flats}
 	Suppose we are given a property $\gamma$ and distribution $p \in \simplex$.
-	For all $r\in\gamma(p)$, if there is no flat $F$ of codimension at most $d$ containing $p$ so that $F \cap \simplex \subseteq \gamma_r$, then there is no convex surrogate loss $L : \reals^d \times \Y \to \reals$ that indirectly elicits $\gamma$.\jessie{Do we still want to state it as the contrapositive?  That's where the bound comes from, but we use the original direction for all of the intuitive explanation.}
+	For all $r\in\gamma(p)$, if there is no flat $F$ of codimension at most $d$ containing $p$ so that $F \cap \simplex \subseteq \gamma_r$, then there is no convex surrogate loss $L : \reals^d \times \Y \to \reals$ that indirectly elicits $\gamma$.\jessiet{Do we still want to state it as the contrapositive?  That's where the bound comes from, but we use the original direction for all of the intuitive explanation.}
 \end{theorem}
 \begin{proof}[Proof]
 	We prove the contrapositive: if there is a surrogate loss $L$ indirectly eliciting $\gamma$, then for all $p \in \simplex$ and $r \in \R$ such that $r \in \gamma(p)$, there is an $d$-codimensional flat $F$ such that $F \cap \simplex \subseteq \gamma_r$ and $p \in F$.
@@ -439,7 +436,7 @@ Thus, elicitation complexity greater than $d$ implies no indirect elicitation of
 
 \bo{Where do we discuss the chain from consistency to indirect elicitation ... how much to talk about our general calibration definition, and general consistency definitions?}
 
-When one is given a discrete target loss,~\cite{ramaswamy2016convex} give lower bounds on the convex calibration dimension, or equivalently the dimension of a convex and consistent surrogate, by constructing what they call the subspace of feasible dimensions and giving bounds in terms of its dimension.
+When one is given a discrete target loss,~\cite{ramaswamy2016convex} give lower bounds on the convex calibration dimension, or equivalently the dimension of a convex and consistent surrogate\jessiet{should probably cite the original calibration iff consistent in finite setting result}, by constructing what they call the subspace of feasible dimensions and giving bounds in terms of its dimension.
 \begin{definition}[Subspace of feasible directions]
 	Define the \emph{subspace of feasible directions} $\S_\C(p)$ of a convex set $\C \subseteq \reals^n$ at a point $p \in \C$ as the subspace $\S_\C(p) = \{ v \in \reals^n : \exists \epsilon_0 > 0 $ such that $p + \epsilon v \in \C \; \forall \epsilon \in (-\epsilon_0,\epsilon_0) \}$.
 %  \raf{Let's simplify to $\epsilon \in (-\epsilon_0,\epsilon_0)$}
