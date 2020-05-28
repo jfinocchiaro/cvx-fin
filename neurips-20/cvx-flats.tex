@@ -545,16 +545,46 @@ The following statement from~\cite{ramaswamy2016convex} provides an upper bound 
 %	As $\Delta_{\Y'} \subseteq \simplex$, this is in particular true for all $p \in \Delta_{\Y'}$.
 %	Therefore, for all $p \in \Delta_{\Y'}$, we have $\Gamma'_u = \Gamma_u \cap \Delta_{\Y'} \subseteq \gamma_{\psi(u)} \cap \Delta_{\Y'} = \gamma'_{\psi(u)}$, and thus $L'$ indirectly elicits $\gamma'$.
 \end{proof}
+\subsection{Example}\label{subsec:examples-finite}
+There are some cases where the bound provided by Theorem~\ref{thm:cvx-flats} is strictly tighter than the bound provided by feasible subspace dimension in Corollary~\ref{cor:fsd-bound}.
+For example, we can consider the \emph{abstain property} over 3 outcomes where one wishes to report the most likely outcome $y$ if $Pr[Y=y|x] \geq 1/2$ and abstains from predicting ($\bot$) otherwise.
+This is elicited by the target loss $\ell^{abs} := \mathbbm{1}\{r \not \in \{y, \bot\}\} + (1/2)\mathbbm{1}\{r = \bot\}$. 
+For this example, we choose $p$ to be the uniform distribution.
+In this case, the bound by feasible subspace dimension yields $\ccdim(\ell^) \geq 3 - 2 - 1 = 0$, as the feasible subspace dimension is $2$ since we are on the relative interior of the level set and simplex, as shown in Figure~\ref{fig:fsd-bound}.
 
+However, consider any flat of codimension $1$ (a line in the two dimensions; a plane in three) containing $p$.
+When intersected with the simplex, one can see that any line in the simplex through $p$ also leaves the cell $\gamma_\bot$, which contains $p$.
+See Figure~\ref{fig:flats-bound} for intuition.
+Therefore, we have no flat of codimension $1$ containing $p$ staying in $\gamma_\bot$, so we obtain $\ccdim(\ell^{abs}) \geq 3 - 0 - 1 = 2$.
+
+\begin{figure}
+\begin{minipage}{0.45\linewidth}
+	\centering
+	\includegraphics[width=\linewidth]{tikz/fsd-bound.pdf}
+	\caption{Since the uniform distribution is on the relative interior of the simplex and the level set $\gamma_\bot$, its feasible subspace dimension is $2$.}
+	\label{fig:fsd-bound}
+\end{minipage}
+\hfill
+\begin{minipage}{0.45\linewidth}
+	\centering
+	\includegraphics[width=\linewidth]{tikz/flats-bound.pdf}
+	\caption{Any flat of codimension $1$ through the uniform distribution also leaves the (gray) cell $\gamma_\bot$ in the simplex.}
+	\label{fig:flats-bound}
+\end{minipage}
+\end{figure}
 
 \section{Continuous-valued predictions}\label{sec:contin-consis}
 
-Theorem~\ref{thm:cvx-flats} also addresses one major open question from~\cite{frongillo2015elicitation,frongillo2018elicitation}\jessiet{which citation?}: \emph{what are lower bounds on convex elicitation complexity?}
-Since proposition~\ref{prop:consistent-implies-indir-elic-prop} allows us to use convex elicitation complexity as a tool to understand efficiency of consistent convex surrogates for a given property, which is more often what is given in a continuous prediction setting.
 
+Theorem~\ref{thm:consistent-implies-indir-elic} allows us to use convex elicitation complexity as a tool to understand efficiency of consistent convex surrogates for a given property, which is more often what is given in a continuous estimation setting.
 For example, when one wants to learn an $\alpha$-quantile, we start with the property rather than a loss.
-In the literature, when one wants to learn a quantile, pinball loss $L(r,y) = (r-y)(\mathbbm{1}_{r \geq y} - \alpha)$ typically appears without explanation or justification.
-Elicitation allows us to understand why pinball loss is consistent for learning a quantile as the pinball loss elicits the $\alpha$-quantile.
+In the literature, pinball loss $L(r,y) = (r-y)(\mathbbm{1}_{r \geq y} - \alpha)$ typically appears without explanation or justification as to why it is relevant in relation to the $\alpha$-quantile.
+Elicitation teaches us why pinball loss is consistent for learning a quantile as the pinball loss elicits the $\alpha$-quantile.
+
+
+Theorem~\ref{thm:cvx-flats} also addresses one major open question from~\cite{frongillo2015elicitation,frongillo2018elicitation}\jessiet{which citation?}: \emph{what are lower bounds on convex elicitation complexity?}
+While Theorem~\ref{thm:cvx-flats} is a statement about consistent surrogates, the heart of it is actually about indirect property elicitation.
+Thus, the result also applies to extend previous results from~\cite{frongillo2015elicitation,frongillo2018elicitation} to provide new bounds on elicitation complexity for certain classes of properties in Theorem~\ref{thm:bayes-risk-lower-bound}.
 
 \newcommand{\lbar}{\underline{L}} % couldn't do L* while proofreading...
 \newcommand{\iden}{\mathrm{iden}}
@@ -567,6 +597,7 @@ Elicitation allows us to understand why pinball loss is consistent for learning 
   Then for any $p,p'\in\simplex$ with $\Gamma(p)\neq\Gamma(p')$, we have $\lbar(\lambda p + (1-\lambda) p') > \lambda \lbar(p) + (1-\lambda) \lbar(p')$ for all $\lambda\in(0,1)$.
 \end{lemma}
 
+When extending the results of~\cite{frongillo2018elicitation}, we assume a property is identifiable, meaning its level sets are flats.
 \begin{definition}
   A property $\Gamma:\simplex\to\R$ is \emph{$d$-identifiable} if its level sets are flats of co-dimension at most $d$ intersected with $\simplex$.
   \raft{Update to be consistent with our definitions / notation / conventions.  I'd vote for using co-dimension since it makes so much of the analysis easier...  Could make more formal too.}
@@ -575,11 +606,11 @@ Elicitation allows us to understand why pinball loss is consistent for learning 
 \jessiet{Flats or unions of flats?}
 
 \raf{A modification of the argument of \citet[Corollary 7]{frongillo2018elicitation}}
-
+In the proof of Theorem~\ref{thm:consistent-implies-indir-elic} below, we modify the argument of~\cite[Corollary 7]{frongillo2018elicitation} to bound the elicitation complexity of the Bayes Risk of the loss.
 \begin{theorem}
   \label{thm:bayes-risk-lower-bound}
   Let $L$ elicit some identifiable $\Gamma:\simplex\to\reals^d$ with $\iden(\Gamma)=d$.
-  If $\lbar$ is non-constant on every non-singleton level set of $\Gamma$, then $\eliccvx(\lbar) \geq \min(d+1,n-1)$.
+  If $\lbar$ is non-constant on every non-singleton level set of $\Gamma$, then $\eliccvx(\lbar) \geq \min(d+1,n-1)$. 
 \end{theorem}
 \begin{proof}
   Suppose for a contradiction that we have some convex-elicitable property $\hat\Gamma:\simplex\to\reals^d$ and link $\psi : \reals^d \to \reals$ such that $\lbar = \psi \circ \hat\Gamma$.
