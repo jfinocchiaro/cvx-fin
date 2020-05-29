@@ -66,6 +66,7 @@
 \newcommand{\elicembed}{\mathrm{elic}_\mathrm{embed}}
 \newcommand{\ccdim}{\mathrm{ccdim}}
 \newcommand{\codim}{\mathrm{codim}}
+\newcommand{\rank}{\mathrm{rank}}
 \newcommand{\supp}{\mathrm{supp}}
 \newcommand{\spn}{\mathrm{span}}
 \newcommand{\propdis}{\mu}
@@ -88,7 +89,7 @@
 \newcommand{\risk}[1]{#1^*}
 \newcommand{\inprod}[2]{\langle #1, #2 \rangle}
 \newcommand{\toto}{\rightrightarrows}
-\neccommand{\ones}{\mathbbm{1}}
+\newcommand{\ones}{\mathbbm{1}}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
@@ -402,33 +403,37 @@ Fixing a distribution $p$, we can then construct a set of $n$ witnesses in $\par
 The nullspace of the matrix of these witnesses yields a flat, formally introduced below, of codimension $d$ intersecting our fixed distribution $p$ and the level set(s) $\gamma_r$ containing $p$.
 
 \begin{definition}[Flat]
-	A \emph{flat} $F$ of $\reals^n$ is an affine subspace of $\reals^n$.
+	A \emph{flat} $F \subseteq \affhull(\simplex)$ of $\reals^n$ is an affine subspace of $\reals^n$.
 	In other words, $F\subseteq \reals^n$ can be written $F=\{x\in\reals^n : Wx + b = 0\}$ for some $W\in\reals^{d\times n}$ and $b\in\reals^d$ where $d\leq n$.
-	The codimension of the flat $F$ relative to $\reals^n$ is given by $\mathrm{rank}(W)$, and the dimension of $F$ is $n - \mathrm{rank}(W)$.
+	The codimension of the flat $F$ relative to $\reals^n$ (relative to $\affhull(\simplex)$) is given by $\mathrm{rank}(W)$, and the dimension of $F$ is $n - \mathrm{rank}(W) - 1$.
 \end{definition}
 
 Now we can consider specific characteristics of convex losses in order to understand the convex elicitation complexity of a given property.
 
 \begin{theorem}\label{thm:cvx-flats}
 	Suppose we are given a property $\gamma$ and distribution $p \in \simplex$.
-	For all $r\in\gamma(p)$, if there is no flat $F$ of codimension at most $d$ containing $p$ so that $F \cap \simplex \subseteq \gamma_r$, then there is no convex surrogate loss $L : \reals^d \times \Y \to \reals$ that indirectly elicits $\gamma$.\jessiet{Do we still want to state it as the contrapositive?  That's where the bound comes from, but we use the original direction for all of the intuitive explanation.}
-  \raft{I kind of see your point.  In fact, in the continuous setting, I use the original direction in the proof.  What do we do for FSD stuff?}
+	For all $r\in\gamma(p)$, if there is no flat $F \subseteq \affhull(\simplex)$ \jessie{affine hull or affine span?} of codimension at most $d+1$ containing $p$ so that $F \cap \simplex \subseteq \gamma_r$, then there is no convex surrogate loss $L : \reals^d \times \Y \to \reals$ that indirectly elicits $\gamma$.\jessiet{Do we still want to state it as the contrapositive?  That's where the bound comes from, but we use the original direction for all of the intuitive explanation.}
+  \raft{I kind of see your point.  In fact, in the continuous setting, I use the original direction in the proof.  What do we do for FSD stuff?}\jessiet{The same.}
 \end{theorem}
-\begin{proof}[Proof]
-	We prove the contrapositive: if there is a convex surrogate loss $L$ indirectly eliciting $\gamma$, then for all $p \in \simplex$ and $r \in \R$ such that $r \in \gamma(p)$, there is a flat $F$ of codimension at most $d$ such that $F \cap \simplex \subseteq \gamma_r$ and $p \in F$.
+\begin{proof}
+	We prove the contrapositive: if there is a convex surrogate loss $L$ indirectly eliciting $\gamma$, then for all $p \in \simplex$ and $r \in \R$ such that $r \in \gamma(p)$, there is a flat $F \subseteq \affhull(\simplex)$ of codimension at most $d+1$ such that $F \cap \simplex \subseteq \gamma_r$ and $p \in F$.
 	
 	Suppose we have $L:\reals^d \times \Y \to \reals$ eliciting $\Gamma$ and link $\psi : \reals^d \to \R$ such that for all $u \in \reals^d$, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$, i.e., $L$ indirectly elicits $\gamma$.
 	Fix $p \in \simplex$, and take any $u \in \Gamma(p)$ such that $\psi(u) = r \in \gamma(p)$.
+	What we really show is that $F \subseteq \Gamma_u$, but as $\Gamma_u \subseteq \gamma_r$, the subset inclusion stacks to see the desired result.
 	We know that $u \in \Gamma(p) \iff \vec 0 \in \partial L(u; p) \iff \vec 0 \in \oplus_y p_y \partial L(u,y)$, where $\oplus$ denotes the nonnegative weighted Minkowski sum~\cite[Theorem 4.1.1]{hiriart2012fundamentals}.  (Observe that in order for $L$ to be convex, $L(\cdot, y)$ must be convex for all $y \in \Y$.) 
 	
 	Observe that the Minkowski sum $\oplus_y p_y \partial L(u,y) = \{p_1 x_1 + \ldots + p_n x_n : x_1 \in \partial L(u,1), \ldots, x_n \in \partial L(u,n) \}$.
 	In order for $\vec 0$ to be in this $p$-weighted Minkowski sum, we then have that each choice of $x_i$ is a flat for $\partial L(u, i)$.
 	Moreover, with $p$ fixed, we know there is a vector of witnesses $W = [x_1, \ldots, x_n] \in \reals^{d\times n}$ such that $\sum_y p_y x_y = \vec 0$.
-	Now we can take $F := \ker(W)$, whose rank is at most $d$.
+	Taking $W' := [W; \ones]^T$ and $b' = [\vec 0 ; -1]^T$, we now can take $F := \ker(W') + b'$, whose codimension is at most $d + 1$.
 
-	We also claim that $F \cap \simplex \subseteq \gamma_r$.
-	To see this, consider $q \in F$, but $q \not \in \gamma_r$.
-	That would mean that $Wq + b = \vec 0$ , which in turn implies $\vec 0 \in \partial L(u;q)$, implying $q \in \Gamma_u$.
+	We also claim that $F \in \affhull(\simplex)$ and $F \cap \simplex \subseteq \gamma_r$.
+	To verify $F \in \affhull(\simplex)$, observe that the $\ones$ row of $W'$ and $-1$ element of $b$ implies $\sum_i p_i = 1$, enforcing $F$ is in the affine span of the simplex.
+	Moreover, the nonnegativity constraints of $F$ are imposed by \jessie{??}
+	
+	To see $F \subseteq \gamma_r$, consider $q \in F$, but $q \not \in \gamma_r$.
+	That would mean that $W'q + b = \vec 0$ where $b = [\vec 0 ; -1]^T$, which in turn implies $\vec 0 \in \partial L(u;q)$, implying $q \in \Gamma_u \subseteq \gamma_{r}$.
 	Therefore, $q \not \in \gamma_r$ would contradict $L$ indirectly eliciting $\gamma$.
 \end{proof}
 
@@ -520,9 +525,9 @@ The following statement from~\cite{ramaswamy2016convex} provides an upper bound 
 	Take $L' := L|_{\Y'}$ and $\ell' := \ell|_{\Y'}$.
 	
 	First, observe $L'$ (eliciting $\Gamma$) indirectly elicits $\gamma' := \prop{\ell'}$ since, for all $p \in \simplex$, and therefore all $p \in \Delta_{\Y'}$, we have $p \in \Gamma_u \implies p \in \gamma_{\psi(u)}$, and $\Gamma(p) = \Gamma'(p)$ and $\gamma(p) = \gamma'(p)$ for $p \in \Delta_{\Y'}$.
-	This same observation can be used to observe that $L'$ is also calibrated with respect to $\ell'$ as the calibration bound holds for all $p \in \simplex$, and therefore for all $p \in \Delta_{\Y'}$ by equality of $\gamma$ and $\gamma'$ for $p \in \Delta_{\Y'}$.
+	This same observation can be used to observe that $L'$ is also calibrated with respect to $\ell'$ as the calibration bound holds for all $p \in \simplex$, and therefore for all $p \in \simplexp$ by equality of $\gamma$ and $\gamma'$ for $p \in \simplexp$.
 	
-	As $L'$ is calibrated with respect to $\ell'$ and indirectly elicits $\gamma' := \prop{\ell'}$, then by Theorem~\ref{thm:cvx-flats}, we know there exists a flat $F'$ of codimension $d$ relative to $\reals^{\Y'}$ so that $\dim(F') = \|p\|_0 - d - 1$.
+	As $L'$ is calibrated with respect to $\ell'$ and indirectly elicits $\gamma' := \prop{\ell'}$, then by Theorem~\ref{thm:cvx-flats}, we know there exists a flat $F'$ of codimension $d$ relative to $\reals^{\Y'}$ so that $\dim(F') \geq \|p\|_0 - d - 1$.
 	Moreover, as $d$ is the maximal codimension of such a flat, we show in Lemma~\ref{lem:feas-sub-is-a-flat} that $\S_{\gamma_r}(p)$ is one such flat, and we have $\dim(\S_{\gamma_r}(p)) \geq \dim(F') = \|p\|_0 - d- 1$.
 	Lemma~\ref{lem:p-boundary-fsd} then states $\dim(\S_{\gamma'_r}(p)) = \dim(\S_{\gamma_r}(p))$, and from there we observe the result.
 %	First, for intuition, consider $p \in \relint{\simplex}$. 
@@ -550,7 +555,7 @@ There are some cases where the bound provided by Theorem~\ref{thm:cvx-flats} is 
 For example, we can consider the \emph{abstain property} over 3 outcomes where one wishes to report the most likely outcome $y$ if $Pr[Y=y|x] \geq 1/2$ and abstains from predicting ($\bot$) otherwise.
 This is elicited by the target loss $\ell^{abs} := \mathbbm{1}\{r \not \in \{y, \bot\}\} + (1/2)\mathbbm{1}\{r = \bot\}$. 
 For this example, we choose $p$ to be the uniform distribution.
-In this case, the bound by feasible subspace dimension yields $\ccdim(\ell^) \geq 3 - 2 - 1 = 0$, as the feasible subspace dimension is $2$ since we are on the relative interior of the level set and simplex, as shown in Figure~\ref{fig:fsd-bound}.
+In this case, the bound by feasible subspace dimension yields $\ccdim(\ell^{abs}) \geq 3 - 2 - 1 = 0$, as the feasible subspace dimension is $2$ since we are on the relative interior of the level set and simplex, as shown in Figure~\ref{fig:fsd-bound}.
 \raft{This is a bit of a strawman, since the FSD technique as a whole gives $\geq 1$ here, for e.g.\ $p=(1/4,1/4,1/2)$; let's maybe discuss both $p$'s for both techniques?}
 
 However, consider any flat of codimension $1$ (a line in the two dimensions; a plane in three) containing $p$.
