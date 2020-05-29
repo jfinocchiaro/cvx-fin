@@ -66,10 +66,12 @@
 \newcommand{\elicembed}{\mathrm{elic}_\mathrm{embed}}
 \newcommand{\ccdim}{\mathrm{ccdim}}
 \newcommand{\codim}{\mathrm{codim}}
+\newcommand{\rank}{\mathrm{rank}}
 \newcommand{\supp}{\mathrm{supp}}
 \newcommand{\spn}{\mathrm{span}}
 \newcommand{\propdis}{\mu}
 \newcommand{\affhull}{\mathrm{affhull}}
+
 
 \newcommand{\C}{\mathcal{C}}
 \newcommand{\D}{\mathcal{D}}
@@ -415,34 +417,35 @@ Fixing a distribution $p$, we can then construct a set of $n$ witnesses in $\par
 The nullspace of the matrix of these witnesses yields a flat, formally introduced below, of codimension $d$ intersecting our fixed distribution $p$ and the level set(s) $\gamma_r$ containing $p$.
 
 \begin{definition}[Flat]
-	A \emph{flat} $F$ of $\reals^n$ is an affine subspace of $\reals^n$.
-	In other words, $F\subseteq \reals^n$ can be written $F=\{x\in\reals^n : Wx + b = 0\}$ for some $W\in\reals^{d\times n}$ and $b\in\reals^d$ where $d\leq n$.
-	The codimension of the flat $F$ relative to $\reals^n$ is given by $\mathrm{rank}(W)$, and the dimension of $F$ is $n - \mathrm{rank}(W)$.
+	A \emph{flat} $F \subseteq \affhull(\simplex)$ of $\reals^n$ can be written $F=\{x\in\affhull(\simplex) : Wx = \vec 0\}$ for some $W\in\reals^{d\times n}$ where $d\leq n$.
+	The codimension of the flat $F$ relative to $\affhull(\simplex)$ is given by $\mathrm{rank}(W)$, and the dimension of $F$ is $n - \mathrm{rank}(W) - 1$.
 \end{definition}
 
 Now we can consider specific characteristics of convex losses in order to understand the convex elicitation complexity of a given property.
+\raft{Reminder: give tons of credit to Hari's paper}
 
 \begin{theorem}\label{thm:cvx-flats}
-	Suppose we are given a property $\gamma$ and distribution $p \in \simplex$.
-	For all $r\in\gamma(p)$, if there is no flat $F$ of codimension at most $d$ containing $p$ so that $F \cap \simplex \subseteq \gamma_r$, then there is no convex surrogate loss $L : \reals^d \times \Y \to \reals$ that indirectly elicits $\gamma$.\jessiet{Do we still want to state it as the contrapositive?  That's where the bound comes from, but we use the original direction for all of the intuitive explanation.}
-  \raft{I kind of see your point.  In fact, in the continuous setting, I use the original direction in the proof.  What do we do for FSD stuff?}
+%	Suppose we are given a property $\gamma$ and distribution $p \in \simplex$.
+%	For all $r\in\gamma(p)$, if there is no flat $F \subseteq \affhull(\simplex)$ \jessie{affine hull or affine span?} of codimension at most $d+1$ containing $p$ so that $F \cap \simplex \subseteq \gamma_r$, then there is no convex surrogate loss $L : \reals^d \times \Y \to \reals$ that indirectly elicits $\gamma$.
+%	
+	If there is a convex surrogate loss $L : \reals^d \times\Y \to \reals$ indirectly eliciting $\gamma$, then for all $p \in \simplex$ and $r \in \R$ such that $r \in \gamma(p)$, there is a flat $F \subseteq \affhull(\simplex)$ of codimension at most $d+1$ such that $F \cap \simplex \subseteq \gamma_r$ and $p \in F$.
 \end{theorem}
-\begin{proof}[Proof]
-	We prove the contrapositive: if there is a convex surrogate loss $L$ indirectly eliciting $\gamma$, then for all $p \in \simplex$ and $r \in \R$ such that $r \in \gamma(p)$, there is a flat $F$ of codimension at most $d$ such that $F \cap \simplex \subseteq \gamma_r$ and $p \in F$.
-	
-	Suppose we have $L:\reals^d \times \Y \to \reals$ eliciting $\Gamma$ and link $\psi : \reals^d \to \R$ such that for all $u \in \reals^d$, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$, i.e., $L$ indirectly elicits $\gamma$.
+\begin{proof}
+%	We prove the contrapositive: if there is a convex surrogate loss $L$ indirectly eliciting $\gamma$, then for all $p \in \simplex$ and $r \in \R$ such that $r \in \gamma(p)$, there is a flat $F \subseteq \affhull(\simplex)$ of codimension at most $d+1$ such that $F \cap \simplex \subseteq \gamma_r$ and $p \in F$.
+%	
+	Suppose we have $L:\reals^d \times \Y \to \reals$ eliciting $\Gamma$ and link $\psi : \reals^d \to \R$ such that for all $u \in \reals^d$, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$, i.e., $(L, \psi)$ indirectly elicits $\gamma$.
 	Fix $p \in \simplex$, and take any $u \in \Gamma(p)$ such that $\psi(u) = r \in \gamma(p)$.
+	What we really show is that $F \cap \simplex \subseteq \Gamma_u$, but as $\Gamma_u \subseteq \gamma_r$, the subset inclusion stacks to yield the desired result.
 	We know that $u \in \Gamma(p) \iff \vec 0 \in \partial L(u; p) \iff \vec 0 \in \oplus_y p_y \partial L(u,y)$, where $\oplus$ denotes the nonnegative weighted Minkowski sum~\cite[Theorem 4.1.1]{hiriart2012fundamentals}.  (Observe that in order for $L$ to be convex, $L(\cdot, y)$ must be convex for all $y \in \Y$.) 
 	
-	Observe that the Minkowski sum $\oplus_y p_y \partial L(u,y) = \{p_1 x_1 + \ldots + p_n x_n : x_1 \in \partial L(u,1), \ldots, x_n \in \partial L(u,n) \}$.
+	The $p$-weighted Minkowski sum $\oplus_y p_y \partial L(u,y) = \{p_1 x_1 + \ldots + p_n x_n : x_1 \in \partial L(u,1), \ldots, x_n \in \partial L(u,n) \}$.
 	In order for $\vec 0$ to be in this $p$-weighted Minkowski sum, we then have that each choice of $x_i$ is a flat for $\partial L(u, i)$.
 	Moreover, with $p$ fixed, we know there is a vector of witnesses $W = [x_1, \ldots, x_n] \in \reals^{d\times n}$ such that $\sum_y p_y x_y = \vec 0$.
-	Now we can take $F := \ker(W)$, whose rank is at most $d$.
+	With $W' := [W;\ones^T]$, we can now take $F := \ker(W') = \{x \in \affhull(\simplex) : W' x = \vec 0\}$, whose codimension is at most $d + 1$.
+	We particularly have $p \in F$ by construction.
 
-	We also claim that $F \cap \simplex \subseteq \gamma_r$.
-	To see this, consider $q \in F$, but $q \not \in \gamma_r$.
-	That would mean that $Wq + b = \vec 0$ , which in turn implies $\vec 0 \in \partial L(u;q)$, implying $q \in \Gamma_u$.
-	Therefore, $q \not \in \gamma_r$ would contradict $L$ indirectly eliciting $\gamma$.
+	To see $F \cap \simplex \subseteq \gamma_r$, consider $q \in F \cap \simplex$.
+	That would mean that $W'q = \vec 0 \implies Wq = \vec 0$, which in turn implies $\vec 0 \in \partial L(u;q)$, implying $q \in \Gamma_u \subseteq \gamma_{r}$.
 \end{proof}
 
 Since Theorem~\ref{thm:consistent-implies-indir-elic} says that consistency implies indirect elicitation, we can now apply results on convex elicitation complexity, like the result above, to understand the minimal dimension required to construct a consistent surrogate loss.
@@ -533,9 +536,9 @@ The following statement from~\cite{ramaswamy2016convex} provides an upper bound 
 	Take $L' := L|_{\Y'}$ and $\ell' := \ell|_{\Y'}$.
 	
 	First, observe $L'$ (eliciting $\Gamma$) indirectly elicits $\gamma' := \prop{\ell'}$ since, for all $p \in \simplex$, and therefore all $p \in \Delta_{\Y'}$, we have $p \in \Gamma_u \implies p \in \gamma_{\psi(u)}$, and $\Gamma(p) = \Gamma'(p)$ and $\gamma(p) = \gamma'(p)$ for $p \in \Delta_{\Y'}$.
-	This same observation can be used to observe that $L'$ is also calibrated with respect to $\ell'$ as the calibration bound holds for all $p \in \simplex$, and therefore for all $p \in \Delta_{\Y'}$ by equality of $\gamma$ and $\gamma'$ for $p \in \Delta_{\Y'}$.
+	This same observation can be used to observe that $L'$ is also calibrated with respect to $\ell'$ as the calibration bound holds for all $p \in \simplex$, and therefore for all $p \in \simplexp$ by equality of $\gamma$ and $\gamma'$ for $p \in \simplexp$.
 	
-	As $L'$ is calibrated with respect to $\ell'$ and indirectly elicits $\gamma' := \prop{\ell'}$, then by Theorem~\ref{thm:cvx-flats}, we know there exists a flat $F'$ of codimension $d$ relative to $\reals^{\Y'}$ so that $\dim(F') = \|p\|_0 - d - 1$.
+	As $L'$ is calibrated with respect to $\ell'$ and indirectly elicits $\gamma' := \prop{\ell'}$, then by Theorem~\ref{thm:cvx-flats}, we know there exists a flat $F'$ of codimension $d$ relative to $\reals^{\Y'}$ so that $\dim(F') \geq \|p\|_0 - d - 1$.
 	Moreover, as $d$ is the maximal codimension of such a flat, we show in Lemma~\ref{lem:feas-sub-is-a-flat} that $\S_{\gamma_r}(p)$ is one such flat, and we have $\dim(\S_{\gamma_r}(p)) \geq \dim(F') = \|p\|_0 - d- 1$.
 	Lemma~\ref{lem:p-boundary-fsd} then states $\dim(\S_{\gamma'_r}(p)) = \dim(\S_{\gamma_r}(p))$, and from there we observe the result.
 %	First, for intuition, consider $p \in \relint{\simplex}$. 
@@ -562,8 +565,9 @@ The following statement from~\cite{ramaswamy2016convex} provides an upper bound 
 There are some cases where the bound provided by Theorem~\ref{thm:cvx-flats} is strictly tighter than the bound provided by feasible subspace dimension in Corollary~\ref{cor:fsd-bound}.
 For example, we can consider the \emph{abstain property} over 3 outcomes where one wishes to report the most likely outcome $y$ if $Pr[Y=y|x] \geq 1/2$ and abstains from predicting ($\bot$) otherwise.
 This is elicited by the target loss $\ell^{abs} := \mathbbm{1}\{r \not \in \{y, \bot\}\} + (1/2)\mathbbm{1}\{r = \bot\}$. 
+We can consider two different distributions; in the first, our bound yields a strong gap over the feasible subspace dimension bound, and in the second, the bounds are equal.
 For this example, we choose $p$ to be the uniform distribution.
-In this case, the bound by feasible subspace dimension yields $\ccdim(\ell^) \geq 3 - 2 - 1 = 0$, as the feasible subspace dimension is $2$ since we are on the relative interior of the level set and simplex, as shown in Figure~\ref{fig:fsd-bound}.
+In this case, the bound by feasible subspace dimension yields $\ccdim(\ell^{abs}) \geq 3 - 2 - 1 = 0$, as the feasible subspace dimension is $2$ since we are on the relative interior of the level set and simplex, as shown in Figure~\ref{fig:fsd-bound}.
 \raft{This is a bit of a strawman, since the FSD technique as a whole gives $\geq 1$ here, for e.g.\ $p=(1/4,1/4,1/2)$; let's maybe discuss both $p$'s for both techniques?}
 
 However, consider any flat of codimension $1$ (a line in the two dimensions; a plane in three) containing $p$.
@@ -571,18 +575,22 @@ When intersected with the simplex, one can see that any line in the simplex thro
 See Figure~\ref{fig:flats-bound} for intuition.
 Therefore, we have no flat of codimension $1$ containing $p$ staying in $\gamma_\bot$, so we obtain $\ccdim(\ell^{abs}) \geq 3 - 0 - 1 = 2$.
 
+Now consider the distribution $q = (1/4, 1/4, 1/2)$, shown in blue in Figures~\ref{fig:fsd-bound} and~\ref{fig:flats-bound}.
+The feasible subspace dimension (of both $\gamma_\bot$ and $\gamma_3$) is $1$, since one only move in the $(0,1/2, 1/2)$ and $(1/2, 0, 1/2)$ directions without leaving the level sets respectively, and the three points are collinear in $\affhull(\simplex)$.  This yields $\ccdim(\ell^{abs}) \geq 3 - 1- 1 = 1$.
+The same line segment defines a flat contained in both $\gamma_\bot$ and $\gamma_3$, so we have $\ccdim(\ell^{abs}) \geq 3 - 1 - 1 = 1$ by the flat given by Theorem~\ref{thm:cvx-flats}.
+
 \begin{figure}
 \begin{minipage}{0.45\linewidth}
 	\centering
 	\includegraphics[width=\linewidth]{tikz/fsd-bound.pdf}
-	\caption{Since the uniform distribution is on the relative interior of the simplex and the level set $\gamma_\bot$, its feasible subspace dimension is $2$.}
+	\caption{Since the uniform distribution is on the relative interior of the simplex and the level set $\gamma_\bot$, its feasible subspace dimension is $2$. The distribution $p = (1/4, 1/4, 1/2)$ in blue has feasible subspace dimension $1$.}
 	\label{fig:fsd-bound}
 \end{minipage}
 \hfill
 \begin{minipage}{0.45\linewidth}
 	\centering
 	\includegraphics[width=\linewidth]{tikz/flats-bound.pdf}
-	\caption{Any flat of codimension $1$ through the uniform distribution also leaves the (gray) cell $\gamma_\bot$ in the simplex.}
+	\caption{Any flat of codimension $1$ through the uniform distribution also leaves the (gray) cell $\gamma_\bot$ in the simplex. However, for the distribution $p = (1/4, 1/4, 1/2)$ in blue,there is a $1$ dimensional flat containing $p$ that is a subseteq of $\gamma_\bot$ and $\gamma_3$.}
 	\label{fig:flats-bound}
 \end{minipage}
 \end{figure}
@@ -611,23 +619,22 @@ Thus, the result also applies to extend previous results from~\cite{frongillo201
   Then for any $p,p'\in\simplex$ with $\Gamma(p)\neq\Gamma(p')$, we have $\lbar(\lambda p + (1-\lambda) p') > \lambda \lbar(p) + (1-\lambda) \lbar(p')$ for all $\lambda\in(0,1)$.
 \end{lemma}
 
-\begin{lemma}\label{lem:affhull-interior}
-  \raf{Skip this...}
-  Let $C\subseteq\reals^m$ be convex with nonempty interior $\mathring C$.
-  Then for any flat $F\subseteq\reals^m$ with $F\cap\mathring C \neq \emptyset$, we have $\affhull(F\cap C) = F$.
-\end{lemma}
-\begin{proof}
-  As $\affhull(F) = F$ and $F\cap C\subseteq F$, the inclusion $\affhull(F\cap C) \subseteq F$ is clear.
-  For the reverse, let $p\in F\cap\mathring C$ and let $B\subseteq C$ be an open set containing $p$.
-  For any $q\in F$, we thus have $q' = p + \epsilon (q-p) \in B$ for sufficiently small $\epsilon > 0$.
-  As $q' = (1-\epsilon) p + \epsilon q$, we have $q' \in \affhull(F)\cap C = F\cap C$.
-  As $q = (1-1/\epsilon) p + (1/\epsilon) q'$, we thus have $q\in\affhull(F\cap C)$.
-\end{proof}
+% \begin{lemma}\label{lem:affhull-interior}
+%   \raf{Skip this...}
+%   Let $C\subseteq\reals^m$ be convex with nonempty interior $\mathring C$.
+%   Then for any flat $F\subseteq\reals^m$ with $F\cap\mathring C \neq \emptyset$, we have $\affhull(F\cap C) = F$.
+% \end{lemma}
+% \begin{proof}
+%   As $\affhull(F) = F$ and $F\cap C\subseteq F$, the inclusion $\affhull(F\cap C) \subseteq F$ is clear.
+%   For the reverse, let $p\in F\cap\mathring C$ and let $B\subseteq C$ be an open set containing $p$.
+%   For any $q\in F$, we thus have $q' = p + \epsilon (q-p) \in B$ for sufficiently small $\epsilon > 0$.
+%   As $q' = (1-\epsilon) p + \epsilon q$, we have $q' \in \affhull(F)\cap C = F\cap C$.
+%   As $q = (1-1/\epsilon) p + (1/\epsilon) q'$, we thus have $q\in\affhull(F\cap C)$.
+% \end{proof}
 
 \begin{lemma}\label{lem:affhull-relint}
-  \raf{Relint version; I think correct!}
   Let $C\subseteq\reals^m$ be convex.
-  Then for any flat $F\subseteq\affhull(C)$ with $F\cap\relint C \neq \emptyset$, we have $\affhull(F\cap C) = F$.
+  Then for any affine subspace $F\subseteq\affhull(C)$ with $F\cap\relint C \neq \emptyset$, we have $\affhull(F\cap C) = F$.
 \end{lemma}
 \begin{proof}
   As $\affhull(F) = F$ and $F\cap C\subseteq F$, the inclusion $\affhull(F\cap C) \subseteq F$ is clear.
@@ -645,10 +652,14 @@ Thus, the result also applies to extend previous results from~\cite{frongillo201
 % \end{definition}
 
 In the proof of Theorem~\ref{thm:consistent-implies-indir-elic} below, we modify the argument of~\citet[Corollary 7]{frongillo2018elicitation} to bound the elicitation complexity of the Bayes risk of the loss.
+\raft{Note to self: need to sync the refs to the actual version on arxiv... or something...}
 \begin{theorem}
   \label{thm:bayes-risk-lower-bound}
   Let $L$ elicit some $\Gamma:\simplex\to\reals^d$.
-  Let $p\in\relint\simplex$ and let $\Gamma_r$ be some level set of $\Gamma$ such that (i) $p\in\Gamma_r$, (ii) $\codim(\affhull(\Gamma_r))=d+1$, and (iii) if $\Gamma_r$ is not a singleton, $\lbar$ is nonconstant on $\Gamma_r$.
+  Let $p\in\relint\simplex$ and let $\Gamma_r$ be some level set of $\Gamma$ such that
+  (i) $p\in\Gamma_r$,
+  (ii) $\codim(\affhull(\Gamma_r))=d$, and
+  (iii) either $\Gamma_r$ is a singleton or $\lbar$ is nonconstant on $\Gamma_r$.
   Then $\eliccvx(\lbar) \geq \min(d+1,n-1)$.
 \end{theorem}
 \begin{proof}
@@ -662,34 +673,37 @@ In the proof of Theorem~\ref{thm:consistent-implies-indir-elic} below, we modify
   We conclude $\hat\Gamma$ must refine $\Gamma$, and thus $\hat L$ actually indirectly elicits $\Gamma$ through some other link function.
   % The proof of \cite[Theorem 4]{frongillo2018elicitation} argues that $\hat\Gamma$ must refine $\Gamma$, in the sense that for all $\hat r \in \hat\Gamma(\simplex)$ we have $\hat\Gamma_{\hat r} \subseteq \Gamma_r$ for some $r\in\reals^k$.
 
-  By Theorem~\ref{thm:cvx-flats}, as $\hat L$ elicits $\hat\Gamma$ and indirectly elicits $\Gamma$, there is a level set $\hat\Gamma_{\hat r}$ and flat $\hat F$ containing $p$ such that $\codim(\hat F) \leq k$ and $S := \hat F \cap \simplex \subseteq \hat\Gamma_{\hat r} \subseteq \Gamma_r$.
+  By Theorem~\ref{thm:cvx-flats}, as $\hat L$ elicits $\hat\Gamma$ and indirectly elicits $\Gamma$, there is a level set $\hat\Gamma_{\hat r}$ and flat $\hat F\subseteq\affhull(\simplex)$ containing $p$ such that $\codim(\hat F) \leq k$ and $S := \hat F \cap \simplex \subseteq \hat\Gamma_{\hat r} \subseteq \Gamma_r$.
   \raft{This last statement does follow from the proof of our main theorem, but it takes a second to realize that we show the chain of inclusions.}
-  Let $F = \affhull(\Gamma_r)$ and recall $\codim(F)=d+1$.
-  Let $F' = \hat F \cap \affhull(\simplex)$, and observe the following: $p\in F'\cap\relint\simplex$, $F' \subseteq \affhull(\simplex)$, $S=F'\cap\simplex\subseteq\Gamma_r$, and $\codim(F') \leq k+1$.
-  From the first two observations, Lemma~\ref{lem:affhull-relint} gives $\affhull(S) = \affhull(F'\cap \simplex) = F'$.
-  Now as $S \subseteq \Gamma_r$, we also have $F' = \affhull(S) \subseteq \affhull(\Gamma_r) = F$,
-  implying $\codim(F') \geq \codim(F)$.
+  Let $F = \affhull(\Gamma_r)$ and recall $\codim(F)=d$.
+  % Let $F' = \hat F \cap \affhull(\simplex)$, and observe the following: $p\in F'\cap\relint\simplex$, $F' \subseteq \affhull(\simplex)$, $S=F'\cap\simplex\subseteq\Gamma_r$, and $\codim(F') \leq k+1$.
+  % the next \hat Fs used to be F's
+  As $p\in \hat F\cap\relint\simplex$, Lemma~\ref{lem:affhull-relint} gives $\affhull(S) = \affhull(\hat F\cap \simplex) = \hat F$.
+  Now as $S \subseteq \Gamma_r$, we also have $\hat F = \affhull(S) \subseteq \affhull(\Gamma_r) = F$,
+  implying $\codim(\hat F) \geq \codim(F)$.
 
-  If $\Gamma_r = \{p\}$ is a singleton, then $F = \affhull(\Gamma_r) = \{p\}$, and in particular $n = \codim(F) \leq \codim(F')$, so we must have $k=d=n-1$.
+  If $\Gamma_r = \{p\}$ is a singleton, then $F = \affhull(\Gamma_r) = \{p\}$, and in particular $n-1 = \codim(F) \leq \codim(\hat F)$, so we must have $k=d=n-1$.
   If $\Gamma_r$ is not a singleton, suppose for a contradiction that $k\leq d$.
-  Then $\codim(F) = d+1 \geq k+1 \geq \codim(F')$, so we must have $\codim(F')=d+1=\codim(F)$; combining with $F' \subseteq F$ gives $F' = F$.
-  We now have $S = F' \cap \simplex = F \cap \simplex = \Gamma_r$, and as $S \subseteq \hat\Gamma_{\hat r} \subseteq \Gamma_r$, we conclude $S = \hat\Gamma_{\hat r} = \Gamma_r$.
+  Then $\codim(F) = d \geq k \geq \codim(\hat F)$, so we must have $\codim(\hat F)=d=\codim(F)$; combining with $\hat F \subseteq F$ gives $\hat F = F$.
+  We now have $S = \hat F \cap \simplex = F \cap \simplex = \Gamma_r$, and as $S \subseteq \hat\Gamma_{\hat r} \subseteq \Gamma_r$, we conclude $S = \hat\Gamma_{\hat r} = \Gamma_r$.
   By assumption, $\lbar$ is non-constant on $\Gamma_r$, so we have distributions $p,p' \in \Gamma_r = \hat\Gamma_{\hat r}$ with $\lbar(p)\neq\lbar(p')$, which contradicts $\lbar = \psi \circ \hat\Gamma$.
 \end{proof}
 
 
-\subsection{Examples \raf{all informal for now}}
+\subsection{Examples}
 
-As a warm-up, let us see how to show the elicitation complexity of the variance of a random variable, with respect to convex losses, is exactly 2 whenever $|\Y|\geq 3$.
+As a warm-up, let us see how to show $\eliccvx(\Var)=2$ whenever $|\Y|\geq 3$, meaning the lowest dimension of a convex loss to estimate conditional variance is 2.
+It is interesting to note that, to the best of our knowledge, even this simple bound is novel.
+While intuitively obvious, the lower bound of 2 is not trivial.
+In particular, the well-known fact that the variance is not elicitable does not yield this lower bound, as it does not rule out the variance being a link of a real-valued convex-elicitable property; cf.~\citet{frongillo2018elicitation}.
+
 Let $\Y\subseteq\reals$ be a finite set with $n=|\Y|$.
-Observe that the variance of $Y$ is the Bayes risk of squared loss $L:\reals\times\Y\to\reals$, $L(r,y) = (r-y)^2$.
-We can see this using the fact that squared loss elicits the mean $\Gamma(p) = \E_p Y$, so that $\Var_p[Y] = \E_p (\E_pY - Y)^2 = \min_{r\in\reals} \E_p L(r,Y)$.
-To apply Theorem~\ref{thm:bayes-risk-lower-bound}, we take this $L$ and $\Gamma$ and $d=1$, and must choose an appropriate level set $\Gamma_r$.
-Here we taking $p = \tfrac 1 n \ones$ to be the uniform distribution, and let $r=\E_pY$.
+Observe that the variance of $Y$ is the Bayes risk of squared loss $L(r,y) = (r-y)^2$; as $L$ elicits the mean $\Gamma(p) = \E_p Y$, we have $\Var_p[Y] = \E_p (\E_pY - Y)^2 = \min_{r\in\reals} \E_p L(r,Y)$.
+To apply Theorem~\ref{thm:bayes-risk-lower-bound}, we take this $L$ and $\Gamma$ and $d=1$, and must choose an appropriate level set $\Gamma_r$; we choose $p = \tfrac 1 n \ones$ to be the uniform distribution and let $r=\E_pY$.
 
 Let us verify the three conditions:
 (i) $p\in\Gamma_r$ by construction.
-(ii) Letting $v\in\reals^\Y$ with $v_y = y - r$, we have $F = \ker W$ for $W = [v;\ones]$.
+(ii) Letting $v\in\reals^\Y$ with $v_y = y - r$, define $F = \ker W$ for $W = [v;\ones]$.
 Note that $\rank(W) = 2$, as the $y$ values are distinct by assumption.
 From the second row of $W$ we have $F\subseteq\affhull(\simplex)$, so Lemma~\ref{lem:affhull-interior} gives $\affhull(\Gamma_r) = F$ and thus $\codim(\affhull(\Gamma_r)) = \rank(W) = 2 = d+1$.
 (iii)
@@ -698,20 +712,20 @@ If $\Var[Y]$ were constant in $\Gamma_r$, then we would have some $c\in\reals$ s
 Letting $W' = [v;v';\ones]$ where $v'_y = y^2-r^2-c$, by the same logic above we have $\ker W = \affhull(\Gamma_r) = \ker W'$, which contradicts $\rank(W)=2$.
 Thus $\Var[Y]$ cannot be constant on $\Gamma_r$.
 
-Applying Theorem~\ref{thm:bayes-risk-lower-bound} gives $\eliccvx(\Var) \geq \min(2,n-1)$, which as desired is $2$ when $n\geq 3$.
+Applying Theorem~\ref{thm:bayes-risk-lower-bound} gives $\eliccvx(\Var) \geq \min(2,n-1)$, as desired.
 In fact, this bound is tight for all $n$.
 For $n=1$ there is only one distribution and we have complexity $0$; for $n=2$ the mean itself, elicited by squared loss, determines the distribution; for $n\geq 3$ we may elicit the first two moments via the convex $L(r,y) = (r_1-y)^2 + (r_2-y^2)^2$, and recover the variance via $\psi(r) = r_2-r_1^2$.
-It is interesting to note that, to the best of our knowledge, even this simple bound is novel.
-While intuitively obvious, the lower bound of 2 is not trivial, as pathological examples illustrate~\cite{frongillo2018elicitation}.
 
-For another application of Theorem~\ref{thm:bayes-risk-lower-bound}, consider any strictly concave function $G:\simplex\to\reals$ of the distribution.
-It is well-known that $G$ is the Bayes risk of a proper loss defined by the Bregman divergence $L(p,y) = G(\delta_y) -G(p) - dG_p \cdot (\delta_y - p)$ where $\delta_y(y') = \ones\{y=y'\}$ is the point distribution on $y$~\cite{gneiting2007strictly}\raf{other refs}.
-For technical reasons, we need to modify $L$ so that the report space is $\reals^{n-1}$ by dropping a dimension, so that $L'(p',y) = L((p',1-\sum_{i=1}^{n-1}),y)$.
-\raf{Gah I forgot how tricky this was...}
+For another application, let us see how Theorem~\ref{thm:bayes-risk-lower-bound} implies $\eliccvx(G) = n-1$ for any strictly concave function $G:\simplex\to\reals$ of the distribution, including most entropy functions.
+In other words, there is no convex loss function allowing one to consistently estimate conditional entropy using fewer dimensions than required to estimate the conditional distribution itself.
+This observation also extends to norms; given any $k>1$, $G(p) = \|p\|_k^k$ is strictly convex, and hence $\eliccvx(\|\cdot\|_k) = n-1$, as otherwise we could link to $G$ via $\psi(r) = r^k$.
+These results illustrate the power of our technique.
 
-\begin{itemize}
-\item Entropy and norms: In fact, \emph{any} strictly convex/concave function $G$ of $p$ will do here.  You can write it as the Bayes risk (or negative Bayes risk) of a strictly proper scoring rule, which elicits the full distribution $\Gamma(p) = p$.  Since $\iden(\Gamma) = n-1$ since you don't actually need the $n$th coordinate, you have $\eliccvx(G) = n-1$; the upper bound comes from the fact that you can elicit the full distribution with a convex loss and just compute $G$.
-\end{itemize}
+To show the bound, recall that $G$ is the Bayes risk of a proper loss defined by $L(p,y) = G(p) + s_p \cdot (\delta_y - p)$, where $\delta_y(y') = \ones\{y=y'\}$ is the point distribution on $y$ and $-s_p \in \partial (-G)(p)$ is a subgradient of $-G$ at $p$~\citep{gneiting2007strictly,reid2009surrogate,frongillo2014general}.
+Intuitively, since $L$ elicits the identity property $\Gamma(p)=p$, Theorem~\ref{thm:bayes-risk-lower-bound} should therefore give us a maximal lower bound ($n-1$), as the level sets of are $\Gamma$ have codimension $n-1$.
+For technical reasons, however, we need to drop a dimension from the report space, e.g.\ via the bijection $\varphi(p) = (p_1,\ldots,p_{n-1})$, defining $L'(p',y) = L(\varphi^{-1}(p'),y)$ which elicits $\Gamma'(p) = \varphi(p)$ but still has Bayes risk $G$.
+Now the conditions of Theorem~\ref{thm:bayes-risk-lower-bound} are easily checked, where again $p\in\relint\simplex$ is the uniform distribution and $r=\varphi(p)$: (i) is trivial, (ii) $\codim(\affhull(\Gamma_r')) = \codim(\{p\}) = n-1$, and (iii) $\Gamma_r'$ is a singleton.
+As with the variance example, the lower bound is easily matched, e.g.\ by $L_2(p',y) = \|\varphi^{-1}(p')-\delta_y\|_2^2$, which is convex in $p'$, and the link $\psi(p') = G(\varphi^{-1}(p'))$.
 
 
 \section{Conclusions and future work}\label{sec:conclusions}
