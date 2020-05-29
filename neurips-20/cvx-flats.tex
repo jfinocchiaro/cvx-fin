@@ -64,7 +64,7 @@
 \newcommand{\eliccvx}{\mathrm{elic}_\mathrm{cvx}}
 \newcommand{\elicpoly}{\mathrm{elic}_\mathrm{pcvx}}
 \newcommand{\elicembed}{\mathrm{elic}_\mathrm{embed}}
-\newcommand{\ccdim}{\mathrm{ccdim}}
+\newcommand{\ccdim}{\mathrm{cc\,dim}}
 \newcommand{\codim}{\mathrm{codim}}
 \newcommand{\rank}{\mathrm{rank}}
 \newcommand{\supp}{\mathrm{supp}}
@@ -210,7 +210,7 @@ Moreover, the regret of a loss $L(u; p)$ is the excess loss over the optimal; th
 
 \section{Background and Related work}\label{sec:related-work}
 
-\subsection{Consistency and calibration for convex losses}\label{subsec:convex-surrogates}
+\subsection{Consistency and calibration for discrete convex losses}\label{subsec:convex-surrogates}
 
 For discrete prediction problems, one often is able to intuitively start with a target loss $\ell$ in mind: for classification, 0-1 loss comes to mind; for rankings, a borda-like loss that assigns error based on one's distance from the winner's predicted ranking.
 However, when one starts with a (often discrete) target loss they want to minimize, it is often a computationally hard problem.
@@ -233,7 +233,7 @@ In finite prediction tasks, the two are in fact equivalent.
 \cite{ramaswamy2016convex} further show necessary and sufficient conditions for finite prediction problems to be consistent that can be applied to general discrete losses.
 \cite{steinwart2007compare} generalizes the study of consistent losses from the finite prediction setting and characterizes different types of loss functions, relating excess risk bounds, consistency, and calibration, giving proofs for various classes of surrogate losses (i.e. margin-based, distance-based, supervised, unsupervised, etc.)
 See~\cite[Chapter 2]{steinwart2008support} for further discussion of these loss functions.
-In Appendix~\ref{app:calibration}, we give a more general definition of calibration which is equivalent to Definition~\ref{def:calibrated-finite} in finite outcome settings, but generalizes to infinite outcome settings.
+In Appendix~\ref{app:calibration}, we give a more general definition of calibration which is equivalent to Definition~\ref{def:calibrated-finite} in finite prediction settings, but generalizes to infinite prediction settings.
 
 
 \subsection{Property elicitation}\label{subsec:properties}
@@ -316,6 +316,7 @@ In particular, a highly-studied case consists of discrete prediction spaces alon
 Here a notable more-tractable condition is \emph{calibration}, which has been used to prove lower bounds on dimension of consistent surrogates.\bo{references, etc}
 An example is the \emph{feasible subspace dimension} approach of \bo{TODO}.
 
+\jessie{Mention calibration results are in the appendix if the reader wants that connection too.}
 \paragraph{Our approach: indirect elicitation.}
 In this section, we show that indirect elicitation gives a single necessary condition for consistency that applies to all of the above settings.
 This criterion is implied by both consistency and calibration (as fully explored in Appendix \bo{TODO}), so it might be viewed as a weak necessary condition for existence of a dimension-$d$ surrogate.
@@ -353,33 +354,6 @@ Convergence is measured by functions $\propdis(r, p)$ that formalize how close $
 
 %Theorem~\ref{thm:consistent-implies-indir-elic} shows that consistency, either with respect to a target loss $\ell$ or a property $\gamma$, implies indirect elicitation.
 
-\jessie{This section definitely needs some work because I'm not sure what is staying and what's going to the Appendix.}
-\jessie{This proof uses calibration via Definition~\ref{def:calibrated-general}.}
-\bo{Yeah, I skipped this since it seems like we won't bring in calibration definitions to the story...}
-\begin{proposition}\label{prop:consistent-implies-calibrated}
-	If a loss and link $(L, \psi)$ are consistent with respect to a loss $\ell$, then they are calibrated with respect to $\ell$.
-	\jessiet{Probably appendix later; also, should this be a lemma instead of a proposition?}
-%  \raft{Do we define ``continuous loss''?  Maybe ``(not necessarily discrete)'' is clearer.}
-\end{proposition}
-\begin{proof}
-	We show the contrapositive.
-	If $(L, \psi)$ are not calibrated with respect to $\ell$, then there is a sequence $\{u_m\}$ such that $R_L(u_m; p) \to 0$ but $R_\ell(\psi(u_m); p) \not \to 0$ via Lemma~\ref{lem:calib-converging-regrets}.
-	Suppose $D \sim \X \times\Y$ has only one $x \in \X$ with $Pr_D(X = x) > 0$ so that $p := D_x$ and $\E_D f(X,Y) = \E_p f(x, Y)$.
-	Consider any sequence of functions $\{f_m\} \to f$ with $f_m(x) = u_m$ for all $f_m$.
-  \raft{Type error with $D=D_x$; see AA15 for how they phrase \jessie{better?}}
-	Now we have $\E_D L(f_m(X), Y) \to \inf_f \E_D L(f(X), Y)$, but $\E_D \ell(\psi \circ f(X), Y) \not \to \inf_f \E_D \ell(\psi \circ f(X), Y)$, and therefore $(L, \psi)$ is not calibrated with respect to $\ell$.
-\end{proof}
-
-\bo{Same here: appendix?}
-\begin{lemma}\label{lem:calib-implies-indir}
-	If a surrogate and link $(L, \psi)$ are calibrated with respect to a loss $\ell:\R \times\Y \to \reals$, then $L$ indirectly elicits the property $\gamma := \prop{\ell}$.
-\end{lemma}
-\begin{proof}
-	Let $\Gamma$ be the unique property directly elicited by $L$, and fix $p \in \simplex$ with $u$ such that $p \in \Gamma_u$.
-	As $p \in \Gamma_u$, then $\zeta(L(u;p) - \risk{L}(p)) = \zeta(0) = 0$, we observe the bound $\ell(\psi(u); p) \leq \risk{\ell}(p)$.
-	We also have $\ell(\psi(u); p) \geq \risk{\ell}(p)$ by definition of $\risk{\ell}$, so we must have $\ell(\psi(u);p) = \risk{\ell}(p) = \ell(\gamma(p); p)$, and therefore, $p \in \gamma_{\psi(u)}$.
-	Thus, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$, so $L$ indirectly elicits $\gamma$.
-\end{proof}
 
 If $\gamma$ is an elicitable property, and is elicited by $\ell$, then the two definitions are equivalent when using excess expected loss as $\propdis$.
 \begin{lemma}\label{lem:consistent-loss-implies-prop}
@@ -433,7 +407,7 @@ Fixing a distribution $p$, we can then construct a set of $n$ witnesses in $\par
 The nullspace of the matrix of these witnesses yields a flat, formally introduced below, of codimension $d$ intersecting our fixed distribution $p$ and the level set(s) $\gamma_r$ containing $p$.
 
 \begin{definition}[Flat]
-	A \emph{flat} $F \subseteq \affhull(\simplex) \subseteq \reals^n$ is a set $F = \ker W \cap \affhull(\simplex)$ for some $W\in\reals^{d\times n}$ where $d\leq n$.
+	A \emph{flat} $F \subseteq \affhull(\simplex) \subseteq \reals^n$ is a nonempty set $F = \ker W \cap \affhull(\simplex)$ for some $W\in\reals^{d\times n}$ where $d\leq n$.
 	The codimension of $F$ (relative to $\affhull(\simplex)$) is given by $\codim(F)=\mathrm{rank}(W)$, and the dimension of $F$ is $n - \mathrm{rank}(W) - 1$.
 \end{definition}
 
@@ -456,14 +430,15 @@ Now we can consider specific characteristics of convex losses in order to unders
 	
 	The $p$-weighted Minkowski sum $\oplus_y p_y \partial L(u,y) = \{p_1 x_1 + \ldots + p_n x_n : x_1 \in \partial L(u,1), \ldots, x_n \in \partial L(u,n) \}$.
 	In order for $\vec 0$ to be in this $p$-weighted Minkowski sum, each choice of $x_i$ is a flat for $\partial L(u, i)$.
-	Moreover, with $p$ fixed, we know there is a vector of witnesses $W = [x_1, \ldots, x_n] \in \reals^{d\times n}$ such that $\sum_y p_y x_y = \vec 0$; $W$ is similar to $\mathbf{A}^m$ in the proof of~\cite[Theorem 16]{ramaswamy2016convex}.
+	Moreover, with $p$ fixed, we know there is a vector of witnesses $W = [x_1, \ldots, x_n] \in \reals^{d\times n}$ such that $\sum_y p_y x_y = \vec 0$.%; $W$ is similar to $\mathbf{A}^m$ in the proof of~\cite[Theorem 16]{ramaswamy2016convex}.
 	We can now take $F := \ker(W) \cap \affhull(\simplex)$, whose codimension relative to $\affhull(\simplex)$ is at most $d$.
 	We particularly have $p \in \ker W$ by construction, and $p \in \simplex \implies p \in \affhull(\simplex)$, so we have $p \in F$.
 
 	To see $F \cap \simplex \subseteq \gamma_r$, consider $q \in F \cap \simplex$.
-	That would mean that $q \in F \implies \implies Wq = \vec 0 \implies \sum_y p_y x_y^i = 0$ for all $i \in [d]$, which in turn implies $\vec 0 \in \partial L(u;q)$, implying $q \in \Gamma_u \subseteq \gamma_{r}$.
+	That would mean that $q \in F \implies Wq = \vec 0 \implies \sum_y p_y x_y^i = 0$ for all $i \in [d]$, which in turn implies $\vec 0 \in \partial L(u;q)$, implying $q \in \Gamma_u \subseteq \gamma_{r}$.
 \end{proof}
 
+\jessie{Discussion connecting to \cite{ramaswamy2016convex}.}
 Since Theorem~\ref{thm:consistent-implies-indir-elic} says that consistency implies indirect elicitation, we can now apply results on convex elicitation complexity, like the result above, to understand the minimal dimension required to construct a consistent surrogate loss.
 Thus, elicitation complexity greater than $d$ implies no indirect elicitation of the property of interest (or target loss eliciting such a property), which in turn implies there is no $d$-dimensional consistent surrogate with respect to a given loss or property of interest.
 
@@ -554,8 +529,8 @@ The following statement from~\cite{ramaswamy2016convex} provides an upper bound 
 	First, observe $L'$ (eliciting $\Gamma$) indirectly elicits $\gamma' := \prop{\ell'}$ since, for all $p \in \simplex$, and therefore all $p \in \Delta_{\Y'}$, we have $p \in \Gamma_u \implies p \in \gamma_{\psi(u)}$, and $\Gamma(p) = \Gamma'(p)$ and $\gamma(p) = \gamma'(p)$ for $p \in \Delta_{\Y'}$.
 	This same observation can be used to observe that $L'$ is also calibrated with respect to $\ell'$ as the calibration bound holds for all $p \in \simplex$, and therefore for all $p \in \simplexp$ by equality of $\gamma$ and $\gamma'$ for $p \in \simplexp$.
 	
-	As $L'$ is calibrated with respect to $\ell'$ and indirectly elicits $\gamma' := \prop{\ell'}$, then by Theorem~\ref{thm:cvx-flats}, we know there exists a flat $F'$ of codimension $d$ relative to $\reals^{\Y'}$ so that $\dim(F') \geq \|p\|_0 - d - 1$.
-	Moreover, as $d$ is the maximal codimension of such a flat, we show in Lemma~\ref{lem:feas-sub-is-a-flat} that $\S_{\gamma_r}(p)$ is one such flat, and we have $\dim(\S_{\gamma_r}(p)) \geq \dim(F') = \|p\|_0 - d- 1$.
+	As $L'$ is calibrated with respect to $\ell'$ and indirectly elicits $\gamma' := \prop{\ell'}$, then by Theorem~\ref{thm:cvx-flats}, we know there exists a flat $F' \subseteq$ of codimension $d$ relative to $\reals^{\Y'}$ so that $\codim(F') \leq d$.
+	Moreover, as $d$ is the maximal codimension of such a flat, we show in Lemma~\ref{lem:feas-sub-is-a-flat} that $\S_{\gamma_r}(p)$ is one such flat, and we have $\dim(\S_{\gamma_r}(p)) \geq \dim(F') \geq \|p\|_0 - d- 1$.
 	Lemma~\ref{lem:p-boundary-fsd} then states $\dim(\S_{\gamma'_r}(p)) = \dim(\S_{\gamma_r}(p))$, and from there we observe the result.
 %	First, for intuition, consider $p \in \relint{\simplex}$. 
 %	Theorem~\ref{thm:cvx-flats} implies that there exists a flat $F'$ of affine dimension at least $n-d-1$.
@@ -580,7 +555,7 @@ The following statement from~\cite{ramaswamy2016convex} provides an upper bound 
 \subsection{Example}\label{subsec:examples-finite}
 There are some cases where the bound provided by Theorem~\ref{thm:cvx-flats} is strictly tighter than the bound provided by feasible subspace dimension in Corollary~\ref{cor:fsd-bound}.
 For example, we can consider the \emph{abstain property} over 3 outcomes where one wishes to report the most likely outcome $y$ if $Pr[Y=y|x] \geq 1/2$ and abstains from predicting ($\bot$) otherwise.
-This is elicited by the target loss $\ell^{abs} := \mathbbm{1}\{r \not \in \{y, \bot\}\} + (1/2)\mathbbm{1}\{r = \bot\}$. 
+This is elicited by the target loss $\ell^{abs}(r,y) := \mathbbm{1}\{r \not \in \{y, \bot\}\} + (1/2)\mathbbm{1}\{r = \bot\}$. 
 We can consider two different distributions; in the first, our bound yields a strong gap over the feasible subspace dimension bound, and in the second, the bounds are equal.
 For this example, we choose $p$ to be the uniform distribution.
 In this case, the bound by feasible subspace dimension yields $\ccdim(\ell^{abs}) \geq 3 - 2 - 1 = 0$, as the feasible subspace dimension is $2$ since we are on the relative interior of the level set and simplex, as shown in Figure~\ref{fig:fsd-bound}.
@@ -896,6 +871,35 @@ Moreover, we argue that such a sequence of $\{u_m\}$ with converging surrogate r
 %For this sequence, this then gives a loose bound of $0 \leq \lim_{m\to\infty} R_\ell(\psi(u_m); p) \leq c$. 
 %	
 \end{proof}
+
+\subsection{Relating calibration, consistency, and indirect elicitation.}
+Even with the more general notion of calibration that extends beyond discrete predictions, we still have consistency implying calibration.
+\begin{proposition}\label{prop:consistent-implies-calibrated}
+	If a loss and link $(L, \psi)$ are consistent with respect to a loss $\ell$, then they are calibrated with respect to $\ell$.
+	\jessiet{Probably appendix later; also, should this be a lemma instead of a proposition?}
+	%  \raft{Do we define ``continuous loss''?  Maybe ``(not necessarily discrete)'' is clearer.}
+\end{proposition}
+\begin{proof}
+	We show the contrapositive.
+	If $(L, \psi)$ are not calibrated with respect to $\ell$, then there is a sequence $\{u_m\}$ such that $R_L(u_m; p) \to 0$ but $R_\ell(\psi(u_m); p) \not \to 0$ via Lemma~\ref{lem:calib-converging-regrets}.
+	Suppose $D \sim \X \times\Y$ has only one $x \in \X$ with $Pr_D(X = x) > 0$ so that $p := D_x$ and $\E_D f(X,Y) = \E_p f(x, Y)$.
+	Consider any sequence of functions $\{f_m\} \to f$ with $f_m(x) = u_m$ for all $f_m$.
+	\raft{Type error with $D=D_x$; see AA15 for how they phrase \jessie{better?}}
+	Now we have $\E_D L(f_m(X), Y) \to \inf_f \E_D L(f(X), Y)$, but $\E_D \ell(\psi \circ f(X), Y) \not \to \inf_f \E_D \ell(\psi \circ f(X), Y)$, and therefore $(L, \psi)$ is not calibrated with respect to $\ell$.
+\end{proof}
+
+Moreover, we have calibration implying indirect elicitation.
+\begin{lemma}\label{lem:calib-implies-indir}
+	If a surrogate and link $(L, \psi)$ are calibrated with respect to a loss $\ell:\R \times\Y \to \reals$, then $L$ indirectly elicits the property $\gamma := \prop{\ell}$.
+\end{lemma}
+\begin{proof}
+	Let $\Gamma$ be the unique property directly elicited by $L$, and fix $p \in \simplex$ with $u$ such that $p \in \Gamma_u$.
+	As $p \in \Gamma_u$, then $\zeta(L(u;p) - \risk{L}(p)) = \zeta(0) = 0$, we observe the bound $\ell(\psi(u); p) \leq \risk{\ell}(p)$.
+	We also have $\ell(\psi(u); p) \geq \risk{\ell}(p)$ by definition of $\risk{\ell}$, so we must have $\ell(\psi(u);p) = \risk{\ell}(p) = \ell(\gamma(p); p)$, and therefore, $p \in \gamma_{\psi(u)}$.
+	Thus, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$, so $L$ indirectly elicits $\gamma$.
+\end{proof}
+
+Combining the two results, we can observe the result of Theorem~\ref{thm:consistent-implies-indir-elic} another way: \emph{through calibration}.
 
 \section{Omitted Proofs}
 
