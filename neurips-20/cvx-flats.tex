@@ -88,6 +88,7 @@
 \newcommand{\risk}[1]{#1^*}
 \newcommand{\inprod}[2]{\langle #1, #2 \rangle}
 \newcommand{\toto}{\rightrightarrows}
+\neccommand{\ones}{\mathbbm{1}}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
@@ -591,7 +592,7 @@ Therefore, we have no flat of codimension $1$ containing $p$ staying in $\gamma_
 
 Theorem~\ref{thm:consistent-implies-indir-elic} allows us to use convex elicitation complexity as a tool to understand efficiency of consistent convex surrogates for a given property, which is more often what is given in a continuous estimation setting.
 For example, when one wants to learn an $\alpha$-quantile, we start with the property rather than a loss.
-In the literature, pinball loss $L(r,y) = (r-y)(\mathbbm{1}_{r \geq y} - \alpha)$ typically appears without explanation or justification as to why it is relevant in relation to the $\alpha$-quantile.
+In the literature, pinball loss $L(r,y) = (r-y)(\ones_{r \geq y} - \alpha)$ typically appears without explanation or justification as to why it is relevant in relation to the $\alpha$-quantile.
 Elicitation teaches us why pinball loss is consistent for learning a quantile as the pinball loss elicits the $\alpha$-quantile.
 
 
@@ -679,9 +680,36 @@ In the proof of Theorem~\ref{thm:consistent-implies-indir-elic} below, we modify
 
 \subsection{Examples \raf{all informal for now}}
 
-Both these results exactly match what Ian and I showed for the class of identifiable properties, which is super interesting...
+As a warm-up, let us see how to show the elicitation complexity of the variance of a random variable, with respect to convex losses, is exactly 2 whenever $|\Y|\geq 3$.
+Let $\Y\subseteq\reals$ be a finite set with $n=|\Y|$.
+Observe that the variance of $Y$ is the Bayes risk of squared loss $L:\reals\times\Y\to\reals$, $L(r,y) = (r-y)^2$.
+We can see this using the fact that squared loss elicits the mean $\Gamma(p) = \E_p Y$, so that $\Var_p[Y] = \E_p (\E_pY - Y)^2 = \min_{r\in\reals} \E_p L(r,Y)$.
+To apply Theorem~\ref{thm:bayes-risk-lower-bound}, we take this $L$ and $\Gamma$ and $d=1$, and must choose an appropriate level set $\Gamma_r$.
+Here we taking $p = \tfrac 1 n \ones$ to be the uniform distribution, and let $r=\E_pY$.
+
+Let us verify the three conditions:
+(i) $p\in\Gamma_r$ by construction.
+(ii) Letting $v\in\reals^\Y$ with $v_y = y - r$, we have $F = \ker W$ for $W = [v;\ones]$.
+Note that $\rank(W) = 2$, as the $y$ values are distinct by assumption.
+From the second row of $W$ we have $F\subseteq\affhull(\simplex)$, so Lemma~\ref{lem:affhull-interior} gives $\affhull(\Gamma_r) = F$ and thus $\codim(\affhull(\Gamma_r)) = \rank(W) = 2 = d+1$.
+(iii)
+For $n \leq 2 = d+1$, $\Gamma_r=\{p\}$ is a singleton and we are done; otherwise, assume $n\geq 3$.
+If $\Var[Y]$ were constant in $\Gamma_r$, then we would have some $c\in\reals$ such that $c = \Var_{p'}[Y] = \E_{p'} [Y^2] - r^2$ for all $p'\in\Gamma_r$.
+Letting $W' = [v;v';\ones]$ where $v'_y = y^2-r^2-c$, by the same logic above we have $\ker W = \affhull(\Gamma_r) = \ker W'$, which contradicts $\rank(W)=2$.
+Thus $\Var[Y]$ cannot be constant on $\Gamma_r$.
+
+Applying Theorem~\ref{thm:bayes-risk-lower-bound} gives $\eliccvx(\Var) \geq \min(2,n-1)$, which as desired is $2$ when $n\geq 3$.
+In fact, this bound is tight for all $n$.
+For $n=1$ there is only one distribution and we have complexity $0$; for $n=2$ the mean itself, elicited by squared loss, determines the distribution; for $n\geq 3$ we may elicit the first two moments via the convex $L(r,y) = (r_1-y)^2 + (r_2-y^2)^2$, and recover the variance via $\psi(r) = r_2-r_1^2$.
+It is interesting to note that, to the best of our knowledge, even this simple bound is novel.
+While intuitively obvious, the lower bound of 2 is not trivial, as pathological examples illustrate~\cite{frongillo2018elicitation}.
+
+For another application of Theorem~\ref{thm:bayes-risk-lower-bound}, consider any strictly concave function $G:\simplex\to\reals$ of the distribution.
+It is well-known that $G$ is the Bayes risk of a proper loss defined by the Bregman divergence $L(p,y) = G(\delta_y) -G(p) - dG_p \cdot (\delta_y - p)$ where $\delta_y(y') = \ones\{y=y'\}$ is the point distribution on $y$~\cite{gneiting2007strictly}\raf{other refs}.
+For technical reasons, we need to modify $L$ so that the report space is $\reals^{n-1}$ by dropping a dimension, so that $L'(p',y) = L((p',1-\sum_{i=1}^{n-1}),y)$.
+\raf{Gah I forgot how tricky this was...}
+
 \begin{itemize}
-\item Variance: $\iden(\E Y) = 1$, and over $\simplex$ every non-singleton level set of $\E Y$ has different variances, so the theorem gives $\eliccvx(\Var) \geq 2$.  We then have the matching upper bound since $L(r,y) = (r_1-y)^2 + (r_2-y^2)^2$ is convex in $r$, and we can link to $\Var$ from there.
 \item Entropy and norms: In fact, \emph{any} strictly convex/concave function $G$ of $p$ will do here.  You can write it as the Bayes risk (or negative Bayes risk) of a strictly proper scoring rule, which elicits the full distribution $\Gamma(p) = p$.  Since $\iden(\Gamma) = n-1$ since you don't actually need the $n$th coordinate, you have $\eliccvx(G) = n-1$; the upper bound comes from the fact that you can elicit the full distribution with a convex loss and just compute $G$.
 \end{itemize}
 
