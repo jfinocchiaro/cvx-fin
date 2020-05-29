@@ -298,7 +298,15 @@ It is an open problem to understand if these efficiency definitions are generall
 
 
 \section{Consistency implies indirect elicitation}\label{sec:consis-implies-indir}
-While the subtleties of \emph{consistency} vary slightly within the literature, we use two definitions that have the same implications, but one may be more appropriate than the other in a given context.
+%While the subtleties of \emph{consistency} vary slightly within the literature, we use two definitions that have the same implications, but one may be more appropriate than the other in a given context.
+A basic requirement of surrogate losses $L$ is \emph{consistency}, \bo{classically, we have the necessary cond. of calibration. this expands it to the four quadrants and weakens to indirect}.
+
+which we next formalize in two ways.
+First (Definition \ref{def:consistent-ell}), if one is given an original loss $\ell$, then we say $L$ is consistent if optimizing $L$ implies optimizing $\ell$.
+Second (Definition \ref{def:consistent-prop}), if one is given a property $\gamma$ (for example, the conditional mean), then we say $L$ is consistent if optimizing $L$ implies approaching, in some measurable sense, the correct statistic $\gamma(D_x)$ of the conditional distributions.
+We will then show that consistency always implies $L$ indirectly elicits $\prop{\ell}$ or $\gamma$ respectively.
+
+\bo{Mention how calibration fits in?}
 
 \begin{definition}[Consistent: loss]\label{def:consistent-ell}
 	A loss and link $(L,\psi)$ are consistent with respect to an original loss $\ell$ if, for all distributions $D$ over input and label spaces $\X \times\Y$, and for all sequences of measurable hypothesis functions $\{f_m : \X \to \R\}$,
@@ -308,14 +316,15 @@ While the subtleties of \emph{consistency} vary slightly within the literature, 
 \end{definition}
 \bo{On the right side, is measurable enough? I guess we need $\psi \circ f$ to be measurable...on the other hand, we don't want to constrain $f$ based on $\psi$. Do we need a condition on $\psi$ that guarantees $\psi \circ f$ is measurable?}
 
-For continuous properties, such as the expected value, variance, and entropy, asking for a consistent surrogate with respect to an original \emph{loss} may not make sense when we do not have one.
-In this setting, we also define consistency with respect to a property that one wishes to estimate. 
+In an estimation task, rather than being given an original loss $\ell$, one may be given a property such as the expected value, variance, or entropy.
+In this case, we formalize consistency as converging to the correct conditional estimates of the property.
+Convergence is measured by functions $\propdis(r, p)$ that formalize how close $r$ is to ``correct'' for conditional distribution $p$, i.e. in particular we should have $\propdis(r,p) = 0 \iff r \in \gamma(p)$.
 
 \begin{definition}[Consistent: property]\label{def:consistent-prop}
 	Suppose we are given a loss $L : \R \times \Y \to \reals$, link function $\psi: \R \to \R'$, and property $\gamma:\simplex \toto \R'$.
 	Moreover, let $\propdis : \R' \times \simplex \to \reals_+$ any function where $\propdis(r,p) = 0 \iff r \in \gamma(p)$.
 	
-	We say $(L, \psi)$ is \emph{$\mu$-consistent with respect to the property} $\gamma$ if, for all $D$ over $\X \times \Y$ with marginal distributions $D_x$, and for all sequences of measurable functions $\{f_m: \X \to \R\}$, 
+	We say $(L, \psi)$ is \emph{$\mu$-consistent with respect to the property} $\gamma$ if, for all distributions $D$ over $\X \times \Y$ with marginal distributions $D_x$, and for all sequences of measurable functions $\{f_m: \X \to \R\}$, 
 	\begin{equation}
 	\E_{D} L(f_m(X), Y) \to \inf_f \E_{D} L( f(X), Y) \implies \E_X \propdis(\psi \circ f_m(X), D_X) \to 0~.~
 	\end{equation}
@@ -323,10 +332,11 @@ In this setting, we also define consistency with respect to a property that one 
 	We simply say the pair is consistent with respect to $\gamma$ if there is a $\propdis$ such that $(L,\psi)$ are $\propdis$-consistent with respect to $\gamma$.
 \end{definition}
 
-Theorem~\ref{thm:consistent-implies-indir-elic} shows that consistency, either with respect to a target loss $\ell$ or a property $\gamma$, implies indirect elicitation.
+%Theorem~\ref{thm:consistent-implies-indir-elic} shows that consistency, either with respect to a target loss $\ell$ or a property $\gamma$, implies indirect elicitation.
 
 \jessie{This section definitely needs some work because I'm not sure what is staying and what's going to the Appendix.}
 \jessie{This proof uses calibration via Definition~\ref{def:calibrated-general}.}
+\bo{Yeah, I skipped this since it seems like we won't bring in calibration definitions to the story...}
 \begin{proposition}\label{prop:consistent-implies-calibrated}
 	If a loss and link $(L, \psi)$ are consistent with respect to a loss $\ell$, then they are calibrated with respect to $\ell$.
 	\jessiet{Probably appendix later; also, should this be a lemma instead of a proposition?}
@@ -341,6 +351,7 @@ Theorem~\ref{thm:consistent-implies-indir-elic} shows that consistency, either w
 	Now we have $\E_D L(f_m(X), Y) \to \inf_f \E_D L(f(X), Y)$, but $\E_D \ell(\psi \circ f(X), Y) \not \to \inf_f \E_D \ell(\psi \circ f(X), Y)$, and therefore $(L, \psi)$ is not calibrated with respect to $\ell$.
 \end{proof}
 
+\bo{Same here: appendix?}
 \begin{lemma}\label{lem:calib-implies-indir}
 	If a surrogate and link $(L, \psi)$ are calibrated with respect to a loss $\ell:\R \times\Y \to \reals$, then $L$ indirectly elicits the property $\gamma := \prop{\ell}$.
 \end{lemma}
@@ -351,22 +362,24 @@ Theorem~\ref{thm:consistent-implies-indir-elic} shows that consistency, either w
 	Thus, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$, so $L$ indirectly elicits $\gamma$.
 \end{proof}
 
+If $\gamma$ is an elicitable property, and is elicited by $\ell$, then the two definitions are equivalent when using excess expected loss as $\propdis$.
 \begin{lemma}\label{lem:consistent-loss-implies-prop}
 	Suppose we are given a surrogate loss $L$ and link $\psi$, and target loss $\ell$.
 	Consider $\propdis: \R \times \simplex \to \reals_+$ with $\mu(r,p) := R_\ell(r,p)$.
 	$(L, \psi)$ are consistent with respect to $\ell$ if and only if they are $\propdis$-consistent with respect to $\gamma := \prop{\ell}$.
-	\bo{Change to if and only if. Given $L,\psi$, define $\mu$, then consistent iff consistent.}\jessie{Thoughts?}
 \end{lemma}
 \begin{proof}
 	First, observe that $\propdis(r,p) = 0 \iff r \in \gamma(p)$, since $r \in \gamma(p)$ implies $\ell(r;p) = \risk{\ell}(p)$, and if $r \not \in \gamma(p)$, then $\ell(r;p) > \risk{\ell}(p)$.
 	
-	Now suppose $(L, \psi)$ are consistent with respect to $\ell$, and take any sequence $\{f_m\}$ so that, for all $D$ over $\X \times \Y$, we have $\E_D L(f_m(X)) \to \inf_f \E_D L(f(X), Y)$.
-	This implies 
-	\begin{align*}
-	&\; \E_D \ell(\psi \circ f_m(X), Y)\to \inf_f \E_D \ell(\psi \circ f(X), Y) \\
-	&\iff \E_X R_\ell(\psi \circ f_m(X), D_X) \to 0\\
-	&\iff \E_X \propdis(\psi \circ f_m(X), D_X) \to 0~.~
-	\end{align*}
+	\bo{Changed the logic slightly.}
+	Now suppose $(L, \psi)$ are consistent with respect to $\ell$, and take any sequence $\{f_m\}$ of measurable hypotheses.
+        Then
+        \begin{align}
+	  &\; \E_D \ell(\psi \circ f_m(X), Y)\to \inf_f \E_D \ell(\psi \circ f(X), Y)   \label{eqn:cons-loss-cond} \\
+	  &\iff \E_X R_\ell(\psi \circ f_m(X), D_X) \to 0                               \nonumber  \\
+	  &\iff \E_X \propdis(\psi \circ f_m(X), D_X) \to 0~.~                          \label{eqn:cons-prop-cond}
+	\end{align}
+        Therefore, we have that $\mathbb{E}_D L(f_m(X),Y) \to \inf_f \mathbb{E}_D L(f(X),y)$ implies (\ref{eqn:cons-loss-cond}) if and only if it implies (\ref{eqn:cons-prop-cond}).
 \end{proof}
 
 This result allows us to conceptualize the relationship between consistency and properties, and it suggests that our consistency with respect to a property is the correct notion to consider.
@@ -383,9 +396,9 @@ This result allows us to conceptualize the relationship between consistency and 
 %  \raft{Oh good!  I was going to say we should use this way of stating indirect elicitation (``$(L, \psi)$ indirectly elicits $\gamma$'') when we define it above, and use it.  We can then also define the version without $\psi$ easily. \jessie{Changed the definition of indirect elicitation and this Theorem statement.}}
 	Then there is a distribution $p \in \simplex$ so that $u \in \Gamma(p)$ but $\psi(u) \not \in \gamma(p)$.
 
-	Consider the constant sequence $\{u_m\}$ with $u_m = u$ for all $m$, and take $D \sim \X \times\Y$ with only one $x \in \X$ with $Pr_D(X = x) > 0$ so that $p := D_x$ and $\E_D g(X,Y) = \E_p g(x, Y)$ for all functions $g : \X \times \Y \to \reals$, and any sequence $\{f_m\}$ so that $f_m(x) = u_m$ for all $m$.
-  \raft{Check $D$ wording here too \jessie{better?}}
-  	Since $\{u_m\}$ is a constant sequence, we observe $\E_D L(f_m(X), Y) = \inf_f L(f(X),Y)$ for all $m$ since $u \in \Gamma(p)$.
+	Consider the constant sequence $\{f_m\}$ with $f_m(x) = u$ for all $m,x$, and take $D$ to have full support on an arbitrary $x \in \X$, and let $D_x = p$.
+	%and $\E_D g(X,Y) = \E_p g(x, Y)$ for all functions $g : \X \times \Y \to \reals$, and any sequence $\{f_m\}$ so that $f_m(x) = u_m$ for all $m$.
+  	Since $u \in \Gamma(p)$, we observe $\E_D L(f_m(X), Y) = \inf_f L(f(X),Y)$ for all $m$ since $u \in \Gamma(p)$.
 	This yields $\E_D L(f_m(X), Y) \to \inf_f L(f(X),Y)$.
 %  \raft{Maybe clearer to first say $\E_D L(f_m(X), Y) = \inf_f L(f(X),Y)$ for all $m$, and then the easy implication of the convergence \jessie{Done}}
 	However, we have $\E_X \propdis(\psi \circ f_m(X), D_X) = \propdis(\psi(u_m), p) \not \to 0$ as $\propdis(\psi(u), p) \neq 0$ (since $\psi(u) \not \in \gamma(p)$) and the sequence is constant.
