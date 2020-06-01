@@ -88,6 +88,7 @@
 \newcommand{\Y}{\mathcal{Y}}
 
 
+\newcommand{\exploss}[3]{\E_{#3} #1(#2,Y)}
 \newcommand{\risk}[1]{#1^*}
 \newcommand{\inprod}[2]{\langle #1, #2 \rangle}
 \newcommand{\toto}{\rightrightarrows}
@@ -223,22 +224,24 @@ For these reasons, we advocate for indirect elicitation as a tractable and more 
 
 %\raf{I'd suggest discussing general stuff here ($\X\times\Y$, etc) and moving more specific stuff to a more contextual spot --- e.g. property notation in that subsection, feature space etc in 2.0, $R_L$ to where we use it, etc.  We could keep notation like $\supp,\affhull,2^\R$ in a terse paragraph just before 2.1}
 \raf{Do we use $L(u;p)$ much?  It's $L(u,p)$ below.  I'd prefer to avoid it unless we really use it a ton.}\jessie{We primarily use $L(u;p)$. It was just a typo in this introduction of regret.  I don't mind changing it, but I like the semicolon.  I think that might be Bo's class influencing me haha.  My preferences aren't super strong one way of the other here.}\jessie{Missing codim; in flats definition is fine?}
+\raf{While ugly, for now let's use:} ``\verb|\exploss{L}{u}{p}|''
 
-We consider learning from pairs in $\X \times \Y$, for some \emph{feature space} $\X$ and \emph{outcome space} $\Y$.
-A learning algorithm must produce a hypothesis $f: \X \to \R$, for some \emph{prediction space} $\R$, which may be different from $\Y$.
-For example in ranking problems, $\R$ may be all $n!$ permutations over the $n$ outcomes forming $\Y$.
-
-In general, we use $\ell: \R \times \Y \to \reals$ to denote a \emph{target loss} where the goal is minimize expected loss, $\E ~ \ell(f(X),Y)$ for pairs $X,Y$ drawn from some distribution.
-
-We use $L: \reals^d \times \Y \to \reals$ to denote a \emph{surrogate} loss, and typically denote a surrogate prediction with $u \in \reals^d$.
-A loss $\ell$ is \emph{discrete} if $|\Y|$ and $|\R| < \infty$, and a surrogate $L$ is \emph{convex} if it is convex in the prediction space for every outcome $y \in \Y$.
-
-Because the paper focuses heavily on conditional distributions over $\Y$ given some $x \in X$, we abstract away $x$ with the following notation.
+We consider supervised learning problems in the space $\X \times \Y$, for some \emph{feature space} $\X$ and \emph{outcome space} (or label space) $\Y$.
+The task is to produce a hypothesis $f: \X \to \R$, for some \emph{prediction space} $\R$, which may be different from $\Y$.
+For example, in ranking problems $\R$ may be all $n!$ permutations over the $n$ outcomes/labels forming $\Y$.
+As we focus heavily on conditional distributions $\Pr[Y|X=x]$ over $\Y$ given some $x \in X$, we abstract away $x$ with the following notation.
 The probability simplex over $\Y$ is $\simplex$.
 For $p \in \simplex$, let $\supp(p)$ be the support of $p$.
-For a distribution $p \in \simplex$, we denote the expected target loss for prediction $r$ to be $\E_{Y \sim p} \ell(r, Y) := \ell(r; p)$.
-Similarly, $\E_{Y \sim p} L(u, Y) := L(u ; p)$.
-We call the excess loss over the optimal the \emph{regret} of a loss $L(u; p)$; that is, $R_L(u,p) := L(u;p) - \inf_{u^*} L(u^*; p)$.
+
+If given, we use $\ell: \R \times \Y \to \reals$ to denote a \emph{target loss}, with predictions $r\in\R$.
+%where the goal is minimize expected loss, $\E ~ \ell(f(X),Y)$ for pairs $X,Y$ drawn from some distribution.
+Similarly, $L: \reals^d \times \Y \to \reals$ will typically denote a \emph{surrogate} loss, with surrogate predictions $u \in \reals^d$.
+A loss $\ell$ is \emph{discrete} if both $\Y$ and $\R$ are finite sets.
+A surrogate $L$ is \emph{convex} if $L(\cdot,y)$ is convex for every outcome $y \in \Y$.
+For a given $p\in\simplex$, the (conditional) \emph{regret}, or excess risk, of a loss $L$ is given by $R_L(u,p) := \exploss{L}{u}{p} - \inf_{u^*} \exploss{L}{u^*}{p}$.
+
+% For a distribution $p \in \simplex$, we denote the expected target loss for prediction $r$ to be $\E_{Y \sim p} \ell(r, Y) := \ell(r; p)$.
+% Similarly, $\E_{Y \sim p} L(u, Y) := L(u ; p)$.
 
 
 
@@ -525,6 +528,7 @@ We now show that this bound follows relatively directly from Theorem \ref{thm:cv
   \item For other $p$, we show that the feasible subspace dimension is the same relative to the simplex on $\supp(p)$. Meanwhile any flat containing $p$ has only smaller codimension relative to $\supp{p}$. This extends the proof to this case.
 \end{itemize}
 } % END BO COMMENT
+\raf{Would also like to mention how our proof is shorter, even factoring in all the lemmas and theorem 2, since we don't have to deal with the infimum in calibration (the eplisons in their proof) and cut straight to the exact minimizers.}
 
 We regain the bounds provided by~\citet[Theorem 16]{ramaswamy2016convex}, but have to do a little bit of groundwork to translate from our Theorem~\ref{thm:cvx-flats} and their result, restated in Corollary~\ref{cor:fsd-bound}.
 First, in Lemma~\ref{lem:feas-sub-is-a-flat}, we show that, for a fixed $p$ and prediction $r$ so that $r \in \gamma(p)$, the feasible subspace $\Sc_{\gamma_r}(p)$ is a flat satisfying the requirements of Theorem~\ref{thm:cvx-flats}.
