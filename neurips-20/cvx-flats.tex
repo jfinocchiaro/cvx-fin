@@ -228,12 +228,12 @@ For these reasons, we advocate for indirect elicitation as a tractable and more 
 
 \section{Background and Related work}\label{sec:related-work}
 
-We consider supervised learning problems in the space $\X \times \Y$, for some \emph{feature space} $\X$ and \emph{label space} $\Y$.
+We consider supervised learning problems in the space $\X \times \Y$, for some \emph{feature space} $\X$ and \emph{label space} $\Y$m with data drawn from a distribution $D$ over $\X \times \Y$.
 The task is to produce a hypothesis $f: \X \to \R$, for some \emph{prediction space} $\R$, which may be different from $\Y$.
 For example, in ranking problems $\R$ may be all $n!$ permutations over the $n$ labels forming $\Y$.
-As we focus heavily on conditional distributions $\Pr[Y|X=x]$ over $\Y$ given some $x \in X$, we abstract away $x$ with the following notation.
+As we focus heavily on conditional distributions $D_x = \Pr[Y|X=x]$ over $\Y$ given some $x \in X$, we abstract away $x$ with the following notation.
 The probability simplex over $\Y$ is $\simplex$.
-\raft{FYI: moved $\supp$ to where we use it.}
+\raft{FYI: moved $\supp$ to where we use it.\jessie{ok}}
 
 If given, we use $\ell: \R \times \Y \to \reals$ to denote a \emph{target loss}, with predictions $r\in\R$.
 %where the goal is minimize expected loss, $\E ~ \ell(f(X),Y)$ for pairs $X,Y$ drawn from some distribution.
@@ -274,7 +274,7 @@ In particular, as definitions of consistency are relatively intractable to apply
 \subsection{Calibration}\label{subsec:calibration}
 
 When given a discrete target loss, such as for classification-like problems, direct empirical risk minimization is typically NP-hard, forcing one to find a more tractable surrogate.
-To ensure consistency, the literature has embraced the notion of \emph{calibration} due to~\citet{tewari2007consistency}, and its generalizations to arbitrary discrete target losses\raft{Jessie: what are the best cites here? AA15?}.
+To ensure consistency, the literature has embraced the notion of \emph{calibration} due to~\citet{tewari2007consistency}, and its generalizations to arbitrary discrete target losses~\citep{agarwal2015consistent,ramaswamy2016convex}\raft{Jessie: what are the best cites here? AA15? \jessie{I think RAT16 also works here.  Including both.  AA15 presents calibrated properties for a given discrete loss, but RAT talks more about calibrated surrogates}}.
 Calibration is a much more tractable and weaker condition than consistency, yet the two are equivalent under suitable assumptions~\cite{tewari2007consistency,ramaswamy2016convex}.
 Intuitively, calibration says that one cannot approach the optimal surrogate loss while linking to an suboptimal target prediction.
 %\raft{FYI Jessie: what you had was now pretty redundant to what we have earlier}\jessie{Definitely}
@@ -297,13 +297,14 @@ Typically, we take $\U = \reals^d$ for some $d\in\mathbb{N}$.
 \btw{We could also replace $\U$ by $\reals^d$ throughout, but it seemed distracting in this section}
 
 \raf{I like a lot of what's here but it's not clear why we are talking about it.  In some sense most of these details are not that relevant to the present paper, but it can still be nice to talk about previous work.  Maybe we should subsample, or at least group them, like ``many works characterize calibrated surrogates for specific target losses [list of cites].''} \jessie{That's a good point, and would help cut down on space.... most of this is older.}
-\citet{zhang2004statistical,lin2004note,bartlett2006convexity,tewari2007consistency} characterize consistent and calibrated surrogates for classification problems.
-In discrete prediction tasks when given a target loss, the two are in fact equivalent.  
-\citet{bartlett2006convexity} show that if a convex surrogate is differentiable, minimal at $0$, and nonnegative, it is a consistent surrogate for binary classification problems, and~\citet{tewari2007consistency} generalizes this result for multiclass classification. 
-\citet{tewari2007consistency} further show necessary and sufficient conditions for discrete prediction problems to be consistent that can be applied to general discrete losses.
-\citet{steinwart2007compare} generalizes the study of consistent losses from the discrete prediction setting and characterizes different types of loss functions, relating excess risk bounds, consistency, and calibration, studying various classes of surrogate losses (i.e. margin-based, distance-based, supervised, unsupervised, etc.)
-See~\citet[Chapter 2]{steinwart2008support} for further discussion of these loss functions.
-In Appendix~\ref{app:calibration}, we give a more general definition of calibration which is equivalent to Definition~\ref{def:calibrated-finite} in discrete prediction settings, but generalizes to continuous estimation settings.
+%\citet{zhang2004statistical,lin2004note,bartlett2006convexity,tewari2007consistency} characterize consistent and calibrated surrogates for classification problems.
+%In discrete prediction tasks when given a target loss, the two are in fact equivalent.  
+%\citet{bartlett2006convexity} show that if a convex surrogate is differentiable, minimal at $0$, and nonnegative, it is a consistent surrogate for binary classification problems, and~\citet{tewari2007consistency} generalizes this result for multiclass classification. 
+%\citet{tewari2007consistency} further show necessary and sufficient conditions for discrete prediction problems to be consistent that can be applied to general discrete losses.
+Many works characterize calibrated surrogates for specific discrete target losses~\citep{zhang2004statistical,lin2004note,bartlett2006convexity,tewari2007consistency}, including the canonical 0-1 loss for binary classification.
+Moreover,~\citet{steinwart2007compare,steinwart2008support} generalizes the study of consistent losses from the discrete prediction setting and characterizes different types of loss functions, relating excess risk bounds, consistency, and calibration for various classes of surrogate losses (i.e. margin-based, distance-based, supervised, unsupervised, etc.)
+%See~\citet[Chapter 2]{steinwart2008support} for further discussion of these loss functions.
+In Appendix~\ref{app:calibration}, we give a definition of calibration which is equivalent to Definition~\ref{def:calibrated-finite} in discrete prediction settings, but generalizes to continuous estimation settings.
 
 
 \subsection{Property elicitation}\label{subsec:properties}
@@ -311,7 +312,7 @@ In Appendix~\ref{app:calibration}, we give a more general definition of calibrat
 Arising from the statistics and economics literature, property elicitation is similar to calibration, but only places a restriction on the exact minimizers of a surrogate $L$.
 Specifically, given a statistic or \emph{property} $\Gamma$ of interest, which maps a distribution $p$ over $\Y$ to the set of desired or correct predictions, the minimizers of $L$ should precisely coincide with $\Gamma$.
 Intuitively, $p = \Pr[Y|X=x]$ is a conditional distribution, though the definition is also applied to point prediction settings.
-\raft{FYI Jessie: I like this line but $D_x$ has not been defined yet}
+\raft{FYI Jessie: I like this line but $D_x$ has not been defined yet \jessie{I added $D$ in the notation section and introduced it there.  Let me know if it really doesn't mesh with you, but I think it fit somewhat naturally.}}
 
 \begin{definition}[Property, elicits]
 	A \emph{property} is a set-valued function $\Gamma : \simplex \to 2^\R \setminus \emptyset$, which we denote $\Gamma: \simplex \toto \R$.
