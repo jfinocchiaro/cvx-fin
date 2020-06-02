@@ -335,7 +335,7 @@ Finally, when multiple properties are in play, we typically denote the target pr
 
 To relate property elicitation to consistency, we need to allow for a link function, which gives rise to the notion of \emph{indirect} elicitation.
 \begin{definition}[Indirect Elicitation]\label{def:indirectly-elicits}
-	A loss and link $(L, \psi)$ \emph{indirectly elicit} a property $\gamma:\simplex \toto \R'$ if $L$ elicits a property $\Gamma: \simplex \toto \U$ such that for all $u \in \U$, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$.
+	A loss and link $(L, \psi)$ \emph{indirectly elicit} a property $\gamma:\simplex \toto \R'$ if $L$ elicits a property $\Gamma: \simplex \toto \U$ such that for all $u \in \U$, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$ \jessie{and $\Gamma_u \neq \emptyset$?}.
 	We say $L$ \emph{indirectly elicits} $\gamma$ if such a link $\psi$ exists.
 \end{definition}
 For single-valued properties, the above definition reduces to the natural requirement $\gamma = \psi \circ \Gamma$.
@@ -345,7 +345,7 @@ For single-valued properties, the above definition reduces to the natural requir
 % Instead, we lighten this restriction to say that any optimal prediction for $\Gamma$ must be linked to \emph{an} optimal prediction for $\gamma$, and we must do so deterministically. 
 
 It is straightforward to show that, for a discrete target loss $\ell$, calibration implies indirect elicitation, as perhaps first observed by \citet{agarwal2015consistent}.
-Formally, if $(L,\psi)$ is calibrated with respect to $\ell$, then $(L,\psi)$ indirectly elicits $\gamma = \prop{\ell}$.
+Formally, if $(L,\psi)$ is calibrated with respect to $\ell$, then $(L,\psi)$ indirectly elicits $\gamma = \prop{\ell}$.\jessiet{If $\gamma(p) = \emptyset$ fir some $p$, then calibration doesn't hold, so our concerns don't apply to this statement.}
 To see this, take $u\in\U$ and $p\in\Gamma_u$, implying $u\in\Gamma(p)$.
 From eq.~\eqref{eq:elic}, $\exploss{L}{u}{p} = \inf_{u'\in\U} \exploss{L}{u'}{p}$, so we must have $\psi(u) \in \gamma(p)$ from eq.~\eqref{eq:calibration}, as desired.
 %\raft{Jessie: if this argument makes sense to you, you can cut that prop in the appendix now}
@@ -447,9 +447,9 @@ If $\gamma$ is a property elicited by a target loss $\ell$, then taking $\propdi
   $\mu(r,p) := R_\ell(r,p)$.
   Then
 	$(L, \psi)$ is consistent with respect to $\ell$ if and only if $(L,\psi)$ is $\propdis$-consistent with respect to $\gamma := \prop{\ell}$.
-\end{lemma}
+\end{lemma}\jessiet{Slight trickiness here.  Seems like this should still go through if $\Gamma$ can be empty though.  Have $\propdis(r,p) \neq 0$ for all $r$, but could still approach $0$.}
 \begin{proof}
-	First, observe that $\propdis(r,p) = 0 \iff \exploss{\ell}{r}{p} = \inf_{r' \in \R} \exploss{\ell}{r'}{p} \iff r \in \gamma(p)$.
+	First, observe that $\propdis(r,p) = 0 \iff \exploss{\ell}{r}{p} = \min_{r' \in \R} \exploss{\ell}{r'}{p} \iff r \in \gamma(p)$.\jessie{changed inf to min... right?}
 	Now suppose $(L, \psi)$ are consistent with respect to $\ell$, and take any sequence $\{f_m\}$ of measurable hypotheses.
   Rewriting the right-hand side of Definition~\ref{def:consistent-ell},
         \begin{align}
@@ -468,7 +468,7 @@ We now show this necessity directly.
 \end{theorem}
 \begin{proof}
 %  \raft{Maybe ref the consistency definition here explicitly, at the top and the end}
-	By Lemma~\ref{lem:consistent-loss-implies-prop}), it suffices to show the result for consistency with respect to a property $\gamma$, setting $\gamma := \prop{\ell}$ if $\ell$ is given instead.
+	By Lemma~\ref{lem:consistent-loss-implies-prop}, it suffices to show the result for consistency with respect to a property $\gamma$, setting $\gamma := \prop{\ell}$ if $\ell$ is given instead.\jessiet{flagging; but calls on lemma 1 for the technical backbone.}
 	We show the contrapositive; suppose $(L, \psi)$ does not indirectly elicit $\gamma$, meaning we have some $p \in \simplex$ so that $u \in \Gamma(p)$ but $\psi(u) \not \in \gamma(p)$, where $\Gamma := \prop{L}$.
 	Consider the constant sequence $\{f_m\}$ with $f_m(x) = u$ for all $m,x$, and take $D$ with full support on some $x \in \X$, and let $D_x = p$.
   Since $u \in \Gamma(p)$, we observe $\E_D L(f_m(X), Y) = \inf_f L(f(X),Y)$ for all $m$; in particular $\E_D L(f_m(X), Y) \to \inf_f L(f(X),Y)$.
