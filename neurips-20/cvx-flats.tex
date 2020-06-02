@@ -14,7 +14,8 @@
 % to compile a camera-ready version, add the [final] option, e.g.:
 %     \usepackage[final]{neurips_2020}
 
-% to avoid loading the natbib package, add option nonatbib:
+%     to avoid loading the natbib package, add option nonatbib:
+\PassOptionsToPackage{numbers, compress}{natbib}
 \usepackage{neurips_2020}
 
 \usepackage[utf8]{inputenc} % allow utf-8 input
@@ -227,10 +228,9 @@ For these reasons, we advocate for indirect elicitation as a tractable and more 
 
 \section{Background and Related work}\label{sec:related-work}
 
-We consider supervised learning problems in the space $\X \times \Y$, for some \emph{feature space} $\X$ and \emph{outcome space} (or label space) $\Y$.
-\raft{To discuss: labels or outcomes?}
+We consider supervised learning problems in the space $\X \times \Y$, for some \emph{feature space} $\X$ and \emph{label space} $\Y$.
 The task is to produce a hypothesis $f: \X \to \R$, for some \emph{prediction space} $\R$, which may be different from $\Y$.
-For example, in ranking problems $\R$ may be all $n!$ permutations over the $n$ outcomes/labels forming $\Y$.
+For example, in ranking problems $\R$ may be all $n!$ permutations over the $n$ labels forming $\Y$.
 As we focus heavily on conditional distributions $\Pr[Y|X=x]$ over $\Y$ given some $x \in X$, we abstract away $x$ with the following notation.
 The probability simplex over $\Y$ is $\simplex$.
 For $p \in \simplex$, let $\supp(p)$ be the support of $p$.
@@ -239,7 +239,7 @@ If given, we use $\ell: \R \times \Y \to \reals$ to denote a \emph{target loss},
 %where the goal is minimize expected loss, $\E ~ \ell(f(X),Y)$ for pairs $X,Y$ drawn from some distribution.
 Similarly, $L: \reals^d \times \Y \to \reals$ will typically denote a \emph{surrogate} loss, with surrogate predictions $u \in \reals^d$.
 A loss $\ell$ is \emph{discrete} if both $\Y$ and $\R$ are finite sets.
-A surrogate $L$ is \emph{convex} if $L(\cdot,y)$ is convex for every outcome $y \in \Y$.
+A surrogate $L$ is \emph{convex} if $L(\cdot,y)$ is convex for every label $y \in \Y$.
 For a given $p\in\simplex$, the (conditional) \emph{regret}, or excess risk, of a loss $L$ is given by $R_L(u,p) := \exploss{L}{u}{p} - \inf_{u^*} \exploss{L}{u^*}{p}$.
 
 % For a distribution $p \in \simplex$, we denote the expected target loss for prediction $r$ to be $\E_{Y \sim p} \ell(r, Y) := \ell(r; p)$.
@@ -251,34 +251,38 @@ For a given $p\in\simplex$, the (conditional) \emph{regret}, or excess risk, of 
 
 
 %\bo{Citation help appreciated!} \jessie{\cite{fisher1922mathematical,zhang2004statistical,bartlett2006convexity,tewari2007consistency,steinwart2007compare,ramaswamy2016convex} -- these are the ones I know of that discuss consistency in slightly various forms.  I believe the definition we run with is most similar to \cite{ramaswamy2016convex}.}
-A basic requirement of surrogate losses $L: \reals^d \times \Y \to \reals$ is \emph{consistency}, which roughly means that minimizing $L$-loss corresponds to
-\raft{I like this phrasing -- nicely captures all settings}
-solving the target problem of interest.
+A basic requirement of surrogate losses $L: \reals^d \times \Y \to \reals$ is \emph{consistency}, which roughly means that minimizing $L$-loss corresponds to solving the target problem of interest.
 We consider two kinds of consistency.
-In the first, we are given a \emph{target loss} $\ell$ and we define $L$ to be consistent (Definition \ref{def:consistent-ell}) if minimizing $L$ and applying a link yields hypotheses minimizing $\ell$.
-This kind follows much of the machine learning literature~\citep{zhang2004statistical,bartlett2006convexity,tewari2007consistency,steinwart2007compare,ramaswamy2016convex}.
-In the first, we are given a \textbf{target statistic} such as the conditional variance, as in classical statistics~\citep{fisher1922mathematical}.
-Here we will define $L$ to be consistent (Definition \ref{def:consistent-prop}) if minimizing $L$ and applying a link function yields estimates converging to the correct value, by some measure.
+In the first, we are given a \emph{target loss} $\ell$, and we roughly define $L$ to be consistent if minimizing $L$, and applying a link, minimizes $\ell$ (Definition \ref{def:consistent-ell}).
+This definition follows much of the machine learning literature~\citep{zhang2004statistical,bartlett2006convexity,tewari2007consistency,steinwart2007compare,ramaswamy2016convex}.
+In the second, we are given a \emph{target statistic}, such as the conditional variance or quantile, as in classical statistics~\citep{fisher1922mathematical}.
+Here we will define $L$ to be consistent if minimizing $L$ and applying a link function yields estimates converging to the correct value, by some measure (Definition \ref{def:consistent-prop}).
 
-It is also useful to distinguish between two domains: a \textbf{discrete} target prediction space, e.g. a classification problem; versus a \textbf{continuous} one, e.g. a regression or estimation problem.
-We informally refer to the four resulting cases -- target statistic versus target loss and discrete versus continuous predictions -- as the ``four quadrants'' of supervised learning problems.
+In addition to the two possible targets, wee may have one of two domains: a \emph{discrete} target prediction space, like a classification problem, or a \emph{continuous} one, like a regression or estimation problem.
+We informally refer to the four resulting cases---target loss vs.\ statistic, and discrete vs.\ continuous predictions----as the ``four quadrants'' of supervised learning problems.
 
 The goal of this paper is to give lower bounds on the dimension $d$ of consistent surrogate losses.
-A priori, it is not necessarily clear that compatible definitions of consistency could be given for both target statistics and target losses; for this we turn to our key tool of \emph{property elicitation}.
-This technique will then allow us to prove lower bounds across all four quadrants.
-In prior work, most research on this problem focuses on the quadrant of target losses and discrete predictions. \bo{cite?}
-Moreover, definitions of consistency itself are relatively intractable and opaque, so this literature often focuses on a weaker condition called calibration.
+A priori, it is not necessarily clear that compatible definitions of consistency could be given for both target statistics and target losses.
+We observe that, in fact, target losses are a special case of target statistics (\S~\ref{sec:consis-implies-indir}),
+meaning that \emph{property elicitation} is uniquely suited to studying general lower bounds.
+% This technique will then allow us to prove lower bounds across all four quadrants.
+In prior work, most research on this problem focuses on the quadrant of target losses and discrete predictions.
+\raft{Jessie: add cites here?}
+In particular, as definitions of consistency are relatively intractable to apply directly, the literature often focuses on a weaker condition called calibration, which only applies when given a discrete target loss.
 
 
 \subsection{Calibration}\label{subsec:calibration}
 
-\raf{Same general comment on style, etc, as intro.  See if you can get the point across in fewer words.}\jessie{Took a pass on this as well.}
-For discrete prediction problems, we often start with a target loss $\ell$ in mind: for classification, 0-1 loss comes to mind; for high-confidence classification, a variation of 0-1 loss that allows a constant, moderate penalty for abstaining can be used.
-However, optimizing over a target loss is often a computationally hard problem.
-This is why we use surrogate losses, but desire consistency to guarantee the surrogate ``corresponds'' to the original loss.%, or property we want to predict, as is more common in the the continuous estimation setting.
-A surrogate is no good on its own; we also need a link function to map from the surrogate prediction space back to the \emph{correct} prediction in the original prediction space.
-This notion of a correct surrogate is typically captured by the notion of \emph{consistency}, introduced formally in Definitions~\ref{def:consistent-ell} and~\ref{def:consistent-prop}.
-Related, and sometimes equivalent, is \emph{calibration}, which was the primary tool to study consistency until~\citet{agarwal2015consistent} introduced the use of property elicitation to study consistency in certain contexts.
+When given a discrete target loss, such as for classification-like problems, direct empirical risk minimization is typically NP-hard, forcing one to find a more tractable surrogate.
+To ensure consistency, the literature has embraced the notion of \emph{calibration} due to~\citet{tewari2007consistency}, and its generalizations to arbitrary discrete target losses.
+Calibration is a much more tractable and weaker condition than consistency, yet the two are equivalent under suitable assumptions~\cite{tewari2007consistency,ramaswamy2016convex}.
+\raft{FYI Jessie: what you had was now pretty redundant to what we have earlier}
+% For discrete prediction problems, we often start with a target loss $\ell$ in mind: for classification, 0-1 loss comes to mind; for high-confidence classification, a variation of 0-1 loss that allows a constant, moderate penalty for abstaining can be used.
+% However, optimizing over a target loss is often a computationally hard problem.
+% This is why we use surrogate losses, but desire consistency to guarantee the surrogate ``corresponds'' to the original loss.%, or property we want to predict, as is more common in the the continuous estimation setting.
+% A surrogate is no good on its own; we also need a link function to map from the surrogate prediction space back to the \emph{correct} prediction in the original prediction space.
+% This notion of a correct surrogate is typically captured by the notion of \emph{consistency}, introduced formally in Definitions~\ref{def:consistent-ell} and~\ref{def:consistent-prop}.
+% Related, and sometimes equivalent, is \emph{calibration}, which was the primary tool to study consistency until~\citet{agarwal2015consistent} introduced the use of property elicitation to study consistency in certain contexts.
 
 \begin{definition}[Calibrated: discrete predictions]\label{def:calibrated-finite}
 	Let $\ell : \R \times \Y \to \reals_+$ be a discrete target loss eliciting the property $\gamma$.
@@ -288,16 +292,20 @@ Related, and sometimes equivalent, is \emph{calibration}, which was the primary 
 	\end{equation}
 \end{definition}
 
+\raf{I like a lot of what's here but it's not clear why we are talking about it.  In some sense most of these details are not that relevant to the present paper, but it can still be nice to talk about previous work.  Maybe we should subsample, or at least group them, like ``many works characterize calibrated surrogates for specific target losses [list of cites].''}
 \citet{zhang2004statistical,lin2004note,bartlett2006convexity,tewari2007consistency} characterize consistent and calibrated surrogates for classification problems.
 In discrete prediction tasks when given a target loss, the two are in fact equivalent.  
 \citet{bartlett2006convexity} show that if a convex surrogate is differentiable, minimal at $0$, and nonnegative, it is a consistent surrogate for binary classification problems, and~\citet{tewari2007consistency} generalizes this result for multiclass classification. 
-\citet{ramaswamy2016convex} further show necessary and sufficient conditions for discrete prediction problems to be consistent that can be applied to general discrete losses.
+\citet{tewari2007consistency} further show necessary and sufficient conditions for discrete prediction problems to be consistent that can be applied to general discrete losses.
 \citet{steinwart2007compare} generalizes the study of consistent losses from the discrete prediction setting and characterizes different types of loss functions, relating excess risk bounds, consistency, and calibration, studying various classes of surrogate losses (i.e. margin-based, distance-based, supervised, unsupervised, etc.)
 See~\citet[Chapter 2]{steinwart2008support} for further discussion of these loss functions.
 In Appendix~\ref{app:calibration}, we give a more general definition of calibration which is equivalent to Definition~\ref{def:calibrated-finite} in discrete prediction settings, but generalizes to continuous estimation settings.
 
 
 \subsection{Property elicitation}\label{subsec:properties}
+
+\raf{GOT HERE}
+
 In Section~\ref{sec:consis-implies-indir} we show that indirect property elicitation is also a necessary condition for constructing a consistent surrogate loss.
 Informally, a property is a function mapping a probability distribution $p$ over the outcome set $\Y$ to the ``suggested prediction'' given $p$.
 For intuition, one can conceptualize $p = D_x$ for some given input $x$.
@@ -326,6 +334,8 @@ Sometimes we can ``indirectly'' elicit a property by taking a transformation of 
 	
 	Moreover, $L$ indirectly elicits $\gamma$ if such a link $\psi$ exists.
 \end{definition}
+
+\raf{Note: implied by calibration}
 
 There are a few possible definitions of indirect elicitation, but this is the most applicable for our setting because when we consider set-valued properties, we do not have that \emph{all} optimal predictions for $\Gamma$ must be linked back to \emph{all} optimal predictions for $\gamma$.
 Instead, we lighten this restriction to say that any optimal prediction for $\Gamma$ must be linked to \emph{an} optimal prediction for $\gamma$, and we must do so deterministically. 
