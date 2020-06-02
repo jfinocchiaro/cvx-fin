@@ -51,8 +51,8 @@
 \newcommand{\jessiet}[1]{\mytodo{purple!20!white}{JF: #1}}
 \newcommand{\proposedadd}[1]{\mynote{orange}{#1}}
 \newcommand{\bo}[1]{\mynote{blue}{[Bo: #1]}}
-\newcommand{\botodo}[1]{\mytodo{blue!20!white}{[Bo: #1]}}
-\newcommand{\btw}[1]{\mytodo{gray!20!white}{[BTW: #1]}}%TURN OFF FOR NOW \mytodo{gray}{#1}}
+\newcommand{\botodo}[1]{\mytodo{blue!20!white}{Bo: #1}}
+\newcommand{\btw}[1]{\mytodo{gray!20!white}{BTW: #1}}%TURN OFF FOR NOW \mytodo{gray}{#1}}
 \ifnum\Comments=1               % fix margins for todonotes
 \setlength{\marginparwidth}{1in}
 \fi
@@ -233,7 +233,7 @@ The task is to produce a hypothesis $f: \X \to \R$, for some \emph{prediction sp
 For example, in ranking problems $\R$ may be all $n!$ permutations over the $n$ labels forming $\Y$.
 As we focus heavily on conditional distributions $\Pr[Y|X=x]$ over $\Y$ given some $x \in X$, we abstract away $x$ with the following notation.
 The probability simplex over $\Y$ is $\simplex$.
-For $p \in \simplex$, let $\supp(p)$ be the support of $p$.
+\raft{FYI: moved $\supp$ to where we use it.}
 
 If given, we use $\ell: \R \times \Y \to \reals$ to denote a \emph{target loss}, with predictions $r\in\R$.
 %where the goal is minimize expected loss, $\E ~ \ell(f(X),Y)$ for pairs $X,Y$ drawn from some distribution.
@@ -274,8 +274,9 @@ In particular, as definitions of consistency are relatively intractable to apply
 \subsection{Calibration}\label{subsec:calibration}
 
 When given a discrete target loss, such as for classification-like problems, direct empirical risk minimization is typically NP-hard, forcing one to find a more tractable surrogate.
-To ensure consistency, the literature has embraced the notion of \emph{calibration} due to~\citet{tewari2007consistency}, and its generalizations to arbitrary discrete target losses.
+To ensure consistency, the literature has embraced the notion of \emph{calibration} due to~\citet{tewari2007consistency}, and its generalizations to arbitrary discrete target losses\raft{Jessie: what are the best cites here? AA15?}.
 Calibration is a much more tractable and weaker condition than consistency, yet the two are equivalent under suitable assumptions~\cite{tewari2007consistency,ramaswamy2016convex}.
+Intuitively, calibration says that one cannot approach the optimal surrogate loss while linking to an supoptimal target prediction.
 \raft{FYI Jessie: what you had was now pretty redundant to what we have earlier}
 % For discrete prediction problems, we often start with a target loss $\ell$ in mind: for classification, 0-1 loss comes to mind; for high-confidence classification, a variation of 0-1 loss that allows a constant, moderate penalty for abstaining can be used.
 % However, optimizing over a target loss is often a computationally hard problem.
@@ -285,12 +286,14 @@ Calibration is a much more tractable and weaker condition than consistency, yet 
 % Related, and sometimes equivalent, is \emph{calibration}, which was the primary tool to study consistency until~\citet{agarwal2015consistent} introduced the use of property elicitation to study consistency in certain contexts.
 
 \begin{definition}[Calibrated: discrete predictions]\label{def:calibrated-finite}
-	Let $\ell : \R \times \Y \to \reals_+$ be a discrete target loss eliciting the property $\gamma$.
-	A surrogate loss $L : \reals^d \times \Y \to \reals_+$  and link $\psi:\reals^d \to \R$ pair $(L, \psi)$ is \emph{calibrated} with respect to $\ell$ if 
+	Let $\ell : \R \times \Y \to \reals$ be a discrete target loss, and let $\gamma : \simplex \to 2^\R$ be given by $\gamma(p) = \argmin_{r\in\R} \exploss{\ell}{r}{p}$.
+	A surrogate loss $L : \U \times \Y \to \reals$  and link $\psi:\U \to \R$ pair $(L, \psi)$ is \emph{calibrated with respect to} $\ell$ if 
 	\begin{equation}\label{eq:calibration}
-	\forall p \in \simplex: \inf_{u \in \reals^d : \psi(u) \not \in \gamma(p)} L(u;p) > \inf_{u \in \reals^d} L(u;p)~.~
+	\forall p \in \simplex: \inf_{u \in \U : \psi(u) \not \in \gamma(p)} \exploss{L}{u}{p} > \inf_{u \in \U} \exploss{L}{u}{p}~.~
 	\end{equation}
 \end{definition}
+Typically, we take $\U = \reals^d$ for some $d\in\mathbb{N}$.
+\btw{We could also replace $\U$ by $\reals^d$ throughout, but it seemed distracting in this section}
 
 \raf{I like a lot of what's here but it's not clear why we are talking about it.  In some sense most of these details are not that relevant to the present paper, but it can still be nice to talk about previous work.  Maybe we should subsample, or at least group them, like ``many works characterize calibrated surrogates for specific target losses [list of cites].''}
 \citet{zhang2004statistical,lin2004note,bartlett2006convexity,tewari2007consistency} characterize consistent and calibrated surrogates for classification problems.
@@ -304,24 +307,42 @@ In Appendix~\ref{app:calibration}, we give a more general definition of calibrat
 
 \subsection{Property elicitation}\label{subsec:properties}
 
-\raf{GOT HERE}
+Arising from the statistics and economics literature, property elicitation is similar to calibration, but only places a restriction on the exact minimizers of a surrogate $L$.
+Specifically, given a statistic or \emph{property} $\Gamma$ of interest, which maps a distribution $p$ over $\Y$ to the set of desired or correct predictions, the minimizers of $L$ should precisely coincide with $\Gamma$.
+Intuitively, $p = \Pr[Y|X=x]$ is a conditional distribution, though the definition is also applied to point prediction settings.
+\raft{FYI Jessie: I like this line but $D_x$ has not been defined yet}
 
-In Section~\ref{sec:consis-implies-indir} we show that indirect property elicitation is also a necessary condition for constructing a consistent surrogate loss.
-Informally, a property is a function mapping a probability distribution $p$ over the outcome set $\Y$ to the ``suggested prediction'' given $p$.
-For intuition, one can conceptualize $p = D_x$ for some given input $x$.
-Take the function  $\Gamma: \simplex \to 2^\R \setminus \emptyset$ to be denoted $\Gamma:\simplex \toto \R$.
-\begin{definition}[Property, elicits, level set]
-	A \emph{property} is a (possibly set-valued) function $\Gamma : \simplex \toto \R$ mapping distributions to predictions.
-	A loss $L : \R \times \Y \to \reals_+$ \emph{elicits} the property $\Gamma$ if,
+\begin{definition}[Property, elicits]
+	A \emph{property} is a set-valued function $\Gamma : \simplex \to 2^\R \setminus \emptyset$, which we denote $\Gamma: \simplex \toto \R$.
+	A loss $L : \R \times \Y \to \reals$ \emph{elicits} the property $\Gamma$ if
 	\begin{equation}
-	\forall p \in \simplex, \;\; \Gamma(p) = \argmin_{u \in \R}L(u;p)
+    \label{eq:elic}    
+    \forall p \in \simplex, \;\; \Gamma(p) = \argmin_{u \in \R} \exploss{L}{u}{p}~.
 	\end{equation}
-	Moreover, we call a \emph{level set} $\Gamma_r := \{p \in \simplex : r \in \Gamma(p)\}$ to be the set of distributions for which predicting $u$ minimizes the expected loss of the loss eliciting $\Gamma$.
 \end{definition}
 
-We call a property $\gamma: \simplex \toto \R$ \emph{discrete} if $|\R| < \infty$, and we call a property \emph{set-valued} if there is a $p \in \simplex$ so that $|\Gamma(p)| > 1$, and \emph{single-valued} otherwise.
-We use $\Gamma := \prop{L}$ to say $\Gamma$ is the (unique) property elicited by $L$.
-%Without much loss of generality, we assume that discrete properties are \emph{non-redundant}, meaning that for each $\gamma_r$, there is no $\gamma_{r'}$ such that $\gamma_{r'} \subseteq \gamma_r$.
+The \emph{level set} of $\Gamma$ at value $r\in\R$ is $\Gamma_r := \{p \in \simplex : r \in \Gamma(p)\}$.
+We call a property $\Gamma: \simplex \toto \R$ \emph{discrete} if $\R$ is a finite set.
+A property is \emph{single-valued} if $|\Gamma(p)| = 1$ for all $p\in\simplex$, in which case we write $\Gamma\to\R$.
+We use $\Gamma := \prop{L}$ to denote the unique property elicited by $L$ from eq.~\eqref{eq:elic}.
+Finally, when multiple properties are in play, we typically denote the target property by $\gamma$, and the surrogate by $\Gamma$.
+
+To relate property elicitation to consistency, we need to allow for a link function, which gives rise to the notion of \emph{indirect} elicitation.
+\begin{definition}[Indirect Elicitation]\label{def:indirectly-elicits}
+	A loss and link $(L, \psi)$ \emph{indirectly elicit} a property $\gamma:\simplex \toto \R'$ if $L$ elicits a property $\Gamma: \simplex \toto \U$ such that for all $u \in \U$, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$.
+	We say $L$ \emph{indirectly elicits} $\gamma$ if such a link $\psi$ exists.
+\end{definition}
+For single-valued properties, the above definition reduces to the natural requirement $\gamma = \psi \circ \Gamma$.
+\btw{interesting discussion of set-valued properties commented out; revive later!}
+% While there are several possible set-valued extensions, Definition~\ref{def:indirectly-elicits} best matches  suited for studying consistency.
+% There are a few possible definitions of indirect elicitation, but this is the most applicable for our setting because when we consider set-valued properties, we do not have that \emph{all} optimal predictions for $\Gamma$ must be linked back to \emph{all} optimal predictions for $\gamma$.
+% Instead, we lighten this restriction to say that any optimal prediction for $\Gamma$ must be linked to \emph{an} optimal prediction for $\gamma$, and we must do so deterministically. 
+
+It is straightforward to show that, for a discrete target loss $\ell$, if $(L,\psi)$ is calibrated with respect to $\ell$, then $(L,\psi)$ indirectly elicits $\gamma = \prop{\ell}$.
+To see this, take $u\in\U$ and $p\in\Gamma_u$, implying $u\in\Gamma(p)$.
+From eq.~\eqref{eq:elic}, $\exploss{L}{u}{p} = \inf_{u'\in\U} \exploss{L}{u'}{p}$, so we must have $\psi(u) \in \gamma(p)$ from eq.~\eqref{eq:calibration}, as desired.
+
+As we will see in Section~\ref{sec:consis-implies-indir}, indirect property elicitation is also a necessary condition for constructing a consistent surrogate loss.
 
 Property elicitation of a single property is well-understood~\citep{savage1971elicitation,osband1985information-eliciting,lambert2008eliciting, lambert2009eliciting, lambert2018elicitation}, and \citet{finocchiaro2018convex} are among the first to consider \emph{convex} elicitable properties.
 Additionally, \citet{agarwal2015consistent} are the first to our knowledge to formally relate property elicitation to the consistency of a surrogate loss, although they only consider settings with $|\Y| < \infty$. \jessiet{right?}
@@ -329,16 +350,11 @@ Additionally, \citet{agarwal2015consistent} are the first to our knowledge to fo
 
 Sometimes we can ``indirectly'' elicit a property by taking a transformation of some other property that might be easier to elicit.
 
-\begin{definition}[Indirect Elicitation]\label{def:indirectly-elicits}
-	A loss and link $(L, \psi)$ \emph{indirectly elicit} a property $\gamma:\simplex \toto \R'$ if $L$ elicits a property $\Gamma: \simplex \toto \R$ such that for all $r \in \R$, we have $\Gamma_r \subseteq \gamma_{\psi(r)}$.
-	
-	Moreover, $L$ indirectly elicits $\gamma$ if such a link $\psi$ exists.
-\end{definition}
+
+
 
 \raf{Note: implied by calibration}
 
-There are a few possible definitions of indirect elicitation, but this is the most applicable for our setting because when we consider set-valued properties, we do not have that \emph{all} optimal predictions for $\Gamma$ must be linked back to \emph{all} optimal predictions for $\gamma$.
-Instead, we lighten this restriction to say that any optimal prediction for $\Gamma$ must be linked to \emph{an} optimal prediction for $\gamma$, and we must do so deterministically. 
 
 
 \subsection{Complexity notions}\label{subsec:complexity}
@@ -483,6 +499,7 @@ The point of this result is the contrapositive: if $\gamma$ has a more intricate
 %Fixing a distribution $p \in \simplex$, we construct a set of $n$ witnesses in $\partial L(u,y)$ for each $y$ whose $p$-weighted sum is $\vec 0$.
 %The nullspace of the matrix of these witnesses yields a flat, formally introduced below, of codimension at most $d$ intersecting our fixed distribution $p$ and the level set(s) $\gamma_r$ containing $p$.
 
+\raf{Introduce $\affhull$}
 
 \begin{definition}[Flat]
 	A \emph{flat} $F \subseteq \affhull(\simplex) \subseteq \reals^n$ is a nonempty set $F = \ker W \cap \affhull(\simplex)$ for some $W\in\reals^{d\times n}$ where $d\leq n$.
@@ -569,7 +586,7 @@ Due to the infimum in the definition of calibration, the original proof requires
 	Thus, we have $\dim(\Sc_{\gamma_r}(p)) \geq n - d - 1$, thus completing the proof for $p \in \relint{\simplex}$.
 	
 	When $p \not \in \relint{\simplex}$, we can loosely ``project down'' to the subsimplex on the support of $p$ and modify $L$ and $\ell$ so that the feasible subspace dimension on this modified space is the same relative to the subsimplex.
-	Any flat containing $p$ in the original simplex can only have smaller codimension relative to $\reals^{\supp(p)}$.
+	Any flat containing $p$ in the original simplex can only have smaller codimension relative to $\reals^{\supp(p)}$, where $\supp(p):=\{y\in\Y:p_y > 0\}$ is the support of $p$.
 	We can now apply Theorem~\ref{thm:cvx-flats} on the modified space; the dimension $\dim(\Sc_{\gamma_r}(p)) = \|p\|_0 - \codim(\Sc_{\gamma_r}(p)) - 1$ yields the bound.
 \end{proof}
 
@@ -778,7 +795,7 @@ Therefore, we use this more general definition of calibration when proving state
 \begin{definition}[Calibrated]\label{def:calibrated-general}
 	A loss $L:\reals^d \times \Y \to \reals$ is \emph{calibrated} with respect to a loss $\ell : \R \times \Y \to \reals$ eliciting the property $\gamma$ if there is a link $\psi : \reals^d \to \R$ such that, for all distributions $p \in \simplex$, there exists a function $\zeta : \reals_+ \to \reals_+$ with $\zeta$ continuous at $0^+$ and $\zeta(0) = 0$ such that for all $u \in \reals^d$, we have
 	\begin{equation}\label{eq:calibrated-general}
-	\ell( \psi(u); p) - \risk{\ell}(p)  \leq \zeta \left(  L(u;p) - \risk{L}(p) \right)~.~
+	\ell( \psi(u); p) - \risk{\ell}(p)  \leq \zeta \left(  \exploss{L}{u}{p} - \risk{L}(p) \right)~.~
 	\end{equation}
 \end{definition}
 
@@ -799,7 +816,7 @@ Lemma~\ref{lem:calib-converging-regrets} shows calibration if and only if $D$, w
 	\jessiet{Old proof commented out; simplified using Lemma~\ref{lem:calib-converging-regrets}}
 $\implies$
 	We prove the contrapositive; if $(L, \psi)$ is not calibrated with respect to $\ell$ by Definition~\ref{def:calibrated-finite}, then it is not calibrated via Definition~\ref{def:calibrated-general} either.
-	If $(L, \psi)$ are not calibrated with respect to $\ell$ by Definition~\ref{def:calibrated-finite}, then there is a $p \in \simplex$ so that $\inf_{u : \psi(u) \not \in \gamma(p)} L(u;p) = \inf_u L(u; p)$.
+	If $(L, \psi)$ are not calibrated with respect to $\ell$ by Definition~\ref{def:calibrated-finite}, then there is a $p \in \simplex$ so that $\inf_{u : \psi(u) \not \in \gamma(p)} \exploss{L}{u}{p} = \inf_u L(u; p)$.
 	Thus there is a sequence $\{u_m\}$ so that $\lim_{m \to \infty} \psi(u_m) \not \in \gamma(p)$ and $L(u_m; p) \to \risk{L}(p)$.  
 	Now we have $R_L(u_m; p \to 0$ but $R_\ell(\psi(u_m); p) \not \to 0$, so by Lemma~\ref{lem:calib-converging-regrets}, we contradict calibration by Definition~\ref{def:calibrated-general}.
 %	
@@ -855,7 +872,7 @@ Lemma~\ref{lem:calib-converging-regrets} now gives a condition equivalent to cal
 	
 	$\impliedby$ 
 \jessie{$D \implies (A \wedge C)$}
-	Fix $p \in \simplex$, and consider $\zeta(c) := \sup_{u: R_L(u;p) \leq c} R_\ell(\psi(u); p)$.  
+	Fix $p \in \simplex$, and consider $\zeta(c) := \sup_{u: R_L(u,p) \leq c} R_\ell(\psi(u); p)$.  
 	We will show $R_L(u_m; p) \to 0 \implies R_\ell(\psi(u_m); p) \to 0$ gives calibration via the function $\zeta$ constructed above. 
 	With $\zeta$ as constructed, we should that the bound in equation~\eqref{eq:calibrated-general} is satisfied for all $u \in \reals^d$ and apply Lemma~\ref{lem:continuous-iff-limits} to observe that if there is a sequence $\{\epsilon_m\} \to 0$ so that $\zeta(\epsilon_m) \not \to 0$, it is because $R_L(u_m, p) \not \to 0 \not \implies R_\ell(\psi(u_m), p) \to 0$.
 	
@@ -914,7 +931,7 @@ Moreover, we have calibration implying indirect elicitation.
 \end{lemma}
 \begin{proof}
 	Let $\Gamma$ be the unique property directly elicited by $L$, and fix $p \in \simplex$ with $u$ such that $p \in \Gamma_u$.
-	As $p \in \Gamma_u$, then $\zeta(L(u;p) - \risk{L}(p)) = \zeta(0) = 0$, we observe the bound $\ell(\psi(u); p) \leq \risk{\ell}(p)$.
+	As $p \in \Gamma_u$, then $\zeta(\exploss{L}{u}{p} - \risk{L}(p)) = \zeta(0) = 0$, we observe the bound $\ell(\psi(u); p) \leq \risk{\ell}(p)$.
 	We also have $\ell(\psi(u); p) \geq \risk{\ell}(p)$ by definition of $\risk{\ell}$, so we must have $\ell(\psi(u);p) = \risk{\ell}(p) = \ell(\gamma(p); p)$, and therefore, $p \in \gamma_{\psi(u)}$.
 	Thus, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$, so $L$ indirectly elicits $\gamma$.
 \end{proof}
