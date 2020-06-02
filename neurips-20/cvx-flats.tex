@@ -1044,26 +1044,33 @@ We justify the three conditions of Theorem~\ref{thm:bayes-risk-lower-bound}:
 
 
 \section{Omitted examples}
-\paragraph{A weather example:}
-Consider the following scenario where someone is deciding how to dress for their bike ride.\jessiet{Someone just went to the bike shop...}
-They want to wear a rain jacket if it rains, but don't want to have to carry it around if it doesn't rain.
-Moreover, they might want their base layer to be appropriate for the heat.
-Consider the three outcomes $\Y = \{$sunny, cloudy, rainy$\}$, and we suppose we want to bring a jacket if $Pr[ y= $rain | weather conditions] $ \geq 3/5$.
-Moreover, we want to wear a short sleeved shirt if $Pr[y= $sunny | weather conditions] $ \geq$ $Pr[y= $cloudy | weather conditions], and long-sleeved otherwise.
+\paragraph{Discrete problem with no target loss.}
+Consider the following scenario where someone is deciding how to dress for the weather based on a meteorologist's forecast.
+Consider the three outcomes $\Y = \{$sunny, snowy, rainy$\}$, and we suppose we want to have some bias towards health and safety, so the meteorologist should only predict sunny weather if $Pr[$sunny | weather data$] \geq 3/4$.
+Otherwise, they should predict whatever is more likely  given the weather data: rain or snow.
 
-We can now model this problem by a property with the reports $\R = \{$rain jacket and short-sleeve base layer (rj,ss), rain jacket and long-sleeve base layer (rj,ls), no rain jacket, short-sleeve (no rj,ss), no rain jacket, long-sleeve (no rj,ls)$\}$, where $\Gamma(p)$ is shown in Figure~\ref{fig:t-example}.
-However, we do not have a target loss for this problem, so constructing a consistent surrogate for this problem is ill-defined without Definition~\ref{def:consistent-prop} unless one takes the time to try to reverse engineer a target loss, which faces the problem of scale as properties become more intricate.
+We can now model this problem by a property with the reports $\R = \Y$, and have 
+\begin{align*}
+\Gamma(p) &= \begin{cases}
+\text{sunny} & p_{\text{sunny}} \geq 3/4 \\
+\text{rainy} & p_{\text{sunny}} \leq 3/4 \wedge p_{\text{rainy}} \geq p_{\text{snowy}} \\
+\text{snowy} & p_{\text{sunny}} \leq 3/4 \wedge p_{\text{snowy}} \geq p_{\text{rainy}} \\
+\end{cases}~,~
+\end{align*} 
+shown in Figure~\ref{fig:t-example}.
+Since the cells of elicitable properties in the simplex form a power diagram~\citep{lambert2009eliciting}, we know that there is actually \emph{no} target loss that directly elicits this problem.
+Constructing a consistent surrogate for this task is ill-defined without Definition~\ref{def:consistent-prop}.
+The function $\propdis(r,p) = \ones\{r \not \in \Gamma(p)\}$, which satisfies the requirements of $\propdis$, now allows us to use Definition~\ref{def:consistent-prop} to think about consistent surrogates for this task.
 
 Our bounds from Theorem~\ref{thm:cvx-flats} on the distribution $p = (1/5, 3/5, 1/5)$ suggest that the convex elicitation complexity $\eliccvx(\Gamma) \geq 3 - 0 -1 = 2$, since there is no way to draw a line through $p$ while staying in just one level set on the simplex.
-This bound is the same as those given by feasible subspace dimension, but we cannot definitely say anything about convex calibration dimension since we do not have a target loss.
-\jessie{Do we want to construct a convex surrogate for this?  Not super clear how...}
+This bound is the same as those given by feasible subspace dimension, but we cannot apply~\citet[Theorem 16]{ramaswamy2016convex}, which makes a statement about convex calibration dimension, since we do not have a target loss.
 
-This example, although rather silly, can also extend to other decision-tree-like properties that do not have an explicit or easily constructed target loss.
+This example, although seemingly contrived, can also extend to other decision-tree-like properties that do not have an explicit or easily constructed target loss.
 
 \begin{figure}
 	\centering
-	\includegraphics[width=0.4\linewidth]{tikz/t-example.pdf}
-	\caption{Our example on how to dress for a bike ride.}
+	\includegraphics[width=0.3\linewidth]{tikz/t-example.pdf}
+	\caption{Our meteorology example with a bias towards citizen safety.}
 	\label{fig:t-example}
 \end{figure}
 
