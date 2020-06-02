@@ -262,7 +262,7 @@ This definition follows much of the machine learning literature~\citep{zhang2004
 In the second, we are given a \emph{target statistic}, such as the conditional variance or quantile, as in classical statistics~\citep{fisher1922mathematical}.
 Here we will define $L$ to be consistent if minimizing $L$ and applying a link function yields estimates converging to the correct value, by some measure (Definition \ref{def:consistent-prop}).
 
-In addition to the two possible targets, we may have one of two domains: a \emph{discrete} target prediction space, like a classification problem, or a \emph{continuous} one, like a regression or estimation problem.
+In addition to the two possible targets, we may have one of two domains: a \emph{discrete} (and finite)\btw{Bo: added ``and finite''} target prediction space, like a classification problem, or a \emph{continuous} one, like a regression or estimation problem.
 We informally refer to the four resulting cases---target loss vs.\ statistic, and discrete vs.\ continuous predictions---as the ``four quadrants'' of supervised learning problems.
 
 The goal of this paper is to give lower bounds on the dimension $d$ of consistent surrogate losses.
@@ -449,17 +449,15 @@ If $\gamma$ is a property elicited by a target loss $\ell$, then taking $\propdi
 	$(L, \psi)$ is consistent with respect to $\ell$ if and only if $(L,\psi)$ is $\propdis$-consistent with respect to $\gamma := \prop{\ell}$.
 \end{lemma}
 \begin{proof}
-	First, observe that $\propdis(r,p) = 0 \iff r \in \gamma(p)$, since $r \in \gamma(p)$ implies $\ell(r;p) = \risk{\ell}(p) := \inf_{r' \in \R} \exploss{\ell}{r'}{p}$, and if $r \not \in \gamma(p)$, then $\ell(r;p) > \risk{\ell}(p)$.
-  \raft{We don't define $\risk{\ell}$}\jessiet{Added in line, but very subtle.  not a huge fan.}
+	First, observe that $\propdis(r,p) = 0 \iff \exploss{\ell}{r}{p} = \inf_{r' \in \R} \exploss{\ell}{r'}{p} \iff r \in \gamma(p)$.
 	Now suppose $(L, \psi)$ are consistent with respect to $\ell$, and take any sequence $\{f_m\}$ of measurable hypotheses.
-  Then \btw{todo: emphasize that it's target loss}
-%  \raft{Discuss proof}
+  Rewriting the right-hand side of Definition~\ref{def:consistent-ell},
         \begin{align}
 	  &\; \E_D \ell(\psi \circ f_m(X), Y)\to \inf_f \E_D \ell(\psi \circ f(X), Y)   \label{eqn:cons-loss-cond} \\
 	  &\iff \E_X R_\ell(\psi \circ f_m(X), D_X) \to 0                               \nonumber  \\
 	  &\iff \E_X \propdis(\psi \circ f_m(X), D_X) \to 0~.~                          \label{eqn:cons-prop-cond}
 	\end{align}
-        Therefore, we have that $\mathbb{E}_D L(f_m(X),Y) \to \inf_f \mathbb{E}_D L(f(X),y)$ implies (\ref{eqn:cons-loss-cond}) if and only if it implies (\ref{eqn:cons-prop-cond}).
+        Therefore, $\mathbb{E}_D L(f_m(X),Y) \to \inf_f \mathbb{E}_D L(f(X),Y)$ implies (\ref{eqn:cons-loss-cond}) if and only if it implies (\ref{eqn:cons-prop-cond}).
 \end{proof}
 
 When noting that some properties are not elicitable, including the variance, Lemma~\ref{lem:consistent-loss-implies-prop} confirms that consistency with respect to a property is a strictly broader notion, and further points to indirect elicitation as a natural necessary condition for consistency.
@@ -489,68 +487,38 @@ The key idea, crystallized from the proof of \citet[Theorem 16]{ramaswamy2016con
 Theorem \ref{thm:cvx-flats} will show that if $d$ is small, then the level set $\{p : u \in \argmin_{u'} \exploss{L}{u'}{p}\}$ must be large; in fact, it must roughly contain a high-dimensional affine subspace, or \emph{flat}.
 But by definition of indirect elicitation, there is some level set $\gamma_r$ (where $u$ is linked to $r$) containing this flat as well.
 The point of this result is the contrapositive: if $\gamma$ has a level set intricate enough to not contain any high-dimensional flats, then $\gamma$ cannot have a low-dimensional consistent surrogate.
-\raft{Very nice!}
 
-\botodo{Not sure the proof sketch is worth it, since the proof itself is pretty short. Commenting out for now, but let me know what y'all would prefer!}
-%As a first step, observe that all minima of convex functions are global, so $\vec 0  \in \partial L(u, y)$ if and only if $u$ minimizes $L$ in its first component.
-%This allows us to consider subgradient sets of the loss at a fixed distribution $p$ as the weighted Minkowski sums of subgradient sets for the loss on each outcome.\bo{This won't be clear except to readers very well versed in convex analysis. I think we'll have to sketch why that's true.}
-%Fixing a distribution $p \in \simplex$, we construct a set of $n$ witnesses in $\partial L(u,y)$ for each $y$ whose $p$-weighted sum is $\vec 0$.
-%The nullspace of the matrix of these witnesses yields a flat, formally introduced below, of codimension at most $d$ intersecting our fixed distribution $p$ and the level set(s) $\gamma_r$ containing $p$.
-
-\raf{Introduce $\affhull$}
-Throughout, we often use the affine hull of the simplex, $\affhull(\simplex) = \{\sum_{i=1}^n \alpha_i p_i : p_i \in \simplex, \alpha_i \in \reals, \sum_{i=1}^n \alpha_i = 1\}$, which has dimension $n-1$.
-
+We now define flats formally.
+Recall that the affine hull is the set of all linear combinations whose coefficients sum to 1.
+In particular, we will often use $\affhull(\simplex) = \{\sum_{i=1}^n \alpha_i p_i : p_i \in \simplex, \alpha_i \in \reals, \sum_{i=1}^n \alpha_i = 1\}$, which has dimension $n-1$.
 \begin{definition}[Flat]
 	A \emph{flat} $F \subseteq \affhull(\simplex) \subseteq \reals^n$ is a nonempty set $F = \ker W \cap \affhull(\simplex)$ for some $W\in\reals^{d\times n}$ where $d\leq n$.
 	The codimension of $F$ (relative to $\affhull(\simplex)$) is given by $\codim(F)=\mathrm{rank}(W)$, and the dimension of $F$ is $n - \mathrm{rank}(W) - 1$.
 \end{definition}
 
-\raf{1}
-Flats of a convex (expected) loss are complemented by its subgradients.\footnote{We define the subdifferential $\partial L(u,y) = \{g \in \reals^d : L(u',y) \geq L(u,y) +g^T (u' - u) \; \forall u' \in \reals^d  \}$, and members of this set subgradients.}  % of convex losses and their flats in order to understand convex elicitation complexity.
-Fixing a distribution $p \in \simplex$, we observe the reports $u$ where $\vec 0$ is in the $p$-weighted Minkowski sum of the subdifferentials $\partial L(u,y)$, where the summation is over $y$.
-By definition of the Minkowski sum, this yields a vector of witnesses that are subgradients whose $p$-weighted sum is exactly $\vec 0$.
-Moreover, this exact choice of subgradients must add to $\vec 0$ for all $q$ in the same flat containing $p$, and the dimension of the flat is determined in part by the prediction dimension.
-%While subgradients live in the prediction space and flats in probability space, the two can be connected considering a $p \in \simplex$.
-%In a loose sense, this $p$ is a witness of a flat of the level set, and the flat must be of certain codimension (dependent on prediction dimension) so that, for this witness $p$, we can extract a witness $W$ of subgradient sets proving that $\vec 0 \in \partial \exploss{L}{u}{p}$; our desired optimality condition.\jessiet{This is probably TMI but it at least helped me to write it out and think of it this way (p as a witness of the flat, in a loose sense)}
-
-\raf{2}
-Flats of a convex (expected) loss are complemented by its subgradients.\footnote{We define the subdifferential $\partial L(u,y) = \{g \in \reals^d : L(u',y) \geq L(u,y) +g^T (u' - u) \; \forall u' \in \reals^d  \}$, and members of this set subgradients.}  % of convex losses and their flats in order to understand convex elicitation complexity. 
-\raft{What kind of zen is this}
-While subgradients live in the prediction space and flats in probability space, the two can be connected considering a distribution $p \in \simplex$.
-In a loose sense, this $p$ is a witness of a flat of the level set, and the flat must be of certain codimension (dependent on prediction dimension) so that, for this witness $p$, we can extract a witness $W$ of subgradient sets proving that $\vec 0 \in \partial \exploss{L}{u}{p}$; our desired optimality condition.
-\jessiet{This is probably TMI but it at least helped me to write it out and think of it this way (p as a witness of the flat, in a loose sense)}
-
-The intuition for this result comes from the proof of~\citet[Theorem 16]{ramaswamy2016convex}, although indirect elicitation lets us simplify their proof that originally relied on calibration.
-In fact, their main proof tool, the subspace of feasible dimensions (Definition~\ref{def:subspace-feas}), is a linear shift of a flat satisfying the requirements of Theorem~\ref{thm:cvx-flats}, which lets us deduce their result as Corollary~\ref{cor:fsd-bound} through a much shorter proof thanks to our reliance on elicitation.
+We now state our lower bound.
 
 \begin{theorem}\label{thm:cvx-flats}
-%	Suppose we are given a property $\gamma$ and distribution $p \in \simplex$.
-%	For all $r\in\gamma(p)$, if there is no flat $F \subseteq \affhull(\simplex)$ \jessie{affine hull or affine span?} of codimension at most $d+1$ containing $p$ so that $F \cap \simplex \subseteq \gamma_r$, then there is no convex surrogate loss $L : \reals^d \times \Y \to \reals$ that indirectly elicits $\gamma$.
-%	
 	If there is a convex surrogate loss $L : \reals^d \times\Y \to \reals$ indirectly eliciting $\gamma$, then for all $p \in \simplex$ and $r \in \R$ such that $r \in \gamma(p)$, there is a flat $F \subseteq \affhull(\simplex)$ of codimension at most $d$ such that $F \cap \simplex \subseteq \gamma_r$ and $p \in F$.
 \end{theorem}
 \begin{proof}
-%	We prove the contrapositive: if there is a convex surrogate loss $L$ indirectly eliciting $\gamma$, then for all $p \in \simplex$ and $r \in \R$ such that $r \in \gamma(p)$, there is a flat $F \subseteq \affhull(\simplex)$ of codimension at most $d+1$ such that $F \cap \simplex \subseteq \gamma_r$ and $p \in F$.
-%	
 	Let $\Gamma := \prop{L}$ and suppose $(L, \psi)$ indirectly elicits $\gamma$ for some link $\psi : \reals^d \to \R$, so that for all $u \in \reals^d$, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$.
-	Fix $p \in \simplex$ and $r \in \gamma(p)$, and take any $u \in \Gamma(p)$ such that $\psi(u) = r \in \gamma(p)$.\jessie{Does such a $u$ exist?}
+	Fix $p \in \simplex$ and $r \in \gamma(p)$.
+  \jessie{Show that there is some $u \in \Gamma(p)$ such that $\psi(u) = r$.}
 	We will show $F \cap \simplex \subseteq \Gamma_u$; the result then follows from $\Gamma_u \subseteq \gamma_r$.
 	As $L$ is convex and elicits $\Gamma$, we have $u \in \Gamma(p) \iff \vec 0 \in \partial \exploss{L}{u}{p} \iff \vec 0 \in \oplus_y p_y \partial L(u,y)$, where $\oplus$ denotes the Minkowski sum~\citep[Theorem 4.1.1]{hiriart2012fundamentals}.
   % (Observe that in order for $L$ to be convex, $L(\cdot, y)$ must be convex for all $y \in \Y$.) 
 	
-	Expanding, we have $\oplus_y p_y \partial L(u,y) = \{p_1 x_1 + \ldots + p_n x_n : x_1 \in \partial L(u,1), \ldots, x_n \in \partial L(u,n) \}$.
-%	In particular, $u \in \Gamma(p)$ if and only if $\vec 0$ is a $p$-convex combination of subgradients.
-	Defining the matrix $W = [x_1, \ldots, x_n] \in \reals^{d\times n}$, we have $W p = \sum_y p_y x_y = \vec 0$
-  (cf. $\mathbf{A}^m$ from~\cite[Theorem 16]{ramaswamy2016convex}).
+	Expanding, we have $\oplus_y p_y \partial L(u,y) = \{ \sum_{y\in\Y} p_y x_y : x_y \in \partial L(u,y) \; \forall y\in\Y\}$.
+	Defining the matrix $W = [x_1, \ldots, x_n] \in \reals^{d\times n}$, we have $W p = \sum_y p_y x_y = \vec 0$;
+  cf.~\cite[$\mathbf{A}^m$ in Theorem 16]{ramaswamy2016convex}.
 	Now taking $F := \ker(W) \cap \affhull(\simplex)$, we have $\codim(F) = \rank(W) \leq d$, and $p \in F$ by construction.
   To see $F \cap \simplex \subseteq \gamma_r$, from the chain of equivalences above, we have for any $q\in\simplex$ that $q \in \ker W \implies u \in \Gamma(q) \implies q \in \Gamma_u \subseteq \gamma_r$.
-
-  \raf{Old:}
-	That would mean that $q \in F \implies Wq = \vec 0 \implies \sum_y q_y (x_y)_j = 0$ for all $j \in [d]$, which in turn implies $\vec 0 \in \partial L(u;q)$, implying $q \in \Gamma_u \subseteq \gamma_{r}$.
 \end{proof}
 
-%Since Theorem~\ref{thm:consistent-implies-indir-elic} says that consistency implies indirect elicitation, we now apply results on convex elicitation complexity, like the result above, to understand the minimal dimension required to construct a consistent surrogate loss.
-%This result suggests that elicitation complexity greater than $d$ implies no indirect elicitation of the property of interest (or target loss eliciting such a property), which in turn implies there is no $d$-dimensional consistent surrogate with respect to a given loss or property of interest.
+The proof takes its insipration from~\citet[Theorem 16]{ramaswamy2016convex}, and extracts a witness $W$ of the optimality of a surrogate prediction $u$.
+This witness $W$ takes the form of a matrix whose columns are selection of subgradients of $L$, and thus $u$ must also be optimal for any other distribution in the flat defined by the kernel of $W$.
+As we show next, the original statement of~\citet[Theorem 16]{ramaswamy2016convex}, which uses the stronger notion of calibration and thus applies only to discrete target losses, actually follows as a special case of Theorem~\ref{thm:cvx-flats}.
 
 \section{Discrete-valued predictions}\label{sec:finite-calib}
 
