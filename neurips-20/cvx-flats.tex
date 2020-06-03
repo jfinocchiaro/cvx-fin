@@ -185,7 +185,7 @@ A natural tension arises between consistency and the prediction dimension, as co
 We are therefore interested in finding consistent convex surrogates with a low prediction dimension, such as logarithmic in the number of labels, as is desired in many structured prediction problems~\cite{ramaswamy2018consistent,yu2018lovasz,berman2018lovasz}.
 \raft{FYI Jessie: what used to be this last paragraph still didn't quite get where you want to be in terms of motivating the problem.  I'd suggest taking a careful look at the diff at some point to see what I changed and ask me if you don't see why.  Probably the biggest issue was in laying out the gap.  You often need to give more detail about what \emph{has} been done to say what hasn't.}
 
-While meaningful bounds on the prediction dimension have recently begun to appear, both for discrete and continuous predictions~\cite{lambert2008eliciting,ramaswamy2012classification,ramaswamy2016convex,ramaswamy2018consistent,frongillo2018elicitation}, these works have several drawbacks.
+While meaningful bounds on the prediction dimension have recently begun to appear, both for discrete and continuous predictions~\cite{lambert2008eliciting,ramaswamy2016convex,ramaswamy2018consistent,frongillo2018elicitation}, these works have several drawbacks.
 Consistency for discrete target losses is typically studied using calibration, which though powerful and undeniably useful, can be challenging to work with, and general results about calibration are sparse.
 In the case of continuous predictions, results for \emph{convex} surrogates remain a major open problem~\cite{frongillo2018elicitation}.
 
@@ -585,17 +585,18 @@ The same line segment defines a flat contained in both $\gamma_\bot$ and $\gamma
 
 
 \begin{figure}
-\begin{minipage}{0.45\linewidth}
+\begin{minipage}{0.4\linewidth}
 	\centering
 	\includegraphics[width=\linewidth]{tikz/fsd-bound.pdf}
-	\caption{Since the uniform distribution is in the relative interior of the simplex and the level set $\gamma_\bot$, its feasible subspace dimension is $2$. The distribution $p = (1/4, 1/4, 1/2)$, a blue dot, has feasible subspace dimension $1$.}
+	\caption{Since the uniform distribution is in the relative interior of the simplex and the level set $\gamma_\bot$, its feasible subspace dimension is $2$. The distribution $(1/4, 1/4, 1/2)$, blue dot, has FSD $1$.}
 	\label{fig:fsd-bound}
 \end{minipage}
 \hfill
-\begin{minipage}{0.45\linewidth}
+\begin{minipage}{0.4\linewidth}
 	\centering
 	\includegraphics[width=\linewidth]{tikz/flats-bound.pdf}
-	\caption{Any flat of codimension $1$ through the uniform distribution also leaves the (gray) cell $\gamma_\bot$ in the simplex. However, for the distribution $p = (1/4, 1/4, 1/2)$, there is a $1$ dimensional flat containing $p$ that is a subseteq of $\gamma_\bot$ and $\gamma_3$.}
+	\caption{Any flat of codimension $1$ through the uniform distribution also leaves the (gray) cell $\gamma_\bot$ in the simplex. %However, for the distribution $p = (1/4, 1/4, 1/2)$, there is a $1$ dimensional flat containing $p$ that is a subseteq of $\gamma_\bot$ and $\gamma_3$.
+	}
 	\label{fig:flats-bound}
 \end{minipage}
 \end{figure}
@@ -687,7 +688,8 @@ Bounding the prediction dimension on convex surrogate losses may yield significa
 While this work tightens bounds on the dimension of consistent surrogate losses, it does not completely characterize the dimensionality of a convex surrogate for a given problem.
 One might be able to further tighten these bounds by property elicitation by studying monotonicity and adjacency of level sets.
 In discrete predictions, these bounds might also be tightened if the equivalence of convex calibration dimension and embedding dimension of~\citet{finocchiaro2020embedding} is shown; the current embedding dimension bounds are not tight either, but additional structure is imposed by considering the embedding framework.
-Lastly, the practical reason why consistency is desired is to ensure the guarantee of empirical risk minimization (ERM) rates; however, the relationship between ERM rates and property elicitation has not been studied.
+Moreover, the practical reason why consistency is desired is to ensure the guarantee of empirical risk minimization (ERM) rates; however, the relationship between ERM rates and property elicitation has not been studied.
+Lastly, Theorem~\ref{thm:cvx-flats} relies on Minkowski sums, which have not been clearly defined for infinite $\Y$; we leave this generalization as an open question.
 \btw{Infinite $\Y$}
 
 \newpage
@@ -731,14 +733,13 @@ Lemma~\ref{lem:calib-converging-regrets} shows calibration if and only if $D$, w
 
 \begin{proposition}
 	When $\R$ is finite, a loss and link $(L, \psi)$ are calibrated with respect to a target loss $\ell$ via Definition~\ref{def:calibrated-general} if and only if calibration via Definition~\ref{def:calibrated-finite}.
-\end{proposition}
+\end{proposition}\jessiet{Okay if $\Gamma$ is empty}
 \begin{proof}
-	\jessiet{Old proof commented out; simplified using Lemma~\ref{lem:calib-converging-regrets}}
 $\implies$
 	We prove the contrapositive; if $(L, \psi)$ is not calibrated with respect to $\ell$ by Definition~\ref{def:calibrated-finite}, then it is not calibrated via Definition~\ref{def:calibrated-general} either.
-	If $(L, \psi)$ are not calibrated with respect to $\ell$ by Definition~\ref{def:calibrated-finite}, then there is a $p \in \simplex$ so that $\inf_{u : \psi(u) \not \in \gamma(p)} \exploss{L}{u}{p} = \inf_u L(u; p)$.
-	Thus there is a sequence $\{u_m\}$ so that $\lim_{m \to \infty} \psi(u_m) \not \in \gamma(p)$ and $L(u_m; p) \to \risk{L}(p)$.  
-	Now we have $R_L(u_m; p \to 0$ but $R_\ell(\psi(u_m); p) \not \to 0$, so by Lemma~\ref{lem:calib-converging-regrets}, we contradict calibration by Definition~\ref{def:calibrated-general}.
+	If $(L, \psi)$ are not calibrated with respect to $\ell$ by Definition~\ref{def:calibrated-finite}, then there is a $p \in \simplex$ so that $\inf_{u : \psi(u) \not \in \gamma(p)} \exploss{L}{u}{p} = \inf_u \exploss{L}{u}{p}$.
+	Thus there is a sequence $\{u_m\}$ so that $\lim_{m \to \infty} \psi(u_m) \not \in \gamma(p)$ and $\exploss{L}{u_m}{p} \to \risk{L}(p)$.  
+	Now we have $R_L(u_m; p) \to 0$ but $R_\ell(\psi(u_m); p) \not \to 0$, so by Lemma~\ref{lem:calib-converging-regrets}, we contradict calibration by Definition~\ref{def:calibrated-general}.
 %	
 % Commented out 05.19.2020 for easier proof if Lemma 5 is true.
 %	We prove the contrapositive; if $(L, \psi)$ is not calibrated with respect to $\ell$ by Definition~\ref{def:calibrated-finite}, then it is not calibrated via Definition~\ref{def:calibrated-general} either.
@@ -751,7 +752,7 @@ $\implies$
 
 $\impliedby$
 Suppose there was a function $\zeta$ satisfying the bound in Equation~\eqref{eq:calibrated-general} for a fixed distribution $p \in \simplex$.
-Observe the bound in Equation~\eqref{eq:calibration} can be written as $R_L(u,p) > 0$ for all $p \in \simplex$ and $u$ so that $\psi(u)$ is bounded away from $\gamma(p)$. \jessie{details correct??}
+Observe the bound in Equation~\eqref{eq:calibration} can be written as $R_L(u,p) > 0$ for all $p \in \simplex$ and $u$ such that $\psi(u)$ is bounded away from $\gamma(p)$. \jessie{details correct??}
 
 By Equation~\eqref{eq:calibrated-general}, for any sequence $\{u_m\}$ so that $\psi(u_m) \not \to \gamma(p)$, we have must have $\zeta(R_\ell(\psi(u_m), p)) \not \to 0$ as we would otherwise contradict the bound in Equation~\eqref{eq:calibrated-general} since $R_\ell(\psi(u), p) \not \to 0$. 
 Therefore $R_L(u_m, p) \not \to 0$; thus, the strict inequality holds.
@@ -794,7 +795,7 @@ Lemma~\ref{lem:calib-converging-regrets} now gives a condition equivalent to cal
 \jessie{$D \implies (A \wedge C)$}
 	Fix $p \in \simplex$, and consider $\zeta(c) := \sup_{u: R_L(u,p) \leq c} R_\ell(\psi(u); p)$.  
 	We will show $R_L(u_m; p) \to 0 \implies R_\ell(\psi(u_m); p) \to 0$ gives calibration via the function $\zeta$ constructed above. 
-	With $\zeta$ as constructed, we should that the bound in equation~\eqref{eq:calibrated-general} is satisfied for all $u \in \reals^d$ and apply Lemma~\ref{lem:continuous-iff-limits} to observe that if there is a sequence $\{\epsilon_m\} \to 0$ so that $\zeta(\epsilon_m) \not \to 0$, it is because $R_L(u_m, p) \not \to 0 \not \implies R_\ell(\psi(u_m), p) \to 0$.
+	With $\zeta$ as constructed, we observe that the bound in equation~\eqref{eq:calibrated-general} is satisfied for all $u \in \reals^d$ and apply Lemma~\ref{lem:continuous-iff-limits} to observe that if there is a sequence $\{\epsilon_m\} \to 0$ so that $\zeta(\epsilon_m) \not \to 0$, it is because $R_L(u_m, p) \not \to 0 \not\implies R_\ell(\psi(u_m), p) \to 0$.
 	
 
 \jessie{D $\implies$ C}
@@ -1062,8 +1063,11 @@ Since the cells of elicitable properties in the simplex form a power diagram~\ci
 Constructing a consistent surrogate for this task is ill-defined without Definition~\ref{def:consistent-prop}.
 The function $\propdis(r,p) = \ones\{r \not \in \Gamma(p)\}$, which satisfies the requirements of $\propdis$, now allows us to use Definition~\ref{def:consistent-prop} to think about consistent surrogates for this task.
 
-Our bounds from Theorem~\ref{thm:cvx-flats} on the distribution $p = (1/5, 3/5, 1/5)$ suggest that the convex elicitation complexity $\eliccvx(\Gamma) \geq 3 - 0 -1 = 2$, since there is no way to draw a line through $p$ while staying in just one level set on the simplex.
-This bound is the same as those given by feasible subspace dimension, but we cannot apply~\citet[Theorem 16]{ramaswamy2016convex}, which makes a statement about convex calibration dimension, since we do not have a target loss.
+Since $\Gamma$ is not elicitable, we cannot apply Theorem~\ref{thm:cvx-flats} for the distribution $p = (3/4, 1/8,1/8)$, since $\Gamma(p) = \{$rainy, snowy, sunny$\}$.
+However, our bounds from Theorem~\ref{thm:cvx-flats} on the distribution $q = (1/10, 7/10, 1/5)$, which we can apply since $\Gamma(q) = \{$snowy$\}$, suggest that the convex elicitation complexity $\eliccvx(\Gamma) \geq 3 - 0 -1 = 2$, since there is no way to draw a line through $q$ while staying in just one level set on the simplex.
+
+\citet[Theorem 16]{ramaswamy2016convex} cannot draw any conclusions about this property for two reasons that go hand in hand: first, we are given a target property instead of a target loss.
+Second, since the property is not elicitable (hence why there can be no target loss), we observe $\dim(\Sc_{\Gamma_{\text{rainy}}}(p)) \neq \dim(\Sc_{\Gamma_{\text{sunny}}}(p))$, so their result cannot be applied as~\citet[Lemma 23]{ramaswamy2016convex} does not hold.
 
 This example, although seemingly contrived, can also extend to other decision-tree-like properties that do not have an explicit or easily constructed target loss.
 
