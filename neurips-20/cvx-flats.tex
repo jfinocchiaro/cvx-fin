@@ -174,44 +174,28 @@ For continuous predictions, our lower bound gives new results for variance estim
 
 \section{Introduction}\label{sec:intro}
 
-\raf{General comment: see if you can make the intro less of an explanation to someone who has never heard of consistency, etc, and more of a ``reminder'' and recap of what's been going on in the field, culminating in the gap between what is out there and what we would like to know -- the gap that we fill}
-\raf{General style: see if you can make the writing sharper, with less passive voice.  See if you can channel some Hemmingway and boil each sentence down to the key point.}
-\jessie{Alright, I tried...}
+Surrogate risk minimization is one of the most widespread techniques in supervised machine learning.
+A surrogate loss is often necessary for one of two reasons: (1) the target loss does not satisfy some desiderata, such as convexity, or (2) the target loss may not be given at all, as is often the case in continuous estimation problems, when one instead has a target conditional statistic to estimate from training data.
+In both of these settings, a minimal requirement of a surrogate loss is \emph{consistency}, a precursor to excess risk bounds and rates.
+Roughly speaking, consistency means that minimizing surrogate risk corresponds to solving the target problem of interest:
+the target risk should also be minimized, or the average deviation to and true conditional statistic function converges to 0.
+\raft{FYI Jessie: pretty good!  I condensed and reorganized slightly, but it was basically good to go as it was}
 
-\raf{6/1/2020: The style is great.  Two minor things there: (1) if you scan the first paragraph, you'll see we mention consistency before ``defining'' it, (2) it's strange to mention a definition/contribution in the first paragraph.  Here's a sentence that might help: ``[in continuous settings], typically consistency means the average deviation from the hypothesis and the true ``regression function'' converges to 0 in probability''.  You could also state this before defining consistency, it which case you replace ``consistency means'' with ``we want a surrogate such that'' or something.}
+Motivated by structural prediction and other problems with exponentially or infinitely large label sets, we are particularly interested in the \emph{prediction dimension} of a surrogate: the dimension $d$ of its prediction space $\reals^d$.
+A natural tension arises between consistency and the prediction dimension, as consistency is always possible for a sufficiently large dimension, but a larger dimension typically increases the computational complexity of learning.
+\raft{Loved this prev sentence!  Great way to frame the issue.}
+We are therefore interested in finding consistent convex surrogates with a low prediction dimension, such as logarithmic in the number of labels, as is desired in many structured prediction problems~\cite{ramaswamy2018consistent,yu2018lovasz}\raft{any other cites?}.
+\raft{FYI Jessie: what used to be this last paragraph still didn't quite get where you want to be in terms of motivating the problem.  I'd suggest taking a careful look at the diff at some point to see what I changed and ask me if you don't see why.  Probably the biggest issue was in laying out the gap.  You often need to give more detail about what \emph{has} been done to say what hasn't.}
 
-\raf{6/1/2020: The bigger problem though is the end of my ``general comment'' above.  The intro will be much stronger if we can state the gap --- and that's a general principle which applies to almost any paper/proposal/research statement.  In our case, we need to motivate the challenge of designing/reasoning about consistency, and particularly the work on the prediction dimension.  You'll probably want another paragraph for this bit; maybe you have some text that you cut which addresses this?}
-\raf{I'd suggest stating this in this ``gap'' paragraph: ``Previous [] bounds on the [prediction dimension] of a consistent surrogate [] considered one of four settings: whether one is given a target loss or not, and whether one is making a continuous or discrete prediction.''  [Edits in []].}\jessie{A little unclear on what these comments mean, but I tried to incorporate them, assuming I interpreted them correctly.}
+While meaningful bounds on the prediction dimension have recently begun to appear, both for discrete and continuous predictions~\cite{lambert2008eliciting,ramaswamy2012classification,ramaswamy2016convex,ramaswamy2018consistent,frongillo2018elicitation}, these works have several drawbacks.
+Consistency for discrete target losses is typically studied using calibration, which though powerful and undeniably useful, can be challenging to work with, and general results about calibration are sparse.
+In the case of continuous predictions, results for \emph{convex} surrogates remain a major open problem~\cite{frongillo2018elicitation}.
 
-
-In supervised machine learning, one often makes predictions about future outcomes by minimizing a surrogate loss on training data.
-The use of a surrogate is often necessary for one of two reasons: the target loss does not satisfy some ``niceness'' conditions that we desire, or the goal is to estimate some statistic rather than minimize a target loss.
-When given a target loss, a surrogate should yield good statistical guarantees; informally, we want low surrogate risk to imply low target risk.
-%A good surrogate should yield bounds on the excess risk so that optimal predictions for the surrogate can be linked to optimal predictions for a target (possibly discrete) loss with bounded excess error, regardless of the underlying data distribution.
-%\raft{Style example: ``we want low surrogate risk to mean low target risk.''}
-Without a target loss, one typically starts with a statistic of the data they would like to estimate instead, such as the conditional expected value or an $\alpha$-quantile.
-We seek \emph{consistent} surrogates, which typically means the average deviation from the hypothesis and true ``regression function'' converges to 0 in probability.
-Consistency is important as it is a precursor to excess risk bounds and rates, and we are particularly interested in consistent \emph{and convex} surrogates.
-% in which any sequence of hypotheses converging to the optimal prediction can be linked to a sequence that converges to either the correct prediction for the discrete loss or statistic value, depending on the setting. 
-%We would also like our surrogate losses to be 
-
-Surrogate losses take predictions $u \in \reals^d$ and measure their error against observed outcomes.
-There is a natural tension between consistency and the prediction dimension $d$, as increasing the prediction dimension yields more degrees of freedom to link a surrogate prediction to the ``correct'' one in the original space, but also increases the computational expense of the problem.
-We therefore desire a consistent surrogate with a low prediction dimension, as this is one potential source of significant computational speedup.
-Prediction dimension bounds have been well-studied in the literature, typically through proxies like calibration (\S~\ref{subsec:calibration}) and property elicitation (\S~\ref{subsec:properties}).
-Consider structured prediction settings, where the number of possible outcomes can grow exponentially fast; a surrogate with logarithmic dimension can enable the optimization of otherwise expensive problems.
-%\jessiet{Adding the following two sentences: is this what you meant?}
-%While prediction dimension is a well-studied problem (\S~\ref{subsec:complexity}), previous results bounding prediction dimension only apply within very specific settings.
-Previous bounds on the prediction dimension of a consistent surrogate have been considered in isolation in one of four settings: whether one is given a target loss or not, and whether one is making a continuous or discrete prediction.
-
-\raf{I started adding to this paragraph and realized I could break it off and replace the following paragraph...}
-
-Our results make two contributions to this field.
+Our results make two contributions toward closing this gap.
 First, after introducing a general definition of consistency (\S~\ref{sec:consis-implies-indir}) which applies to all four settings mentioned above, we show that indirect property elicitation is a necessary condition for consistency in all these settings (Theorem~\ref{thm:consistent-implies-indir-elic}).
-This observation suggests property elicitation as a more powerful tool to lower bound the prediction dimension of a consistent surrogate.
-\raft{Note: convexity not needed in the first one \jessie{Rephrased this next sentence to emphasize this point.}}
-Second, when restricting our focus to consistent \emph{convex} surrogates, we state a general lower bound on the prediction dimension (Theorem~\ref{thm:cvx-flats}).
-This generalizes a calibration result of \citet{ramaswamy2016convex} to all four settings, and to our knowledge is the first such bound at this level of generality.
+As indirect elicitation is more tractable than calibration, and applies more generally, this observation suggests indirect elicitation as the better choice to study lower bounds on the prediction dimension of a consistent surrogate.
+Second, we state a general lower bound on the prediction dimension of a consistent \emph{convex} surrogate (Theorem~\ref{thm:cvx-flats}).
+Our result generalizes a calibration result of \citet{ramaswamy2016convex} to all four settings, yielding to our knowledge the most general such bound.
 
 While indirect elicitation is only a necessary condition, our bounds recover or improve upon the state of the art:
 we achieve tighter bounds than the feasible subspace dimension approach for discrete predictions~\citep{ramaswamy2016convex}, yet recover their result (Corollary~\ref{cor:fsd-bound}), and no bounds for convex surrogates were known in the continuous prediction setting~\citep{frongillo2018elicitation}.
