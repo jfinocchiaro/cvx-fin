@@ -52,7 +52,7 @@
 \newcommand{\proposedadd}[1]{\mynote{orange}{#1}}
 \newcommand{\bo}[1]{\mynote{blue}{[Bo: #1]}}
 \newcommand{\botodo}[1]{\mytodo{blue!20!white}{Bo: #1}}
-\newcommand{\btw}[1]{\mytodo{gray!20!white}{BTW: #1}}%TURN OFF FOR NOW \mytodo{gray}{#1}}
+\newcommand{\btw}[1]{\mytodo{gray!10!white}{\textcolor{gray}{BTW: #1}}}%TURN OFF FOR NOW \mytodo{gray}{#1}}
 \ifnum\Comments=1               % fix margins for todonotes
 \setlength{\marginparwidth}{1in}
 \fi
@@ -182,7 +182,7 @@ the target risk should also be minimized, or the average deviation to and true c
 
 Motivated by structural prediction and other problems with exponentially or infinitely large label sets, we are particularly interested in the \emph{prediction dimension} of a surrogate: the dimension $d$ of its prediction space $\reals^d$.
 A natural tension arises between consistency and the prediction dimension, as consistency is always possible for a sufficiently large dimension, but a larger dimension typically increases the computational complexity of learning.
-We are therefore interested in finding consistent convex surrogates with a low prediction dimension, such as logarithmic in the number of labels, as is desired in many structured prediction problems~\cite{ramaswamy2018consistent,yu2018lovasz,berman2018lovasz}\raft{any other cites? added one (from Blashko) that claims to be a tractable surrogate for Jaccard Index}.
+We are therefore interested in finding consistent convex surrogates with a low prediction dimension, such as logarithmic in the number of labels, as is desired in many structured prediction problems~\cite{ramaswamy2018consistent,yu2018lovasz,berman2018lovasz}.
 \raft{FYI Jessie: what used to be this last paragraph still didn't quite get where you want to be in terms of motivating the problem.  I'd suggest taking a careful look at the diff at some point to see what I changed and ask me if you don't see why.  Probably the biggest issue was in laying out the gap.  You often need to give more detail about what \emph{has} been done to say what hasn't.}
 
 While meaningful bounds on the prediction dimension have recently begun to appear, both for discrete and continuous predictions~\cite{lambert2008eliciting,ramaswamy2012classification,ramaswamy2016convex,ramaswamy2018consistent,frongillo2018elicitation}, these works have several drawbacks.
@@ -311,7 +311,7 @@ Finally, when multiple properties are in play, we typically denote the target pr
 
 To relate property elicitation to consistency, we need to allow for a link function, which gives rise to the notion of \emph{indirect} elicitation.
 \begin{definition}[Indirect Elicitation]\label{def:indirectly-elicits}
-	A loss and link $(L, \psi)$ \emph{indirectly elicit} a property $\gamma:\simplex \toto \R'$ if $L$ elicits a property $\Gamma: \simplex \toto \U$ such that for all $u \in \U$, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$ \jessie{and $\Gamma_u \neq \emptyset$?}.
+	A loss and link $(L, \psi)$ \emph{indirectly elicit} a property $\gamma:\simplex \toto \R'$ if $L$ elicits a property $\Gamma: \simplex \toto \U$ such that for all $u \in \U$, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$.
 	We say $L$ \emph{indirectly elicits} $\gamma$ if such a link $\psi$ exists.
 \end{definition}
 For single-valued properties, the above definition reduces to the natural requirement $\gamma = \psi \circ \Gamma$.
@@ -321,12 +321,19 @@ For single-valued properties, the above definition reduces to the natural requir
 % Instead, we lighten this restriction to say that any optimal prediction for $\Gamma$ must be linked to \emph{an} optimal prediction for $\gamma$, and we must do so deterministically. 
 
 It is straightforward to show that, for a discrete target loss $\ell$, calibration implies indirect elicitation, as perhaps first observed by \citet{agarwal2015consistent}.
-Formally, if $(L,\psi)$ is calibrated with respect to $\ell$, then $(L,\psi)$ indirectly elicits $\gamma = \prop{\ell}$.\jessiet{If $\gamma(p) = \emptyset$ fir some $p$, then calibration doesn't hold, so our concerns don't apply to this statement.}
+Formally, if $(L,\psi)$ is calibrated with respect to $\ell$, then $(L,\psi)$ indirectly elicits $\gamma = \prop{\ell}$.
 To see this, take $u\in\U$ and $p\in\Gamma_u$, implying $u\in\Gamma(p)$.
 From eq.~\eqref{eq:elic}, $\exploss{L}{u}{p} = \inf_{u'\in\U} \exploss{L}{u'}{p}$, so we must have $\psi(u) \in \gamma(p)$ from eq.~\eqref{eq:calibration}, as desired.
 %\raft{Jessie: if this argument makes sense to you, you can cut that prop in the appendix now}
 As a result, indirect elicitation in a necessary condition for consistency when given a target discrete loss.
 As we will see in \S~\ref{sec:consis-implies-indir}, it is also a necessary condition for consistency more broadly, including in all four quadrants mentioned above.
+
+An important caveat to the above definitions is that we have required $\Gamma = \prop{L}$ to be nonempty everywhere, meaning that $\exploss{L}{\cdot}{p}$ always achieves a minimum.
+\raft{Let's make sure we agree with this paragraph}
+While this condition is restrictive, and rules out several popular surrogates such as logistic and exponential loss for binary classification, these are easily rectified for example by thresholding the loss $L'(u,y) = \max(L(u,y),\epsilon)$ for sufficiently small $\epsilon>0$.
+The results in this paper are not heavily impacted by this restriction, as for example assuming $\Gamma(p) \neq \emptyset$ whenever $p\in\relint\simplex$ is strong enough to include the above examples without impacting Theorems~\ref{thm:cvx-flats} and~\ref{thm:bayes-risk-lower-bound}.
+\raft{In particular, I'm torn about whether this statement is accurate; in the sense that we can restrict to $\P\subseteq\simplex$ I think it's fair, but in the sense that calibration does not imply indirect elicitation without it, probably not}
+We expect that a generalization of property elicitation which allows for ``infinite'' predictions (e.g., along a prescribed ray), thereby ensuring a minimum is always achieved for convex losses, would allow us to lift this restriction entirely.
 \btw{Some refs / related work commented out here.  I think not as relevant as elicitation complexity.}
 
 % Property elicitation of a single property is well-understood~\citep{savage1971elicitation,osband1985information-eliciting,lambert2008eliciting, lambert2009eliciting, lambert2018elicitation}, and \citet{finocchiaro2018convex} are among the first to consider \emph{convex} elicitable properties.
