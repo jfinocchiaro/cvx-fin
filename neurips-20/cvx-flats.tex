@@ -296,7 +296,7 @@ Intuitively, $p = \Pr[Y|X=x]$ is a conditional distribution, though the definiti
 %\raft{FYI Jessie: I like this line but $D_x$ has not been defined yet \jessie{I added $D$ in the notation section and introduced it there.  Let me know if it really doesn't mesh with you, but I think it fit somewhat naturally.}}
 
 \begin{definition}[Property, elicits]
-	A \emph{property} is a set-valued function $\Gamma : \simplex \to 2^\R \setminus \emptyset$, which we denote $\Gamma: \simplex \toto \R$.
+	A \emph{property} is a set-valued function $\Gamma : \simplex \to 2^\R \setminus \{\emptyset\}$, which we denote $\Gamma: \simplex \toto \R$.
 	A loss $L : \R \times \Y \to \reals$ \emph{elicits} the property $\Gamma$ if
 	\begin{equation}
     \label{eq:elic}    
@@ -331,7 +331,8 @@ As we will see in \S~\ref{sec:consis-implies-indir}, it is also a necessary cond
 
 An important caveat to the above definitions is that we have required $\Gamma = \prop{L}$ to be nonempty everywhere, meaning that $\exploss{L}{\cdot}{p}$ always achieves a minimum.
 \raft{Let's make sure we agree with this paragraph}
-While this condition is restrictive, and rules out several popular surrogates such as logistic and exponential loss for binary classification, these are easily rectified for example by thresholding the loss $L'(u,y) = \max(L(u,y),\epsilon)$ for sufficiently small $\epsilon>0$.
+While this condition technically rules out several popular surrogates such as logistic and exponential loss for binary classification, these can be included for example by thresholding the loss $L'(u,y) = \max(L(u,y),\epsilon)$ for sufficiently small $\epsilon>0$.
+\botodo{work on ``heavily impacted''}
 The results in this paper are not heavily impacted by this restriction, as for example assuming $\Gamma(p) \neq \emptyset$ whenever $p\in\relint\simplex$ is strong enough to include the above examples without impacting Theorems~\ref{thm:cvx-flats} and~\ref{thm:bayes-risk-lower-bound}.
 \raft{In particular, I'm torn about whether this statement is accurate; in the sense that we can restrict to $\P\subseteq\simplex$ I think it's fair, but in the sense that calibration does not imply indirect elicitation without it, perhaps not.}
 We expect that a generalization of property elicitation which allows for ``infinite'' predictions (e.g., along a prescribed ray), thereby ensuring a minimum is always achieved for convex losses, would allow us to lift this restriction entirely.
@@ -447,7 +448,7 @@ When noting that some properties are not elicitable, including the variance, Lem
 We now show this necessity directly.
 
 \begin{theorem}\label{thm:consistent-implies-indir-elic}
-	If a surrogate and link pair $(L, \psi)$ is consistent with respect to a property $\gamma$ or loss $\ell$ eliciting $\gamma$, then $(L, \psi)$ indirectly elicits $\gamma$.
+	\botodo{Assume L is minnable}If a surrogate and link pair $(L, \psi)$ is consistent with respect to a property $\gamma$ or loss $\ell$ eliciting $\gamma$, then $(L, \psi)$ indirectly elicits $\gamma$.
 \end{theorem}
 \begin{proof}
 %  \raft{Maybe ref the consistency definition here explicitly, at the top and the end}
@@ -482,25 +483,21 @@ In particular, we will often use $\affhull(\simplex) = \{\sum_{i=1}^n \alpha_i p
 
 A hyperplane weakly separates two sets if its two closed halfspaces respectively contain the two sets.
 \begin{lemma}\label{lem:intersect-levelsets}
-  If $\gamma: \simplex \toto \R$ is an elicitable property, then for any pair of predictions $r \neq r' \in \R$, there is a hyperplane $H = \{p : v \cdot p = 0\}$ that weakly separates both $\gamma_r$ and $\gamma_{r'}$ with $\gamma_r \cap \gamma_{r'} \subseteq H$.
+  If $\gamma: \simplex \toto \R$ is an elicitable property, then for any pair of predictions $r, r' \in \R$ where $\gamma_r \neq \gamma_{r'}$, there is a hyperplane $H = \{x \in \reals^{\Y} : v \cdot x = 0\}$, for some $v \in \reals^\Y$, that weakly separates both $\gamma_r$ and $\gamma_{r'}$ with $\gamma_r \cap H = \gamma_{r'} \cap H = \gamma_r \cap \gamma_{r'}$.
 \end{lemma}
 \begin{proof}
   Because $\gamma$ is elicitable, its level sets are closed convex bounded sets.\bo{cite}
   Note that if the intersection $\gamma_r \cap \gamma_{r'} = \emptyset$, then the separating hyperplane theorem already gives an $H$ that strictly separates the two sets, in particular, $\gamma_r \cap \gamma_{r'}$.
 
-  \bo{Not finished - Sketch next. I don't know if we can appeal to something, but here's my approach to proceed.}
+  Suppose $\gamma$ is elicited by $\ell$.
+  Let $v = \ell(r, \cdot) - \ell(r', \cdot)$, interpreted as a vector in $\reals^\Y$.
+  Let $H = \{ q : v \cdot q = 0 \}$.
+  If $v \cdot q < 0$, then $r'$ cannot be optimal, so $q \not\in \gamma_{r'}$.
+  So $\gamma_{r'} \subseteq \{ q : v \cdot q \geq 0 \}$.
+  Symmetrically, $\gamma_r \subseteq \{ q : v \cdot q \leq 0 \}$.
 
-  \bo{Approach 1}
-
-  Each level set corresponds to a report $r$, which corresponds to a supporting hyperplane $h_r$ of the epigraph of the Bayes risk, where $\gamma_r$ is the set of points above which $h_r$ supports $\epi(\ellbar)$.\bo{cite...?}
-  So $\gamma_r \cap \gamma_{r'}$ is the set of points at which both $h_r$ and $h_{r'}$ support $\epi(\ellbar)$.
-  \bo{Idea: use properties of hyperplanes from here...not sure how exactly}
-
-  \bo{Approach 2}
-
-  First, we claim $\gamma_r$ and $\gamma_{r'}$ are either equal, or have disjoint relative interiors. \bo{True?}
-
-  If not equal, then the intersection is on the relative boundary of both of them, which since they're convex should give a weakly separating hyperplane.
+  Finally, if and only if $v \cdot q = 0$, i.e. $q \in H$, by definition the expected losses of both reports are the same.
+  So $q \in \gamma_r \cap H \iff q \in \gamma_{r'} \cap H$.
 \end{proof}
 
 \begin{lemma}\label{lem:set-valued-prop-flats}
@@ -508,13 +505,16 @@ A hyperplane weakly separates two sets if its two closed halfspaces respectively
 	Then for any flat $F$ containing $p$, $F \cap \simplex \subseteq \gamma_r \iff F \cap \simplex \subseteq \gamma_{r'}$.
 \end{lemma}
 \begin{proof}
+  If $\gamma_r = \gamma_{r'}$, we are done.
+  Otherwise:
   First, by Lemma \ref{lem:intersect-levelsets}, $\gamma_r \cap \gamma_{r'}$ is a closed convex subset of a hyperplane that weakly separates $\gamma_r$ and $\gamma_{r'}$.
   Let it be parameterized by the unit vector $v \in \reals^{\Y}$, where $\gamma_r \subseteq \{ q \in \simplex : v \cdot q \leq 0 \}$, while $\gamma_{r'} \subseteq \{ q \in \simplex : v \cdot q \geq 0\}$, and $q \in \gamma_r \cap \gamma_{r'} \implies v \cdot q = 0$.
 
-  Now, we prove the equivalent claim $F \cap \simplex \subsetneq \gamma_r \iff F \cap \simplex \subsetneq \gamma_{r'}$.
-  Suppose $F \cap \simplex$ has a point $q$ not in $\gamma_r$.
-  If $v \cdot q < 0$, then $q$ is already not in $\gamma_{r'}$, QED.
-  Otherwise, we claim that $p - \epsilon (q-p) \in F \cap \simplex$ for small enough $\epsilon$.
+  \bo{Also get that only points in hyperplane are in the intersection}
+  Now take a point $q \in \gamma_r \setminus \gamma_{r'}$ (WLOG, swapping roles if necessay).
+  By containment in $\gamma_r$, we have $v \cdot q \leq 0$.
+  Then $v \cdot q < 0$, because if $q$ is in the hyperplane and in $\gamma_r$, then it is in $\gamma_{r'}$.
+  Now we claim that $p - \epsilon (q-p) \in F \cap \simplex$ for small enough $\epsilon$.
   Containment in $F$ follows because both $p$ and $q$ are in $F$ and it is a flat, while containment in $\simplex$ follows because $p \in \relint\simplex$.
   But $v \cdot (p - \epsilon (q-p)) = -\epsilon (v \cdot q) < 0$, so $q$ is not in $\gamma_{r'}$, QED.
 \end{proof}
@@ -528,6 +528,18 @@ Then if $L: \reals^d \times \Y \to \reals$ indirectly elicits $\gamma$, there is
 %	If there is a convex surrogate loss $L : \reals^d \times\Y \to \reals$ indirectly eliciting $\gamma$, then for all $p \in \simplex$ and $r \in \R$ such that $r \in \gamma(p)$, there is a flat $F \subseteq \affhull(\simplex)$ of codimension at most $d$ such that $F \cap \simplex \subseteq \gamma_r$ and $p \in F$.
 \end{theorem}
 \begin{proof}
+
+%	There is some u in Gamma(p). (Gamma nonempty.)
+%	Gamma_u contains a big ol flat F.
+%
+%	Let r' = psi(u).
+%	Hence gamma_{r'} contains F.
+%	If singleton, we know r' = r, so done.
+%	Otherwise, elicitable and p in relint.
+%	If r' = r, done. Otherwise:
+%	We can apply Lemma 3: p is in gamma_r cap gamma_{r'}, F contains p and is in gamma_{r'}.
+%	So F is also in gamma_r.
+
 	Let $\Gamma := \prop{L}$ and suppose $(L, \psi)$ indirectly elicits $\gamma$, so that for all $u \in \reals^d$, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$.
 	We now claim there is some $u \in \Gamma(p)$ with $\psi(u) = r$.
 	First, if $|\gamma(p)| = 1$, then any $u \in \Gamma(p)$ must link to $r$ as we contradict indirect elicitation otherwise; we would have $p \in \Gamma_u$ but $p \not \in \gamma_{\psi(u)}$.
