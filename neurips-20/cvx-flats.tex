@@ -215,7 +215,6 @@ For these reasons, we advocate for indirect elicitation as a tractable and more 
 \section{Background and Related work}\label{sec:related-work}
 
 We consider supervised learning problems in the space $\X \times \Y$, for some \emph{feature space} $\X$ and a finite \emph{label space} $\Y$, with data drawn from a distribution $D$ over $\X \times \Y$.
-\raft{Added: $\Y$ is always finite for us.  Reminds me: we should state infinite $\Y$ as a major open problem}
 The task is to produce a hypothesis $f: \X \to \R$, for some \emph{prediction space} $\R$, which may be different from $\Y$.
 For example, in ranking problems $\R$ may be all $n!$ permutations over the $n$ labels forming $\Y$.
 As we focus heavily on conditional distributions $D_x = \Pr[Y|X=x]$ over $\Y$ given some $x \in X$, we often abstract away $x$, working directly with probability simplex $\simplex$, the set of all distributions over $\Y$.
@@ -343,8 +342,7 @@ We expect that a generalization of property elicitation which allows for ``infin
 
 \subsection{Prediction dimension and elicitation complexity}\label{subsec:complexity}
 
-Various works have studied the minimum prediction dimension $d$ needed in order to construct a consistent surrogate loss $L: \reals^d \times \Y \to \reals$, typically through proxies such as calibration~\citep{agarwal2015consistent,ramaswamy2016convex}
-\raft{no other cites?  AA15 sort of counts I think} and property elicitation~\citep{frongillo2015vector-valued,fissler2016higher,frongillo2018elicitation}.
+Various works have studied the minimum prediction dimension $d$ needed in order to construct a consistent surrogate loss $L: \reals^d \times \Y \to \reals$, typically through proxies such as calibration~\citep{agarwal2015consistent,ramaswamy2016convex} and property elicitation~\citep{frongillo2015vector-valued,fissler2016higher,frongillo2018elicitation}.
 %\raft{Nice!  Love ``proxies'' here.}
 In the case of a discrete target loss, \citet{ramaswamy2016convex} introduce \emph{convex calibration dimension}, the minimum prediction dimension yielding a convex calibrated surrogate.
 Their results has led to the design of consistent convex surrogates for discrete prediction problems such as hierarchical classification~\citep{ramaswamy2015hierarchical} and classification with an abstain option~\citep{ramaswamy2018consistent}.
@@ -429,7 +427,8 @@ If $\gamma$ is a property elicited by a target loss $\ell$, then taking $\propdi
   $\mu(r,p) := R_\ell(r,p)$.
   Then
 	$(L, \psi)$ is consistent with respect to $\ell$ if and only if $(L,\psi)$ is $\propdis$-consistent with respect to $\gamma := \prop{\ell}$.
-\end{lemma}\btw{Don't \emph{need} $\prop{\ell}$ nonempty/nondegenerate here.}
+  \btw{Note: don't actually $\gamma$ nonempty here.}
+\end{lemma}
 \begin{proof}
 	First, observe that $\propdis(r,p) = 0 \iff \exploss{\ell}{r}{p} = \inf_{r' \in \R} \exploss{\ell}{r'}{p} \iff r \in \gamma(p)$.
 	Now suppose $(L, \psi)$ are consistent with respect to $\ell$, and take any sequence $\{f_m\}$ of measurable hypotheses.
@@ -480,8 +479,8 @@ In particular, we will often use $\affhull(\simplex) = \{\sum_{i=1}^n \alpha_i p
 \end{definition}
 
 \begin{lemma}\label{lem:set-valued-prop-flats}
-	Suppose we are given an elicitable property $\gamma : \simplex \toto \R$ and distribution $p \in \simplex$\jessie{relint?} with reports $r,r' \in \R$ with $p \in \gamma_r \cap \gamma_{r'}$.
-	Then for any flat $F$ containing $p$, $F \subseteq \gamma_r \implies F \subseteq \gamma_{r'}$.
+	Suppose we are given an elicitable property $\gamma : \simplex \toto \R$ and distribution $p \in \relint\simplex$ such that $p \in \gamma_r \cap \gamma_{r'}$ for $r,r' \in \R$.
+	Then for any flat $F$ containing $p$, $F \subseteq \gamma_r \iff F \subseteq \gamma_{r'}$.
 \end{lemma}
 \begin{proof}
 	
@@ -522,28 +521,12 @@ We now show that this bound follows relatively directly from Theorem \ref{thm:cv
 \citet{ramaswamy2016convex} construct what they call the subspace of feasible dimensions and give bounds in terms of its dimension.
 \begin{definition}[Subspace of feasible directions]\label{def:subspace-feas}
 	The \emph{subspace of feasible directions} $\Sc_\C(p)$ of a convex set $\C \subseteq \reals^n$ at a point $p \in \C$ is the subspace $\Sc_\C(p) = \{ v \in \reals^n : \exists \epsilon_0 > 0 $ such that $p + \epsilon v \in \C \; \forall \epsilon \in (-\epsilon_0,\epsilon_0) \}$.
-%  \raf{Let's simplify to $\epsilon \in (-\epsilon_0,\epsilon_0)$}
 \end{definition}
 
-%\bo{Jessie, if you have time, could you move everything but the corollary statement to the appendix, then (below the corollary statement) flesh out something like the following proof sketch? if you are pressed for time, let me know and I'll take a crack at it!
-%\begin{itemize}
-%  \item First consider $p \in \relint{\simplex}$.
-%  \item If there is a codimension-$d$ flat in the level set containing $p$, then the feasible subspace definitely has dimension at least as large as the flat.
-%  \item The completes the proof for $p \in \relint{\simplex}$ (explaining how Theorem 2 applies).
-%  \item For other $p$, we show that the feasible subspace dimension is the same relative to the simplex on $\supp(p)$. Meanwhile any flat containing $p$ has only smaller codimension relative to $\supp{p}$. This extends the proof to this case.
-%\end{itemize}
-%} % END BO COMMENT
-%\raf{Would also like to mention how our proof is shorter, even factoring in all the lemmas and theorem 2, since we don't have to deal with the infimum in calibration (the eplisons in their proof) and cut straight to the exact minimizers.}\jessie{took a crack at it and made a note}
-
-\botodo{Felt like most of the proof details here would overlap unnecessarily with the proof sketch itself.}
-%We regain the bounds provided by~\citet[Theorem 16]{ramaswamy2016convex}, but have to do a little bit of groundwork to translate from our Theorem~\ref{thm:cvx-flats} and their result, restated in Corollary~\ref{cor:fsd-bound}.
-%First, in Lemma~\ref{lem:feas-sub-is-a-flat}, we show that, for a fixed $p$ and prediction $r$ so that $r \in \gamma(p)$, the feasible subspace $\Sc_{\gamma_r}(p)$ is a flat satisfying the requirements of Theorem~\ref{thm:cvx-flats}.
-%Therefore, we have the dimension of $\Sc_{\gamma_r}(p)$ being upper bounded by $d$, at least for $p \in \relint{\simplex}$. 
-
 It turns out that the subspace of feasible directions is, roughly, a special case of a flat described by Theorem~\ref{thm:cvx-flats}.
-\botodo{Avoided mentioning the lemma, since it's not in the main body.}
 This allows us to prove the bound of \citet{ramaswamy2016convex}, Corollary~\ref{cor:fsd-bound}, in a shorter and (in our opinion) simpler way.
 Due to the infimum in the definition of calibration, the original proof requires careful taking of sequences and the approximate subdifferentials, while indirect elicitation allows us to work with exact minimizers of the surrogate.
+\raft{Revisit this sentence!}
 
 \begin{restatable}[\citep{ramaswamy2016convex}]{corollary}{hariresult}\label{cor:fsd-bound}
 	Suppose we are given a discrete loss $\ell:\R \to \reals^\Y_+$ eliciting $\gamma$.
@@ -627,7 +610,7 @@ Extending to infinite $\Y$, such as $\Y=\reals$, remains open.
 % \end{definition}
 
 In the proof of Theorem~\ref{thm:bayes-risk-lower-bound} below, we modify the argument of~\citet[Corollary 7]{frongillo2018elicitation} to bound the convex elicitation complexity of the Bayes risk of the loss.
-\btw{Raf Note to self: need to sync the refs to the actual version on arxiv... or something...}
+\raft{Note to self: need to sync the refs to the actual version on arxiv... or something...}
 %\begin{restatable}{theorem}{bayesrisklowerbound}\label{thm:bayes-risk-lower-bound}
 \begin{restatable}{theorem}{bayesrisklowerbound}\label{thm:bayes-risk-lower-bound}
   Let $L$ elicit some $\Gamma:\simplex\to\reals^d$.
@@ -688,7 +671,7 @@ While this work tightens bounds on the dimension of consistent surrogate losses,
 One might be able to further tighten these bounds by property elicitation by studying monotonicity and adjacency of level sets.
 In discrete predictions, these bounds might also be tightened if the equivalence of convex calibration dimension and embedding dimension of~\citet{finocchiaro2020embedding} is shown; the current embedding dimension bounds are not tight either, but additional structure is imposed by considering the embedding framework.
 Lastly, the practical reason why consistency is desired is to ensure the guarantee of empirical risk minimization (ERM) rates; however, the relationship between ERM rates and property elicitation has not been studied.
-\btw{Infinite $\Y$}
+\raft{Infinite $\Y$}
 
 \newpage
 
@@ -733,7 +716,7 @@ Lemma~\ref{lem:calib-converging-regrets} shows calibration if and only if $D$, w
 	When $\R$ is finite, a loss and link $(L, \psi)$ are calibrated with respect to a target loss $\ell$ via Definition~\ref{def:calibrated-general} if and only if calibration via Definition~\ref{def:calibrated-finite}.
 \end{proposition}
 \begin{proof}
-	\jessiet{Old proof commented out; simplified using Lemma~\ref{lem:calib-converging-regrets}}
+	\btw{Old proof commented out; simplified using Lemma~\ref{lem:calib-converging-regrets}}
 $\implies$
 	We prove the contrapositive; if $(L, \psi)$ is not calibrated with respect to $\ell$ by Definition~\ref{def:calibrated-finite}, then it is not calibrated via Definition~\ref{def:calibrated-general} either.
 	If $(L, \psi)$ are not calibrated with respect to $\ell$ by Definition~\ref{def:calibrated-finite}, then there is a $p \in \simplex$ so that $\inf_{u : \psi(u) \not \in \gamma(p)} \exploss{L}{u}{p} = \inf_u L(u; p)$.
@@ -816,7 +799,9 @@ Then for all $\epsilon > 0$, there exists a $m' \in \mathbb{N}$ so that $R_L(u_m
 Since this is true for all $\epsilon$, we have $S(\epsilon)$ nonempty for all $\epsilon > 0$, and therefore $\zeta(c)$ is discrete for all $c > 0$.
 Now if $\zeta(\epsilon_m) \not \to 0$, it must be because $R_\ell(\psi(u_m), p) \not \to 0$ for some sequence converging to zero surrogate regret, and therefore we contradict the statement $R_L(u_m, p) \to 0 \implies R_\ell(\psi(u_m), p) \to 0$.
 
-Moreover, we argue that such a sequence of $\{u_m\}$ with converging surrogate regret always exists by continuity and boundedness from below \jessiet{really just need lower semi-continuity and boundedness from below} of the surrogate loss, since we can take the constant sequence at the (attained) infimum.
+Moreover, we argue that such a sequence of $\{u_m\}$ with converging surrogate regret always exists by continuity and boundedness from below of the surrogate loss,
+\btw{really just need lower semi-continuity and boundedness from below}
+since we can take the constant sequence at the (attained) infimum.
 %
 %\jessie{$D \implies A$, but actually $\lnot B \wedge C \implies \lnot D$}
 %Fix $p \in \simplex$.
@@ -833,15 +818,12 @@ Moreover, we argue that such a sequence of $\{u_m\}$ with converging surrogate r
 Even with the more general notion of calibration that extends beyond discrete predictions, we still have consistency implying calibration.
 \begin{proposition}\label{prop:consistent-implies-calibrated}
 	If a loss and link $(L, \psi)$ are consistent with respect to a loss $\ell$, then they are calibrated with respect to $\ell$.
-	\jessiet{Probably appendix later; also, should this be a lemma instead of a proposition?}
-	%  \raft{Do we define ``continuous loss''?  Maybe ``(not necessarily discrete)'' is clearer.}
 \end{proposition}
 \begin{proof}
 	We show the contrapositive.
 	If $(L, \psi)$ are not calibrated with respect to $\ell$, then there is a sequence $\{u_m\}$ such that $R_L(u_m; p) \to 0$ but $R_\ell(\psi(u_m); p) \not \to 0$ via Lemma~\ref{lem:calib-converging-regrets}.
 	Suppose $D \sim \X \times\Y$ has only one $x \in \X$ with $Pr_D(X = x) > 0$ so that $p := D_x$ and $\E_D f(X,Y) = \E_p f(x, Y)$.
 	Consider any sequence of functions $\{f_m\} \to f$ with $f_m(x) = u_m$ for all $f_m$.
-	\raft{Type error with $D=D_x$; see AA15 for how they phrase \jessie{better?}}
 	Now we have $\E_D L(f_m(X), Y) \to \inf_f \E_D L(f(X), Y)$, but $\E_D \ell(\psi \circ f(X), Y) \not \to \inf_f \E_D \ell(\psi \circ f(X), Y)$, and therefore $(L, \psi)$ is not calibrated with respect to $\ell$.
 \end{proof}
 
@@ -851,6 +833,7 @@ Moreover, we have calibration implying indirect elicitation.
 \end{lemma}
 \begin{proof}
 	Let $\Gamma$ be the unique property directly elicited by $L$, and fix $p \in \simplex$ with $u$ such that $p \in \Gamma_u$.
+  \raft{Use $\Gamma(p) \neq \emptyset$ here!}
 	As $p \in \Gamma_u$, then $\zeta(\exploss{L}{u}{p} - \risk{L}(p)) = \zeta(0) = 0$, we observe the bound $\ell(\psi(u); p) \leq \risk{\ell}(p)$.
 	We also have $\ell(\psi(u); p) \geq \risk{\ell}(p)$ by definition of $\risk{\ell}$, so we must have $\ell(\psi(u);p) = \risk{\ell}(p) = \ell(\gamma(p); p)$, and therefore, $p \in \gamma_{\psi(u)}$.
 	Thus, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$, so $L$ indirectly elicits $\gamma$.
@@ -952,7 +935,6 @@ The next result helps us generalize Lemma~\ref{lem:feas-sub-is-a-flat} to any $p
 
 \subsection{Proof of Theorem~\ref{thm:bayes-risk-lower-bound}}
 
-\btw{Bo: I assume this will go to the appendix}
 \begin{lemma}[\citep{frongillo2018elicitation}]
 	\label{lem:elic-complex-bayes-concave}
 	Suppose the loss $L$ elicits $\Gamma:\simplex\to\R$.
