@@ -481,23 +481,25 @@ In particular, we will often use $\affhull(\simplex) = \{\sum_{i=1}^n \alpha_i p
 	The codimension of $F$ (relative to $\affhull(\simplex)$) is given by $\codim(F)=\mathrm{rank}(W)$, and the dimension of $F$ is $n - \mathrm{rank}(W) - 1$.
 \end{definition}
 
+\botodo{Decide how much stays versus goes to the appendix, and write in explanations/sketches.}
+
 A hyperplane weakly separates two sets if its two closed halfspaces respectively contain the two sets.
 \begin{lemma}\label{lem:intersect-levelsets}
-  If $\gamma: \simplex \toto \R$ is an elicitable property, then for any pair of predictions $r, r' \in \R$ where $\gamma_r \neq \gamma_{r'}$, there is a hyperplane $H = \{x \in \reals^{\Y} : v \cdot x = 0\}$, for some $v \in \reals^\Y$, that weakly separates both $\gamma_r$ and $\gamma_{r'}$ with $\gamma_r \cap H = \gamma_{r'} \cap H = \gamma_r \cap \gamma_{r'}$.
+  If $\gamma: \simplex \toto \R$ is an elicitable property, then for any pair of predictions $r, r' \in \R$ where $\gamma_r \neq \gamma_{r'}$, there is a hyperplane $H = \{x \in \reals^{\Y} : v \cdot x = 0\}$, for some $v \in \reals^\Y$, that weakly separates $\gamma_r$ and $\gamma_{r'}$ and has $\gamma_r \cap H = \gamma_{r'} \cap H = \gamma_r \cap \gamma_{r'}$.
 \end{lemma}
 \begin{proof}
-  Because $\gamma$ is elicitable, its level sets are closed convex bounded sets.\bo{cite}
-  Note that if the intersection $\gamma_r \cap \gamma_{r'} = \emptyset$, then the separating hyperplane theorem already gives an $H$ that strictly separates the two sets, in particular, $\gamma_r \cap \gamma_{r'}$.
-
-  Suppose $\gamma$ is elicited by $\ell$.
-  Let $v = \ell(r, \cdot) - \ell(r', \cdot)$, interpreted as a vector in $\reals^\Y$.
+  \btw{Bo: the proof holds as written for the case where the level sets have empty intersection.}
+  Let $\ell$ elicit $\gamma$.
+  Let $v = \ell(r, \cdot) - \ell(r', \cdot)$, interpreted as a nonzero vector in $\reals^\Y$.
   Let $H = \{ q : v \cdot q = 0 \}$.
   If $v \cdot q < 0$, then $r'$ cannot be optimal, so $q \not\in \gamma_{r'}$.
   So $\gamma_{r'} \subseteq \{ q : v \cdot q \geq 0 \}$.
   Symmetrically, $\gamma_r \subseteq \{ q : v \cdot q \leq 0 \}$.
+  This is weak separation, and it immediately implies that $\gamma_r \cap \gamma_{r'} \subseteq H$.
 
   Finally, if and only if $v \cdot q = 0$, i.e. $q \in H$, by definition the expected losses of both reports are the same.
   So $q \in \gamma_r \cap H \iff q \in \gamma_{r'} \cap H$.
+  This gives $\gamma_r \cap H = \gamma_{r'} \cap H = \gamma_r \cap \gamma_{r'} \cap H = \gamma_r \cap \gamma_{r'}$.
 \end{proof}
 
 \begin{lemma}\label{lem:set-valued-prop-flats}
@@ -506,17 +508,20 @@ A hyperplane weakly separates two sets if its two closed halfspaces respectively
 \end{lemma}
 \begin{proof}
   If $\gamma_r = \gamma_{r'}$, we are done.
-  Otherwise:
-  First, by Lemma \ref{lem:intersect-levelsets}, $\gamma_r \cap \gamma_{r'}$ is a closed convex subset of a hyperplane that weakly separates $\gamma_r$ and $\gamma_{r'}$.
-  Let it be parameterized by the unit vector $v \in \reals^{\Y}$, where $\gamma_r \subseteq \{ q \in \simplex : v \cdot q \leq 0 \}$, while $\gamma_{r'} \subseteq \{ q \in \simplex : v \cdot q \geq 0\}$, and $q \in \gamma_r \cap \gamma_{r'} \implies v \cdot q = 0$.
+  Otherwise, Lemma \ref{lem:intersect-levelsets} gives a hyperplane $H = \{ x \in \reals^\Y : v \cdot x = 0\}$ and a guarantee that $\gamma_r \subseteq \{ q \in \simplex : v \cdot q \leq 0\}$, while $\gamma_{r'} \subseteq \{ q \in \simplex : v \cdot q \geq 0 \}$, and finally $\gamma_r \cap \gamma_{r'} \subseteq H$.
 
-  \bo{Also get that only points in hyperplane are in the intersection}
-  Now take a point $q \in \gamma_r \setminus \gamma_{r'}$ (WLOG, swapping roles if necessay).
-  By containment in $\gamma_r$, we have $v \cdot q \leq 0$.
-  Then $v \cdot q < 0$, because if $q$ is in the hyperplane and in $\gamma_r$, then it is in $\gamma_{r'}$.
-  Now we claim that $p - \epsilon (q-p) \in F \cap \simplex$ for small enough $\epsilon$.
+  Suppose $F \cap \simplex \subseteq \gamma_r$.
+  We show $F \cap \simplex \subseteq \gamma_{r'}$.
+  Let $q \in F \cap \simplex$.
+  We claim that for small enough $\epsilon$, the point $q' = p - \epsilon (q-p)$ is in $F \cap \simplex$ as well.
   Containment in $F$ follows because both $p$ and $q$ are in $F$ and it is a flat, while containment in $\simplex$ follows because $p \in \relint\simplex$.
-  But $v \cdot (p - \epsilon (q-p)) = -\epsilon (v \cdot q) < 0$, so $q$ is not in $\gamma_{r'}$, QED.
+
+  Now, suppose for contradiction that $q \not\in \gamma_{r'}$.
+  Then $v \cdot q < 0$: containment in $\gamma_r$ gives $v \cdot q \leq 0$, and if $v \cdot q = 0$ then $q \in \gamma_r \cap H \implies q \in \gamma_{r'}$, a contradiction.
+  But, noting that $p \in H$, we have $v \cdot q' = -\epsilon (v \cdot q) > 0$, so $q'$ is not in $\gamma_{r}$.
+  This contradicts the assumption $F \cap \simplex \subseteq \gamma_r$.
+  Therefore, we must have $q \in \gamma_{r'}$, so we have shown $F \cap \simplex \subseteq \gamma_{r'}$.
+  Because $r$ and $r'$ were completely symmetric, this completes the proof.
 \end{proof}
 
 We now state our lower bound.
