@@ -171,7 +171,7 @@
 Given a prediction task, understanding when one can and cannot design a consistent convex surrogate loss, particularly a low-dimensional one, is an important and active area of machine learning research. 
 While calibration has historically been used to reason about consistency, we propose indirect property elicitation as an alternative necessary condition for a surrogate loss to be consistent. 
 Motivated by structured prediction and other domains where the prediction dimension of the surrogate is of central importance, we give a novel lower bound on the prediction dimension. 
-Our lower bound tightens existing results in the case of discrete predictions, namely the feasible subspace dimension, showing that previous work implicitly relied on calibration essentially \raf{Tried ``essentially''} only via property elicitation. 
+Our lower bound tightens existing results in the case of discrete predictions, namely the feasible subspace dimension, showing that previous calibration-based bounds can largely be recovered purely via property elicitation.
 For continuous predictions, our lower bound gives new results for variance estimation as well as the estimation of entropy and norms of the conditional distribution.
 \end{abstract}
 
@@ -184,7 +184,7 @@ Roughly speaking, consistency means that minimizing surrogate risk corresponds t
 the target risk should also be minimized, or the average deviation to the true conditional statistic function converges to 0.
 
 Motivated by structural prediction and other problems with exponentially or infinitely large label sets, we are particularly interested in the \emph{prediction dimension} of a surrogate: the dimension $d$ of its prediction space $\reals^d$.
-A natural tension arises between consistency and the prediction dimension, as consistency is always possible for a sufficiently large dimension, but a larger dimension typically increases the computational\botodo{and sample?}\raft{I think so, but not sure -- you'd probably know better} complexity of learning.
+A natural tension arises between consistency and the prediction dimension, as consistency is always possible for a sufficiently large dimension, but a larger dimension can increase the computational and sample complexity of learning.
 We are therefore interested in finding consistent convex surrogates with a low prediction dimension, such as logarithmic in the number of labels, as is desired in many structured prediction problems~\cite{ramaswamy2018consistent,yu2018lovasz,berman2018lovasz}.
 %\raft{FYI Jessie: what used to be this last paragraph still didn't quite get where you want to be in terms of motivating the problem.  I'd suggest taking a careful look at the diff at some point to see what I changed and ask me if you don't see why.  Probably the biggest issue was in laying out the gap.  You often need to give more detail about what \emph{has} been done to say what hasn't.}
 
@@ -336,12 +336,9 @@ The close connection between indirect elicitation and calibration was first expl
 In particular, calibration of $L \in \L$ with respect to $\ell$ implies indirect elicitation quite directly: take $u\in\U$ and $p\in\Gamma_u$, implying $u\in\Gamma(p)$.
 From eq.~\eqref{eq:elic}, $\exploss{L}{u}{p} = \inf_{u'\in\U} \exploss{L}{u'}{p}$, so we must have $\psi(u) \in \gamma(p)$ from eq.~\eqref{eq:calibration}, as desired.
 As a result, indirect elicitation in a necessary condition for consistency in this case; \S~\ref{sec:consis-implies-indir} will extend this to all four quadrants mentioned above.
-\botodo{Somewhere, we need to credit AA15 for Thm 9 and Cor 10. \jessie{Did this under elicitation complexity section}}
 
 An important caveat to the above definitions is that we have required $\Gamma = \prop{L}$ to be nonempty everywhere, meaning that $\exploss{L}{\cdot}{p}$ always achieves a minimum.
-\raft{Let's make sure we agree with this paragraph}
 While this condition technically rules out several popular surrogates such as logistic and exponential loss for binary classification, these can be included for example by thresholding the loss $L'(u,y) = \max(L(u,y),\epsilon)$ for sufficiently small $\epsilon>0$.
-\botodo{work on ``heavily impacted''}
 The results in this paper are not heavily impacted by this restriction, as for example assuming $\Gamma(p) \neq \emptyset$ whenever $p\in\relint\simplex$ is strong enough to include the above examples without impacting Theorems~\ref{thm:cvx-flats} and~\ref{thm:bayes-risk-lower-bound}.
 \raft{In particular, I'm torn about whether this statement is accurate; in the sense that we can restrict to $\P\subseteq\simplex$ I think it's fair, but in the sense that calibration does not imply indirect elicitation without it, perhaps not.}\jessiet{If we define the property only on $\P \subseteq \simplex$ where $\Gamma$ is nonempty, calibration over $\P$ should hold, though, right?}
 We expect that a generalization of property elicitation which allows for ``infinite'' predictions (e.g., along a prescribed ray), thereby ensuring a minimum is always achieved for convex losses, would allow us to lift this restriction entirely.
@@ -489,17 +486,17 @@ Theorem \ref{thm:cvx-flats} will show that if $d$ is small, then the level set $
 But by definition of indirect elicitation, there is some level set $\gamma_r$ (where $u$ is linked to $r$) containing this flat as well.
 The point of this result is the contrapositive: if $\gamma$ has a level set intricate enough to not contain any high-dimensional flats, then $\gamma$ cannot have a low-dimensional consistent surrogate.
 
-We now define flats formally.
+We now define flats formally. Recall $\affhull(\simplex) = \{\sum_{i=1}^n \alpha_i p_i : p_i \in \simplex, \alpha_i \in \reals, \sum_{i=1}^n \alpha_i = 1\}$, which has dimension $n-1$.
 %Recall that the affine hull is the set of all linear combinations whose coefficients sum to 1.
 %In particular, we will often use \footnote{Recall $\affhull(\simplex) = \{\sum_{i=1}^n \alpha_i p_i : p_i \in \simplex, \alpha_i \in \reals, \sum_{i=1}^n \alpha_i = 1\}$, which has dimension $n-1$.}\jessiet{Space suggestion: move terse version of this to footnote.}
 \begin{definition}[Flat]\label{def:flat}
-	A \emph{flat} $F \subseteq \affhull(\simplex)$\footnote{Recall $\affhull(\simplex) = \{\sum_{i=1}^n \alpha_i p_i : p_i \in \simplex, \alpha_i \in \reals, \sum_{i=1}^n \alpha_i = 1\}$, which has dimension $n-1$.} $\subseteq \reals^n$ is a nonempty set $F = \ker W \cap \affhull(\simplex)$ for some $W\in\reals^{d\times n}$ where $d\leq n$.
+	A \emph{flat} $F \subseteq \affhull(\simplex)$ $\subseteq \reals^n$ is a nonempty set $F = \ker W \cap \affhull(\simplex)$ for some $W\in\reals^{d\times n}$ where $d\leq n$.
 	The codimension of $F$ (relative to $\affhull(\simplex)$) is given by $\codim(F)=\mathrm{rank}(W)$, and the dimension of $F$ is $n - \mathrm{rank}(W) - 1$.
 \end{definition}
 
 We now state our elicitation lower bound, Theorem \ref{thm:cvx-flats}.
-By combining with Theorem \ref{thm:consistent-implies-indir-elic}, it will be used to imply consistency bounds.
 \botodo{Added comparison to AA15; please proofread!\jessie{looks good to me}}
+By combining with Theorem \ref{thm:consistent-implies-indir-elic}, it will be used to imply consistency bounds.
 A result of a similar flavor is \citet[Theorem 9]{agarwal2015consistent}, which lower-bounds the affine dimension of level sets of $\prop{L}$.
 Theorem \ref{thm:cvx-flats} gives a more powerful criterion, namely containment of flats of certain dimension in the level sets, and this is needed to give good bounds for some of our examples.
 Theorem \ref{thm:cvx-flats} also gives a lower bound for any given target $\ell$ or $\gamma$, rather than a given surrogate $L$ (although an analogous implication of their Theorem 9 may have been known to \citet{agarwal2015consistent}).
