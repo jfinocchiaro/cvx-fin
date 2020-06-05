@@ -553,45 +553,53 @@ As we show next, the original statement of~\citet[Theorem 16]{ramaswamy2016conve
 
 \section{Discrete-valued predictions}\label{sec:finite-calib}
 
-The main known technique for lower bounds on surrogate dimensions is given by \citet{ramaswamy2016convex} for the quadrant of a target loss with discrete predictions.
-We now show that this bound follows relatively directly from Theorem \ref{thm:cvx-flats}.
+The main known technique for lower bounds on surrogate dimensions is given by \citet{ramaswamy2016convex} for the quadrant of a target loss and discrete predictions.
+The proof heavily builds around the ``limits of sequences'' structure of the definition of calibration.
+We now show that, by restricting slightly to the broad class of minimizable losses $\L$, their bound follows relatively directly from Theorem \ref{thm:cvx-flats}.\footnote{We conjecture, as an intriguing open problem, that even this restriction can be lifted and the bound of \citet{ramaswamy2016convex} can be entirely recovered via indirect elicitation lower bounds; perhaps by generalizing the definition of indirect elicitation to apply to non-minimizable losses in some way.}
 %\citet{ramaswamy2016convex} give lower bounds on the convex calibration dimension, or equivalently the dimension of a convex and consistent surrogate\jessiet{should probably cite the original calibration iff consistent in discrete setting result; have it earlier in the paper now. \bo{Ideally we've explained the connection earlier and don't need to say it here.}}, by constructing what they call the subspace of feasible dimensions and giving bounds in terms of its dimension.
 \citet{ramaswamy2016convex} construct what they call the subspace of feasible dimensions and give bounds in terms of its dimension.
 \begin{definition}[Subspace of feasible directions]\label{def:subspace-feas}
 	The \emph{subspace of feasible directions} $\Sc_\C(p)$ of a convex set $\C \subseteq \reals^n$ at a point $p \in \C$ is the subspace $\Sc_\C(p) = \{ v \in \reals^n : \exists \epsilon_0 > 0 $ such that $p + \epsilon v \in \C \; \forall \epsilon \in (-\epsilon_0,\epsilon_0) \}$.
 \end{definition}
 
+\citet{ramaswamy2016convex} gives a lower bound on the dimensionality of all convex surrogates, i.e. $\ccdim(\ell) \geq \|p\| - \dim(\Sc_{\gamma_r}(p)) - 1$ for all $p$ and $r \in \gamma(p)$.
 It turns out that the subspace of feasible directions is, roughly, a special case of a flat described by Theorem~\ref{thm:cvx-flats}.
-This allows us to prove the bound of \citet{ramaswamy2016convex}, Corollary~\ref{cor:fsd-bound}, in a shorter and (in our opinion) simpler way.
+So, by making a slight restriction to the class of minimizable convex surrogates $\L$, we can derive this lower bound from our general technique in a way that we find shorter and simpler.
 Due to the infimum in the definition of calibration, the original proof requires careful taking of sequences and the approximate subdifferentials, while indirect elicitation allows us to work with exact minimizers of the surrogate.
-\raft{Revisit this sentence!}
-%\jessiet{``of surrogates attaining their infimum''?}
-\jessiet{Bo's suggested story in meeting: We gave up generality to get a nice clean proof}
+\raft{Revisit this sentence! \bo{Visited, had fun, bought the t-shirt.}}
 
 \begin{restatable}[\citep{ramaswamy2016convex}]{corollary}{hariresult}\label{cor:fsd-bound}
-	Suppose we are given a discrete loss $\ell:\R \to \reals^\Y_+$ eliciting $\gamma$.
-	Take $p \in \simplex$ and $r \in \R$ such that $p \in \gamma_r$.
+	Let $\ell:\R \to \reals^\Y_+$ be a discrete loss eliciting $\gamma$, and let $L \in \L_d$ be a minimizable consistent convex surrogate for $\ell$ with prediction space $\reals^d$.
+	Then for all $p \in \simplex$ and $r \in \gamma(p)$,
 	\begin{equation}
-	\ccdim(\ell) \geq \|p\|_0 - \dim(\Sc_{\gamma_r}(p)) - 1~.~
-	\end{equation}\jessiet{TODO: add minnability}
+	  d \geq \|p\|_0 - \dim(\Sc_{\gamma_r}(p)) - 1~.~
+	\end{equation}\jessiet{TODO: add minnability\bo{Tried!}}
+%% Bo: old version, Jun 4 7pm
+%%	Suppose we are given a discrete loss $\ell:\R \to \reals^\Y_+$ eliciting $\gamma$.
+%%	Take $p \in \simplex$ and $r \in \R$ such that $p \in \gamma_r$.
+%%	\begin{equation}
+%%	\ccdim(\ell) \geq \|p\|_0 - \dim(\Sc_{\gamma_r}(p)) - 1~.~
+%%	\end{equation}\jessiet{TODO: add minnability\bo{Tried!}}
 \end{restatable}
 \begin{proof}[Proof sketch]
+	\btw{Bo: rearranged the statements here a little, I felt the previous version required the reader to keep a bit more in their head.}
 	First, consider some $p \in \relint{\simplex}$ for intuition.
-	Observe that $\Sc_{\gamma_r}(p) + p$ is a flat containing $p$ in $\affhull(\simplex)$, and moreover that  $\Sc_{\gamma_r}(p) + p \subseteq \gamma_r$.
-	As Theorem~\ref{thm:cvx-flats} guarantees the existence of a flat $F'$ of codimension at most $d$, we know that $d \geq \codim(F') \geq \codim(\Sc_{\gamma_r}(p)) = n- \dim(\Sc_{\gamma_r}(p)) - 1$.
-	Thus, we have $\dim(\Sc_{\gamma_r}(p)) \geq n - d - 1$, thus completing the proof for $p \in \relint{\simplex}$.
+	Theorem~\ref{thm:cvx-flats} guarantees the existence of a flat $F$ of dimension at least $n-d-1$ with $p \in F$ and $F \cap \simplex \subseteq \gamma_r$.
+	For $p \in \relint{\simplex}$, this implies that $\Sc_{\gamma_r}(p) \supseteq F - p$.
+	Thus, we have $\dim(\Sc_{\gamma_r}(p)) \geq n - d - 1$, completing the proof for $p \in \relint{\simplex}$.
 	
-	When $p \not \in \relint{\simplex}$, we can loosely ``project down'' to the subsimplex on the support of $p$ and modify $L$ and $\ell$ so that the feasible subspace dimension on this modified space is the same relative to the subsimplex.
-	Any flat containing $p$ in the original simplex can only have smaller codimension relative to $\reals^{\supp(p)}$, where $\supp(p):=\{y\in\Y:p_y > 0\}$ is the support of $p$.
-	We can now apply Theorem~\ref{thm:cvx-flats} on the modified space; the dimension $\dim(\Sc_{\gamma_r}(p)) = \|p\|_0 - \codim(\Sc_{\gamma_r}(p)) - 1$ yields the bound.
+	\btw{Bo: also rewrote this a bit; I hope it still sounds good?}
+	When $p \not \in \relint{\simplex}$, we can loosely ``project down'' to the subsimplex on the support of $p$ and modify $L$ and $\ell$ accordingly.
+	Now $p$ is in the relative interior of this subsimplex, so the above result gives that $\dim(\Sc_{\gamma_r}(p)) \geq \|p\|_0 - d - 1$, where the feasible subspace dimension is relative to $\reals^{\supp(p)}$.
+	Finally, we observe that the feasible subspace dimension in the projected space is the same as in the original space because of $p$'s location on a face of $\simplex$.
 \end{proof}
 
 \paragraph{Example: High-confidence classification.}\label{subsec:examples-finite}
 There are some cases where the bound provided by Theorem~\ref{thm:cvx-flats} is strictly tighter than the bound provided by feasible subspace dimension in Corollary~\ref{cor:fsd-bound}.
-For an example of how Theorem~\ref{thm:cvx-flats} applies to a given discrete target loss, we defer the reader to Appendix~\ref{app:omitted-examples}. 
-When given a target loss, we can consider the \emph{abstain property} of~\citet{ramaswamy2018consistent} over 3 outcomes where one wishes to predict the most likely outcome $y$ if $Pr[Y=y|x] \geq 1/2$ and abstains from predicting ($\bot$) otherwise.
+For an example of how Theorem~\ref{thm:cvx-flats} applies to a discrete property for which there is no target loss -- a non-elicitable property, i.e. a quadrant not considered by \citet{ramaswamy2018consistent} -- we refer the reader to Appendix~\ref{app:omitted-examples}. 
+When given a target loss, we can consider the \emph{abstain property} of~\citet{ramaswamy2018consistent} over 3 outcomes where one wishes to predict the most likely outcome $y$ if $Pr[Y=y|x] \geq 1/2$ and ``abstain'' by predicting $\bot$ otherwise.
 This is elicited by the target loss $\ell^{abs}(r,y) := \mathbbm{1}\{r \not \in \{y, \bot\}\} + (1/2)\mathbbm{1}\{r = \bot\}$. 
-We can consider two different distributions; in the first, our bound yields a strict gap over the feasible subspace dimension bound, and in the second, the bounds are equal.
+To lower bound the dimension of convex surrogates, we can consider two different distributions; in the first, our bound yields a strict gap over the feasible subspace dimension bound, and in the second, the bounds are equal.
 First, we choose $p$ to be the uniform distribution (black dot in Figures~\ref{fig:fsd-bound} and~\ref{fig:flats-bound}).
 In this case, the bound by feasible subspace dimension yields $\ccdim(\ell^{abs}) \geq 3 - 2 - 1 = 0$, as the feasible subspace dimension is $2$ since we are on the relative interior of the level set and simplex, as shown in Figure~\ref{fig:fsd-bound}.
 %% Bo: resolved on Jun 1, afternoon
