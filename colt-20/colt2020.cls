@@ -18,7 +18,7 @@
 
 \LoadClass[pmlr]{jmlr}
 
-\jmlrvolume{vol {TBD}}
+\jmlrvolume{vol 125}
 \jmlryear{2020}
 \jmlrproceedings{PMLR}{Proceedings of Machine Learning Research}
 
