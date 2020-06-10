@@ -190,8 +190,9 @@ Nevertheless, nonsmooth losses, such as the polyhedral losses we consider, have 
 A notable addition to this literature is~\citet{ramaswamy2018consistent}, who argue that nonsmooth losses may enable dimension reduction of the prediction space (range of the surrogate hypothesis) relative to smooth losses, illustrating this conjecture with a surrogate for \emph{abstain loss} needing only $\log n$ dimensions for $n$ labels, whereas the best known smooth loss needs $n-1$.
 Their surrogate is a natural example of an embedding (cf.~Section~\ref{sec:abstain}), and serves as inspiration for our work.
 
-While property elicitation has by now an extensive literature~\cite{savage1971elicitation,osband1985information-eliciting,lambert2008eliciting,gneiting2011making,steinwart2014elicitation,frongillo2015vector-valued,fissler2016higher,lambert2018elicitation}\raft{others? already a bit much...}, these works are mostly concerned with point estimation problems.
-Literature directly connecting property elicitation to consistency is sparse, with the main reference being~\citet{agarwal2015consistent}; note however that they consider single-valued properties, whereas properties elicited by general convex losses are necessarily set-valued.\jessiet{It might be a little more subtle than that; \cite{agarwal2015consistent} does have a section on set-valued properties IIRC}
+While property elicitation has by now an extensive literature~\citep{savage1971elicitation,osband1985information-eliciting,lambert2008eliciting,gneiting2011making,steinwart2014elicitation,frongillo2015vector-valued,fissler2016higher,lambert2018elicitation}\raft{others? already a bit much...}, these works are mostly concerned with point estimation problems.
+Literature directly connecting property elicitation to consistency is sparse, with the main reference being~\citet{agarwal2015consistent}; note however that they consider single-valued properties in finite outcome settings, whereas properties elicited by general convex losses are necessarily set-valued.
+\citet{finocchiaro2020indirect}\jessiet{neurips 2020 paper; might need to throw on arxiv if we want this ref.} additionally relates indirect property elicitation to consistency in finite outcome settings when one is given either a target loss or property in both discrete and continuous prediction settings, assuming surrogates attain their infimum.
 
 % \citet{agarwal2015consistent} and~\citet{ramaswamy2016convex} study the existence of convex surrogates; the latter proves lower bounds on dimensionality of hypothesis spaces for e.g.~0-1 loss via their notion of feasible subspace dimension.
 %   These works are generally not directly comparable to our results, as they do not consider the embedding method.
@@ -211,7 +212,6 @@ After introducing notation, and terminology from property elicitation, we thus g
 Let $\Y$ be a finite outcome (label) space, and throughout let $n=|\Y|$.
 The set of probability distributions on $\Y$ is denoted $\simplex\subseteq\reals^{\Y}$, represented as vectors of probabilities.
 We write $p_y$ for the probability of outcome $y \in \Y$ drawn from $p \in \simplex$.
-\raft{ADDED}
 We first discuss the conditional setting, with just labels $\Y$ and no features $\X$, and show in Section~\ref{sec:links-embeddings} how these notions relate to the usual $\X\times\Y$ setting.
 
 We assume that a given discrete prediction problem, such as classification, is given in the form of a \emph{discrete loss} $\ell:\R\to\reals^\Y_+$, which maps a report (prediction) $r$ from a finite set $\R$ to the vector of loss values $\ell(r) = (\ell(r)_y)_{y\in\Y}$ for each possible outcome $y\in\Y$.
@@ -236,8 +236,7 @@ A convex function $f:\reals^d\to\reals$ is \emph{polyhedral} if its epigraph is 
 \end{definition}
 %
 For example, hinge loss is polyhedral, whereas logistic loss is not.
-\raft{ADDED}
-To motivate our focus on polyhedral losses, we echo Ramaswamy et al.~\cite[Section 1.2]{ramaswamy2018consistent}, who note that smooth surrogates often encode much more information than necessary, and in these cases non-smooth surrogates are the only candidates to achieve a low input dimension $d$ above.
+To motivate our focus on polyhedral losses, we echo~\citet[Section 1.2]{ramaswamy2018consistent}, who note that smooth surrogates often encode much more information than necessary, and in these cases non-smooth surrogates are the only candidates to achieve a low input dimension $d$ above.
 
 \subsection{Property Elicitation}
 \label{sec:property-elicitation}
@@ -254,7 +253,7 @@ See the discussion following Definition~\ref{def:elicits} for conventions regard
 \end{definition}
 
 Intuitively, $\Gamma(p)$ is the set of reports which should be optimal for a given distribution $p$, and $\Gamma_r$ is the set of distributions for which the report $r$ should be optimal.
-\btw{Finite property note commented out}%(Note that our definitions align such that discrete losses elicit finite properties; both are non-redundant in the correct senses.)
+(Note that our definitions align such that discrete losses elicit finite properties; both are non-redundant in the correct senses.)
 For example, the \emph{mode} is the %finite
 property $\mode(p) = \argmax_{y\in\Y} p_y$, and captures the set of optimal reports for 0-1 loss: for each distribution over the labels, one should report the most likely label.
 In this case we say 0-1 loss \emph{elicits} the mode, as we formalize below.
@@ -280,9 +279,7 @@ For general properties and losses, we will also use $\Gamma$ and $L$, as above.
 \label{sec:links-embeddings}
 
 To assess whether a surrogate and link function align with the original loss, we turn to the common condition of \emph{calibration}.
-Roughly, a surrogate and link are calibrated if the best possible expected loss achieved by linking to an incorrect report is strictly suboptimal.
-\btw{Separated stuff commented out}
-% , which require that the excess loss of some report is bounded by (a constant times) the excess loss of the linked report.
+Roughly, a surrogate and link are calibrated if the best possible expected loss achieved by linking to an incorrect report is strictly suboptimal, which require that the excess loss of some report is bounded by (a constant times) the excess loss of the linked report.
 
 % \begin{definition}[Consistency]\label{def:consistency}
 %   A surrogate $L:\reals^d\to\reals^\Y_+$ and link $\psi:\reals^d\to\R$ is \emph{consistent} with a discrete loss $\ell:\R\to\reals^\Y_+$ if \raf{statement about distributions on $\X\times\Y$, limits of hypotheses, and Bayes opt hypotheses}
@@ -313,7 +310,9 @@ Given feature space $\X$, fix a distribution $D \in \Delta(\X\times\Y)$.
 Let $L^*$ be the best possible expected $L$-loss achieved by any hypothesis $H:\X\to\reals^d$, and $\ell^*$ the best expected $\ell$-loss for any hypothesis $h:\X\to\R$, respectively.
 Then $(L,\psi)$ is consistent if a sequence of surrogate hypotheses $H_1,H_2,\ldots$ whose $L$-loss limits to $L^*$, then the $\ell$-loss of $\psi\circ H_1,\psi \circ H_2, \ldots$ limits to $\ell^*$.
 As Definition~\ref{def:calibrated} does not involve the feature space $\X$, we will drop it for the remainder of the paper.
-\proposedadd{Note that in the finite-outcome setting, calibration is necessary and sufficient for consistency from a generalization of~\cite{tewari2007consistency}.  While our notion of embedding is sufficient for calibration (and therefore consistency), it is worth noting that it is not \emph{necessary} for these conditions.  For example, while logistic loss does not embed $0-1$ loss, the surrogate and link for logistic loss are consistent with respect to $0-1$ loss.}
+Note that in the finite-outcome setting, calibration is necessary and sufficient for consistency from a generalization of~\cite{tewari2007consistency}.  
+While our notion of embedding is sufficient for calibration (and therefore consistency), it is worth noting that it is not \emph{necessary} for these conditions.  
+For example, while logistic loss does not embed 0-1 loss, the surrogate and link for logistic loss are consistent with respect to 0-1 loss.
 
 Several consistent convex surrogates in the literature can be thought of as ``embeddings'', wherein one maps the discrete reports to a vector space, and finds a convex loss which agrees with the original loss.
 A key condition is that the original reports should be optimal exactly when the corresponding embedded points are optimal.
