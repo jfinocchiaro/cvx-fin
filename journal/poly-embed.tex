@@ -185,6 +185,7 @@ thus giving a very general framework to construct consistent convex surrogates f
 %We conclude with preliminary results in higher dimensions and other future directions.
 
 \paragraph{Related works.}
+\jessiet{Add note about precision vs recall~\citep{menon2019multilabel} and $F_\beta$ measure~\citep{zhang2020convex}.}
 The literature on convex surrogates focuses mainly on smooth surrogate losses~\citep{crammer2001algorithmic,bartlett2006convexity,bartlett2008classification, duchi2018multiclass, williamson2016composite, reid2010composite}.
 Nevertheless, nonsmooth losses, such as the polyhedral losses we consider, have been proposed and studied for a variety of classification-like problems~\citep{yang2018consistency,yu2018lovasz,lapin2015top}.
 A notable addition to this literature is~\citet{ramaswamy2018consistent}, who argue that nonsmooth losses may enable dimension reduction of the prediction space (range of the surrogate hypothesis) relative to smooth losses, illustrating this conjecture with a surrogate for \emph{abstain loss} needing only $\log(n)$ dimensions for $n$ labels, whereas the best known smooth loss needs $n-1$ dimensions.
@@ -426,7 +427,7 @@ This useful fact will drive many of our results.
   Letting $\U := \varphi(\R)$, define $\gamma':\simplex \toto \U$ by $\gamma' : p \mapsto \Gamma(p)\cap \U$.
   To see that $\gamma'(p) \neq \emptyset$ for all $p\in\simplex$, note that by the definition of $\gamma$ as the property elicited by $\ell$ we have some $r \in \gamma(p)$, and by the embedding condition~\eqref{eq:embed-loss}, $\varphi(r) \in \Gamma(p)$.
   By Lemma~\ref{lem:loss-restrict}, we see that $L|_{\U}$ (the loss $L$ with reports restricted to $\U$) elicits $\gamma'$ and $\risk{L} = \risk{L|_{\U}}$.
-  As $L(\varphi(\cdot)) = \ell(\cdot)$ by the embedding, we have
+  As $L(\varphi(\cdot)) = \ell(\cdot)$ by embedding condition (i), we have
   \begin{equation*}
     \risk{\ell}(p) = \min_{r \in \R}\inprod{p}{\ell(r)} = \min_{r \in \R}\inprod{p}{L(\varphi(r))} = \min_{u \in \U}\inprod{p}{L(u)} = \risk{L|_\U}(p)~,
   \end{equation*}
@@ -437,14 +438,29 @@ This useful fact will drive many of our results.
   For the reverse implication, assume that $\risk{L} = \risk{\ell}$.
   In what follows, we implicitly work in the affine hull of $\simplex$ \proposedadd{by projecting into $\reals^{n-1}$}, so that interiors are well-defined, and $\risk{\ell}$ may be differentiable on the (relative) interior of $\simplex$.
   Since $\ell$ is discrete, $-\risk{\ell}$ is polyhedral as the pointwise maximum of a finite set of linear functions.
-  The projection of its epigraph $E_\ell$ onto $\simplex$ forms a power diagram by Theorem~\ref{thm:aurenhammer}, whose cells are full-dimensional and correspond to the level sets $\gamma_r$ of $\gamma = \prop{\ell}$.
+%  Moreover, consider the linear transformation $P: \ell \mapsto [\mathbb{I}_{n-1}, \vec 0] \risk{\ell}$ projecting $\risk{\ell}$ down to $n-1$ dimensions.
+  The projection of its epigraph $E_{\ell}$ onto $\simplex$ forms a power diagram by Theorem~\ref{thm:aurenhammer}, whose cells are full-dimensional (in $n$ dimensions) and correspond to the level sets $\gamma_r$ of $\gamma = \prop{\ell}$.
 
-  For each $r\in\R$, let $p_r$ be a distribution in the interior of $\gamma_r$, and let $u_r \in \Gamma(p)$.
+  For each $r\in\R$, let $p_r$ be a distribution in the relative interior of $\gamma_r$, and let $u_r \in \Gamma(p)$.
   Observe that, by definition of the Bayes risk and $\Gamma$, for all $u\in\reals^d$ the hyperplane $v \mapsto \inprod{v}{-L(u_r)}$ supports the epigraph $E_L$ of $-\risk{L}$ at the point $(p,-\inprod{p}{L(u)})$ if and only if $u\in\Gamma(p)$.
   Thus, the hyperplane $v \mapsto \inprod{v}{-L(u_r)}$ supports $E_L = E_\ell$ at the point $(p_r,-\inprod{p_r}{L(u_r)})$, and thus does so at the entire facet $\{(p,-\inprod{p}{L(u_r)}) : p\in\gamma_r\}$; by the above, $u_r \in \Gamma(p)$ for all such distributions as well.
   We conclude that $u_r \in \Gamma(p) \iff p \in \gamma_r \iff r \in \gamma(p)$, satisfying condition~\eqref{eq:embed-loss} for $\varphi : r \mapsto u_r$.
   To see that the loss values match, we merely note that the supporting hyperplanes to the facets of $E_L$ and $E_\ell$ are the same, and the loss values are uniquely determined by the supporting hyperplane.
   (In particular, if $h$ supports the facet corresponding to $\gamma_r$, we have $\ell(r)_y = L(u_r)_y = h(\delta_y)$, where $\delta_y$ is the point distribution on outcome $y$.)
+  
+%  \btw{RF: This is on the informal side, mostly because of the ``working in the affine hull'' bit.  It can all be formalized though, probably should be for the journal version: just take an appropriate linear projection of $\reals^n$ to $\reals^{n-1}$, and work with the projected versions of everything, and then project back.}
+%  For the reverse implication, assume that $\risk{L} = \risk{\ell}$.
+%  In what follows, we implicitly work in the affine hull of $\simplex$ \proposedadd{by projecting into $\reals^{n-1}$}, so that interiors are well-defined, and $\risk{\ell}$ may be differentiable on the (relative) interior of $\simplex$.
+%  \proposedadd{Formally, we work with $L' := P(L)$ and $\ell' := P(\ell)$, where $P:\reals^n \to \reals^{n-1}$ is the linear transformation given by $[\mathbb{I}_{n-1}, \vec 0]$, taking the first $n-1$ components of $L$ and $\ell$, respectively.}
+%  Since $\ell$ is discrete,\proposedadd{ so is $\ell'$, and thus} $-\risk{\ell}$ is polyhedral as the pointwise maximum of a finite set of linear functions.
+%  The projection of its epigraph $E_\ell$ onto $\simplex$ forms a power diagram by Theorem~\ref{thm:aurenhammer}, whose cells are full-dimensional and correspond to the level sets $\gamma_r$ of $\gamma = \prop{\ell}$.
+%  
+%  For each $r\in\R$, let $p_r$ be a distribution in the interior of $\gamma_r$, and let $u_r \in \Gamma(p)$.
+%  Observe that, by definition of the Bayes risk and $\Gamma$, for all $u\in\reals^d$ the hyperplane $v \mapsto \inprod{v}{-L(u_r)}$ supports the epigraph $E_L$ of $-\risk{L}$ at the point $(p,-\inprod{p}{L(u)})$ if and only if $u\in\Gamma(p)$.
+%  Thus, the hyperplane $v \mapsto \inprod{v}{-L(u_r)}$ supports $E_L = E_\ell$ at the point $(p_r,-\inprod{p_r}{L(u_r)})$, and thus does so at the entire facet $\{(p,-\inprod{p}{L(u_r)}) : p\in\gamma_r\}$; by the above, $u_r \in \Gamma(p)$ for all such distributions as well.
+%  We conclude that $u_r \in \Gamma(p) \iff p \in \gamma_r \iff r \in \gamma(p)$, satisfying condition~\eqref{eq:embed-loss} for $\varphi : r \mapsto u_r$.
+%  To see that the loss values match, we merely note that the supporting hyperplanes to the facets of $E_L$ and $E_\ell$ are the same, and the loss values are uniquely determined by the supporting hyperplane.
+%  (In particular, if $h$ supports the facet corresponding to $\gamma_r$, we have $\ell(r)_y = L(u_r)_y = h(\delta_y)$, where $\delta_y$ is the point distribution on outcome $y$.)
 \end{proof}
 
 %\btw{RF: matching risks is not necessary for \emph{consistency}, as evidenced by logistic loss for 0-1 loss.  Maybe we should just make the observation, earlier on, that \emph{embedding} is not necessary for consistency. \jessie{Added a few sentences above, when talking about consistency vs calibration.}}
@@ -529,8 +545,13 @@ Note however that the number of dimensions $d$ required could be as large as $|\
   \end{align*}
   It remains to show $L(u)_y \geq 0$ for all $u\in\reals^n$, $y\in\Y$.
   Letting $\delta_y\in\simplex$ be the point distribution on outcome $y\in\Y$, we have for all $u\in\reals^n$, $L(u)_y \geq \inf_{u'\in\reals^n} L(u')_y = \risk{L}(\delta_y) = \risk{\ell}(\delta_y) \geq 0$, where the final inequality follows from the nonnegativity of $\ell$.
-  \btw{FUTURE: to get $n-1$, just use the same trick as before and note that the Bayes risk doesn't change.  Should be a couple lines.  (Not needed for NeurIPS since we don't focus on the dimension.)}
+  \btw{FUTURE: to get $n-1$, just use the same trick as before and note that the Bayes risk doesn't change.  Should be a couple lines.}
 \end{proof}
+
+\proposedadd{Moreover, to construct an embedding of dimension $n-1$ instead of $n$ (see~\citet{finocchiaro2020embedding} for significance of dimension),  we use the same trick as in the proof of Proposition~\ref{prop:embed-bayes-risks}.
+For $p \in \simplex$, consider $p_{-n}$ to be the first $n-1$ coordinates of $p$ identically projected into $n-1$ dimensional space subject to the affine constraint $\sum_y p_y = 1$, so that $p_n = 1 - \sum_{y=1}^{n-1} p_y$. 
+Take $L' : \reals^{n-1} \to \reals^\Y$ defined by $u \mapsto (-\ell')^*(u) \ones - u$, where $\ell'$ is $\ell$ projected into $n-1$ dimensions as in Proposition~\ref{prop:embed-bayes-risks}, so that $\inprod{\ell}{p} = \ell'(p_{-n})$ for all $p \in \simplex$.
+The Bayes risks $\risk{L}(p)$ and $\risk{L'}(p_{-n})$ are equal for all $p \in \simplex$; thus, the result holds in $n-1$ dimensions as well.}
 
 %\btw{Cut summary for now (Why is this cool?)}
 %\jessiet{Jessie: added a bit to say why this is cool.}
@@ -975,9 +996,11 @@ A key step in the following definition will be to narrow down a ``link envelope'
 \btw{FUTURE: we should comment in the discussion section that we probably can show that *any* loss embedding $\ell$ must be polyhedral-ish, meaning polyhedral except for stuff that is never optimal.  This theorem would then not need the ``polyhedral'' part. This is related to the ``convex envelope conjucture'', that if $L$ embeds $\ell$ via $\varphi$, you can just take the loss $L'$ such that $L_y$ is the convex envelope of points $\{(\varphi(r),L(r)_y)\}_{r\in\R}$.}
 \btw{FUTURE: This prop and theorem give an excellent reason to focus on embeddings, since other techniques do not necessarily give you separated links for free.  Since we know we get them for free, we can just focus on the property, and study elicitation complexity; we know if we have a link at all it can be taken to be separated.  [[Is this true?]]}
 
+
+
 Note that the construction given above in Definition~\ref{def:eps-thick-link} is not necessarily computationally efficient as the number of labels $n$ grows.
 In practice this potential inefficiency is not typically a concern, as the family of losses typically has some closed form expression in terms of $n$, and thus the construction can proceed at the symbolic level.
-We illustrate this formulaic approach in Section~\ref{sec:abstain}.
+We illustrate this formulaic approach in \S~\ref{sec:abstain}.
 % \proposedadd{In general, we are not overly concerned with the computational complexity of computing the surrogate and link, since these calculations only need to be computed once.  They are generally derived mathematically, rather than computationally.  These symbolic calculations typically tend to be straightforward, but can sometimes be tricky.}
 
 
@@ -1297,6 +1320,10 @@ This leaves the question of embedding dimension open for the hierarchical surrog
 This paper formalizes an intuitive way to design convex surrogate losses for classification-like problems---by embedding the reports into $\reals^d$.
 We establish a close relationship between embeddings and polyhedral surrogates, showing both that every polyhedral loss embeds a discrete loss (Theorem~\ref{thm:poly-embeds-discrete}) and that every discrete loss is embedded by some polyhedral loss (Theorem~\ref{thm:discrete-loss-poly-embeddable}).
 We then construct a calibrated link function from any polyhedral loss to the discrete loss it embeds, giving consistency for all such losses (Theorem~\ref{thm:eps-thick-calibrated}).
+In fact, we conjecture that \emph{any} loss embedding a discrete $\ell$ must be polyhedral on the convex hull of the embedded reports. 
+(The convex hull of the embedded reports follows since any point not in the convex hull will never minimize the expected loss.)
+Since discrete losses have a finite set of reports, and in turn, minimizers, any surrogate embedding the discrete loss must also have a finite set of unique minimizers.
+This is in turn related to another conjecture about the ``convex envelope'' of embeddings: if $L$ embeds $\ell$ by the embedding $\varphi$, the (polyhedral) surrogate $L'$ such that $L'_y$ is the convex envelope of $\{(\varphi(r),L(r)_y)\}_{r\in\R}$ also embeds $\ell$.
 We conclude with examples of how the embedding framework presented can be applied to understand existing surrogates in the literature, including those for the abstain loss, top-$k$ loss, and Lov\'asz hinge.
 In particular, our link construction recovers the link function proposed by~\citet{ramaswamy2018consistent} for abstain loss, as well as another simpler link based on the $L_1$ norm.
 
