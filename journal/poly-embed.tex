@@ -185,8 +185,7 @@ thus giving a very general framework to construct consistent convex surrogates f
 %We conclude with preliminary results in higher dimensions and other future directions.
 
 \paragraph{Related works.}
-\jessiet{Add note about precision vs recall~\citep{menon2019multilabel} and $F_\beta$ measure~\citep{zhang2020convex}.}
-The literature on convex surrogates focuses mainly on smooth surrogate losses~\citep{crammer2001algorithmic,bartlett2006convexity,bartlett2008classification, duchi2018multiclass, williamson2016composite, reid2010composite}.
+The literature on convex surrogates focuses mainly on smooth surrogate losses~\citep{crammer2001algorithmic,bartlett2006convexity,bartlett2008classification, duchi2018multiclass, williamson2016composite, reid2010composite,menon2019multilabel,zhang2020convex}.
 Nevertheless, nonsmooth losses, such as the polyhedral losses we consider, have been proposed and studied for a variety of classification-like problems~\citep{yang2018consistency,yu2018lovasz,lapin2015top}.
 A notable addition to this literature is~\citet{ramaswamy2018consistent}, who argue that nonsmooth losses may enable dimension reduction of the prediction space (range of the surrogate hypothesis) relative to smooth losses, illustrating this conjecture with a surrogate for \emph{abstain loss} needing only $\log(n)$ dimensions for $n$ labels, whereas the best known smooth loss needs $n-1$ dimensions.
 Their surrogate is a natural example of an embedding (cf.~\S~\ref{sec:abstain}), and serves as inspiration for our work.
@@ -194,7 +193,7 @@ Their surrogate is a natural example of an embedding (cf.~\S~\ref{sec:abstain}),
 While property elicitation has by now an extensive literature~\citep{savage1971elicitation,osband1985information-eliciting,lambert2008eliciting,gneiting2011making,steinwart2014elicitation,frongillo2015vector-valued,fissler2016higher,lambert2018elicitation}, these works are mostly concerned with point estimation problems.
 Literature directly connecting property elicitation to consistency is sparse.
 However,~\citet{agarwal2015consistent} consider single-valued properties in finite outcome settings, whereas finite properties elicited by general convex losses are necessarily set-valued.
-\citet{finocchiaro2020indirect}\jessiet{neurips 2020 paper; might need to throw on arxiv if we want this ref.} additionally relates indirect property elicitation to consistency in finite outcome settings when one is given either a target loss or property in both discrete and continuous prediction settings, assuming surrogates attain their infimum.
+\citet{finocchiaro2020indirect}\jessiet{neurips 2020 paper; might need to throw on arxiv if we want this ref.} additionally relates indirect property elicitation to consistency in finite outcome settings when one is given either a target loss or property in both discrete and continuous prediction settings, assuming surrogates attain their infimum in expectation over all distributions over the outcomes.
 
 % \citet{agarwal2015consistent} and~\citet{ramaswamy2016convex} study the existence of convex surrogates; the latter proves lower bounds on dimensionality of hypothesis spaces for e.g.~0-1 loss via their notion of feasible subspace dimension.
 %   These works are generally not directly comparable to our results, as they do not consider the embedding method.
@@ -204,9 +203,10 @@ However,~\citet{agarwal2015consistent} consider single-valued properties in fini
 \section{Setting}
 \label{sec:setting}
 
-For discrete prediction problems like classification, due to hardness of directly optimizing a given discrete loss, many machine learning algorithms can be thought of as minimizing a surrogate loss function with better optimization qualities, e.g., convexity.
+For discrete prediction problems like classification, due to hardness of directly optimizing a given discrete loss, many machine learning algorithms minimize a surrogate loss function with better optimization qualities, e.g., convexity.
 Of course, to show that this surrogate loss successfully addresses the original problem, one needs to establish consistency, which depends crucially on the choice of link function that maps surrogate reports (predictions) to original reports.
 After introducing notation, and terminology from property elicitation, we study \emph{calibration} (Definition~\ref{def:calibrated}), which is equivalent to consistency in finite settings~\citep{bartlett2006convexity,tewari2007consistency} and depends solely on the conditional distribution over $\Y$.
+Consistency is a prerequisite to obtain empirical risk minimization bounds, motivating our firm requirement of constructing consistent surrogates.
 
 \subsection{Notation and Losses}
 \label{sec:notation-losses}
@@ -227,7 +227,7 @@ The \emph{Bayes risk} of a loss $L:\reals^d\to\reals^\Y_+$ is the function $\ris
 For example, 0-1 loss is a discrete loss with $\R = \Y = \{-1,1\}$
 given by $\ellzo(r)_y = \Ind{r \neq y}$, with Bayes risk $\risk{\ellzo}(p) = 1-\max_{y\in\Y} p_y$.
 Two important surrogates for $\ellzo$ are hinge loss $\hinge(u)_y = (1-yu)_+$, where $(x)_+ = \max(x,0)$, and logistic loss $L(u)_y = \log(1+\exp(-yu))$ for $u\in\reals$.
-\btw{Jessie: Should we add plots of the Bayes Risks for these since we don't (currently) have page restrictions?}
+See Figures~\ref{fig:0-1-br},~\ref{fig:hinge-br}, and~\ref{fig:logistic-br} for a visualization of the Bayes risks of 0-1, Hinge, and Logistic losses, respectively.
 
 Most of the surrogates $L$ we consider will be \emph{polyhedral}, meaning piecewise linear and convex; we therefore briefly recall the relevant definitions.
 In $\reals^d$, a \emph{polyhedral set} or \emph{polyhedron} is the intersection of a finite number of closed halfspaces.
@@ -239,7 +239,7 @@ A convex function $f:\reals^d\to\reals$ is \emph{polyhedral} if its epigraph is 
 \end{definition}
 %
 For example, hinge loss is polyhedral, whereas logistic loss is not.
-To motivate our focus on polyhedral losses, we echo~\citet[Section~1.2]{ramaswamy2018consistent}, who note that smooth surrogates often encode much more information than necessary, and in these cases non-smooth surrogates are the only candidates to achieve a low input dimension $d$ above.
+To motivate our focus on polyhedral losses, we echo~\citet[Section~1.2]{ramaswamy2018consistent}, who note that smooth surrogates often encode much more information than necessary, and in these cases non-smooth surrogates are the best candidates to achieve a low input dimension $d$.
 
 \subsection{Property Elicitation}
 \label{sec:property-elicitation}
@@ -368,7 +368,30 @@ For condition (ii), let us compute the property each loss elicits, i.e., the set
 % Now, take the embedding $\varphi$ to be the identity.  % := r$ if $r \in [-1,1]$, and $\sgn(r)$ otherwise.
 In particular, we see that $-1 \in \prop{\ellzo}(p) \iff p_1 \in [0, 1/2] \iff -1 \in \prop{\hinge}(p)$, and $1 \in \prop{\ellzo}(p) \iff p_1 \in [1/2,1] \iff 1 \in \prop{\hinge}(p)$.
 With both conditions of Definition~\ref{def:loss-embed} satisfied, we conclude that $\hinge$ embeds $2\ellzo$.
-In this particular case, it is known $(\hinge,\psi)$ is calibrated for $\psi(u) = \sgn(u)$; in \S~\ref{sec:calibration} we show that, perhaps surprisingly, all embeddings lead to calibration with an appropriate link.
+In this particular case, it is known $(\hinge,\psi)$ is calibrated for $\psi(u) = \sgn(u)$; in \S~\ref{sec:calibration} we show that, perhaps surprisingly, all embeddings imply the existence of a link so that the surrogate is calibrated.
+
+\begin{figure}
+	\begin{minipage}{0.3\linewidth}
+		\centering
+		\includegraphics[width=0.9\linewidth]{figs/0-1-br.pdf}
+		\caption{Bayes Risk of the 0-1 loss.}
+		\label{fig:0-1-br}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.3\linewidth}
+		\centering
+		\includegraphics[width=0.9\linewidth]{figs/hinge-br.pdf}
+		\caption{Bayes Risk of Hinge Loss.}
+		\label{fig:hinge-br}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.3\linewidth}
+	\centering
+	\includegraphics[width=0.9\linewidth]{figs/logistic-br.pdf}
+	\caption{Bayes Risk of the logistic loss.}
+	\label{fig:logistic-br}
+\end{minipage}
+\end{figure}
 
 % Taking $\R = \{-1,1\}$ and the above embedding, we can write the expected loss over each report
 % \begin{center}
@@ -419,7 +442,9 @@ This useful fact will drive many of our results.
 	Moreover, we have $\risk{L} = \risk{L|_\U}$ by construction of $\gamma'$ and its nondegeneracy.
 	$\impliedby$: We know $\risk{\ell}$ is polyhedral, and classic results (Aurenhammer) show that the projection of the facets of the epigraph of $\risk{\ell}$ form a power diagram on the simplex.  Each cell of this power diagram corresponds to a level set of $\gamma_r$.  A corollary of each level set being a cell in a power diagram is that each $\gamma_r$ is full-dimensional.
 	We know there is a report $u_r$ such that $u_r \in \Gamma(\tilde p)$ for some $\tilde p \in \inter{\gamma_r}$.
-	Moreover, the point $(p, -\inprod{p}{L(u_r)})$ forms a supporting hyperplane of $-\risk{L}$ (and therefore $-\risk{\ell}$ as well) if and only if $u_r \in \Gamma(p)$ for $p \in \Gamma_{u_r} = \gamma_r$.  
+	Moreover, the point $(p, -\inprod{p}{L(u_r)})$ forms a supporting hyperplane of $-\risk{L}$ (and therefore $-\risk{\ell}$ as well) if and only if $u_r \in \Gamma(p)$ for $p \in \Gamma_{u_r}$. 
+	As $(p, -\inprod{p}{L(u_r)})$ also forms a supporting hyperplane of $-\risk{\ell}$, we must then have $p \in \gamma_r$.
+	As this is true for all $p \in \Gamma_{u_r}$, we must have $\Gamma_{u_r} = \gamma_r$.
 	Losses match by considering the supporting hyperplanes to the facets of the epigraphs of the Bayes Risks are the same, and the loss values are uniquely determined by the final coordinate by this final coordinate of the supporting hyperplane.}
   Throughout we have $L:\reals^d\to\reals^\Y_+$, $\ell:\R\to\reals^\Y_+$, and define $\Gamma = \prop{L}$ and $\gamma = \prop{\ell}$.
   Suppose $L$ embeds $\ell$ via the embedding $\varphi$.
@@ -436,17 +461,18 @@ This useful fact will drive many of our results.
 
     \btw{RF: This is on the informal side, mostly because of the ``working in the affine hull'' bit.  It can all be formalized though, probably should be for the journal version: just take an appropriate linear projection of $\reals^n$ to $\reals^{n-1}$, and work with the projected versions of everything, and then project back.}
   For the reverse implication, assume that $\risk{L} = \risk{\ell}$.
-  In what follows, we implicitly work in the affine hull of $\simplex$ \proposedadd{by projecting into $\reals^{n-1}$}, so that interiors are well-defined, and $\risk{\ell}$ may be differentiable on the (relative) interior of $\simplex$.
+  In what follows, we implicitly work in the affine hull of $\simplex$ by taking the appropriate projection into $\reals^{n-1}_+$, so that interiors are well-defined, and $\risk{\ell}$ may be differentiable on the interior of $\simplex$.
+  (For intuition, one can consider the relative interiors in $\reals^n_+$, but we need to consider interiors in order to apply previous results.)
   Since $\ell$ is discrete, $-\risk{\ell}$ is polyhedral as the pointwise maximum of a finite set of linear functions.
 %  Moreover, consider the linear transformation $P: \ell \mapsto [\mathbb{I}_{n-1}, \vec 0] \risk{\ell}$ projecting $\risk{\ell}$ down to $n-1$ dimensions.
-  The projection of its epigraph $E_{\ell}$ onto $\simplex$ forms a power diagram by Theorem~\ref{thm:aurenhammer}, whose cells are full-dimensional (in $n$ dimensions) and correspond to the level sets $\gamma_r$ of $\gamma = \prop{\ell}$.
+  The projection of its epigraph $E_{\ell}$ onto $\simplex$ forms a power diagram by Theorem~\ref{thm:aurenhammer}, whose cells are full-dimensional (in $n-1$ dimensions) and correspond to the level sets $\gamma_r$ of $\gamma = \prop{\ell}$.
 
-  For each $r\in\R$, let $p_r$ be a distribution in the relative interior of $\gamma_r$, and let $u_r \in \Gamma(p)$.
-  Observe that, by definition of the Bayes risk and $\Gamma$, for all $u\in\reals^d$ the hyperplane $v \mapsto \inprod{v}{-L(u_r)}$ supports the epigraph $E_L$ of $-\risk{L}$ at the point $(p,-\inprod{p}{L(u)})$ if and only if $u\in\Gamma(p)$.
+  For each $r\in\R$, let $p_r$ be a distribution in the interior of $\gamma_r$, and let $u_r \in \Gamma(p)$.
+  Observe that, by definition of the Bayes risk and $\Gamma$, for all $v\in\reals^d$ the hyperplane $v \mapsto \inprod{v}{-L(u_r)}$ supports the epigraph $E_L$ of $-\risk{L}$ at the point $(p,-\inprod{p}{L(v)})$ if and only if $v\in\Gamma(p)$.
   Thus, the hyperplane $v \mapsto \inprod{v}{-L(u_r)}$ supports $E_L = E_\ell$ at the point $(p_r,-\inprod{p_r}{L(u_r)})$, and thus does so at the entire facet $\{(p,-\inprod{p}{L(u_r)}) : p\in\gamma_r\}$; by the above, $u_r \in \Gamma(p)$ for all such distributions as well.
   We conclude that $u_r \in \Gamma(p) \iff p \in \gamma_r \iff r \in \gamma(p)$, satisfying condition~\eqref{eq:embed-loss} for $\varphi : r \mapsto u_r$.
   To see that the loss values match, we merely note that the supporting hyperplanes to the facets of $E_L$ and $E_\ell$ are the same, and the loss values are uniquely determined by the supporting hyperplane.
-  (In particular, if $h$ supports the facet corresponding to $\gamma_r$, we have $\ell(r)_y = L(u_r)_y = h(\delta_y)$, where $\delta_y$ is the point distribution on outcome $y$.)
+  In particular, if $h$ supports the facet corresponding to $\gamma_r$, we have $\ell(r)_y = L(u_r)_y = h(\delta_y)$, where $\delta_y$ is the point distribution on outcome $y$.
   
 %  \btw{RF: This is on the informal side, mostly because of the ``working in the affine hull'' bit.  It can all be formalized though, probably should be for the journal version: just take an appropriate linear projection of $\reals^n$ to $\reals^{n-1}$, and work with the projected versions of everything, and then project back.}
 %  For the reverse implication, assume that $\risk{L} = \risk{\ell}$.
@@ -465,15 +491,14 @@ This useful fact will drive many of our results.
 
 %\btw{RF: matching risks is not necessary for \emph{consistency}, as evidenced by logistic loss for 0-1 loss.  Maybe we should just make the observation, earlier on, that \emph{embedding} is not necessary for consistency. \jessie{Added a few sentences above, when talking about consistency vs calibration.}}
 
-\btw{RF: DKR (section 3.1) realized the importance of matching Bayes risks, but they could only give general results for strictly convex (concave I should say) risks, in part because they fixed the link function to be a generalization of $\sgn$.  In contrast, we focus exclusively on non-strictly-convex risks.}
-
+%\btw{RF: DKR (section 3.1) realized the importance of matching Bayes risks, but they could only give general results for strictly convex (concave I should say) risks, in part because they fixed the link function to be a generalization of $\sgn$.  In contrast, we focus exclusively on non-strictly-convex risks.}
 
 
 From this more succinct embedding condition, we can in turn simplify the condition that a loss embeds \emph{some} discrete loss: it does if and only if its Bayes risk is polyhedral.
 (We say a concave function is polyhedral if its negation is a polyhedral convex function.)
 Note that the Bayes risk, a function from distributions over $\Y$ to the reals, may be polyhedral even if the loss itself is not.
 
-\proposedadd{Previous work from~\citet[Proposition 4]{duchi2018multiclass} realized the significance of matching Bayes risks for calibration with respect to the 0-1 loss, but their result relies the Bayes risk of the surrogate being strictly concave.  As polyhedral functions are never strictly concave, Proposition~\ref{prop:embed-risk-poly} extends their result to the embedding setting.}
+Previous work from~\citet[Proposition 4]{duchi2018multiclass} realized the significance of matching Bayes risks for calibration with respect to the 0-1 loss, but their result relies the Bayes risk of the surrogate being strictly concave.  As polyhedral functions are never strictly concave, Proposition~\ref{prop:embed-risk-poly} extends their result to the embedding setting.
 
 \begin{proposition}\label{prop:embed-risk-poly}
   A loss $L$ embeds a discrete loss if and only if $\risk{L}$ is polyhedral.
