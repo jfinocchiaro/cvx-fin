@@ -169,7 +169,7 @@ Furthermore, the kinds of strategies available for constructing surrogates, and 
 
 We augment this literature by studying a particularly natural approach for finding convex surrogates, wherein one ``embeds'' a discrete loss.
 Specifically, we say a convex surrogate $L$ embeds a discrete loss $\ell$ if there is an injective embedding from the discrete reports (predictions) to a vector space such that (i) the original loss values are recovered, and (ii) a report is $\ell$-optimal if and only if the embedded report is $L$-optimal.
-If this embedding can be extended to a calibrated link function, which maps approximately $L$-optimal reports to $\ell$-optimal reports, then consistency follows~\citep{agarwal2015consistent}.
+If this embedding can be extended to a calibrated link function, which roughly maps approximately $L$-optimal reports to $\ell$-optimal reports, then consistency follows~\citep{agarwal2015consistent}.
 Common examples of this general construction include hinge loss as a surrogate for 0-1 loss and the abstain surrogate mentioned above~\citep{ramaswamy2018consistent}.
 
 Using tools from property elicitation, we show a tight relationship between such embeddings and the class of polyhedral (piecewise-linear convex) loss functions.
@@ -187,6 +187,8 @@ thus giving a very general framework to construct consistent convex surrogates f
 \paragraph{Related works.}
 The literature on convex surrogates focuses mainly on smooth surrogate losses~\citep{crammer2001algorithmic,bartlett2006convexity,bartlett2008classification, duchi2018multiclass, williamson2016composite, reid2010composite,menon2019multilabel,zhang2020convex,bao2020calibrated}.
 Nevertheless, nonsmooth losses, such as the polyhedral losses we consider, have been proposed and studied for a variety of classification-like problems~\citep{yang2018consistency,yu2018lovasz,lapin2015top}.
+Moreover~\citet{zhang2020bayes} describes the impact of the hypothesis class has on consistency, and when consistency relative to the hypothesis class differs from Bayes consistency; the latter is what we describe in this paper when we say ``consistency.''
+
 A notable addition to this literature is~\citet{ramaswamy2018consistent}, who argue that nonsmooth losses may enable dimension reduction of the prediction space (range of the surrogate hypothesis) relative to smooth losses, illustrating this conjecture with a surrogate for \emph{abstain loss} needing only $\log(n)$ dimensions for $n$ labels, whereas the best known smooth loss needs $n-1$ dimensions.
 Their surrogate is a natural example of an embedding (cf.~\S~\ref{sec:abstain}), and serves as inspiration for our work.
 
@@ -194,7 +196,7 @@ Their surrogate is a natural example of an embedding (cf.~\S~\ref{sec:abstain}),
 While property elicitation has by now an extensive literature~\citep{savage1971elicitation,osband1985information-eliciting,lambert2008eliciting,gneiting2011making,steinwart2014elicitation,frongillo2015vector-valued,fissler2016higher,lambert2018elicitation}, these works are mostly concerned with point estimation problems.
 Literature directly connecting property elicitation to consistency is sparse.
 However,~\citet{agarwal2015consistent} consider single-valued properties in finite outcome settings, whereas finite properties elicited by general convex losses are necessarily set-valued.
-\citet{finocchiaro2020indirect}\jessiet{neurips 2020 paper; might need to throw on arxiv if we want this ref.} additionally relates indirect property elicitation to consistency in finite outcome settings when one is given either a target loss or property in both discrete and continuous prediction settings, assuming surrogates attain their infimum in expectation over all distributions over the outcomes.
+\citet{finocchiaro2020indirect}\jessiet{cvx-flats paper; might need to throw on arxiv if we want this ref.} additionally relates indirect property elicitation to consistency in finite outcome settings\jessiet{flag} when one is given either a target loss or property in both discrete and continuous prediction settings, assuming surrogates attain their infimum in expectation over all distributions over the outcomes.
 
 % \citet{agarwal2015consistent} and~\citet{ramaswamy2016convex} study the existence of convex surrogates; the latter proves lower bounds on dimensionality of hypothesis spaces for e.g.~0-1 loss via their notion of feasible subspace dimension.
 %   These works are generally not directly comparable to our results, as they do not consider the embedding method.
@@ -206,7 +208,7 @@ However,~\citet{agarwal2015consistent} consider single-valued properties in fini
 
 For discrete prediction problems like classification, due to hardness of directly optimizing a given discrete loss, many machine learning algorithms minimize a surrogate loss function with better optimization qualities, e.g., convexity.
 Of course, to show that this surrogate loss successfully addresses the original problem, one needs to establish consistency, which depends crucially on the choice of link function that maps surrogate reports (predictions) to original reports.
-After introducing notation, and terminology from property elicitation, we study \emph{calibration} (Definition~\ref{def:calibrated}), which is equivalent to consistency in finite settings~\citep{bartlett2006convexity,tewari2007consistency} and depends solely on the conditional distribution over $\Y$.
+After introducing notation, and terminology from property elicitation, we study \emph{calibration} (Definition~\ref{def:calibrated}), which is equivalent to consistency in finite outcome settings~\citep{bartlett2006convexity,tewari2007consistenc,ramaswamy2016convex} and depends solely on the conditional distribution over $\Y$.
 Consistency is a prerequisite to obtain empirical risk minimization bounds, motivating our firm requirement of constructing consistent surrogates.
 
 \subsection{Notation and Losses}
@@ -249,7 +251,7 @@ To make headway, we will appeal to concepts and results from the property elicit
 In our case, this map will often be multivalued, meaning a single distribution could yield multiple optimal reports.
 (For example, when $p=(1/2,1/2)$, both $r=1$ and $r=-1$ optimize 0-1 loss.)
 To this end, we will use double arrow notation to mean a mapping to all nonempty subsets, so that $\Gamma: \simplex \toto \R$ is shorthand for $\Gamma: \simplex \to 2^{\R} \setminus \{\emptyset\}$.
-See the discussion following Definition~\ref{def:elicits} for notational conventions.% regarding $\R$, $\Gamma$, $\gamma$, $L$, $\ell$, etc.
+%See the discussion following Definition~\ref{def:elicits} for notational conventions.% regarding $\R$, $\Gamma$, $\gamma$, $L$, $\ell$, etc.
 
 \begin{definition}[Property, level set]\label{def:property}
   A \emph{property} is a function $\Gamma:\simplex\toto\R$.
@@ -311,7 +313,7 @@ for all $p \in \simplex$,
   \end{equation}
   If $(L, \psi)$ is calibrated with respect to $\ell$, we call $\psi$ a \emph{calibrated link.}
 \end{definition}
-It is well-known that calibration implies \emph{consistency}, in the following sense (cf.~\citep{agarwal2015consistent}).
+It is well-known in finite-outcome settings that calibration implies\jessiet{is equivalent to?} \emph{consistency}, in the following sense (cf.~\citep{agarwal2015consistent}).
 Given feature space $\X$, fix a distribution $D \in \Delta(\X\times\Y)$.
 Let $L^*$ be the best possible expected $L$-loss achieved by any hypothesis $H:\X\to\reals^d$, and $\ell^*$ the best expected $\ell$-loss for any hypothesis $h:\X\to\R$, respectively.
 Then $(L,\psi)$ is consistent if a sequence of surrogate hypotheses $H_1,H_2,\ldots$ whose $L$-loss limits to $L^*$, then the $\ell$-loss of $\psi\circ H_1,\psi \circ H_2, \ldots$ limits to $\ell^*$.
@@ -424,7 +426,7 @@ In this particular case, it is known $(\hinge,\psi)$ is calibrated for $\psi(u) 
 \label{sec:poly-loss-embed}
 
 In this section, we establish a tight relationship between the technique of embedding and the use of polyhedral (piecewise-linear convex) surrogate losses.
-We defer to the following section the question of when such surrogates are consistent.
+We defer the question of when such surrogates are consistent to \S~\ref{sec:calibration}.
 
 To begin, we observe that our embedding condition in Definition~\ref{def:loss-embed} is equivalent to merely matching Bayes risks.
 % For example, one can check that $\risk{\hinge} = 2\min\{p_1,p_2\} = 2\risk{\ellzo}$.
@@ -499,6 +501,7 @@ This useful fact will drive many of our results.
 From this more succinct embedding condition, we can in turn simplify the condition that a loss embeds \emph{some} discrete loss: it does if and only if its Bayes risk is polyhedral.
 (We say a concave function is polyhedral if its negation is a polyhedral convex function.)
 Note that the Bayes risk, a function from distributions over $\Y$ to the reals, may be polyhedral even if the loss itself is not.
+For example, this can be seen by a loss that is polyhedral in the convex hull of $\phi(\R)$, but smooth outside that region.
 
 Previous work from~\citet[Proposition 4]{duchi2018multiclass} realized the significance of matching Bayes risks for calibration with respect to the 0-1 loss, but their result relies the Bayes risk of the surrogate being strictly concave.  As polyhedral functions are never strictly concave, Proposition~\ref{prop:embed-risk-poly} extends their result to the embedding setting.
 
@@ -618,7 +621,7 @@ While Definition~\ref{def:loss-embed} gives the notion of one \emph{loss} embedd
 
 
 By condition (ii.) of Definition~\ref{def:loss-embed}, we then have $L$ embedding $\ell$ implies $\prop{L}$ embeds $\prop{\ell}$.
-This statement is not immediately equivalent because property embedding does not capture the requirement of matching losses on embedded points; i.e. that $L(\varphi(r)) = \ell(r)$ for all $r \in \R$.  
+However, Definitions~\ref{def:loss-embed} and~\ref{def:prop-embed} are not immediately equivalent because property embedding does not capture the requirement of matching losses on embedded points; i.e., that $L(\varphi(r)) = \ell(r)$ for all $r \in \R$.  
 However, Lemma~\ref{lem:embed-defs-equiv} shows an equivalence follows without loss of generality.
 
 \jessiet{New to journal version}
@@ -629,24 +632,23 @@ However, Lemma~\ref{lem:embed-defs-equiv} shows an equivalence follows without l
 \end{lemma}
 \begin{proof}
   \raft{All the important pieces are here, but take it slower.  State $\ell$ as a definition (let $\ell$ be given by...) and show why $L$ embeds it.\jessie{Took another pass but changed technique, adding in this detail.  Now very similar to the proof of Prop 1 forward direction.}}
-  	Consider a loss $\ell : \R \to \reals_+^\Y$, defined so that $\ell : r \mapsto L(\varphi(r))$, where $\varphi$ is the same embedding given by $\Gamma$ embedding $\gamma$.
-        
+  	Consider a loss $\ell : \R \to \reals_+^\Y$, defined so that $\ell : r \mapsto L(\varphi(r))$, i.e. $\ell = L|_{\varphi(\R)}$, where $\varphi$ is the same embedding given by $\Gamma$ embedding $\gamma$.
     Now, we claim that $L$ embeds $\ell$.
 %    To see this, consider that Condition (i.) of matching embedded loss values is met by construction of $\ell$.
     Using Proposition~\ref{prop:embed-bayes-risks}, showing $\risk{L} = \risk{\ell}$ suffices to show that $L$ embeds $\ell$.
     
-    We aim to show that for all $p \in \simplex$, we have $(1) \inf_{u \in \reals^d}\inprod{p}{L(u)} = (2) \inf_{r \in \R}\inprod{p}{L(\varphi(r))}$, and the equality of risks follows.
+    First, we show that for all $p \in \simplex$, we have $(1) \inf_{u \in \reals^d}\inprod{p}{L(u)} = (2) \inf_{r \in \R}\inprod{p}{L(\varphi(r))}$, and the equality of risks follows.
     $(1) \leq (2)$ follows from the fact that $\varphi(\R) \subset \reals^d$ and definition of infimum. 
     Consider that if we did not have $(1) \geq (2)$ for some $p \in \simplex$, then there would be no $r$ such that $\varphi(r) \in \Gamma(p)$.
     Therefore the property it embeds, $\gamma$ is degenerate at $p$, i.e. $\gamma(p) = \emptyset$, yielding a contradiction.
-    This gives us $(1) = (2)$, so we have $\risk{L} = \risk{L|_{\varphi(\R)}}$.
+    This gives us $(1) = (2)$, so we have $\risk{L} = \risk{L|_{\varphi(\R)}} = \risk{\ell(r)}$ by construction of $\ell$.
+    %
+    %Now consider the property $\Gamma' := p \mapsto \Gamma(p) \cap \varphi(\R)$.
+    %We have $\Gamma'$ nondegenerate since $\Gamma$ embedding $\gamma$ implies that, for all $p \in \simplex$, there is some $r \in \R$ such that $\varphi(r) \in \Gamma(p)$.
+    %Therefore, for all $p \in \simplex$, we have $\inf_{r \in \R}\inprod{p}{L(\varphi(r))} = \inf_{r \in \R} \inprod{p}{\ell(r)}$, which yields $\risk{L|_{\varphi(\R)}} = \risk{\ell}$.
+    %Chaining the two equalities, we now have $\risk{L} = \risk{\ell}$.
     
-    Now consider the property $\Gamma' := p \mapsto \Gamma(p) \cap \varphi(\R)$.
-    We have $\Gamma'$ nondegenerate since $\Gamma$ embedding $\gamma$ implies that, for all $p \in \simplex$, there is some $r \in \R$ such that $\varphi(r) \in \Gamma(p)$.
-    Therefore, for all $p \in \simplex$, we have $\inf_{r \in \R}\inprod{p}{L(\varphi(r))} = \inf_{r \in \R} \inprod{p}{\ell(r)}$, which yields $\risk{L|_{\varphi(\R)}} = \risk{\ell}$.
-    Chaining the two equalities, we now have $\risk{L} = \risk{\ell}$.
-    
-    To verify $\ell$ elicits $\gamma$, consider $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p)$ by embedding, $ \iff \varphi(r) \in \argmin_{u \in \reals^d} \inprod{p}{L(u)}$ by $L$ eliciting $\Gamma$, and $ \iff r \in \argmin_{r \in \R} \inprod{p}{\ell(r)}$ by applying the definition of properties to the embedding definition.
+    %To verify $\ell$ elicits $\gamma$, consider $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p)$ by embedding, $ \iff \varphi(r) \in \argmin_{u \in \reals^d} \inprod{p}{L(u)}$ by $L$ eliciting $\Gamma$, and $ \iff r \in \argmin_{r \in \R} \inprod{p}{\ell(r)}$ by applying the definition of properties to the embedding definition.
 %    \hrule
 %	If $\Gamma$ embeds a finite $\gamma$, $L$ must embed a discrete loss $\ell$ such that $\ell(r) = L(\varphi(r))$ for all $r \in \R$.  
 %	Moreover, we can see $\ell$ elicits $\gamma$ since we have $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p) \iff \varphi(r) \in \argmin_{u \in \reals^d} \inprod{p}{L(u)} \iff r \in \argmin_{r \in \R} \inprod{p}{\ell(r)}$.
@@ -662,7 +664,7 @@ Moreover, we can assume that finite properties are non-redundant without much lo
 	$\gamma$ is \emph{finite} if it is non-redundant and $\R$ is a finite set.
 \end{definition}
 
-When working with convex losses which are not strictly convex, one quickly encounters redundant properties: if $\inprod{p}{L(\cdot)}$ is minimized by a point where $p\cdot L$ is flat, then there will be an uncountable set of reports which also minimize the expected loss.
+When working with convex losses which are not strictly convex, one quickly encounters redundant properties: if $\inprod{p}{L(\cdot)}$ is minimized by a point where $\inprod{p}{L}$ is flat, then there will be an uncountable set of reports which also minimize the expected loss.
 As results in property elicitation typically assume properties are non-redundant (e.g.~\cite{frongillo2014general,frongillo2015elicitation}), it is useful to consider a transformation which removes redundant level sets, captured by the \emph{trim} operation.
 
 \begin{definition}\label{def:trim}
@@ -673,7 +675,7 @@ As results in property elicitation typically assume properties are non-redundant
 %Take note that the unlabeled property $\trim(\Gamma)$ is non-redundant, meaning that for any $\theta \in \trim(\Gamma)$, there is no level set $\theta' \in \trim(\Gamma)$ such that $\theta \subset \theta'$; this is a corollary of Proposition~\ref{prop:embed-trim}.
 
 
-Before we state the Proposition needed to prove many of the statements in Section~\ref{sec:poly-loss-embed}, we will need to general lemmas about properties and their losses.
+Before we state Proposition~\ref{prop:embed-trim}, which is needed to prove many of the statements in Section~\ref{sec:poly-loss-embed}, we will need to general lemmas about properties and their losses.
 The first follows from standard results relating finite properties to power diagrams (see Theorem~\ref{thm:aurenhammer}), and its proof is omitted.
 The second is closely related to the definition of the trim operator: it states that if some subset of the reports are always represented among the minimizers of a loss, then one may remove all other reports and elicit the same property (with those other reports removed).
 
@@ -751,14 +753,14 @@ Finally, we have an important converse: if $\Gamma$ has finitely many full-dimen
     %\raft{I see why you wanted this addition here, but (a) it's clear from the def of embedding, and (b) we don't have varphi defined.  So let's leave it out.}
 	Moreover, when any of the above hold, $\{\gamma_r : r\in\R\} = \trim(\Gamma) = \Theta$, and $\gamma$ is elicitable.
 \end{proposition}
-\begin{proof}
+\begin{proof}\jessie{Consolidated; original below.}
 	Let $L$ elicit $\Gamma$.
 	
 	1 $\Rightarrow$ 2:
         %\jessie{Loss intuition: Let $L$ elicit $\Gamma$.  If $\Gamma$ embeds a finite $\gamma'$, $L$ must embed a discrete loss $\ell$ such that $\ell(r) = L(\varphi(r))$.  Therefore, $\risk{L} = \risk{\ell}$ is polyhedral. Moreover, we have $\Gamma$ also embedding the finite property $\prop{\ell} := \gamma$ as a corollary of the definition of embedding properties. We claim $\trim(\Gamma) = \{\gamma_r : r \in \R\}$ (Lemma~\ref{lem:embedded-level-sets-trim}), and since the latter set is finitely generated (as $\R$ is finite), we have have $\trim(\Gamma)$ is finite.  Moreover, as $\gamma$ is nondegenerate (since it is defined over the simplex), we have that $\cup_{r \in \R} \gamma_r = \simplex$.}
   If $\Gamma$ embeds a finite $\gamma$, then Lemma~\ref{lem:embed-defs-equiv} says there is be a discrete loss $\ell$ embedded by $L$ such that $\ell$ elicits $\gamma$.
   \raft{Again, a bit too brief.  Consider adding some of this statement into the Lemma. \jessie{Is this better?}}
-  by Lemma~\ref{lem:embedded-level-sets-trim}, we then observe that $\trim(\Gamma) = \{\Gamma_{\varphi(r)} : r \in \R \} = \{\gamma_r : r \in \R\}$.
+  By Lemma~\ref{lem:embedded-level-sets-trim}, we then observe that $\trim(\Gamma) = \{\Gamma_{\varphi(r)} : r \in \R \} = \{\gamma_r : r \in \R\}$.
 %  \raft{Replace with ``As $\R$ is finite, we conclude $\trim(\Gamma)$ is finite.'' or similar}
   As $\R$ is finite, we conclude that $\trim(\Gamma)$ is also finite.
 %  Since the latter set is finitely generated (as $\R$ is finite), we have have $\trim(\Gamma)$ is finite.
@@ -909,12 +911,13 @@ Finally, we have an important converse: if $\Gamma$ has finitely many full-dimen
 	In particular, $\gamma'$ refines $\gamma$, and as $\gamma'$ is finite, $\gamma$ must be finite.
 \end{proof}
 
+\jessie{I am going to suggest cutting this; I don't think it adds much to the narrative and forward refs results from calibrated links.}
 \begin{corollary}\label{cor:ie-sufficient} \jessiet{Added 7.24.20.  Probably too long to be a Corollary proof, but would rather start too long than too short.  Also the proof has a forward ref}
 	If a polyhedral loss $L:\reals^d \to \reals^\Y$ indirectly elicits a property $\gamma': \simplex \toto \R'$, then for any loss $\ell'$ eliciting $\gamma'$, there exists a link $\bar \psi$ such that $(L, \bar \psi)$ is calibrated with respect to $\ell'$.
 \end{corollary}
 \begin{proof}
 	By Theorem~\ref{thm:ie-iff-embeds-refinement}, we know that $\Gamma := \prop{L}$ embeds a property $\gamma\simplex \toto \R$ which refines $\gamma'$.
-	Therefore, these exists a calibrated link $\psi : \reals^d \to \R$ from $\Gamma$ to $\gamma$.
+	Therefore, these exists a calibrated link $\psi : \reals^d \to \R$ from $\Gamma$ to $\gamma$. \jessie{Relies on results in the next section...}
 	Moreover, as $\gamma$ refines $\gamma'$, take any link $\psi': r \mapsto r'$, where $\gamma_r \subseteq \gamma'_{r'}$. 
 	(We know such a link exists by refinement.)
 	Consider $\tilde \psi := \psi \circ \psi'$.
