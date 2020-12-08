@@ -155,16 +155,16 @@ Surrogate risk minimization is one of the most widespread techniques in supervis
 %A surrogate loss is often necessary for one of two reasons: (1) the target loss does not satisfy some desiderata, such as convexity, or (2) the target loss may not be given at all, as is often the case in continuous estimation problems, when one instead has a target conditional statistic to estimate from training data.
 Often, we desire surrogate losses to be \emph{consistent}, as this precedes deriving excess risk bounds and rates.
 Roughly speaking, consistency means that minimizing surrogate risk corresponds to solving the target problem of interest:
-the target risk should also be minimized, or the average deviation to the true conditional statistic function converges to 0.
+the target risk should also be minimized, or the average deviation to the true conditional statistic function converges to 0.\jessie{Not sure if I like these sentences here, or in general}
 
 %examples of problems where we care a lot about prediction dimension (that happen to be finite discrete)
 A variety of prediction tasks call for the construction of consistent, and ideally convex, surrogates.
 Applications ranging from extreme classification to top-$k$ predictions to ranking have inspired an entire line of research into the construction of surrogate loss functions for these tasks.
 Until recently, the dimensionality of such surrogate prediction space has typically scaled linearly with the number of outcomes unless sacrifices are made in terms of consistency.
-This linear growth of prediction dimension in the number of outcomes leads to computationally expensive or intractable optimization problems, but it is unknown when it is possible to optimize a surrogate in a lower-dimensional prediction space for many tasks that have large outcome spaces.
+This linear growth of prediction dimension (in the number of outcomes) leads to computationally expensive or intractable optimization problems, but it is unknown when it is possible to optimize a surrogate in a lower-dimensional prediction space for many tasks that have large outcome spaces.
 
-However, for some tasks, it is possible to reduce the dimension of this surrogate prediction space without sacrificing consistency.  
-Consider the high-confidence classification presented by the abstain loss~\citep{ramaswamy2018consistent}.
+We do know that for some tasks, it is possible to reduce the dimension of this surrogate prediction space without sacrificing consistency.  
+Consider the high-confidence classification presented by the abstain loss~\citep{ramaswamy2018consistent}\jessie{Cite conference version too so timeline makes sense?}.
 When trying to predict one of $n$ outcomes, the abstain loss is minimized by predicting the most likely outcome if it is likely enough, and ``abstaining'' from predicting otherwise.
 \citet{ramaswamy2016convex} present a convex surrogate, called the BEP loss, for the abstain loss that takes as input a prediction in an exponentially lower dimension than the number of outcomes.
 The BEP loss is a high-dimensional generalization of the hinge loss so that reports are ``embedded'' into the corners of the $\pm 1$ hypercube, and abstaining is embedded to the origin.
@@ -173,9 +173,10 @@ This loss allows one to optimize this BEP loss that takes $\Theta(\log n)$-dimen
 
 %in a seemingly unrelated setting, finance problems blah blah.
 In its own line of literature, financial institutions have sought scoring rules to learn banks' estimates of financial risk in their investments.\jessie{cite}
-Given the desired measure of financial risk, such as the variance or Conditional Value at Risk (CVaR), auditing institutions are tasked with designing scoring rules that, directly or indirectly, estimate the desired statistic.
-For example, while there is no loss function that enables one to directly learn the variance, we can learn the first and second central moments, which yields an unbiased estimator of the variance.
+Given the desired measure of financial risk, such as the variance or Conditional Value at Risk (CVaR), auditing institutions are tasked with designing scoring rules that, directly or indirectly, incentivize truthfully estimating the desired statistic.
+For example, while there is no loss function that enables one to directly learn the variance, we can learn the first and second central moments \jessie{how much detail to share?} by proper scoring rules, which yields an unbiased estimator of the variance.
 However, asking a bank for a large number of predictions may be infeasible by their own knowledge of the financial risk distribution.
+That is, institutions and individuals may only be expected to articulate predictions of summary statistics of their beliefs, rather than their entire belief.
 To this end, learning desired statistics with a minimal number of reports also emerges as an important question in finance.
 \jessie{Raf, helppp}
 
@@ -187,7 +188,7 @@ These two types of problems have been historically studied with different mathem
 
 \section{Background and Related work}\label{sec:related-work}
 
-We consider supervised learning problems in the space $\X \times \Y$, for some \emph{feature space} $\X$ and a finite \emph{label space} $\Y$ of size $n$, with data drawn from a distribution $D$ over $\X \times \Y$.
+We consider supervised learning problems in the space $\X \times \Y$, for some \emph{feature space} $\X$ and a finite \emph{label space} $\Y$ of size $n$, with data drawn from a distribution $D$ over $\X \times \Y$.\footnote{Throughout this paper, we assume $\Y$ is finite for simplicity, though some results are extended to infinite outcome settings in the Appendix.}
 The task is to produce a hypothesis $f: \X \to \R$, for some \emph{prediction space} $\R$, which may be different from $\Y$.
 For example, in ranking problems $\R$ may be all $n!$ permutations over the $n$ labels forming $\Y$.
 As we focus heavily on conditional distributions $D_x = \Pr[Y|X=x]$ over $\Y$ given some $x \in X$, we often abstract away $x$, working directly with probability simplex $\simplex$, the set of all distributions over $\Y$~\cite[Chapter 3]{steinwart2008support}.
@@ -208,7 +209,7 @@ Typically, we notate finite report sets $\R$ (and $\R'$ if a second finite set i
 
 
 \subsection{Consistency} \label{subsec:consistency}
-
+\jessie{Looking at this now, sections 2.1-4 feel like a lot...}
 
 %\bo{Citation help appreciated!} \jessie{\cite{fisher1922mathematical,zhang2004statistical,bartlett2006convexity,tewari2007consistency,steinwart2007compare,ramaswamy2016convex} -- these are the ones I know of that discuss consistency in slightly various forms.  I believe the definition we run with is most similar to \cite{ramaswamy2016convex}.}
 A basic requirement of surrogate losses $L: \reals^d \times \Y \to \reals$ is consistency, which roughly means that minimizing $L$-loss corresponds to solving the target problem of interest.
@@ -235,7 +236,7 @@ In particular, as definitions of consistency are relatively intractable to apply
 When given a discrete target loss, such as for classification-like problems, direct empirical risk minimization is typically NP-hard, forcing one to find a more tractable surrogate.
 To ensure consistency, the literature has embraced the notion of \emph{calibration} due to~\citet{tewari2007consistency}, and its generalizations to arbitrary discrete target losses~\citep{agarwal2015consistent,ramaswamy2016convex}.
 Calibration is more tractable and weaker than consistency, yet the two are equivalent under suitable assumptions~\cite{tewari2007consistency,ramaswamy2016convex}.
-Intuitively, calibration says one cannot approach the optimal surrogate loss while linking to an suboptimal target prediction.
+Intuitively, calibration says one cannot achieve the optimal surrogate loss while linking to a suboptimal target prediction.
 
 % For discrete prediction problems, we often start with a target loss $\ell$ in mind: for classification, 0-1 loss comes to mind; for high-confidence classification, a variation of 0-1 loss that allows a constant, moderate penalty for abstaining can be used.
 % However, optimizing over a target loss is often a computationally hard problem.
@@ -440,6 +441,7 @@ This points to indirect elicitation as a natural necessary condition for consist
 \end{proof}
 
 \section{Prediction Dimension of Consistent Convex Surrogates}\label{sec:char-convex}
+\jessie{Feelis like this section got cut a lot for NeurIPS, but seems like some more narrative in this section might be helpful.}
 
 We now turn to the question of bounding the prediction dimension of a consistent convex surrogate.
 From Theorem \ref{thm:consistent-implies-indir-elic}, given a target property $\gamma$ or loss $\ell$ with $\gamma = \prop{\ell}$, this task reduces to lower bounding the prediction dimension of a convex surrogate indirectly eliciting $\gamma$.
@@ -683,11 +685,11 @@ Several important questions remain open.
 Particularly for the discrete settings, we would like to know whether one can lift the restriction that surrogates always achieve a minimum; we conjecture positively.
 For continuous settings, it would be especially interesting to extend to the case $\Y=\reals$, which would require a more careful analysis in Theorems~\ref{thm:cvx-flats} and~\ref{thm:bayes-risk-lower-bound}.
 Finally, of course, we would like to characterize $\ccdim$ and $\eliccvx$ and develop a general framework for constructing surrogates achieving the best possible prediction dimension.
-\btw{Some good questions commented out here; revisit if we have space}
-% One might be able to further tighten these bounds by property elicitation by studying monotonicity and adjacency of level sets.
-% In discrete predictions, these bounds might also be tightened if the equivalence of convex calibration dimension and embedding dimension of~\citet{finocchiaro2020embedding} is shown; the current embedding dimension bounds are not tight either, but additional structure is imposed by considering the embedding framework.
-% Moreover, the practical reason why consistency is desired is to ensure the guarantee of empirical risk minimization (ERM) rates; however, the relationship between ERM rates and property elicitation has not been studied.
-% Lastly, Theorem~\ref{thm:cvx-flats} relies on Minkowski sums, which have not been clearly defined for infinite $\Y$; we leave this generalization as an open question.
+\jessie{for neurips, we had commented out everything below this for space}
+One might be able to further tighten these bounds by property elicitation by studying monotonicity and adjacency of level sets.
+In discrete predictions, these bounds might also be tightened if the equivalence of convex calibration dimension and embedding dimension of~\citet{finocchiaro2020embedding} is shown; the current embedding dimension bounds are not tight either, but additional structure is imposed by considering the embedding framework.
+Moreover, the practical reason why consistency is desired is to ensure the guarantee of empirical risk minimization (ERM) rates; however, the relationship between ERM rates and property elicitation has not been studied.
+Lastly, Theorem~\ref{thm:cvx-flats} relies on Minkowski sums, which have not been clearly defined for infinite $\Y$; we leave this generalization as an open question.
 
 \newpage
 
