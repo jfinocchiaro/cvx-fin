@@ -68,6 +68,8 @@
 \newcommand{\rank}{\mathrm{rank}}
 \newcommand{\supp}{\mathrm{supp}}
 \newcommand{\spn}{\mathrm{span}}
+\newcommand{\range}{\mathrm{range}\,}
+\newcommand{\zeros}[1]{\mathrm{ker}_\P\,#1}
 \newcommand{\propdis}{\mu}
 \newcommand{\affhull}{\mathrm{affhull}}
 \newcommand{\epi}{\mathrm{epi}}
@@ -209,7 +211,10 @@ As we focus heavily on conditional distributions $p := D_x = \Pr[Y|X=x]$ over $\
 If given, we use $\ell: \R \times \Y \to \reals$ to denote a \emph{target loss}, with predictions $r\in\R$.
 %where the goal is minimize expected loss, $\E ~ \ell(f(X),Y)$ for pairs $X,Y$ drawn from some distribution.
 Similarly, $L: \reals^d \times \Y \to \reals$ will typically denote a \emph{surrogate} loss, with surrogate predictions $u \in \reals^d$.
-We write $\L_d$ for the set of surrogates $L: \reals^d \times \Y \to \reals$ that are always minimizable, in the sense that $\argmin_{u} \exploss{L}{u}{p}$ is nonempty for all $p\in\simplex$, and write $\L = \cup_{d \in \mathbb{N}} \L_d$.
+We write $\L_d^{inf} $\jessie{Add conditions on $\L$ for infinite $\Y$} for the set of minimizable, $\mathcal{B}(\reals^d) \otimes \Y$-measurable and lower semi-continuous surrogates $L : \reals^d \times\Y \to \reals$ such that $\E_p L(u,Y) < \infty$ for all $u \in \reals^d, p \in \P$; we will use this class of loss functions with $\Y$ such that $|\Y| = \infty$ in mind. \jessie{Sufficient condition for $\A$-normal convex integrand: $L$ is lower semi-continuous and $\mathcal{B}(\A) \otimes \Y$-measurable; $\E_p L(u,Y)$ finite for all $u, p$, there exists a $u_0$ for each $p$ so that $\E_p L(u_0, Y)$ is finite and continuous for Rockefellar's corollary, though it's stricter than Ioffe and Tokhimorov IIRC}
+Similarly, let $\L_d^{fin}$ be surrogates $L: \reals^d \times \Y \to \reals$ that are $\mathcal{B}(\reals^d) \otimes \Y$-measurable and minimizable, in the sense that $\argmin_{u} \exploss{L}{u}{p}$ is nonempty for all $p\in\P$-- we use this class of losses with finite $\Y$ in mind.
+Moreover, we write $\L_d = \L_d^{inf} \cup \L_d^{fin}$ and $\L = \cup_{d \in \N} \L_d$.
+%We write $\L_d = \L_d^{inf} \cup \L_d^{fin}$\jessie{Add conditions on $\L$ for infinite $\Y$} for the set of surrogates $L: \reals^d \times \Y \to \reals$ that are always minimizable, in the sense that $\argmin_{u} \exploss{L}{u}{p}$ is nonempty for all $p\in\simplex$, and write $\L = \cup_{d \in \mathbb{N}} \L_d$.
 A loss $\ell$ is \emph{discrete} if $\R$ is a finite set.
 A surrogate $L$ is \emph{convex} if $L(\cdot,y)$ is convex in $u$ for every label $y \in \Y$.
 For a given $p\in\simplex$, the (conditional) \emph{regret}, or excess risk, of a loss $L$ is given by $R_L(u,p) := \exploss{L}{u}{p} - \inf_{u^*} \exploss{L}{u^*}{p}$.
@@ -383,7 +388,7 @@ we delegate this proof to Appendix~\ref{app:calibration} and directly prove the 
 
 Since indirect elicitation is implied by both consistency and calibration of a surrogate $L \in \L$, it might seem a very weak necessary condition for consistency.
 Yet, as we show in the following sections, it gives state-of-the-art lower bounds on the prediction dimension of consistent convex surrogates.
-In particular, our bounds imply those given via feasible subspace dimension~\citep[Theorem] 16{ramaswamy2016convex} in Corollary~\ref{cor:fsd-bound}.
+In particular, our bounds imply those given via feasible subspace dimension~\citep[Theorem 16]{ramaswamy2016convex} in Corollary~\ref{cor:fsd-bound}.
 
 We start by formalizing consistency in two ways that generalize across our four quadrants.
 First, given a target loss $\ell$, we say $L$ is consistent if optimizing $L$ implies applying a link $\psi$ optimizes $\ell$ (Definition~\ref{def:consistent-ell}).
@@ -483,6 +488,14 @@ Moreover, $\ker(W) = \{p \in \simplex : Wp = \vec 0\}$ is the kernel of matrix $
 	The codimension of $F$ is given by $\codim(F)=\mathrm{rank}(W)$, and the dimension of $F$ (relative to $\affhull(\simplex)$) is $n - \mathrm{rank}(W) - 1$.
 \end{definition}
 
+\jessie{Aiming for a unified definition here}
+\begin{definition}[Unified definition: Flat]\label{def:flat-general}
+	A \emph{flat} $F \subseteq \P$ $\subseteq \reals^n$ is a nonempty set $F = \ker_\P(W) = \{p \in \P : \E_p W = \vec 0\}$ for some $W:C \to \reals^d$.\jessie{??} $W\in\reals^{d\times n}$ where $d\leq n$.
+	If $n$ is finite, we assume $C = \reals^n$, in which case, the codimension of $F$ is given by $\codim(F)=\mathrm{rank}(W)$.
+	If $n$ is infinite, we consider $C = \Y$, with $\codim(F) = \dim(\{p + F : p \in \P\}) \leq d$.
+\end{definition}
+\jessie{There's a bit of nuance about $W$ being a matrix vs function}
+
 We now state our elicitation lower bound, which when combined with Theorem \ref{thm:consistent-implies-indir-elic}, implies consistency bounds.
 \jessie{Be explicit about corollary; add corollary after Thm 11.}
 A similar result is \citet[Theorem 9]{agarwal2015consistent}, which bounds the dimension of level sets of a single-valued $\prop{L}$.
@@ -491,6 +504,58 @@ Theorem \ref{thm:cvx-flats} also gives a lower bound for any given target $\ell$
 \raf{Cut the last bits here; I bet AA15 thought of their result as being about consistency, though I could be wrong}
 % (although an analogous implication of their Theorem 9 may have been known to \citet{agarwal2015consistent}).
 % We also note that the lower bound on elicitation complexity in \citet{agarwal2015consistent} is not translated into a lower bound for \emph{consistent} surrogates, which is the main contribution of this work.
+
+
+\jessie{TODO: Introduce $\C^*_d$ notation}
+\begin{lemma}
+	  \label{thm:convex-flats-inf-dim}\jessie{Edit to be about $\Gamma$}
+	Let $\hat\Gamma\in\C^*_d$ for some $d\in\mathbb{N}$.
+	For all $r\in\range\hat\Gamma$ and $p\in\hat\Gamma_r$, there is some $V_{u,p}:\Y\to\reals^d$ such that $p \in \zeros{\hat V_{u,p}} \subseteq \Gamma_\psi(r)$.
+\end{lemma}
+\begin{proof}
+	\jessie{Direct}
+		Let $\Gamma := \prop{L}$ and suppose $\Gamma \in \mathcal{E}^*_d(\P)$ is refined by $\hat \Gamma$ via the link $\psi$.
+		We know such a $\Gamma$ exists by definition of $\C^*_d(\P)$.
+		For all $r \in \range(\hat \Gamma)$, we then have $\hat\Gamma_r \subseteq \Gamma_{\psi(r)}$.
+		Let $u := \psi(r)$.
+		As $L$ is convex and elicits $\Gamma$, we have $u \in \Gamma(p) \iff \vec 0 \in \partial \exploss{L}{u}{p}$. 
+		We proceed in two cases, depending on $|\Y|$.
+		
+		\emph{Finite $\Y$: }
+		If $\Y$ is finite, this is additionally equivalent to $\vec 0 \in \oplus_y p_y \partial L(u,y)$, where $\oplus$ denotes the Minkowski sum~\citep[Theorem 4.1.1]{hiriart2012fundamentals}.\footnote{$\partial$ represents the subdifferential $\partial f(x) = \{z : f(x') - f(x) \geq \inprod{z}{x'-x}\; \forall x' \}$.}
+		Expanding, we have $\oplus_y p_y \partial L(u,y) = \{ \sum_{y\in\Y} p_y x_y : x_y \in \partial L(u,y) \; \forall y\in\Y\}$,
+		and thus $W p = \sum_y p_y x_y = \vec 0$ where $W = [x_1, \ldots, x_n] \in \reals^{d\times n}$;
+		cf.~\cite[$\mathbf{A}^m$ in Theorem 16]{ramaswamy2016convex}.
+		
+		
+		\emph{Infinite $\Y$: }	
+		$L \in \L^{inf}_d$ implies $L$ satisfies the assumptions of~\cite[Corollary 1]{rockafellar1982interchange}, we can interchange subdifferentiation and expectation to observe $\vec 0 \in \partial \E_p L(u,Y) \iff \vec 0 \in \E_p \partial L(u,Y) := \cl\{\int V(y)dp(y) : V \mathrm{msbl}, V(y) \in \partial L(u,y) a.s.\}$.
+		We can now take $V_{u,p}$ to be such a $V: \Y \to \reals^d$, which exists as the subgradient is nonempty.
+		
+		
+		In both cases, we take $F := \zeros{V_{u,p}}$, and have $\codim(F) \leq d$ by Definition~\ref{def:flat}, and $p \in F$ by construction.
+		To see $F \subseteq \hat \Gamma_u$, from the chain of equivalences above, we have for any $q\in\P$ that $q \in \zeros{V_{u,p}} \implies u \in \Gamma(q) \implies q \in \Gamma_u$.
+\end{proof}
+
+\begin{lemma}
+	Let $\hat\Gamma\in\C^*_d$ for some $d\in\mathbb{N}$.
+	For all $r\in\range\hat\Gamma$ and $p$ such that $\{r\} = \hat\Gamma(p)$, there is some $V_{u,p}:\Y\to\reals^d$ such that $p \in \zeros{\hat V_{u,p}} \subseteq \hat \Gamma_r$.
+\end{lemma}
+
+\begin{lemma}
+	Let $\hat\Gamma\in\C^*_d$ for some $d\in\mathbb{N}$ and suppose $\hat \Gamma$ is elicitable and defined over finite $\Y$.
+	For all $r\in\range\hat\Gamma$ and $p \in \relint(\P)$ such that $p \in \hat \Gamma_r$, there is some $V_{u,p}:\Y\to\reals^d$ such that $p \in \zeros{\hat V_{u,p}} \subseteq \hat \Gamma_r$.
+\end{lemma}
+
+\begin{corollary} \jessie{Indirect}
+	Let $\hat \Gamma \in \C^*_d$ for some $d \in \mathbb{N}$.
+	If, for some $p \in \P$, we observe $|\hat \Gamma(p)| = 1$, and there is not a flat $\zeros{\hat V_{u,p}}$ of codimension at most $d$ then there is no $d$-dimensional convex surrogate $L$ consistent with respect to $\hat \Gamma$.
+\end{corollary}
+
+\begin{corollary} \jessie{Indirect}
+	Let $\hat \Gamma \in \C^*_d$ for some $d \in \mathbb{N}$ and $\hat \Gamma$ be (directly) elicitable with $|\Y| < \infty$.
+	If, for some $p \in \relint(\P)$, we observe there is no flat $\zeros{\hat V_{u,p}}$ of codimension at most $d$, then there is a $d$-dimensional convex surrogate $L$ consistent with respect to $\hat \Gamma$.
+\end{corollary}
 
 \begin{theorem}\label{thm:cvx-flats}
   Let a property $\gamma:\simplex\toto\R$ be given, let $p\in\simplex$ such that either (i) $|\gamma(p)|=1$ or (ii) $\gamma$ is elicitable and $p\in\relint\simplex$, and let $r\in\gamma(p)$.
@@ -670,6 +735,7 @@ Extending to infinite $\Y$, such as $\Y=\reals$, remains open.
 
 
 \paragraph{Example: Variance.}
+\jessie{Keep this}
 As a warm-up, let us see how to show $\eliccvx(\Var)=2$ whenever $|\Y|\geq 3$, meaning the lowest dimension of a convex loss to estimate conditional variance is 2~\citep{osband1985providing,lambert2018elicitation}.
 It is interesting to note that, to the best of our knowledge, even this simple bound is novel.
 While intuitively obvious, the lower bound of 2 is not trivial.
@@ -689,6 +755,7 @@ In fact, this bound is tight for all $n$.
 For $n=1$ there is only one distribution and we have complexity $0$; for $n=2$ the mean itself, elicited by squared loss, determines the distribution; for $n\geq 3$ we may elicit the first two moments via the convex $L(r,y) = (r_1-y)^2 + (r_2-y^2)^2$, and recover the variance via $\psi(r) = r_2-r_1^2$.
 
 \paragraph{Example: Entropy and Norms.}
+\jessie{Move to Appendix?}
 For another application, let us see how Theorem~\ref{thm:bayes-risk-lower-bound} implies $\eliccvx(G) = n-1$ for any strictly concave function $G:\simplex\to\reals$ of the distribution, including most entropy functions.
 In other words, there is no convex loss function allowing one to consistently estimate conditional entropy using fewer dimensions than required to estimate the conditional distribution itself.
 This observation also extends to norms; given any $k>1$, $G(p) = \|p\|_k^k$ is strictly convex, and hence $\eliccvx(\|\cdot\|_k) = n-1$, as otherwise we could link to $G$ via $\psi(r) = r^k$.
