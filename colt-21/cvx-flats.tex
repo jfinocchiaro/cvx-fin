@@ -65,6 +65,7 @@
 \newcommand{\elicembed}{\mathrm{elic}_\mathrm{embed}}
 \newcommand{\ccdim}{\mathrm{cc\,dim}}
 \newcommand{\codim}{\mathrm{codim}}
+\newcommand{\Pcodim}{\mathcal{P}-\mathrm{codim}}
 \newcommand{\rank}{\mathrm{rank}}
 \newcommand{\supp}{\mathrm{supp}}
 \newcommand{\spn}{\mathrm{span}}
@@ -489,10 +490,13 @@ Moreover, $\ker(W) = \{p \in \simplex : Wp = \vec 0\}$ is the kernel of matrix $
 \end{definition}
 
 \jessie{Aiming for a unified definition here}
-\begin{definition}[Unified definition: Flat]\label{def:flat-general}
-	A \emph{flat} $F \subseteq \P$ $\subseteq \reals^n$ is a nonempty set $F = \ker_\P(W) = \{p \in \P : \E_p W = \vec 0\}$ for some $W:C \to \reals^d$.\jessie{??} $W\in\reals^{d\times n}$ where $d\leq n$.
-	If $n$ is finite, we assume $C = \reals^n$, in which case, the codimension of $F$ is given by $\codim(F)=\mathrm{rank}(W)$.
-	If $n$ is infinite, we consider $C = \Y$, with $\codim(F) = \dim(\{p + F : p \in \P\}) \leq d$.
+\begin{definition}[\jessie{Unified definition: }Flat]\label{def:flat-general}
+	A \emph{flat} $F \subseteq \P$ $\subseteq \reals^n$ is a nonempty set $F = \ker_\P(W) = \{p \in \P : \E_p W = \vec 0\}$ for some $W:\Y \to \reals^d$.
+	Furthermore, we define $\codim(F) := \dim(\spn(\P) / \spn(F))$.
+	
+	%recover this later
+	If $n$ is finite, the codimension of $F$ is given by $\codim(F)=\mathrm{rank}(W)$.
+	If $n$ is infinite, consider $\codim(F) = \dim(\{p + F : p \in \P\}) \leq d$.
 \end{definition}
 \jessie{There's a bit of nuance about $W$ being a matrix vs function}
 
@@ -505,56 +509,54 @@ Theorem \ref{thm:cvx-flats} also gives a lower bound for any given target $\ell$
 % (although an analogous implication of their Theorem 9 may have been known to \citet{agarwal2015consistent}).
 % We also note that the lower bound on elicitation complexity in \citet{agarwal2015consistent} is not translated into a lower bound for \emph{consistent} surrogates, which is the main contribution of this work.
 
+\begin{definition}[$\P$-codimension]
+	The \emph{$\P$-codimension} of a convex set $F \subseteq \P$ is the minimum $d$ such that there exists a measurable function $V : \Y \to \reals^d$ such that $F = \zeros{V}$, and is denoted $\Pcodim(F)$.
+\end{definition}
 
-\jessie{TODO: Introduce $\C^*_d$ notation}
+
 \begin{lemma}
 	  \label{thm:convex-flats-inf-dim}\jessie{Edit to be about $\Gamma$}
-	Let $\hat\Gamma\in\C^*_d$ for some $d\in\mathbb{N}$.
-	For all $r\in\range\hat\Gamma$ and $p\in\hat\Gamma_r$, there is some $V_{u,p}:\Y\to\reals^d$ such that $p \in \zeros{\hat V_{u,p}} \subseteq \Gamma_\psi(r)$.
+	Let $\Gamma\in\C^*_d$ for some $d\in\mathbb{N}$.
+	For all $u\in\range\Gamma$ and $p\in\Gamma_r$, there is some $V_{u,p}:\Y\to\reals^d$ such that $p \in \zeros{V_{u,p}} \subseteq \Gamma_r$.
 \end{lemma}
 \begin{proof}
 	\jessie{Direct}
-		Let $\Gamma := \prop{L}$ and suppose $\Gamma \in \mathcal{E}^*_d(\P)$ is refined by $\hat \Gamma$ via the link $\psi$.
-		We know such a $\Gamma$ exists by definition of $\C^*_d(\P)$.
-		For all $r \in \range(\hat \Gamma)$, we then have $\hat\Gamma_r \subseteq \Gamma_{\psi(r)}$.
-		Let $u := \psi(r)$.
+		Let $\Gamma := \prop{L}$.
 		As $L$ is convex and elicits $\Gamma$, we have $u \in \Gamma(p) \iff \vec 0 \in \partial \exploss{L}{u}{p}$. 
 		We proceed in two cases, depending on $|\Y|$.
 		
 		\emph{Finite $\Y$: }
 		If $\Y$ is finite, this is additionally equivalent to $\vec 0 \in \oplus_y p_y \partial L(u,y)$, where $\oplus$ denotes the Minkowski sum~\citep[Theorem 4.1.1]{hiriart2012fundamentals}.\footnote{$\partial$ represents the subdifferential $\partial f(x) = \{z : f(x') - f(x) \geq \inprod{z}{x'-x}\; \forall x' \}$.}
-		Expanding, we have $\oplus_y p_y \partial L(u,y) = \{ \sum_{y\in\Y} p_y x_y : x_y \in \partial L(u,y) \; \forall y\in\Y\}$,
-		and thus $W p = \sum_y p_y x_y = \vec 0$ where $W = [x_1, \ldots, x_n] \in \reals^{d\times n}$;
-		cf.~\cite[$\mathbf{A}^m$ in Theorem 16]{ramaswamy2016convex}.
-		
+		Expanding, we have $\oplus_y p_y \partial L(u,y) = \{ \sum_{y\in\Y} p_y x_y : x_y \in \partial L(u,y) \; \forall y\in\Y\}$, and thus $W p = \sum_y p_y x_y = \vec 0$ where $W = [x_1, \ldots, x_n] \in \reals^{d\times n}$; cf.~\cite[$\mathbf{A}^m$ in Theorem 16]{ramaswamy2016convex}.
+		Let $V_{u,p} : \Y \to \reals^d$ be the function mapping column indices of $W$ to columns of $W$, and taking their inner product with $p$.
+		That is, $V_{u,p}(y) := W_y p$.
+				
 		
 		\emph{Infinite $\Y$: }	
 		$L \in \L^{inf}_d$ implies $L$ satisfies the assumptions of~\cite[Corollary 1]{rockafellar1982interchange}, we can interchange subdifferentiation and expectation to observe $\vec 0 \in \partial \E_p L(u,Y) \iff \vec 0 \in \E_p \partial L(u,Y) := \cl\{\int V(y)dp(y) : V \mathrm{msbl}, V(y) \in \partial L(u,y) a.s.\}$.
 		We can now take $V_{u,p}$ to be such a $V: \Y \to \reals^d$, which exists as the subgradient is nonempty.
 		
 		
-		In both cases, we take $F := \zeros{V_{u,p}}$, and have $\codim(F) \leq d$ by Definition~\ref{def:flat}, and $p \in F$ by construction.
-		To see $F \subseteq \hat \Gamma_u$, from the chain of equivalences above, we have for any $q\in\P$ that $q \in \zeros{V_{u,p}} \implies u \in \Gamma(q) \implies q \in \Gamma_u$.
+		In both cases, we take the flat $F := \zeros{V_{u,p}}$, and have $\codim(F) \leq d$ by Definition~\ref{def:flat}, and $p \in F$ by construction. \jessie{Flesh out}
+		To see $F \subseteq \Gamma_u$, from the chain of equivalences above, we have for any $q\in\P$ that $q \in \zeros{V_{u,p}} \implies u \in \Gamma(q) \implies q \in \Gamma_u$.
 \end{proof}
 
 \begin{lemma}
-	Let $\hat\Gamma\in\C^*_d$ for some $d\in\mathbb{N}$.
-	For all $r\in\range\hat\Gamma$ and $p$ such that $\{r\} = \hat\Gamma(p)$, there is some $V_{u,p}:\Y\to\reals^d$ such that $p \in \zeros{\hat V_{u,p}} \subseteq \hat \Gamma_r$.
+	Let $\gamma$ be indirectly elicited by some $\Gamma\in\C^*_d$ for some $d\in\mathbb{N}$.
+	For all $r\in\range\gamma$ and $p$ such that $|\gamma(p)| = 1$ with $\{r\} = \gamma(p)$, there is some $V_{u,p}:\Y\to\reals^d$ such that $p \in \zeros{\hat V_{u,p}} \subseteq \gamma_r$.
 \end{lemma}
 
 \begin{lemma}
-	Let $\hat\Gamma\in\C^*_d$ for some $d\in\mathbb{N}$ and suppose $\hat \Gamma$ is elicitable and defined over finite $\Y$.
-	For all $r\in\range\hat\Gamma$ and $p \in \relint(\P)$ such that $p \in \hat \Gamma_r$, there is some $V_{u,p}:\Y\to\reals^d$ such that $p \in \zeros{\hat V_{u,p}} \subseteq \hat \Gamma_r$.
+	Let $\gamma$ be indirectly elicited by some $\Gamma\in\C^*_d$ for some $d\in\mathbb{N}$, and suppose $\gamma$ is elicitable on $\P$ defined over finite $\Y$.
+	For all $r\in\range\gamma$ and $p \in \relint{\P}$ such that $p \in \gamma_r$, there is some $V_{u,p}:\Y\to\reals^d$ such that $p \in \zeros{V_{u,p}} \subseteq \gamma_r$.
 \end{lemma}
 
 \begin{corollary} \jessie{Indirect}
-	Let $\hat \Gamma \in \C^*_d$ for some $d \in \mathbb{N}$.
-	If, for some $p \in \P$, we observe $|\hat \Gamma(p)| = 1$, and there is not a flat $\zeros{\hat V_{u,p}}$ of codimension at most $d$ then there is no $d$-dimensional convex surrogate $L$ consistent with respect to $\hat \Gamma$.
+	Given target property $\gamma:\P \to\to \reals^d$, if there is some $p \in \P$ such that $|\gamma(p)| = 1$ with $\gamma(p) = \{r\}$, and there is not a flat $\zeros{\hat V_{u,p}} \subseteq \gamma_r$ of $\P$-codimension at most $d$ then there is no $d$-dimensional convex surrogate $L$ consistent with respect to $\hat \Gamma$.
 \end{corollary}
 
 \begin{corollary} \jessie{Indirect}
-	Let $\hat \Gamma \in \C^*_d$ for some $d \in \mathbb{N}$ and $\hat \Gamma$ be (directly) elicitable with $|\Y| < \infty$.
-	If, for some $p \in \relint(\P)$, we observe there is no flat $\zeros{\hat V_{u,p}}$ of codimension at most $d$, then there is a $d$-dimensional convex surrogate $L$ consistent with respect to $\hat \Gamma$.
+	Given target property $\gamma:\P \to\to \reals^d$, where $\P$ is defined over a finite set of outcomes $\Y$, if there is some $p \in \relint{\P}$ and there is not a flat $\zeros{\hat V_{u,p}} \subseteq \gamma_r$ of $\P$-codimension at most $d$ then there is no $d$-dimensional convex surrogate $L$ consistent with respect to $\gamma$.
 \end{corollary}
 
 \begin{theorem}\label{thm:cvx-flats}
