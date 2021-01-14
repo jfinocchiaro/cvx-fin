@@ -168,7 +168,6 @@ For statistic estimation, our lower bound gives new results for estimating varia
 
 \section{Introduction}\label{sec:intro}
 \jessie{Without moving anything around, take a shot at storyboarding this.  Want enough detail to understand how much time to spend on each chunk.  (1 bullet per paragraph)}
-\jessie{Could be handy to have Han's paper in here.  Play down some of the continuous value examples.}
 %supervised learning blah
 Surrogate risk minimization is one of the most widespread optimization heuristics in supervised machine learning.
 %A surrogate loss is often necessary for one of two reasons: (1) the target loss does not satisfy some desiderata, such as convexity, or (2) the target loss may not be given at all, as is often the case in continuous estimation problems, when one instead has a target conditional statistic to estimate from training data.
@@ -183,11 +182,11 @@ The dimensionality of such surrogate prediction space often scales linearly with
 This linear growth of prediction dimension (in the number of outcomes) leads to computationally expensive or intractable optimization problems, but it is unknown when it is possible to design a surrogate in a lower-dimensional prediction space for many tasks that have large outcome spaces.
 
 We do know that for some tasks, it is possible to reduce the dimension of this surrogate prediction space without sacrificing consistency.  
-Consider the high-confidence classification presented by the abstain loss~\citep{ramaswamy2018consistent}\jessie{Cite conference version too so timeline makes sense?}.
+Consider the high-confidence classification presented by the abstain target loss~\citep{ramaswamy2012classification,ramaswamy2018consistent}.
 When trying to predict one of $n$ outcomes, the abstain loss is minimized by predicting the most likely outcome if it is likely enough, and ``abstaining'' from predicting otherwise.
-\citet{ramaswamy2016convex} present a convex surrogate, called the BEP loss, for the abstain loss that takes as input a prediction in an exponentially lower dimension than the number of outcomes.
+\citet{ramaswamy2016convex} present a convex surrogate, called the BEP loss, for the abstain target loss that takes as input a prediction logarithmic in the number of outcomes.
 The BEP loss is a high-dimensional generalization of the hinge loss so that outcome predictions are ``embedded'' into the corners of the $\pm 1$ hypercube, and abstaining is embedded to the origin.
-This BEP loss is consistent with respect to the target 0-1 modification $\ell(r,y) = \Ind{r \not \in \{y,\bot\}} + (1/2) \Ind{r = \bot}$, and takes $\Theta(\log n)$-dimensional surrogate predictions, instead of $\Theta(n)$, as was required of previous consistent surrogates.
+This BEP loss is consistent with respect to the target 0-1 modification $\ell(r,y) = \Ind{r \not \in \{y,\bot\}} + (1/2) \Ind{r = \bot}$, and takes $\Theta(\log n)$-dimensional surrogate predictions, instead of $\Theta(n)$, as was required of previous consistent surrogates.\jessie{Some of this repetitive}
 
 
 %in a seemingly unrelated setting, finance problems blah blah.
@@ -207,21 +206,21 @@ These two types of problems have been historically studied with different mathem
 
 \section{Background and Related work}\label{sec:related-work}
 
-We consider supervised learning problems in the space $\X \times \Y$, for some \emph{feature space} $\X$ and a finite \emph{label space} $\Y$ of size $n$, with data drawn from a distribution $D$ over $\X \times \Y$.\footnote{Throughout this paper, we assume $\Y$ is finite for simplicity, though some results are extended to infinite outcome settings in Appendix~\ref{app:infinite-Y}.}
+We consider supervised learning problems in the space $\X \times \Y$, for some \emph{feature space} $\X$ and a \emph{label space} $\Y$ of size $n$, with data drawn from a distribution $D$ over $\X \times \Y$.
 The task is to produce a hypothesis $f: \X \to \R$, for some \emph{prediction space} $\R$, which may be different from $\Y$.
-For example, in ranking problems $\R$ may be all $n!$ permutations over the $n$ labels forming $\Y$.
-As we focus heavily on conditional distributions $p := D_x = \Pr[Y|X=x]$ over $\Y$ given some $x \in X$, we often abstract away $x$, working directly with probability simplex $\simplex$, the set of all distributions over $\Y$, through tools such as calibration~\cite[Chapter 3]{steinwart2008support}.
+For example, in ranking problems, $\R$ may be all $n!$ permutations over the $n$ labels forming $\Y$.
+As we focus heavily on conditional distributions $p := D_x = \Pr[Y|X=x]$ over $\Y$ given some $x \in X$, we often abstract away $x$, working directly with distributions over outcomes $\P \subseteq \simplex$, through tools such as calibration~\cite[Chapter 3]{steinwart2008support}.
 
 If given, we use $\ell: \R \times \Y \to \reals$ to denote a \emph{target loss}, with predictions $r\in\R$.
 %where the goal is minimize expected loss, $\E ~ \ell(f(X),Y)$ for pairs $X,Y$ drawn from some distribution.
 Similarly, $L: \reals^d \times \Y \to \reals$ will typically denote a \emph{surrogate} loss, with surrogate predictions $u \in \reals^d$.
-We write $\L_d^{inf} $\jessie{Add conditions on $\L$ for infinite $\Y$} for the set of minimizable, $\mathcal{B}(\reals^d) \otimes \Y$-measurable and lower semi-continuous surrogates $L : \reals^d \times\Y \to \reals$ such that $\E_p L(u,Y) < \infty$ for all $u \in \reals^d, p \in \P$; we will use this class of loss functions with $\Y$ such that $|\Y| = \infty$ in mind. \jessie{Sufficient condition for $\A$-normal convex integrand: $L$ is lower semi-continuous and $\mathcal{B}(\A) \otimes \Y$-measurable; $\E_p L(u,Y)$ finite for all $u, p$, there exists a $u_0$ for each $p$ so that $\E_p L(u_0, Y)$ is finite and continuous for Rockefellar's corollary, though it's stricter than Ioffe and Tokhimorov IIRC}
-Similarly, let $\L_d^{fin}$ be surrogates $L: \reals^d \times \Y \to \reals$ that are $\mathcal{B}(\reals^d) \otimes \Y$-measurable and minimizable, in the sense that $\argmin_{u} \exploss{L}{u}{p}$ is nonempty for all $p\in\P$-- we use this class of losses with finite $\Y$ in mind.
-Moreover, we write $\L_d = \L_d^{inf} \cap \L_d^{fin}$ and $\L = \cup_{d \in \N} \L_d$.
-%We write $\L_d = \L_d^{inf} \cup \L_d^{fin}$\jessie{Add conditions on $\L$ for infinite $\Y$} for the set of surrogates $L: \reals^d \times \Y \to \reals$ that are always minimizable, in the sense that $\argmin_{u} \exploss{L}{u}{p}$ is nonempty for all $p\in\simplex$, and write $\L = \cup_{d \in \mathbb{N}} \L_d$.
-A loss $\ell$ is \emph{discrete} if $\R$ is a finite set.
-A surrogate $L$ is \emph{convex} if $L(\cdot,y)$ is convex in $u$ for every label $y \in \Y$.
-For a given $p\in\simplex$, the (conditional) \emph{regret}, or excess risk, of a loss $L$ is given by $R_L(u,p) := \exploss{L}{u}{p} - \inf_{u^*} \exploss{L}{u^*}{p}$.
+We write $\L_d $ for the set of $\mathcal{B}(\reals^d) \otimes \Y$-measurable and lower semi-continuous surrogates $L : \reals^d \times\Y \to \reals$ such that $\E_p L(u,Y) < \infty$ for all $u \in \reals^d, p \in \P$, and are minimizable, in the sense that $\argmin_{u} \exploss{L}{u}{p}$ is nonempty for all $p\in\P$.
+\jessie{Sufficient condition for $\A$-normal convex integrand: $L$ is lower semi-continuous and $\mathcal{B}(\A) \otimes \Y$-measurable; $\E_p L(u,Y)$ finite for all $u, p$, there exists a $u_0$ for each $p$ so that $\E_p L(u_0, Y)$ is finite and continuous for Rockefellar's corollary, though it's stricter than Ioffe and Tokhimorov IIRC}
+%Similarly, let $\L_d^{fin}$ be surrogates $L: \reals^d \times \Y \to \reals$ that are $\mathcal{B}(\reals^d) \otimes \Y$-measurable and minimizable, in the sense that $\argmin_{u} \exploss{L}{u}{p}$ is nonempty for all $p\in\P$-- we use this class of losses with finite $\Y$ in mind.
+Moreover, we write $\L = \cup_{d \in \mathbb{N}} \L_d$.
+A loss $\ell: \R\times \Y \to \reals$ is \emph{discrete} if $\R$ is a finite set.
+A surrogate $L:\U \times \Y \to \reals$ is \emph{convex} if $L(\cdot,y)$ is convex in $u$ almost surely in $\Y$.
+For a given $p\in\P$, the (conditional) \emph{regret}, or excess risk, of a loss $L$ is given by $R_L(u,p) := \exploss{L}{u}{p} - \inf_{u^*} \exploss{L}{u^*}{p}$.
 Typically, we notate finite report sets $\R$ (and $\R'$ if a second finite set is needed) and continuous prediction spaces $\U \subseteq \reals^d$.
 
 
@@ -520,7 +519,7 @@ Theorem \ref{thm:cvx-flats} also gives a lower bound for any given target $\ell$
 
 \begin{lemma}
 	  \label{thm:convex-flats-inf-dim}
-	Let $\Gamma\in\C^*_d$ for some $d\in\mathbb{N}$.
+	Let $\Gamma$ be (directly) elicited by a convex $L \in \L_d$ for some $d\in\mathbb{N}$.
 	For all $u\in\range\Gamma$ and $p\in\Gamma_u$, there is some $V_{u,p}:\Y\to\reals^d$ such that $p \in \zeros{V_{u,p}} \subseteq \Gamma_u$.
 \end{lemma}
 \begin{proof}
@@ -532,51 +531,61 @@ Theorem \ref{thm:cvx-flats} also gives a lower bound for any given target $\ell$
 		\emph{Finite $\Y$: }
 		If $\Y$ is finite, this is additionally equivalent to $\vec 0 \in \oplus_y p_y \partial L(u,y)$, where $\oplus$ denotes the Minkowski sum~\citep[Theorem 4.1.1]{hiriart2012fundamentals}.\footnote{$\partial$ represents the subdifferential $\partial f(x) = \{z : f(x') - f(x) \geq \inprod{z}{x'-x}\; \forall x' \}$.}
 		Expanding, we have $\oplus_y p_y \partial L(u,y) = \{ \sum_{y\in\Y} p_y x_y : x_y \in \partial L(u,y) \; \forall y\in\Y\}$, and thus $W p = \sum_y p_y x_y = \vec 0$ where $W = [x_1, \ldots, x_n] \in \reals^{d\times n}$; cf.~\cite[$\mathbf{A}^m$ in Theorem 16]{ramaswamy2016convex}.
-		Let $V_{u,p} : \Y \to \reals^d$ be the function mapping column indices of $W$ to columns of $W$, and taking their inner product with $p$.
-		That is, $V_{u,p}(y) := W_y p$.
+		Let $V_{u,p} : \Y \to \reals^d$ be the function mapping column indices of $W$ to columns of $W$.
+		That is, $V_{u,p}(y) := W_y$.
 				
 		
 		\emph{Infinite $\Y$: }	
-		$L \in \L^{inf}_d$ and convex \jessie{Need to be explicit in our definition of $\C^*$ to imply $L \in \L^{inf}_d$} implies $L$ satisfies the assumptions of~\cite[Corollary 1]{rockafellar1982interchange}, we can interchange subdifferentiation and expectation to observe $\vec 0 \in \partial \E_p L(u,Y) \iff \vec 0 \in \E_p \partial L(u,Y) := \cl\{\int V(y)dp(y) : V \mathrm{msbl}, V(y) \in \partial L(u,y) a.s.\}$.
-		We can now take $V_{u,p}$ to be such a $V: \Y \to \reals^d$, which exists as the subgradient is nonempty.
+		$L \in \L_d$ and convex implies $L$ satisfies the assumptions of~\cite[Corollary 1]{rockafellar1982interchange}, we can interchange subdifferentiation and expectation to observe $\partial \E_p L(u,Y) = \E_p \partial L(u,Y) := \cl\{\int V(y)dp(y) : V \mathrm{measurable}, V(y) \in \partial L(u,y) \textrm{a.s. in } p\}$.\jessie{Cite~\cite{ioffe1969minimization} instead; they don't use closure and it's the same result.}
+		We can now take $V_{u,p}$ to be such a $V: \Y \to \reals^d$, which exists as $\vec 0 \in \partial \E_p L(u,Y)$, and therefore, the set is nonempty.
+		\jessie{What happens if $\vec 0$ not in the set, but is in the closure}
 		
 		
 		In both cases, we take the flat $F := \zeros{V_{u,p}}$, and have $p \in F$ by construction.
 		To see $F \subseteq \Gamma_u$, from the chain of equivalences above, we have for any $q\in\P$ that $q \in \zeros{V_{u,p}} \implies \vec 0 \in \partial \E_q L(u,Y) \implies u \in \Gamma(q) \implies q \in \Gamma_u$.
 \end{proof}
 
-\begin{lemma}
-	Let $\gamma$ be indirectly elicited by some $\Gamma\in\C^*_d$ for some $d\in\mathbb{N}$.
-	For all $r\in\range\gamma$ and $p$ such that $|\gamma(p)| = 1$ with $\{r\} = \gamma(p)$, there is some flat $F$ \jessie{of \Pcodimension at most $d$?} such that $p \in F \subseteq \gamma_r$.
-\end{lemma}
+%\begin{lemma}
+%	Let $\gamma$ be indirectly elicited by some $d$-convex-elicitable $\Gamma$ for $d\in\mathbb{N}$.
+%	For all $r\in\range\gamma$ and $p$ such that $|\gamma(p)| = 1$ with $\{r\} = \gamma(p)$, there is some flat $F$ \jessie{of \Pcodimension at most $d$?} such that $p \in F \subseteq \gamma_r$.
+%\end{lemma}
+
+
+\begin{corollary} 
+	Given target property $\gamma:\P \toto \R$, if there is some $p \in \P$ such that $|\gamma(p)| = 1$ with $\gamma(p) = \{r\}$, there is some flat $F$ of \Pcodimension at most $d$ such that $p \in F \subseteq \gamma_r$
+	Moreover, if there is not a flat $F \subseteq \gamma_r$ of \Pcodimension at most $d$ then there is no $d$-dimensional convex surrogate $L$ consistent with respect to $\gamma$.
+\end{corollary}
 \begin{proof}
 	Let $(L, \psi)$ indirectly elicit $\gamma$ and the convex function $L$ and elicit $\Gamma$.
 	As $\Gamma$ is non-empty, there is some $u \in \Gamma(p)$.
 	Since $\gamma$ is single-valued at $p$, we have $r = \psi(u)$; by Lemma~\ref{thm:convex-flats-inf-dim}, we know there is a flat $F = \zeros{V_{u,p}}$ so that $p \in F \subseteq \Gamma_u$.
 	By definition of indirect elicitation, we additionally have $\Gamma_u \subseteq \gamma_r$.
 	Thus, we have $p \in F \subseteq \gamma_r$.
+	
+	\jessie{TODO: Pull in consistency}
 \end{proof}
 
-\begin{corollary} 
-	Given target property $\gamma:\P \toto \reals^d$, if there is some $p \in \P$ such that $|\gamma(p)| = 1$ with $\gamma(p) = \{r\}$, and there is not a flat $F \subseteq \gamma_r$ of \Pcodimension at most $d$ then there is no $d$-dimensional convex surrogate $L$ consistent with respect to $\hat \Gamma$.
-\end{corollary}
 
-\begin{lemma}
-	Let $\gamma$ be indirectly elicited by some $\Gamma\in\C^*_d$ for some $d\in\mathbb{N}$, and suppose $\gamma$ is elicitable on $\P$ defined over finite $\Y$.
-	For all $r\in\range\gamma$ and $p \in \relint{\P}$ such that $p \in \gamma_r$, there is some flat $F$ \jessie{of \Pcodimension at most $d$} such that $p \in F \subseteq \gamma_r$.
-\end{lemma}
+
+%\begin{lemma}
+%	Let $\gamma$ be indirectly elicited by some $d$-convex-elicitable $\Gamma$ for some $d\in\mathbb{N}$, and suppose $\gamma$ is elicitable on $\P$ defined over finite $\Y$.
+%	For all $r\in\range\gamma$ and $p \in \relint{\P}$ such that $p \in \gamma_r$, there is some flat $F$ \jessie{of \Pcodimension at most $d$} such that $p \in F \subseteq \gamma_r$.
+%\end{lemma}
+
+\begin{corollary} 
+	Given target property $\gamma:\P \toto \reals^d$, where $\P$ is defined over a finite set of outcomes $\Y$.
+	For all $p \in \relint{\P}$, there is some flat $F$ \jessie{of \Pcodimension at most $d$} such that $p \in F \subseteq \gamma_r$.
+	Moreover, if there is some $p \in \relint{\P}$ so that there is not a flat $F \subseteq \gamma_r$ of \Pcodimension at most $d$ then there is no $d$-dimensional convex surrogate $L$ consistent with respect to $\gamma$.
+\end{corollary}
 \begin{proof}
 	Let $(L, \psi)$ indirectly elicit $\gamma$ and the convex function $L$ and elicit $\Gamma$.
 	As $\Gamma$ is non-empty, there is some $u \in \Gamma(p)$, and suppose $r' = \psi(u)$.
 	Take $F \subseteq \Gamma_u$ to be the flat that exists by Lemma~\ref{thm:convex-flats-inf-dim}.
 	If $r = r'$, then $p \in F \subseteq \Gamma_u \subseteq \gamma_r$ by indirect elicitation.
 	Otherwise, by Lemma~\ref{lem:set-valued-prop-flats}, for elicitable properties with $p \in \gamma_r \cap \gamma_{r'}$, we observe $p \in F\subseteq \gamma_r \iff p \in F \subseteq \gamma_{r'}$.
+	
+	\jessie{TODO: Add in consistency bit}
 \end{proof}
-
-
-\begin{corollary} 
-	Given target property $\gamma:\P \toto \reals^d$, where $\P$ is defined over a finite set of outcomes $\Y$, if there is some $p \in \relint{\P}$ and there is not a flat $F \subseteq \gamma_r$ of \Pcodimension at most $d$ then there is no $d$-dimensional convex surrogate $L$ consistent with respect to $\gamma$.
-\end{corollary}
 
 \btw{Jessie: Suggest delete - this is the original version}
 \begin{theorem}\label{thm:cvx-flats}
