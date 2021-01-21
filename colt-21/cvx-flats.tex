@@ -491,15 +491,12 @@ Moreover, $\ker(W) = \{p \in \simplex : Wp = \vec 0\}$ is the kernel of matrix $
 	The codimension of $F$ is given by $\codim(F)=\mathrm{rank}(W)$, and the dimension of $F$ (relative to $\affhull(\simplex)$) is $n - \mathrm{rank}(W) - 1$.
 \end{definition}
 
-
+\jessie{Differentiate between $\ker$ and $\zeros$}
 \begin{definition}[\jessie{Updated definition: }Flat]\label{def:flat-general}
 	A \emph{flat} $F \subseteq \P$ $\subseteq \reals^n$ is a nonempty set $F = \ker_\P(W) = \{q \in \P : \E_q W = \vec 0\}$ for some $W:\Y \to \reals^d$.
 	Furthermore, we define $\codim(F) := \dim(\spn(\P) / \spn(F))$.
 	
-	%recover this later
-	\btw{Jessie: Suggest delete}
-	If $n$ is finite, the codimension of $F$ is given by $\codim(F)=\mathrm{rank}(W)$.
-	If $n$ is infinite, consider $\codim(F) = \dim(\{p + F : p \in \P\}) \leq d$.
+	
 \end{definition}
 
 We now state our elicitation lower bound, which when combined with Theorem \ref{thm:consistent-implies-indir-elic}, implies consistency bounds.
@@ -1057,13 +1054,32 @@ A hyperplane weakly separates two sets if its two closed halfspaces respectively
 
 \begin{lemma}\label{lem:finite-relint-dim}
   Let flat $F\subseteq \P$ contain some $p\in\relint{\P}$.
-  Then $p \in \relint{F}$ and $\Pcodim(F) = \codim(F)$.
+  Then $p \in \relint{F}$ and \jessie{Originally $\Pcodim(F) = \codim(F)$? Also; $F$ vs $F'$?}.
 \end{lemma}
 \begin{proof}
-	\jessie{TODO}
-	First, to observe $p \in \relint{F}$, since $p \in \relint{\P}$, we must have some ball $B(\epsilon, p) \subseteq \P$ so that $B(\epsilon, p) \cap F \subseteq F$ and is also a ball, and thus $p \in \relint{F}$.
+	\jessie{TODO: write out def of relint (algebraic definition) to be explicit}
+	Since $p \in \relint{\P}$, there is some small enough $\epsilon > 0 $ so that for $q \in \P, \alpha \in (-\epsilon,\epsilon)$, the point $q_\alpha := p - \alpha(q - p)$ is still in $\P$.
+	In particular, if $q \in F$, then $q_\alpha \in F$, as it is a linear combination of elements of $F$, which is a convex set as it is a flat.
+	Therefore, $p \in \relint{F}$.
+		
+		\bigskip
+	\jessie{Where does this belong? Cause it's not here.}
+	Now let $T_V : \spn(\P) \to \reals^d$ be the function mapping $q \mapsto \E_q V$ for the function $V$ given by Threorem~\ref{thm:convex-flats-inf-dim}.
+	Let $p \in \relint{\simplex} \cap F$, and define $F' := F - \{p\}$, and similarly define $P' := P - \{p\}$ and $T'_V(v) = \E_{Y \sim v} V(Y)$.
 	
-	Moreover, to observe $\Pcodim(F) = \codim(F)$, \jessie{TODO}
+	Now let $v \in \ker(T'_V)$ (so that $q = p + v$).
+	There must exist an $\epsilon > 0$ so that $\epsilon v \in F'$ since, by Lemma~\ref{lem:finite-relint-dim}, we have $p \in \relint{\simplex}$, and therefore $\vec 0 \in \relint{F'}$.
+	Moreover, we have $\epsilon v \in \ker(T'_V)$ by construction, since both $v$ and $\vec 0$ are in the kernel; this implies that $\spn(F') = \ker(T'_V)$.
+	
+	
+	Moreover, we want to observe $F' = P' \cap \ker(T'_V)$.
+	In order to see this, consider $v \in F' \iff v + p \in F$, and similarly for $\P'$ and $\ker(T'_V)$.
+	Now, as $F \subseteq P$ by construction, we have $F' \subseteq P'$, and since $\spn(F') = \ker(T'_V)$, we additionally have $F' \subseteq \ker(T'_V)$, yielding $F' \subseteq P' \cap \ker(T'_V)$.
+	Now consider $v \in \P' \cap \ker(T'_V)$; we know that $\E_v V = \vec 0$, and therefore, $\E_{q} = \vec 0 $, so $v \in F'$, thus showing $F' = P' \cap \ker(T'_V)$.
+	
+	
+	Therefore, we have $\dim(\spn(F')) = \dim(\ker(T'_V)) \geq \dim(\spn(P')) - d$ by \jessie{isomorphism theorem} since $F' = \ker(T'_V) \cap P'$.
+	When we substitute $P = \simplex$, this yields the bound $\dim(\spn(F')) \geq n - 1 - d$.
 \end{proof}
 
 \begin{lemma}\label{lem:set-valued-prop-flats}
@@ -1077,6 +1093,7 @@ A hyperplane weakly separates two sets if its two closed halfspaces respectively
 	Suppose $F \subseteq \gamma_r$.
 	We show $F \subseteq \gamma_{r'}$.
 	Let $q \in F$.
+	%By Lemma~\ref{lem:finite-relint-dim}, we also have $p \in \relint{F}$
 	We claim that for small enough $\epsilon$, the point $q' = p - \epsilon (q-p)$ is in $F$ as well.
 	Containment in $F$ follows because both $p$ and $q$ are in $F$ and it is a flat, while containment in $\P$ follows because $p \in \relint\P$.
 	
@@ -1091,15 +1108,19 @@ A hyperplane weakly separates two sets if its two closed halfspaces respectively
 \subsection{Reconstructing the result of~\citet[Theorem 16]{ramaswamy2016convex}}
 \begin{lemma}\label{lem:feas-sub-is-a-flat}
 	Suppose we have the discrete elicitable property $\gamma$ and distribution $p \in \relint{\simplex}$ with $r \in \gamma(p)$.
-	If $F$ is a flat so that $p \in F \subseteq \gamma_r$, then $F - p$ is a subspace contained in $\Sc_{\gamma_r}(p)$.
-	\jessie{Is this what we want to show? I feel like we want $\Sc_{\gamma_r}(p)$ is a flat containing $p$.}  
+	If $F$ is a flat so that $p \in F \subseteq \gamma_r$, then $F' := F - \{p\}$ is a subspace contained in $\Sc_{\gamma_r}(p)$.
 	%  \raf{I think you want $p$ in the interior of the simplex for now}
 \end{lemma}
 \begin{proof}
-	First, observe $F-p$ is a subspace as it is a linear shift of $F$, which is a linear subspace by definition of a flat and the fact that it contains $\vec 0$ (since $F$ contains $p$, which we subtract from).
-	Moreover, by Lemma~\ref{lem:finite-relint-dim}, we have $p \in \relint(F)$, so $\vec 0 \in \relint{F-p}$.
+	We aim to show $v \in F' \implies v \in \Sc_{\gamma_r}(p)$.
+	First, observe $v \in F' \iff p + v \in F$.
+	As $p \in \relint{\simplex}$, by Lemma~\ref{lem:finite-relint-dim}, we additionally have $p \in \relint{F}$, and in turn $\vec 0 \in \relint{F'}$.\jessie{Last part irrelevant?}
 	
+	Suppose $v \in F'$, and since $p \in \relint{F}$, there is an $\epsilon > 0$ so that for all $\alpha \in (-\epsilon, \epsilon)$, we have $p + \alpha v \in F \implies p + \alpha v \in \gamma_r$, since $F$ is convex, as are level sets of elicitable properties~\cite{lambert2009eliciting}.
+	By definition of $\Sc_{\gamma_r}(p)$, there is then an $\epsilon$ satisfying the requirement for $v \in \Sc_{\gamma_r}(p)$, so we can conclude $v \in \Sc_{\gamma_r}(p)$, yielding the desired result.
 	
+	\bigskip
+		
 % %commented out 01.21.2021 - Jessie
 %	\jessie{Revisit this proof}
 %	Observe $F-p$ is a subspace as it is a linear shift of $F$, which is a linear subspace by definition of a flat and the fact that it contains $\vec 0$ (since $F$ contains $p$, which we subtract from).
@@ -1155,8 +1176,8 @@ The next result helps us generalize Lemma~\ref{lem:feas-sub-is-a-flat} to any $p
 	First, observe $L'$ (eliciting $\Gamma$) indirectly elicits $\gamma' := \prop{\ell'}$ since, for all $p \in \simplex$, and therefore all $p \in \Delta_{\Y'}$, we have $p \in \Gamma_u \implies p \in \gamma_{\psi(u)}$, and $\Gamma(p) = \Gamma'(p)$ and $\gamma(p) = \gamma'(p)$ for $p \in \Delta_{\Y'}$.
 	This same observation can be used to observe that $L'$ is also calibrated with respect to $\ell'$ as the calibration bound holds for all $p \in \simplex$, and therefore for all $p \in \simplexp$ by equality of $\gamma$ and $\gamma'$ for $p \in \simplexp$.
 	
-	As $L'$ is calibrated with respect to $\ell'$ and indirectly elicits $\gamma' := \prop{\ell'}$, then by Theorem~\ref{thm:cvx-flats}, we know there exists a flat $F' \subseteq$ of codimension $d$ relative to $\reals^{\Y'}$ so that $\codim(F') \leq d$.
-	Moreover, as $d$ is the maximal codimension of such a flat, we show in Lemma~\ref{lem:feas-sub-is-a-flat} that $\Sc_{\gamma_r}(p)$ is one such flat, and we have $\dim(\Sc_{\gamma_r}(p)) \geq \dim(F') \geq \|p\|_0 - d- 1$.
+	As $L'$ is calibrated with respect to $\ell'$ and indirectly elicits $\gamma' := \prop{\ell'}$, then by Corollary~\ref{cor:Pcodim-flat-elic-relint-prop}, we know there exists a flat with $p \in F' \subseteq \gamma'_r$ \jessie{NOTATION- this $F'$ isn't $F - \{p\}$} of \Pcodimension at most $d$.\jessie{To my understanding, we still don't relate \Pcodimension to dimension? Or did I just miss that.}
+	Moreover, as $d$ is the maximal codimension of such a flat, we show in Lemma~\ref{lem:feas-sub-is-a-flat} that $\Sc_{\gamma_r}(p)$ is one such flat, and we have $\dim(\Sc_{\gamma_r}(p)) \geq \dim(F - \{p\}) \geq \|p\|_0 - d- 1$ by Lemma~\jessie{??}.
 	Lemma~\ref{lem:p-boundary-fsd} then states $\dim(\Sc_{\gamma'_r}(p)) = \dim(\Sc_{\gamma_r}(p))$, and from there we observe the result.
 	%	First, for intuition, consider $p \in \relint{\simplex}$. 
 	%	Theorem~\ref{thm:cvx-flats} implies that there exists a flat $F'$ of affine dimension at least $n-d-1$.
