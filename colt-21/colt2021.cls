@@ -1,6 +1,6 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{colt2021}[2021/02/01 v1.0 COLT 2021 Proceedings]
-\newcommand{\todo}{\color{red}}
+% \newcommand{\todo}{\color{red}}
 
 \@ifundefined{ifanonsubmission}{
   \newif\ifanonsubmission
