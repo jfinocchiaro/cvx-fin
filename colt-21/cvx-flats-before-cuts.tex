@@ -100,7 +100,6 @@
 \newcommand{\ellbar}{\underline{\ell}}
 \newcommand{\lbar}{\underline{L}} % couldn't do L* while proofreading...
 \newcommand{\iden}{\mathrm{iden}}
-\newcommand{\im}{\mathrm{im}}
 \newcommand{\Var}{\mathrm{Var}}
 
 \newcommand{\exploss}[3]{\E_{#3} #1(#2,Y)}
@@ -169,6 +168,7 @@ For statistic estimation, our lower bound gives new results for estimating varia
 \end{abstract}
 
 \section{Introduction}\label{sec:intro}
+\jessie{Without moving anything around, take a shot at storyboarding this.  Want enough detail to understand how much time to spend on each chunk.  (1 bullet per paragraph)}
 %supervised learning blah
 Surrogate risk minimization is one of the most widespread optimization heuristics in supervised machine learning.
 %A surrogate loss is often necessary for one of two reasons: (1) the target loss does not satisfy some desiderata, such as convexity, or (2) the target loss may not be given at all, as is often the case in continuous estimation problems, when one instead has a target conditional statistic to estimate from training data.
@@ -216,13 +216,13 @@ If given, we use $\ell: \R \times \Y \to \reals$ to denote a \emph{target loss},
 %where the goal is minimize expected loss, $\E ~ \ell(f(X),Y)$ for pairs $X,Y$ drawn from some distribution.
 Similarly, $L: \reals^d \times \Y \to \reals$ will typically denote a \emph{surrogate} loss, with surrogate predictions $u \in \reals^d$.
 We write $\L_d $ for the set of $\mathcal{B}(\reals^d) \otimes \Y$-measurable and lower semi-continuous surrogates $L : \reals^d \times\Y \to \reals$ such that $\E_p L(u,Y) < \infty$ for all $u \in \reals^d, p \in \P$, and are minimizable, in the sense that $\argmin_{u} \exploss{L}{u}{p}$ is nonempty for all $p\in\P$.
-\jessiet{Sufficient condition for $\A$-normal convex integrand: $L$ is lower semi-continuous and $\mathcal{B}(\A) \otimes \Y$-measurable; $\E_p L(u,Y)$ finite for all $u, p$, there exists a $u_0$ for each $p$ so that $\E_p L(u_0, Y)$ is finite and continuous for Rockefellar's corollary, though it's stricter than Ioffe and Tokhimorov IIRC}
+\jessie{Sufficient condition for $\A$-normal convex integrand: $L$ is lower semi-continuous and $\mathcal{B}(\A) \otimes \Y$-measurable; $\E_p L(u,Y)$ finite for all $u, p$, there exists a $u_0$ for each $p$ so that $\E_p L(u_0, Y)$ is finite and continuous for Rockefellar's corollary, though it's stricter than Ioffe and Tokhimorov IIRC}
 %Similarly, let $\L_d^{fin}$ be surrogates $L: \reals^d \times \Y \to \reals$ that are $\mathcal{B}(\reals^d) \otimes \Y$-measurable and minimizable, in the sense that $\argmin_{u} \exploss{L}{u}{p}$ is nonempty for all $p\in\P$-- we use this class of losses with finite $\Y$ in mind.
 Moreover, we write $\L = \cup_{d \in \mathbb{N}} \L_d$.
 A loss $\ell: \R\times \Y \to \reals$ is \emph{discrete} if $\R$ is a finite set.
 A surrogate $L:\U \times \Y \to \reals$ is \emph{convex} if $L(\cdot,y)$ is convex in $u$ almost surely in $\Y$.
 For a given $p\in\P$, the (conditional) \emph{regret}, or excess risk, of a loss $L$ is given by $R_L(u,p) := \exploss{L}{u}{p} - \inf_{u^*} \exploss{L}{u^*}{p}$.
-Typically, we notate finite report sets $\R$ (and $\R'$ if a second finite set is needed) and continuous prediction spaces $\reals^d$.
+Typically, we notate finite report sets $\R$ (and $\R'$ if a second finite set is needed) and continuous prediction spaces $\U \subseteq \reals^d$.
 
 
 % For a distribution $p \in \simplex$, we denote the expected target loss for prediction $r$ to be $\E_{Y \sim p} \ell(r, Y) := \ell(r; p)$.
@@ -276,11 +276,12 @@ Intuitively, calibration says one cannot achieve the optimal surrogate loss whil
 
 \begin{definition}[Calibrated]\label{def:calibrated-finite}
 	Let $\ell : \R \times \Y \to \reals$ be a discrete target loss.
-	A surrogate loss $L : \reals^d \times \Y \to \reals$  and link $\psi:\reals^d \to \R$ pair $(L, \psi)$ is \emph{calibrated with respect to} $\ell$ if 
+	A surrogate loss $L : \U \times \Y \to \reals$  and link $\psi:\U \to \R$ pair $(L, \psi)$ is \emph{calibrated with respect to} $\ell$ if 
 	\begin{equation}\label{eq:calibration}
-	\forall p \in \simplex: \inf_{u \in \reals^d : \psi(u) \not \in \argmin_r \E_p\ell(r,Y)} \exploss{L}{u}{p} > \inf_{u \in \reals^d} \exploss{L}{u}{p}~.~
+	\forall p \in \simplex: \inf_{u \in \U : \psi(u) \not \in \argmin_r \E_p\ell(r,Y)} \exploss{L}{u}{p} > \inf_{u \in \U} \exploss{L}{u}{p}~.~
 	\end{equation}
 \end{definition}
+Typically, we take $\U = \reals^d$ for some $d\in\mathbb{N}$.
 \btw{We could also replace $\U$ by $\reals^d$ throughout, but it seemed distracting in this section}
 
 Many works characterize calibrated surrogates for specific discrete target losses~\citep{zhang2004statistical,lin2004note,bartlett2006convexity,tewari2007consistency}, including the canonical 0-1 loss for binary and multiclass classification.
@@ -1046,11 +1047,12 @@ A hyperplane weakly separates two sets if its two closed halfspaces respectively
 \end{proof}
 
 \begin{lemma}\label{lem:finite-relint-dim}
-  Let the $d$-flat $F\subseteq \P$ (defined over finite $\Y$) contain some $p\in\relint{\P}$.
+  Let the $d$-flat $F\subseteq \P$ contain some $p\in\relint{\P}$.
   Then 
   \begin{enumerate}
   	\item[(i)] $p \in \relint{F}$; 
   	\item[(ii)] $\dim(\spn(F - \{p\})) \geq \dim(\spn(\P - \{p\})) - d$;
+  	\item[(iii)] Given a discrete elicitable property $\gamma: \P \toto \R$ and $r \in \gamma(p)$, we have $F - \{p\}$ contained in $\Sc_{\gamma_r}(p)$.
   \end{enumerate}
 \end{lemma}
 \begin{proof}
@@ -1066,46 +1068,29 @@ A hyperplane weakly separates two sets if its two closed halfspaces respectively
 	
 	(ii)
 	Let $p \in F$, and define $F_p := F - \{p\}$, $\P_p := \P - \{p\}$ and $T_W(v) = \E_{Y \sim v} W(Y)$ for the function $W : \Y \to \reals^d$ such that $F = \zeros{W}$.
-	(Such a function must exist by $F$ being a $d$-flat.)
-	We aim to show $\dim(\spn(F_p)) = \dim(\ker(T_W)) \geq \dim(\spn(P_p)) - d$.
-
-	The first equality follows if we show $\spn(F_p) = \ker(T_W)$.
-	Let $v \in \ker(T_W) = \{v \in \spn(\P_p) : T_W(v) = \vec 0\}$.
-	As $p \in \relint{\P}$ implies $\vec 0 \in \relint{F_p}$ as a Corollary of (i), there must exist an $\epsilon > 0$ so that $\epsilon v \in F_p$ and $-\epsilon v \in F_p$.
+	(Such a function must exist by $F$ being a $d$-representation.)
+	
+	Now let $v \in \ker(T_W) = \{v \in \spn(\P_p) : T_W(v) = \vec 0\}$.
+	There must exist an $\epsilon > 0$ so that $\epsilon v \in F_p$ and $-\epsilon v \in F_p$ $p \in \relint{\P}$ implies $\vec 0 \in \relint{F_p}$ by (1.).
 	Moreover, we have $\pm \epsilon v \in \ker(T_W)$ by linearity of expectation, so $v \in \relint{\ker(T_W)}$.
 	This allows us to conclude $\spn(F_p) = \ker(T_W)$.\jessie{Right?}
 	
-	Now, $\dim(\ker(T_W)) \geq \dim(\spn(P_p)) - d$ follows from the rank nullity theorem, as $\P$ is defined as a set of probability distributions over a finite outcome set $\Y$.
-	The rank-nullity theorem states $\dim(\im(T_W)) + \dim(\ker(T_W)) = \dim(\spn(\P_p))$.
-	As $\dim(\im(T_W)) \geq d$, this yields the desired inequality.
+	We want to show $F_p = \P_p \cap \ker(T_W)$, then derive the result from there. \jessie{I don't see why this is necessary.}
 	
-	Chaining the results together yields $\dim(\spn(F_p)) \geq \dim(\spn(\P_p)) - d$.
+	In order to see this, consider $v \in F_p \iff v + p \in F$, and similarly for $\P_p$.
+	Now, as $F \subseteq \P$ by construction, we have $F_p \subseteq \P_p$, and since $\spn(F_p) = \ker(T_W)$, we additionally have $F_p \subseteq \ker(T_W)$, yielding $F_p \subseteq \P_p \cap \ker(T_W)$.
+	Now consider $v \in \P_p \cap \ker(T_W)$; we know that $\E_v W = \vec 0$, and therefore, $\E_{q} W = \vec 0$, so $v \in F_p$, thus $F_p = \P_p \cap \ker(T_W)$.
 	
-%	Now let $v \in \ker(T_W) = \{v \in \spn(\P_p) : T_W(v) = \vec 0\}$.
-%	There must exist an $\epsilon > 0$ so that $\epsilon v \in F_p$ and $-\epsilon v \in F_p$ $p \in \relint{\P}$ implies $\vec 0 \in \relint{F_p}$ by (1.).
-%	Moreover, we have $\pm \epsilon v \in \ker(T_W)$ by linearity of expectation, so $v \in \relint{\ker(T_W)}$.
-%	This allows us to conclude $\spn(F_p) = \ker(T_W)$.\jessie{Right?}
-%	
-%	We want to show $F_p = \P_p \cap \ker(T_W)$, then derive the result from there. \jessie{I don't see why this is necessary.}
-%	
-%	In order to see this, consider $v \in F_p \iff v + p \in F$, and similarly for $\P_p$.
-%	Now, as $F \subseteq \P$ by construction, we have $F_p \subseteq \P_p$, and since $\spn(F_p) = \ker(T_W)$, we additionally have $F_p \subseteq \ker(T_W)$, yielding $F_p \subseteq \P_p \cap \ker(T_W)$.
-%	Now consider $v \in \P_p \cap \ker(T_W)$; we know that $\E_v W = \vec 0$, and therefore, $\E_{q} W = \vec 0$, so $v \in F_p$, thus $F_p = \P_p \cap \ker(T_W)$.
-%	
-%	Since $\spn(F_p) = \ker(T_W)$, we have $\dim(\spn(F_p)) = \dim(\ker(T_W)) \geq \dim(\spn(\P_p)) - d$ by \jessie{isomorphism theorem} since $F_p = \ker(T_W) \cap \P_p$. \jessie{??}
-\end{proof}
-
-\begin{lemma}\label{lem:Fp-subset-feasible-subset}
-Suppose we are given $p \in \relint{P}$, property $\gamma: \P \toto \R$, and report $r \in \gamma(p)$.
-If $\gamma$ is indirectly elicited by a convex $L \in \L_d$, then there is a $d$-flat $F$ such that $p \in F$ and $F_p := F - \{p\} \subseteq \Sc_{\gamma_r}(p)$.	
-\end{lemma}
-\begin{proof}
-	Construct $F$ as in Theorem~\ref{thm:convex-flats-inf-dim}; this flat $F$ is a $d$-flat, contains $p$, and we have $F \subseteq \gamma_r$.
+	Since $\spn(F_p) = \ker(T_W)$, we have $\dim(\spn(F_p)) = \dim(\ker(T_W)) \geq \dim(\spn(\P_p)) - d$ by \jessie{isomorphism theorem} since $F_p = \ker(T_W) \cap \P_p$. \jessie{??}
+	
+	\bigskip
+	
+	(iii)
 	We aim to show $v \in F_p \implies v \in \Sc_{\gamma_r}(p)$.
-	By~\ref{lem:finite-relint-dim} (i), we know $p \in \relint{F}$, and therefore, $\vec 0 \in \relint{F_p}$.
+	By (i), we know $p \in \relint{F}$, and therefore, $\vec 0 \in \relint{F_p}$.
 	Consider $v \in F_p$.
 	By $F_p$ being convex and $\vec 0 \in \relint{F_p}$, we know there exists an $\alpha > 0$ so that $-\alpha v \in F_p$.
-	This implies $p - \alpha v \in F \implies p - \alpha v \in \gamma_r \implies v \in \Sc_{\gamma_r}(p)$ since $F$ and $\Sc_{\gamma_r}(p)$ are convex and $F \subseteq \gamma_r$.
+	This implies $p - \alpha v \in F \implies p - \alpha v \in \gamma_r \implies v \in \Sc_{\gamma_r}(p)$ since $F$ and $\Sc_{\gamma_r}(p)$ are convex and by construction of $F$ as the kernel space of a subgradient of a convex loss\jessiet{We need the loss setup here and the loss to be convex... makes me think this last part should be pulled out into its own statement.}
 	This yields the desired result, $F_p \subseteq \Sc_{\gamma_r}(p)$.
 \end{proof}
 
@@ -1116,32 +1101,20 @@ If $\gamma$ is indirectly elicited by a convex $L \in \L_d$, then there is a $d$
 \begin{proof}
 	If $\gamma_r = \gamma_{r'}$, we are done.
 	Otherwise, Lemma \ref{lem:intersect-levelsets} gives a hyperplane $H = \{ x \in \reals^\Y : v \cdot x = 0\}$ and a guarantee that $\gamma_r \subseteq \{ q \in \simplex : v \cdot q \leq 0\}$, while $\gamma_{r'} \subseteq \{ q \in \simplex : v \cdot q \geq 0 \}$, and finally $\gamma_r \cap \gamma_{r'} \subseteq H$.
-
-Suppose $F \subseteq \gamma_r$.
-We show $F \subseteq \gamma_{r'}$.
-Let $q \in F$.
-Since, by Lemma~\ref{lem:finite-relint-dim} (i), we have $p \in \relint{F}$, there is a $\epsilon > 0$ so that $q' = p - \epsilon (q-p) \in F$
-
-Now, suppose for contradiction that $q \not\in \gamma_{r'}$.\jessiet{I think this count be made more concise, but is clearest this way; it's a bit tricky with the movement between discussing flats and hyperplanes and being subsets of level sets, etc.}
-Then $v \cdot q < 0$: containment in $\gamma_r$ gives $v \cdot q \leq 0$, and if $v \cdot q = 0$ then $q \in \gamma_r \cap H \implies q \in \gamma_{r'}$, a contradiction.
-But, noting that $p \in H$, we have $v \cdot q' = -\epsilon (v \cdot q) > 0$, so $q'$ is not in $\gamma_{r}$.
-This contradicts the assumption $F \subseteq \gamma_r$.
-Therefore, we must have $q \in \gamma_{r'}$, so we have shown $F \subseteq \gamma_{r'}$.
-Because $r$ and $r'$ were completely symmetric, this completes the proof.
-
-% %commented out 01.22.2021 - Jessie; incorporating Lemma that says p in relint(F)	
-%	Suppose $F \subseteq \gamma_r$.
-%	We show $F \subseteq \gamma_{r'}$.
-%	Let $q \in F$.
-%	We claim that for small enough $\epsilon$, the point $q' = p - \epsilon (q-p)$ is in $F$ as well.
-%	Containment in $F$ follows because both $p$ and $q$ are in $F$ and it is a flat, while containment in $\P$ follows because $p \in \relint\P$. \jessie{Does $\relint{F}$ actually come in here?}
-%	
-%	Now, suppose for contradiction that $q \not\in \gamma_{r'}$.
-%	Then $v \cdot q < 0$: containment in $\gamma_r$ gives $v \cdot q \leq 0$, and if $v \cdot q = 0$ then $q \in \gamma_r \cap H \implies q \in \gamma_{r'}$, a contradiction.
-%	But, noting that $p \in H$, we have $v \cdot q' = -\epsilon (v \cdot q) > 0$, so $q'$ is not in $\gamma_{r}$.
-%	This contradicts the assumption $F \subseteq \gamma_r$.
-%	Therefore, we must have $q \in \gamma_{r'}$, so we have shown $F \subseteq \gamma_{r'}$.
-%	Because $r$ and $r'$ were completely symmetric, this completes the proof.
+	
+	Suppose $F \subseteq \gamma_r$.
+	We show $F \subseteq \gamma_{r'}$.
+	Let $q \in F$.
+	%By Lemma~\ref{lem:finite-relint-dim} part (1.), we also have $q \in \relint{F}$
+	We claim that for small enough $\epsilon$, the point $q' = p - \epsilon (q-p)$ is in $F$ as well.
+	Containment in $F$ follows because both $p$ and $q$ are in $F$ and it is a flat, while containment in $\P$ follows because $p \in \relint\P$. \jessie{Does $\relint{F}$ actually come in here?}
+	
+	Now, suppose for contradiction that $q \not\in \gamma_{r'}$.
+	Then $v \cdot q < 0$: containment in $\gamma_r$ gives $v \cdot q \leq 0$, and if $v \cdot q = 0$ then $q \in \gamma_r \cap H \implies q \in \gamma_{r'}$, a contradiction.
+	But, noting that $p \in H$, we have $v \cdot q' = -\epsilon (v \cdot q) > 0$, so $q'$ is not in $\gamma_{r}$.
+	This contradicts the assumption $F \subseteq \gamma_r$.
+	Therefore, we must have $q \in \gamma_{r'}$, so we have shown $F \subseteq \gamma_{r'}$.
+	Because $r$ and $r'$ were completely symmetric, this completes the proof.
 \end{proof}
 
 \subsection{Reconstructing the result of~\citet[Theorem 16]{ramaswamy2016convex}}
