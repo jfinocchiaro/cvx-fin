@@ -66,6 +66,7 @@
 \newcommand{\elicembed}{\mathrm{elic}_\mathrm{embed}}
 \newcommand{\ccdim}{\mathrm{cc\,dim}}
 \newcommand{\rank}{\mathrm{rank}}
+\newcommand{\proj}{\mathrm{proj}}
 \newcommand{\supp}{\mathrm{supp}}
 \newcommand{\spn}{\mathrm{span}}
 
@@ -632,7 +633,7 @@ Due to the infimum in the definition of calibration, the original proof requires
 	\jessie{Redid this citing Lemma~\ref{lem:finite-relint-dim} instead}
 	First, take $p \in \relint{\simplex}$ for intuition, so $\|p\|_0 = n$.
 	Lemma~\ref{thm:convex-flats-inf-dim} guarantees the existence of a $d$-flat $F$ with $p \in F \subseteq \gamma_r$.
-	Moreover, since $p \in \relint{\simplex}$, the flat $F$ satisfies the requirements of Lemma~\ref{lem:finite-relint-dim}, and the bound $\dim(\Sc_{\gamma_r}(p)) \geq \spn(F - \{p\}) \geq n - d- 1$ is given by chaining ~\ref{lem:finite-relint-dim} (ii) and Lemma~\ref{lem:Fp-subset-feasible-subset}.
+	Moreover, since $p \in \relint{\simplex}$, the flat $F$ satisfies the requirements of Lemma~\ref{lem:finite-relint-dim}, and the bound $\dim(\Sc_{\gamma_r}(p)) \geq \spn(F - \{p\}) \geq n - d- 1$ is given by chaining Lemma~\ref{lem:finite-relint-dim} (ii) and Lemma~\ref{lem:Fp-subset-feasible-subset}.
 %	By Lemma~\ref{lem:Pcodim-codim-finite}, this implies the existence of a matrix $W$ such that $p \in \{q \in \simplex : Wq = \vec 0 \} = F \subseteq \gamma_r$ and $\codim(W) \leq d$.
 %	%dimension at least $n-d-1$ with $p \in F$ and $F \cap \simplex \subseteq \gamma_r$. 
 %	For $p \in \relint{\simplex}$, this implies that $\Sc_{\gamma_r}(p) \supseteq F - p$.
@@ -1005,30 +1006,46 @@ A hyperplane weakly separates two sets if its two closed halfspaces respectively
   \end{enumerate}
 \end{lemma}
 \begin{proof}
-  \raf{Moved; see margin comment:  for the function $W : \Y \to \reals^d$ such that $F = \zeros{W}$.
-    (Such a function must exist by $F$ being a $d$-flat.)}
+  %\raf{Moved; see margin comment:  for the function $W : \Y \to \reals^d$ such that $F = \zeros{W}$.  (Such a function must exist by $F$ being a $d$-flat.)}
+  
+  As $F$ is a $d$-flat, we have some $W:\Y \to \reals^d$ such that $F = \zeros{W}$.
+  Define $F_p := F - \{p\}$, $\P_p := \P - \{p\}$ and $T_W:\spn(\P_p)\to\reals^d, v\mapsto \E_v W$.
   
   (i)
-  Since $p \in \relint{\P}$, there is some small enough $\epsilon > 0 $ so that for $q \in \P$\raft{You want the quantification order of $\epsilon$ and $q$ swapped I think; also, add ``for all'' for clarity}, $\alpha \in (-\epsilon,\epsilon)$, the point $q_\alpha := p - \alpha(q - p)$ is still in $\P$.
+  Since $p \in \relint{\P}$, for all $q \in \P$, there is some small enough $\epsilon > 0 $ so that for all $\alpha \in (-\epsilon,\epsilon)$, the point $q_\alpha := p - \alpha(q - p)$ is still in $\P$.
+  \jessiet{Probably a dumb question, but does this require $\P$ convex?}
   In particular, for $q \in F$, we claim $q_\alpha \in F$.
-  \raft{$V$ comes out of nowhere here, and then in the next bullet you introduce $W$ for the same thing. Better to do all that before both bullets. ``As $F$ is a $d$-flat, we have some $W$... $F=\zeros{W}$''.  Also, okay to just write $\E_p W$ not $\E_p W(Y)$, since technically $W$ is a random variable.}
-  As $p,q \in F$, we have $\E_pV = \E_qV = \vec 0$.
-  By linearity of expectation, we then have $\E_{q_\alpha} V = \vec 0$.
+  %\raft{$V$ comes out of nowhere here, and then in the next bullet you introduce $W$ for the same thing. Better to do all that before both bullets. ``As $F$ is a $d$-flat, we have some $W$... $F=\zeros{W}$''.  Also, okay to just write $\E_p W$ not $\E_p W(Y)$, since technically $W$ is a random variable.}
+  As $p,q \in F$, we have $\E_pW = \E_qW = \vec 0$.
+  By linearity of expectation, we then have $\E_{q_\alpha} W = \vec 0$.
   % (Y) = \E_p V(Y) - \alpha(\E_q V(Y) - \E_p V(Y)) = \vec 0 - \alpha(\vec 0 - \vec 0) = \vec 0$.
   This implies $q_\alpha \in F$, and therefore $p \in \relint{F}$.
   
   (ii)
-  Define $F_p := F - \{p\}$, $\P_p := \P - \{p\}$ and $T_W:\spn(\P_p)\to\reals^d, v\mapsto \E_v W$.
   We first show $\spn(F_p) = \ker(T_W)$.
-  Let $v \in \ker(T_W)$. % = \{v \in \spn(\P_p) : T_W(v) = \vec 0\}$.
-  From (i), as $p \in \relint{\P}$, we have $\vec 0 \in \relint{F_p}$.
-  Thus there is some $\epsilon > 0$ so that $\epsilon v \in F_p$ and $-\epsilon v \in F_p$.
-  Moreover, we have $\pm \epsilon v \in \ker(T_W)$ by linearity of expectation, so $v \in \relint{\ker(T_W)}$.
-  Hence, $\spn(F_p) = \ker(T_W)$.\jessie{Right?}\raf{Why? Hint: you want to show $v$ is in the span of $F_p$; in fact, it's a scalar multiple of something in $F_p$.}
+%  Let $v \in \ker(T_W)$. % = \{v \in \spn(\P_p) : T_W(v) = \vec 0\}$.
+%  From (i), as $p \in \relint{\P}$, we have $\vec 0 \in \relint{F_p}$.
+%  Thus there is some $\epsilon > 0$ so that $\epsilon v \in F_p$ and $-\epsilon v \in F_p$.
+%  As $\epsilon v \in F_p$, and $v$ is a scalar multiple of it, we additionally conclude $v \in \spn(F_p)$.
+%  Moreover, we have $\pm \epsilon v \in \ker(T_W)$ by linearity of expectation, so $v \in \relint{\ker(T_W)}$.
+%  Hence, $\spn(F_p) = \ker(T_W)$.\jessie{Right?}\raf{Why? Hint: you want to show $v$ is in the span of $F_p$; in fact, it's a scalar multiple of something in $F_p$.}
+%  
+%  
+  Let $v \in \spn(F_p)$.
+  Then there is some $\alpha$ so that $\alpha v \in F_p$.
+  This means $\E_{\alpha v} W = \vec 0$, which in turn implies $\alpha v \in \ker(T_W)$.
+  By linearity of expectation, we additionally have $v \in \ker(T_W)$.
+  Thus, $\spn(F_p) \subseteq \ker(T_W)$.
+  
+  Now let $v \in \ker(T_W)$, and $v' \in F_p$.
+  This means $\E_v W = \vec 0$, so it suffices to show $v = c v' \in F_p$, thus showing $v \in \spn(F_p)$.
+  Since $p \in \relint{\P}$, we must have $\vec 0 \in \relint{F_p}$, so we know there is some small enough $\epsilon > 0$ so that $-\alpha v' \in F_p$ for $\alpha \in (-\epsilon, \epsilon)$.
+  Take $c = -\alpha$, and we conclude $v \in \spn(F_p)$.
+  Therefore, $\ker(T_W) = \spn(F_p)$.
   
   As $\Y$ is a finite set, $\spn(\P_p)$ is a finite-dimensional vector space.
   The rank-nullity theorem states $\dim(\im(T_W)) + \dim(\ker(T_W)) = \dim(\spn(\P_p))$.
-  As $\dim(\im(T_W)) \leq d$, and we have shown above that $\spn(F_p) = \ker(T_W)$, the conclusion follows.\raft{Worth checking the diff for what I changed. Inequality was backwards :-)}
+  As $\dim(\im(T_W)) \leq d$, and we have shown above that $\spn(F_p) = \ker(T_W)$, the conclusion follows.\raft{Worth checking the diff for what I changed. Inequality was backwards :-)} \jessiet{Lol saw this comment in the diff before I pulled...}
   % 
   %	Now let $v \in \ker(T_W) = \{v \in \spn(\P_p) : T_W(v) = \vec 0\}$.
   %	There must exist an $\epsilon > 0$ so that $\epsilon v \in F_p$ and $-\epsilon v \in F_p$ $p \in \relint{\P}$ implies $\vec 0 \in \relint{F_p}$ by (1.).
@@ -1049,7 +1066,7 @@ Suppose we are given $p \in \relint{\P}$, property $\gamma: \P \toto \R$, and re
 If $\gamma$ is indirectly elicited by a convex $L \in \L_d$, then there is a $d$-flat $F$ such that $p \in F$ and $F_p := F - \{p\} \subseteq \Sc_{\gamma_r}(p)$.	
 \end{lemma}
 \begin{proof}
-	Construct $F$ as in Theorem~\ref{thm:convex-flats-inf-dim}\raft{Lemma?}; $F$ is a $d$-flat, contains $p$, and we have $F \subseteq \gamma_r$.
+	Construct $F$ as in Lemma~\ref{thm:convex-flats-inf-dim}; $F$ is a $d$-flat, contains $p$, and we have $F \subseteq \gamma_r$.
 	We aim to show $v \in F_p \implies v \in \Sc_{\gamma_r}(p)$.
 	By Lemma~\ref{lem:finite-relint-dim}(i), we know $p \in \relint{F}$, and therefore, $\vec 0 \in \relint{F_p}$.
 	Consider $v \in F_p$.
@@ -1070,13 +1087,13 @@ Suppose $F \subseteq \gamma_r$; we wish to show $F \subseteq \gamma_{r'}$.
 Let $q \in F$.
 By Lemma~\ref{lem:finite-relint-dim}(i), we have $p \in \relint{F}$, so there exists $\epsilon > 0$ so that $q' = p - \epsilon (q-p) \in F$.
 
-Now, suppose for contradiction that $q \not\in \gamma_{r'}$.\jessiet{I think this count be made more concise, but is clearest this way; it's a bit tricky with the movement between discussing flats and hyperplanes and being subsets of level sets, etc.}
+Now, suppose for contradiction that $q \not\in \gamma_{r'}$.\jessiet{I think this can be made more concise, but is clearest this way; it's a bit tricky with the movement between discussing flats and hyperplanes and being subsets of level sets, etc.}
 Then $v \cdot q < 0$: containment in $\gamma_r$ gives $v \cdot q \leq 0$, and if $v \cdot q = 0$ then $q \in \gamma_r \cap H \implies q \in \gamma_{r'}$, a contradiction.
 But, noting that $p \in H$, we have $v \cdot q' = -\epsilon (v \cdot q) > 0$, so $q'$ is not in $\gamma_{r}$.
 This contradicts the assumption $F \subseteq \gamma_r$.
 Therefore, we must have $q \in \gamma_{r'}$, so we have shown $F \subseteq \gamma_{r'}$.
 Because $r$ and $r'$ were completely symmetric, this completes the proof.
-
+%
 % %commented out 01.22.2021 - Jessie; incorporating Lemma that says p in relint(F)	
 %	Suppose $F \subseteq \gamma_r$.
 %	We show $F \subseteq \gamma_{r'}$.
@@ -1156,19 +1173,25 @@ The next result helps us generalize Lemma~\ref{lem:finite-relint-dim} to any $p$
 
 \hariresult*
 \begin{proof}
-	Let $L : \reals^d \times \Y \to \reals$ be a calibrated surrogate for $\ell$, and consider $\Y' := \supp(p)$ and what happens when we restrict $L$ and $\ell$ to only the outcomes in $\Y'$.
-	Take $L' := L|_{\Y'}$ and $\ell' := \ell|_{\Y'}$.
+	Let $L : \reals^d \times \Y \to \reals$ elicit $\Gamma$ be a calibrated surrogate for $\ell$, and consider $\Y^{\proj(q)} := \supp(q)$ for any $q \in \simplex$ and what happens when we restrict $L$ and $\ell$ to only the outcomes in $\Y^{\proj(q)}$.
+	Take $L^{\proj(q)} := L|_{\Y^{\proj(q)}}$ and $\ell^{\proj(q)} := \ell|_{\Y^{\proj(q)}}$.
+	In particular, take $\Y' = \Y^{\proj(p)}, L' = L^{\proj(p)}$, and $\ell' = \ell^{\proj(p)}$. 
+	By calibration, we have $L$ indirectly eliciting $\gamma$.
 	
-	First, observe $L'$ (eliciting $\Gamma$) indirectly elicits $\gamma' := \prop{\ell'}$ since, for all $p \in \simplex$, and therefore all $p \in \Delta_{\Y'}$, we have $p \in \Gamma_u \implies p \in \gamma_{\psi(u)}$, and $\Gamma(p) = \Gamma'(p)$ and $\gamma(p) = \gamma'(p)$ for $p \in \Delta_{\Y'}$.
-	This same observation can be used to observe that $L'$ is also calibrated with respect to $\ell'$ as the calibration bound holds for all $p \in \simplex$, and therefore for all $p \in \simplexp$ by equality of $\gamma$ and $\gamma'$ for $p \in \simplexp$.
 	
-	As $L'$ is calibrated (and consistent) with respect to $\ell'$ and indirectly elicits $\gamma' := \prop{\ell'}$, then by Corollary~\ref{cor:Pcodim-flat-elic-relint-prop}, we know there exists a $d$-flat $F$ with $p \in F \subseteq \gamma'_r$.
-	Taking $\P = \simplexp$ in Lemma~\ref{lem:finite-relint-dim}(ii) gives $\dim(\spn(F_p)) \geq \|p\|_0 - 1 - d$\raft{Might be nicer on the reader to add one more step for $\|p\|_0$. Also, I just realized we are using $p\in\simplex$ here, but then $p$ can't be in $F\subseteq\Delta_{\Y'}$ ($p$ is an $n$-vector). So maybe we need a $p'$ too.}.
-	Moreover, $F_p \subseteq \Sc_{\gamma'_r}(p)$ since $p \in \relint{F}$ by Lemma~\ref{lem:finite-relint-dim} part (3.)\raft{update ref}.
-	By Lemma~\ref{lem:p-boundary-fsd}, we additionally have $\Sc_{\gamma_r}(p) = \Sc_{\gamma'_r}(p)$.
+	Now, observe $L'$ (eliciting $\Gamma'$) indirectly elicits $\gamma' := \prop[\simplexp]{\ell'}$ since, for all $q \in \simplex$, taking $P(q) \in \simplexp$ to be $q$ projected onto $\simplexp$ by removing $0$ entries of $q$, and letting $p' = P(p)$, we have $p' \in \Gamma'_u \implies p' \in \gamma'_{\psi(u)}$.
+	Moreover, $\Gamma(p) = \Gamma'(p')$ and $\gamma(p) = \gamma'(p')$.
+	This same observation can be used to observe that $L'$ is also calibrated with respect to $\ell'$ as the calibration bound holds for all $q \in \simplex$, and therefore for all $P(q)$ by equality of $\gamma(q) = \gamma^{\proj(q)}(P(q))$.
+	
+	As $L'$ is calibrated (and consistent) with respect to $\ell'$ and indirectly elicits $\gamma' := \prop{\ell'}$, then by Corollary~\ref{cor:Pcodim-flat-elic-relint-prop}, we know there exists a $d$-flat $F$ with $p' \in F \subseteq \gamma'_r$.
+	Taking $\P = \simplexp$, we know $p' \in \relint{\simplexp}$ by construction, so we can apply Lemma~\ref{lem:finite-relint-dim}(ii), which gives $\dim(\spn(F_{p'})) \geq \dim(\spn(\P_{p'})) - d$.
+	Since $\P = \simplexp$ and $p' \in \relint{\simplexp}$, we have $\dim(\spn(\P_{p'})) = \dim(\affhull(\simplexp)) = \|p\|_0 - 1$.
+	Therefore, $\dim(\spn(F_p)) \geq \|p\|_0 - 1 - d$\raft{Might be nicer on the reader to add one more step for $\|p\|_0$. Also, I just realized we are using $p\in\simplex$ here, but then $p$ can't be in $F\subseteq\Delta_{\Y'}$ ($p$ is an $n$-vector). So maybe we need a $p'$ too.}.
+	Moreover, $F_{p'} \subseteq \Sc_{\gamma'_r}(p')$ since $p' \in \relint{F}$ by Lemma~\ref{lem:Fp-subset-feasible-subset}.
+	By Lemma~\ref{lem:p-boundary-fsd}, we additionally have $\Sc_{\gamma_r}(p) = \Sc_{\gamma'_r}(p')$.
 	Chaining these results, we obtain 
 	\begin{align*}
-	\dim(\Sc_{\gamma_r}(p)) = \dim(\Sc_{\gamma'_r}(p))  &\geq \dim(F_p) = \dim(\spn(F_p)) \geq \|p\|_0 - 1 - d~.~
+	\dim(\Sc_{\gamma_r}(p)) = \dim(\Sc_{\gamma'_r}(p'))  &\geq \dim(F_{p'}) = \dim(\spn(F_{p'})) \geq \|p\|_0 - 1 - d~.~
 	\end{align*}
 %
 %	this yields the bound $\dim(\spn(F-\{p\})) \geq \|p\|_0 - 1 - d$.
@@ -1313,7 +1336,7 @@ However, we cannot apply either at $p$ since $\gamma(p) = \{$rainy, snowy, sunny
 \citet[Theorem 16]{ramaswamy2016convex} cannot draw any conclusions about this property for two reasons that go hand in hand: first, we are given a target property instead of a target loss.
 Second, since the property is not elicitable (hence why there can be no target loss), we observe $\dim(\Sc_{\gamma_{\text{rainy}}}(p)) \neq \dim(\Sc_{\gamma_{\text{sunny}}}(p))$, so their result cannot be applied as~\citet[Lemma 23]{ramaswamy2016convex} does not hold.
 
-However, our bounds from Corollary~\ref{cor:Pcodim-flat-single-val-prop} on the distribution $q = (1/8, 3/4 - \epsilon, 1/8 + \epsilon)$ for a small enough $\epsilon > 0$, which we can apply since $\gamma(q) = \{$snowy$\}$, suggest that the convex elicitation complexity $\eliccvx(\gamma) \geq 2$, since there is no way to draw a $1$-flat (line)through $q$ while staying in just one level set on the simplex.
+However, our bounds from Corollary~\ref{cor:Pcodim-flat-single-val-prop} on the distribution $q = (1/8, 3/4 - \epsilon, 1/8 + \epsilon)$ for a small enough $\epsilon > 0$, which we can apply since $\gamma(q) = \{$snowy$\}$, suggest that the convex elicitation complexity $\eliccvx(\gamma) \geq 2$, since there is no way to draw a $1$-flat (line) through $q$ while staying in just one level set on the simplex.
 
 
 This example, although seemingly contrived, also extends to other decision-tree-like properties that do not have an explicit or easily constructed target loss.
