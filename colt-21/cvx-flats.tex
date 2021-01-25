@@ -211,7 +211,30 @@ The two examples above are seemingly unrelated given how different the settings 
 In risk estimation, on the other hand, we aim to estimate a continuous variable based on the desired summary statistic instead of target loss.
 These two types of problems have been historically studied with different mathematical tools because of these perceived differences; however, in this paper, we show formal connections between consistent surrogates and property elicitation, and leverage these to understand new bounds on prediction dimension for consistent surrogates that spans both settings. 
 
-\section{Background and Related work}\label{sec:related-work}
+\paragraph{The ``four quadrants'' of problem types}
+In addition to the two possible targets, we may have one of two domains: a \emph{discrete} (i.e.\ finite) target prediction space, like a classification problem, or a \emph{continuous} one, like a regression or estimation problem.
+We informally refer to the four resulting cases---target loss vs.\ target statistic, and discrete vs.\ continuous predictions---as the ``four quadrants'' of supervised learning problems, shown in Figure~\ref{fig:four-quadrants}.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.7\linewidth]{tikz/consistency-elicitation-calibration.pdf}
+	\caption{The four quadrants of prediction tasks; Theorem~\ref{thm:consistent-implies-indir-elic} allows us to understand the relationship between indirect elicitation and consistency in all four quadrants for the first time.\jessie{Move to side of figure}}
+	\label{fig:four-quadrants}
+\end{figure}
+
+
+\paragraph{Contributions}
+\jessiet{Almost definitely want to re-format and polish this.}
+Our contributions are as follows:
+\begin{itemize}
+	\item Formalize a notion of consistency with respect to a target statistic (Definition~\ref{def:consistent-prop}) and show its relationship to consistency with respect to a target loss (Lemma~\ref{lem:consistent-loss-implies-prop}).
+	\item Show indirect elicitation is a necessary condition for consistency (Theorem~\ref{thm:consistent-implies-indir-elic}).
+	\item Present a new framework for deriving lower bounds on the prediction dimension of consistent convex surrogates (Corollaries~\ref{cor:Pcodim-flat-single-val-prop} and~\ref{cor:Pcodim-flat-elic-relint-prop}).
+	These bounds are the first to our knowledge that can be applied in all four quadrants.
+	\item Use this framework to derive new bounds for well-studied problems such as abstain loss (\S~\ref{sec:finite-calib}) and variance, entropy, and norms (\S~\ref{sec:contin-consis}).
+\end{itemize}
+
+\section{Background and Related work}\label{sec:related-work}\jessie{Be careful with name of section}
 
 We consider supervised learning problems in the space $\X \times \Y$, for some \emph{feature space} $\X$ and a \emph{label space} $\Y$ of size $n$, with data drawn from a distribution $D$ over $\X \times \Y$.
 The task is to produce a hypothesis $f: \X \to \R$, for some \emph{prediction space} $\R$, which may be different from $\Y$.
@@ -238,14 +261,15 @@ Typically, we notate finite report sets $\R$ (and $\R'$ if a second finite set i
 
 \subsection{Consistency} \label{subsec:consistency}
 \jessiet{Looking at this now, sections 2.1-4 feel like a lot...}
-\jessie{I think the story we want to tell is as follows: there are these two types of problems where [convex] prediction dimension is important.  Typically, these problems are studied with different tools; here, we present a tool to bound prediction dimension in both settings.  This tool relies on property elicitation, which we show (somehow for the first time to our knowledge) can be formally connected to consistency.}
-\jessie{Could split into high level in previous work; ie previous work and setting are distinct.}
-\jessie{Top of 2 in setting}
+%\jessie{I think the story we want to tell is as follows: there are these two types of problems where [convex] prediction dimension is important.  Typically, these problems are studied with different tools; here, we present a tool to bound prediction dimension in both settings.  This tool relies on property elicitation, which we show (somehow for the first time to our knowledge) can be formally connected to consistency.}
+\jessiet{Could split into high level in previous work; ie previous work and setting are distinct.}
+\jessiet{Top of 2 in setting}
 \jessie{Want a clear distinction between what came before and what we're adding.}
-\jessie{Can defer Lemma 8 to appendix?  Maybe}
+
 
 
 %\bo{Citation help appreciated!} \jessie{\cite{fisher1922mathematical,zhang2004statistical,bartlett2006convexity,tewari2007consistency,steinwart2007compare,ramaswamy2016convex} -- these are the ones I know of that discuss consistency in slightly various forms.  I believe the definition we run with is most similar to \cite{ramaswamy2016convex}.}
+\jessiet{Make this subsection more concise?}
 A basic requirement of surrogate losses $L: \reals^d \times \Y \to \reals$ is consistency, which roughly means that minimizing $L$-loss corresponds to solving the target problem of interest.
 We consider two kinds of consistency.
 In the first, we are given a \emph{target loss} $\ell$, and we roughly define $L$ to be consistent if minimizing $L$ and applying a link, minimizes $\ell$ (Definition \ref{def:consistent-ell}).
@@ -253,12 +277,6 @@ This definition follows much of the machine learning literature~\citep{zhang2004
 In the second notion of consistency, we are given a \emph{target statistic}, such as the conditional variance or quantile, as in classical statistics, but no target loss.\jessie{citation for stats def}
 Here we will define $L$ to be consistent if minimizing $L$ and applying a link function yields estimates converging to the correct value, by some measure (Definition \ref{def:consistent-prop}).
 
-\jessiet{I think we should move this paragraph to the intro?}
-\paragraph{The ``four quadrants'' of problem types}
-In addition to the two possible targets, we may have one of two domains: a \emph{discrete} (i.e.\ finite) target prediction space, like a classification problem, or a \emph{continuous} one, like a regression or estimation problem.
-We informally refer to the four resulting cases---target loss vs.\ target statistic, and discrete vs.\ continuous predictions---as the ``four quadrants'' of supervised learning problems.
-\jessie{How does this paragraph change?}
-\jessie{Add image? tikz/consistency-elicitation-calibration.pdf}
 
 The goal of this paper is to give lower bounds on the dimension $d$ of consistent surrogate losses.
 A priori, it is not necessarily clear that compatible definitions of consistency could be given for both target statistics and target losses.
@@ -266,8 +284,9 @@ We observe that, in fact, target losses are a special case of target statistics 
 which suggests property elicitation (see \S~\ref{subsec:properties}) as being uniquely \jessie{not nec. uniquely?} suited to studying general lower bounds.
 % This technique will then allow us to prove lower bounds across all four quadrants.
 In prior work, most research on this problem focuses on the quadrant of target losses and discrete predictions~\citep{zhang2004statistical,bartlett2006convexity,tewari2007consistency,ramaswamy2015hierarchical,ramaswamy2016convex,ramaswamy2018consistent}.
-In particular, as definitions of consistency are relatively intractable to apply directly, the literature often focuses on a weaker condition called calibration, which only applies when given a discrete target loss. \jessie{Target doesn't have to be discrete, but $\Y$ finite, right?}
-\jessie{Make this section more concise?}
+In particular, as definitions of consistency are relatively intractable to apply directly, the literature often focuses on a weaker condition called calibration, which only applies when given a discrete target loss. 
+%\jessie{Target doesn't have to be discrete, but $\Y$ finite, right?}
+
 
 
 \subsection{Calibration}\label{subsec:calibration}
@@ -390,6 +409,7 @@ They construct a calibrated link functions from embeddings, which together with 
 \section{Consistency implies indirect elicitation}\label{sec:consis-implies-indir}
 
 \jessiet{Simplify; merge with Sec 4.  Jessie take a pass at proof sketch of Theorem 1.  Narrative here reads to me as ``hey this general result through calibration is our main contribution'' which I'm not sure if we particularly want.  Also want to double check how different our calibration definition is from Steinwart}
+\jessie{Can defer Lemma 8 to appendix?  Thoughts?}
 
 In this section, we show that indirect elicitation is necessary for consistency (Theorem \ref{thm:consistent-implies-indir-elic}) for losses in $\L$, while simultaneously applying to all of the above settings (our four quadrants). \jessiet{Tagging quadrant speak}
 For the case of a given discrete target loss, it is well-known that a surrogate is consistent if and only if it is calibrated (e.g.\,~\citep[Theorem 1, part 3]{bartlett2006convexity}).
@@ -1357,7 +1377,7 @@ However, our bounds from Corollary~\ref{cor:Pcodim-flat-single-val-prop} on the 
 This example, although seemingly contrived, also extends to other decision-tree-like properties that do not have an explicit or easily constructed target loss.
 \begin{figure}
 	\centering
-	\includegraphics[width=0.3\linewidth]{tikz/t-example.pdf}
+	\includegraphics[width=0.5\linewidth]{tikz/t-example.pdf}
 	\caption{A meteorology example with a bias towards citizen safety.}
 	\label{fig:t-example}
 \end{figure}
