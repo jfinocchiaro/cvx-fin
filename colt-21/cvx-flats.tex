@@ -59,6 +59,7 @@
 \newcommand{\posreals}{\reals_{>0}}%{\reals_{++}}
 \newcommand{\simplex}{\Delta_\Y}
 \newcommand{\relint}[1]{\mathrm{relint}(#1)}
+\newcommand{\interior}{\mathrm{int}\,}
 \newcommand{\prop}[2][\mathcal{P}]{\mathrm{prop}_{#1}[#2]}
 \newcommand{\elic}{\mathrm{elic}}
 \newcommand{\eliccvx}{\mathrm{elic}_\mathrm{cvx}}
@@ -119,6 +120,7 @@
 %\newtheorem{conjecture}{Conjecture}
 %\newtheorem{definition}{Definition}
 \newtheorem{assumption}{Assumption}
+\newtheorem{condition}{Condition}
 %\newtheorem{remark}{Remark}
 
 
@@ -695,7 +697,7 @@ The same line segment defines a flat contained in both $\gamma_\bot$ and $\gamma
 %In the literature, pinball loss $L(r,y) = (r-y)(\ones_{r \geq y} - \alpha)$ typically appears without explanation or justification as to why it is relevant in relation to the $\alpha$-quantile.
 %Elicitation teaches us why pinball loss is consistent for learning a quantile as the pinball loss elicits the $\alpha$-quantile.
 In continuous estimation problems, often one is not given a target loss, but instead a target (conditional) statistic of the data one wishes to estimate, such as the mean or variance.
-In this setting, Theorem~\ref{thm:cvx-flats} \jessie{Change ref} gives lower bounds on the prediction dimension of convex losses with a link to the desired conditional statistic, i.e., the convex elicitation complexity.
+In this setting, Lemma~\ref{thm:convex-flats-inf-dim} gives lower bounds on the prediction dimension of convex losses with a link to the desired conditional statistic, i.e., the convex elicitation complexity.
 In particular,
 % following an argument from~\citet{frongillo2018elicitation},
 Theorem~\ref{thm:bayes-risk-lower-bound} below yields new bounds on the convex elicitation complexity of statistics which quantify risk or uncertainty such as variance, entropy, or financial risk measures.
@@ -705,7 +707,7 @@ The lower bounds of that work are essentially all with respect to identifiable p
 In contrast, properties elicited by non-smooth convex losses are generally not identifiable.
 For example, the properties elicited by hinge loss and the abstain surrogate are not identifiable, as their level sets are not flats (see Figure~\ref{fig:fsd-bound}).
 Establishing a theory of elicitation complexity for convex-elicitable properties therefore seemed to require entirely new ideas.
-Surprisingly, we show that the central techniques of~\citet{frongillo2020elicitation} also apply to convex-elicitable properties, via \raf{MAIN THM}.
+Surprisingly, we show that the central techniques of~\citet{frongillo2020elicitation} also apply to convex-elicitable properties, via Lemma~\ref{thm:convex-flats-inf-dim}.
 In particular, we can recover their main lower bound for the large class of Bayes risks.
 
 % Theorem~\ref{thm:cvx-flats} also addresses one major open question  from~\citet{frongillo2015elicitation,frongillo2018elicitation}\jessiet{which citation?}: \emph{what are lower bounds on convex elicitation complexity?}
@@ -719,13 +721,14 @@ In particular, we can recover their main lower bound for the large class of Baye
 %   We write $\iden(\Gamma) = \min\{d \in \mathbb{N} : \Gamma\text{ is $d$-identifiable}\}$.
 % \end{definition}
 
-\begin{restatable}{theorem}{bayesrisklowerbound}\label{thm:bayes-risk-lower-bound}
-  Let $L$ elicit some $\Gamma:\simplex\to\reals^d$.
-  Let $p\in\relint\simplex$ and let $\Gamma_r$ be some level set of $\Gamma$ such that
-  (i) $p\in\Gamma_r$,
-  (ii) $\codim(\affhull(\Gamma_r))=d$, and
-  (iii) either $\Gamma_r$ is a singleton or $\lbar := \inf_u \E_p L(u,Y)$ is nonconstant on $\Gamma_r$.
-  Then $\eliccvx(\lbar) \geq \min(d+1,n-1)$.
+\begin{condition}\label{cond:v-interior}
+  There exists $r\in\range\Gamma$, such that $\Gamma_r = \zeros{V}$ is a $d$-flat presented by some $V:\Y\to\reals^d$ such that \raft{I think we only need $\Gamma_r \subseteq \zeros{V}$.  I think I'll update the proof at some point to reflect this, since it actually gets a bit easier to follow.} $0\in\interior\{\E_pV : p\in\P\}$.
+\end{condition}
+
+\begin{restatable}{theorem}{bayesrisklowerbound}\label{thm:bayes-risk-lower-bound}\btw{Old version for finite $\Y$ is in the NeurIPS 2020 submission; especially lots more detail on variance / norm / entropy examples}
+  Let $\Gamma:\P\to\reals^d$ satisfy Condition~\ref{cond:v-interior} for some $r\in\reals^d$.
+  Let $L$ elicit $\Gamma$ such that $\lbar$ is non-constant on $\Gamma_r$.
+  Then $\eliccvx(\lbar) \geq d+1$.
 \end{restatable}
 
 \begin{proof}[Proof sketch; full proof in Appendix~\ref{app:omitted-proofs}]
@@ -739,24 +742,25 @@ In particular, we can recover their main lower bound for the large class of Baye
 
 
 \paragraph{Example: Variance.}
-\jessie{Keep this}
-As a warm-up, let us see how to show $\eliccvx(\Var)=2$ whenever $|\Y|\geq 3$, meaning the lowest dimension of a convex loss to estimate conditional variance is 2~\citep{osband1985providing,lambert2018elicitation}.
+As a warm-up, let us see how to show $\eliccvx(\Var)=2$, meaning the lowest dimension of a convex loss to estimate conditional variance is 2~\citep{osband1985providing,lambert2018elicitation}.
 It is interesting to note that, to the best of our knowledge, even this simple bound is novel.
 While intuitively obvious, the lower bound of 2 is not trivial.
 In particular, the well-known fact that the variance is not elicitable does not yield this lower bound, as it does not rule out the variance being a link of a real-valued convex-elicitable property; cf.~\citet[Remark 1]{frongillo2018elicitation}.
 
-Let $\Y\subseteq\reals$ be a finite set with $n=|\Y|$.
-Observe that the variance of $Y$ is the Bayes risk of squared loss $L(r,y) = (r-y)^2$; as $L$ elicits the mean $\Gamma(p) = \{\E_p [Y]\}$, we have $\Var_p[Y] = \{\E_p (\E_pY - Y)^2 \} = \{\min_{r\in\reals} \E_p L(r,Y) \}$.
-To apply Theorem~\ref{thm:bayes-risk-lower-bound}, we take this $L$ and $\Gamma$ and $d=1$, and must choose an appropriate level set $\Gamma_r$; we choose $p = \tfrac 1 n \ones$ to be the uniform distribution and let $r=\E_pY$.
-We summarize three conditions here, leaving the full details to Appendix~\ref{app:variance-example}:
-(i) $p\in\Gamma_r$ by construction.
-(ii) Letting $v\in\reals^\Y$ with $v_y = y - r$, the flat $F = \ker W \cap \affhull(\simplex)$ for $W = [v]\in\reals^{1\times n}$ contains $\Gamma_r$, and has $\codim(\affhull(\Gamma_r)) = \rank(W) = 1 = d$.
-(iii)
-$\Gamma_r=\{p\}$ is a singleton for $n \leq 2 = d+1$, and for $n\geq 3$ there are enough degrees of freedom in $\simplex$ for there to be two distributions with mean $r$ and different variances.
+Let $\Y\subseteq\reals$.
+Observe that the variance of $Y$ is the Bayes risk of squared loss $L(r,y) = (r-y)^2$; as $L$ elicits the mean $\Gamma(p) = \E_p [Y]$, we have $\Var_p[Y] = \{\E_p (\E_pY - Y)^2 \} = \min_{r\in\reals} \E_p L(r,Y)$.
+To apply Theorem~\ref{thm:bayes-risk-lower-bound}, we take this $L$ and $\Gamma$ and $d=1$, and must choose an appropriate level set $\Gamma_r$
+\raf{Fill in details: $\P$ has two distributions with different means, and two with the same mean but different variances}
 
-Applying Theorem~\ref{thm:bayes-risk-lower-bound} gives $\eliccvx(\Var) \geq \min(2,n-1)$, as desired.
-In fact, this bound is tight for all $n$.
-For $n=1$ there is only one distribution and we have complexity $0$; for $n=2$ the mean itself, elicited by squared loss, determines the distribution; for $n\geq 3$ we may elicit the first two moments via the convex $L(r,y) = (r_1-y)^2 + (r_2-y^2)^2$, and recover the variance via $\psi(r) = r_2-r_1^2$.
+\raf{The bound is tight}
+We may elicit the first two moments via the convex $L(r,y) = (r_1-y)^2 + (r_2-y^2)^2$, and recover the variance via $\psi(r) = r_2-r_1^2$.
+
+\raf{Summarize in a Cor?}
+
+\paragraph{Example: Conditional Value at Risk.}
+
+
+
 
 \paragraph{Example: Entropy and Norms.}
 \jessie{Move to Appendix?}
