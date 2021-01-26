@@ -105,6 +105,7 @@
 \newcommand{\iden}{\mathrm{iden}}
 \newcommand{\im}{\mathrm{im}}
 \newcommand{\Var}{\mathrm{Var}}
+\newcommand{\CVaR}{\mathrm{CVaR}}
 
 \newcommand{\exploss}[3]{\E_{#3} #1(#2,Y)}
 \newcommand{\risk}[1]{\underline{#1}}
@@ -779,40 +780,53 @@ In particular, we can recover their main lower bound for the large class of Baye
   So $k \geq d + 1$.
 \end{proof}
 
+We now illustrate the theorem with two important examples: variance and conditional value at risk.
+Several other applications from \citet{frongillo2018elicitation}, such as spectral risk measures, entropy, and norms, follow similarly.
 
 \paragraph{Example: Variance.}
-As a warm-up, let us see how to show $\eliccvx(\Var)=2$, meaning the lowest dimension of a convex loss to estimate conditional variance is 2~\citep{osband1985providing,lambert2018elicitation}.
-It is interesting to note that, to the best of our knowledge, even this simple bound is novel.
-While intuitively obvious, the lower bound of 2 is not trivial.
-In particular, the well-known fact that the variance is not elicitable does not yield this lower bound, as it does not rule out the variance being a link of a real-valued convex-elicitable property; cf.~\citet[Remark 1]{frongillo2018elicitation}.
+As a warm-up, let us see how to show $\eliccvx(\Var)=2$, meaning the lowest dimension of a convex loss to estimate conditional variance is 2.%~\citep{osband1985providing,lambert2018elicitation}.
+This lower bound follows from Theorem~\ref{thm:bayes-risk-lower-bound} as the variance is the Bayes risk of squared loss $L(r,y) = (r-y)^2$, which elicits the mean $\Gamma(p) = \E_p Y$.
+Interestingly, while intuitively obvious, even this simple result is novel.
+In particular, the well-known fact that the variance is not elicitable does not yield a lower bound of 2, as it does not rule out the variance being a link of a real-valued convex-elicitable property; cf.~\citet[Remark 1]{frongillo2018elicitation}.
 
-Let $\Y\subseteq\reals$.
-Observe that the variance of $Y$ is the Bayes risk of squared loss $L(r,y) = (r-y)^2$; as $L$ elicits the mean $\Gamma(p) = \E_p [Y]$, we have $\Var_p[Y] = \{\E_p (\E_pY - Y)^2 \} = \min_{r\in\reals} \E_p L(r,Y)$.
-To apply Theorem~\ref{thm:bayes-risk-lower-bound}, we take this $L$ and $\Gamma$ and $d=1$, and must choose an appropriate level set $\Gamma_r$
-\raf{Fill in details: $\P$ has two distributions with different means, and two with the same mean but different variances}
-
-\raf{The bound is tight}
-We may elicit the first two moments via the convex $L(r,y) = (r_1-y)^2 + (r_2-y^2)^2$, and recover the variance via $\psi(r) = r_2-r_1^2$.
-
-\raf{Summarize in a Cor?}
+\begin{corollary}
+  \label{cor:variance}
+  Let $\P\subseteq\simplex$ for $\Y\subseteq \reals$, such that there exist $p,q,q'\in\P$ with $\E_p Y = \E_q Y \neq \E_{q'} Y$ and $\Var(p) \neq \Var(q)$.
+  \raft{Note to self: I think this condition is tight actually: if there is no such triple in $\P$, I think $\eliccvx(\Var) \leq 1$ (i.e., $\Var$ is constant or a function of the mean)}
+  Then $\eliccvx(\Var)=2$.
+\end{corollary}
+\begin{proof}
+  For the upper bound, we may elicit the first two moments via the convex loss $L(r,y) = (r_1-y)^2 + (r_2-y^2)^2$, and recover the variance via $\psi(r) = r_2-r_1^2$, giving $\eliccvx(\Var) \leq 2$.
+  Now for the lower bound.
+  Without loss of generality, $\E_qY < \E_{q'}Y$.
+  Let $r = \tfrac 1 2 \E_qY + \tfrac 1 2 \E_{q'}Y$, and define $V:\Y\to\reals, y\mapsto y-r$.
+  Then $\zeros{V} = \{p'\in\P \mid \E_{p'}Y=r\} = \Gamma_r$ where $\Gamma:p'\mapsto \E_{p'}Y$ is the mean.
+  As $\E_q Y < r < \E_{q'} Y$, we conclude $\E_q V < 0 < \E_{q'} V$.
+  We have now satisfied Condition~\ref{cond:v-interior} for $d=1$.
+  To apply Theorem~\ref{thm:bayes-risk-lower-bound}, it remains to show that $\Var$ is non-constant on $\Gamma_r$.
+  % and the identity $\Var(p') = \E_{p'} Y^2 - (\E_{p'} Y)^2$
+  By our assumptions and the definition of $\Var$, we have $\E_p Y^2 \neq \E_q Y^2$.
+  Letting $p_1 = \tfrac 1 2 q + \tfrac 1 2 q'$, $p_2 = \tfrac 1 2 p + \tfrac 1 2 q'$, we have $\E_{p_i}Y = r$ for $i\in\{1,2\}$, but $\E_{p_1} Y^2 = \tfrac 1 2 \E_qY^2 + \tfrac 1 2 \E_{q'}Y^2 \neq \tfrac 1 2 \E_pY^2 + \tfrac 1 2 \E_{q'}Y^2 = \E_{p_2}Y^2$.
+  As $p_1,p_2$ have the same mean but different second moments, we conclude $\Var(p_1) \neq \Var(p_2)$.
+\end{proof}
 
 \paragraph{Example: Conditional Value at Risk.}
 
+\citet{frongillo2018elicitation} observe that one of the most prominent financial risk measures, the conditional value at risk (CVaR), can be expressed as a Bayes risk.
+In particular, for $0 < \alpha < 1$, we may define
+\begin{align}
+  \CVaR_\alpha(p)
+  &= \inf_{r\in\reals} \E_p\left\{ \tfrac 1 \alpha(r-Y)\ones_{r\geq Y}- r\right\}~,
+  \label{eq:elic-complex-es-3}
+\end{align}
+which is the Bayes risk of the transformed pinball loss $L_\alpha(r,y) = \tfrac 1 \alpha(r-y)\ones_{r\geq y}-r$.
+In turn, $L_\alpha$ elicits the $\alpha$-quantile $q_\alpha(p) = \raf{DEF}$.
 
-
-
-\paragraph{Example: Entropy and Norms.}
-\jessie{Move to Appendix?}
-For another application, let us see how Theorem~\ref{thm:bayes-risk-lower-bound} implies $\eliccvx(G) = n-1$ for any strictly concave function $G:\simplex\to\reals$ of the distribution, including most entropy functions.
-In other words, there is no convex loss function allowing one to consistently estimate conditional entropy using fewer dimensions than required to estimate the conditional distribution itself.
-This observation also extends to norms; given any $k>1$, $G(p) = \|p\|_k^k$ is strictly convex, and hence $\eliccvx(\|\cdot\|_k) = n-1$, as otherwise we could link to $G$ via $\psi(r) = r^k$.
-These results illustrate the power of our technique.
-
-To show the bound, recall that $G$ is the Bayes risk of a proper loss defined by $L(p,y) = G(p) + s_p \cdot (\delta_y - p)$, where $\delta_y(y') = \ones\{y=y'\}$ is the point distribution on $y$ and $-s_p \in \partial (-G)(p)$ is a subgradient of $-G$ at $p$~\citep{gneiting2007strictly,reid2009surrogate,frongillo2014general}.
-Intuitively, since $L$ elicits the identity property $\Gamma(p)=p$, Theorem~\ref{thm:bayes-risk-lower-bound} should therefore give us a maximal lower bound ($n-1$), as the level sets of are $\Gamma$ have codimension $n-1$.
-For technical reasons, however, we need to drop a dimension from the prediction space, e.g.\ via the bijection $\varphi(p) = (p_1,\ldots,p_{n-1})$, defining $L'(p',y) = L(\varphi^{-1}(p'),y)$ which elicits $\Gamma'(p) = \varphi(p)$ but still has Bayes risk $G$.
-Now the conditions of Theorem~\ref{thm:bayes-risk-lower-bound} are easily checked, where again $p\in\relint\simplex$ is the uniform distribution and $r=\varphi(p)$: (i) is trivial, (ii) $\codim(\affhull(\Gamma_r')) = \codim(\{p\}) = n-1$, and (iii) $\Gamma_r'$ is a singleton.
-As with the variance example, the lower bound is easily matched, e.g.\ by $L_2(p',y) = \|\varphi^{-1}(p')-\delta_y\|_2^2$, which is convex in $p'$, and the link $\psi(p') = G(\varphi^{-1}(p'))$.
+\begin{corollary}
+  \label{cor:spectral-risks}
+  Let $\P$ \raf{four distributions: $p_0,p_1,p_2$ w/ increasing quantiles and $p_1'$ with the same quantile as $p_1$ but different tail}.
+  Then $\eliccvx(\CVaR_\alpha) = 2$.
+\end{corollary}
 
 
 \section{Conclusions and future work}\label{sec:conclusions}
