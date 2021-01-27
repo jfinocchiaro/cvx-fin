@@ -63,6 +63,7 @@
 \newcommand{\prop}[2][\mathcal{P}]{\mathrm{prop}_{#1}[#2]}
 \newcommand{\elic}{\mathrm{elic}}
 \newcommand{\eliccvx}{\mathrm{elic}_\mathrm{cvx}}
+\newcommand{\conscvx}{\mathrm{cons}_\mathrm{cvx}}
 \newcommand{\elicpoly}{\mathrm{elic}_\mathrm{pcvx}}
 \newcommand{\elicembed}{\mathrm{elic}_\mathrm{embed}}
 \newcommand{\ccdim}{\mathrm{cc\,dim}}
@@ -89,6 +90,7 @@
 \newcommand{\E}{\mathbb{E}}
 \newcommand{\F}{\mathcal{F}}
 \renewcommand{\L}{\mathcal{L}}
+\newcommand{\Lcvx}{\mathcal{L}^{\text{cvx}}}
 \newcommand{\I}{\mathcal{I}}
 \newcommand{\N}{\mathcal{N}}
 \newcommand{\R}{\mathcal{R}}
@@ -199,7 +201,7 @@ This BEP loss is consistent with respect to the target 0-1 modification $\ell(r,
 
 
 %in a seemingly unrelated setting, finance problems blah blah.
-In its own line of literature, financial institutions have sought scoring rules to learn banks' estimates of financial risk in their investments.\jessie{cite}
+In a seemingly unrelated problem, financial institutions have sought scoring rules to learn banks' estimates of financial risk in their investments.\jessie{cite}
 Given the desired measure of financial risk, such as the variance or Conditional Value at Risk (CVaR), auditing institutions are tasked with designing scoring rules that, directly or indirectly, incentivize truthfully estimating the desired statistic.
 For example, while there is no loss function that enables one to directly learn the variance, we can learn the first and second central moments \jessiet{how much detail to share?} by proper scoring rules, which yields an unbiased estimator of the variance.
 However, asking a bank for a large number of predictions may be infeasible by their own knowledge of the financial risk distribution.
@@ -209,15 +211,45 @@ To this end, learning desired statistics with a minimal number of reports also e
 
 
 % point out distinctions and how these seem like very different settings (e.g. loss vs no loss), but we'll be able to address both with the same techniques, modulo some simplicity in the proofs.
-The two examples above are seemingly unrelated given how different the settings are; in the abstain problem, we have a finite prediction problem where we want to design a consistent convex surrogate for a given target loss.
-In risk estimation, on the other hand, we aim to estimate a continuous variable based on the desired summary statistic instead of target loss.
-These two types of problems have been historically studied with different mathematical tools because of these perceived differences; however, in this paper, we show formal connections between consistent surrogates and property elicitation, and leverage these to understand new bounds on prediction dimension for consistent surrogates that spans both settings. 
+Despite their seeming differences, in this paper, we show formal connections between consistent surrogates and property elicitation, and leverage these to understand new bounds on prediction dimension for consistent surrogates that spans both settings. 
+Reducing surrogate prediction dimension which maintaining consistency is important to improve the computational complexity of the learning algorithm, as it decreases the dimension of the ERM optimization problem.
+Given a target loss or statistic, we provide a new framework for constructing lower bounds on this prediction dimension that supersedes previous results in the machine learning literature (Corollary~\ref{cor:fsd-bound}) and answers open questions of the elicitation literature (\jessie{cite}). 
+
 
 \paragraph{The ``four quadrants'' of problem types}
 Above, we discuss a significant divergence in previous frameworks: the difference in constructing a surrogate given a \emph{target loss} and a \emph{target statistic}.
 In addition to the two possible targets, we may have one of two domains: a \emph{discrete} (i.e.\ finite) target prediction space, like a classification problem, or a \emph{continuous} one, like a regression or estimation problem.
-We informally refer to the four resulting cases---target loss vs.\ target statistic, and discrete vs.\ continuous predictions---as the ``four quadrants'' of supervised learning problems, shown in Figure~\ref{fig:four-quadrants}.
+We informally refer to the four resulting cases---target loss vs.\ target statistic, and discrete vs.\ continuous predictions---as the ``four quadrants'' of supervised learning problems, shown in Table~\ref{tab:quadrants}.
 For further examples in the off-diagonal quadrants, see Appendix~\ref{app:omitted-examples}.
+
+\paragraph{Literature on consistency and calibration}% \label{subsec:consistency}
+%\bo{Citation help appreciated!} \jessie{\cite{fisher1922mathematical,zhang2004statistical,bartlett2006convexity,tewari2007consistency,steinwart2007compare,ramaswamy2016convex} -- these are the ones I know of that discuss consistency in slightly various forms.  I believe the definition we run with is most similar to \cite{ramaswamy2016convex}.}
+\jessiet{Make this subsection more concise?}
+A basic requirement of surrogate losses $L: \reals^d \times \Y \to \reals$ is consistency, which roughly means that minimizing $L$-loss corresponds to solving the target problem of interest.
+We consider two kinds of consistency.
+In the first, we are given a \emph{target loss} $\ell$, and we roughly define $L$ to be consistent if minimizing $L$ and applying a link, minimizes $\ell$ (Definition \ref{def:consistent-ell}).
+This definition follows much of the machine learning literature~\citep{zhang2004statistical,bartlett2006convexity,tewari2007consistency,steinwart2007compare,ramaswamy2016convex}.
+In the second notion of consistency, we are given a \emph{target statistic}, such as the conditional variance or quantile, as in classical statistics, but no target loss~\citep{gyorfi2006distribution, fan1998efficient,ruppert1997local}.
+Here we will define $L$ to be consistent if minimizing $L$ and applying a link function yields estimates converging to the correct value, by some measure (Definition \ref{def:consistent-prop}).
+\jessiet{Can trim this paragraph significantly}
+
+
+\jessiet{This paragraph a little redundant}
+The goal of this paper is to give lower bounds on the dimension $d$ of consistent surrogate losses.
+A priori, it is not necessarily clear that compatible definitions of consistency could be given for both target statistics and target losses.
+We observe that, in fact, target losses are a special case of target statistics (\S~\ref{sec:consis-implies-indir}),
+which suggests property elicitation (see \S~\ref{subsec:properties}) is well-suited to study general lower bounds.
+% This technique will then allow us to prove lower bounds across all four quadrants.
+In prior work, most research on this problem focuses on the quadrant of target losses and discrete predictions~\citep{zhang2004statistical,bartlett2006convexity,tewari2007consistency,ramaswamy2015hierarchical,ramaswamy2016convex,ramaswamy2018consistent}.
+In particular, as definitions of consistency are relatively intractable to apply directly, the literature often focuses on a weaker condition called calibration, which only applies when given a discrete target loss. 
+%\jessie{Target doesn't have to be discrete, but $\Y$ finite, right?}
+
+\jessiet{Proposed paragraph about calibration to replace \S 2.2}
+Given a target loss, calibration~\citep[Chapter 3]{steinwart2008support} is typically the tool used to study consistency.
+Particularly,~\citet{zhang2004statistical, lin2004note,bartlett2006convexity,tewari2007consistency,ramaswamy2016convex} show the equivalence of consistency and calibration in the first quadrant, where one is given a target statistic and discrete prediction set.
+We discuss the additional relationship of elicitation to calibration in Appendix~\ref{app:calibration}, and derive Theorem~\ref{thm:consistent-implies-indir-elic} via calibration.
+
+
 
 %\begin{figure}
 %	\begin{minipage}{0.25\linewidth}
@@ -235,9 +267,10 @@ For further examples in the off-diagonal quadrants, see Appendix~\ref{app:omitte
 	\begin{tabular}{|l||l|l|} 
 		\hline
 		& \emph{Target loss}  & \emph{Target statistic}\\ \hline \hline
-		\emph{Discrete prediction} & \textbf{Q1:} High-confidence classification \S~\ref{sec:finite-calib}  & \textbf{Q2:} Hierarchical prediction App.~\ref{app:omitted-examples}\\ \hline 
-		\emph{Continuous estimation} & \textbf{Q3:} AUC Optimization \jessie{??} & \textbf{Q4:} Variance, entropy, and norms \S~\ref{sec:contin-consis} \\ 
-		& \citet{gao2012consistency} & \\
+		\emph{Discrete} & \textbf{Q1:} Classification  & \textbf{Q2:} Hierarchical prediction\\ 
+		{\em prediction} & & \\ \hline 
+		\emph{Continuous } & \textbf{Q3:} Least-squares regression & \textbf{Q4:} Variance estimation\\ 
+		\emph{estimation}& & \\
 		\hline
 	\end{tabular}
 \caption{The four quadrants of problem types, with an example of interest for each.}
@@ -256,8 +289,7 @@ Our contributions are as follows:
 	\item Use this framework to derive new bounds for well-studied problems such as abstain loss (\S~\ref{sec:finite-calib}) and variance, entropy, and norms (\S~\ref{sec:contin-consis}).
 \end{itemize}
 
-\section{Background and Related work}\label{sec:related-work}
-\jessiet{Be careful with name of section}
+\section{Preliminaries \jessie{Setting?}}\label{sec:related-work}
 
 We consider supervised learning problems in the space $\X \times \Y$, for some \emph{feature space} $\X$ and a \emph{label space} $\Y$ of size $n$, with data drawn from a distribution $D$ over $\X \times \Y$.
 The task is to produce a hypothesis $f: \X \to \R$, for some \emph{prediction space} $\R$, which may be different from $\Y$.
@@ -267,13 +299,14 @@ As we focus heavily on conditional distributions $p := D_x = \Pr[Y|X=x]$ over $\
 If given, we use $\ell: \R \times \Y \to \reals$ to denote a \emph{target loss}, with predictions $r\in\R$.
 %where the goal is minimize expected loss, $\E ~ \ell(f(X),Y)$ for pairs $X,Y$ drawn from some distribution.
 Similarly, $L: \reals^d \times \Y \to \reals$ will typically denote a \emph{surrogate} loss, with surrogate predictions $u \in \reals^d$.
-We write $\L_d $ for the set of $\mathcal{B}(\reals^d) \otimes \Y$-measurable and lower semi-continuous surrogates $L : \reals^d \times\Y \to \reals$ such that $\E_p L(u,Y) < \infty$ for all $u \in \reals^d, p \in \P$, and are minimizable, in the sense that $\argmin_{u} \exploss{L}{u}{p}$ is nonempty for all $p\in\P$.
+We write $\L_d $ for the set of $\mathcal{B}(\reals^d) \otimes \Y$-measurable surrogates $L : \reals^d \times\Y \to \reals$ such that $\E_p L(u,Y) < \infty$ for all $u \in \reals^d, p \in \P$, and are minimizable, in the sense that $\argmin_{u} \exploss{L}{u}{p}$ is nonempty for all $p\in\P$.
+Moreover, $\Lcvx_d \subseteq \L_d$ is the set of convex losses in $\L_d$.
 \jessiet{Sufficient condition for $\A$-normal convex integrand: $L$ is lower semi-continuous and $\mathcal{B}(\A) \otimes \Y$-measurable; $\E_p L(u,Y)$ finite for all $u, p$, there exists a $u_0$ for each $p$ so that $\E_p L(u_0, Y)$ is finite and continuous for Rockefellar's corollary, though it's stricter than Ioffe and Tokhimorov IIRC}
 %Similarly, let $\L_d^{fin}$ be surrogates $L: \reals^d \times \Y \to \reals$ that are $\mathcal{B}(\reals^d) \otimes \Y$-measurable and minimizable, in the sense that $\argmin_{u} \exploss{L}{u}{p}$ is nonempty for all $p\in\P$-- we use this class of losses with finite $\Y$ in mind.
-Moreover, we write $\L = \cup_{d \in \mathbb{N}} \L_d$.
+Moreover, we write $\L = \cup_{d \in \mathbb{N}} \L_d$, and $\Lcvx = \cup_{d \in \mathbb{N}} \Lcvx_d$.
 A loss $\ell: \R\times \Y \to \reals$ is \emph{discrete} if $\R$ is a finite set.
 A surrogate $L:\reals^d \times \Y \to \reals$ is \emph{convex} if $L(\cdot,y)$ is convex in $u$ almost surely in $\Y$.
-\jessiet{Move this notation to section 6?}For a given $p\in\P$, the (conditional) \emph{regret}, or excess risk, of a loss $L$ is given by $R_L(u,p) := \exploss{L}{u}{p} - \inf_{u^*} \exploss{L}{u^*}{p}$.
+For a given $p\in\P$, the (conditional) \emph{regret}, or excess risk, of a loss $L$ is given by $R_L(u,p) := \exploss{L}{u}{p} - \inf_{u^*} \exploss{L}{u^*}{p}$.
 Typically, we notate finite report sets $\R$ and continuous prediction spaces $\reals^d$.
 
 
@@ -282,68 +315,7 @@ Typically, we notate finite report sets $\R$ and continuous prediction spaces $\
 
 
 
-\subsection{Consistency \jessie{and calibration}} \label{subsec:consistency}
-\jessiet{Looking at this now, sections 2.1-4 feel like a lot...}
-%\jessie{I think the story we want to tell is as follows: there are these two types of problems where [convex] prediction dimension is important.  Typically, these problems are studied with different tools; here, we present a tool to bound prediction dimension in both settings.  This tool relies on property elicitation, which we show (somehow for the first time to our knowledge) can be formally connected to consistency.}
-\jessiet{Could split into high level in previous work; ie previous work and setting are distinct.}
-\jessiet{Top of 2 in setting}
-\jessie{Want a clear distinction between what came before and what we're adding.}
 
-
-
-%\bo{Citation help appreciated!} \jessie{\cite{fisher1922mathematical,zhang2004statistical,bartlett2006convexity,tewari2007consistency,steinwart2007compare,ramaswamy2016convex} -- these are the ones I know of that discuss consistency in slightly various forms.  I believe the definition we run with is most similar to \cite{ramaswamy2016convex}.}
-\jessiet{Make this subsection more concise?}
-A basic requirement of surrogate losses $L: \reals^d \times \Y \to \reals$ is consistency, which roughly means that minimizing $L$-loss corresponds to solving the target problem of interest.
-We consider two kinds of consistency.
-In the first, we are given a \emph{target loss} $\ell$, and we roughly define $L$ to be consistent if minimizing $L$ and applying a link, minimizes $\ell$ (Definition \ref{def:consistent-ell}).
-This definition follows much of the machine learning literature~\citep{zhang2004statistical,bartlett2006convexity,tewari2007consistency,steinwart2007compare,ramaswamy2016convex}.
-In the second notion of consistency, we are given a \emph{target statistic}, such as the conditional variance or quantile, as in classical statistics, but no target loss~\citep{gyorfi2006distribution, fan1998efficient,ruppert1997local}.
-Here we will define $L$ to be consistent if minimizing $L$ and applying a link function yields estimates converging to the correct value, by some measure (Definition \ref{def:consistent-prop}).
-\jessiet{Can trim this paragraph significantly}
-
-
-The goal of this paper is to give lower bounds on the dimension $d$ of consistent surrogate losses.
-A priori, it is not necessarily clear that compatible definitions of consistency could be given for both target statistics and target losses.
-We observe that, in fact, target losses are a special case of target statistics (\S~\ref{sec:consis-implies-indir}),
-which suggests property elicitation (see \S~\ref{subsec:properties}) is well-suited to study general lower bounds.
-% This technique will then allow us to prove lower bounds across all four quadrants.
-In prior work, most research on this problem focuses on the quadrant of target losses and discrete predictions~\citep{zhang2004statistical,bartlett2006convexity,tewari2007consistency,ramaswamy2015hierarchical,ramaswamy2016convex,ramaswamy2018consistent}.
-In particular, as definitions of consistency are relatively intractable to apply directly, the literature often focuses on a weaker condition called calibration, which only applies when given a discrete target loss. 
-%\jessie{Target doesn't have to be discrete, but $\Y$ finite, right?}
-
-\jessiet{Proposed paragraph about calibration to replace \S 2.2}
-Given a target loss, calibration~\citep[Chapter 3]{steinwart2008support} is typically the tool used to study consistency.
-Particularly,~\citet{zhang2004statistical, lin2004note,bartlett2006convexity,tewari2007consistency,ramaswamy2016convex} show the equivalence of consistency and calibration in the first quadrant, where one is given a target statistic and discrete prediction set.
-We discuss the additional relationship of elicitation to calibration in Appendix~\ref{app:calibration}, and derive Theorem~\ref{thm:consistent-implies-indir-elic} via calibration.
-
-
-\subsection{Calibration}\label{subsec:calibration}
-
-When given a discrete target loss, such as for classification-like problems, direct empirical risk minimization is typically NP-hard, forcing one to find a more tractable surrogate.
-To ensure consistency, the literature has embraced the notion of \emph{calibration} from~\citet[Chapter 3]{steinwart2008support}, which aligns with the definition in~\citet{tewari2007consistency} for multiclass classification, and its generalizations to arbitrary discrete target losses~\citep{agarwal2015consistent,ramaswamy2016convex}.
-Calibration is more tractable and weaker than consistency, yet the two are equivalent under suitable assumptions~\citep{tewari2007consistency,ramaswamy2016convex}.
-Intuitively, calibration says one cannot achieve the optimal surrogate loss while linking to a suboptimal target prediction.
-
-% For discrete prediction problems, we often start with a target loss $\ell$ in mind: for classification, 0-1 loss comes to mind; for high-confidence classification, a variation of 0-1 loss that allows a constant, moderate penalty for abstaining can be used.
-% However, optimizing over a target loss is often a computationally hard problem.
-% This is why we use surrogate losses, but desire consistency to guarantee the surrogate ``corresponds'' to the original loss.%, or property we want to predict, as is more common in the the continuous estimation setting.
-% A surrogate is no good on its own; we also need a link function to map from the surrogate prediction space back to the \emph{correct} prediction in the original prediction space.
-% This notion of a correct surrogate is typically captured by the notion of \emph{consistency}, introduced formally in Definitions~\ref{def:consistent-ell} and~\ref{def:consistent-prop}.
-% Related, and sometimes equivalent, is \emph{calibration}, which was the primary tool to study consistency until~\citet{agarwal2015consistent} introduced the use of property elicitation to study consistency in certain contexts.
-
-\begin{definition}[Calibrated]\label{def:calibrated-finite}
-	Let $\ell : \R \times \Y \to \reals$ be a discrete target loss.
-	A surrogate loss $L : \reals^d \times \Y \to \reals$  and link $\psi:\reals^d \to \R$ pair $(L, \psi)$ is \emph{$\P$-calibrated with respect to} $\ell$ if 
-	\begin{equation}\label{eq:calibration}
-	\forall p \in \P: \inf_{u \in \reals^d : \psi(u) \not \in \argmin_r \E_p\ell(r,Y)} \exploss{L}{u}{p} > \inf_{u \in \reals^d} \exploss{L}{u}{p}~.~
-	\end{equation}
-	We simply say $L$ is calibrated if $\P$ is understood from context.
-\end{definition}
-
-Many works characterize calibrated surrogates for specific discrete target losses~\citep{zhang2004statistical,lin2004note,bartlett2006convexity,tewari2007consistency}, including the canonical 0-1 loss for binary and multiclass classification.
-%Moreover, \citet{steinwart2007compare} and \citet{steinwart2008support} generalize the study of consistent losses from the discrete prediction setting and characterizes different types of loss functions, relating excess risk bounds, consistency, and calibration for various classes of surrogate losses (i.e. margin-based, distance-based, supervised, unsupervised, etc.).
-%See~\citet[Chapter 2]{steinwart2008support} for further discussion of these loss functions.
-In Appendix~\ref{app:calibration}, we give a definition of calibration which is a special case of calibration via~\citet{steinwart2008support}, and show it is equivalent to Definition~\ref{def:calibrated-finite} in discrete prediction settings, but can be applied in continuous estimation settings as well.
 
 
 \subsection{Property elicitation}\label{subsec:properties}
@@ -382,7 +354,7 @@ For single-valued properties, this definition reduces to the natural requirement
 The close connection between indirect elicitation and calibration was first explored by \citet{agarwal2015consistent}.
 In particular, calibration of $L \in \L$ with respect to $\ell$ implies indirect elicitation quite directly: take $u\in\reals^d$ and $p\in\Gamma_u$, implying $u\in\Gamma(p)$.
 From eq.~\eqref{eq:elic}, $\exploss{L}{u}{p} = \inf_{u'\in\reals^d} \exploss{L}{u'}{p}$, so we must have $\psi(u) \in \gamma(p)$ from eq.~\eqref{eq:calibration}, as desired.
-As a result, indirect elicitation is a necessary condition for consistency in this case, and in fact, we show this is true for all four quadrants (\S~\ref{sec:consis-implies-indir}). \jessiet{quadrant speak vs ``in both cases'' (discrete target loss vs continuous estimation)?}
+As a result, indirect elicitation is a necessary condition for consistency in this case, and in fact, we show this is true for all four quadrants (\S~\ref{sec:consis-implies-indir}).
 
 
 An important caveat to the above definitions is that, since $\Gamma = \prop[\P]{L}$ is nonempty everywhere, we must have $L\in\L$, meaning that $\exploss{L}{\cdot}{p}$ always achieves a minimum.
@@ -401,22 +373,30 @@ We expect that a generalization of property elicitation which allows for ``infin
 
 Various works have studied the minimum prediction dimension $d$ needed in order to construct a consistent surrogate loss $L: \reals^d \times \Y \to \reals$, typically through proxies such as calibration~\citep{steinwart2008support,agarwal2015consistent,ramaswamy2016convex} and property elicitation~\citep{frongillo2015vector-valued,fissler2016higher,frongillo2020elicitation}.
 %\raft{Nice!  Love ``proxies'' here.}
-For discrete target losses, \citet{ramaswamy2016convex} introduce \emph{convex calibration dimension}, the minimum prediction dimension yielding a convex calibrated surrogate.\jessiet{Discussion about how this is really about consistency}
+For discrete target losses, \citet{ramaswamy2016convex} introduce \emph{convex calibration dimension}, the minimum prediction dimension yielding a convex calibrated surrogate.
+In their setting (Quadrant 1), this is equivalent to convex consistency dimension (Definition~\ref{def:cvx-consistency-dim}).
 Their results have led to the design of consistent convex surrogates for discrete prediction problems such as hierarchical classification~\citep{ramaswamy2015hierarchical} and classification with an abstain option~\citep{ramaswamy2018consistent}.
 
 %\raft{FYI Jessie: Two general points.  (1) I spent the majority of my time in this section just on dependencies; e.g.\ you had ``similar to elicitation complexity mentioned above'' but elicitation complexity was not mentioned above.  Next time it would be more efficient if you made sure to balance local edits with global scans to catch these sorts of things, as well as making sure we aren't explaining things twice, etc.  (2) You tend to mix background with nods to our results, which is actually good to do, but it can be jarring if you go back and forth too much.  See for example how I changed the previous subsection, reserving the nod to our work to the end of the subsection.}\jessiet{Noted boss man}
 
-\begin{definition}[Convex Calibration Dimension]
-	Given a target discrete loss $\ell$, its \emph{convex calibration dimension} $\ccdim(\ell)$ is the minimum dimension $d$ such that there is a convex surrogate \mbox{$L: \reals^d \times \Y \to \reals$} and link $\psi$ such that $(L,\psi)$ is calibrated with respect to $\ell$.
-  \btw{Maybe take out of definition environment, but (a) I'd worry that people wouldn't be able to find the definition when we use it later, and (b) I'm hoping we can make the distinction very clear, which now is achieved by the parallel definitions}
+%\begin{definition}[Convex Calibration Dimension]
+%	Given a target discrete loss $\ell$, its \emph{convex calibration dimension} $\ccdim(\ell)$ is the minimum dimension $d$ such that there is a $L \in \Lcvx_d$ and link $\psi$ such that $(L,\psi)$ is calibrated with respect to $\ell$.
+%	jessiet{Change this def to be about consistent prediction dimension}
+%  \btw{Maybe take out of definition environment, but (a) I'd worry that people wouldn't be able to find the definition when we use it later, and (b) I'm hoping we can make the distinction very clear, which now is achieved by the parallel definitions}
+%\end{definition}
+
+\begin{definition}[Convex Consistency Dimension]\label{def:cvx-consistency-dim}
+	Given a target loss $\ell:\R \times\Y \to \reals$ or statistic $\gamma: \P \toto \R$, its \emph{convex consistency dimension} $\conscvx(\cdot)$ is the minimum dimension $d$ such that there is a $L \in \Lcvx_d$ and link $\psi$ such that $(L,\psi)$ is calibrated with respect to $\ell$ or $\gamma$.
+%	\btw{Maybe take out of definition environment, but (a) I'd worry that people wouldn't be able to find the definition when we use it later, and (b) I'm hoping we can make the distinction very clear, which now is achieved by the parallel definitions}
 \end{definition}
+Observe that this definition only makes sense given a target statistic with the introduction of consistency with respect to a statistic in Definition~\ref{def:consistent-prop}.
 
 In the case of a target statistic/property $\gamma$, \citet{lambert2008eliciting} similarly introduce the notion of \emph{elicitation complexity}, later generalized by \citet{frongillo2020elicitation}, which captures the lowest prediction dimension of a surrogate which indirectly elicits $\gamma$.
 This notion is more general as it extends to continuous estimation settings and does not inherently depend on a target loss being given. 
 % However, until now, no formal connection to consistency has been shown for convex elicitation complexity.
 
 \begin{definition}[Convex Elicitation Complexity]
-	Given a target property $\gamma$, the \emph{convex elicitation complexity} $\eliccvx(\gamma)$ is the minimum dimension $d$ such that there is a convex surrogate \mbox{$L : \reals^d \times \Y \to \reals$} indirectly eliciting $\gamma$.
+	Given a target property $\gamma$, the \emph{convex elicitation complexity} $\eliccvx(\gamma)$ is the minimum dimension $d$ such that there is a $L \in \Lcvx_d$ indirectly eliciting $\gamma$.
 \end{definition}
 In particular, $\eliccvx(\prop{\ell}) \leq \ccdim(\ell)$ when restricting to minimizable surrogates ($\L$).
 
@@ -455,12 +435,11 @@ Second, given a target property $\gamma$, such as the $\alpha$-quantile, we say 
 We then observe that Definition~\ref{def:consistent-ell} is subsumed by Definition~\ref{def:consistent-prop}, and use this to show consistency implies $L$ indirectly elicits $\prop{\ell}$ or $\gamma$ respectively.
 
 \begin{definition}[Consistent: loss]\label{def:consistent-ell}
-	Let \jessie{a convex} $\P \subseteq \simplex$ be given.
-	A loss and link $(L,\psi)$ are $\D$-consistent for a set $\D$ of distributions over $\X \times \Y$ with respect to a target loss $\ell$ if, for all distributions $p \in \P$, there exists an $x \in \X$ and marginal distribution $D_x \in \D$ such that for all sequences of measurable hypothesis functions $\{f_m : \X \to \R\}$,\jessiet{in a given hypothesis class?}
+	A loss and link $(L,\psi)$ are $\D$-consistent for a set $\D$ of distributions over $\X \times \Y$ with respect to a target loss $\ell$ if, for all $D \in \D$, such that for all sequences of measurable hypothesis functions $\{f_m : \X \to \R\}$,
 	\begin{align*}
 	\E_D L(f_m(X), Y) \to \inf_f \E_D L(f(X), Y) &\implies \E_D \ell((\psi \circ f_m)(X), Y) \to \inf_f \E_D \ell((\psi \circ f)(X), Y)~.~
 	\end{align*}
-If such a $\D$ exists, then we simply say $(L,\psi)$ is consistent.
+Given a set $\P \subseteq \simplex$, if for all distributions $p \in \P$, there exists an $x \in \X$ and $D \in \D$ with a point mass on $x$ such that $p = D_x$, then we simply say $(L,\psi)$ is consistent.
 \end{definition}
 
 
@@ -476,14 +455,15 @@ In particular we should have $\propdis(r,p) = 0 \iff r \in \gamma(p)$.
 \btw{Bo: Would be nice to give some natural special cases: for a finite property, $\propdis(r,p) = \Ind{r \in \gamma(p)}$, and for single-valued properties with a distance metric on $\R$, $\propdis(r,p) = \text{dist}(r, \gamma(p))$.}
 
 \begin{definition}[Consistent: property]\label{def:consistent-prop}
-	Suppose we are given a loss $L : \reals^d \times \Y \to \reals$, link function $\psi: \reals^d \to \R$, and property $\gamma:\P \toto \R$.
+	Suppose we are given a loss $L \in \L_d$, link function $\psi: \reals^d \to \R$, and property $\gamma:\P \toto \R$.
 	Moreover, let $\propdis : \R \times \P \to \reals_+$ be any function satisfying $\propdis(r,p) = 0 \iff r \in \gamma(p)$.
-	We say $(L, \psi)$ is \emph{$(\propdis, \D)$-consistent with respect to} $\gamma$ if, for all $p \in \P$, there exists a $D$ over $\X \times\Y$ and $x \in \X$ so that $D_x \in \D$, and for all sequences of measurable functions $\{f_m: \X \to \R\}$, 
+	We say $(L, \psi)$ is \emph{$(\propdis, \D)$-consistent with respect to} $\gamma$ if, for all $D \in \D$ and sequences of measurable functions $\{f_m: \X \to \R\}$, 
 	\begin{equation}
     \E_{D} L(f_m(X), Y) \to \inf_f \E_{D} L( f(X), Y) \implies \E_X \propdis(\psi \circ f_m(X), D_X) \to 0~.~
   \end{equation}
   %where $D_x = \Pr[Y|X=x]$.
-	We say $(L,\psi)$ is consistent with respect to $\gamma$ if there is such a $\propdis$ and $\D$ so that $(L,\psi)$ is $(\propdis, \D)$-consistent with respect to $\gamma$.
+  Suppose there is a set $\D$ such that, for all $p \in \P$, there is an $x \in \X$ and $D \in \D$ with a point mass on $x$ such that $p = D_x$ and a $\propdis$ satisfying the requirements above.
+  In this case, if $(L,\psi)$ are $(\propdis,\D)$-consistent, we simply say the pair is consistent with respect to $\gamma$.
 \end{definition}
 
 Typical definitions of consistency require $\D$ to be the set of all distributions over $\X \times \Y$, which allows for $\P = \simplex$, but our requirements on $\D$ are strictly weaker.
@@ -525,7 +505,7 @@ This points to indirect elicitation as a natural necessary condition for consist
 
 
 \begin{theorem}\label{thm:consistent-implies-indir-elic}
-	For a convex surrogate $L \in \L$, if the pair $(L, \psi)$ is consistent with respect to a property $\gamma: \P \toto \R$ or a loss $\ell$ eliciting $\gamma$, then $(L, \psi)$ indirectly elicits $\gamma$.
+	For a surrogate $L \in \L$, if the pair $(L, \psi)$ is consistent with respect to a property $\gamma: \P \toto \R$ or a loss $\ell$ eliciting $\gamma$, then $(L, \psi)$ indirectly elicits $\gamma$.
 	%\jessie{Require $\P \supseteq \cup_{D \in \D}\cup_x D_x$ and convex?  With our assumptions on the loss (namely, the expected loss is finite everywhere for all $p$), we should be able to apply Fubini-Tonelli, so that $\P \supseteq \cup_D \cup_x D_x$ and convex is sufficient, as any $D_X$ will be covered by this since the joint expectation is the same as $\E_X \E_Y L(u;D_X)$}\jessiet{Need $\X$ and $\Y$ to be $\sigma$-finite, which I think is immediate from them being probability measures} 
 	%\jessie{Union of convex hulls of $D_x$ is convex, and use the fact that we .  Better : assume $\P = \{D_x : x \in \X and D \in \D\}$}
 \end{theorem}
@@ -534,8 +514,8 @@ This points to indirect elicitation as a natural necessary condition for consist
 	By Lemma~\ref{lem:consistent-loss-implies-prop}, it suffices to show the result for consistency with respect to a property $\gamma$, setting $\gamma := \prop{\ell}$ if $\ell$ is given instead.
 	We show the contrapositive; suppose $(L, \psi)$ does not indirectly elicit $\gamma$, meaning we have some $p \in \P$ so that $u \in \Gamma(p)$ but $\psi(u) \not \in \gamma(p)$, where $\Gamma := \prop{L}$.
 	Observe that we use the fact $\Gamma(p) \neq \emptyset$.
-	Consider the constant sequence $\{f_m\}$ with $f_m(x) = u$ for all $m,x$, and take the $D\sim \X \times\Y$ and $x \in \X$ such that $D_x = p$.
-  Since $u \in \Gamma(p)$, we observe $\E_D L(f_m(X), Y) = \inf_f L(f(X),Y)$ for all $m$; in particular $\E_D L(f_m(X), Y) \to \inf_f L(f(X),Y)$.
+	Consider the constant sequence $\{f_m\}$ with $f_m(x) = u$ for all $m,x$, and take the $D\sim \X \times\Y$ with a point mass on $x' \in \X$ such that $D_{x'} = p$.
+  Since $u \in \Gamma(p)$, we observe $\E_D L(f_m(X), Y) = \inf_f \E_D L(f(X),Y)$ for all $m$; in particular $\E_p L(f_m(x), Y) \to \inf_f \E_p L(f(X),Y)$.
 %  \raft{Maybe clearer to first say $\E_D L(f_m(X), Y) = \inf_f L(f(X),Y)$ for all $m$, and then the easy implication of the convergence \jessie{Done}}
 	However, we have $\E_X \propdis(\psi \circ f_m(X), D_X) = \propdis(\psi(u_m), p) = \propdis(\psi(u), p) \neq 0$, since $\psi(u) \not \in \gamma(p)$.
 %  \raft{Almost -- just clarify that this is the expectation over $D$ too by construction \jessie{Kinda done?}}
@@ -580,7 +560,7 @@ Corollaries~\ref{cor:Pcodim-flat-single-val-prop} and~\ref{cor:Pcodim-flat-elic-
 
 \begin{lemma}
 	  \label{lem:convex-flats-inf-dim}
-	Let $\Gamma:\P \toto \reals^d$ be (directly) elicited by a convex $L \in \L_d$ for some $d\in\mathbb{N}$.
+	Let $\Gamma:\P \toto \reals^d$ be (directly) elicited by $L \in \Lcvx_d$ for some $d\in\mathbb{N}$.
 	For all $u\in\range\Gamma$ and $p\in\Gamma_u$, there is some $V_{u,p}:\Y\to\reals^d$ such that $p \in \zeros{V_{u,p}} \subseteq \Gamma_u$.
 \end{lemma}
 \begin{proof}
@@ -614,7 +594,7 @@ Corollaries~\ref{cor:Pcodim-flat-single-val-prop} and~\ref{cor:Pcodim-flat-elic-
 \begin{corollary}\label{cor:Pcodim-flat-single-val-prop}
 Let target property $\gamma:\P \toto \R$ and $d\in\mathbb N$ be given.
 Let $p \in \P$ with $|\gamma(p)| = 1$, and take $\gamma(p) = \{r\}$.
-If there is no $d$-flat $F$ with $p \in F \subseteq \gamma_r$, then no $L\in\L_d$ indirectly elicits $\gamma$\raft{To discuss next meeting: maybe it's better to say $\eliccvx(\gamma) > d$ instead of the indirectly elicits bit.  Both here and the next Cor.}, and in particular, there is no convex surrogate $L \in \L_d$ that is  consistent with respect to $\gamma$.
+If there is no $d$-flat $F$ with $p \in F \subseteq \gamma_r$, then no $L\in\Lcvx_d$ indirectly elicits $\gamma$\raft{To discuss next meeting: maybe it's better to say $\eliccvx(\gamma) > d$ instead of the indirectly elicits bit.  Both here and the next Cor.}, and in particular, there is no surrogate $L \in \Lcvx_d$ that is  consistent with respect to $\gamma$.
 %  %commented out 20 Jan 2021 8:37am - Jessie.  switching first statement to be the contrapositive
 %  Suppose we are given a target property $\gamma:\P \toto \R$, where $\P\subseteq\simplex$, indirectly elicited by a convex loss $L \in \L_d$.
 %  For all $p \in \P$ with $|\gamma(p)| = 1$, and $\gamma(p) = \{r\}$, there is some flat $F$ of \Pcodimension at most $d$ such that $p \in F \subseteq \gamma_r$.
@@ -641,7 +621,7 @@ If there is no $d$-flat $F$ with $p \in F \subseteq \gamma_r$, then no $L\in\L_d
 \begin{corollary}\label{cor:Pcodim-flat-elic-relint-prop} 
   Let an elicitable target property $\gamma:\P \toto \R$ be given, where $\P\subseteq\simplex$ is defined over a finite set of outcomes $\Y$, and let $d\in\mathbb N$.
 Let $p \in \relint{\P}$.
-If there is no $d$-flat $F$ with $p \in F \subseteq \gamma_r$, then no $L\in\L_d$ indirectly elicits $\gamma$, and in particular, there is no convex surrogate $L \in \L_d$ that is consistent with respect to $\gamma$.
+If there is no $d$-flat $F$ with $p \in F \subseteq \gamma_r$, then no $L\in\Lcvx_d$ indirectly elicits $\gamma$, and in particular, there is no surrogate $L \in \Lcvx_d$ that is consistent with respect to $\gamma$.
 %
 %  %commented out 20 Jan 2021 at 8:40a - Jessie - switching first statement to be the contrapositive.
 %  Suppose we are given a target property $\gamma:\P \toto \R$, where $\P\subseteq\simplex$ for a finite set of outcomes $\Y$, indirectly elicited by a convex loss $L \in \L_d$.
@@ -693,7 +673,7 @@ Due to the infimum in the definition of calibration, the original proof requires
 %\end{proof}
 
 \begin{restatable}[\cite{ramaswamy2016convex} Theorem 18]{corollary}{hariresult}\label{cor:fsd-bound}
-	Let $\ell:\R \times \Y \to \reals$ be a discrete loss eliciting $\gamma:\simplex \toto \R$, and let $L \in \L_d$ be a minimizable consistent convex surrogate for $\ell$.
+	Let $\ell:\R \times \Y \to \reals$ be a discrete loss eliciting $\gamma:\simplex \toto \R$, and let $L \in \Lcvx_d$ be consistent with respect to $\ell$.
 	Then for all $p \in \simplex$ and $r \in \gamma(p)$,
 	\begin{equation}
 	  d \geq \|p\|_0 - \dim(\Sc_{\gamma_r}(p)) - 1~.~
@@ -707,7 +687,6 @@ Due to the infimum in the definition of calibration, the original proof requires
 \end{restatable}
 \begin{proof}[Proof sketch]
 	%\btw{Bo: rearranged the statements here a little, I felt the previous version required the reader to keep a bit more in their head.}
-	\jessie{Redid this citing Lemma~\ref{lem:finite-relint-dim} instead}
 	First, take $p \in \relint{\simplex}$ for intuition, so $\|p\|_0 = n$.
 	Lemma~\ref{lem:convex-flats-inf-dim} guarantees the existence of a $d$-flat $F$ with $p \in F \subseteq \gamma_r$.
 	Moreover, since $p \in \relint{\simplex}$, the flat $F$ satisfies the requirements of Lemma~\ref{lem:finite-relint-dim}, and the bound $\dim(\Sc_{\gamma_r}(p)) \geq \Scr_F(p) \geq n - d- 1$ is given by Lemma~\ref{lem:finite-relint-dim} (ii).
@@ -749,10 +728,9 @@ The same line segment defines a flat contained in both $\gamma_\bot$ and $\gamma
 	\centering
 	\includegraphics[width=\linewidth]{tikz/fsd-bound.pdf}
 	\caption{%Since the uniform distribution is in the relative interior of the simplex and the level set $\gamma_\bot$, 
-          $\dim(\Sc_{\gamma_\bot}($\textbullet$)) = 2$ and $\dim(\Sc_{\gamma_\bot}({\color{blue}\scalebox{0.5}{$\bigstar$}})) = 1$.
-          \raf{Jessie: for color reasons, maybe we could make the blue one a different symbol?  Here's my attempt... could be touched up :-)}
-          \vspace*{-5pt}
-        }
+          $\dim(\Sc_{\gamma_\bot}($\textbullet$)) = 2$ and $\dim(\Sc_{\gamma_\bot}(\star)) = 1$.
+          %\raf{Jessie: for color reasons, maybe we could make the blue one a different symbol?  Here's my attempt... could be touched up :-)}
+          \vspace*{-5pt}        }
 	\label{fig:fsd-bound}
 \end{minipage}
 \hfill
@@ -927,14 +905,41 @@ Moreover, the practical reason why consistency is desired is to ensure the guara
 
 \newpage
 \appendix
-\section{A general notion of calibration}\label{app:calibration}
+\section{Notes on calibration}\label{app:calibration}
+
+When given a discrete target loss, such as for classification-like problems, direct empirical risk minimization is typically NP-hard, forcing one to find a more tractable surrogate.
+To ensure consistency, the literature has embraced the notion of \emph{calibration} from~\citet[Chapter 3]{steinwart2008support}, which aligns with the definition in~\citet{tewari2007consistency} for multiclass classification, and its generalizations to arbitrary discrete target losses~\citep{agarwal2015consistent,ramaswamy2016convex}.
+Calibration is more tractable and weaker than consistency, yet the two are equivalent under suitable assumptions~\citep{tewari2007consistency,ramaswamy2016convex}.
+Intuitively, calibration says one cannot achieve the optimal surrogate loss while linking to a suboptimal target prediction.
+
+% For discrete prediction problems, we often start with a target loss $\ell$ in mind: for classification, 0-1 loss comes to mind; for high-confidence classification, a variation of 0-1 loss that allows a constant, moderate penalty for abstaining can be used.
+% However, optimizing over a target loss is often a computationally hard problem.
+% This is why we use surrogate losses, but desire consistency to guarantee the surrogate ``corresponds'' to the original loss.%, or property we want to predict, as is more common in the the continuous estimation setting.
+% A surrogate is no good on its own; we also need a link function to map from the surrogate prediction space back to the \emph{correct} prediction in the original prediction space.
+% This notion of a correct surrogate is typically captured by the notion of \emph{consistency}, introduced formally in Definitions~\ref{def:consistent-ell} and~\ref{def:consistent-prop}.
+% Related, and sometimes equivalent, is \emph{calibration}, which was the primary tool to study consistency until~\citet{agarwal2015consistent} introduced the use of property elicitation to study consistency in certain contexts.
+
+\begin{definition}[Calibrated]\label{def:calibrated-finite}
+	Let $\ell : \R \times \Y \to \reals$ be a discrete target loss.
+	A surrogate loss $L : \reals^d \times \Y \to \reals$  and link $\psi:\reals^d \to \R$ pair $(L, \psi)$ is \emph{$\P$-calibrated with respect to} $\ell$ if 
+	\begin{equation}\label{eq:calibration}
+	\forall p \in \P: \inf_{u \in \reals^d : \psi(u) \not \in \argmin_r \E_p\ell(r,Y)} \exploss{L}{u}{p} > \inf_{u \in \reals^d} \exploss{L}{u}{p}~.~
+	\end{equation}
+	We simply say $L$ is calibrated if $\P$ is understood from context.
+\end{definition}
+
+Many works characterize calibrated surrogates for specific discrete target losses~\citep{zhang2004statistical,lin2004note,bartlett2006convexity,tewari2007consistency}, including the canonical 0-1 loss for binary and multiclass classification.
+%Moreover, \citet{steinwart2007compare} and \citet{steinwart2008support} generalize the study of consistent losses from the discrete prediction setting and characterizes different types of loss functions, relating excess risk bounds, consistency, and calibration for various classes of surrogate losses (i.e. margin-based, distance-based, supervised, unsupervised, etc.).
+%See~\citet[Chapter 2]{steinwart2008support} for further discussion of these loss functions.
+We give another definition of calibration which is a special case of calibration via~\citet{steinwart2008support}, and show it is equivalent to Definition~\ref{def:calibrated-finite} in discrete prediction settings, but can be applied in continuous estimation settings as well.
+
 For general settings, we introduce a notion of calibration that is a special case of calibration as introduced by~\citet[Definition 2.7]{steinwart2007compare} and~\citet[Chapter 3]{steinwart2008support}. 
 %\jessiet{I think we need to be careful how we present this; I'm not sure it's a new definition, though we seem to prove new results about it.}
 We will show that in discrete prediction settings, it is equivalent to the more commonplace definition given in Definition~\ref{def:calibrated-finite}.
 Therefore, we use this more general definition of calibration when proving statements about the relationship between consistency, calibration, and indirect elicitation.
 
 \begin{definition}[Calibrated]\label{def:calibrated-general}
-	A loss $L:\reals^d \times \Y \to \reals$ is \emph{$\P$-calibrated} with respect to a loss $\ell : \R \times \Y \to \reals$ eliciting the property $\gamma$ \jessie{$\gamma$ isn't used here...?} if there is a link $\psi : \reals^d \to \R$ such that, for all distributions $p \in \P$, there exists a function $\zeta : \reals_+ \to \reals_+$ with $\zeta$ continuous at $0^+$ and $\zeta(0) = 0$ such that for all $u \in \reals^d$, we have
+	A loss $L:\reals^d \times \Y \to \reals$ is \emph{$\P$-calibrated} with respect to a loss $\ell : \R \times \Y \to \reals$ if there is a link $\psi : \reals^d \to \R$ such that, for all distributions $p \in \P$, there exists a function $\zeta : \reals_+ \to \reals_+$ with $\zeta$ continuous at $0^+$ and $\zeta(0) = 0$ such that for all $u \in \reals^d$, we have
 	\begin{equation}\label{eq:calibrated-general}
 	\ell( \psi(u); p) - \risk{\ell}(p)  \leq \zeta \left(  \exploss{L}{u}{p} - \risk{L}(p) \right)~.~
 	\end{equation}
@@ -1107,7 +1112,7 @@ A hyperplane weakly separates two sets if its two closed halfspaces respectively
   Then 
   \begin{enumerate}
   	\item[(i)] $p \in \relint{F}$; 
-  	\item[(ii)] $\dim(\Scr_F(p)) \geq \dim(\spn(\P - \{p\})) - d$.
+  	\item[(ii)] $\dim(\Scr_F(p)) \geq \dim(\affhull(\P)) - d$.
   \end{enumerate}
 \end{lemma}
 \jessiet{Bo had a good point that $\spn(F_p)$ is probably easier to understand, instead of having an extra layer of notation in there.  Do we want to stick with $\Scr_F(p)$ or $\spn(F_p)$?}
@@ -1158,8 +1163,15 @@ A hyperplane weakly separates two sets if its two closed halfspaces respectively
   Take $c = -\alpha$, and we conclude $v \in \Scr_F(p)$.
   Therefore, $\ker(T_W) = \Scr_F(p)$.
   
+  We finally want to show $\dim(\affhull(\P)) = \dim(\spn(\P_p))$.
+  Consider that any $q \in \spn(\P_p)$ can be written as a scalar multiple of an element of $\P_p$, which can be written as a convex combination of elements of the minimal basis $\P_p$.
+  In particular, since $\vec 0 \in \P_p$, it can be written as an affine combination of elements of the basis, so $\dim(\affhull(\P)) \geq \dim(\spn(\P_p))$.
+  We also have $\affhull(\P) - \{p\} \subseteq \spn(\P_p)$, so $\dim(\affhull(\P)) = \dim(\affhull(\P) - \{p\}) \leq \spn(\P_p)$.
+  Therefore, $\dim(\affhull(\P)) = \dim(\spn(\P_p))$.
+  \jessie{Check me!}
+  
   As $\Y$ is a finite set, $\spn(\P_p)$ is a finite-dimensional vector space.
-  The rank-nullity theorem states $\dim(\im(T_W)) + \dim(\ker(T_W)) = \dim(\spn(\P_p))$.
+  The rank-nullity theorem states $\dim(\im(T_W)) + \dim(\ker(T_W)) = \dim(\spn(\P_p)) \dim(\affhull(\P))$.
   As $\dim(\im(T_W)) \leq d$, and we have shown above that $\Scr_F(p) = \spn(F_p) = \ker(T_W)$, the conclusion follows.
   % 
   %	Now let $v \in \ker(T_W) = \{v \in \spn(\P_p) : T_W(v) = \vec 0\}$.
@@ -1302,7 +1314,7 @@ Because $r$ and $r'$ were completely symmetric, this completes the proof.
 	This same observation can be used to observe that $L'$ is also calibrated with respect to $\ell'$ as the calibration bound holds for all $q \in \simplex$, and therefore for all $P(q)$ by equality of $\gamma(q) = \gamma^{\proj(q)}(P(q))$.
 	
 	As $L'$ is calibrated (and consistent) with respect to $\ell'$ and indirectly elicits $\gamma' := \prop[\simplexp]{\ell'}$, then by Corollary~\ref{cor:Pcodim-flat-elic-relint-prop}, we know there exists a $d$-flat $F$ with $p' \in F \subseteq \gamma'_r$.
-	Taking $\P = \simplexp$, we know $p' \in \relint{\simplexp}$ by construction, so we can apply Lemma~\ref{lem:finite-relint-dim}(ii), which gives $\dim(\Scr_F(p')) \geq \dim(\spn(\simplexp - \{p\})) =  \dim(\affhull(\simplexp)) - d = \|p\|_0 - 1-d$.\footnote{To construct this second equality, observe $\dim(\spn(\simplexp - \{p\})) \leq \dim(\affhull(\simplexp))$ by using the standard basis for affine hull of the simplex, which has $\|p\|_0 - 1$ elements.  For $\dim(\spn(\simplexp - \{p\})) \geq \dim(\affhull(\simplexp))$, observe that the uniform distribution on $\simplexp$ has full support and therefore requires $\|p\|_0 - 1$ elements in its basis.}
+	Taking $\P = \simplexp$, we know $p' \in \relint{\simplexp}$ by construction, so we can apply Lemma~\ref{lem:finite-relint-dim}(ii), which gives $\dim(\Scr_F(p')) \geq  \dim(\affhull(\simplexp)) - d = \|p\|_0 - 1-d$.\footnote{To reason about $\dim(\affhull(\simplexp)) = \|p\|_0 - 1$, observe that the uniform distribution on $\simplexp$ has full support and therefore requires $\|p\|_0 - 1$ elements in its basis.}
 	%which gives $\dim(\Scr_F(p')) \geq \dim(\spn(\P_{p'})) - d$.
 	%Since $\P = \simplexp$ and $p' \in \relint{\simplexp}$, we have $\dim(\spn(\P_{p'})) = \dim(\affhull(\simplexp)) = \|p\|_0 - 1$. \jessie{How to get rid of sub p notation here?}
 	%Therefore, $\dim(\spn(F_p)) \geq \|p\|_0 - 1 - d$
