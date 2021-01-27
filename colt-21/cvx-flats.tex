@@ -268,7 +268,7 @@ Typically, we notate finite report sets $\R$ (and $\R'$ if a second finite set i
 
 
 
-\subsection{Consistency} \label{subsec:consistency}
+\subsection{Consistency \jessie{and calibration}} \label{subsec:consistency}
 \jessiet{Looking at this now, sections 2.1-4 feel like a lot...}
 %\jessie{I think the story we want to tell is as follows: there are these two types of problems where [convex] prediction dimension is important.  Typically, these problems are studied with different tools; here, we present a tool to bound prediction dimension in both settings.  This tool relies on property elicitation, which we show (somehow for the first time to our knowledge) can be formally connected to consistency.}
 \jessiet{Could split into high level in previous work; ie previous work and setting are distinct.}
@@ -297,6 +297,10 @@ In prior work, most research on this problem focuses on the quadrant of target l
 In particular, as definitions of consistency are relatively intractable to apply directly, the literature often focuses on a weaker condition called calibration, which only applies when given a discrete target loss. 
 %\jessie{Target doesn't have to be discrete, but $\Y$ finite, right?}
 
+\jessiet{Proposed paragraph about calibration to replace \S 2.2}
+In the machine learning literature, calibration~\citep[Chapter 3]{steinwart2008support} is typically the tool used to study consistency.
+Particularly,~\citet{zhang2004statistical, lin2004note,bartlett2006convexity,tewari2007consistency,ramaswamy2016convex} show the equivalence of consistency and calibration in the first quadrant, where one is given a target statistic and discrete prediction set.
+We discuss the additional relationship of elicitation to calibration in Appendix~\ref{app:calibration}, and derive Theorem~\ref{thm:consistent-implies-indir-elic} via calibration.
 
 
 \subsection{Calibration}\label{subsec:calibration}
@@ -419,13 +423,13 @@ They construct a calibrated link functions from embeddings, which together with 
 \section{Consistency implies indirect elicitation}\label{sec:consis-implies-indir}
 
 \jessiet{Simplify; merge with Sec 4.  Jessie take a pass at proof sketch of Theorem 1.  Narrative here reads to me as ``hey this general result through calibration is our main contribution'' which I'm not sure if we particularly want.  Also want to double check how different our calibration definition is from Steinwart}
-\jessie{Can defer Lemma 8 to appendix?  Thoughts?}
+
 
 In this section, we show that indirect elicitation is necessary for consistency (Theorem \ref{thm:consistent-implies-indir-elic}) for losses in $\L$, while simultaneously applying to all of the above settings (our four quadrants). \jessiet{Tagging quadrant speak}
 For the case of a given discrete target loss, it is well-known that a surrogate is consistent if and only if it is calibrated (e.g.\,~\citep[Theorem 1, part 3]{bartlett2006convexity}).
 For this case, we can show Theorem~\ref{thm:consistent-implies-indir-elic} via calibration, and even extend the definition of calibration and proof approach to continuous prediction spaces.
 As we are also interested in the other two quadrants, when given a target statistic instead of as target loss,
-we delegate this proof to Appendix~\ref{app:calibration} and directly prove the general result for all four quadrants. \jessiet{Quadrant speak}
+we delegate this proof to Appendix~\ref{app:calibration} and directly prove the general result for all four quadrants.\jessiet{If we move calibration to the Appendix, this paragraph can be mostly removed}
 
 Since indirect elicitation is implied by both consistency and calibration of a surrogate $L \in \L$, it might seem a very weak necessary condition for consistency.
 Yet, as we show in the following sections, it gives state-of-the-art lower bounds on the prediction dimension of consistent convex surrogates.
@@ -437,16 +441,18 @@ Second, given a target property $\gamma$, such as the $\alpha$-quantile, we say 
 We then observe that Definition~\ref{def:consistent-ell} is subsumed by Definition~\ref{def:consistent-prop}, and use this to show consistency implies $L$ indirectly elicits $\prop{\ell}$ or $\gamma$ respectively.
 
 \begin{definition}[Consistent: loss]\label{def:consistent-ell}
-	A loss and link $(L,\psi)$ are $\D$-consistent with respect to a target loss $\ell$ if, for all distributions $D \in \D$ over input and label spaces $\X \times\Y$, and for all sequences of measurable hypothesis functions $\{f_m : \X \to \R\}$,\jessie{in a given hypothesis class?}
+	Let \jessie{a convex} $\P \subseteq \simplex$ be given.
+	A loss and link $(L,\psi)$ are $\D$-consistent for a set $\D$ of distributions over $\X \times \Y$ with respect to a target loss $\ell$ if, for all distributions $p \in \P$, there exists an $x \in \X$ and marginal distribution $D_x \in \D$ such that for all sequences of measurable hypothesis functions $\{f_m : \X \to \R\}$,\jessiet{in a given hypothesis class?}
 	\begin{align*}
 	\E_D L(f_m(X), Y) \to \inf_f \E_D L(f(X), Y) &\implies \E_D \ell((\psi \circ f_m)(X), Y) \to \inf_f \E_D \ell((\psi \circ f)(X), Y)~.~
 	\end{align*}
+If such a $\D$ exists, then we simply say $(L,\psi)$ is consistent.
 \end{definition}
-If $\D$ is the set of all distributions over $\X\times\Y$, then we simply say $(L,\psi)$ is consistent.\jessiet{TODO: propogate this change}
+
 
 %% Bo: resolved, Jun 1
 %\botodo{On the right side, is measurable enough? I guess we need $\psi \circ f$ to be measurable...on the other hand, we don't want to constrain $f$ based on $\psi$. Do we need a condition on $\psi$ that guarantees $\psi \circ f$ is measurable?}
-\raft{I think okay as written -- if $\psi$ is restrictive, you won't achieve consistency.  And typically $f$ is much more expressive anyway, e.g. $\reals^\Y$ for classification.}
+%\raft{I think okay as written -- if $\psi$ is restrictive, you won't achieve consistency.  And typically $f$ is much more expressive anyway, e.g. $\reals^\Y$ for classification.}
 
 Instead of a target loss $\ell$, one may want to learn a target property, i.e. a conditional statistic such as the expected value, variance, or entropy.
 In this case, following the tradition in the statistics literature on conditional estimation~\citep{gyorfi2006distribution,fan1998efficient,ruppert1997local},
@@ -458,25 +464,29 @@ In particular we should have $\propdis(r,p) = 0 \iff r \in \gamma(p)$.
 \begin{definition}[Consistent: property]\label{def:consistent-prop}
 	Suppose we are given a loss $L : \reals^d \times \Y \to \reals$, link function $\psi: \reals^d \to \R'$, and property $\gamma:\P \toto \R'$.
 	Moreover, let $\propdis : \R' \times \P \to \reals_+$ be any function satisfying $\propdis(r,p) = 0 \iff r \in \gamma(p)$.
-	We say $(L, \psi)$ is \emph{$(\propdis, \D)$-consistent with respect to} $\gamma$ if, for all distributions $D \in \D$ over $\X \times \Y$, and for all sequences of measurable functions $\{f_m: \X \to \R\}$, 
+	We say $(L, \psi)$ is \emph{$(\propdis, \D)$-consistent with respect to} $\gamma$ if, for all $p \in \P$, there exists a $D$ over $\X \times\Y$ and $x \in \X$ so that $D_x \in \D$, and for all sequences of measurable functions $\{f_m: \X \to \R\}$, 
 	\begin{equation}
-    \E_{D} L(f_m(X), Y) \to \inf_f \E_{D} L( f(X), Y) \implies \E_X \propdis(\psi \circ f_m(X), D_X) \to 0~,
+    \E_{D} L(f_m(X), Y) \to \inf_f \E_{D} L( f(X), Y) \implies \E_X \propdis(\psi \circ f_m(X), D_X) \to 0~.~
   \end{equation}
-  where $D_x = \Pr[Y|X=x]$.
-	We say $(L,\psi)$ is $\D$-consistent with respect to $\gamma$ if there is such a $\propdis$ so that $(L,\psi)$ is $\propdis$-consistent with respect to $\gamma$.
-	Moreover, if $\D$ is the set of all distributions over $\X \times \Y$, we simply say consistent.
+  %where $D_x = \Pr[Y|X=x]$.
+	We say $(L,\psi)$ is consistent with respect to $\gamma$ if there is such a $\propdis$ and $\D$ so that $(L,\psi)$ is $(\propdis, \D)$-consistent with respect to $\gamma$.
 \end{definition}
+
+We observe the condition on the existence of $\D$ may seem weak; we use Definitions~\ref{def:consistent-ell} and~\ref{def:consistent-prop} to show lower bounds on consistent prediction dimension through indirect elicitation, so in this case, this actually demonstrates the strength of elicitation as a tool to show lower bounds about consistency.\jessie{Revisit}
 
 %Theorem~\ref{thm:consistent-implies-indir-elic} shows that consistency, either with respect to a target loss $\ell$ or a property $\gamma$, implies indirect elicitation.
 
 If $\gamma$ is a property elicited by a target loss $\ell$, then taking $\propdis$ to be the $\ell$-regret makes the two definitions are equivalent. % for the appropriate choice of $\propdis$.
 % when using target regret of $r$ (compared to an optimal prediction for $p$) as $\propdis(r,p)$.
+
 \begin{lemma}\label{lem:consistent-loss-implies-prop}
-	Given a surrogate loss $L$, link $\psi$, and target loss $\ell$, set
+	Let \jessie{convex} $\P \subseteq \simplex$ be given.
+	\jessiet{Defer to appendix?  Thoughts?}
+	Given a surrogate loss $L \in \L$, link $\psi$, and target loss $\ell$, set
 	% Take $\propdis: \R \times \simplex \to \reals_+$ with 
   $\mu(r,p) := R_\ell(r,p)$.
-  Then
-	$(L, \psi)$ is $\D$-consistent with respect to $\ell$ if and only if $(L,\psi)$ is $(\propdis, \D)$-consistent with respect to $\gamma := \prop[\simplex]{\ell}$. \jessie{We can restrict to $\P$ right? Is $\P \supseteq \cup_{x \in \X} D_x$ required? I think here, having the property over the simplex is fine, but not sure how that propagates to the theorem 9.}
+  Then there is a $\D$ such that
+	$(L, \psi)$ is $\D$-consistent with respect to $\ell$ if and only if $(L,\psi)$ is $(\propdis, \D)$-consistent with respect to $\gamma := \prop{\ell}$. 
   \btw{Note: don't actually need $\gamma$ nonempty here.}
 \end{lemma}
 \jessie{Defer proofs to appendix from this section}
@@ -489,7 +499,8 @@ If $\gamma$ is a property elicited by a target loss $\ell$, then taking $\propdi
 	  &\iff \E_X R_\ell(\psi \circ f_m(X), D_X) \to 0                               \nonumber  \\
 	  &\iff \E_X \propdis(\psi \circ f_m(X), D_X) \to 0~.~                          \label{eqn:cons-prop-cond}
 	\end{align}
-        Therefore, $\mathbb{E}_D L(f_m(X),Y) \to \inf_f \mathbb{E}_D L(f(X),Y)$ implies (\ref{eqn:cons-loss-cond}) if and only if it implies (\ref{eqn:cons-prop-cond}).\jessiet{Add Fubini Tonelli}
+        Therefore, $\mathbb{E}_D L(f_m(X),Y) \to \inf_f \mathbb{E}_D L(f(X),Y)$ implies (\ref{eqn:cons-loss-cond}) if and only if it implies (\ref{eqn:cons-prop-cond}).
+        Observe that the assumptions on $\L$ allow us to apply the Fubini-Tonelli Theorem~\cite[Theorem 2.37]{folland1999real}, which yields the equivalence of eq.~\ref{eqn:cons-loss-cond} to the next line.
 \end{proof}
 
 %Lemma~\ref{lem:consistent-loss-implies-prop} confirms that consistency with respect to a target property is a strictly broader notion than with respect to a target loss.
@@ -497,9 +508,9 @@ Because each target loss in $\L$ elicits some property, but not all target prope
 This points to indirect elicitation as a natural necessary condition for consistency, as formalized in Theorem \ref{thm:consistent-implies-indir-elic}.
 
 
-In what follows, we assume $\P = \{D_x : x \in \X, D \in \D\}$ and is a convex set.
 \begin{theorem}\label{thm:consistent-implies-indir-elic}
-	For a convex surrogate $L \in \L$, if the pair $(L, \psi)$ is $\D$-consistent with respect to a property $\gamma: \P \toto \R$ or a loss $\ell$ eliciting $\gamma$, then $(L, \psi)$ indirectly elicits $\gamma$.\jessiet{How do we want to handle consistency here- we want it to be specific to the distribution}\jessie{Require $\P \supseteq \cup_{D \in \D}\cup_x D_x$ and convex?  With our assumptions on the loss (namely, the expected loss is finite everywhere for all $p$), we should be able to apply Fubini-Tonelli, so that $\P \supseteq \cup_D \cup_x D_x$ and convex is sufficient, as any $D_X$ will be covered by this since the joint expectation is the same as $\E_X \E_Y L(u;D_X)$}\jessiet{Need $\X$ and $\Y$ to be $\sigma$-finite, which I think is immediate from them being probability measures} 
+	For a convex surrogate $L \in \L$, if the pair $(L, \psi)$ is consistent with respect to a property $\gamma: \P \toto \R$ or a loss $\ell$ eliciting $\gamma$, then $(L, \psi)$ indirectly elicits $\gamma$.
+	%\jessie{Require $\P \supseteq \cup_{D \in \D}\cup_x D_x$ and convex?  With our assumptions on the loss (namely, the expected loss is finite everywhere for all $p$), we should be able to apply Fubini-Tonelli, so that $\P \supseteq \cup_D \cup_x D_x$ and convex is sufficient, as any $D_X$ will be covered by this since the joint expectation is the same as $\E_X \E_Y L(u;D_X)$}\jessiet{Need $\X$ and $\Y$ to be $\sigma$-finite, which I think is immediate from them being probability measures} 
 	%\jessie{Union of convex hulls of $D_x$ is convex, and use the fact that we .  Better : assume $\P = \{D_x : x \in \X and D \in \D\}$}
 \end{theorem}
 \begin{proof}
@@ -507,7 +518,7 @@ In what follows, we assume $\P = \{D_x : x \in \X, D \in \D\}$ and is a convex s
 	By Lemma~\ref{lem:consistent-loss-implies-prop}, it suffices to show the result for consistency with respect to a property $\gamma$, setting $\gamma := \prop{\ell}$ if $\ell$ is given instead.
 	We show the contrapositive; suppose $(L, \psi)$ does not indirectly elicit $\gamma$, meaning we have some $p \in \P$ so that $u \in \Gamma(p)$ but $\psi(u) \not \in \gamma(p)$, where $\Gamma := \prop{L}$.
 	Observe that we use the fact $\Gamma(p) \neq \emptyset$.
-	Consider the constant sequence $\{f_m\}$ with $f_m(x) = u$ for all $m,x$, and take $D$ with full support on some $x \in \X$, and let $D_x = p$.
+	Consider the constant sequence $\{f_m\}$ with $f_m(x) = u$ for all $m,x$, and take the $D\sim \X \times\Y$ and $x \in \X$ such that $D_x = p$.
   Since $u \in \Gamma(p)$, we observe $\E_D L(f_m(X), Y) = \inf_f L(f(X),Y)$ for all $m$; in particular $\E_D L(f_m(X), Y) \to \inf_f L(f(X),Y)$.
 %  \raft{Maybe clearer to first say $\E_D L(f_m(X), Y) = \inf_f L(f(X),Y)$ for all $m$, and then the easy implication of the convergence \jessie{Done}}
 	However, we have $\E_X \propdis(\psi \circ f_m(X), D_X) = \propdis(\psi(u_m), p) = \propdis(\psi(u), p) \neq 0$, since $\psi(u) \not \in \gamma(p)$.
@@ -515,15 +526,15 @@ In what follows, we assume $\P = \{D_x : x \in \X, D \in \D\}$ and is a convex s
 	Thus, we observe $(L, \psi)$ is not consistent with respect to $\gamma$ (Definition~\ref{def:consistent-prop}).
 \end{proof}
 
-\jessie{Comment about how the assumption on sets isn't a big deal.}
-While the assumption $\P = \{D_x : x \in \X, D \in \D\}$ may seem restrictive, it is primarily made for the sake of bookkeeping.
-In particular, when $\Y$ is a finite set, we often take $\P = \simplex$, in which case, the assumption is unnecessary.
-The primary reason we desire $\P$ more general than $\simplex$ is when there are infinitely many possible outcomes; for example, squared loss only elicits the expected value on distributions whose variance is finite.
-In this case, we still do not find the assumption very restrictive, and find it covers most cases one might practically be interested in.
+%\jessie{Comment about how the assumption on sets isn't a big deal.}
+%While the assumption $\P = \{D_x : x \in \X, D \in \D\}$ may seem restrictive, it is primarily made for the sake of bookkeeping.
+%In particular, when $\Y$ is a finite set, we often take $\P = \simplex$, in which case, the assumption is unnecessary.
+%The primary reason we desire $\P$ more general than $\simplex$ is when there are infinitely many possible outcomes; for example, squared loss only elicits the expected value on distributions whose variance is finite.
+%In this case, we still do not find the assumption very restrictive, and find it covers most cases one might practically be interested in.
 
 
 \section{Prediction Dimension of Consistent Convex Surrogates}\label{sec:char-convex}
-\jessie{Feels like this section got cut a lot for NeurIPS, but seems like some more narrative in this section might be helpful.}
+\jessiet{Feels like this section got cut a lot for NeurIPS, but seems like some more narrative in this section might be helpful.}
 
 We now turn to the question of bounding the prediction dimension of a consistent convex surrogate.
 From Theorem \ref{thm:consistent-implies-indir-elic}, given a target property $\gamma$ or loss $\ell$ with $\gamma = \prop{\ell}$, this task reduces to lower bounding the prediction dimension of a convex surrogate indirectly eliciting $\gamma$.
@@ -792,7 +803,7 @@ We now illustrate the theorem with two important examples: variance and conditio
 Several other applications from \citet{frongillo2018elicitation}, such as spectral risk measures, entropy, and norms, follow similarly.
 
 \paragraph{Example: Variance.}
-As a warm-up, let us see how to show $\eliccvx(\Var)=2$, meaning the lowest dimension of a convex loss to estimate conditional variance is 2.%~\citep{osband1985providing,lambert2018elicitation}.
+As a warm-up, let us see how to show $\eliccvx(\Var)=2$, meaning the lowest dimension of a convex loss to estimate conditional variance is 2. %~\citep{osband1985providing,lambert2018elicitation}.
 This lower bound follows from Theorem~\ref{thm:bayes-risk-lower-bound} as the variance is the Bayes risk of squared loss $L(r,y) = (r-y)^2$, which elicits the mean $\Gamma(p) = \E_p Y$.
 Interestingly, while intuitively obvious, even this simple result is novel.
 In particular, the well-known fact that the variance is not elicitable does not yield a lower bound of 2, as it does not rule out the variance being a link of a real-valued convex-elicitable property; cf.~\citet[Remark 1]{frongillo2018elicitation}.
@@ -1123,7 +1134,7 @@ A hyperplane weakly separates two sets if its two closed halfspaces respectively
   
   As $\Y$ is a finite set, $\spn(\P_p)$ is a finite-dimensional vector space.
   The rank-nullity theorem states $\dim(\im(T_W)) + \dim(\ker(T_W)) = \dim(\spn(\P_p))$.
-  As $\dim(\im(T_W)) \leq d$, and we have shown above that $\Scr_F(p) = \ker(T_W)$, the conclusion follows.
+  As $\dim(\im(T_W)) \leq d$, and we have shown above that $\Scr_F(p) = \spn(F_p) = \ker(T_W)$, the conclusion follows.
   % 
   %	Now let $v \in \ker(T_W) = \{v \in \spn(\P_p) : T_W(v) = \vec 0\}$.
   %	There must exist an $\epsilon > 0$ so that $\epsilon v \in F_p$ and $-\epsilon v \in F_p$ $p \in \relint{\P}$ implies $\vec 0 \in \relint{F_p}$ by (1.).
