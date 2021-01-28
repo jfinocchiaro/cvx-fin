@@ -163,7 +163,9 @@
 \maketitle
 
 \begin{abstract}
-Given a prediction task, understanding when one can and cannot design a consistent convex surrogate loss, particularly a low-dimensional one, is an important and active area of machine learning research. 
+  Given a prediction task, understanding when one can and cannot design a consistent convex surrogate loss, particularly a low-dimensional one, is an important and active area of machine learning research.
+  The prediction task may be given as a target loss, as in problems like classification or structured prediction, or simply as a (conditional) statistic of the data, as in risk measure estimation.
+  Techniques to design and analyze surrogate losses in these scenarios seem differ
 Surrogate loss construction often presents itself in one of two scenarios, typically studied by different frameworks: first, when one is given a target loss for a finite prediction task, and second, when one simply has a statistic they would like to estimate.
 %Through indirect property elicitation, we present a tool to study bounds on prediction dimension for surrogates in both of these settings.
 Motivated by settings such as structured prediction where the prediction dimension of the surrogate is of central\jessiet{a tad dramatic?} importance, we give a new technique for constructing lower bounds on the convex prediction dimension that applies to both frameworks. 
@@ -180,9 +182,31 @@ For statistic estimation, our lower bound gives new results for estimating varia
 
 \section{Introduction}\label{sec:intro}
 %supervised learning blah
+Surrogate risk minimization is one of the most widespread techniques in supervised machine learning.
+A surrogate loss is often necessary for one of two reasons: (1) the target loss does not satisfy some desiderata, such as convexity, or (2) the target loss may not be given at all, as is often the case in continuous prediction problems when one seeks to estimate a target conditional statistic\raft{I felt we needed a sentence like this to justify \emph{why} we need a surrogate. And given that we need it, we can't really avoid hinting at the quadrants...}.
+In both of these settings, we minimally require \emph{consistency}, a precursor to excess risk bounds and rates.
+Roughly speaking, consistency means that minimizing surrogate risk corresponds to solving the target problem of interest:
+the target risk is also minimized, or the continuous prediction approaches the true conditional statistic.
+
+% examples of problems where we care a lot about prediction dimension (that happen to be finite discrete)
+Despite the ubiquity of surrogate losses, we lack general frameworks to design and analyze surrogates.
+This state of affairs is especially dire when one seeks surrogates with low \emph{prediction dimension}, the dimension of surrogate prediction domain (e.g.\ the number of labels for multiclass classification).
+(1) In structured prediction and extreme classification, the prediction dimension can easily become intractably large, and often one sacrafices consistency for lack of better surrogates.
+\raf{Expand a bit; we lack tight bounds}
+(2) Risk measures such as conditional value at risk (CVaR) have applications in financial regulation, robust engineering design, and algorithmic fairness, yet provably cannot be given via a target loss.
+These applications therefore require a surrogate loss, and preferrably one of low (or at least finite) prediction dimension.
+Recent work~\citep{fissler2016higher,frongillo2020elicitation} gives prediction dimension bounds for some of these risk measures, but without the requirement that the surrogate be convex: bounds for convex surrogates is left as a major open question.
+
+We present a unification of existing techniques to bound the prediction dimension of consistent convex surrogates in both settings above.
+In (1), we recover the feasible subspace dimension result of \citet{ramaswamy2016convex}, and give an example where our bound is even tighter.
+In (2), we give the first prediction dimension bounds for risk measures with respect to convex surrogates, addressing the open question above.
+Our framework rests on property elicitation, a weaker condition than calibration, as a tool to understand consistency across a wide variety of domains.
+
+\raf{\hrule Old version below:}
+
 Surrogate risk minimization is one of the most widespread learning heuristics in supervised machine learning.
 %A surrogate loss is often necessary for one of two reasons: (1) the target loss does not satisfy some desiderata, such as convexity, or (2) the target loss may not be given at all, as is often the case in continuous estimation problems, when one instead has a target conditional statistic to estimate from training data.
-Often, we desire surrogate losses to be \emph{consistent}, which informally means the surrogate loss ``corresponds'' to the desired learning problem, and this condition is a prerequisite for deriving excess risk bounds.
+We require surrogate losses to be \emph{consistent}, which informally means the surrogate loss ``corresponds'' to the desired learning problem, and this condition is a prerequisite for deriving excess risk bounds.
 %Deriving excess risk bounds and rates require a surrogate to be consistent, hence the focus on consistency.
 Construction of surrogates for a desired task is often ad hoc, leaving consistency of such losses an open question.
 Depending on the data distribution, these inconsistent surrogates may actually yield predictions that do not correspond to the target task. 
@@ -224,7 +248,7 @@ Given a target loss or statistic, we provide a new framework for constructing lo
 Above, we discuss a significant divergence in previous frameworks: the difference in constructing a surrogate given a \emph{target loss} and a \emph{target statistic}.
 In addition to the two possible targets, we may have one of two domains: a \emph{discrete} (i.e.\ finite) target prediction space, like a classification problem, or a \emph{continuous} one, like a regression or estimation problem.
 We informally refer to the four resulting cases---target loss vs.\ target statistic, and discrete vs.\ continuous predictions---as the ``four quadrants'' of supervised learning problems, shown in Table~\ref{tab:quadrants}.
-For further examples in quadrants 2 and 3, see Appendix~\ref{app:omitted-examples}.\jessiet{Don't actually have any Q3 examples in there at the moment}
+For further examples, see Appendix~\ref{app:omitted-examples}.\jessiet{Don't actually have any Q3 examples in there at the moment}
 
 \paragraph{Literature on consistency and calibration}% \label{subsec:consistency}
 %\bo{Citation help appreciated!} \jessie{\cite{fisher1922mathematical,zhang2004statistical,bartlett2006convexity,tewari2007consistency,steinwart2007compare,ramaswamy2016convex} -- these are the ones I know of that discuss consistency in slightly various forms.  I believe the definition we run with is most similar to \cite{ramaswamy2016convex}.}
