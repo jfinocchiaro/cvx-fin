@@ -298,11 +298,12 @@ As we focus heavily on conditional distributions $p := D_x = \Pr[Y|X=x]$ over $\
 If given, we use $\ell: \R \times \Y \to \reals$ to denote a \emph{target loss}, with predictions $r\in\R$.
 %where the goal is minimize expected loss, $\E ~ \ell(f(X),Y)$ for pairs $X,Y$ drawn from some distribution.
 Similarly, $L: \reals^d \times \Y \to \reals$ will typically denote a \emph{surrogate} loss, with surrogate predictions $u \in \reals^d$.
-We write $\L_d $ for the set of $\mathcal{B}(\reals^d) \otimes \Y$-measurable and lower semi-continuous surrogates $L : \reals^d \times\Y \to \reals$ such that $\E_p L(u,Y) < \infty$ for all $u \in \reals^d, p \in \P$, and are minimizable, in the sense that $\argmin_{u} \exploss{L}{u}{p}$ is nonempty for all $p\in\P$.
+\raft{To discuss: add brief explanation for $\E_p$ notation, that $Y\sim p$?  Not sure if it's clear.}
+We write $\L_d $ for the set of $\mathcal{B}(\reals^d) \otimes \Y$-measurable surrogates $L : \reals^d \times\Y \to \reals$ such that $\E_p L(u,Y) < \infty$ for all $u \in \reals^d, p \in \P$, and are minimizable, in the sense that $\argmin_{u} \exploss{L}{u}{p}$ is nonempty for all $p\in\P$.
 Moreover, $\Lcvx_d \subseteq \L_d$ is the set of convex losses in $\L_d$.
 \jessiet{Sufficient condition for $\A$-normal convex integrand: $L$ is lower semi-continuous and $\mathcal{B}(\A) \otimes \Y$-measurable; $\E_p L(u,Y)$ finite for all $u, p$, there exists a $u_0$ for each $p$ so that $\E_p L(u_0, Y)$ is finite and continuous for Rockefellar's corollary, though it's stricter than Ioffe and Tokhimorov IIRC}
 %Similarly, let $\L_d^{fin}$ be surrogates $L: \reals^d \times \Y \to \reals$ that are $\mathcal{B}(\reals^d) \otimes \Y$-measurable and minimizable, in the sense that $\argmin_{u} \exploss{L}{u}{p}$ is nonempty for all $p\in\P$-- we use this class of losses with finite $\Y$ in mind.
-Moreover, we write $\L = \cup_{d \in \mathbb{N}} \L_d$, and $\Lcvx = \cup_{d \in \mathbb{N}} \Lcvx_d$.
+Set $\L = \cup_{d \in \mathbb{N}} \L_d$, and $\Lcvx = \cup_{d \in \mathbb{N}} \Lcvx_d$.
 A loss $\ell: \R\times \Y \to \reals$ is \emph{discrete} if $\R$ is a finite set.
 A surrogate $L:\reals^d \times \Y \to \reals$ is \emph{convex} if $L(\cdot,y)$ is convex in $u$ almost surely in $\Y$.
 For a given $p\in\P$, the (conditional) \emph{regret}, or excess risk, of a loss $L$ is given by $R_L(u,p) := \exploss{L}{u}{p} - \inf_{u^*} \exploss{L}{u^*}{p}$.
@@ -334,7 +335,8 @@ Intuitively, to relate to consistency, one can think of $p = \Pr[Y|X=x]$ as a co
 The \emph{level set} of $\Gamma$ at value $r\in\R$ is $\Gamma_r := \{p \in \P : r \in \Gamma(p)\}$.
 We call a property $\Gamma: \P \toto \R$ \emph{discrete} if $\R$ is a finite set.
 A property is \emph{single-valued} if $|\Gamma(p)| = 1$ for all $p\in\P$.
-%, in which case we write $\Gamma:\simplex\to\R$.
+A property is \emph{single-valued} if $|\Gamma(p)|=1$ for all $p\in\P$, in which case we may write $\Gamma:\P\to\R$ and $\Gamma(p) \in \R$\raft{added, since sec 6 gets confusing without this single-arrow notation}.
+We define the \emph{range} of a property by $\range \Gamma = \bigcup_{p\in\P} \Gamma(p) \subseteq \R$.
 When $L\in\L$, we use $\Gamma := \prop[\P]{L}$ to denote the unique property elicited by $L$ (for distributions in $\P$) from eq.~\eqref{eq:elic}. 
 Typically, we denote the target property by $\gamma$, and the surrogate by $\Gamma$.
 
@@ -395,7 +397,7 @@ In the case of a target statistic $\gamma$, \citet{lambert2008eliciting} similar
 This notion is more general as it extends to continuous estimation settings and does not inherently depend on a target loss being given. 
 % However, until now, no formal connection to consistency has been shown for convex elicitation complexity.
 
-\begin{definition}[Convex Elicitation Complexity]
+\begin{definition}[Convex Elicitation Complexity]\label{def:cvx-elic-complex}
 	Given a target property $\gamma$, the \emph{convex elicitation complexity} $\eliccvx(\gamma)$ is the minimum dimension $d$ such that there is a $L \in \Lcvx_d$ indirectly eliciting $\gamma$.
 \end{definition}
 In particular, $\eliccvx(\prop{\ell}) \leq \conscvx(\ell)$ when restricting to minimizable surrogates ($\Lcvx$).
@@ -769,6 +771,11 @@ In essence, their techniques rely on finding a dimension $d$ such that the level
 One concludes that one cannot indirectly elicit $\gamma$ via a $d$-dimensional identifiable property $\hat\Gamma$, as the level sets of $\hat\Gamma$, each $d$-flats, could not be contained within level sets of $\gamma$.
 Lemma~\ref{lem:convex-flats-inf-dim} states that the level sets of $d$-dimensional convex-elicitable properties are unions of $d$-flats, and thus the general logic of~\citet{frongillo2020elicitation} can still apply.
 In particular, we can recover their main lower bound for the large class of Bayes risks.
+
+\begin{definition}
+  \label{def:bayes-risk}
+  Given loss function $L:\R\times\Y \to \reals$ for some report set $\R$, the \emph{Bayes risk} of $L$ is defined as $\lbar(p) := \inf_{r \in \R} \E_pL(r,Y)$.
+\end{definition}
 
 % Theorem~\ref{thm:cvx-flats} also addresses one major open question  from~\citet{frongillo2015elicitation,frongillo2020elicitation}\jessiet{which citation?}: \emph{what are lower bounds on convex elicitation complexity?}
 % While Theorem~\ref{thm:cvx-flats} is a statement about consistent surrogates, the heart of it is actually about indirect property elicitation.
@@ -1356,11 +1363,165 @@ Because $r$ and $r'$ were completely symmetric, this completes the proof.
 
 \section{Proof of Theorem~\ref{thm:bayes-risk-lower-bound}}
 
+\newcommand{\EL}{\mathcal{E}}
+\newcommand{\V}{\mathcal{V}}
+\newcommand{\defeq}{:=}
+\newcommand{\conv}{\mathrm{conv}}
+
+\subsection{General setting of elicitation complexity}
+
+We briefly introduce the general notion of elicitation complexity, of which Definition~\ref{def:cvx-elic-complex} is a special case, as some statements are more naturally made in this general setting.
+
+\begin{definition}
+  \label{def:refine}
+  $\Gamma'$ \emph{refines} $\Gamma$ if for all $r'\in\range\Gamma'$ there exists $r\in\range\Gamma$ with $\Gamma'_{r'} \subseteq \Gamma_r$.
+\end{definition}
+Equivalently, $\Gamma'$ refines $\Gamma$ if there is a link function $\psi:\range\Gamma'\to\range\Gamma$ such that $\Gamma'_{r'} \subseteq \Gamma_{\psi(r')}$ for all $r'\in\range\Gamma'$.
+
+\begin{definition}
+  \label{def:el}
+  For $k\in\mathbb{N}\cup\{\infty\}$, let $\EL_k(\P)$ denote the class of all elicitable properties $\Gamma:\P\to\reals^k$, and $\EL(\P) \defeq \bigcup_{k\in\mathbb{N}\cup\{\infty\}} \EL_k(\P)$.
+  When $\P$ is implicit we simply write $\EL$.
+\end{definition}
+
+\begin{definition}
+  \label{def:elic-complex}
+  Let $\C$ be a class of properties.
+  % A property $\Gamma$ is \emph{$k$-elicitable with respect to $\C$}
+  % if there exists an intermediate property  and which refines $\Gamma$.
+  The \emph{elicitation complexity} of a property $\Gamma$ with respect to $\C$, denoted  $\elic_\C(\Gamma)$, is the minimum value of $k\in\mathbb{N}\cup\{\infty\}$ such that there exists $\hat \Gamma \in \C\cap\EL_k(\P)$ that refines $\Gamma$.
+\end{definition}
+
+
+\subsection{Supporting statements}
+
+\begin{proposition}[\citet{osband1985providing}]
+  \label{prop:elic-complex-level-sets-convex}
+  Let $\Gamma$ be elicitable.
+  Then $\Gamma_r$ is convex for all $r\in\range\Gamma$.
+\end{proposition}
+
+\begin{lemma}[{Set-valued extension of \citet[Lemma 4]{frongillo2020elicitation}}]
+  \label{lem:refine}
+  If $\Gamma'$ refines $\Gamma$ then $\elic_\C(\Gamma') \geq \elic_\C(\Gamma)$.
+\end{lemma}
+
+\begin{proof}
+  As $\Gamma'$ refines $\Gamma$, we have some $\psi:\range\Gamma'\to\range\Gamma$ such that for all $r'\in \range\Gamma'$ we have $\Gamma'_{r'} \subseteq \Gamma_{\psi(r')}$.
+  Suppose we have $\hat\Gamma\in\C$ and $\varphi:\range\hat\Gamma\to\range\Gamma'$ such that for all $u\in \range\hat\Gamma$ we have $\hat\Gamma_u \subseteq \Gamma'_{\varphi(u)}$.
+  Then for all $u\in \range\hat\Gamma$ we have $\hat\Gamma_u \subseteq \Gamma'_{\varphi(u)} \subseteq \Gamma_{(\psi \circ \varphi)(u)}$.
+  In particular, if $\elic_\C(\Gamma') = m$, then we have such a $\hat\Gamma:\P\toto \reals^m$, and hence $\elic_\C(\Gamma) \leq m$.
+  \raft{The logic for this whole proof could use a very careful check}
+\end{proof}
+
+\begin{lemma}[{\citet[Lemma 8]{frongillo2020elicitation}}]
+  \label{lem:elic-complex-bayes-concave}
+  Suppose $L$ elicits $\Gamma:\P\to\R$ and has Bayes risk $\lbar$.
+  Then for any $p,p'\in\P$ with $\Gamma(p)\neq\Gamma(p')$, we have $\lbar(\lambda p + (1-\lambda) p') > \lambda \lbar(p) + (1-\lambda) \lbar(p')$ for all $\lambda\in(0,1)$.
+\end{lemma}
+
+\begin{lemma}[{Adapted from \citet[Theorem 4]{frongillo2020elicitation}}]
+  \label{lem:bayes-risk-lower-bound}
+  If $L$ elicits a single-valued $\Gamma$, and $\hat\Gamma$ refines $\lbar$, then $\hat\Gamma$ refines $\Gamma$.
+\end{lemma}
+\begin{proof}
+  Suppose for a contradiction that $\hat\Gamma$ does not refine $\Gamma$.
+  Then we have some $u\in\range\hat\Gamma$ such that for all $r\in\range\Gamma$ we have $\hat\Gamma_u \not\subseteq \Gamma_r$.
+  In particular, recalling that $\Gamma$ is single-valued, we must have $p,p'\in\hat\Gamma_u$ such that $\Gamma(p) \neq \Gamma(p')$.
+  Moreover, as $\hat\Gamma$ refines $\lbar$, we also have $\lbar(p) = \lbar(p')$.
+  From Lemma~\ref{lem:elic-complex-bayes-concave} and $\lambda=1/2$ we have $\lbar(q) > \tfrac 1 2 \lbar(p) + \tfrac 1 2 \lbar(p') = \lbar(p)$, where $q = \tfrac 1 2 p + \tfrac 1 2 p'$.
+  As the level set $\hat\Gamma_u$ is convex by Proposition~\ref{prop:elic-complex-level-sets-convex}, we also have $q \in \hat\Gamma_u$, and hence $\lbar(q)=\lbar(p)$, a contradiction.
+\end{proof}
+
+\begin{lemma}[Minor modifications from \citet{frongillo2020elicitation}]\label{lem:lin-alg-nested-level-sets}
+  Let $\V$ be a real vector space.
+  Let $f:\V\to\reals^k$ be linear and $C\subseteq \V$ convex with $\spn C = \V$, and let $m\in\mathbb{N}$.
+  Suppose that $0 \in \interior f(C)$, and
+  for all $v\in S \defeq C \cap \ker f$, there exists a linear $\hat f_v:\V\to\reals^m$ with $v \in C \cap \ker \hat f_v \subseteq S$.
+  Then $m \geq k$.
+  If $m=k$, we additionally have $0\in\interior\hat f_v(C)$ for some $v\in S$.
+  \raft{I changed the statement to reflect the proof better, but did not change the proof apart from $\hat f \to \hat f_v$.  Could still use a careful check though!}
+\end{lemma}
+\begin{proof}
+  The condition $0 \in \interior f(C)$ is equivalent to the existence of some $v_1,\ldots v_{k+1} \in C$ such that $0\in\interior\conv\{f(v_i) : i\in\{1,\ldots,k+1\}\}$.
+  Let $\alpha_1,\ldots,\alpha_{k+1}>0$, $\sum_{i=1}^{k+1} \alpha_i = 1$, such that $\sum_{i=1}^{k+1} \alpha_i f(v_i) = 0$.
+  As these are barycentric coordinates,
+  this choice of $\alpha_i$ is unique, a fact which will be important later.
+  We will take $v = \sum_{i=1}^{k+1} \alpha_i v_i$, an element of $C$ by convexity, and thus an element of $S$ as $f(v)=0$.
+
+  Let $\hat f_v:\V\to\reals^m$ be linear with $v \in \hat S := C \cap \ker \hat f_v \subseteq S$.
+  Let $\beta_1,\ldots,\beta_{k+1}\in\reals$, $\sum_{i=1}^{k+1} \beta_i = 0$, such that $\sum_{i=1}^{k+1} \beta_i \hat f_v(v_i) = 0$.
+  We will show that the $\beta_i$ must be identically zero, i.e. that $\{\hat f_v(v_i):i\in\{1,\ldots,k+1\}\}$ are affinely independent.
+%  \raft{We want to show that the $\beta_i$ must be 0 (that's one definition of affine independence)}
+  By construction, $v' := \sum_{i=1}^{k+1} \beta_iv_i \in \ker \hat f_v$, and as $v\in\ker\hat f_v$, for all $\lambda > 0$ we have $v_\lambda := v + \lambda v' = \sum_{i=1}^{k+1} (\alpha_i + \lambda \beta_i) v_i \in \ker \hat f_v$.
+  Taking $\lambda$ sufficiently small, we have $\gamma_i := \alpha_i + \lambda \beta_i > 0$ for all $i$, and $\sum_{i=1}^{k+1} \gamma_i = \sum_{i=1}^{k+1} \alpha_i + \lambda\sum_{i=1}^{k+1} \beta_i = 1$.
+  By convexity of $C$, we have $v_\lambda \in C$.
+  Now $v_\lambda \in C \cap \ker \hat f_v \subseteq S = C \cap \ker f$, and in particular $v_\lambda \in \ker f$.
+  Thus, $f(v_\lambda) = \sum_{i=1}^{k+1} \gamma_i f(v_i) = 0$.
+  By the uniqueness of barycentric coordinates, for all $i\in\{1,\ldots,k+1\}$, we must have $\gamma_i = \alpha_i$ and thus $\beta_i = 0$, as desired.
+
+  As $\hat f_v(C)$ contains $k+1$ affinely independent points, we have $m \geq \dim \im \hat f_v \geq k$.
+  When $m=k$,
+  by affine independence, the set $\conv\{\hat f_v(v_i) : i\in\{1,\ldots,k+1\}\}$ has dimension $k$ in $\reals^k$.
+  As $0 = \hat f_v(v) = \sum_{i=1}^{k+1} \alpha_i \hat f_v(v_i)$, and $\alpha_i > 0$ for all $i$, we conclude $0\in\interior\conv\{\hat f_v(v_i) : i\in\{1,\ldots,k+1\}\} \subseteq \interior \hat f_v(C)$.
+\end{proof}
+
+\begin{lemma}[{\citet[Lemma 14]{frongillo2020elicitation}}]
+  \label{lem:lin-alg-span}
+  Let $\V$ be a real vector space.
+  Let $f:\V\to\reals^k$ be linear, $C\subseteq \V$ convex with $\spn C = \V$, and let $S = C \cap \ker f$.
+  If $0 \in \interior f(C)$ then $\spn S = \ker f$.
+\end{lemma}
+
+\subsection{Proving the lower bound}
+
+Let $\C^*_d$ be the class of properties $\Gamma$ which are elicited by a convex loss $L\in\Lcvx_d$ for some $d\in\mathbb{N}$, and let $\C^*\defeq \bigcup_{d\in\mathbb{N}} \C^*_d$.
+Then for all properties $\gamma$, if $\elic_{\C^*}(\gamma) < \infty$, we have $\elic_{\C^*}(\gamma) = \eliccvx(\gamma)$, a fact we use tacitly in the proof.\raft{When we add the stuff on entropy and norms, we'll need to actually define $\Lcvx_{\infty}$, which is a whole other can of worms... but totally fine actually.  Fun times for later :-]}
+
+
 \bayesrisklowerbound*
+% \begin{theorem}
+%   Let $\Gamma:\P\to\reals^d$ satisfy Condition~\ref{cond:v-interior} for some $r\in\reals^d$.
+%   Let $L$ elicit $\Gamma$ such that $\lbar$ is non-constant on $\Gamma_r$.
+%   Then $\elic_{\C^*}(\lbar) \geq d+1$.
+% \end{theorem}
+\begin{proof}
+  Let $V:\Y\to\reals^d$ and $r$ be given by the statement of the theorem and from Condition~\ref{cond:v-interior}.
+  Let $m = \elic_{\C^*}(\lbar)$, so that we have $\hat\Gamma\in\C^*_m$ which refines $\lbar$.
+  By Lemma~\ref{lem:bayes-risk-lower-bound} we have $\hat\Gamma$ refines $\Gamma$.
+
+  \raft{Notes to self about the proof commented out here}
+  % This is how I thought it should go next, but actually, we can't / don't want to make statements about $\elic_{\C^*}(\Gamma)$, since then the theorem will apply even when $L$ itself is not convex.
+  % Plus, the proof is actually easier to follow this way!
+  % ``Via the identity link function, we also have $\elic_{\C^*}(\hat\Gamma) \leq m$.
+  % Moreover, from Lemma~\ref{lem:refine}, $\elic_{\C^*}(\lbar) = m \geq \elic_{\C^*}(\hat\Gamma) \geq \elic_{\C^*}(\Gamma)$.''
+
+  We now establish the conditions of Lemma~\ref{lem:lin-alg-nested-level-sets} for $C=\P$.
+  Let $f:\spn \P \to \reals^d$, $p \mapsto \E_pV$.
+  From Condition~\ref{cond:v-interior}, we have $0\in\interior f(\P)$ and $\ker f \cap \P = \zeros{V} = \Gamma_r$.
+  Now let $p\in\Gamma_r$ be arbitrary, and take any $u\in\hat\Gamma(p)$.
+  As $\Gamma$ is single-valued, $r\in\range\Gamma$ is the unique value with $p\in\Gamma_r$.
+  As $\hat\Gamma$ refines $\Gamma$, there exists $r'\in\range\Gamma$ with $\hat\Gamma_u \subseteq \Gamma_{r'}$, and since $p\in\hat\Gamma_u$, we conclude $r'=r$ from the above.
+  From Lemma~\ref{lem:convex-flats-inf-dim}, we have some $\hat V_{u,p}$ with $p\in\zeros{\hat V_{u,p}} \subseteq \hat\Gamma_u \subseteq \Gamma_r = \zeros{V}$.
+  Letting $\hat f_p:\spn \P \to \reals^d$, $p \mapsto \E_p\hat V_{u,p}$, we have now satisfied the conditions of Lemma~\ref{lem:lin-alg-nested-level-sets}.
+  We conclude $m \geq d$, and moreover, if $m=d$, then there exists some $q\in\Gamma_r$ such that $0 \in\interior\hat f_q(\P)$.
+    
+  Now suppose $m = d$ for a contradiction.
+  Let $\hat S\defeq \ker f_q\cap \P$.
+  Applying Lemma~\ref{lem:lin-alg-span} to the functions $f$ and $\hat f_q$
+  we have $\spn \ker f = \spn \Gamma_r$ and $\spn \ker \hat f_q = \spn \hat S$.
+  As $\hat S \subseteq \Gamma_r$, we have $\ker \hat f_q = \spn \hat S \subseteq \spn \Gamma_r = \ker f$.
+  By the first isomorphism theorem, we also have $\codim \ker \hat f_q = \codim \ker f = d$, as the images of these linear maps span all of $\reals^d$.
+  By the third isomorphism theorem we conclude $\Gamma_r = \hat S$.
+  Moreover, as $\hat S \subseteq \hat\Gamma_u \subseteq \Gamma_r$, we have $\hat S = \hat\Gamma_u = \Gamma_r$.
+
+  We now see that $\lbar$ is constant on $\Gamma_r$ since there is some link function $\psi:\reals^m\to\reals$ such that $\Gamma_r = \hat\Gamma_u \subseteq \lbar_{\psi(u)}$, meaning $\lbar(p) = \psi(u)$ for all $p\in\Gamma_r$.
+  This statement contradicts the assumption that $\lbar$ is non-constant on $\Gamma_r$.
+\end{proof}
 
 
 
-\section{Omitted examples}\label{app:omitted-examples}
+\section{Omitted Examples}\label{app:omitted-examples}
 \paragraph{Discrete problem with no target loss.}
 Consider the following scenario where someone is deciding how to dress for the weather based on a meteorologist's forecast.
 Consider the three outcomes $\Y = \{$rainy, sunny, snowy$\}$, and we suppose we want to have some bias towards health and safety, so the meteorologist should only predict sunny weather if $Pr[$sunny $|$ weather data$] \geq 3/4$.
