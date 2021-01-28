@@ -189,8 +189,10 @@ the target risk is also minimized, or the continuous prediction approaches the t
 % examples of problems where we care a lot about prediction dimension (that happen to be finite discrete)
 Despite the ubiquity of surrogate losses, we lack general frameworks to design and analyze surrogates.
 This state of affairs is especially dire when one seeks surrogates with low \emph{prediction dimension}, the dimension of surrogate prediction domain (e.g.\ the number of labels for multiclass classification).
-(1) In structured prediction and extreme classification, the prediction dimension can easily become intractably large, and often one sacrafices consistency for lack of better surrogates.
+(1) In structured prediction and extreme classification, the prediction dimension can easily become intractably large, and often one sacrifices consistency for lack of better surrogates.
 \raf{Expand a bit; we lack tight bounds}
+\jessie{Attempt}
+Without a general framework for surrogate loss construction and analysis, it is impossible to determine if these sacrifices are necessary, or if there are ways to improve dimensionality without sacrificing consistency.
 (2) Risk measures such as conditional value at risk (CVaR) have applications in financial regulation, robust engineering design, and algorithmic fairness, yet provably cannot be given via a target loss.
 These applications therefore require a surrogate loss, and preferrably one of low (or at least finite) prediction dimension.
 Recent work~\citep{fissler2016higher,frongillo2020elicitation} gives prediction dimension bounds for some of these risk measures, but without the requirement that the surrogate be convex: bounds for convex surrogates is left as a major open question.
@@ -221,27 +223,18 @@ For further examples, see Appendix~\ref{app:omitted-examples}.\jessiet{Don't act
 \paragraph{Literature on consistency and calibration}% \label{subsec:consistency}
 %\bo{Citation help appreciated!} \jessie{\cite{fisher1922mathematical,zhang2004statistical,bartlett2006convexity,tewari2007consistency,steinwart2007compare,ramaswamy2016convex} -- these are the ones I know of that discuss consistency in slightly various forms.  I believe the definition we run with is most similar to \cite{ramaswamy2016convex}.}
 \jessiet{Make this subsection more concise?}
-A basic requirement of surrogate losses $L: \reals^d \times \Y \to \reals$ is consistency, which roughly means that minimizing $L$-loss corresponds to solving the target problem of interest.
-We consider two kinds of consistency.
-In the first, we are given a \emph{target loss} $\ell$, and we roughly define $L$ to be consistent if minimizing $L$ and applying a link, minimizes $\ell$ (Definition \ref{def:consistent-ell}).
-This definition follows much of the machine learning literature~\citep{zhang2004statistical,bartlett2006convexity,tewari2007consistency,steinwart2007compare,ramaswamy2016convex}.
-In the second notion of consistency, we are given a \emph{target statistic}, such as the conditional variance or quantile, as in classical statistics, but no target loss~\citep{gyorfi2006distribution, fan1998efficient,ruppert1997local}.
-Here we will define $L$ to be consistent if minimizing $L$ and applying a link function yields estimates converging to the correct value, by some measure (Definition \ref{def:consistent-prop}).
-\jessiet{Can trim this paragraph significantly}
+We focus on the construction of consistent surrogate losses $L: \reals^d \times \Y \to \reals$, roughly meaning that minimizing $L$-loss corresponds to solving the target problem of interest.
+Typically, we are given a \emph{target loss} $\ell$, and we roughly define $L$ to be consistent if minimizing $L$ and applying a link, minimizes $\ell$ (Definition \ref{def:consistent-ell})~\citep{zhang2004statistical,bartlett2006convexity,tewari2007consistency,steinwart2007compare,ramaswamy2016convex}.
+We introduce a notion of consistency in which one is given a \emph{target statistic}, such as the conditional variance or quantile, as in classical statistics, but no target loss~\citep{gyorfi2006distribution, fan1998efficient,ruppert1997local}.
+Here we will define $L$ to be consistent if minimizing $L$ and applying a link function yields estimates converging to the correct value (Definition \ref{def:consistent-prop}).
 
 
-\jessiet{This paragraph a little redundant}
-The goal of this paper is to give lower bounds on the dimension $d$ of consistent surrogate losses.
+\jessiet{This paragraph feels a little redundant}
 A priori, it is not necessarily clear that compatible definitions of consistency could be given for both target statistics and target losses.
-We observe that, in fact, target losses are a special case of target statistics (\S~\ref{sec:consis-implies-indir}),
-which suggests property elicitation (see \S~\ref{subsec:properties}) is well-suited to study general lower bounds.
-% This technique will then allow us to prove lower bounds across all four quadrants.
-In prior work, most research on this problem focuses on the quadrant of target losses and discrete predictions (Quadrant 1)~\citep{zhang2004statistical,bartlett2006convexity,tewari2007consistency,ramaswamy2015hierarchical,ramaswamy2016convex,ramaswamy2018consistent}.
-As definitions of consistency are relatively intractable to apply directly, the literature often focuses on a weaker condition called calibration, which only applies when given a discrete target loss, e.g. Quadrants 1 and 3. 
-%\jessie{Target doesn't have to be discrete, but $\Y$ finite, right?}
+We observe that, in fact, target losses are a special case of target statistics (\S~\ref{sec:consis-implies-indir}), which suggests property elicitation (see \S~\ref{subsec:properties}) is well-suited to study general lower bounds.
+Most prior work on convex consistency dimension focuses on the quadrant of target losses and discrete predictions (Quadrant 1)~\citep{zhang2004statistical,bartlett2006convexity,tewari2007consistency,ramaswamy2015hierarchical,ramaswamy2016convex,ramaswamy2018consistent}.
 
-\jessiet{Proposed paragraph about calibration to replace \S 2.2}
-As definitions of consistency are relatively intractable to apply directly, the literature often focuses on a weaker condition called calibration~\citep[Chapter 3]{steinwart2008support}, which only applies when given a discrete target loss.
+As definitions of consistency are relatively intractable to apply directly, the literature often focuses on a weaker condition called calibration, which only applies when given a discrete target loss, e.g. Quadrants 1 and 3. 
 Particularly,~\citet{zhang2004statistical, lin2004note,bartlett2006convexity,tewari2007consistency,ramaswamy2016convex} show the equivalence of consistency and calibration in the Quadrant 1, where one is given a target statistic and discrete prediction set.
 We discuss the additional relationship of elicitation and calibration in Appendix~\ref{app:calibration}, and derive Theorem~\ref{thm:consistent-implies-indir-elic} via calibration.
 
@@ -270,6 +263,8 @@ We discuss the additional relationship of elicitation and calibration in Appendi
 \label{tab:quadrants}
 \end{center}
 \end{table}
+
+\begin{figure}
 \begin{center}
 \resizebox{0.8\linewidth}{!}{%
 \begin{tikzpicture}
@@ -299,17 +294,18 @@ We discuss the additional relationship of elicitation and calibration in Appendi
 \end{tikzpicture}
 }
 \end{center}
+\caption{Flow and implications of results \jessie{Change}}
+\label{fig:results-flow}
+\end{figure}
 
 \paragraph{Contributions}
-\jessiet{Almost definitely want to re-format and polish this.}
-Our contributions are as follows:
-\begin{itemize}
-	\item Formalize a notion of consistency with respect to a target statistic (Definition~\ref{def:consistent-prop}) and show its relationship to consistency with respect to a target loss (Lemma~\ref{lem:consistent-loss-implies-prop}).
-	\item Show indirect elicitation is a necessary condition for consistency (Theorem~\ref{thm:consistent-implies-indir-elic}).
-	\item Present a new framework for deriving lower bounds on the prediction dimension of consistent convex surrogates (Corollaries~\ref{cor:Pcodim-flat-single-val-prop} and~\ref{cor:Pcodim-flat-elic-relint-prop}).
-	These bounds are the first to our knowledge that can be applied in all four quadrants.
-	\item Use this framework to derive new bounds for well-studied problems such as abstain loss (\S~\ref{sec:finite-calib}) and variance, entropy, and norms (\S~\ref{sec:contin-consis}).
-\end{itemize}
+\jessiet{Thoughts on this vs bullet points?}
+Our contributions are summarized in Figure~\ref{fig:results-flow}.
+First, we formalize a notion of consistency with respect to a target statistic (Definition~\ref{def:consistent-prop}) and show its relationship to consistency with respect to a target loss (Lemma~\ref{lem:consistent-loss-implies-prop}).
+We then show indirect elicitation is a necessary condition for consistency (Theorem~\ref{thm:consistent-implies-indir-elic}).
+With these tools in hand, we present a new framework for deriving lower bounds on the prediction dimension of consistent convex surrogates (Corollaries~\ref{cor:Pcodim-flat-single-val-prop} and~\ref{cor:Pcodim-flat-elic-relint-prop}) via indirect elicitation.
+These bounds are the first to our knowledge that can be applied in all four quadrants.
+Finally, we use this framework to derive new bounds for well-studied problems such as abstain loss (\S~\ref{sec:finite-calib}) and variance, entropy, and norms (\S~\ref{sec:contin-consis}).
 
 \section{Preliminaries \jessie{Setting?}}\label{sec:related-work}
 
@@ -743,8 +739,8 @@ When given a target loss, we can consider the \emph{abstain property} over 3 out
 This is elicited by the target loss $\ell^{abs}(r,y) := \Ind{r \not \in \{y, \bot\}} + (1/2)\Ind{r = \bot}$. 
 \citet{ramaswamy2016convex} present a convex surrogate for the abstain target loss that takes as input a prediction whose dimension is logarithmic in the number of outcomes, yielding new upper bounds on $\conscvx(\ell^{abs})$ which are an exponential improvement over previous results, e.g.,~\cite{crammer2001algorithmic}.
 To lower bound the dimension of convex surrogates, we can consider two different distributions; in the first, our bound yields a strict gap over the feasible subspace dimension bound, and in the second, the bounds are equal.
-First, we choose $p$ to be the uniform distribution (black dot in Figures~\ref{fig:fsd-bound} and~\ref{fig:flats-bound}).
-In this case, the bound by feasible subspace dimension yields $\conscvx(\ell^{abs}) \geq 3 - 2 - 1 = 0$, as the feasible subspace dimension is $2$ since we are on the relative interior of the level set and simplex, as shown in Figure~\ref{fig:fsd-bound}.
+First, we choose $p$ to be the uniform distribution (black dot in Figure~\ref{fig:fsd-flats-abstain}).
+In this case, the bound by feasible subspace dimension yields $\conscvx(\ell^{abs}) \geq 3 - 2 - 1 = 0$, as the feasible subspace dimension is $2$ since we are on the relative interior of the level set and simplex, as shown in Figure~\ref{fig:fsd-flats-abstain} (L).
 
 
 
@@ -753,33 +749,44 @@ In this case, the bound by feasible subspace dimension yields $\conscvx(\ell^{ab
 
 However, consider any $1$-flat containing $p$ (the uniform distribution).
 When intersected with the simplex, one can see that any line in the simplex through $p$ also leaves the cell $\gamma_\bot$, which contains $p$.
-See Figure~\ref{fig:flats-bound} for intuition; a $1$-flat through $p \in \relint{\simplex}$ would be a line in such a figure.
+See Figure~\ref{fig:fsd-flats-abstain} (R) for intuition; a $1$-flat through $p \in \relint{\simplex}$ would be a line in such a figure.
 Therefore, we have no $1$-flat containing $p$ staying in $\gamma_\bot$, so we obtain a better lower bound, $\conscvx(\ell^{abs}) \geq 2$.
 Combining this with the upper bounds given by~\cite{ramaswamy2018consistent}, we observe the bound $\conscvx(\ell^{abs}) = 2$ is tight.
 
-Our bounds sometimes match those of~\citep{ramaswamy2016convex}; consider the distribution $q = (1/4, 1/4, 1/2)$, shown in blue in Figures~\ref{fig:fsd-bound} and~\ref{fig:flats-bound}.
+Our bounds sometimes match those of~\citep{ramaswamy2016convex}; consider the distribution $q = (1/4, 1/4, 1/2)$, shown in blue in Figure~\ref{fig:fsd-flats-abstain}.
 The feasible subspace dimension (of both $\gamma_\bot$ and $\gamma_3$) is $1$, since one only moves toward the distributions $(0,1/2, 1/2)$ and $(1/2, 0, 1/2)$ without leaving the level sets, and the three points are collinear in $\affhull(\simplex)$, suggesting $\Sc_{\gamma_\bot}(q) = 1$.  
 This yields $\conscvx(\ell^{abs}) \geq 3 - 1- 1 = 1$.
 The same line segment defines a flat contained in both $\gamma_\bot$ and $\gamma_3$, so we have $\conscvx(\ell^{abs}) \geq 1$ by Corollary~\ref{cor:Pcodim-flat-elic-relint-prop}, matching the feasible subspace dimension bound.
 
 
-\begin{figure}[ht]
-\begin{minipage}{0.45\linewidth}
+%\begin{figure}[ht]
+%\begin{minipage}{0.45\linewidth}
+%	\centering
+%	\includegraphics[width=\linewidth]{tikz/fsd-bound.pdf}
+%	\caption{%Since the uniform distribution is in the relative interior of the simplex and the level set $\gamma_\bot$, 
+%          $\dim(\Sc_{\gamma_\bot}($\textbullet$)) = 2$ and $\dim(\Sc_{\gamma_\bot}({\color{blue}\star})) = 1$.}
+%	\label{fig:fsd-bound}
+%\end{minipage}
+%\hfill
+%\begin{minipage}{0.45\linewidth}
+%	\centering
+%	\includegraphics[width=\linewidth]{tikz/flats-bound.pdf}
+%	\caption{Any $1$-flat $F$ through \textbullet leaves $\gamma_\bot$.
+%	However, there is a $1$-flat containing ${\color{blue}\star}$ that is a subset of $\gamma_\bot$ and $\gamma_3$.
+%	}
+%	\label{fig:flats-bound}
+%\end{minipage}
+%\end{figure}
+
+
+\begin{figure}[htb]
 	\centering
-	\includegraphics[width=\linewidth]{tikz/fsd-bound.pdf}
-	\caption{%Since the uniform distribution is in the relative interior of the simplex and the level set $\gamma_\bot$, 
-          $\dim(\Sc_{\gamma_\bot}($\textbullet$)) = 2$ and $\dim(\Sc_{\gamma_\bot}({\color{blue}\star})) = 1$.}
-	\label{fig:fsd-bound}
-\end{minipage}
-\hfill
-\begin{minipage}{0.45\linewidth}
-	\centering
-	\includegraphics[width=\linewidth]{tikz/flats-bound.pdf}
-	\caption{Any $1$-flat $F$ through \textbullet leaves $\gamma_\bot$.
-	However, there is a $1$-flat containing ${\color{blue}\star}$ that is a subset of $\gamma_\bot$ and $\gamma_3$.
-	}
-	\label{fig:flats-bound}
-\end{minipage}
+	\begin{tabular}{cc}
+		\includegraphics[width=.45\textwidth]{tikz/fsd-bound.pdf} &
+		\includegraphics[width=.45\textwidth]{tikz/flats-bound.pdf} \\
+	\end{tabular}
+	\caption{(Left): Feasible subspace dimension $\Sc_{\gamma_\bot}(\bullet) = 2$ and $\Sc_{\gamma_\bot}({\color{blue}\star}) = 1$, giving the bound $\conscvx(\ell^{abs}) \geq 3- 1-1 = 1$.  (Right): No $1$-flat through $\bullet$ (a line since $\bullet \in \relint{\simplex})$  stays fully contained in $\gamma_\bot$, so $\conscvx(\ell^{abs}) > 1$.}
+	\label{fig:fsd-flats-abstain}
 \end{figure}
 
 \section{Continuous-valued predictions}\label{sec:contin-consis}
