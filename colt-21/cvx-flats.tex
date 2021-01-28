@@ -34,6 +34,7 @@
 \usepackage{bbm}
 \usepackage{xspace}
 \usetikzlibrary{arrows}
+\usetikzlibrary{shapes}
 
 \makeatletter
 \let\Ginclude@graphics\@org@Ginclude@graphics 
@@ -99,6 +100,7 @@
 \newcommand{\Sc}{\mathcal{S}}  % jessie, feel free to redef, just not \S :-)
 \newcommand{\Scr}{\mathcal{S}}  % using this for the span of F_p - not sure if we want this to be parallel to the feasible subspace notation
 \newcommand{\U}{\mathcal{U}}
+\newcommand{\V}{\mathcal{V}}
 \newcommand{\X}{\mathcal{X}}
 \newcommand{\Y}{\mathcal{Y}}
 
@@ -264,9 +266,8 @@ We discuss the additional relationship of elicitation and calibration in Appendi
 
 \begin{table}
 	\begin{center}
-	\begin{tabular}{|p{12ex}||l|l|} 
-		\hline
-		& \emph{Target loss}  & \emph{Target statistic}\\ \hline \hline
+	\begin{tabular}{p{12ex}|l|l|} 
+		& \emph{Target loss}  & \emph{Target statistic}\\ \hline
 		\emph{Discrete} & \textbf{Q1:} Classification  & \textbf{Q2:} Hierarchical prediction\\ 
 		{\em prediction} & & \\ \hline 
 		\emph{Continuous } & \textbf{Q3:} Least-squares regression & \textbf{Q4:} Variance estimation\\ 
@@ -281,7 +282,7 @@ We discuss the additional relationship of elicitation and calibration in Appendi
 \resizebox{0.8\linewidth}{!}{%
 \begin{tikzpicture}
 
-\tikzset{vertex/.style = {shape=circle,draw,minimum size=10em}}
+\tikzset{vertex/.style = {ellipse,draw,minimum width=10em}}
 \tikzset{edge/.style = {->,> = triangle 45, thick}}
 \tikzset{node/.style = {anchor=above, sloped}}
 
@@ -418,11 +419,12 @@ Their results have led to the design of consistent convex surrogates for discret
 %\end{definition}
 
 \begin{definition}[Convex Consistency Dimension]\label{def:cvx-consistency-dim}
-	Given a target loss $\ell:\R \times\Y \to \reals$ or statistic $\gamma: \P \toto \R$, its \emph{convex consistency dimension} $\conscvx(\cdot)$ is the minimum dimension $d$ such that there is a convex $L : \reals^d \times \Y \to \reals$ and link $\psi$ such that $(L,\psi)$ is consistent with respect to $\ell$ or $\gamma$.
+  Given a target loss $\ell:\R \times\Y \to \reals$ or statistic $\gamma: \P \toto \R$, its \emph{convex consistency dimension} $\conscvx(\cdot)$ is the minimum dimension $d$ such that there is a convex $L : \reals^d \times \Y \to \reals$ and link $\psi$ such that $(L,\psi)$ is consistent with respect to $\ell$ or $\gamma$.
+  \raft{Why not use $\Lcvx$ here?  Then you don't need the qualifier below.}
 %	\btw{Maybe take out of definition environment, but (a) I'd worry that people wouldn't be able to find the definition when we use it later, and (b) I'm hoping we can make the distinction very clear, which now is achieved by the parallel definitions}
 \end{definition}
 A priori, this definition does not really make sense given a target statistic.
-In Definition~\ref{def:consistent-prop}, we formalize consistency with respect to a property so that we can study $\conscvx(\gamma)$. \jessiet{Do we want to just talk about $\ell$ here?}
+In Definition~\ref{def:consistent-prop}, we formalize consistency with respect to a property so that we can study $\conscvx(\gamma)$. \jessiet{Do we want to just talk about $\ell$ here?}\raft{I didn't think about the target property vs target loss point.  Let's discuss.}
 
 In the case of a target statistic $\gamma$, \citet{lambert2008eliciting} similarly introduce the notion of \emph{elicitation complexity}, later generalized by \citet{frongillo2020elicitation}, which captures the lowest prediction dimension of a surrogate which indirectly elicits $\gamma$.
 This notion is more general as it extends to continuous estimation settings and does not inherently depend on a target loss being given. 
@@ -466,11 +468,13 @@ Second, given a target property $\gamma$, such as the $\alpha$-quantile, we say 
 We then observe that Definition~\ref{def:consistent-ell} is subsumed by Definition~\ref{def:consistent-prop}, and use this to show consistency implies $L$ indirectly elicits $\prop{\ell}$ or $\gamma$ respectively.
 
 \begin{definition}[Consistent: loss]\label{def:consistent-ell}
-	A loss and link $(L,\psi)$ are $\D$-consistent for a set $\D$ of distributions over $\X \times \Y$ with respect to a target loss $\ell$ if, for all $D \in \D$ and all sequences of measurable hypothesis functions $\{f_m : \X \to \R\}$,
-	\begin{align*}
-	\E_D L(f_m(X), Y) \to \inf_f \E_D L(f(X), Y) &\implies \E_D \ell((\psi \circ f_m)(X), Y) \to \inf_f \E_D \ell((\psi \circ f)(X), Y)~.~
-	\end{align*}
-Given a set $\P \subseteq \simplex$, if for all distributions $p \in \P$, there exists a $D \in \D$ and $x \in \X$ such that $D$ has a point mass on $x$ and $p = D_x$, then we simply say $(L,\psi)$ is consistent.
+  A loss and link $(L,\psi)$ are \emph{$\D$-consistent} for a set $\D$ of distributions over $\X \times \Y$ with respect to a target loss $\ell$ if, for all $D \in \D$ and all sequences of measurable hypothesis functions $\{f_m : \X \to \R\}$,
+  \begin{align*}
+    \E_D L(f_m(X), Y) \to \inf_f \E_D L(f(X), Y) &\implies \E_D \ell((\psi \circ f_m)(X), Y) \to \inf_f \E_D \ell((\psi \circ f)(X), Y)~.~
+  \end{align*}
+  % Given a set $\P \subseteq \simplex$, if for all distributions $p \in \P$, there exists a $D \in \D$ and $x \in \X$ such that $D$ has a point mass on $x$ and $p = D_x$, then we simply say $(L,\psi)$ is consistent.
+  For a given set $\P \subseteq \simplex$, we simply say $(L,\psi)$ is \emph{consistent} if it is $\D$-consistent for some $\D$ satisfying the following: for all $p \in \P$, there exists $D \in \D$ and $x \in \X$ such that $D$ has a point mass on $x$ and $p = D_x$.
+  \raft{Touched up to clarify the quantification over $\D$}
 \end{definition}
 
 
@@ -492,9 +496,11 @@ In particular we should have $\propdis(r,p) = 0 \iff r \in \gamma(p)$.
 	\begin{equation}
     \E_{D} L(f_m(X), Y) \to \inf_f \E_{D} L( f(X), Y) \implies \E_X \propdis(\psi \circ f_m(X), D_X) \to 0~.~
   \end{equation}
-  %where $D_x = \Pr[Y|X=x]$.
-  Suppose there is a set $\D$ such that, for all $p \in \P$, there is a $D \in \D$ with a point mass on some $x \in \X$ such that $p = D_x$ and a $\propdis$ satisfying the requirements above.
-  In this case, if $(L,\psi)$ are $(\propdis,\D)$-consistent, we simply say the pair is consistent with respect to $\gamma$.
+  % where $D_x = \Pr[Y|X=x]$.
+  We simply say $(L,\psi)$ is \emph{$\mu$-consistent} if it is $(\mu,\D)$-consistent for some $\D$ satisfying the following: for all $p \in \P$, there exists $D \in \D$ and $x \in \X$ such that $D$ has a point mass on $x$ and $p = D_x$.
+  \raft{Ditto; hopefully this is equivalent to what was here before (commented out below)}
+  % Suppose there is a set $\D$ such that, for all $p \in \P$, there is a $D \in \D$ with a point mass on some $x \in \X$ such that $p = D_x$ and a $\propdis$ satisfying the requirements above.
+  % In this case, if $(L,\psi)$ are $(\propdis,\D)$-consistent, we simply say the pair is consistent with respect to $\gamma$.
 \end{definition}
 
 Typical definitions of consistency require $\D$ to be the set of all distributions over $\X \times \Y$, which allows for $\P = \simplex$, but our requirements on $\D$ are strictly weaker.
@@ -536,21 +542,24 @@ This points to indirect elicitation as a natural necessary condition for consist
 
 
 \begin{theorem}\label{thm:consistent-implies-indir-elic}
-	For a surrogate $L \in \L$, if the pair $(L, \psi)$ is consistent with respect to a property $\gamma: \P \toto \R$ or a loss $\ell$ eliciting $\gamma$, then $(L, \psi)$ indirectly elicits $\gamma$.
-	%\jessie{Require $\P \supseteq \cup_{D \in \D}\cup_x D_x$ and convex?  With our assumptions on the loss (namely, the expected loss is finite everywhere for all $p$), we should be able to apply Fubini-Tonelli, so that $\P \supseteq \cup_D \cup_x D_x$ and convex is sufficient, as any $D_X$ will be covered by this since the joint expectation is the same as $\E_X \E_Y L(u;D_X)$}\jessiet{Need $\X$ and $\Y$ to be $\sigma$-finite, which I think is immediate from them being probability measures} 
-	%\jessie{Union of convex hulls of $D_x$ is convex, and use the fact that we .  Better : assume $\P = \{D_x : x \in \X and D \in \D\}$}
+  For a surrogate $L \in \L$, if the pair $(L, \psi)$ is consistent with respect to a property $\gamma: \P \toto \R$ or a loss $\ell$ eliciting $\gamma$, then $(L, \psi)$ indirectly elicits $\gamma$.
 \end{theorem}
+for all $p\in\P$, a $D\in\D$ with $\Pr_D[Y]=p$ being the marginal distribution on $\Y$.
+
 \begin{proof}
-%  \raft{Maybe ref the consistency definition here explicitly, at the top and the end}
-	By Lemma~\ref{lem:consistent-loss-implies-prop}, it suffices to show the result for consistency with respect to a property $\gamma$, setting $\gamma := \prop{\ell}$ if $\ell$ is given instead.
-	We show the contrapositive; suppose $(L, \psi)$ does not indirectly elicit $\gamma$, meaning we have some $p \in \P$ so that $u \in \Gamma(p)$ but $\psi(u) \not \in \gamma(p)$, where $\Gamma := \prop{L}$.
-	Observe that we use the fact $\Gamma(p) \neq \emptyset$.
-	Consider the constant sequence $\{f_m\}$ with $f_m(x) = u$ for all $m,x$, and take the $D\sim \X \times\Y$ with a point mass on $x' \in \X$ such that $D_{x'} = p$.
-  Since $u \in \Gamma(p)$, we observe $\E_D L(f_m(X), Y) = \inf_f \E_D L(f(X),Y)$ for all $m$; in particular $\E_p L(f_m(x), Y) \to \inf_f \E_p L(f(X),Y)$.
-%  \raft{Maybe clearer to first say $\E_D L(f_m(X), Y) = \inf_f L(f(X),Y)$ for all $m$, and then the easy implication of the convergence \jessie{Done}}
-	However, we have $\E_X \propdis(\psi \circ f_m(X), D_X) = \propdis(\psi(u_m), p) = \propdis(\psi(u), p) \neq 0$, since $\psi(u) \not \in \gamma(p)$.
-%  \raft{Almost -- just clarify that this is the expectation over $D$ too by construction \jessie{Kinda done?}}
-	Thus, we observe $(L, \psi)$ is not consistent with respect to $\gamma$ (Definition~\ref{def:consistent-prop}).
+  By Lemma~\ref{lem:consistent-loss-implies-prop}, it suffices to show the result for consistency with respect to a property $\gamma$, setting $\gamma := \prop{\ell}$ if $\ell$ is given instead.
+  We show the contrapositive; suppose $(L, \psi)$ does not indirectly elicit $\gamma$, meaning we have some $p \in \P$ so that $u \in \Gamma(p)$ but $\psi(u) \not \in \gamma(p)$, where $\Gamma := \prop{L}$.
+  Observe that we use the fact $\Gamma(p) \neq \emptyset$.
+  By definition, we have consistency with respect to some distribution $D$ on $\X\times\Y$ with a point mass on some $x\in\X$ and $D_x = p$.
+  Consider a constant sequence $\{f_m\}$ with $f_m = f'$ such that $f'(x) = u$,
+  so that $\E_D L(f_m(X), Y) = \E_{D_x} L(f_m(x),Y) = \E_p L(u,Y)$.
+  Since $u \in \Gamma(p)$, we have $\E_p L(u,Y) = \inf_f \E_{D_x} L(f(x),Y) = \inf_f \E_D L(f(X),Y)$.
+  In particular, we have $\E_D L(f_m(X), Y) \to \inf_f \E_D L(f(X),Y)$.
+  \raft{Old version commented out; I think we meant $D$ not $p$}%$\E_p L(f_m(x), Y) \to \inf_f \E_p L(f(X),Y)$.
+  % \raft{Maybe clearer to first say $\E_D L(f_m(X), Y) = \inf_f L(f(X),Y)$ for all $m$, and then the easy implication of the convergence \jessie{Done}}
+  However, we have $\E_X \propdis(\psi \circ f_m(X), D_X) = \propdis(\psi(u_m), p) = \propdis(\psi(u), p) \neq 0$, since $\psi(u) \not \in \gamma(p)$.
+  \raft{$u_m$ not defined; just cut out that term perhaps?}
+  Therefore $(L, \psi)$ is not consistent with respect to $\gamma$ (Definition~\ref{def:consistent-prop}).
 \end{proof}
 
 %\jessie{Comment about how the assumption on sets isn't a big deal.}
@@ -602,12 +611,13 @@ Corollaries~\ref{cor:Pcodim-flat-single-val-prop} and~\ref{cor:Pcodim-flat-elic-
 		Let $V_{u,p} : \Y \to \reals^d, y \mapsto W_y$ be the function encoding the columns of $W$.
 		Observe that $\E_p V_{u,p} = \vec 0$.				
 		
-		\emph{Infinite $\Y$: }	
-		$L \in \L_d$ and convex implies $L$ satisfies the assumptions of~\cite{ioffe1969minimization}, we can interchange subdifferentiation and expectation to observe $\partial \E_p L(u,Y) = \E_p \partial L(u,Y) := \{\int V(y)dp(y) : V \text{ measurable}, V(y) \in \partial L(u,y) \text{ a.s. in } p\}$.
-		%\jessie{What happens if $\vec 0$ not in the set, but is in the closure}\jessie{Cite~\cite{ioffe1969minimization} instead; they don't use closure and it's the same result. (Instead of ~\cite[Cor 1]{rockafellar1982interchange})}
-		We can now take $V_{u,p}$ to a $V: \Y \to \reals^d$ so that $\E_p V = \vec 0$\raft{I think you're skipping a step or two here, so I'd suggest spelling this out.  You want $\E_p V = 0$ after all, so not any $V$ in that set. \jessie{Attempted to spell it out. Feel free to burn if happier with this}}, which exists as $\vec 0 \in \partial \E_p L(u,Y)$, and therefore, the set contains some $V$ so that $\E_p V = \vec 0$.
-		
-		
+		\emph{Infinite $\Y$: }
+		Any $L \in \Lcvx_d$ satisfies the assumptions of~\cite{ioffe1969minimization}, so we may interchange subdifferentiation and expectation.
+                Specifically, letting $\V_{u,p} = \{V:\Y\to\reals^d \mid V \text{ measurable}, V(y) \in \partial L(u,y) \text{ a.s.\ in } p\}$, we have
+                $\partial \E_p L(u,Y) = \{\int V(y)dp(y) \mid V\in\V_{u,p}\}$.
+		% \jessie{What happens if $\vec 0$ not in the set, but is in the closure}\jessie{Cite~\cite{ioffe1969minimization} instead; they don't use closure and it's the same result. (Instead of ~\cite[Cor 1]{rockafellar1982interchange})}
+                As $\vec 0 \in \partial \E_p L(u,Y)$, in particular, there is some $V_{u,p} \in \V_{u,p}$ such that $\E_p V_{u,p} = 0$.
+                \raft{Rewrote.  But I see a problem, hopefully not a big one: we want to conclude $\E_q V_{u,p} = 0 \implies q \in \Gamma_u$.  But the ``a.s.\ in $p$'' means we may not have $0 \in \partial \E_q L(u,Y)$, since maybe $V_{u,p}(y)$ is not in $\partial L(u,y)$ a.s.\ in $q$...}
 		
 		In both cases, we take the flat $F := \zeros{V_{u,p}}$, and have $p \in F$ by construction.
 		To see $F \subseteq \Gamma_u$, from the chain of equivalences above, we have for any $q\in\P$ that $q \in \zeros{V_{u,p}} \implies \vec 0 \in \partial \E_q L(u,Y) \implies u \in \Gamma(q) \implies q \in \Gamma_u$.
@@ -632,14 +642,13 @@ and in particular, there is no surrogate $L \in \Lcvx_d$ that is consistent with
 %  In particular, if there is a $p \in \P$ such that $\gamma(p) = \{r\}$ such that there is no flat $F$ of \Pcodimension at most $d$ such that $p \in F \subseteq \gamma_r$, then there is no convex surrogate $L \in \L_d$ consistent with respect to $\gamma$.
 \end{corollary}
 \begin{proof}
-	Let $(L, \psi)$ indirectly elicit $\gamma$ and the convex function $L$ and elicit $\Gamma$.
+	Let $(L, \psi)$ indirectly elicit $\gamma$, where $L\in\Lcvx_d$, and let $\Gamma = \prop{L}$.
 	As $\Gamma$ is non-empty, there is some $u \in \Gamma(p)$.
-	Since $\gamma$ is single-valued at $p$, we have $r = \psi(u)$; by Lemma~\ref{lem:convex-flats-inf-dim}, we know there is a flat $F = \zeros{V_{u,p}}$ so that $p \in F \subseteq \Gamma_u$.
-	Moreover, by construction, we know it is a $d$-flat.
+	Since $\gamma$ is single-valued at $p$, we have $r = \psi(u)$; by Lemma~\ref{lem:convex-flats-inf-dim}, we know there is a $d$-flat $F = \zeros{V_{u,p}}$ so that $p \in F \subseteq \Gamma_u$.
 	By definition of indirect elicitation, we additionally have $\Gamma_u \subseteq \gamma_r$.
 	Thus, we have $p \in F \subseteq \gamma_r$.
-	
-	Now, if we do not have a flat satisfying the above conditions, then we do not have any $L$ so that $\prop{L}$ indirectly elicits $\gamma$, and in turn do not have a link such that $L$ is consistent with respect to $\gamma$ by Theorem~\ref{thm:consistent-implies-indir-elic}.
+
+        If no flat $F$ satisfies the above conditions, then no $L\in\Lcvx_d$ indirectly elicits $\gamma$, and hence no such that $L$ is consistent with respect to $\gamma$ by Theorem~\ref{thm:consistent-implies-indir-elic}.
 \end{proof}
 
 
@@ -761,8 +770,8 @@ The same line segment defines a flat contained in both $\gamma_\bot$ and $\gamma
 	\centering
 	\includegraphics[width=\linewidth]{tikz/fsd-bound.pdf}
 	\caption{%Since the uniform distribution is in the relative interior of the simplex and the level set $\gamma_\bot$, 
-          $\dim(\Sc_{\gamma_\bot}($\textbullet$)) = 2$ and $\dim(\Sc_{\gamma_\bot}(\star)) = 1$.
-          %\raf{Jessie: for color reasons, maybe we could make the blue one a different symbol?  Here's my attempt... could be touched up :-)}
+          $\dim(\Sc_{\gamma_\bot}($\textbullet$)) = 2$ and $\dim(\Sc_{\gamma_\bot}({\color{blue}\star})) = 1$.
+          \raf{I had a feeling my comment wasn't 100\% clear -- fine/useful to have the color, but good to have the symbol in case of colorblindness/grayscale}
           \vspace*{-5pt}        }
 	\label{fig:fsd-bound}
 \end{minipage}
@@ -771,7 +780,7 @@ The same line segment defines a flat contained in both $\gamma_\bot$ and $\gamma
 	\centering
 	\includegraphics[width=\linewidth]{tikz/flats-bound.pdf}
 	\caption{Any $1$-flat $F$ through \textbullet leaves $\gamma_\bot$.
-	However, there is a $1$-flat containing $\star$ that is a subset of $\gamma_\bot$ and $\gamma_3$.
+	However, there is a $1$-flat containing ${\color{blue}\star}$ that is a subset of $\gamma_\bot$ and $\gamma_3$.
 	}
 	\label{fig:flats-bound}
 \end{minipage}
@@ -1341,7 +1350,8 @@ Because $r$ and $r'$ were completely symmetric, this completes the proof.
 
 \hariresult*
 \begin{proof}
-	Let $L : \reals^d \times \Y \to \reals$ elicit $\Gamma$ be a calibrated surrogate for $\ell$, and consider $\Y^{\proj(q)} := \supp(q)$ for any $q \in \simplex$ and what happens when we restrict $L$ and $\ell$ to only the outcomes in $\Y^{\proj(q)}$.
+  Let $L : \reals^d \times \Y \to \reals$ elicit $\Gamma$ be a calibrated surrogate for $\ell$, and consider $\Y^{\proj(q)} := \supp(q)$ for any $q \in \simplex$ and what happens when we restrict $L$ and $\ell$ to only the outcomes in $\Y^{\proj(q)}$.
+  \raft{I'm not getting the $\proj(q)$ stuff.  It would help if you defined $\proj(q)$, but even so, I suspect there is a more direct approach.  E.g. you define all these $\proj(q)$ versions and then just take the primed versions to be equal.  I'd suggest starting from scratch and thinking through what exactly you need.}
 	Take $L^{\proj(q)} := L|_{\Y^{\proj(q)}}$ and $\ell^{\proj(q)} := \ell|_{\Y^{\proj(q)}}$.
 	In particular, take $\Y' = \Y^{\proj(p)}, L' = L^{\proj(p)}$, and $\ell' = \ell^{\proj(p)}$. 
 	By calibration, we have $L$ indirectly eliciting $\gamma$.
@@ -1395,7 +1405,6 @@ Because $r$ and $r'$ were completely symmetric, this completes the proof.
 \section{Proof of Theorem~\ref{thm:bayes-risk-lower-bound}}
 
 \newcommand{\EL}{\mathcal{E}}
-\newcommand{\V}{\mathcal{V}}
 \newcommand{\defeq}{:=}
 \newcommand{\conv}{\mathrm{conv}}
 
