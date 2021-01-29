@@ -399,7 +399,7 @@ In Quadrant 1, \citet{ramaswamy2016convex} introduce a special case of convex co
 %\end{definition}
 
 \begin{definition}[Convex Consistency Dimension]\label{def:cvx-consistency-dim}
-  Given a target loss $\ell:\R \times\Y \to \reals$ or statistic $\gamma: \P \toto \R$, its \emph{convex consistency dimension} $\conscvx(\cdot)$ is the minimum dimension $d$ such that there is a convex $L :\reals^d \times\Y \to \reals$ and link $\psi$ such that $(L,\psi)$ is consistent with respect to $\ell$ or $\gamma$.
+  Given a target loss $\ell:\R \times\Y \to \reals$ or statistic $\gamma: \P \toto \R$, its \emph{convex consistency dimension} $\conscvx(\cdot)$ is the minimum dimension $d$ such that there is a $L \in \Lcvx_d$ and link $\psi$ such that $(L,\psi)$ is consistent with respect to $\ell$ or $\gamma$.
   \raft{Why not use $\Lcvx$ here?  Then you don't need the qualifier below. \jessie{$\Lcvx$ implies minimizability, do we want that baked in here?}}
 %	\btw{Maybe take out of definition environment, but (a) I'd worry that people wouldn't be able to find the definition when we use it later, and (b) I'm hoping we can make the distinction very clear, which now is achieved by the parallel definitions}
 \end{definition}
@@ -413,7 +413,7 @@ This notion is more general as it extends to continuous estimation settings and 
 \begin{definition}[Convex Elicitation Complexity]\label{def:cvx-elic-complex}
 	Given a target property $\gamma$, the \emph{convex elicitation complexity} $\eliccvx(\gamma)$ is the minimum dimension $d$ such that there is a $L \in \Lcvx_d$ indirectly eliciting $\gamma$.
 \end{definition}
-In particular, $\eliccvx(\prop{\ell}) \leq \conscvx(\ell)$ when restricting to minimizable surrogates ($\Lcvx$).
+In particular, $\eliccvx(\prop{\ell}) \leq \conscvx(\ell)$.
 
 %As we show next, calibration implies indirect elicitation, which means the convex elicitation complexity always lower bounds the convex calibration dimension in the setting of discrete target losses.
 %Yet despite this fact, the state-of-the-art lower bound for convex calibration dimension, the \emph{feasible subspace dimension} of \citet{ramaswamy2016convex}, is a special case of our lower bound for convex elicitation complexity (Theorem~\ref{thm:cvx-flats}), meaning we achieve the same or even higher lower bounds.
@@ -531,6 +531,10 @@ This points to indirect elicitation as a natural necessary condition for consist
   Therefore $(L, \psi)$ is not consistent with respect to $\gamma$ (Definition~\ref{def:consistent-prop}).
 \end{proof}
 
+\begin{corollary}
+	Given a property $\gamma : \P \toto \R$, we have $\eliccvx(\gamma) \leq \conscvx(\gamma)$.
+\end{corollary}
+
 %\jessie{Comment about how the assumption on sets isn't a big deal.}
 %While the assumption $\P = \{D_x : x \in \X, D \in \D\}$ may seem restrictive, it is primarily made for the sake of bookkeeping.
 %In particular, when $\Y$ is a finite set, we often take $\P = \simplex$, in which case, the assumption is unnecessary.
@@ -588,6 +592,7 @@ Corollaries~\ref{cor:Pcodim-flat-single-val-prop} and~\ref{cor:Pcodim-flat-elic-
 		
 		In both cases, we take the flat $F := \zeros{V_{u,p}}$, and have $p \in F$ by construction.
 		To see $F \subseteq \Gamma_u$, from the chain of equivalences above, we have for any $q\in\P$ that $q \in \zeros{V_{u,p}} \implies \vec 0 \in \partial \E_q L(u,Y) \implies u \in \Gamma(q) \implies q \in \Gamma_u$.
+		\jessie{Footnote about how we can probably lessen the assumption on $\P$}
 \end{proof}
 
 Knowing indirect elicitation implies the existence of such a flat, we now apply  Theorem~\ref{thm:consistent-implies-indir-elic} and Lemma~\ref{lem:convex-flats-inf-dim} to construct lower bounds on convex consistency dimension.
@@ -601,10 +606,11 @@ Knowing indirect elicitation implies the existence of such a flat, we now apply 
 \begin{corollary}\label{cor:Pcodim-flat-single-val-prop}
 Let target property $\gamma:\P \toto \R$ and $d\in\mathbb N$ be given.
 Let $p \in \P$ with $|\gamma(p)| = 1$, and take $\gamma(p) = \{r\}$.
-If there is no $d$-flat $F$ with $p \in F \subseteq \gamma_r$, then $\eliccvx(\gamma) > d$, 
+If there is no $d$-flat $F$ with $p \in F \subseteq \gamma_r$, then $\eliccvx(\gamma) \geq d + 1$, 
 %no $L\in\Lcvx_d$ indirectly elicits $\gamma$
 \raft{To discuss next meeting: maybe it's better to say $\eliccvx(\gamma) > d$ instead of the indirectly elicits bit.  Both here and the next Cor.\jessie{Changed.  I don't have strong opinions here, but lean towards $\eliccvx$ for the sake of unifying narrative.  Feel free to burn.}}
-and in particular, there is no surrogate $L \in \Lcvx_d$ that is consistent with respect to $\gamma$.
+and in particular, $\conscvx(\gamma) \geq d + 1$.
+%there is no surrogate $L \in \Lcvx_d$ that is consistent with respect to $\gamma$.
 %  %commented out 20 Jan 2021 8:37am - Jessie.  switching first statement to be the contrapositive
 %  Suppose we are given a target property $\gamma:\P \toto \R$, where $\P\subseteq\simplex$, indirectly elicited by a convex loss $L \in \L_d$.
 %  For all $p \in \P$ with $|\gamma(p)| = 1$, and $\gamma(p) = \{r\}$, there is some flat $F$ of \Pcodimension at most $d$ such that $p \in F \subseteq \gamma_r$.
@@ -630,9 +636,10 @@ and in particular, there is no surrogate $L \in \Lcvx_d$ that is consistent with
 \begin{corollary}\label{cor:Pcodim-flat-elic-relint-prop} 
   Let an elicitable target property $\gamma:\P \toto \R$ be given, where $\P\subseteq\simplex$ is defined over a finite set of outcomes $\Y$, and let $d\in\mathbb N$.
 Let $p \in \relint{\P}$.
-If there is no $d$-flat $F$ with $p \in F \subseteq \gamma_r$, then $\eliccvx(\gamma) > d$, 
+If there is no $d$-flat $F$ with $p \in F \subseteq \gamma_r$, then $\eliccvx(\gamma) \geq d + 1$, 
 %no $L\in\Lcvx_d$ indirectly elicits $\gamma$, 
-and in particular, there is no surrogate $L \in \Lcvx_d$ that is consistent with respect to $\gamma$.
+and in particular, $\conscvx(\gamma) \geq d + 1$.
+%there is no surrogate $L \in \Lcvx_d$ that is consistent with respect to $\gamma$.
 %
 %  %commented out 20 Jan 2021 at 8:40a - Jessie - switching first statement to be the contrapositive.
 %  Suppose we are given a target property $\gamma:\P \toto \R$, where $\P\subseteq\simplex$ for a finite set of outcomes $\Y$, indirectly elicited by a convex loss $L \in \L_d$.
@@ -668,6 +675,7 @@ By restricting slightly to the broad class of minimizable losses $\Lcvx$, we sho
 \citet{ramaswamy2016convex} gives a lower bound on the dimensionality of all consistent convex surrogates, i.e. $\conscvx(\ell) \geq \|p\|_0 - \dim(\Sc_{\gamma_r}(p)) - 1$ for all $p$ and $r \in \gamma(p)$, particularly in the setting where one is given a discrete prediction problem and target loss over finite outcomes.
 It turns out that the subspace of feasible directions is essentially a special case of a flat described by Lemma~\ref{lem:convex-flats-inf-dim}.
 So, by making a slight restriction to the class of minimizable convex surrogates $\Lcvx$, we can derive this lower bound from our general technique in a way that we find shorter and simpler.
+\jessie{Remind reader we restrict to minnable}
 %Due to the infimum in the definition of calibration (their proof tool), the original proof requires careful taking of sequences and the approximate subdifferentials, while indirect elicitation allows us to work with exact minimizers of the surrogate.
 
 %\jessie{I think this Lemma can be moved to the Appendix; just leaving it here for now to make sure it gets eyes on it.}
@@ -687,7 +695,8 @@ So, by making a slight restriction to the class of minimizable convex surrogates
 	Let $\ell:\R \times \Y \to \reals$ be a discrete loss eliciting $\gamma:\simplex \toto \R$ with $\Y$ finite, and let $L \in \Lcvx_d$ be consistent with respect to $\ell$.
 	Then for all $p \in \simplex$ and $r \in \gamma(p)$,
 	\begin{equation}
-	  d \geq \|p\|_0 - \dim(\Sc_{\gamma_r}(p)) - 1~.~
+	  \conscvx(\gamma) \geq \|p\|_0 - \dim(\Sc_{\gamma_r}(p)) - 1~.~
+	  %d \geq \|p\|_0 - \dim(\Sc_{\gamma_r}(p)) - 1~.~
 	\end{equation}
 %% Bo: old version, Jun 4 7pm
 %%	Suppose we are given a discrete loss $\ell:\R \to \reals^\Y_+$ eliciting $\gamma$.
@@ -700,8 +709,8 @@ So, by making a slight restriction to the class of minimizable convex surrogates
 	%\btw{Bo: rearranged the statements here a little, I felt the previous version required the reader to keep a bit more in their head.}
 	First, take $p \in \relint{\simplex}$ for intuition, so $\|p\|_0 = n$.
 	Lemma~\ref{lem:convex-flats-inf-dim} guarantees the existence of a $d$-flat $F$ with $p \in F \subseteq \gamma_r$.
-	Moreover, since $p \in \relint{\simplex}$, the flat $F$ satisfies the requirements of Lemma~\ref{lem:finite-relint-dim}, and the bound $\dim(\Sc_{\gamma_r}(p)) \geq \Scr_F(p) \geq n - d- 1$ is given by Lemma~\ref{lem:finite-relint-dim} (ii).
-        \raft{missing dim above; also, should give intuition instead of (or in addition to) lemmas, since that's more the point of a sketch}
+	Moreover, since $p \in \relint{\simplex}$, the flat $F$ satisfies the requirements of Lemma~\ref{lem:finite-relint-dim}, and the bound $\dim(\Sc_{\gamma_r}(p)) \geq \dim(\Scr_F(p)) \geq n - d- 1$ is given by Lemma~\ref{lem:finite-relint-dim} (ii).
+        \raft{should give intuition instead of (or in addition to) lemmas, since that's more the point of a sketch}
 %	By Lemma~\ref{lem:Pcodim-codim-finite}, this implies the existence of a matrix $W$ such that $p \in \{q \in \simplex : Wq = \vec 0 \} = F \subseteq \gamma_r$ and $\codim(W) \leq d$.
 %	%dimension at least $n-d-1$ with $p \in F$ and $F \cap \simplex \subseteq \gamma_r$. 
 %	For $p \in \relint{\simplex}$, this implies that $\Sc_{\gamma_r}(p) \supseteq F - p$.
@@ -821,6 +830,7 @@ The proof of the following Theorem is relegated to Appendix~\ref{app:pf-bayesris
   Let $\Gamma:\P\to\reals^d$ satisfy Condition~\ref{cond:v-interior} for some $r\in\reals^d$.
   Let $L$ elicit $\Gamma$ such that $\lbar$ is non-constant on $\Gamma_r$.
   Then $\eliccvx(\lbar) \geq d+1$.
+  \raft{Chain $\conscvx(\cdot)$ result}
 \end{restatable}
 
 % \begin{proof}[Proof sketch; full proof in Appendix~\ref{app:omitted-proofs}]
@@ -846,6 +856,7 @@ In particular, the well-known fact that the variance is not elicitable does not 
   Let $\P\subseteq\simplex$ for $\Y = \reals$, such that $\P$ is a set of Lebesgue densities with all $p \in \P$ having the same support, and there exists $p,q,q'\in\P$ with $\E_p Y = \E_q Y \neq \E_{q'} Y$ and $\Var(p) \neq \Var(q)$.
   \raft{Note to self: I think this condition is tight actually: if there is no such triple in $\P$, I think $\eliccvx(\Var) \leq 1$ (i.e., $\Var$ is constant or a function of the mean)}
   Then $\eliccvx(\Var)=2$.
+  \raft{Chain $\conscvx(\cdot)$ result}
 \end{corollary}
 \begin{proof}
   For the upper bound, we may elicit the first two moments via the convex loss $L(r,y) = (r_1-y)^2 + (r_2-y^2)^2$, and recover the variance via $\psi(r) = r_2-r_1^2$, giving $\eliccvx(\Var) \leq 2$.
@@ -880,6 +891,7 @@ Under mild assumptions, we find that there is no consistent real-valued convex s
   \label{cor:spectral-risks}
   Let $\P\subseteq \P_q$ contain $p_1,p_2,p_3,p_2'$ such that $q_\alpha(p_1) < q_\alpha(p_2) < q_\alpha(p_3)$ and $\CVaR_\alpha(p_2) \neq \CVaR_\alpha(p_2')$.\raft{Update}
   Then $\eliccvx(\CVaR_\alpha) \geq 2$.
+  \raft{Chain $\conscvx(\cdot)$ result}
 \end{corollary}
 As first shown by \citet{fissler2016higher}, the pair $(\CVaR_\alpha,q_\alpha)$ is jointly indentifiable and elicitable, but not by any convex loss~\citep[Prop.\ 4.2.31]{fissler2017higher}.
 We conjecture $\eliccvx(\CVaR_\alpha) > 2$, which would be an interesting gap between elicitation complexity for identifiable and convex-elicitable properties.
