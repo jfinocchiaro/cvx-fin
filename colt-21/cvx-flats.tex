@@ -417,7 +417,6 @@ This notion is more general as it extends to continuous estimation settings and 
 \begin{definition}[Convex Elicitation Complexity]\label{def:cvx-elic-complex}
 	Given a target property $\gamma$, the \emph{convex elicitation complexity} $\eliccvx(\gamma)$ is the minimum dimension $d$ such that there is a $L \in \Lcvx_d$ indirectly eliciting $\gamma$.
 \end{definition}
-In particular, $\eliccvx(\prop{\ell}) \leq \conscvx(\prop{\ell}) = \conscvx(\ell)$.
 
 %As we show next, calibration implies indirect elicitation, which means the convex elicitation complexity always lower bounds the convex calibration dimension in the setting of discrete target losses.
 %Yet despite this fact, the state-of-the-art lower bound for convex calibration dimension, the \emph{feasible subspace dimension} of \citet{ramaswamy2016convex}, is a special case of our lower bound for convex elicitation complexity (Theorem~\ref{thm:cvx-flats}), meaning we achieve the same or even higher lower bounds.
@@ -535,8 +534,10 @@ This points to indirect elicitation as a natural necessary condition for consist
   Therefore $(L, \psi)$ is not consistent with respect to $\gamma$ (Definition~\ref{def:consistent-prop}).
 \end{proof}
 
+This result allows us to state elicitation complexity as a lower bound for convex consistency dimension.
+
 \begin{corollary}
-	Given a property $\gamma : \P \toto \R$, we have $\eliccvx(\gamma) \leq \conscvx(\gamma)$.
+	Given a property $\gamma : \P \toto \R$ or loss $\ell:\R \times \Y \to \reals$ eliciting $\gamma$, we have $\eliccvx(\gamma) \leq \conscvx(\gamma) = \conscvx(\ell)$.
 \end{corollary}
 
 %\jessie{Comment about how the assumption on sets isn't a big deal.}
@@ -655,7 +656,7 @@ and in particular, $\conscvx(\gamma) \geq d + 1$.
 	As $\Gamma$ is non-empty, there is some $u \in \Gamma(p)$, and suppose $r' = \psi(u)$.
 	Take $F \subseteq \Gamma_u$ to be the flat that exists by Lemma~\ref{lem:convex-flats-inf-dim}.
 	If $r = r'$, then $p \in F \subseteq \Gamma_u \subseteq \gamma_r$ by indirect elicitation.
-	Otherwise, by Lemma~\ref{lem:set-valued-prop-flats}\jessiet{Moving to miscellaneous omitted proofs}, for elicitable properties with $p \in \gamma_r \cap \gamma_{r'}$, we observe $p \in F\subseteq \gamma_r \iff p \in F \subseteq \gamma_{r'}$.
+	Otherwise, by Lemma~\ref{lem:set-valued-prop-flats}, for elicitable properties with $p \in \gamma_r \cap \gamma_{r'}$, we observe $p \in F\subseteq \gamma_r \iff p \in F \subseteq \gamma_{r'}$.
 	
 	As above, if we do not have a flat satisfying the above conditions, then we do not have any $L$ so that $\prop{L}$ indirectly elicits $\gamma$, and in turn do not have a link such that $L \in \L_d$ is consistent with respect to $\gamma$ by Theorem~\ref{thm:consistent-implies-indir-elic}.
 \end{proof}
@@ -679,7 +680,6 @@ By restricting slightly to the broad class of minimizable losses $\Lcvx$, we sho
 \citet{ramaswamy2016convex} gives a lower bound on the dimensionality of all consistent convex surrogates, i.e. $\conscvx(\ell) \geq \|p\|_0 - \dim(\Sc_{\gamma_r}(p)) - 1$ for all $p$ and $r \in \gamma(p)$, particularly in the setting where one is given a discrete prediction problem and target loss over finite outcomes.
 It turns out that the subspace of feasible directions is essentially a special case of a flat described by Lemma~\ref{lem:convex-flats-inf-dim}.
 So, by making a slight restriction to the class of minimizable convex surrogates $\Lcvx$, we can derive this lower bound from our general technique in a way that we find shorter and simpler.
-\jessie{Remind reader we restrict to minnable}
 %Due to the infimum in the definition of calibration (their proof tool), the original proof requires careful taking of sequences and the approximate subdifferentials, while indirect elicitation allows us to work with exact minimizers of the surrogate.
 
 %\jessie{I think this Lemma can be moved to the Appendix; just leaving it here for now to make sure it gets eyes on it.}
@@ -696,7 +696,7 @@ So, by making a slight restriction to the class of minimizable convex surrogates
 %\end{proof}
 
 \begin{restatable}[\cite{ramaswamy2016convex} Theorem 18]{corollary}{hariresult}\label{cor:fsd-bound}
-	Let $\ell:\R \times \Y \to \reals$ be a discrete loss eliciting $\gamma:\simplex \toto \R$ with $\Y$ finite, and let $L \in \Lcvx_d$ be consistent with respect to $\ell$.
+	Let $\ell:\R \times \Y \to \reals$ be a discrete loss eliciting $\gamma:\simplex \toto \R$ with $\Y$ finite.%, and let $L \in \Lcvx_d$ be consistent with respect to $\ell$.
 	Then for all $p \in \simplex$ and $r \in \gamma(p)$,
 	\begin{equation}
 	  \conscvx(\gamma) \geq \|p\|_0 - \dim(\Sc_{\gamma_r}(p)) - 1~.~
@@ -714,7 +714,15 @@ So, by making a slight restriction to the class of minimizable convex surrogates
 	First, take $p \in \relint{\simplex}$ for intuition, so $\|p\|_0 = n$.
 	Lemma~\ref{lem:convex-flats-inf-dim} guarantees the existence of a $d$-flat $F$ with $p \in F \subseteq \gamma_r$.
 	Moreover, since $p \in \relint{\simplex}$, the flat $F$ satisfies the requirements of Lemma~\ref{lem:finite-relint-dim}, and the bound $\dim(\Sc_{\gamma_r}(p)) \geq \dim(\Scr_F(p)) \geq n - d- 1$ is given by Lemma~\ref{lem:finite-relint-dim} (ii).
-        \raft{should give intuition instead of (or in addition to) lemmas, since that's more the point of a sketch}
+        \raft{should give intuition instead of (or in addition to) lemmas, since that's more the point of a sketch \jessie{Good point... taking a pass below}}
+        
+        \jessie{Adding an attempt at sketch below, but also my brain isn't functioning.}
+    If $\conscvx(\gamma) = d$, then there is a $L \in \Lcvx_d$ so that $L$ is consistent with respect to $\gamma$, and in turn, indirectly elicits $\gamma$.
+    Lemma~\ref{lem:convex-flats-inf-dim} says that there should be some $d$-flat $F = \zeros{V}$ contained in $\gamma_r$.
+    In particular, we can verify $\Sc_{\gamma_r}(p) + \{p\}$ is one such $d$-flat.
+    If $p \in \relint{\simplex}$, then the feasible subspace  (shifted by $p$) spans\jessiet{not the word I want...} $\relint{\simplex}$, and in particular, we can observe that the shifted feasible subspace is full dimensional relative to $\affhull(\simplex)$.
+    We then use the rank-nullity theorem with a bound on $\rank(V) \leq d$ to obtain the bound $d \geq n-1-d$.
+    
 %	By Lemma~\ref{lem:Pcodim-codim-finite}, this implies the existence of a matrix $W$ such that $p \in \{q \in \simplex : Wq = \vec 0 \} = F \subseteq \gamma_r$ and $\codim(W) \leq d$.
 %	%dimension at least $n-d-1$ with $p \in F$ and $F \cap \simplex \subseteq \gamma_r$. 
 %	For $p \in \relint{\simplex}$, this implies that $\Sc_{\gamma_r}(p) \supseteq F - p$.
@@ -828,7 +836,7 @@ In particular, we can recover their main lower bound for the large class of Baye
   For some $r\in\range\Gamma$, the level set $\Gamma_r = \zeros{V}$ is a $d$-flat presented by some $V:\Y\to\reals^d$ such that \raft{I think we only need $\Gamma_r \subseteq \zeros{V}$.  I think I'll update the proof at some point to reflect this, since it actually gets a bit easier to follow.} $0\in\interior\{\E_pV : p\in\P\}$.
 \end{condition}
 
-The proof of the following Theorem is relegated to Appendix~\ref{app:pf-bayesrisklowerbound}
+The proof of the following Theorem is relegated to Appendix~\ref{app:pf-bayesrisklowerbound}.
 \begin{restatable}{theorem}{bayesrisklowerbound}\label{thm:bayes-risk-lower-bound}\btw{Old version for finite $\Y$ is in the NeurIPS 2020 submission; especially lots more detail on variance / norm / entropy examples}
   Let $\P$ be a set of Lebesgue densities supported on the same set for all $p \in \P$.
   Let $\Gamma:\P\to\reals^d$ satisfy Condition~\ref{cond:v-interior} for some $r\in\reals^d$.
@@ -1207,7 +1215,7 @@ Combining the two results, we can observe the result of Theorem~\ref{thm:consist
   \jessie{Check me!}
   
   As $\Y$ is a finite set, $\spn(\P_p)$ is a finite-dimensional vector space.
-  The rank-nullity theorem states $\dim(\im(T_W)) + \dim(\ker(T_W)) = \dim(\spn(\P_p)) \dim(\affhull(\P))$.
+  The rank-nullity theorem states $\dim(\im(T_W)) + \dim(\ker(T_W)) = \dim(\spn(\P_p)) = \dim(\affhull(\P))$.
   As $\dim(\im(T_W)) \leq d$, and we have shown above that $\Scr_F(p) = \spn(F_p) = \ker(T_W)$, the conclusion follows.
   % 
   %	Now let $v \in \ker(T_W) = \{v \in \spn(\P_p) : T_W(v) = \vec 0\}$.
@@ -1308,14 +1316,16 @@ Combining the two results, we can observe the result of Theorem~\ref{thm:consist
 \begin{proof}
   Let $L : \reals^d \times \Y \to \reals$ elicit $\Gamma$ be a calibrated surrogate for $\ell$, and consider $\Y^{\proj(q)} := \supp(q)$ for any $q \in \simplex$ and what happens when we restrict $L$ and $\ell$ to only the outcomes in $\Y^{\proj(q)}$.
   \raft{I'm not getting the $\proj(q)$ stuff.  It would help if you defined $\proj(q)$, but even so, I suspect there is a more direct approach.  E.g. you define all these $\proj(q)$ versions and then just take the primed versions to be equal.  I'd suggest starting from scratch and thinking through what exactly you need.}
-	Take $L^{\proj(q)} := L|_{\Y^{\proj(q)}}$ and $\ell^{\proj(q)} := \ell|_{\Y^{\proj(q)}}$.
-	In particular, take $\Y' = \Y^{\proj(p)}, L' = L^{\proj(p)}$, and $\ell' = \ell^{\proj(p)}$. 
-	By calibration, we have $L$ indirectly eliciting $\gamma$.
+  Take $L^{\proj(q)} := L|_{\Y^{\proj(q)}}$ and $\ell^{\proj(q)} := \ell|_{\Y^{\proj(q)}}$.
+  Observe that for all $q \in \simplex$, we have $\gamma(q) = \gamma^{\proj(q)}(B(q))$.
+	
+  In particular, take $\Y' = \Y^{\proj(p)}, L' = L^{\proj(p)}$, and $\ell' = \ell^{\proj(p)}$. 
+  By consistency, we have $L$ indirectly eliciting $\gamma$.
 	
 	
-	Now, observe $L'$ (eliciting $\Gamma'$) indirectly elicits $\gamma' := \prop[\simplexp]{\ell'}$ since, for all $q \in \simplex$, taking $P(q) \in \simplexp$ to be $q$\jessiet{Rename this projection} projected onto $\simplexp$ by removing $0$ entries of $q$, and letting $p' = P(p)$, we have $p' \in \Gamma'_u \implies p' \in \gamma'_{\psi(u)}$.
+	Now, observe $L'$ (eliciting $\Gamma'$) indirectly elicits $\gamma' := \prop[\simplexp]{\ell'}$ since, for all $q \in \simplex$, taking $B : q \mapsto \{q_{y} \mid y > 0\}$, and in particular, $p' = B(p)$, we have $p' \in \Gamma'_u \implies p' \in \gamma'_{\psi(u)}$.
 	Moreover, $\Gamma(p) = \Gamma'(p')$ and $\gamma(p) = \gamma'(p')$.
-	This same observation can be used to observe that $L'$ is also calibrated with respect to $\ell'$ as the calibration bound holds for all $q \in \simplex$, and therefore for all $P(q)$ by equality of $\gamma(q) = \gamma^{\proj(q)}(P(q))$.
+	This same observation can be used to observe that $L'$ is also calibrated with respect to $\ell'$ as the calibration bound holds for all $q \in \simplex$, and .
 	
 	As $L'$ is calibrated (and consistent) with respect to $\ell'$ and indirectly elicits $\gamma' := \prop[\simplexp]{\ell'}$, then by Corollary~\ref{cor:Pcodim-flat-elic-relint-prop}, we know there exists a $d$-flat $F$ with $p' \in F \subseteq \gamma'_r$.
 	Taking $\P = \simplexp$, we know $p' \in \relint{\simplexp}$ by construction, so we can apply Lemma~\ref{lem:finite-relint-dim}(ii), which gives $\dim(\Scr_F(p')) \geq  \dim(\affhull(\simplexp)) - d = \|p\|_0 - 1-d$.\footnote{To reason about $\dim(\affhull(\simplexp)) = \|p\|_0 - 1$, observe that the uniform distribution on $\simplexp$ has full support and therefore requires $\|p\|_0 - 1$ elements in its basis.}
