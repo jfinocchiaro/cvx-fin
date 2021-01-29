@@ -163,12 +163,12 @@
 \maketitle
 
 \begin{abstract}
-Given a prediction task, we wish to understand when one can and cannot design an ``efficient'' consistent convex surrogate loss.
+Given a prediction task, understanding when one can and cannot design a consistent convex surrogate loss, particularly a low-dimensional one, is an important and active area of machine learning research. 
 The prediction task may be given as a target loss, as in classification and structured prediction, or simply as a (conditional) statistic of the data, as in risk measure estimation.
-These two scenarios typically have involved quite different techniques for designing and analyzing surrogate losses.
-We unify these settings by generalizing notions of consistency from machine learning and give lower bounds on prediction dimension that extend across settings.
+These two scenarios typically involve different techniques for designing and analyzing surrogate losses.
+We unify these settings using tools from property elicitation, and give a general lower bound on prediction dimension.
 Our lower bound tightens existing results in the case of discrete predictions, showing that previous calibration-based bounds can largely be recovered via property elicitation.
-For statistic estimation, our lower bound gives new results for estimating variance, entropy, and norms of the conditional distribution, resolving some open problems.
+For continuous estimation, our lower bound resolves on open problem on estimating measures of risk and uncertainy.
 %
 %
 %Given a prediction task, understanding when one can and cannot design a consistent convex surrogate loss, particularly a low-dimensional one, is an important and active area of machine learning research. 
@@ -346,6 +346,7 @@ Typically, we notate finite report sets $\R$.
 \subsection{Property elicitation}\label{subsec:properties}
 Arising from the statistics and economics literature, property elicitation is similar to calibration, but only characterizes exact minimizers of a surrogate~\citep{savage1971elicitation,osband1985information-eliciting,lambert2008eliciting,lambert2009eliciting,lambert2018elicitation,frongillo2015vector-valued,frongillo2014general}.
 Specifically, given a statistic or \emph{property} $\Gamma$ of interest, which maps a distribution $p \in \P \subseteq \simplex$ to the set of desired or correct predictions, the minimizers of $L$ should precisely coincide with $\Gamma$.
+For example, squared loss $L(r,y) = (r-y)^2$ elicits the mean $\Gamma(p) = \E_p Y$.
 For intuition, to relate to consistency, one can think of $p = \Pr[Y|X=x]$ as a conditional distribution, though the definition is also applied to point prediction settings.
 
 \begin{definition}[Property, elicits]
@@ -573,7 +574,8 @@ Corollaries~\ref{cor:Pcodim-flat-single-val-prop} and~\ref{cor:Pcodim-flat-elic-
   \label{lem:convex-flats-inf-dim}
   Let $\Gamma:\P \toto \reals^d$ be (directly) elicited by $L \in \Lcvx_d$ for some $d\in\mathbb{N}$.
   Let $\Y$ be either a finite set, or $\Y = \reals$, in which case we assume each $p\in\P$ admits a Lebesgue density supported on the same set for all $p\in\P$.%
-  \footnote{This assumption is for technical convenience, though we suspect it is strictly stronger than necessary.\raf{This assumption is for technical convenience...}}
+  \footnote{This assumption is largely for technical convenience, to ensure that $\V_{u,p}$ does not depend on $p$.
+    Any such assumption would suffice, and we suspect even that condition can be relaxed.}
   For all $u\in\range\Gamma$ and $p\in\Gamma_u$, there is some $V_{u,p}:\Y\to\reals^d$ such that $p \in \zeros{V_{u,p}} \subseteq \Gamma_u$.
 \end{lemma}
 \begin{proof}
@@ -587,15 +589,15 @@ Corollaries~\ref{cor:Pcodim-flat-single-val-prop} and~\ref{cor:Pcodim-flat-elic-
   Observe that $\E_p V_{u,p} = \vec 0$.				
   
   \emph{$\Y=\reals$: }
-  \jessiet{Note: this should work for any infinite $\Y$ so long as you have a good $\sigma$-algebra... working at least with $\Y \subseteq \reals$ just makes things easier since we can take the Borel $\sigma$-algebra for granted.}
+  \btw{Note: this should work for any infinite $\Y$ so long as you have a good $\sigma$-algebra... working at least with $\Y \subseteq \reals$ just makes things easier since we can take the Borel $\sigma$-algebra for granted.}
   Any $L \in \Lcvx_d$ satisfies the assumptions of~\cite{ioffe1969minimization}, so we may interchange subdifferentiation and expectation.
   Specifically, letting $\V_{u,p} = \{V:\Y\to\reals^d \mid V \text{ measurable}, V(y) \in \partial L(u,y) \text{ $p$-a.s.}\}$, we have
   $\partial \E_p L(u,Y) = \{\int V(y)dp(y) \mid V\in\V_{u,p}\}$.
   As $\vec 0 \in \partial \E_p L(u,Y)$, in particular, there is some $V_{u,p} \in \V_{u,p}$ such that $\E_p V_{u,p} = 0$.
-  \jessiet{Fleshing this out: $\exists E \subseteq \mathcal{B}(\Y)$ so that $p(E) = 0$ and $V(y) \in \partial L(u,y) \forall y \in E^c$.  Claim $q(E) = 0$, which would complete the claim that $V(y) \in \partial L(u,y) q$-a.s.  For contradiction, if $q(E) > 0$, then $\exists x \in E$ and open neighborhood $N_x \ni x$ with $q(N_x) > 0$.  Since $\supp(p) = \supp(q)$, we then have $p(N_x) >0$, contradicting $p(E) = 0$, and hence $V(y) \in \partial L(u,y)$ not $p$-a.s.  Therefore, we must have $q(E) = 0$, so $V(y) \in \partial L(u,y) q$-a.s.}
-  For any $q\in\P$, as by assumption $q$ is supported on the same set as $p$, we have $V_{u,p}(y)\in\partial L(u,y)$ $q$-a.s., so that $V_{u,p}\in\V_{u,q}$\raft{I'm a bit too tired to see exactly how this follows, but it seems intuitively obvious. I'm okay to punt on it for the submission, but if someone has time to check, that would be great! \jessie{See above margin comment.  I think it's too much detail for the conference submission, but feel free to change my mind.}}.
+  \btw{Fleshing this out: $\exists E \subseteq \mathcal{B}(\Y)$ so that $p(E) = 0$ and $V(y) \in \partial L(u,y) \forall y \in E^c$.  Claim $q(E) = 0$, which would complete the claim that $V(y) \in \partial L(u,y) q$-a.s.  For contradiction, if $q(E) > 0$, then $\exists x \in E$ and open neighborhood $N_x \ni x$ with $q(N_x) > 0$.  Since $\supp(p) = \supp(q)$, we then have $p(N_x) >0$, contradicting $p(E) = 0$, and hence $V(y) \in \partial L(u,y)$ not $p$-a.s.  Therefore, we must have $q(E) = 0$, so $V(y) \in \partial L(u,y) q$-a.s.}
+  For any $q\in\P$, as by assumption $q$ is supported on the same set as $p$, we have $V_{u,p}(y)\in\partial L(u,y)$ $q$-a.s., so that $V_{u,p}\in\V_{u,q}$\btw{I'm a bit too tired to see exactly how this follows, but it seems intuitively obvious. I'm okay to punt on it for the submission, but if someone has time to check, that would be great! \jessie{See above margin comment.  I think it's too much detail for the conference submission, but feel free to change my mind.}}.
   Thus, $\E_q V_{u,p} = 0$ implies $0\in\partial\E_q L(u,Y)$ by the above.
-  \raft{For posterity, the bug: we want to conclude $\E_q V_{u,p} = 0 \implies q \in \Gamma_u$.  But the ``a.s.\ in $p$'' means we may not have $0 \in \partial \E_q L(u,Y)$, since maybe $V_{u,p}(y)$ is not in $\partial L(u,y)$ a.s.\ in $q$...}
+  \btw{For posterity, the bug: we want to conclude $\E_q V_{u,p} = 0 \implies q \in \Gamma_u$.  But the ``a.s.\ in $p$'' means we may not have $0 \in \partial \E_q L(u,Y)$, since maybe $V_{u,p}(y)$ is not in $\partial L(u,y)$ a.s.\ in $q$...}
   
   In both cases, we take the flat $F := \zeros{V_{u,p}}$, and have $p \in F$ by construction.
   To see $F \subseteq \Gamma_u$, from the chain of equivalences above, we have for any $q\in\P$ that $q \in \zeros{V_{u,p}} \implies \vec 0 \in \partial \E_q L(u,Y) \implies u \in \Gamma(q) \implies q \in \Gamma_u$.
@@ -696,39 +698,23 @@ So, by making a slight restriction to the class of minimizable convex surrogates
 %\end{proof}
 
 \begin{restatable}[\cite{ramaswamy2016convex} Theorem 18]{corollary}{hariresult}\label{cor:fsd-bound}
-	Let $\ell:\R \times \Y \to \reals$ be a discrete loss eliciting $\gamma:\simplex \toto \R$ with $\Y$ finite.%, and let $L \in \Lcvx_d$ be consistent with respect to $\ell$.
-	Then for all $p \in \simplex$ and $r \in \gamma(p)$,
-	\begin{equation}
-	  \conscvx(\gamma) \geq \|p\|_0 - \dim(\Sc_{\gamma_r}(p)) - 1~.~
-	  %d \geq \|p\|_0 - \dim(\Sc_{\gamma_r}(p)) - 1~.~
-	\end{equation}
-%% Bo: old version, Jun 4 7pm
-%%	Suppose we are given a discrete loss $\ell:\R \to \reals^\Y_+$ eliciting $\gamma$.
-%%	Take $p \in \simplex$ and $r \in \R$ such that $p \in \gamma_r$.
-%%	\begin{equation}
-%%	\ccdim(\ell) \geq \|p\|_0 - \dim(\Sc_{\gamma_r}(p)) - 1~.~
-%%	\end{equation}\jessiet{TODO: add minnability\bo{Tried!}}
+  Let $\ell:\R \times \Y \to \reals$ be a discrete loss eliciting $\gamma:\simplex \toto \R$ with $\Y$ finite.
+  % , and let $L \in \Lcvx_d$ be consistent with respect to $\ell$.
+  Then for all $p \in \simplex$ and $r \in \gamma(p)$,
+  \begin{equation}
+    \conscvx(\gamma) \geq \|p\|_0 - \dim(\Sc_{\gamma_r}(p)) - 1~.~
+    % d \geq \|p\|_0 - \dim(\Sc_{\gamma_r}(p)) - 1~.~
+  \end{equation}
 \end{restatable}
-\begin{proof}[Proof sketch]
-%	First, take $p \in \relint{\simplex}$ for intuition, so $\|p\|_0 = n$.
-%	Lemma~\ref{lem:convex-flats-inf-dim} guarantees the existence of a $d$-flat $F$ with $p \in F \subseteq \gamma_r$.
-%	Moreover, since $p \in \relint{\simplex}$, the flat $F$ satisfies the requirements of Lemma~\ref{lem:finite-relint-dim}, and the bound $\dim(\Sc_{\gamma_r}(p)) \geq \dim(\Scr_F(p)) \geq n - d- 1$ is given by Lemma~\ref{lem:finite-relint-dim} (ii).
-        \raft{should give intuition instead of (or in addition to) lemmas, since that's more the point of a sketch \jessie{Good point... taking a pass below. Commented out original first paragraph above.}}
-        
-        \jessiet{Adding an attempt at first paragraph of sketch below, but also my brain isn't functioning.}
-    If $\conscvx(\gamma) \leq d$, then there is a $L \in \Lcvx_d$ so that $L$ is consistent with respect to $\gamma$, and in turn, indirectly elicits $\gamma$.
-    Lemma~\ref{lem:convex-flats-inf-dim} says that there is some $d$-flat $F = \zeros{V}$ such that $p \in F \subseteq \gamma_r$.
-    In particular, if $p \in \relint{\simplex}$, this object has the same dimension as $\Sc_{\gamma_r}(p)$, relative to $\affhull(\simplex)$, whose dimension is $|\Y| - 1 = \|p\|_0 - 1$.
-    We then use the rank-nullity theorem with a bound on $\rank(V) \leq d$ to obtain the bound $d \geq \|p\|_0-1-\dim(\Sc_{\gamma_r}(p))$.
-    
-%	By Lemma~\ref{lem:Pcodim-codim-finite}, this implies the existence of a matrix $W$ such that $p \in \{q \in \simplex : Wq = \vec 0 \} = F \subseteq \gamma_r$ and $\codim(W) \leq d$.
-%	%dimension at least $n-d-1$ with $p \in F$ and $F \cap \simplex \subseteq \gamma_r$. 
-%	For $p \in \relint{\simplex}$, this implies that $\Sc_{\gamma_r}(p) \supseteq F - p$.
-%	Moreover, this implies $\dim(\Sc_{\gamma_r}(p)) \geq \codim(W) = n - d - 1$, completing the proof for $p \in \relint{\simplex}$.
-
-	When $p \not \in \relint{\simplex}$, we can ``project down'' to the subsimplex on the support of $p$ and modify $L$ and $\ell$ accordingly.
-	Now $p$ is in the relative interior of this subsimplex, so the above result gives $\conscvx(\gamma) \geq \|p\|_0 - 1 - \dim(\Sc_{\gamma_r}(p))$, where the feasible subspace dimension is relative to $\reals^{\supp(p)}$.
-	Finally, we observe that the feasible subspace dimension in the projected space is the same as in the original space because of $p$'s location on a face of $\simplex$.
+\begin{proof}[Sketch]
+  If $\conscvx(\gamma) \leq d$, then there is a $L \in \Lcvx_d$ so that $L$ is consistent with respect to $\gamma$, and in turn, indirectly elicits $\gamma$.
+  Lemma~\ref{lem:convex-flats-inf-dim} says that there is some $d$-flat $F = \zeros{V}$ such that $p \in F \subseteq \gamma_r$.
+  In particular, if $p \in \relint{\simplex}$, we can see $\dim(F) = \dim(\Sc_{\gamma_r}(p))$.
+  Since $\affhull(\simplex)$ has dimension $|\Y| - 1 = \|p\|_0 - 1$, by rank-nullity and $\rank(V) \leq d$ (more precisely, the corresponding linear map $q\mapsto \E_q V$) we have $d \geq \|p\|_0-1-\dim(\Sc_{\gamma_r}(p))$.
+  
+  When $p \not \in \relint{\simplex}$, we can project down to the subsimplex on the support of $p$, again of dimension $\|p\|_0 - 1$, and modify $L$ and $\ell$ accordingly.
+  Now $p$ is in the relative interior of this subsimplex, so the above gives $\conscvx(\gamma) \geq \|p\|_0 - 1 - \dim(\Sc_{\gamma_r}(p))$, where now $\Sc$ is relative to $\reals^{\supp(p)}$.
+  Finally, the feasible subspace dimension in the projected space is the same as in the original space because of $p$'s location on a face of $\simplex$.
 \end{proof}
 
 There are some cases where the bound provided by Corollaries~\ref{cor:Pcodim-flat-single-val-prop} and~\ref{cor:Pcodim-flat-elic-relint-prop} is strictly tighter than the bound provided by feasible subspace dimension in Corollary~\ref{cor:fsd-bound}.
@@ -756,9 +742,8 @@ The feasible subspace dimension of both $\gamma_\bot$ and $\gamma_3$ at ${\color
 This yields $\conscvx(\ell^{abs}) \geq 3 - 1- 1 = 1$.
 The same line segment defines a flat contained in both $\gamma_\bot$ and $\gamma_3$, so we have $\conscvx(\ell^{abs}) \geq 1$ by Corollary~\ref{cor:Pcodim-flat-elic-relint-prop}, matching the feasible subspace dimension bound.
 
-It's worth noting that bounds provided by $d$-flats appear to work well at distributions complimentary to those providing previous bounds via feasible subspace dimension.
-In some rough sense, this is because flats allow us a ``global'' view of the property we are eliciting, while the feasible subspace method only permits a ``local'' look at the property, so we find our method works better for distributions in $\relint\simplex$.
-\jessiet{Can someone check this paragraph?}
+Bounds using $d$-flats appear to work well at distributions where previous bounds via feasible subspace dimension would have been vacuous.
+In essence, flats allow us a ``global'' view of the property we are eliciting, while the feasible subspace method only permits a ``local'' look at the property, so we find our method works better for distributions in $\relint\simplex$.
 
 
 %\begin{figure}[ht]
