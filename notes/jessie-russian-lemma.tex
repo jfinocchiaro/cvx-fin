@@ -79,7 +79,7 @@
 \newcommand{\V}{\mathcal{V}}
 \newcommand{\X}{\mathcal{X}}
 \newcommand{\Y}{\mathcal{Y}}
-
+\newcommand{\Z}{\mathcal{Z}}
 
 \newcommand{\risk}[1]{\underline{#1}}
 \newcommand{\inprod}[2]{\langle #1, #2 \rangle}%\mathrm{int}(#1)}
@@ -116,23 +116,32 @@
 
 \begin{document}
 \maketitle
+	\jessie{Meeting notes Mar 1, 2021: - Careful about pulling out expectation in bullet 2; when is inner product of RV = expectation of inner product? - Point out contradicting the second line would yield contradiction of subgradient inequality - Go slowly through the definition of measurable}
 \paragraph{Setting} 
 $\effdom(L) = \reals^d$, and $E_q L(u,Y) < \infty$ for all $u \in \reals^d$ and $p \in \P$ \jessie{$y \in \Y$?}
 
 $\effdom(L) = \reals^d$ and $L$ convex means that $\partial \E_q L(u,Y) \neq \emptyset$ for all $q \in \P$.
 
-We define $\E_p \partial L(u,Y) = \{x \in \reals^d : x = \E_p V(Y), V(y) \in \partial L(u,y), V \text{ measurable}\}$.
+We define $\E_p \partial L(u,Y) = \{\E_p V: V(y) \in \partial L(u,y) p\text{-almost surely}, V \text{ measurable}\}$.
+Moreover, let $\V_{u} = \{V : \Y \to \reals^d : V \text{ measurable}, V(\omega) \in \partial L(u,\omega) \forall \omega \in \Omega\}$.
+Observe the set $\Z_u(p) := \{\E_p V(Y): V \in \V_u\} \subseteq \E_p \partial L(u,Y)$.
 
-Moreover, let $\V_{u} = \{V : \Y \to \reals^d : V \text{ measurable}, V(\omega) \in \partial L(u,\omega)\}$.
+\begin{definition}[Measurable (set-valued function)]
+	Let $\B(\reals^d)$ is the Borel $\sigma$-algebra of $\reals^d$.
+	Suppose $(\Omega, \B(\Omega))$ is a measurable space and $f:\Omega \toto \reals^d$ a multifunction taking values in the set of nonempty closed subsets of $\reals^d$.
+	We say $f$ is weakly measurable if, for every open $U \subseteq \reals^d$, we have
+	\begin{equation*}
+	\{\omega : f(\omega) \cap U \neq \emptyset\} \in \B(\Omega)~.~
+	\end{equation*}
+\end{definition}
 
 \begin{lemma}
 	For any $z \in \reals^d$, there exists a $v \in \E_p \partial L(u,Y)$ such that $\inprod{z}{v} = \E_p L'(u,Y;z)$.
 \end{lemma}
 \begin{proof}
-	\jessie{Meeting notes: - Careful about pulling out expectation in bullet 2; when is inner product of RV = expectation of inner product? - Point out contradicting the second line would yield contradiction of subgradient inequality - Go slowly through the definition of measurable}
 
 Fix $z$.
-Consider the set-valued function $Q_z : \Omega \to 2^{\reals^d}$ defined by $Q_z(\omega) := \{V \in \V_u: \inprod{z}{V(\omega)} = L'(u,\omega;z) \}$. \jessie{type check!}
+Consider the set-valued function $Q_z : \Omega \to 2^{\reals^d}$ defined by $Q_z(\omega) := \{V : \inprod{z}{V(\omega)} = L'(u,\omega;z), V \in \V_u \}$. \jessie{type check: okay when you think about $V$ as a RV instead of function.}
 Now, we want to take a measurable function $V \in \V_u$ that is a selection of $Q_z$ satisfying the following conditions:
 \begin{enumerate}
 	\item $V \in \V_u$.
@@ -145,42 +154,26 @@ If these are true, then we can take $v := \E_p V$ and observe the result.
 
 	
 1.  
-If $Q_z$ is measurable and closed-valued, then by \jessie{Rockafellar VA 14.6}, we have a measurable selection $V \in \V_u$ such that $\inprod{z}{V(\omega)} = L'(u,\omega; z)$ for all $\omega \in \Omega$.
-Thus, it just remains to show $Q_z$ is measurable and closed-valued.
-First, we have $Q_z$ closed-valued by \jessie{Being lazy; will fill in later.}
-%Now, we have $Q_z$ measurable if, for every open set $O \subset \reals^d$, the set $Q_z^{-1}(O) \in \B(\reals^d)$.
-%\jessie{Rockafellar Wets VA Def 14.1}.
-As measurable functions are closed under (countable) intersections, we have that $Q_z$ intersection of measurable functions.
-$V \in \V_u$ is measurable by definition.
-Moreover, the function $\omega \mapsto \partial L(u,\omega)$ is measurable by \jessie{Rockafellar: Measurable Dependence, Corollary 4.6}, which also ensures $Q_z(\omega) \neq \emptyset$ for any $\omega \in \Omega$.
-Now, we aim to show the function $\omega \mapsto \{c : \inprod{z}{c} = L'(u,\omega;z)\}$ is measurable, which follows from measurability of $L'$ and the fact $\inprod{z}{\cdot}$ is continuous in its second argument, the set is measurable. \jessie{Copying Russian argument}
+If $Q_z$ is measurable and closed-valued, then by \jessie{Castaing, also Rockafellar VA 14.6}, we have a measurable selection $V \in \V_u$ such that $\inprod{z}{V(\omega)} = L'(u,\omega; z)$ for all $\omega \in \Omega$.
 
-As $Q_z$ is the intersection of these three functions, we conclude $Q_z$ is measurable and closed-valued, and therefore has a measurable selection $V \in \V_u$ such that $\inprod{z}{V(\omega) = L'(u,\omega;z)$ for all $\omega \in \Omega$.
+Thus, we show $Q_z$ is measurable and closed-valued.
+First, we have $Q_z$ closed-valued since $L$ is convex and therefore its directional derivative is continuous. \jessie{Being lazy; will fill in later.}
 
+As measurable functions are closed under (countable) intersections, we can simply show $Q_z$ intersection of measurable functions; namely, since we have $Q_z(\omega) = \V_u \cap f: \omega \mapsto \partial L(u,\omega) \cap g : \omega \mapsto \{c : \inprod{z}{c} = L'(u,\omega;z)\}$.
+
+$\V_u$ is measurable by construction as it is a collection of measurable sets.
+Moreover, the function $f$ is measurable by \jessie{Rockafellar: Measurable Dependence, Corollary 4.6}.
+Now, we aim to show the function $g$ is measurable, which follows from measurability of $L'$ and the fact $\inprod{z}{\cdot}$ is continuous in its second argument, hence Borel, the set is measurable. \jessie{Copying Russian argument}
+
+As $Q_z$ is the intersection of these three functions, we conclude $Q_z$ is measurable and closed-valued, and therefore has a measurable selection $V \in \V_u$ such that $\inprod{z}{V(\omega) = L'(u,\omega;z)}$ for all $\omega \in \Omega$.
+
+$g(\omega) = \{c \in \reals^d : \inprod{z}{c} = L'(u,\omega;z)\}$.
+For all closed $U \in \reals^d$, have $g^{-1}(U) = \{\omega : \exists c \in \reals^d : \inprod{z}{c} = L'(u,\omega;z)\} \in \B(\Omega)$
 
 \bigskip 
 
 2.  
-This statement follows trivially as $V(\omega) \in \partial L(u,\omega)$ for all $\omega \in \Omega$.
-
-\iffalse
-First, we want to show $\E_p V \in \E_p \partial L(u,Y)$.
-That is, $\int V(\omega) dp\omega \in \int \partial L(u,\omega) dp\omega = \{\E_p V(Y) : V \textrm{ measurable, }\, V(\omega) \in \partial L(u,\omega)\}$.
-Since $V$ is measurable, it is just left to show $V(\omega) \in \partial L(u,\omega)$ $p$-almost surely.
-
-By construction, for all $\omega \in \Omega$, we have $\inprod{V(\omega)}{z} = L'(u,\omega;z)$.
-This implies 
-\begin{align*}
-\inprod{V(\omega)}{z} &= L'(u,\omega;z)\\
-\inprod{V(\omega)}{z} &= \sup_{x \in \partial L(u,\omega)} \inprod{x}{z} \jessie{\textrm{Boyd and Vandenberghe slides}}\\
-\implies \inprod{V(\omega)}{z} &\geq \inprod{x}{z} \; \forall x \in \partial L(u,\omega)\\
-z := \omega - t \text{\footnotemark}\implies \inprod{V(\omega)}{\omega - t} &\geq \inprod{x}{\omega - t} \geq L(u,\omega) - L(u,t) \; \forall x \in \partial L(u,\omega)\\
-\implies \inprod{V(\omega)}{\omega-t} &\geq L(u,\omega) - L(u,t)\,\forall t \in \reals^d\\
-V(\omega) &\in \partial L(u,\omega) \\ 
-\end{align*}
-\footnotetext{can we do this?  since $z$ is fixed but $t$ is a variable}
-\jessie{This is actually a bit stronger than we need; is that part of my issue?}
-\fi
+This statement follows trivially as $\E_p V \in \Z_p(u) \subseteq \E_p \partial L(u,Y)$. 
 
 \bigskip
 
