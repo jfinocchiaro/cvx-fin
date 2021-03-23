@@ -11,6 +11,7 @@
 \usepackage{amsfonts}       % blackboard math symbols
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
+\usepackage[normalem]{ulem}
 
 \usepackage{mathtools, amsmath, amssymb, amsthm, graphicx, verbatim}
 %\usepackage[thmmarks, thref, amsthm]{ntheorem}
@@ -98,6 +99,7 @@
 \newcommand{\ellabs}[1]{\ell_{#1}}
 \newcommand{\elltopk}{\ell^{\text{top-$k$}}}
 \newcommand{\elltop}[1]{\ell^{\text{top-$#1$}}}
+\newcommand{\emb}{{\tt emb}}
 
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
@@ -153,15 +155,21 @@ We go on to illustrate the power of this embedding framework with succinct proof
 %Often, for computational or other reasons, one is interested in a property $\gamma$ such as the mode, but wishes to elicit it by minimizing some other ``surrogate'' loss $L$ over some other space such as $\reals^d$, then mapping the result back to $\R$ using a link function.
 %We now formalize this procedure.
 %
-\jessie{ TODO Items 04 Mar 2021
+\jessie{ TODO Items 01 Mar 2021
 	\begin{itemize}
-		\item Reorg sections: \S 3 (Embeddings, matching risks, etc.), \S 5 (Calibrated link), Examples, \S 4 (Polyhedral losses: I.E. implies consistency) OR Main results (w/o proof), Examples, \S 3, \S 5, \S 4
-		\item Flesh out and expand on Ordered Partition Example - DONE
+		\item \sout{Reorg sections: \S 3 (Embeddings, matching risks, etc.), \S 5 (Calibrated link), Examples, \S 4 (Polyhedral losses: I.E. implies consistency) OR Main results (w/o proof), Examples, \S 3, \S 5, \S 4}
+		\item \sout{Flesh out and expand on Ordered Partition Example}
 		\item add paragraph of discussion on the requirements of polyhedral losses
 		\item Check proof and statement of Theorem~\ref{thm:poly-ie-implies-consistent} - Jessie, 17 Mar 21: took a look to brush up; Theorem~\ref{thm:ie-iff-embeds-refinement} can use a look too.
-\end{itemize}}
-
-\jessie{ TODO Items summer 2020
+		\item Try to make section~\ref{sec:poly-loss-embed} self-contained, moving up results from appendix 
+		\begin{itemize}
+		\item \sout{for now, move everything up except PDs}
+		\item see if you can isolate what exactly we need from PDs and state it as a new lemma (which is just about Bayes risks)
+		\item rethink proofs of Prop 1 and 2, see if we resolve the redundancy
+		\end{itemize}
+		\item Make Cor 1 a Theorem: "For L polyhedral, ell discrete, L ind elic prop[ell] <==> L consistent wrt ell"
+\end{itemize}
+TODO Items summer 2020
 	\begin{itemize}
 		\item Formalize reverse implication proof of Proposition 1 with projections into the affine hull and back
 		\item Mention how our focus on polyhedral risks and general links extends DKR Section 3.1 (probably after Prop 1)
@@ -437,7 +445,7 @@ In this particular case, it is known $(\hinge,\psi)$ is calibrated for $\psi(u) 
 In this section, we establish a tight relationship between the technique of embedding and the use of polyhedral (piecewise-linear convex) surrogate losses.
 We defer the question of when such surrogates are consistent to \S~\ref{sec:calibration}.
 
-In Proposition~\ref{prop:embed-bayes-risks}, we show an equivalent condition to embedding, whose proof relies on the following Lemma about the Bayes Risk of a ``restricted'' surrogate.
+In Proposition~\ref{prop:embed-bayes-risks}, we show an equivalent condition to embedding, whose proof relies on the following Lemma about the Bayes Risk of a ``restricted'' surrogate, shown here.
 \begin{lemma}\label{lem:loss-restrict}
 	Let $L$ elicit $\Gamma:\simplex\toto\R_1$, and let $\R_2\subseteq\R_1$ such that $\Gamma(p) \cap \R_2 \neq \emptyset$ for all $p\in\simplex$.
 	Then $L|_{\R_2}$ ($L$ restricted to $\R_2$) elicits $\gamma:\simplex\toto\R_2$ defined by $\gamma(p) = \Gamma(p)\cap \R_2$.
@@ -488,14 +496,13 @@ This useful fact will drive many of our results.
   By Lemma~\ref{lem:loss-restrict}, we see that $L|_{\U}$ (the loss $L$ with reports restricted to $\U$) elicits $\gamma'$ and $\risk{L} = \risk{L|_{\U}}$.
   As $L(\varphi(\cdot)) = \ell(\cdot)$ by embedding condition (i), we have
   \begin{equation*}
-    \risk{\ell}(p) = \min_{r \in \R}\inprod{p}{\ell(r)} = \min_{r \in \R}\inprod{p}{L(\varphi(r))} = \min_{u \in \U}\inprod{p}{L(u)} = \risk{L|_\U}(p)~,
+    \risk{\ell}(p) = \min_{r \in \R}\inprod{p}{\ell(r)} = \min_{r \in \R}\inprod{p}{L(\varphi(r))} = \min_{u \in \U}\inprod{p}{L(u)} = \risk{L|_\U}(p) = \risk{L}(p)~,
   \end{equation*}
   for all $p\in\simplex$.
-  Combining with the above, we now have $\risk{L} = \risk{\ell}$.
-
+  
     \btw{RF: This is on the informal side, mostly because of the ``working in the affine hull'' bit.  It can all be formalized though, probably should be for the journal version: just take an appropriate linear projection of $\reals^n$ to $\reals^{n-1}$, and work with the projected versions of everything, and then project back.}
   For the reverse implication, assume that $\risk{L} = \risk{\ell}$.
-  In what follows, we implicitly work in the affine hull of $\simplex$ by taking the appropriate projection into $\reals^{n-1}_+$, so that interiors are well-defined, and $\risk{\ell}$ may be differentiable on the interior of $\simplex$.
+  In what follows, we implicitly work in the affine hull of $\simplex$ by taking an appropriate invertible linear projection $A : \reals^n_+ \to \reals^{n-1}_+$, so that interiors are well-defined, and $\risk{\ell}$ may be differentiable on the interior of $\simplex$.
   (For intuition, one can consider the relative interiors in $\reals^n_+$, but we need to consider interiors in order to apply previous results.)
   Since $\ell$ is discrete, $-\risk{\ell}$ is polyhedral as the pointwise maximum of a finite set of linear functions.
 %  Moreover, consider the linear transformation $P: \ell \mapsto [\mathbb{I}_{n-1}, \vec 0] \risk{\ell}$ projecting $\risk{\ell}$ down to $n-1$ dimensions.
@@ -527,20 +534,21 @@ This useful fact will drive many of our results.
 
 %\btw{RF: DKR (section 3.1) realized the importance of matching Bayes risks, but they could only give general results for strictly convex (concave I should say) risks, in part because they fixed the link function to be a generalization of $\sgn$.  In contrast, we focus exclusively on non-strictly-convex risks.}
 
+The result above focuses on matching the values of Bayes Risks, while the following result from~\citet{aurenhammer1987power} allows us to move towards understanding the projection of the Bayes Risk onto the simplex $\simplex$.
 
-From this more succinct embedding condition, we can in turn simplify the condition that a loss embeds \emph{some} discrete loss: it does if and only if its Bayes risk is polyhedral.
-(We say a concave function is polyhedral if its negation is a polyhedral convex function.)
-Note that the Bayes risk, a function from distributions over $\Y$ to the reals, may be polyhedral even if the loss itself is not.
-For example, this can be seen by a loss that is polyhedral in the convex hull of $\phi(\R)$, but smooth outside that region.
+\begin{theorem}[Aurenhammer~\cite{aurenhammer1987power}]\label{thm:aurenhammer}
+	A cell complex is affinely equivalent to a convex polyhedron if and only if it is a power diagram.
+\end{theorem}
 
-Previous work from~\citet[Proposition 4]{duchi2018multiclass} realized the significance of matching Bayes risks for calibration with respect to the 0-1 loss, but their result relies the Bayes risk of the surrogate being strictly concave.  As polyhedral functions are never strictly concave, Proposition~\ref{prop:embed-risk-poly} extends their result to the embedding setting.
+In particular, one can consider the epigraph of a polyhedral convex function on $\reals^d$ and the projection down to $\reals^d$; in this case we call the resulting power diagram \emph{induced} by the convex function.
 
+\jessiet{Can remove this; took the part of the proof used in Thm 2 and moved there.  It's not a dependency anywhere else.}
 \begin{proposition}\label{prop:embed-risk-poly}
   A loss $L$ embeds a discrete loss if and only if $\risk{L}$ is polyhedral.
 \end{proposition}
 \begin{proof}
 	%\jessie{Intuition: $\Leftarrow$: There are a finite set of full-dimensional level sets, which we enumerate.  We then use these enumerated reports to define a finite property $\gamma$ such that $u_i \in \Gamma(p) \implies i \in \gamma(p)$, and take the discrete loss values equal to original loss values at the enumerated points.}
-  If $L$ embeds $\ell$, Proposition~\ref{prop:embed-bayes-risks} gives us $\risk{L} = \risk{\ell}$, and its proof already argued that $\risk{\ell}$ is polyhedral.
+  If $L$ embeds $\ell$, Proposition~\ref{prop:embed-bayes-risks} gives us $\risk{L} = \risk{\ell}$, and its proof already argued that $\risk{\ell}$ is polyhedral since $\risk{\ell}$ is a pointwise max of a finite number of linear functions.
   For the converse, let $\risk{L}$ be polyhedral; we again examine the proof of Proposition~\ref{prop:embed-bayes-risks}.
   The projection of the epigraph of $\risk{L}$ onto $\simplex$ forms a power diagram by Theorem~\ref{thm:aurenhammer} with finitely many cells $C_1,\ldots,C_k$, which we can index by $\R := \{1,\ldots,k\}$.
   Defining the property $\gamma:\simplex\toto\R$ by $\gamma_r = C_r$ for $r\in\R$, we see that the same construction gives us points $u_r \in\reals^d$ such that $u_r \in \Gamma(p) \iff r \in \gamma(p)$.
@@ -569,20 +577,96 @@ Previous work from~\citet[Proposition 4]{duchi2018multiclass} realized the signi
 % =======
 \end{proof}
 
-Combining Proposition~\ref{prop:embed-risk-poly} with the observation that polyhedral losses have polyhedral Bayes risks (Lemma~\ref{lem:poly-loss-poly-risk}), we obtain the first direction of our equivalence between polyhedral losses and embedding.
+
+We extend Theorem~\ref{thm:aurenhammer} to a weighted sum of convex functions, showing that the induced power diagram is the same for any choice of strictly positive weights.
+
+\begin{lemma}\label{lem:polyhedral-pd-same}
+	Let $f_1,\ldots,f_m:\reals^d\to\reals$ be polyhedral convex functions.
+	The power diagram induced by $\sum_{i=1}^m p_i f_i$ is the same for all $p \in \inter\simplex$.
+\end{lemma}
+\begin{proof}
+	For any convex function $g$ with epigraph $P$, the proof of~\citet[Theorem 4]{aurenhammer1987power} shows that the power diagram induced by $g$ is determined by the facets of $P$.
+	Let $F$ be a facet of $P$, and $F'$ its projection down to $\reals^d$.
+	It follows that $g|_{F'}$ is affine, and thus $g$ is differentiable on $\inter F'$ with constant derivative $d\in\reals^d$.
+	Conversely, for any subgradient $d'$ of $g$, the set of points $\{x\in\reals^d : d'\in\partial g(x)\}$ is the projection of a face of $P$; we conclude that $F = \{(x,g(x))\in\reals^{d+1} : d\in\partial g(x)\}$ and $F' = \{x\in\reals^d : d\in\partial g(x)\}$.
+	
+	Now let $f := \sum_{i=1}^k f_i$ with epigraph $P$, and $f' := \sum_{i=1}^k p_i f_i$ with epigraph $P'$.
+	By Rockafellar~\cite{rockafellar1997convex}, $f,f'$ are polyhedral.
+	We now show that $f$ is differentiable whenever $f'$ is differentiable:
+	\begin{align*}
+	\partial f(x) = \{d\}
+	&\iff \sum_{i=1}^k \partial f_i(x) = \{d\} \\
+	&\iff \forall i\in\{1,\ldots,k\}, \; \partial f_i(x) = \{d_i\} \\
+	&\iff \forall i\in\{1,\ldots,k\}, \; \partial p_i f_i(x) = \{p_id_i\} \\
+	&\iff \sum_{i=1}^k \partial p_if_i(x) = \left\{\sum_{i=1}^k p_id_i\right\} \\
+	&\iff \partial f'(x) = \left\{\sum_{i=1}^k p_id_i\right\}~.
+	\end{align*}
+	From the above observations, every facet of $P$ is determined by the derivative of $f$ at any point in the interior of its projection, and vice versa.
+	Letting $x$ be such a point in the interior, we now see that the facet of $P'$ containing $(x,f'(x))$ has the same projection, namely $\{x'\in\reals^d : \nabla f(x) \in \partial f(x')\} = \{x'\in\reals^d : \nabla f'(x) \in \partial f'(x')\}$.
+	Thus, the power diagrams induced by $f$ and $f'$ are the same.
+	The conclusion follows from the observation that the above held for any strictly positive weights $p$, and $f$ was fixed.
+\end{proof}
+
+This allows us to reason about the range of the property elicited by a polyhedral loss; in particular, it is finite.
+
+\begin{lemma}
+	\label{lem:polyhedral-range-gamma}
+	Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss, and let $\Gamma = \prop{L}$.
+	Then the range of $\Gamma$, $\U = \Gamma(\simplex) = \{\Gamma(p) \subseteq \reals^d : p\in\simplex\}$, is a finite set of closed polyhedra.
+\end{lemma}
+\begin{proof}
+	For all $p$, let $P(p)$ be the epigraph of the convex function $u\mapsto \inprod{p}{L(u)}$.
+	From Lemma~\ref{lem:polyhedral-pd-same}, we have that the power diagram $D_\Y$ induced by the projection of $P(p)$ onto $\reals^d$ is the same for any $p\in\inter\simplex$.
+	Let $\F_\Y$ be the set of faces of $D_\Y$, which by the above are the set of faces of $P(p)$ projected onto $\reals^d$ for any $p\in\inter\simplex$.
+	
+	We claim for all $p\in\inter\simplex$, that $\Gamma(p) \in \F_\Y$.
+	To see this, let $u \in \Gamma(p)$, and $u' = (u,\inprod{p}{L(u)}) \in P(p)$.
+	The optimality of $u$ is equivalent to $u'$ being contained in the face $F$ of $P(p)$ exposed by the normal $(0,\ldots,0,-1)\in\reals^{d+1}$.
+	Thus, $\Gamma(p) = \argmin_{u\in\reals^d} \inprod{p}{L(u)}$ is a projection of $F$ onto $\reals^d$, which is an element of $\F_\Y$.
+	
+	Now consider $\Y'\subset \Y$, $\Y'\neq\emptyset$.
+	Applying the above argument, we have a similar guarantee: a finite set $\F_{\Y'}$ such that $\Gamma(p) \in \F_{\Y'}$ for all $p$ with support exactly $\Y'$.
+	Taking $\F = \bigcup\{\F_{\Y'} | \Y'\subseteq\Y, \Y'\neq\emptyset\}$, we have for all $p\in\simplex$ that $\Gamma(p) \in \F$, giving $\U \subseteq \F$.
+	As $\F$ is finite, so is $\U$, and the elements of $\U$ are closed polyhedra as faces of $D_{\Y'}$ for some $\Y'\subseteq\Y$.
+\end{proof}
+
+\begin{lemma}
+	\label{lem:poly-loss-poly-risk}
+	If $L$ is polyhedral, $\risk{L}$ is polyhedral.
+\end{lemma}
+\begin{proof}
+	Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss, and $\Gamma = \prop{L}$.
+	By Lemma~\ref{lem:polyhedral-range-gamma}, $\U = \Gamma(\simplex)$ is finite.
+	For each $U\in \U$, select $u_U \in U$, and let $U' = \{u_U : U \in\U\}$.
+	Then for all $p\in\simplex$ we have $\Gamma(p) \cap U' \neq \emptyset$, so Lemma~\ref{lem:loss-restrict} gives us $\risk{L} = \risk{L|_{U'}}$, which is polyhedral as $U'$ is finite.
+	\btw{RF: interesting: we didn't need Proposition~\ref{prop:embed-risk-poly} after all.  This already gives the discrete loss $L$ embeds!}
+\end{proof}
+
+From the more succinct embedding condition in Proposition~\ref{prop:embed-risk-poly}, we can in turn simplify the condition that a loss embeds \emph{some} discrete loss: it does if and only if its Bayes risk is polyhedral.
+(We say a concave function is polyhedral if its negation is a polyhedral convex function.)
+Note that the Bayes risk, a function from distributions over $\Y$ to the reals, may be polyhedral even if the loss itself is not.
+For example, this can be seen by a loss that is polyhedral in the convex hull of $\phi(\R)$, but smooth outside that region.
+
+Previous work from~\citet[Proposition 4]{duchi2018multiclass} realized the significance of matching Bayes risks for calibration with respect to the 0-1 loss, but their result relies the Bayes risk of the surrogate being strictly concave.  As polyhedral functions are never strictly concave, Proposition~\ref{prop:embed-risk-poly} extends their result to the embedding setting.
+
+
+%Combining Proposition~\ref{prop:embed-risk-poly} with the observation that polyhedral losses have polyhedral Bayes risks (Lemma~\ref{lem:poly-loss-poly-risk}), we obtain the first direction of our equivalence between polyhedral losses and embedding.
 
 \begin{theorem}\label{thm:poly-embeds-discrete}
   Every polyhedral loss $L$ embeds a discrete loss.
 \end{theorem}
-% \begin{proof}
-%   We simply apply Lemma~\ref{lem:poly-loss-poly-risk} and Proposition~\ref{prop:embed-risk-poly}.
-% \end{proof}
+ \begin{proof}
+	The projection of the epigraph of $\risk{L}$ onto $\simplex$ forms a power diagram by Theorem~\ref{thm:aurenhammer} with finitely many cells $C_1,\ldots,C_k$, which we can index by $\R := \{1,\ldots,k\}$.
+	Defining the property $\gamma:\simplex\toto\R$ by $\gamma_r = C_r$ for $r\in\R$, we see that the same construction gives us points $u_r \in\reals^d$ such that $u_r \in \Gamma(p) \iff r \in \gamma(p)$.
+	Define $\ell:\R\to\reals^\Y_+$ by $\ell(r) = L(u_r)$.
+	Since $L$ is polyhedral and $\gamma(p)\cap \R$ is nonempty for all $p \in \simplex$, we have $\risk{L} = \risk{L|_{\R}}$ polyhedral by Lemma~\ref{lem:poly-loss-poly-risk}.
+ \end{proof}
 
 We now turn to the reverse direction: which discrete losses are embedded by some polyhedral loss?
 Perhaps surprisingly, we show that \emph{every} discrete loss is embeddable,
 using a construction via convex conjugate duality which has appeared several times in the literature (e.g.\ \cite{duchi2018multiclass,abernethy2013efficient,frongillo2014general}).
-Note however that the number of dimensions $d$ required could be as large as $|\Y|$, which is particularly undesirable in structured prediction problems with exponentially many outcomes.
-Recent work~\citep{ramaswamy2016convex,finocchiaro2020embedding} yield characterizations for bounding the convex calibration and embedding dimensions.
+Note however that the number of dimensions $d$ required could be as large as $|\Y|$, which is particularly undesirable in structured prediction and information retrieval problems with exponentially many outcomes.
+Recent work~\citep{ramaswamy2016convex,finocchiaro2020embedding,finocchiaro2021unifying} yield characterizations for bounding the convex calibration and embedding dimensions.
 %\raft{CITE: DKR, frongillo-kash (WINE 2014), probably one of Bob's papers?, others?}
 
 \begin{theorem}\label{thm:discrete-loss-poly-embeddable}
@@ -610,9 +694,9 @@ Recent work~\citep{ramaswamy2016convex,finocchiaro2020embedding} yield character
 \end{proof}
 
 \proposedadd{Moreover, to construct an embedding of dimension $n-1$ instead of $n$ (see~\citet{finocchiaro2020embedding} for significance of dimension),  we use the same trick as in the proof of Proposition~\ref{prop:embed-bayes-risks}.
-For $p \in \simplex$, consider $p_{-n}$ to be the first $n-1$ coordinates of $p$ identically projected into $n-1$ dimensional space subject to the affine constraint $\sum_y p_y = 1$, so that $p_n = 1 - \sum_{y=1}^{n-1} p_y$. 
-Take $L' : \reals^{n-1} \to \reals^\Y$ defined by $u \mapsto (-\ell')^*(u) \ones - u$, where $\ell'$ is $\ell$ projected into $n-1$ dimensions as in Proposition~\ref{prop:embed-bayes-risks}, so that $\inprod{\ell}{p} = \ell'(p_{-n})$ for all $p \in \simplex$.
-The Bayes risks $\risk{L}(p)$ and $\risk{L'}(p_{-n})$ are equal for all $p \in \simplex$; thus, the result holds in $n-1$ dimensions as well.}\jessiet{Leaving this change in the macro since we haven't made the change in proposition 1 yet.}
+Consider some invertible linear transformation $A : \reals^n \to \reals^{n-1}$ that reduces to an affine subspace.
+Take $L' : \reals^{n-1} \to \reals^\Y$ as $x \mapsto L(A^{-1}(x))$ and $L$ defined by $u \mapsto (-\ell)^*(u) \ones - u$ where $\ell$ is that same as it is in Proposition~\ref{prop:embed-bayes-risks}, so that $\inprod{\ell(r)}{p} = \inprod{\L(\varphi(r))}{p} = \inprod{L'(A(\varphi(r)))}{p} $ for all $p \in \simplex$.
+The Bayes risks $\risk{L}(p)$ and $\risk{L'}(p)$ are equal for all $p \in \simplex$; thus, the result holds in $n-1$ dimensions as well.}\jessiet{Leaving this change in the macro since we haven't made the change in proposition 1 yet.}
 
 %\btw{Cut summary for now (Why is this cool?)}
 %\jessiet{Jessie: added a bit to say why this is cool.}
@@ -637,369 +721,6 @@ What's more is that there is a polyhedral \emph{embedding} that is calibrated fo
 %  \raf{This follows from Proposition~\ref{prop:embed-trim}, but we're stating this as a corollary... let's see if it follows more directly from the above.  If it doesn't (one complication: there is no discrete loss starting from $2$ or $3$!) we can rephrase it as a theorem / proposition.}
 %\end{proof}
 
-\section{Polyhedral losses: indirect elicitation implies consistency}\label{sec:embed-props}
-%\jessie{Forked from appendix... if we adopt this, we should delete some of the content from the appendix.}
-%\raf{Please fix refs, maybe by removing the duplicates from the appendix}
-\btw{JESSIE: Commented out entire appendix section for the time being.  All that was there that isn't here is some commentary about positive normal sets.}
-\btw{JESSIE: Should this section be before or after embedding losses, since the results in this section are used in the proofs in the embedding losses section?  Narrative of having props then losses: here is this toolkit we have for understanding this notion of embedding, now here is how we apply it to the machine learning thing you actually care about.  Narrative of losses then props: BOOM here's this cool thing, and btw this is how we show it.  I think for a journal I'm inclined towards the latter, but that opinion is not very strong.}
-
-While Definition~\ref{def:loss-embed} gives the notion of one \emph{loss} embedding another, we now generalize the notion of one \emph{property} embedding another.
-\begin{definition}\label{def:prop-embed}
-	A property $\Gamma : \simplex \toto \reals^d$ embeds a property $\gamma:\simplex \toto \R$ if there exists some injective embedding $\varphi:\R \to \reals^d$ such that for all $p \in \simplex$ and $r \in \R$, we have $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p)$.
-	Moreover, we say a loss embeds a property when it embeds a loss eliciting the property.
-\end{definition}
-
-
-By condition (ii.) of Definition~\ref{def:loss-embed}, we then have $L$ embedding $\ell$ implies $\prop{L}$ embeds $\prop{\ell}$.
-However, Definitions~\ref{def:loss-embed} and~\ref{def:prop-embed} are not immediately equivalent because property embedding does not capture the requirement of matching losses on embedded points; i.e., that $L(\varphi(r)) = \ell(r)$ for all $r \in \R$.  
-However, Lemma~\ref{lem:embed-defs-equiv} shows an equivalence follows without loss of generality.
-
-\jessiet{New to journal version}
-\begin{lemma}\label{lem:embed-defs-equiv}
-%  \raft{Introduce $L$}
-	Let $L : \reals^d \to \reals^\Y_+$ be a loss function.
-	If the property $\Gamma := \prop{L}$ embeds the finite property $\gamma : \simplex \toto \R$, then there is a discrete loss $\ell$ such that $\ell$ elicits $\gamma$ and $L$ embeds $\ell$.
-\end{lemma}
-\begin{proof}
-  \raft{All the important pieces are here, but take it slower.  State $\ell$ as a definition (let $\ell$ be given by...) and show why $L$ embeds it.\jessie{Took another pass but changed technique, adding in this detail.  Now very similar to the proof of Prop 1 forward direction.}}
-  	Consider a loss $\ell : \R \to \reals_+^\Y$, defined so that $\ell : r \mapsto L(\varphi(r))$, i.e. $\ell = L|_{\varphi(\R)}$, where $\varphi$ is the same embedding given by $\Gamma$ embedding $\gamma$.
-    Now, we claim that $L$ embeds $\ell$.
-%    To see this, consider that Condition (i.) of matching embedded loss values is met by construction of $\ell$.
-    Using Proposition~\ref{prop:embed-bayes-risks}, showing $\risk{L} = \risk{\ell}$ suffices to show that $L$ embeds $\ell$.
-    
-    First, we show that for all $p \in \simplex$, we have $(1) \inf_{u \in \reals^d}\inprod{p}{L(u)} = (2) \inf_{r \in \R}\inprod{p}{L(\varphi(r))}$, and the equality of risks follows.
-    $(1) \leq (2)$ follows from the fact that $\varphi(\R) \subset \reals^d$ and definition of infimum. 
-    Consider that if we did not have $(1) \geq (2)$ for some $p \in \simplex$, then there would be no $r$ such that $\varphi(r) \in \Gamma(p)$.
-    Therefore the property it embeds, $\gamma$ is degenerate at $p$, i.e. $\gamma(p) = \emptyset$, yielding a contradiction.
-    This gives us $(1) = (2)$, so we have $\risk{L} = \risk{L|_{\varphi(\R)}} = \risk{\ell(r)}$ by construction of $\ell$.
-    %
-    %Now consider the property $\Gamma' := p \mapsto \Gamma(p) \cap \varphi(\R)$.
-    %We have $\Gamma'$ nondegenerate since $\Gamma$ embedding $\gamma$ implies that, for all $p \in \simplex$, there is some $r \in \R$ such that $\varphi(r) \in \Gamma(p)$.
-    %Therefore, for all $p \in \simplex$, we have $\inf_{r \in \R}\inprod{p}{L(\varphi(r))} = \inf_{r \in \R} \inprod{p}{\ell(r)}$, which yields $\risk{L|_{\varphi(\R)}} = \risk{\ell}$.
-    %Chaining the two equalities, we now have $\risk{L} = \risk{\ell}$.
-    
-    %To verify $\ell$ elicits $\gamma$, consider $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p)$ by embedding, $ \iff \varphi(r) \in \argmin_{u \in \reals^d} \inprod{p}{L(u)}$ by $L$ eliciting $\Gamma$, and $ \iff r \in \argmin_{r \in \R} \inprod{p}{\ell(r)}$ by applying the definition of properties to the embedding definition.
-%    \hrule
-%	If $\Gamma$ embeds a finite $\gamma$, $L$ must embed a discrete loss $\ell$ such that $\ell(r) = L(\varphi(r))$ for all $r \in \R$.  
-%	Moreover, we can see $\ell$ elicits $\gamma$ since we have $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p) \iff \varphi(r) \in \argmin_{u \in \reals^d} \inprod{p}{L(u)} \iff r \in \argmin_{r \in \R} \inprod{p}{\ell(r)}$.
-%
-%  \raft{Spell this out; I don't think these distributions are enough, for the same reason as above.  \jessie{Took a different approach of using Prop 1 to show the risks are equal.}}
-%	The final condition of matching loss values is satisfied by considering the equality of the expected loss on each $\delta_y$ distribution.
-\end{proof}
-
-By Lemma~\ref{lem:embed-defs-equiv}, we can work directly with properties and set aside the losses which elicit them, which is often more convenient.
-Moreover, we can assume that finite properties are non-redundant without much loss of generality.
-\begin{definition}[Finite property, non-redundant]
-	A property $\gamma:\simplex\toto\R$ is \emph{redundant} if for some $r,r'\in\R$ with $r \neq r'$, we have $\gamma_r \subseteq \gamma_{r'}$, and \emph{non-redundant} otherwise.
-	$\gamma$ is \emph{finite} if it is non-redundant and $\R$ is a finite set.
-\end{definition}
-
-When working with convex losses which are not strictly convex, one quickly encounters redundant properties: if $\inprod{p}{L(\cdot)}$ is minimized by a point where $\inprod{p}{L}$ is flat, then there will be an uncountable set of reports which also minimize the expected loss.
-As results in property elicitation typically assume properties are non-redundant (e.g.~\cite{frongillo2014general,frongillo2015elicitation}), it is useful to consider a transformation which removes redundant level sets, captured by the \emph{trim} operation.
-
-\begin{definition}\label{def:trim}
-	Given an elicitable property $\Gamma:\simplex \toto\R$, we define $\trim(\Gamma) = \{\Gamma_u : u \in \R \text{ s.t. } \neg\exists u'\in\R,u'\neq u,\, \Gamma_u \subsetneq \Gamma_{u'}\}$ as the set of maximal level sets of $\Gamma$.
-\end{definition}
-
-%\btw{RF: Note for later: should be able to show that the union of trim is the simplex.\jessie{This is part of the proposition statement 2 now.}}
-%Take note that the unlabeled property $\trim(\Gamma)$ is non-redundant, meaning that for any $\theta \in \trim(\Gamma)$, there is no level set $\theta' \in \trim(\Gamma)$ such that $\theta \subset \theta'$; this is a corollary of Proposition~\ref{prop:embed-trim}.
-
-
-Before we state Proposition~\ref{prop:embed-trim}, which is needed to prove many of the statements in Section~\ref{sec:poly-loss-embed}, we will need to general lemmas about properties and their losses.
-The first follows from standard results relating finite properties to power diagrams (see Theorem~\ref{thm:aurenhammer}), and its proof is omitted.
-The second is closely related to the definition of the trim operator: it states that if some subset of the reports are always represented among the minimizers of a loss, then one may remove all other reports and elicit the same property (with those other reports removed).
-
-\begin{lemma}\label{lem:finite-full-dim}
-	Let $\gamma$ be a finite (non-redundant) property elicited by a loss $L$.
-	Then the negative Bayes risk $G$ of $L$ is polyhedral, and the level sets of $\gamma$ are the projections of the facets of the epigraph of $G$ onto $\simplex$, and thus form a power diagram.
-	In particular, the level sets of $\gamma$ are full-dimensional in $\simplex$ (i.e.,\ of dimension $n-1$).
-\end{lemma}
-
-
-\btw{JESSIE: Again, figures/an example might help clarify this}
-When a property $\Gamma$ embeds a finite property $\gamma$, we can show that the level sets of $\gamma$ correspond exactly to their embedded level sets of $\Gamma$, and that these embedded level sets are exactly $\trim(\Gamma)$.
-\jessiet{This lemma new to journal version}
-\begin{lemma}\label{lem:embedded-level-sets-trim}
-	Let $\Gamma$ be an elicitable property.
-	If $\Gamma$ embeds a (non-redundant) finite property $\gamma : \simplex \toto \R$ by the injection $\varphi$, then $\{\gamma_r : r \in \R\} = \{\Gamma_u : u \in \varphi(\R)\} = \trim(\Gamma)$.
-\end{lemma}
-\begin{proof}
-	Let $L$ elicit $\Gamma$.
-	Take $\ell$ to be the loss embedded by $L$ from Lemma~\ref{lem:embed-defs-equiv}.
-	Moreover, by Proposition~\ref{prop:embed-bayes-risks}, we have $\risk{L} = \risk{\ell}$.
-	\raft{Implicitly? Justify the claim.  \jessie{In definition of finite properties, we say that we assume we are talking about non-redundant.}}
-	As $\gamma$ is finite (and non-redundant by assumption), we know that each level set of $\gamma$ must be full-dimensional. 
-	For all $r \in \R$, we know $\gamma_r = \Gamma_{\varphi(r)}$, so we must also have $\Gamma_{\varphi(r)}$ full-dimensional.
-	Moreover, we have $\{\gamma_r : r \in \R\} = \{\Gamma_{\varphi(r)} : r \in \R\}$ as a corollary since this is true for each $r \in \R$.
-	\raft{The main action is here.  (1) Epigraph of $-\risk{L}$. (2) There is really only one case: every level set is a face of the power diagram, which must be contained (weakly, so $\subseteq$) in a facet. (3) To show that level sets are faces, you'll want to appeal to some piece of a proof in the prev section.}
-	Since the cell $\Gamma_{\varphi(r)}$ is the projection of a facet of the epigraph of $\risk{L}$, which is concave, any other level set intersecting $\Gamma_{\varphi(r)}$ can be considered in one of two cases:
-	First, if the level set $\Gamma_u$ (for $u \not \in \varphi(\R)$) is a projection of a lower-dimensional face of $\risk{L}$, which is contained in a facet of the epigraph.
-	Therefore, we must have $\Gamma_u \subset \Gamma_{\varphi(r)}$ for some $r \in \R$, and therefore $\Gamma_u \not \in \trim(\Gamma)$.
-	
-	Second, $\Gamma_u = \Gamma_{\varphi(r)}$ for some $r \in \R$, then the level set is in both $\{\Gamma_{\varphi(r)} : r \in \R\}$ and $\trim(\Gamma)$.
-	%		
-	%		\item[$\supseteq$] Take $u'$ so that $\Gamma_{u'} \not \in \{\Gamma_u : u \in \varphi(\R)\}$.
-	%		We proceed in 3 cases: first, if there exists a $u$ such that $\Gamma_{u'} \subsetneq \Gamma_u$, then $\Gamma_{u'} \not \in \trim(\Gamma)$.
-	%		If there is a $u \in \varphi(\R)$ such that $\Gamma_u = \Gamma_{u'}$, then we have $\Gamma_{u'}$ in the original set, as well as in $\trim(\Gamma)$ by Lemma~\ref{lem:fdls-in-trim}, since $\Gamma_{u'}$ must then be full-dimensional.
-	%		In the final case, we have $\Gamma_{u'}$ not a subset of any $\Gamma_\varphi(r)$.
-	%		Then by nondegeneracy of $\gamma$ (and in turn, of $\Gamma$) spans the interior of multiple level sets in $\{\Gamma_u : u \in \varphi(\R)\}$, which contradicts the elicitability of $\Gamma$ by Lemma~\ref{lem:elicitable-level-sets}.
-	%		Thus, we cannot observe this case.
-	%	\end{itemize}
-\end{proof}
-
-We now state a useful result for proving the existence of an embedding loss, which shows remarkable structure of embeddable properties, and the properties that embed them.
-First, we conclude that any embeddable property must be elicitable.
-We also conclude that if $\Gamma$ embeds $\gamma$, the level sets of $\Gamma$ must all be redundant relative to $\gamma$.
-In other words, $\Gamma$ is exactly the property $\gamma$, just with other reports filling in the gaps between the embedded reports of $\gamma$.
-(When working with convex losses, these extra reports are typically the convex hull of the embedded reports.)
-In this sense, we can regard embedding as only a slight departure from direct elicitation: if a loss $L$ elicits $\Gamma$ which embeds $\gamma$, we can think of $L$ as essentially eliciting $\gamma$ itself.
-Finally, we have an important converse: if $\Gamma$ has finitely many full-dimensional level sets, or if $\trim(\Gamma)$ is finite, then $\Gamma$ must embed some finite elicitable property with those same level sets.
-
-\begin{proposition}\label{prop:embed-trim}
-	Let $\Gamma:\simplex\toto\reals^d$ be an elicitable property.
-	The following are equivalent:
-	\begin{enumerate}\setlength{\itemsep}{0pt}
-		\item $\Gamma$ embeds a finite property $\gamma:\simplex \toto \R$.
-		\item $\trim(\Gamma)$ is a finite set, and $\cup\,\trim(\Gamma) = \simplex$.
-		\item There is a finite set of full-dimensional level sets $\Theta$ of $\Gamma$, and $\cup\,\Theta = \simplex$.
-    \end{enumerate}
-    %\raft{I see why you wanted this addition here, but (a) it's clear from the def of embedding, and (b) we don't have varphi defined.  So let's leave it out.}
-	Moreover, when any of the above hold, $\{\gamma_r : r\in\R\} = \trim(\Gamma) = \Theta$, and $\gamma$ is elicitable.
-\end{proposition}
-\begin{proof}
-	Let $L$ elicit $\Gamma$.
-	
-	1 $\Rightarrow$ 2:
-        %\jessie{Loss intuition: Let $L$ elicit $\Gamma$.  If $\Gamma$ embeds a finite $\gamma'$, $L$ must embed a discrete loss $\ell$ such that $\ell(r) = L(\varphi(r))$.  Therefore, $\risk{L} = \risk{\ell}$ is polyhedral. Moreover, we have $\Gamma$ also embedding the finite property $\prop{\ell} := \gamma$ as a corollary of the definition of embedding properties. We claim $\trim(\Gamma) = \{\gamma_r : r \in \R\}$ (Lemma~\ref{lem:embedded-level-sets-trim}), and since the latter set is finitely generated (as $\R$ is finite), we have have $\trim(\Gamma)$ is finite.  Moreover, as $\gamma$ is nondegenerate (since it is defined over the simplex), we have that $\cup_{r \in \R} \gamma_r = \simplex$.}
-  If $\Gamma$ embeds a finite $\gamma$, then Lemma~\ref{lem:embed-defs-equiv} says there is a discrete loss $\ell$ embedded by $L$ such that $\ell$ elicits $\gamma$.
-  \raft{Again, a bit too brief.  Consider adding some of this statement into the Lemma. \jessie{Is this better?}}
-  By Lemma~\ref{lem:embedded-level-sets-trim}, we then observe that $\trim(\Gamma) = \{\Gamma_{\varphi(r)} : r \in \R \} = \{\gamma_r : r \in \R\}$.
-%  \raft{Replace with ``As $\R$ is finite, we conclude $\trim(\Gamma)$ is finite.'' or similar}
-  As $\R$ is finite, we conclude that $\trim(\Gamma)$ is also finite.
-%  Since the latter set is finitely generated (as $\R$ is finite), we have have $\trim(\Gamma)$ is finite.
-  \raft{Why is it nonempty though?  \jessie{Just above definition 2, we specify that properties are nonempty}}
-  Moreover, as $\gamma$ is nondegenerate (recall that $\gamma: \simplex \toto \R$ is shorthand for $\gamma: \simplex \to 2^\R \setminus \{\emptyset\}$), we have that $\cup \trim(\Gamma) = \cup_{r \in \R} \gamma_r = \simplex$.
-
-  \raft{These next two directions together seem like what we did before for $2\Rightarrow 3$, correct?  (Not as complete though; see the step where we justify the conditions of Lemma~\ref{lem:loss-restrict}.)  I'm actually happy for them to be separated, but let's make sure the argument is just as complete. \jessie{Added in the conditions of Lemma 3 to be a bit more thorough.}}
-	2 $\Rightarrow$ 1:
-	As $\trim(\Gamma)$ is finite, we know $\trim(\Gamma) = \{\Gamma_{u_i}\}_{i=1}^k$ for some finite $k$.
-	Take $\U = \{u_1, \ldots, u_k\}$, and consider $L$ eliciting $\Gamma$ and $\ell := L|_{\U}$.  
-	We have $\U \subset \reals^d$ and $\Gamma(p) \cap \U \neq \emptyset$ for all $p$, since we have $p \in \Gamma_{u_i}$ for some $u_i \in \U$.
-	Then we can apply Lemma~\ref{lem:loss-restrict} to observe that $L$ embeds $\ell$, and therefore $\Gamma$ embeds $\prop{\ell}$, which is finite as $\ell$ is discrete.
-	
-%	1 $\Rightarrow$ 3: \jessie{Intuition: Each $\theta \in \trim(\Gamma)$ is full dimensional by Lemma~\ref{lem:embedded-level-sets-trim} and equality of the set of embedded level sets of $\Gamma$ and set of level sets of $\gamma$.  Take $\Theta = \trim(\Gamma)$.}
-%	Assume $\Gamma$ embeds a finite property $\gamma$.
-%	Then for each $r \in \R$, we have $\Gamma_{\varphi(r)} = \gamma_r$, and therefore $\{\Gamma_{\varphi(r)} : r \in \R\} = \{\gamma_r : r \in \R\}$.
-%	Chaining this with Lemma~\ref{lem:embedded-level-sets-trim}, we have $\trim(\Gamma) = \{\gamma_r : r \in \R\}$.
-%	
-%	\jessie{This is really the beginning of 2 $\Rightarrow 3$}
-%	If there is a level set $\Gamma_{\varphi(\hat r)} \in \trim(\Gamma)$ that is not full-dimensional, then we can define an injection $\varphi'$ so that $\varphi' :\R \setminus \{\hat r\} \to \reals^d$ maps $r \mapsto \varphi(r)$.
-%	(Iterate if there are multiple level sets that are not full-dimensional.)
-%	Now take $\Theta = \{\Gamma_{\varphi'(r)} : r \in \R\}$.
-%	We know each level set in $\Theta$ is full-dimensional by construction, and just need to show $\cup \Theta = \simplex$.
-%	However, if there was a level set $\Gamma_{\varphi(\hat r)}$ that was not in $\trim(\Gamma)$ \jessie{\ldots}
-
-	1 $\Rightarrow$ 3: 
-	Let $\varphi: \R \to \reals^d$ be the embedding function, and take $\Theta = \{\Gamma_{\varphi(r)} : r \in \R\}$.
-	The latter set is equal to $\{\gamma_r : r \in \R\}$ by Lemma~\ref{lem:embedded-level-sets-trim}.
-	Therefore, we know each $\theta \in \Theta = \gamma_r$ for some $r \in \R$, which is full-dimensional in the simplex.
-	Moreover, since $\gamma$ is non-degenerate, we have $\cup \Theta = \cup_r \gamma_r = \simplex$.
-%	\hrule
-%	Since $\Gamma$ embeds the finite property $\gamma$, Lemma~\ref{lem:embed-defs-equiv} yields a loss $\ell$ eliciting $\gamma$ embedded by $L$, and therefore $\risk{L} = \risk{\ell}$.
-%	As in the proof of Proposition~\ref{prop:embed-bayes-risks}, we observe that every facet of the epigraph of $-\risk{\ell}$ projects onto the simplex as a full-dimensional level set of $\gamma$.
-%	As the risks are equal, this is also true for $\Gamma$.
-%	Observe each cell in the simplex of $\gamma$ has some report $r$ so the cell is $\gamma_r$.
-%	If $\varphi: r \mapsto u_r$, then we must have $\gamma_r = \Gamma_{u_r}$.
-%	Take $\Theta$ to be the set $\{\Gamma_{u_r} : u_r \in \varphi(\R)\}$.
-%	We have shown each $\Gamma_{u_r}$ is full-dimensional, and as the union of these cells forms a power diagram on $\simplex$, we have $\cup \Theta = \simplex$.
-
-%	2 $\Rightarrow$ 3:
-%	\jessie{New attempt: show that $\Gamma$ elicitable and $\trim(\Gamma)$ finite implies each $\Gamma_u \in \trim(\Gamma)$ is full-dimensional. }
-%		
-%	We claim every $\theta \in \trim(\Gamma)$ is full-dimensional, then take $\Theta = \trim(\Gamma)$ and the result holds.
-%	Suppose there was a $u \in \reals^d$ so that $\Gamma_u \in \trim(\Gamma)$ and $\Gamma_u$ was not full-dimensional.
-%	The only case in which this happens is if $\Gamma_u$ spans two level sets, as anything that did not would be a subset of a full-dimensional level set in $\trim(\Gamma)$.
-%	However, if $\Gamma_u$ spans the relative interior of two full-dimensional level sets, we contradict the elicitability condition in Lemma~\ref{lem:elicitable-level-sets}.\jessiet{Need to be more careful here.}
-%	(If $\Gamma_u$ spans only the boundary of one level set, then we have that $\Gamma_u$ is a subset of the full-dimensional level set by closure of level sets of elicitable properties.)
-%	Therefore, we must have each $\Gamma_u \in \trim(\Gamma)$ full-dimensional if $\trim(\Gamma)$ is a finite set and $\Gamma$ is elicitable.
-
-
-	3 $\Rightarrow$ 1: \jessie{Intuition: Take $\gamma : p \mapsto \Gamma(p) \cap \varphi(\R)$.}
-    Let $\Theta = \{\theta_1,\ldots,\theta_k\}$.
-	For all $i\in\{1,\ldots,k\}$ let $u_i\in\reals^d$ such that $\Gamma_{u_i} = \theta_i$.
-	Now define $\gamma:\simplex\toto\{1,\ldots,k\}$ by $\gamma(p) = \{i : p\in\theta_i\}$, which is non-degenerate as $\cup\,\Theta = \simplex$.
-	By construction, we have $\gamma_i = \theta_i = \Gamma_{u_i}$ for all $i$, so letting $\varphi(i) = u_i$ we satisfy the definition of embedding, namely statement 1.
-	
-\end{proof}
-\jessiet{03.01.21 - Old version moved to comment}
-%\jessiet{Can we remove this?}
-%\begin{proof}[Original]
-%	Let $L$ elicit $\Gamma$.
-%	
-%	1 $\Rightarrow$ 2:
-%	By the embedding condition, taking $\R_1 = \reals^d$ and $\R_2 = \varphi(\R)$ satisfies the conditions of Lemma~\ref{lem:loss-restrict}: for all $p\in\simplex$, as $\gamma(p) \neq \emptyset$ by definition, we have some $r\in\gamma(p)$ and thus some $\varphi(r) \in \Gamma(p)$.
-%	Let $G(p) := -\min_{u\in\reals^d} \inprod{p}{L(u)}$ be the negative Bayes risk of $L$, which is convex, and $G_{\R}$ that of $L|_{\varphi(\R)}$.
-%	By the Lemma, we also have $G = G_\R$.
-%	As $\gamma$ is finite, $G$ is polyhedral.
-%	Moreover, the projection of the epigraph of $G$ onto $\simplex$ forms a power diagram, with the facets projecting onto the level sets of $\gamma$, the cells of the power diagram.
-%	(See Theorem~\ref{thm:aurenhammer}.)
-%	As $L$ elicits $\Gamma$, for all $u\in\reals^d$, the hyperplane $p\mapsto \inprod{p}{L(u)}$ is a supporting hyperplane of the epigraph of $G$ at $(p,G(p))$ if and only if $u\in\Gamma(p)$.
-%	This supporting hyperplane exposes some face $F$ of the epigraph of $G$, which must be contained in some facet $F'$.
-%	Thus, the projection of $F$, which is $\Gamma_u$, must be contained in the projection of $F'$, which is a level set of $\gamma$.
-%	We conclude that $\Gamma_u \subseteq \gamma_r$ for some $r\in\R$.
-%	Hence, $\trim(\Gamma) = \{\gamma_r : r\in\R\}$, which is finite, and unions to $\simplex$.
-%	
-%	2 $\Rightarrow$ 3: let $\R = \{u_1,\ldots,u_k\} \subseteq\reals^d$ be a set of distinct reports such that $\trim(\Gamma) = \{\Gamma_{u_1},\ldots,\Gamma_{u_k}\}$.
-%	Now as $\cup\,\trim(\Gamma) = \simplex$, for any $p\in\simplex$, we have $p\in\Gamma_{u_i}$ for some $u_i\in\R$, and thus $\Gamma(p) \cap \R \neq \emptyset$.
-%	We now satisfy the conditions of Lemma~\ref{lem:loss-restrict} with $\R_1 = \reals^d$ and $\R_2 = \R$.
-%	The property $\gamma:p\mapsto\Gamma(p)\cap\R$ is non-redundant by the definition of $\trim$, finite, and elicitable.
-%	Now from Lemma~\ref{lem:finite-full-dim}, the level sets $\Theta = \{\gamma_r:r\in\R\}$ are full-dimensional, and union to $\simplex$.
-%	Statement 3 then follows from the fact that $\gamma_r = \Gamma_r$ for all $r\in\R$.
-%	
-%	3 $\Rightarrow$ 1: let $\Theta = \{\theta_1,\ldots,\theta_k\}$.
-%	For all $i\in\{1,\ldots,k\}$ let $u_i\in\reals^d$ such that $\Gamma_{u_i} = \theta_i$.
-%	Now define $\gamma:\simplex\toto\{1,\ldots,k\}$ by $\gamma(p) = \{i : p\in\theta_i\}$, which is non-degenerate as $\cup\,\Theta = \simplex$.
-%	By construction, we have $\gamma_i = \theta_i = \Gamma_{u_i}$ for all $i$, so letting $\varphi(i) = u_i$ we satisfy the definition of embedding, namely statement 1.
-%\end{proof}
-
-
-
-
-
-
-%\begin{lemma}\label{lem:fdls-in-trim}
-%	If $\theta$ is a full-dimensional level set (in the simplex) of the elicitable property $\Gamma$, then $\theta \in \trim(\Gamma)$.
-%\end{lemma}
-%\begin{proof}
-%	Let $u$ be the report such that $\theta = \Gamma_u$.
-%	If there is a $u'$ so that $\Gamma_u = \Gamma_{u'}$, one of the level sets is in $\trim(\Gamma)$, and then we have $\theta$ equal to that level set.
-%	If $\Gamma_u \subsetneq \Gamma_{u'}$, then either $\Gamma_u$ is not a full-dimensional level set or $\Gamma_u \cap \Gamma_{u'}$ is full-dimensonal.
-%	If $\Gamma_u$ is not full-dimensional, then we contradict our assumption.
-%	If $\Gamma_u \cap \Gamma_{u'}$ is full dimensional, then we contradict our elicitability condition (Lemma~\ref{lem:elicitable-level-sets}).
-%	Therefore, full-dimensional level sets of an elicitable property must be in the trim operation of the same property.
-%\end{proof}
-
-
-\btw{JESSIE: This needs more narrative text.}
-
-\begin{definition}
-	Let $\Gamma:\simplex \toto \R$ and $\Gamma':\simplex\toto \R'$.
-	Then $\Gamma'$ \emph{refines} $\Gamma$ if for all $r' \in \R'$, we have $\Gamma'_{r'} \subseteq \Gamma_r$ for some $r \in \R$.
-	That is, the cells of $\Gamma'$ are all contained in the cells of $\Gamma$.
-\end{definition}
-
-\begin{theorem}\label{thm:ie-iff-embeds-refinement}
-	Every polyhedral loss embeds a finite elicitable property.
-	Moreover, a polyhedral loss $L$ indirectly elicits a finite elicitable property $\gamma$ if and only if $\gamma$ is finite and $L$ embeds a property which refines $\gamma$.
-\end{theorem}
-\begin{proof}
-	\jessiet{17 Mar 21: REVISIT THIS... only one direction of the proof now.}
-	\jessie{Intuition: There are only a finite set of possible vertices of the loss, and claim that for each $p \in \simplex$, one of these vertices is a minimizer of $\inprod{p}{L(\cdot)}$.  Rinse and repeat for vertices of the expected loss on all possible (finite) supports.  As there is a some vertex in the property value for every $p \in \simplex$, we have $\trim(\Gamma)$ finite, which yields the results via Prop 3 somehow?  Unclear on that gap.}
-	\jessie{Cut everything but last paragraph}
-	The first statement is a trivial corollary of Theorem~\ref{thm:poly-embeds-discrete}.
-%	Let $L:\reals^d\to\reals^\Y_+$ be a polyhedral loss.
-%	For all $p$, let $P(p)$ be the epigraph of the convex function $u\mapsto \inprod{p}{L(u)}$.
-%	From Lemma~\ref{lem:polyhedral-pd-same}, we have that the power diagram induced by the projection of $P(p)$ onto $\reals^d$ is constant whenever $p\in\inter\simplex$.
-%	Let $q\in\inter\simplex$ be the uniform distribution on $\Y$, and $V_\Y$ be the set of vertices of $P(q)$ projected onto $\reals^d$.
-%	By the above, this set is the same had we replaced $q$ by any $p\in\inter\simplex$.
-%	
-%	Now let $\Gamma := \Gamma[L]$.
-%	We claim for all $p\in\inter\simplex$, that $\Gamma(p) \cap V_\Y \neq \emptyset$.
-%	To see this, let $u \in \Gamma(p)$, and $u' = (u,\inprod{p}{L(u)}) \in P(p)$.
-%	The optimality of $u$ is equivalent to $u$ being contained in the face exposed by the normal $(0,\ldots,0,-1)\in\reals^{d+1}$, which is a face of $P(p)$.
-%	Let $v'\in\reals^{d+1}$ be a vertex on such a face, and $v\in V_\Y$ its projection onto $\reals^d$.
-%	Then $v$ is also optimal, and therefore $v\in\Gamma(p)$.
-%	
-%	Now consider $\Y'\subset \Y$.
-%	Applying the above argument on distributions $p$ with support exactly $\Y'$, we have a similar guarantee: a finite set $V_{\Y'}$ such that $\Gamma(p) \cap V_{\Y'} \neq \emptyset$ for all $p$ with support exactly $\Y'$.
-%	(When $\Y' = \{y\}$ is a singleton, we simply take the projected vertices of $L(\cdot)_y$.)
-%	
-%	Thus, taking $V = \bigcup_{\Y'\subseteq\Y} V_{\Y'}$, we have for all $p\in\simplex$ that $\Gamma(p) \cap V \neq \emptyset$.
-%	This implies that $\trim(\Gamma) \subseteq \{\Gamma_v : v\in V\}$, which is finite, so Proposition~\ref{prop:embed-trim} \jessie{also Prop 3} now gives the conclusion.
-%	\jessiet{Do we need to show the preimage of $\Gamma$ is $V$?}
-
-	
-	%\raft{I might be delusional, but this second part ended up being much slicker than I'd thought, by essentially chaining definitions and maps.  Please check!}
-	For the second part, let $\gamma':\simplex\toto\R'$ be the finite elicitable property embedded by $L$, with embedding $\varphi:\R'\to\reals^d$, and let $\psi:\reals^d \to \R$ be a link to a non-redundant elicitable property $\gamma:\simplex\toto\R$.
-	Then letting $\psi' = (\psi \circ \varphi):\R'\to\R$, we see that $\psi'$ is a link from $\gamma'$ to $\gamma$:
-	for all $r'\in\R'$, we have $\gamma'_{r'} = \prop{L}_{\varphi(r')} \subseteq \gamma_{\psi(\varphi(r'))} = \gamma_{\psi'(r')}$.
-	In particular, $\gamma'$ refines $\gamma$, and as $\gamma'$ is finite, $\gamma$ must be finite.
-	
-	\jessie{Added 18 Mar 21}
-	This suffices to prove both directions of the equality since there is a subtle use of the statement ``$\gamma'_{r'} = \prop{L}_{\varphi(r')}$ follows as a corollary of Proposition~\ref{prop:embed-trim}, and each direction of the statement follows from a subset inclusion of one of these two level sets. 
-%\jessie{added 17 Mar 21}
-%	The ``only if'' direction follows from an implication of refinement, as $L$ embedding $\gamma'$ refining $\gamma \implies L$ indirectly elicits $\gamma$
-%	Take embedding $\varphi$ and calibrated link\jessiet{Implicit forward ref to Theorem~\ref{thm:eps-thick-calibrated}} $\psi':\reals^d \to \R'$, and consider that $\prop{L}_u = \gamma'_{\psi'(u)} \subseteq \gamma_{\psi(u)}$, where $\psi$ is inherent in the definition of refinement.
-	
-\end{proof}
-
-
-\begin{theorem}\label{thm:poly-ie-implies-consistent}
-	If a polyhedral loss $L:\reals^d \to \reals^\Y$ indirectly elicits a property $\gamma': \simplex \toto \R'$, then for any loss $\ell'$ eliciting $\gamma'$, there exists a link $\hat \psi$ such that $(L, \hat \psi)$ is calibrated, and therefore consistent, with respect to $\ell'$.
-\end{theorem}
-\begin{proof}
-	By Theorem~\ref{thm:ie-iff-embeds-refinement}, we know that $\Gamma := \prop{L}$ embeds a finite elicitable property $\gamma:\simplex \toto \R$ which refines $\gamma'$.
-	Therefore, these exists a calibrated link $\psi : \reals^d \to \R$ from $\Gamma$ to $\gamma$ by Theorem~\ref{thm:eps-thick-calibrated}. \jessiet{Forward ref}
-	Moreover, as $\gamma$ refines $\gamma'$, take any link $\psi': r \mapsto r'$, where $\gamma_r \subseteq \gamma'_{r'}$. 
-	(We know such a link exists by refinement.)
-	Consider $\hat \psi := \psi \circ \psi'$.
-	
-	Now, we show that $(L, \hat \psi)$ is calibrated with respect to $\ell'$.
-	Consider that since $\Gamma$ embeds $\gamma$, we have a link $\psi$ such that $(L,\psi)$ is calibrated with respect to $\ell$ eliciting $\gamma$ (Theorem~\ref{thm:eps-thick-calibrated}) \jessiet{Forward ref}.
-	We have
-	\begin{align*}
-	\inf_{u}\inprod{p}{L(u)} &< \inf_{u : \psi(u) \not \in \gamma(p)} \inprod{p}{L(u)}\\
-	&\leq \inf_{u : \psi'(u) \not \in \gamma'(p)} \inprod{p}{L(u)}~.~
-	\end{align*}
-	The second statement is true if $\{u : \psi'(u) \not \in \gamma'(p) \} \subseteq \{u : \psi(u) \not \in \gamma(p) \}$; we show the converse for their compliments, e.g., $\psi(u) \in \gamma(p) \implies \psi'(u) \in \gamma'(p)$.
-	Take $u \in \reals^d$ so that $\psi(u) \in \gamma(p)$.
-	
-	\begin{align*}
-	\psi(u) \in \gamma(p) &\iff \psi' \circ \psi(u) \in \psi' \circ \gamma(p)\\
-	&\implies \hat \psi(u) \in \gamma'(p)~,~
-	\end{align*}
-	where the last equality follows by construction of $\psi'$ and refinement.
-	Consistency now follows as calibration and consistency are equivalent in this setting~\citep{bartlett2006convexity}.
-\end{proof}
-
-
-The above Theorem statement gives us a somewhat surprising result: when restricting to polyhedral losses (and discrete prediction problems), indirect elicitation implies consistency.
-\citet{finocchiaro2021unifying} gives the reverse direction, which allows us to conclude that indirect elicitation and consistency are equivalent when restricting to polyhedral losses.
-
-\iffalse
-\jessie{Other results on refined properties? Assuming we don't want the embedding dimension conjecture brought up on 02.03.2020 in here.}
-\jessie{This is new from the NeurIPS submission.}
-\begin{proposition}\label{prop:calibrated-link-refinement}
-	Take $\prop{\ell} =: \gamma : \simplex \toto \R$ and $\prop{\ell'} =:\gamma' : \simplex \toto \R'$.
-	If $\gamma'$ refines $\gamma$ and $L'$ is calibrated with respect to  the discrete loss $\ell'$, then there exists a link $\psi$ so that $(L', \psi)$ is calibrated with respect to $\ell$.
-	\proposedadd{$(L, \psi)$ calibrated w.r.t. $\ell \implies L $ indirectly elicits $\prop{\ell}$.}
-\end{proposition}
-\begin{proof}
-	Let us construct the link $\psi$ such that, for all $r' \in \R'$ consider $r \in \R$ so that $\gamma'_{r'} \subseteq \gamma_r$.
-	Define $\psi$ so that $\psi'(u) = r' \implies \psi(u) = r$.
-	
-	To see this link and surrogate are calibrated with respect to $\ell$, consider that for any fixed $p \in \simplex$, $\{u \in \reals^d : \psi(u) \not \in \gamma(p)\} \subseteq \{u \in \reals^d : \psi'(u) \not \in \gamma'(p)\}$, which in turn implies that the infimum over the first term of the expected loss is at least the infimum over the second term, which is strictly greater than the Bayes Risk of $L'$ at $p$ by calibration of $(L', \psi')$.
-	
-	\jessiet{Probably need to be more thorough on the subset argument.}
-	That is, 
-	\begin{align*}
-	\{u \in \reals^d : \psi(u) \not \in \gamma(p)\} &\subseteq \{u \in \reals^d : \psi'(u) \not \in \gamma'(p)\}\\
-	\implies
-	\inf_{u \in \reals^d : \psi(u) \not \in \gamma(p)} \inprod{p}{L'(u)} &\geq \inf_{u \in \reals^d : \psi'(u) \not \in \gamma'(p)} \inprod{p}{L'(u)} > \inf_u \inprod{p}{L'(u)}\\
-	\implies 		\inf_{u \in \reals^d : \psi(u) \not \in \gamma(p)} \inprod{p}{L'(u)} &> \inf_u \inprod{p}{L'(u)}~.~
-	\end{align*}
-	Thus, as $p$ is arbitrary, we observe $(L', \psi)$ is calibrated with respect to $\ell$.
-\end{proof}
-\fi
-
-\iffalse
-\begin{conjecture}
-	Let $\gamma'$ refine $\gamma = \prop{\ell}$ and $L'$ embeds $\gamma'$ by the injection $\varphi'$.
-	Define $\phi : \R \to \R'$ such that $\phi(r) = r' \implies \gamma'_{r'} \subseteq \gamma_r$.
-	Let $\varphi:\R \to \reals^d = \phi \circ \varphi'$
-	Then $(-\risk{L'|_{\varphi(R)}})^*$ embeds $\ell$.
-\end{conjecture}
-\fi
 
 \section{Consistency via Calibrated Links}
 \label{sec:calibration}
@@ -1082,6 +803,370 @@ Note that the construction given above in Definition~\ref{def:eps-thick-link} is
 In practice this potential inefficiency is not typically a concern, as the family of losses typically has some closed form expression in terms of $n$, and thus the construction can proceed at the symbolic level.
 We illustrate this formulaic approach in \S~\ref{sec:abstain}.
 % \proposedadd{In general, we are not overly concerned with the computational complexity of computing the surrogate and link, since these calculations only need to be computed once.  They are generally derived mathematically, rather than computationally.  These symbolic calculations typically tend to be straightforward, but can sometimes be tricky.}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Polyhedral losses: indirect elicitation implies consistency}\label{sec:embed-props}
+%\jessie{Forked from appendix... if we adopt this, we should delete some of the content from the appendix.}
+%\raf{Please fix refs, maybe by removing the duplicates from the appendix}
+\btw{JESSIE: Commented out entire appendix section for the time being.  All that was there that isn't here is some commentary about positive normal sets.}
+\btw{JESSIE: Should this section be before or after embedding losses, since the results in this section are used in the proofs in the embedding losses section?  Narrative of having props then losses: here is this toolkit we have for understanding this notion of embedding, now here is how we apply it to the machine learning thing you actually care about.  Narrative of losses then props: BOOM here's this cool thing, and btw this is how we show it.  I think for a journal I'm inclined towards the latter, but that opinion is not very strong.}
+
+While Definition~\ref{def:loss-embed} gives the notion of one \emph{loss} embedding another, we now generalize the notion of one \emph{property} embedding another.
+\begin{definition}\label{def:prop-embed}
+	A property $\Gamma : \simplex \toto \reals^d$ embeds a property $\gamma:\simplex \toto \R$ if there exists some injective embedding $\varphi:\R \to \reals^d$ such that for all $p \in \simplex$ and $r \in \R$, we have $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p)$.
+	Moreover, we say a loss embeds a property when it embeds a loss eliciting the property.
+\end{definition}
+
+
+By condition (ii.) of Definition~\ref{def:loss-embed}, we then have $L$ embedding $\ell$ implies $\prop{L}$ embeds $\prop{\ell}$.
+However, Definitions~\ref{def:loss-embed} and~\ref{def:prop-embed} are not immediately equivalent because property embedding does not capture the requirement of matching losses on embedded points; i.e., that $L(\varphi(r)) = \ell(r)$ for all $r \in \R$.  
+However, Lemma~\ref{lem:embed-defs-equiv} shows an equivalence follows without loss of generality.
+
+\jessiet{New to journal version}
+\begin{lemma}\label{lem:embed-defs-equiv}
+	%  \raft{Introduce $L$}
+	Let $L : \reals^d \to \reals^\Y_+$ be a loss function.
+	If the property $\Gamma := \prop{L}$ embeds the finite property $\gamma : \simplex \toto \R$, then there is a discrete loss $\ell$ such that $\ell$ elicits $\gamma$ and $L$ embeds $\ell$.
+\end{lemma}
+\begin{proof}
+	\raft{All the important pieces are here, but take it slower.  State $\ell$ as a definition (let $\ell$ be given by...) and show why $L$ embeds it.\jessie{Took another pass but changed technique, adding in this detail.  Now very similar to the proof of Prop 1 forward direction.}}
+	Consider a loss $\ell : \R \to \reals_+^\Y$, defined so that $\ell : r \mapsto L(\varphi(r))$, i.e. $\ell = L|_{\varphi(\R)}$, where $\varphi$ is the same embedding given by $\Gamma$ embedding $\gamma$.
+	Now, we claim that $L$ embeds $\ell$.
+	%    To see this, consider that Condition (i.) of matching embedded loss values is met by construction of $\ell$.
+	Using Proposition~\ref{prop:embed-bayes-risks}, showing $\risk{L} = \risk{\ell}$ suffices to show that $L$ embeds $\ell$.
+	
+	First, we show that for all $p \in \simplex$, we have $(1) \inf_{u \in \reals^d}\inprod{p}{L(u)} = (2) \inf_{r \in \R}\inprod{p}{L(\varphi(r))}$, and the equality of risks follows.
+	$(1) \leq (2)$ follows from the fact that $\varphi(\R) \subset \reals^d$ and definition of infimum. 
+	Consider that if we did not have $(1) \geq (2)$ for some $p \in \simplex$, then there would be no $r$ such that $\varphi(r) \in \Gamma(p)$.
+	Therefore the property it embeds, $\gamma$ is degenerate at $p$, i.e. $\gamma(p) = \emptyset$, yielding a contradiction.
+	This gives us $(1) = (2)$, so we have $\risk{L} = \risk{L|_{\varphi(\R)}} = \risk{\ell(r)}$ by construction of $\ell$.
+	%
+	%Now consider the property $\Gamma' := p \mapsto \Gamma(p) \cap \varphi(\R)$.
+	%We have $\Gamma'$ nondegenerate since $\Gamma$ embedding $\gamma$ implies that, for all $p \in \simplex$, there is some $r \in \R$ such that $\varphi(r) \in \Gamma(p)$.
+	%Therefore, for all $p \in \simplex$, we have $\inf_{r \in \R}\inprod{p}{L(\varphi(r))} = \inf_{r \in \R} \inprod{p}{\ell(r)}$, which yields $\risk{L|_{\varphi(\R)}} = \risk{\ell}$.
+	%Chaining the two equalities, we now have $\risk{L} = \risk{\ell}$.
+	
+	%To verify $\ell$ elicits $\gamma$, consider $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p)$ by embedding, $ \iff \varphi(r) \in \argmin_{u \in \reals^d} \inprod{p}{L(u)}$ by $L$ eliciting $\Gamma$, and $ \iff r \in \argmin_{r \in \R} \inprod{p}{\ell(r)}$ by applying the definition of properties to the embedding definition.
+	%    \hrule
+	%	If $\Gamma$ embeds a finite $\gamma$, $L$ must embed a discrete loss $\ell$ such that $\ell(r) = L(\varphi(r))$ for all $r \in \R$.  
+	%	Moreover, we can see $\ell$ elicits $\gamma$ since we have $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p) \iff \varphi(r) \in \argmin_{u \in \reals^d} \inprod{p}{L(u)} \iff r \in \argmin_{r \in \R} \inprod{p}{\ell(r)}$.
+	%
+	%  \raft{Spell this out; I don't think these distributions are enough, for the same reason as above.  \jessie{Took a different approach of using Prop 1 to show the risks are equal.}}
+	%	The final condition of matching loss values is satisfied by considering the equality of the expected loss on each $\delta_y$ distribution.
+\end{proof}
+
+By Lemma~\ref{lem:embed-defs-equiv}, we can work directly with properties and set aside the losses which elicit them, which is often more convenient.
+Moreover, we can assume that finite properties are non-redundant without much loss of generality.
+\begin{definition}[Finite property, non-redundant]
+	A property $\gamma:\simplex\toto\R$ is \emph{redundant} if for some $r,r'\in\R$ with $r \neq r'$, we have $\gamma_r \subseteq \gamma_{r'}$, and \emph{non-redundant} otherwise.
+	$\gamma$ is \emph{finite} if it is non-redundant and $\R$ is a finite set.
+\end{definition}
+
+When working with convex losses which are not strictly convex, one quickly encounters redundant properties: if $\inprod{p}{L(\cdot)}$ is minimized by a point where $\inprod{p}{L}$ is flat, then there will be an uncountable set of reports which also minimize the expected loss.
+As results in property elicitation typically assume properties are non-redundant (e.g.~\cite{frongillo2014general,frongillo2015elicitation}), it is useful to consider a transformation which removes redundant level sets, captured by the \emph{trim} operation.
+
+\begin{definition}\label{def:trim}
+	Given an elicitable property $\Gamma:\simplex \toto\R$, we define $\trim(\Gamma) = \{\Gamma_u : u \in \R \text{ s.t. } \neg\exists u'\in\R,u'\neq u,\, \Gamma_u \subsetneq \Gamma_{u'}\}$ as the set of maximal level sets of $\Gamma$.
+\end{definition}
+
+%\btw{RF: Note for later: should be able to show that the union of trim is the simplex.\jessie{This is part of the proposition statement 2 now.}}
+%Take note that the unlabeled property $\trim(\Gamma)$ is non-redundant, meaning that for any $\theta \in \trim(\Gamma)$, there is no level set $\theta' \in \trim(\Gamma)$ such that $\theta \subset \theta'$; this is a corollary of Proposition~\ref{prop:embed-trim}.
+
+
+Before we state Proposition~\ref{prop:embed-trim}, which is needed to prove many of the statements in Section~\ref{sec:poly-loss-embed}, we will need to general lemmas about properties and their losses.
+The first follows from standard results relating finite properties to power diagrams (see Theorem~\ref{thm:aurenhammer}), and its proof is omitted.
+The second is closely related to the definition of the trim operator: it states that if some subset of the reports are always represented among the minimizers of a loss, then one may remove all other reports and elicit the same property (with those other reports removed).
+
+\begin{lemma}\label{lem:finite-full-dim}
+	Let $\gamma$ be a finite (non-redundant) property elicited by a loss $L$.
+	Then the negative Bayes risk $G$ of $L$ is polyhedral, and the level sets of $\gamma$ are the projections of the facets of the epigraph of $G$ onto $\simplex$, and thus form a power diagram.
+	In particular, the level sets of $\gamma$ are full-dimensional in $\simplex$ (i.e.,\ of dimension $n-1$).
+\end{lemma}
+
+
+\btw{JESSIE: Again, figures/an example might help clarify this}
+When a property $\Gamma$ embeds a finite property $\gamma$, we can show that the level sets of $\gamma$ correspond exactly to their embedded level sets of $\Gamma$, and that these embedded level sets are exactly $\trim(\Gamma)$.
+\jessiet{This lemma new to journal version}
+\begin{lemma}\label{lem:embedded-level-sets-trim}
+	Let $\Gamma$ be an elicitable property.
+	If $\Gamma$ embeds a (non-redundant) finite property $\gamma : \simplex \toto \R$ by the injection $\varphi$, then $\{\gamma_r : r \in \R\} = \{\Gamma_u : u \in \varphi(\R)\} = \trim(\Gamma)$.
+\end{lemma}
+\begin{proof}
+	Let $L$ elicit $\Gamma$.
+	Take $\ell$ to be the loss embedded by $L$ from Lemma~\ref{lem:embed-defs-equiv}.
+	Moreover, by Proposition~\ref{prop:embed-bayes-risks}, we have $\risk{L} = \risk{\ell}$.
+	\raft{Implicitly? Justify the claim.  \jessie{In definition of finite properties, we say that we assume we are talking about non-redundant.}}
+	As $\gamma$ is finite (and non-redundant by assumption), we know that each level set of $\gamma$ must be full-dimensional. 
+	For all $r \in \R$, we know $\gamma_r = \Gamma_{\varphi(r)}$, so we must also have $\Gamma_{\varphi(r)}$ full-dimensional.
+	Moreover, we have $\{\gamma_r : r \in \R\} = \{\Gamma_{\varphi(r)} : r \in \R\}$ as a corollary since this is true for each $r \in \R$.
+	\raft{The main action is here.  (1) Epigraph of $-\risk{L}$. (2) There is really only one case: every level set is a face of the power diagram, which must be contained (weakly, so $\subseteq$) in a facet. (3) To show that level sets are faces, you'll want to appeal to some piece of a proof in the prev section.}
+	Since the cell $\Gamma_{\varphi(r)}$ is the projection of a facet of the epigraph of $\risk{L}$, which is concave, any other level set intersecting $\Gamma_{\varphi(r)}$ can be considered in one of two cases:
+	First, if the level set $\Gamma_u$ (for $u \not \in \varphi(\R)$) is a projection of a lower-dimensional face of $\risk{L}$, which is contained in a facet of the epigraph.
+	Therefore, we must have $\Gamma_u \subset \Gamma_{\varphi(r)}$ for some $r \in \R$, and therefore $\Gamma_u \not \in \trim(\Gamma)$.
+	
+	Second, $\Gamma_u = \Gamma_{\varphi(r)}$ for some $r \in \R$, then the level set is in both $\{\Gamma_{\varphi(r)} : r \in \R\}$ and $\trim(\Gamma)$.
+	%		
+	%		\item[$\supseteq$] Take $u'$ so that $\Gamma_{u'} \not \in \{\Gamma_u : u \in \varphi(\R)\}$.
+	%		We proceed in 3 cases: first, if there exists a $u$ such that $\Gamma_{u'} \subsetneq \Gamma_u$, then $\Gamma_{u'} \not \in \trim(\Gamma)$.
+	%		If there is a $u \in \varphi(\R)$ such that $\Gamma_u = \Gamma_{u'}$, then we have $\Gamma_{u'}$ in the original set, as well as in $\trim(\Gamma)$ by Lemma~\ref{lem:fdls-in-trim}, since $\Gamma_{u'}$ must then be full-dimensional.
+	%		In the final case, we have $\Gamma_{u'}$ not a subset of any $\Gamma_\varphi(r)$.
+	%		Then by nondegeneracy of $\gamma$ (and in turn, of $\Gamma$) spans the interior of multiple level sets in $\{\Gamma_u : u \in \varphi(\R)\}$, which contradicts the elicitability of $\Gamma$ by Lemma~\ref{lem:elicitable-level-sets}.
+	%		Thus, we cannot observe this case.
+	%	\end{itemize}
+\end{proof}
+
+We now state a useful result for proving the existence of an embedding loss, which shows remarkable structure of embeddable properties, and the properties that embed them.
+First, we conclude that any embeddable property must be elicitable.
+We also conclude that if $\Gamma$ embeds $\gamma$, the level sets of $\Gamma$ must all be redundant relative to $\gamma$.
+In other words, $\Gamma$ is exactly the property $\gamma$, just with other reports filling in the gaps between the embedded reports of $\gamma$.
+(When working with convex losses, these extra reports are typically the convex hull of the embedded reports.)
+In this sense, we can regard embedding as only a slight departure from direct elicitation: if a loss $L$ elicits $\Gamma$ which embeds $\gamma$, we can think of $L$ as essentially eliciting $\gamma$ itself.
+Finally, we have an important converse: if $\Gamma$ has finitely many full-dimensional level sets, or if $\trim(\Gamma)$ is finite, then $\Gamma$ must embed some finite elicitable property with those same level sets.
+
+\begin{proposition}\label{prop:embed-trim}
+	Let $\Gamma:\simplex\toto\reals^d$ be an elicitable property.
+	The following are equivalent:
+	\begin{enumerate}\setlength{\itemsep}{0pt}
+		\item $\Gamma$ embeds a finite property $\gamma:\simplex \toto \R$.
+		\item $\trim(\Gamma)$ is a finite set, and $\cup\,\trim(\Gamma) = \simplex$.
+		\item There is a finite set of full-dimensional level sets $\Theta$ of $\Gamma$, and $\cup\,\Theta = \simplex$.
+	\end{enumerate}
+	%\raft{I see why you wanted this addition here, but (a) it's clear from the def of embedding, and (b) we don't have varphi defined.  So let's leave it out.}
+	Moreover, when any of the above hold, $\{\gamma_r : r\in\R\} = \trim(\Gamma) = \Theta$, and $\gamma$ is elicitable.
+\end{proposition}
+\begin{proof}
+	Let $L$ elicit $\Gamma$.
+	
+	1 $\Rightarrow$ 2:
+	%\jessie{Loss intuition: Let $L$ elicit $\Gamma$.  If $\Gamma$ embeds a finite $\gamma'$, $L$ must embed a discrete loss $\ell$ such that $\ell(r) = L(\varphi(r))$.  Therefore, $\risk{L} = \risk{\ell}$ is polyhedral. Moreover, we have $\Gamma$ also embedding the finite property $\prop{\ell} := \gamma$ as a corollary of the definition of embedding properties. We claim $\trim(\Gamma) = \{\gamma_r : r \in \R\}$ (Lemma~\ref{lem:embedded-level-sets-trim}), and since the latter set is finitely generated (as $\R$ is finite), we have have $\trim(\Gamma)$ is finite.  Moreover, as $\gamma$ is nondegenerate (since it is defined over the simplex), we have that $\cup_{r \in \R} \gamma_r = \simplex$.}
+	If $\Gamma$ embeds a finite $\gamma$, then Lemma~\ref{lem:embed-defs-equiv} says there is a discrete loss $\ell$ embedded by $L$ such that $\ell$ elicits $\gamma$.
+	\raft{Again, a bit too brief.  Consider adding some of this statement into the Lemma. \jessie{Is this better?}}
+	By Lemma~\ref{lem:embedded-level-sets-trim}, we then observe that $\trim(\Gamma) = \{\Gamma_{\varphi(r)} : r \in \R \} = \{\gamma_r : r \in \R\}$.
+	%  \raft{Replace with ``As $\R$ is finite, we conclude $\trim(\Gamma)$ is finite.'' or similar}
+	As $\R$ is finite, we conclude that $\trim(\Gamma)$ is also finite.
+	%  Since the latter set is finitely generated (as $\R$ is finite), we have have $\trim(\Gamma)$ is finite.
+	\raft{Why is it nonempty though?  \jessie{Just above definition 2, we specify that properties are nonempty}}
+	Moreover, as $\gamma$ is nondegenerate (recall that $\gamma: \simplex \toto \R$ is shorthand for $\gamma: \simplex \to 2^\R \setminus \{\emptyset\}$), we have that $\cup \trim(\Gamma) = \cup_{r \in \R} \gamma_r = \simplex$.
+	
+	\raft{These next two directions together seem like what we did before for $2\Rightarrow 3$, correct?  (Not as complete though; see the step where we justify the conditions of Lemma~\ref{lem:loss-restrict}.)  I'm actually happy for them to be separated, but let's make sure the argument is just as complete. \jessie{Added in the conditions of Lemma 3 to be a bit more thorough.}}
+	2 $\Rightarrow$ 1:
+	As $\trim(\Gamma)$ is finite, we know $\trim(\Gamma) = \{\Gamma_{u_i}\}_{i=1}^k$ for some finite $k$.
+	Take $\U = \{u_1, \ldots, u_k\}$, and consider $L$ eliciting $\Gamma$ and $\ell := L|_{\U}$.  
+	We have $\U \subset \reals^d$ and $\Gamma(p) \cap \U \neq \emptyset$ for all $p$, since we have $p \in \Gamma_{u_i}$ for some $u_i \in \U$.
+	Then we can apply Lemma~\ref{lem:loss-restrict} to observe that $L$ embeds $\ell$, and therefore $\Gamma$ embeds $\prop{\ell}$, which is finite as $\ell$ is discrete.
+	
+	%	1 $\Rightarrow$ 3: \jessie{Intuition: Each $\theta \in \trim(\Gamma)$ is full dimensional by Lemma~\ref{lem:embedded-level-sets-trim} and equality of the set of embedded level sets of $\Gamma$ and set of level sets of $\gamma$.  Take $\Theta = \trim(\Gamma)$.}
+	%	Assume $\Gamma$ embeds a finite property $\gamma$.
+	%	Then for each $r \in \R$, we have $\Gamma_{\varphi(r)} = \gamma_r$, and therefore $\{\Gamma_{\varphi(r)} : r \in \R\} = \{\gamma_r : r \in \R\}$.
+	%	Chaining this with Lemma~\ref{lem:embedded-level-sets-trim}, we have $\trim(\Gamma) = \{\gamma_r : r \in \R\}$.
+	%	
+	%	\jessie{This is really the beginning of 2 $\Rightarrow 3$}
+	%	If there is a level set $\Gamma_{\varphi(\hat r)} \in \trim(\Gamma)$ that is not full-dimensional, then we can define an injection $\varphi'$ so that $\varphi' :\R \setminus \{\hat r\} \to \reals^d$ maps $r \mapsto \varphi(r)$.
+	%	(Iterate if there are multiple level sets that are not full-dimensional.)
+	%	Now take $\Theta = \{\Gamma_{\varphi'(r)} : r \in \R\}$.
+	%	We know each level set in $\Theta$ is full-dimensional by construction, and just need to show $\cup \Theta = \simplex$.
+	%	However, if there was a level set $\Gamma_{\varphi(\hat r)}$ that was not in $\trim(\Gamma)$ \jessie{\ldots}
+	
+	1 $\Rightarrow$ 3: 
+	Let $\varphi: \R \to \reals^d$ be the embedding function, and take $\Theta = \{\Gamma_{\varphi(r)} : r \in \R\}$.
+	The latter set is equal to $\{\gamma_r : r \in \R\}$ by Lemma~\ref{lem:embedded-level-sets-trim}.
+	Therefore, we know each $\theta \in \Theta = \gamma_r$ for some $r \in \R$, which is full-dimensional in the simplex.
+	Moreover, since $\gamma$ is non-degenerate, we have $\cup \Theta = \cup_r \gamma_r = \simplex$.
+	%	\hrule
+	%	Since $\Gamma$ embeds the finite property $\gamma$, Lemma~\ref{lem:embed-defs-equiv} yields a loss $\ell$ eliciting $\gamma$ embedded by $L$, and therefore $\risk{L} = \risk{\ell}$.
+	%	As in the proof of Proposition~\ref{prop:embed-bayes-risks}, we observe that every facet of the epigraph of $-\risk{\ell}$ projects onto the simplex as a full-dimensional level set of $\gamma$.
+	%	As the risks are equal, this is also true for $\Gamma$.
+	%	Observe each cell in the simplex of $\gamma$ has some report $r$ so the cell is $\gamma_r$.
+	%	If $\varphi: r \mapsto u_r$, then we must have $\gamma_r = \Gamma_{u_r}$.
+	%	Take $\Theta$ to be the set $\{\Gamma_{u_r} : u_r \in \varphi(\R)\}$.
+	%	We have shown each $\Gamma_{u_r}$ is full-dimensional, and as the union of these cells forms a power diagram on $\simplex$, we have $\cup \Theta = \simplex$.
+	
+	%	2 $\Rightarrow$ 3:
+	%	\jessie{New attempt: show that $\Gamma$ elicitable and $\trim(\Gamma)$ finite implies each $\Gamma_u \in \trim(\Gamma)$ is full-dimensional. }
+	%		
+	%	We claim every $\theta \in \trim(\Gamma)$ is full-dimensional, then take $\Theta = \trim(\Gamma)$ and the result holds.
+	%	Suppose there was a $u \in \reals^d$ so that $\Gamma_u \in \trim(\Gamma)$ and $\Gamma_u$ was not full-dimensional.
+	%	The only case in which this happens is if $\Gamma_u$ spans two level sets, as anything that did not would be a subset of a full-dimensional level set in $\trim(\Gamma)$.
+	%	However, if $\Gamma_u$ spans the relative interior of two full-dimensional level sets, we contradict the elicitability condition in Lemma~\ref{lem:elicitable-level-sets}.\jessiet{Need to be more careful here.}
+	%	(If $\Gamma_u$ spans only the boundary of one level set, then we have that $\Gamma_u$ is a subset of the full-dimensional level set by closure of level sets of elicitable properties.)
+	%	Therefore, we must have each $\Gamma_u \in \trim(\Gamma)$ full-dimensional if $\trim(\Gamma)$ is a finite set and $\Gamma$ is elicitable.
+	
+	
+	3 $\Rightarrow$ 1: \jessie{Intuition: Take $\gamma : p \mapsto \Gamma(p) \cap \varphi(\R)$.}
+	Let $\Theta = \{\theta_1,\ldots,\theta_k\}$.
+	For all $i\in\{1,\ldots,k\}$ let $u_i\in\reals^d$ such that $\Gamma_{u_i} = \theta_i$.
+	Now define $\gamma:\simplex\toto\{1,\ldots,k\}$ by $\gamma(p) = \{i : p\in\theta_i\}$, which is non-degenerate as $\cup\,\Theta = \simplex$.
+	By construction, we have $\gamma_i = \theta_i = \Gamma_{u_i}$ for all $i$, so letting $\varphi(i) = u_i$ we satisfy the definition of embedding, namely statement 1.
+	
+\end{proof}
+\jessiet{03.01.21 - Old version moved to comment}
+%\jessiet{Can we remove this?}
+%\begin{proof}[Original]
+%	Let $L$ elicit $\Gamma$.
+%	
+%	1 $\Rightarrow$ 2:
+%	By the embedding condition, taking $\R_1 = \reals^d$ and $\R_2 = \varphi(\R)$ satisfies the conditions of Lemma~\ref{lem:loss-restrict}: for all $p\in\simplex$, as $\gamma(p) \neq \emptyset$ by definition, we have some $r\in\gamma(p)$ and thus some $\varphi(r) \in \Gamma(p)$.
+%	Let $G(p) := -\min_{u\in\reals^d} \inprod{p}{L(u)}$ be the negative Bayes risk of $L$, which is convex, and $G_{\R}$ that of $L|_{\varphi(\R)}$.
+%	By the Lemma, we also have $G = G_\R$.
+%	As $\gamma$ is finite, $G$ is polyhedral.
+%	Moreover, the projection of the epigraph of $G$ onto $\simplex$ forms a power diagram, with the facets projecting onto the level sets of $\gamma$, the cells of the power diagram.
+%	(See Theorem~\ref{thm:aurenhammer}.)
+%	As $L$ elicits $\Gamma$, for all $u\in\reals^d$, the hyperplane $p\mapsto \inprod{p}{L(u)}$ is a supporting hyperplane of the epigraph of $G$ at $(p,G(p))$ if and only if $u\in\Gamma(p)$.
+%	This supporting hyperplane exposes some face $F$ of the epigraph of $G$, which must be contained in some facet $F'$.
+%	Thus, the projection of $F$, which is $\Gamma_u$, must be contained in the projection of $F'$, which is a level set of $\gamma$.
+%	We conclude that $\Gamma_u \subseteq \gamma_r$ for some $r\in\R$.
+%	Hence, $\trim(\Gamma) = \{\gamma_r : r\in\R\}$, which is finite, and unions to $\simplex$.
+%	
+%	2 $\Rightarrow$ 3: let $\R = \{u_1,\ldots,u_k\} \subseteq\reals^d$ be a set of distinct reports such that $\trim(\Gamma) = \{\Gamma_{u_1},\ldots,\Gamma_{u_k}\}$.
+%	Now as $\cup\,\trim(\Gamma) = \simplex$, for any $p\in\simplex$, we have $p\in\Gamma_{u_i}$ for some $u_i\in\R$, and thus $\Gamma(p) \cap \R \neq \emptyset$.
+%	We now satisfy the conditions of Lemma~\ref{lem:loss-restrict} with $\R_1 = \reals^d$ and $\R_2 = \R$.
+%	The property $\gamma:p\mapsto\Gamma(p)\cap\R$ is non-redundant by the definition of $\trim$, finite, and elicitable.
+%	Now from Lemma~\ref{lem:finite-full-dim}, the level sets $\Theta = \{\gamma_r:r\in\R\}$ are full-dimensional, and union to $\simplex$.
+%	Statement 3 then follows from the fact that $\gamma_r = \Gamma_r$ for all $r\in\R$.
+%	
+%	3 $\Rightarrow$ 1: let $\Theta = \{\theta_1,\ldots,\theta_k\}$.
+%	For all $i\in\{1,\ldots,k\}$ let $u_i\in\reals^d$ such that $\Gamma_{u_i} = \theta_i$.
+%	Now define $\gamma:\simplex\toto\{1,\ldots,k\}$ by $\gamma(p) = \{i : p\in\theta_i\}$, which is non-degenerate as $\cup\,\Theta = \simplex$.
+%	By construction, we have $\gamma_i = \theta_i = \Gamma_{u_i}$ for all $i$, so letting $\varphi(i) = u_i$ we satisfy the definition of embedding, namely statement 1.
+%\end{proof}
+
+
+
+
+
+
+%\begin{lemma}\label{lem:fdls-in-trim}
+%	If $\theta$ is a full-dimensional level set (in the simplex) of the elicitable property $\Gamma$, then $\theta \in \trim(\Gamma)$.
+%\end{lemma}
+%\begin{proof}
+%	Let $u$ be the report such that $\theta = \Gamma_u$.
+%	If there is a $u'$ so that $\Gamma_u = \Gamma_{u'}$, one of the level sets is in $\trim(\Gamma)$, and then we have $\theta$ equal to that level set.
+%	If $\Gamma_u \subsetneq \Gamma_{u'}$, then either $\Gamma_u$ is not a full-dimensional level set or $\Gamma_u \cap \Gamma_{u'}$ is full-dimensonal.
+%	If $\Gamma_u$ is not full-dimensional, then we contradict our assumption.
+%	If $\Gamma_u \cap \Gamma_{u'}$ is full dimensional, then we contradict our elicitability condition (Lemma~\ref{lem:elicitable-level-sets}).
+%	Therefore, full-dimensional level sets of an elicitable property must be in the trim operation of the same property.
+%\end{proof}
+
+
+\btw{JESSIE: This needs more narrative text.}
+
+\begin{definition}
+	Let $\Gamma:\simplex \toto \R$ and $\Gamma':\simplex\toto \R'$.
+	Then $\Gamma'$ \emph{refines} $\Gamma$ if for all $r' \in \R'$, we have $\Gamma'_{r'} \subseteq \Gamma_r$ for some $r \in \R$.
+	That is, the cells of $\Gamma'$ are all contained in the cells of $\Gamma$.
+\end{definition}
+
+\begin{theorem}\label{thm:ie-iff-embeds-refinement}
+	Every polyhedral loss embeds a finite elicitable property.
+	Moreover, a polyhedral loss $L$ indirectly elicits a finite elicitable property $\gamma$ if and only if $\gamma$ is finite and $L$ embeds a property which refines $\gamma$.
+\end{theorem}
+\begin{proof}
+	\jessiet{17 Mar 21: REVISIT THIS... only one direction of the proof now.}
+	\jessie{Intuition: There are only a finite set of possible vertices of the loss, and claim that for each $p \in \simplex$, one of these vertices is a minimizer of $\inprod{p}{L(\cdot)}$.  Rinse and repeat for vertices of the expected loss on all possible (finite) supports.  As there is a some vertex in the property value for every $p \in \simplex$, we have $\trim(\Gamma)$ finite, which yields the results via Prop 3 somehow?  Unclear on that gap.}
+	\jessie{Cut everything but last paragraph}
+	The first statement is a trivial corollary of Theorem~\ref{thm:poly-embeds-discrete}.
+	%	Let $L:\reals^d\to\reals^\Y_+$ be a polyhedral loss.
+	%	For all $p$, let $P(p)$ be the epigraph of the convex function $u\mapsto \inprod{p}{L(u)}$.
+	%	From Lemma~\ref{lem:polyhedral-pd-same}, we have that the power diagram induced by the projection of $P(p)$ onto $\reals^d$ is constant whenever $p\in\inter\simplex$.
+	%	Let $q\in\inter\simplex$ be the uniform distribution on $\Y$, and $V_\Y$ be the set of vertices of $P(q)$ projected onto $\reals^d$.
+	%	By the above, this set is the same had we replaced $q$ by any $p\in\inter\simplex$.
+	%	
+	%	Now let $\Gamma := \Gamma[L]$.
+	%	We claim for all $p\in\inter\simplex$, that $\Gamma(p) \cap V_\Y \neq \emptyset$.
+	%	To see this, let $u \in \Gamma(p)$, and $u' = (u,\inprod{p}{L(u)}) \in P(p)$.
+	%	The optimality of $u$ is equivalent to $u$ being contained in the face exposed by the normal $(0,\ldots,0,-1)\in\reals^{d+1}$, which is a face of $P(p)$.
+	%	Let $v'\in\reals^{d+1}$ be a vertex on such a face, and $v\in V_\Y$ its projection onto $\reals^d$.
+	%	Then $v$ is also optimal, and therefore $v\in\Gamma(p)$.
+	%	
+	%	Now consider $\Y'\subset \Y$.
+	%	Applying the above argument on distributions $p$ with support exactly $\Y'$, we have a similar guarantee: a finite set $V_{\Y'}$ such that $\Gamma(p) \cap V_{\Y'} \neq \emptyset$ for all $p$ with support exactly $\Y'$.
+	%	(When $\Y' = \{y\}$ is a singleton, we simply take the projected vertices of $L(\cdot)_y$.)
+	%	
+	%	Thus, taking $V = \bigcup_{\Y'\subseteq\Y} V_{\Y'}$, we have for all $p\in\simplex$ that $\Gamma(p) \cap V \neq \emptyset$.
+	%	This implies that $\trim(\Gamma) \subseteq \{\Gamma_v : v\in V\}$, which is finite, so Proposition~\ref{prop:embed-trim} \jessie{also Prop 3} now gives the conclusion.
+	%	\jessiet{Do we need to show the preimage of $\Gamma$ is $V$?}
+	
+	
+	%\raft{I might be delusional, but this second part ended up being much slicker than I'd thought, by essentially chaining definitions and maps.  Please check!}
+	For the second part, let $\gamma':\simplex\toto\R'$ be the finite elicitable property embedded by $L$, with embedding $\varphi:\R'\to\reals^d$, and let $\psi:\reals^d \to \R$ be a link to a non-redundant elicitable property $\gamma:\simplex\toto\R$.
+	Then letting $\psi' = (\psi \circ \varphi):\R'\to\R$, we see that $\psi'$ is a link from $\gamma'$ to $\gamma$:
+	for all $r'\in\R'$, we have $\gamma'_{r'} = \prop{L}_{\varphi(r')} \subseteq \gamma_{\psi(\varphi(r'))} = \gamma_{\psi'(r')}$.
+	In particular, $\gamma'$ refines $\gamma$, and as $\gamma'$ is finite, $\gamma$ must be finite.
+	
+	\jessie{Added 18 Mar 21}
+	This suffices to prove both directions of the equality since there is a subtle use of the statement ``$\gamma'_{r'} = \prop{L}_{\varphi(r')}$'' follows as a corollary of Proposition~\ref{prop:embed-trim}, and each direction of the statement follows from a subset inclusion of one of these two level sets. 
+	%\jessie{added 17 Mar 21}
+	%	The ``only if'' direction follows from an implication of refinement, as $L$ embedding $\gamma'$ refining $\gamma \implies L$ indirectly elicits $\gamma$
+	%	Take embedding $\varphi$ and calibrated link\jessiet{Implicit forward ref to Theorem~\ref{thm:eps-thick-calibrated}} $\psi':\reals^d \to \R'$, and consider that $\prop{L}_u = \gamma'_{\psi'(u)} \subseteq \gamma_{\psi(u)}$, where $\psi$ is inherent in the definition of refinement.
+	
+\end{proof}
+
+
+\begin{theorem}\label{thm:poly-ie-implies-consistent}
+	If a polyhedral loss $L:\reals^d \to \reals^\Y$ indirectly elicits a property $\gamma: \simplex \toto \R$, then for any loss $\ell$ eliciting $\gamma$, there exists a link $\psi$ such that $(L, \psi)$ is calibrated, and therefore consistent, with respect to $\ell$.
+\end{theorem}
+\begin{proof}
+	By Theorem~\ref{thm:ie-iff-embeds-refinement}, we know that $\Gamma := \prop{L}$ embeds a finite elicitable property $\gamma^\emb:\simplex \toto \R'$ which refines $\gamma$.
+	Therefore, these exists a calibrated link $\psi^\emb : \reals^d \to \R'$ from $\Gamma$ to $\gamma^\emb$ by Theorem~\ref{thm:eps-thick-calibrated}. Moreover, as $\gamma^\emb$ refines $\gamma$, take any link $\psi': r \mapsto r'$, where $\gamma_r \subseteq \gamma'_{r'}$. 
+	(We know such a link exists by refinement.)
+	Consider $\psi := \psi^\emb \circ \psi'$.
+	
+	Now, we show that $(L, \psi)$ is calibrated with respect to $\ell$.
+	Consider that since $\Gamma$ embeds $\gamma^\emb$, we have a link $\psi^\emb$ such that $(L,\psi^\emb)$ is calibrated with respect to $\ell^\emb$ eliciting $\gamma^\emb$ (Theorem~\ref{thm:eps-thick-calibrated}).
+	We have
+	\begin{align*}
+	\inf_{u}\inprod{p}{L(u)} &< \inf_{u : \psi^\emb(u) \not \in \gamma^\emb(p)} \inprod{p}{L(u)}\\
+	&\leq \inf_{u : \psi'(u) \not \in \gamma(p)} \inprod{p}{L(u)}~.~
+	\end{align*}
+	The second statement is true if $\{u : \psi'(u) \not \in \gamma(p) \} \subseteq \{u : \psi^\emb(u) \not \in \gamma^\emb(p) \}$; we show the contrapositive, e.g., $\psi^\emb(u) \in \gamma^\emb(p) \implies \psi'(u) \in \gamma(p)$.
+	Take $u \in \reals^d$ so that $\psi^\emb(u) \in \gamma^\emb(p)$.
+	
+	\begin{align*}
+	\psi^\emb(u) \in \gamma^\emb(p) &\iff \psi' \circ \psi^\emb(u) \in \psi' \circ \gamma^\emb(p)\\
+	&\implies \psi(u) \in \gamma(p)~,~
+	\end{align*}
+	where the last equality follows by construction of $\psi$ and refinement.
+	Consistency now follows as calibration and consistency are equivalent in this setting~\citep{bartlett2006convexity}.
+\end{proof}
+
+The above Theorem statement gives us a somewhat surprising result: when restricting to polyhedral losses (and discrete prediction problems), indirect elicitation implies consistency.
+\citet{finocchiaro2021unifying} gives the reverse direction, which allows us to conclude that indirect elicitation and consistency are equivalent when restricting to polyhedral losses.
+
+\iffalse
+\jessie{Other results on refined properties? Assuming we don't want the embedding dimension conjecture brought up on 02.03.2020 in here.}
+\jessie{This is new from the NeurIPS submission.}
+\begin{proposition}\label{prop:calibrated-link-refinement}
+	Take $\prop{\ell} =: \gamma : \simplex \toto \R$ and $\prop{\ell'} =:\gamma' : \simplex \toto \R'$.
+	If $\gamma'$ refines $\gamma$ and $L'$ is calibrated with respect to  the discrete loss $\ell'$, then there exists a link $\psi$ so that $(L', \psi)$ is calibrated with respect to $\ell$.
+	\proposedadd{$(L, \psi)$ calibrated w.r.t. $\ell \implies L $ indirectly elicits $\prop{\ell}$.}
+\end{proposition}
+\begin{proof}
+	Let us construct the link $\psi$ such that, for all $r' \in \R'$ consider $r \in \R$ so that $\gamma'_{r'} \subseteq \gamma_r$.
+	Define $\psi$ so that $\psi'(u) = r' \implies \psi(u) = r$.
+	
+	To see this link and surrogate are calibrated with respect to $\ell$, consider that for any fixed $p \in \simplex$, $\{u \in \reals^d : \psi(u) \not \in \gamma(p)\} \subseteq \{u \in \reals^d : \psi'(u) \not \in \gamma'(p)\}$, which in turn implies that the infimum over the first term of the expected loss is at least the infimum over the second term, which is strictly greater than the Bayes Risk of $L'$ at $p$ by calibration of $(L', \psi')$.
+	
+	\jessiet{Probably need to be more thorough on the subset argument.}
+	That is, 
+	\begin{align*}
+	\{u \in \reals^d : \psi(u) \not \in \gamma(p)\} &\subseteq \{u \in \reals^d : \psi'(u) \not \in \gamma'(p)\}\\
+	\implies
+	\inf_{u \in \reals^d : \psi(u) \not \in \gamma(p)} \inprod{p}{L'(u)} &\geq \inf_{u \in \reals^d : \psi'(u) \not \in \gamma'(p)} \inprod{p}{L'(u)} > \inf_u \inprod{p}{L'(u)}\\
+	\implies 		\inf_{u \in \reals^d : \psi(u) \not \in \gamma(p)} \inprod{p}{L'(u)} &> \inf_u \inprod{p}{L'(u)}~.~
+	\end{align*}
+	Thus, as $p$ is arbitrary, we observe $(L', \psi)$ is calibrated with respect to $\ell$.
+\end{proof}
+\fi
+
+\iffalse
+\begin{conjecture}
+	Let $\gamma'$ refine $\gamma = \prop{\ell}$ and $L'$ embeds $\gamma'$ by the injection $\varphi'$.
+	Define $\phi : \R \to \R'$ such that $\phi(r) = r' \implies \gamma'_{r'} \subseteq \gamma_r$.
+	Let $\varphi:\R \to \reals^d = \phi \circ \varphi'$
+	Then $(-\risk{L'|_{\varphi(R)}})^*$ embeds $\ell$.
+\end{conjecture}
+\fi
 
 
 
@@ -1507,39 +1592,6 @@ First, we present several definitions from Aurenhammer~\cite{aurenhammer1987powe
   A cell complex $C$ in $\reals^d$ is \emph{affinely equivalent} to a (convex) polyhedron $P \subseteq \reals^{d+1}$ if $C$ is a (linear) projection of the faces of $P$.
 \end{definition}
 
-\begin{theorem}[Aurenhammer~\cite{aurenhammer1987power}]\label{thm:aurenhammer}
-  A cell complex is affinely equivalent to a convex polyhedron if and only if it is a power diagram.
-\end{theorem}
-
-In particular, one can consider the epigraph of a polyhedral convex function on $\reals^d$ and the projection down to $\reals^d$; in this case we call the resulting power diagram \emph{induced} by the convex function.
-We extend Aurenhammer's result to a weighted sum of convex functions, showing that the induced power diagram is the same for any choice of strictly positive weights.
-
-\begin{lemma}\label{lem:polyhedral-pd-same}
-  Let $f_1,\ldots,f_m:\reals^d\to\reals$ be polyhedral convex functions.
-  The power diagram induced by $\sum_{i=1}^m p_i f_i$ is the same for all $p \in \inter\simplex$.
-\end{lemma}
-\begin{proof}
-  For any convex function $g$ with epigraph $P$, the proof of~\citet[Theorem 4]{aurenhammer1987power} shows that the power diagram induced by $g$ is determined by the facets of $P$.
-  Let $F$ be a facet of $P$, and $F'$ its projection down to $\reals^d$.
-  It follows that $g|_{F'}$ is affine, and thus $g$ is differentiable on $\inter F'$ with constant derivative $d\in\reals^d$.
-  Conversely, for any subgradient $d'$ of $g$, the set of points $\{x\in\reals^d : d'\in\partial g(x)\}$ is the projection of a face of $P$; we conclude that $F = \{(x,g(x))\in\reals^{d+1} : d\in\partial g(x)\}$ and $F' = \{x\in\reals^d : d\in\partial g(x)\}$.
-
-  Now let $f := \sum_{i=1}^k f_i$ with epigraph $P$, and $f' := \sum_{i=1}^k p_i f_i$ with epigraph $P'$.
-  By Rockafellar~\cite{rockafellar1997convex}, $f,f'$ are polyhedral.
-  We now show that $f$ is differentiable whenever $f'$ is differentiable:
-  \begin{align*}
-    \partial f(x) = \{d\}
-    &\iff \sum_{i=1}^k \partial f_i(x) = \{d\} \\
-    &\iff \forall i\in\{1,\ldots,k\}, \; \partial f_i(x) = \{d_i\} \\
-    &\iff \forall i\in\{1,\ldots,k\}, \; \partial p_i f_i(x) = \{p_id_i\} \\
-    &\iff \sum_{i=1}^k \partial p_if_i(x) = \left\{\sum_{i=1}^k p_id_i\right\} \\
-    &\iff \partial f'(x) = \left\{\sum_{i=1}^k p_id_i\right\}~.
-  \end{align*}
-  From the above observations, every facet of $P$ is determined by the derivative of $f$ at any point in the interior of its projection, and vice versa.
-  Letting $x$ be such a point in the interior, we now see that the facet of $P'$ containing $(x,f'(x))$ has the same projection, namely $\{x'\in\reals^d : \nabla f(x) \in \partial f(x')\} = \{x'\in\reals^d : \nabla f'(x) \in \partial f'(x')\}$.
-  Thus, the power diagrams induced by $f$ and $f'$ are the same.
-  The conclusion follows from the observation that the above held for any strictly positive weights $p$, and $f$ was fixed.
-\end{proof}
 
 \iffalse
 \section{Embedding properties}\label{app:embed-props}
@@ -1811,38 +1863,6 @@ Finally, we have an important converse: if $\Gamma$ has finitely many full-dimen
 \fi
 
 \section{Polyhedral losses}\label{app:polyhedral-losses}
-\begin{lemma}
-  \label{lem:polyhedral-range-gamma}
-  Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss, and let $\Gamma = \prop{L}$.
-  Then the range of $\Gamma$, $\U = \Gamma(\simplex) = \{\Gamma(p) \subseteq \reals^d : p\in\simplex\}$, is a finite set of closed polyhedra.
-\end{lemma}
-\begin{proof}
-  For all $p$, let $P(p)$ be the epigraph of the convex function $u\mapsto \inprod{p}{L(u)}$.
-  From Lemma~\ref{lem:polyhedral-pd-same}, we have that the power diagram $D_\Y$ induced by the projection of $P(p)$ onto $\reals^d$ is the same for any $p\in\inter\simplex$.
-  Let $\F_\Y$ be the set of faces of $D_\Y$, which by the above are the set of faces of $P(p)$ projected onto $\reals^d$ for any $p\in\inter\simplex$.
-
-  We claim for all $p\in\inter\simplex$, that $\Gamma(p) \in \F_\Y$.
-  To see this, let $u \in \Gamma(p)$, and $u' = (u,\inprod{p}{L(u)}) \in P(p)$.
-  The optimality of $u$ is equivalent to $u'$ being contained in the face $F$ of $P(p)$ exposed by the normal $(0,\ldots,0,-1)\in\reals^{d+1}$.
-  Thus, $\Gamma(p) = \argmin_{u\in\reals^d} \inprod{p}{L(u)}$ is a projection of $F$ onto $\reals^d$, which is an element of $\F_\Y$.
-
-  Now consider $\Y'\subset \Y$, $\Y'\neq\emptyset$.
-  Applying the above argument, we have a similar guarantee: a finite set $\F_{\Y'}$ such that $\Gamma(p) \in \F_{\Y'}$ for all $p$ with support exactly $\Y'$.
-  Taking $\F = \bigcup\{\F_{\Y'} | \Y'\subseteq\Y, \Y'\neq\emptyset\}$, we have for all $p\in\simplex$ that $\Gamma(p) \in \F$, giving $\U \subseteq \F$.
-  As $\F$ is finite, so is $\U$, and the elements of $\U$ are closed polyhedra as faces of $D_{\Y'}$ for some $\Y'\subseteq\Y$.
-\end{proof}
-
-\begin{lemma}
-  \label{lem:poly-loss-poly-risk}
-  If $L$ is polyhedral, $\risk{L}$ is polyhedral.
-\end{lemma}
-\begin{proof}
-  Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss, and $\Gamma = \prop{L}$.
-  By Lemma~\ref{lem:polyhedral-range-gamma}, $\U = \Gamma(\simplex)$ is finite.
-  For each $U\in \U$, select $u_U \in U$, and let $U' = \{u_U : U \in\U\}$.
-  Then for all $p\in\simplex$ we have $\Gamma(p) \cap U' \neq \emptyset$, so Lemma~\ref{lem:loss-restrict} gives us $\risk{L} = \risk{L|_{U'}}$, which is polyhedral as $U'$ is finite.
-  \btw{RF: interesting: we didn't need Proposition~\ref{prop:embed-risk-poly} after all.  This already gives the discrete loss $L$ embeds!}
-\end{proof}
 
 
 %\raft{The following statement is true I believe, but low priority: ``An elicitable property $\Gamma:\simplex\toto\reals$ is convex elicitable (elicited by a convex $L : \reals \to \reals^\Y$) if and only if it is monotone.''  Start of the proof commented out.  Just need to show that $b$ is the upper limit of $a$ and $a$ the lower of $b$; should follow from elicitability of $\Gamma$.}
