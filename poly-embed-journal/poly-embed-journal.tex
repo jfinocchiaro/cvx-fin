@@ -348,21 +348,22 @@ We formalize this notion as follows.
 \begin{definition}
   \raf{Trying this out:}
   Let $L:\R\to\reals^\Y_+$ be a generic loss.
-  We say $S \subseteq \R$ is \emph{representative for $L$} if we have $\prop{L}(p) \cap S \neq \emptyset$ for all $p\in \simplex$.
+  We say $\Sc \subseteq \R$ is \emph{representative for $L$} if we have $\prop{L}(p) \cap \Sc \neq \emptyset$ for all $p\in \simplex$.
 \end{definition}
 
 \begin{definition}[Embedding a loss]\label{def:loss-embed}
   \raft{Alternative: define ``embed over $S$'' first, and then ``embed'' means over some representative $S$.  Let's see if that would work.  Then we can call out $S$ to specify it if we want, but we don't need to carry it around everywhere and change all the statements if we don't want to call out $S$.}
-  A loss $L:\reals^d\to\reals^\Y$ \emph{embeds} a loss $\ell:\R\to\reals^\Y$ if there exists some injective embedding $\varphi:\R\to\reals^d$ such that
-  (i) for all $r\in\R$ we have $L(\varphi(r)) = \ell(r)$, and (ii) for all $p\in\simplex,r\in\R$ we have
+  A loss $L:\reals^d\to\reals^\Y$ \emph{embeds} a loss $\ell:\R\to\reals^\Y$ over a set $\Sc$ if there exists some injective embedding $\varphi:\Sc\to\reals^d$ such that
+  (i) for all $r\in\Sc$ we have $L(\varphi(r)) = \ell(r)$, and (ii) for all $p\in\simplex,r\in\R$ we have
   % \begin{equation}\label{eq:embed-loss}
   %   r \in \argmin_{r'\in\R} \inprod{p}{\ell(r')} \iff \varphi(r) \in \argmin_{u\in\reals^d} \inprod{p}{L(u)}~.
   % \end{equation}
   \begin{equation}\label{eq:embed-loss}
     r \in \prop{\ell}(p) \iff \varphi(r) \in \prop{L}(p)~.
   \end{equation}
+  We simply say $L$ \emph{embeds} $\ell$ if there is some representative set $\Sc$ such that $L$ embeds $\ell$ over $\Sc$.
 \end{definition}
-\proposedadd{Moreover, we say $L$ embeds $\ell$ over the set $S$ if $L$ embeds $\ell|_S$ and $S$ is representative for $\ell$.}
+
 %
 
 It is not immediately clear if embeddings give rise to calibrated links; indeed, apart from mapping the embedded points back to their original reports via $\psi(\varphi(r)) = r$, how to map the remaining values is far from obvious.
@@ -457,9 +458,10 @@ We defer the question of when such surrogates are consistent to \S~\ref{sec:cali
 
 In Proposition~\ref{prop:embed-bayes-risks}, we show an equivalent condition to embedding, whose proof relies on the following Lemma about the Bayes risk of a ``restricted'' surrogate, shown here.
 \begin{lemma}\label{lem:loss-restrict}
-  Let $L$ elicit $\Gamma:\simplex\toto\R_1$, and let $\R_2\subseteq\R_1$ \proposedadd{be representative for $L$}.
+  Let $L$ elicit $\Gamma:\simplex\toto\R_1$, and let $\R_2\subseteq\R_1$ be representative for $L$.
   % such that $\Gamma(p) \cap \R_2 \neq \emptyset$ for all $p\in\simplex$.
-  Then $L|_{\R_2}$ elicits $\gamma:\simplex\toto\R_2$ defined by $\gamma(p) = \Gamma(p)\cap \R_2$, and $\risk{L}=\risk{L|_{\R_2}}$.
+  Then $L|_{\R_2}$ elicits $\gamma:\simplex\toto\R_2$ defined by $\gamma(p) = \Gamma(p)\cap \R_2$.
+  Moreover, $\risk{L}=\risk{L|_{\R_2}}$.
 \end{lemma}
 \begin{proof}
 	Let $p\in\simplex$ be fixed throughout.
@@ -485,31 +487,31 @@ To begin, we observe that our embedding condition in Definition~\ref{def:loss-em
 This useful fact will drive many of our results.
 
 \begin{proposition}\label{prop:embed-bayes-risks}
-  A loss $L:\reals^d \to \reals^\Y_+$ embeds discrete loss $\ell:\R \to \reals^\Y_+$ \proposedadd{for some set of reports $S \subseteq \R$} if and only if $\risk{L}=\risk{\ell}$.
+  A loss $L$ embeds a discrete loss $\ell$ if and only if $\risk{L}=\risk{\ell}$ and the risks are polyhedral.
   % A loss $L:\reals^d\to\reals^\Y$ embeds discrete $\ell:\R\to\reals^Y$ if and only if $\risk{L}=\risk{\ell}$.
 \end{proposition}
 \begin{proof}
   \raft{I'm going ahead with the proposed definition regarding $S$, since I think we can't avoid that for this result at least.}
-  \raft{BTW, maybe we want $\mathcal S$ instead of $S$, not sure}
   Define $\Gamma = \prop{L}$ and $\gamma = \prop{\ell}$.
-  Suppose $L$ embeds $\ell$ over $S\subseteq \R$ via the embedding $\varphi:S\to\reals^d$.
-  Since $S$ is representative, for all $p\in\simplex$ we have $S\cap \gamma(p) \neq \emptyset$.
+  Suppose $L$ embeds $\ell$ over $\Sc\subseteq \R$ via the embedding $\varphi:S\to\reals^d$.
+  Since $\Sc$ is representative, for all $p\in\simplex$ we have $\Sc \cap \gamma(p) \neq \emptyset$.
   \raf{Can we remove $\gamma'$ and show more directly that $\U$ is representative for $\Gamma$?  We only use the second part of Lemma~\ref{lem:loss-restrict} anyway.}
-  Letting $\U := \varphi(S)$, define $\gamma':\simplex \toto \U$ by $\gamma' : p \mapsto \Gamma(p)\cap \U$.
-  To see that $\gamma'(p) \neq \emptyset$ for all $p\in\simplex$, note that by the definition of $\gamma$ as the property elicited by $\ell$ we have some $r \in \gamma(p)$, and by the embedding condition~\eqref{eq:embed-loss}, $\varphi(r) \in \Gamma(p)$.
-  By Lemma~\ref{lem:loss-restrict}, we see that $L|_{\U}$ (the loss $L$ with reports restricted to $\U$) elicits $\gamma'$ and $\risk{L} = \risk{L|_{\U}}$.
+  Take $\U := \varphi(\Sc)$, and consider $\Sc$ is representative of $\ell$ if and only if $\U$ is representative of $L$, as $\gamma(p) \cap \Sc \neq \emptyset \iff \exists r \in \Sc$ such that $r \in \gamma(p) \iff \exists r$ such that $\varphi(r) \in \Gamma(p) \cap \U \iff \Gamma(p) \cap \U \neq \emptyset$.
+  Therefore, we have $\U$ representative of $L|_\U$ since $\Gamma(p)$ is nonempty, and $\U$ is representative of $L$.
+%  To see that $\gamma'(p) \neq \emptyset$ for all $p\in\simplex$, note that by the definition of $\gamma$ as the property elicited by $\ell$ we have some $r \in \gamma(p)$, and by the embedding condition~\eqref{eq:embed-loss}, $\varphi(r) \in \Gamma(p)$.
+  By Lemma~\ref{lem:loss-restrict}, we see that $\risk{L} = \risk{L|_{\U}}$.
   As $L(\varphi(\cdot)) = \ell(\cdot)$ by embedding condition (i), we have
   \begin{equation*}
     \risk{\ell}(p) = \min_{r \in \R}\inprod{p}{\ell(r)} = \min_{r \in \R}\inprod{p}{L(\varphi(r))} = \min_{u \in \U}\inprod{p}{L(u)} = \risk{L|_\U}(p) = \risk{L}(p)~,
   \end{equation*}
   for all $p\in\simplex$.
+  Moreover, the risks are polyhedral as $\risk{\ell}$ is the pointwise max of a finite set of linear functions.
   
     \btw{RF: This is on the informal side, mostly because of the ``working in the affine hull'' bit.  It can all be formalized though, probably should be for the journal version: just take an appropriate linear projection of $\reals^n$ to $\reals^{n-1}$, and work with the projected versions of everything, and then project back.}
   For the reverse implication, assume that $\risk{L} = \risk{\ell}$.
   In what follows, we implicitly work in the affine hull of $\simplex$ by taking an appropriate invertible linear projection to an affine subspace $A : \reals^n_+ \to \reals^{n-1}_+$, so that interiors are well-defined, and $\risk{\ell}$ may be differentiable on the interior of $\simplex$.
   (For intuition, one can consider the relative interiors in $\reals^\Y_+$, but we need to consider interiors in order to apply previous results.)
   Since $\ell$ is discrete, $-\risk{\ell}$ is polyhedral as the pointwise maximum of a finite set of linear functions.
-%  Moreover, consider the linear transformation $P: \ell \mapsto [\mathbb{I}_{n-1}, \vec 0] \risk{\ell}$ projecting $\risk{\ell}$ down to $n-1$ dimensions.
   \raft{I believe we can remove mentions of power diagrams here; let's give it a try.  I don't think we need to project yet, given what we say next.}
   The projection of its epigraph $E_{\ell}$ onto $\simplex$ forms a power diagram by Theorem~\ref{thm:aurenhammer}, whose cells are full-dimensional (in $n-1$ dimensions) and correspond to the level sets $\gamma_r$ of $\gamma = \prop{\ell}$. \jessiet{Don't need Theorem 1; can use Lemma~\ref{lem:finite-full-dim} instead. -21 Mar 21}
 
@@ -523,25 +525,16 @@ This useful fact will drive many of our results.
   To see that the loss values match, we merely note that the supporting hyperplanes to the facets of $E_L$ and $E_\ell$ are the same, and the loss values are uniquely determined by the supporting hyperplane.
   In particular, if $h$ supports the facet corresponding to $\gamma_r$, we have $\ell(r)_y = L(u_r)_y = h(\delta_y)$, where $\delta_y$ is the point distribution on outcome $y$.
 
-  
-%  \btw{RF: This is on the informal side, mostly because of the ``working in the affine hull'' bit.  It can all be formalized though, probably should be for the journal version: just take an appropriate linear projection of $\reals^n$ to $\reals^{n-1}$, and work with the projected versions of everything, and then project back.}
-%  For the reverse implication, assume that $\risk{L} = \risk{\ell}$.
-%  In what follows, we implicitly work in the affine hull of $\simplex$ \proposedadd{by projecting into $\reals^{n-1}$}, so that interiors are well-defined, and $\risk{\ell}$ may be differentiable on the (relative) interior of $\simplex$.
-%  \proposedadd{Formally, we work with $L' := P(L)$ and $\ell' := P(\ell)$, where $P:\reals^n \to \reals^{n-1}$ is the linear transformation given by $[\mathbb{I}_{n-1}, \vec 0]$, taking the first $n-1$ components of $L$ and $\ell$, respectively.}
-%  Since $\ell$ is discrete,\proposedadd{ so is $\ell'$, and thus} $-\risk{\ell}$ is polyhedral as the pointwise maximum of a finite set of linear functions.
-%  The projection of its epigraph $E_\ell$ onto $\simplex$ forms a power diagram by Theorem~\ref{thm:aurenhammer}, whose cells are full-dimensional and correspond to the level sets $\gamma_r$ of $\gamma = \prop{\ell}$.
-%  
-%  For each $r\in\R$, let $p_r$ be a distribution in the interior of $\gamma_r$, and let $u_r \in \Gamma(p)$.
-%  Observe that, by definition of the Bayes risk and $\Gamma$, for all $u\in\reals^d$ the hyperplane $v \mapsto \inprod{v}{-L(u_r)}$ supports the epigraph $E_L$ of $-\risk{L}$ at the point $(p,-\inprod{p}{L(u)})$ if and only if $u\in\Gamma(p)$.
-%  Thus, the hyperplane $v \mapsto \inprod{v}{-L(u_r)}$ supports $E_L = E_\ell$ at the point $(p_r,-\inprod{p_r}{L(u_r)})$, and thus does so at the entire facet $\{(p,-\inprod{p}{L(u_r)}) : p\in\gamma_r\}$; by the above, $u_r \in \Gamma(p)$ for all such distributions as well.
-%  We conclude that $u_r \in \Gamma(p) \iff p \in \gamma_r \iff r \in \gamma(p)$, satisfying condition~\eqref{eq:embed-loss} for $\varphi : r \mapsto u_r$.
-%  To see that the loss values match, we merely note that the supporting hyperplanes to the facets of $E_L$ and $E_\ell$ are the same, and the loss values are uniquely determined by the supporting hyperplane.
-%  (In particular, if $h$ supports the facet corresponding to $\gamma_r$, we have $\ell(r)_y = L(u_r)_y = h(\delta_y)$, where $\delta_y$ is the point distribution on outcome $y$.)
+\proposedadd{For the reverse implication, assume $\risk{L} = \risk{\ell}$ are polyhedral functions.  Since $\risk{\ell}$ is polyhedral, the epigraph of its negation, $E_\ell$, has a finite set of facets, which by definition have well-defined interiors.  For each facet, there must then be some distribution $p_r$ and report $r \in \R$ such that the hyperplane $p_r \mapsto (p_r, \inprod{p_r}{-\ell(r)})$ uniquely supports $E_\ell$.  Form $\Sc$ from the set of such reports $r$, iterating over each facet.  We have $\Sc$ representative of $\ell$ since the union of projected epigraph facets equals the simplex, and these facets and their projections are closed. Therefore, every $p \in \simplex$ is contained in some facet of the epigraph, and thus there is some $r \in \Sc$ so that $r \in \gamma(p)$.
+As the risks are equal, the same is true for $E_L$, e.g., for each facet, there is some $u_r$ so that $p_r \mapsto (p_r, \inprod{p_r}{L(u_r)})$, and one can construct the embedding $\varphi: r \mapsto u_r$ for each $r \in \Sc$.}
+
+\proposedadd{To verify matching losses, observe $\risk \ell (\delta_y) = \risk L (\delta_y)$ for each $y \in \Y$, and these risks are attained by some report $r$ and its embedding $u_r$, respectively.
+Matching optimality is true by construction, since the optimal reports support the epigraph of negative Bayes risk on exactly the same distributions, meaning a report and its embedding are optimal at exactly the same distributions.}
 \end{proof}
 
 \raf{Something like this:}\\
 Together, Lemma~\ref{lem:loss-restrict} and Proposition~\ref{prop:embed-bayes-risks} give the following useful tool for finding embeddings.
-\begin{corollary}
+\begin{corollary}\label{cor:representative-embeds-restriction}
   Let surrogate loss $L:\reals^d \to \reals^\Y_+$ be given.
   If a finite set $\U \subseteq \reals^d$ is representative for $L$, then $L$ embeds the discrete loss $L|_\U$.
 \end{corollary}
@@ -557,38 +550,17 @@ In particular, one can consider the epigraph of a polyhedral convex function on 
 \jessiet{Can remove this; took the part of the proof used in Thm 2 and moved there.  It's not a dependency anywhere else.}
 \raft{Oh, saw this last: didn't realize ``this'' meant the proposition (right?).  If so maybe we should demote the proposition to a corollary or just an observation.}
 \begin{proposition}\label{prop:embed-risk-poly}
-  \proposedadd{There exists a set $S \subseteq \R$ such that the} loss $L$ embeds a discrete loss $\ell : \R \to \reals^\Y_+$ if and only if $\risk{L}$ is polyhedral.
+  A loss $L$ embeds a discrete loss $\ell : \R \to \reals^\Y_+$ if and only if $\risk{L}$ is polyhedral.
 \end{proposition}
 \begin{proof}
-  % \jessie{Intuition: $\Leftarrow$: There are a finite set of full-dimensional level sets, which we enumerate.  We then use these enumerated reports to define a finite property $\gamma$ such that $u_i \in \Gamma(p) \implies i \in \gamma(p)$, and take the discrete loss values equal to original loss values at the enumerated points.}
   \raft{Don't need power diagrams here either.  Also, I think once we have a nice clean proof of Proposition~\ref{prop:embed-bayes-risks} we can resolve the redundancy of these proofs easily, perhaps by proving the stronger statement in Proposition~\ref{prop:embed-bayes-risks}.}
-  If $L$ embeds $\ell$ \proposedadd{on a set $S$}, Proposition~\ref{prop:embed-bayes-risks} gives us $\risk{L} = \risk{\ell}$, and its proof already argued that $\risk{\ell}$ is polyhedral since $\risk{\ell}$ is a pointwise max of a finite number of linear functions.
+  If $L$ embeds a discrete $\ell$, Proposition~\ref{prop:embed-bayes-risks} gives us $\risk{L} = \risk{\ell}$ and polyhedral.
   For the converse, let $\risk{L}$ be polyhedral; we again examine the proof of Proposition~\ref{prop:embed-bayes-risks}.
-  The projection of the epigraph of $\risk{L}$ onto $\simplex$ forms a power diagram by Theorem~\ref{thm:aurenhammer} with finitely many cells $C_1,\ldots,C_k$, which we can index by $\R := \{1,\ldots,k\}$.
-  Defining the property $\gamma:\simplex\toto\R$ by $\gamma_r = C_r$ for $r\in\R$, we see that the same construction gives us points $u_r \in\reals^d$ such that $u_r \in \Gamma(p) \iff r \in \gamma(p)$.
-  Defining $\ell:\R\to\reals^\Y_+$ by $\ell(r) = L(u_r)$, the same proof shows that $L$ embeds $\ell$ \proposedadd{on the set $\R$}.
-  % The reverse direction follows similarly to the proof of Proposition~\ref{prop:embed-bayes-risks}.
-  % Consider, as above, the power diagram induced by projecting $\risk{L}$ onto $\simplex$ corresponding to the level sets of $\Gamma$.
-  % Call the set of full-dimensional cells in this power diagram $F$, and note that $F$ is finite since it defined by a projection of a polyhedral function.
-  % For each $f \in F$, there is a distribution $p \in \inter{f}$ such that the supporting hyperplane at $\risk{L}(p)$ is unique.
-  % Pick some $u_f \in \argmin_{u' \in \U}L(u', p)$.
-  % The coefficients of the supporting hyperplane of $\risk{L}(p)$ exactly describe the discrete loss $\ell(u_f)$.
-  % Repeat this process for every facet, and denote $\R := \{u_f\}_{f \in F}$.
-  % Since $\cup f = \simplex$, and each $f$ isequal to $\Gamma_{u_f}$ for some $u_f \in \reals^d$, we invoke Proposition~\ref{prop:embed-trim} to note $\Gamma:= \prop{L}$ embeds a finite property $\gamma := \prop{\ell}$, and their loss values match up, since $\ell$ is exactly described by the same supporting hyperplanes for each $p \in \simplex$.
-% <<<<<<< HEAD
-%   For the forward direction, suppose $L$ embeds a discrete loss $\ell$.
-%   By Proposition~\ref{prop:embed-bayes-risks}, we know that $\risk{L} = \risk{\ell}$.
-%   Since $\ell$ is discrete, $\risk{\ell}$ is polyhedral as the minimum of a finite set of linear functions in $\simplex$. %\raf{do we know? okay, we do---but why?}.
-%   Therefore, $\risk{L}$ is polyhedral.
-%   The reverse direction follows similarly to the proof of Proposition~\ref{prop:embed-bayes-risks}.
-%   Consider, as above, the power diagram induced by projecting $\risk{L}$ onto $\simplex$ corresponding to the level sets of $\Gamma$.
-%   Call the set of full-dimensional cells in this power diagram $\U'$, where each $U \in \U'$ corresponds to $\Gamma_u$ for some $u \in \U$.
-%   For each $u \in \U'$, there is a distribution $p \in \inter{\Gamma_u}$ such that the supporting hyperplane at $\risk{L}(p)$ is unique.
-%   Pick some $u \in \argmin_{u' \in \U}L(u', p)$.
-%   As before, the coefficients of the supporting hyperplane of $\risk{L}(p)$ exactly describe the discrete loss $\ell(u)$.
-%   Repeat this process for every facet.
-%   Since $\cup_{\U'} \Gamma_u = \simplex$, we invoke Proposition~\ref{prop:embed-trim} to note $\Gamma:= \prop{L}$ embeds a finite property $\gamma := \prop{\ell}$, and their loss values match up, since $\ell$ is exactly described by the same supporting hyperplanes for each $p \in \simplex$.
-% =======
+  \proposedadd{Form the set $\Sc$ by iterating over the facets of $E_L$, the epigraph of $-\risk{L}$.
+  For each facet of $E_L$, which is full-dimensional, there must be some interior distribution $p$ such that $p \mapsto (p, \inprod{p}{L(u)})$ uniquely supports $E_L$, and such a $u$ must exist or else the Bayes risk is not attained.  Take $\Sc$ to be the collection of such reports $u$, and observe $\Sc$ is representative for $L$.  By Corollary~\ref{cor:representative-embeds-restriction}, $L$ embeds $L|_\Sc$, which is finite by construction.}
+%  The projection of the epigraph of $\risk{L}$ onto $\simplex$ forms a power diagram by Theorem~\ref{thm:aurenhammer} with finitely many cells $C_1,\ldots,C_k$, which we can index by $\R := \{1,\ldots,k\}$.
+%  Defining the property $\gamma:\simplex\toto\R$ by $\gamma_r = C_r$ for $r\in\R$, we see that the same construction gives us points $u_r \in\reals^d$ such that $u_r \in \Gamma(p) \iff r \in \gamma(p)$.
+%  Define $\ell:\R\to\reals^\Y_+$ by $\ell(r) = L(u_r)$, the same proof shows that $L$ embeds $\ell$.
 \end{proof}
 
 
@@ -651,9 +623,8 @@ This allows us to reason about the range of the property elicited by a polyhedra
 \begin{proof}
 	Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss, and $\Gamma = \prop{L}$.
 	By Lemma~\ref{lem:polyhedral-range-gamma}, $\U = \Gamma(\simplex)$ is finite.
-	For each $U\in \U$, select $u_U \in U$, and let $U' = \{u_U : U \in\U\}$.
-	Then for all $p\in\simplex$ we have $\Gamma(p) \cap U' \neq \emptyset$, so Lemma~\ref{lem:loss-restrict} gives us $\risk{L} = \risk{L|_{U'}}$, which is polyhedral as $U'$ is finite.
-	\btw{RF: interesting: we didn't need Proposition~\ref{prop:embed-risk-poly} after all.  This already gives the discrete loss $L$ embeds!}
+	For each $U\in \U$, select $u_U \in U$, and let $\Sc' = \{u_U : U \in\U\}$.
+	$\Sc$ is representative of $L$, so Lemma~\ref{lem:loss-restrict} gives us $\risk{L} = \risk{L|_{\Sc}}$, which is polyhedral as $\Sc$ is finite.
 \end{proof}
 
 From the more succinct embedding condition in Proposition~\ref{prop:embed-risk-poly}, we can in turn simplify the condition that a loss embeds \emph{some} discrete loss: it does if and only if its Bayes risk is polyhedral.
@@ -664,18 +635,11 @@ For example, this can be seen by a loss that is polyhedral in the convex hull of
 Previous work from~\citet[Proposition 4]{duchi2018multiclass} realized the significance of matching Bayes risks for calibration with respect to the 0-1 loss, but their result relies the Bayes risk of the surrogate being strictly concave.  As polyhedral functions are never strictly concave, Proposition~\ref{prop:embed-risk-poly} extends their result to the embedding setting.
 
 
-%Combining Proposition~\ref{prop:embed-risk-poly} with the observation that polyhedral losses have polyhedral Bayes risks (Lemma~\ref{lem:poly-loss-poly-risk}), we obtain the first direction of our equivalence between polyhedral losses and embedding.
+Combining Proposition~\ref{prop:embed-risk-poly} with the observation that polyhedral losses have polyhedral Bayes risks (Lemma~\ref{lem:poly-loss-poly-risk}), we obtain the first direction of our equivalence between polyhedral losses and embedding.
 
 \begin{theorem}\label{thm:poly-embeds-discrete}
   Every polyhedral loss $L$ embeds a discrete loss.
 \end{theorem}
- \begin{proof}
- 	\jessie{Why isn't this proof just:  We have $L$ polyhedral $\implies \risk{L}$ polyhedral (L4) $\iff$ $L$ embeds a discrete loss (P2).}
-	The projection of the epigraph of $\risk{L}$ onto $\simplex$ forms a power diagram by Theorem~\ref{thm:aurenhammer} with finitely many cells $C_1,\ldots,C_k$, which we can index by $\R := \{1,\ldots,k\}$.
-	Defining the property $\gamma:\simplex\toto\R$ by $\gamma_r = C_r$ for $r\in\R$, we see that the same construction gives us points $u_r \in\reals^d$ such that $u_r \in \Gamma(p) \iff r \in \gamma(p)$.
-	Define $\ell:\R\to\reals^\Y_+$ by $\ell(r) = L(u_r)$.
-	Since $L$ is polyhedral and $\gamma(p)\cap \R$ is nonempty for all $p \in \simplex$, we have $\risk{L} = \risk{L|_{\R}}$ polyhedral by Lemma~\ref{lem:poly-loss-poly-risk}.
- \end{proof}
 
 We now turn to the reverse direction: which discrete losses are embedded by some polyhedral loss?
 Perhaps surprisingly, we show that \emph{every} discrete loss is embeddable,
@@ -685,7 +649,7 @@ Recent work~\citep{ramaswamy2016convex,finocchiaro2020embedding,finocchiaro2021u
 %\raft{CITE: DKR, frongillo-kash (WINE 2014), probably one of Bob's papers?, others?}
 
 \begin{theorem}\label{thm:discrete-loss-poly-embeddable}
-  For every discrete loss $\ell:\R \to \reals^\Y_+$ \proposedadd{there is a set $S \subseteq \R$ such that $\ell$} is embedded by a polyhedral loss \proposedadd{on $S$}.
+  Every discrete loss $\ell:\R \to \reals^\Y_+$ is embedded by a polyhedral loss.
 \end{theorem}
 \begin{proof}
   Let $n = |\Y|$, and let $C:\reals^n \to \reals$ be given by $(-\risk{\ell})^*$, the convex conjugate of $-\risk{\ell}$.
@@ -695,6 +659,7 @@ Recent work~\citep{ramaswamy2016convex,finocchiaro2020embedding,finocchiaro2021u
   We first show that $L$ embeds $\ell$, and then establish that the range of $L$ is in fact $\reals^\Y_+$, as desired.
 
   We compute Bayes risks and apply Proposition~\ref{prop:embed-bayes-risks} to see that $L$ embeds $\ell$.
+  Observe that $\risk{\ell}$ is polyhedral as $\ell$ is discrete.
   For any $p\in\simplex$, we have
   \begin{align*}
     \risk{L}(p)
@@ -827,7 +792,8 @@ We illustrate this formulaic approach in \S~\ref{sec:abstain}.
 
 While Definition~\ref{def:loss-embed} gives the notion of one \emph{loss} embedding another, we now generalize the notion of one \emph{property} embedding another.
 \begin{definition}\label{def:prop-embed}
-	A property $\Gamma : \simplex \toto \reals^d$ embeds a property $\gamma:\simplex \toto \R$ \proposedadd{for a set $S \subseteq \R$ such that $\gamma(p) \cap S \neq \emptyset$ for all $p \in \simplex$} if there exists some injective embedding $\varphi:\R \to \reals^d$ such that for all $p \in \simplex$ and $r \in \R$, we have $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p)$.
+	A property $\Gamma : \simplex \toto \reals^d$ embeds a property $\gamma:\simplex \toto \R$ on a set $\Sc$ if there exists some injective embedding $\varphi:\R \to \reals^d$ such that for all $p \in \simplex$ and $r \in \R$, we have $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p)$.
+	If there is a representative set $\Sc$ such that $\Gamma$ embeds $\gamma$ on $\Sc$, then we simply say $\Gamma$ embeds $\gamma$.
 	Moreover, we say a loss embeds a property when it embeds a loss eliciting the property.
 \end{definition}
 
@@ -840,17 +806,17 @@ However, Lemma~\ref{lem:embed-defs-equiv} shows an equivalence follows without l
 \begin{lemma}\label{lem:embed-defs-equiv}
 	%  \raft{Introduce $L$}
 	Let $L : \reals^d \to \reals^\Y_+$ be a loss function \proposedadd{whose infimum is attained in expectation for all $p \in \simplex$}.
-	If the property $\Gamma := \prop{L}$ embeds the finite property $\gamma : \simplex \toto \R$ \proposedadd{on $S$}, then there is a discrete loss $\ell:\R \to \reals^\Y_+$ such that $\ell$ elicits $\gamma$ and $L$ embeds $\ell$ \proposedadd{on $S$}.
+	If the property $\Gamma := \prop{L}$ embeds the finite property $\gamma : \simplex \toto \R$, then there is a discrete loss $\ell:\R \to \reals^\Y_+$ such that $\ell$ elicits $\gamma$ and $L$ embeds $\ell$.
 \end{lemma}
 \begin{proof}
 	\raft{All the important pieces are here, but take it slower.  State $\ell$ as a definition (let $\ell$ be given by...) and show why $L$ embeds it.\jessie{Took another pass but changed technique, adding in this detail.  Now very similar to the proof of Prop 1 forward direction.}}
-	Consider a loss $\ell : \R \to \reals_+^\Y$, defined so that $\ell : r \mapsto L(\varphi(r))$, i.e. $\ell = L|_{\varphi(\R)}$, where $\varphi$ is the same embedding given by $\Gamma$ embedding $\gamma$.
-	Now, we claim that $L$ embeds $\ell$ \proposedadd{on the set $S$}, and by Proposition~\ref{prop:embed-bayes-risks}, we can simply show $\risk{L} = \risk{\ell}$.
+	Consider the embedding $\varphi$ given by the property embedding and take the discrete loss $\ell:r \mapsto L(\varphi(r))$.
+	Now, we claim that $L$ embeds $\ell$, and by Proposition~\ref{prop:embed-bayes-risks}, we can simply show $\risk{L} = \risk{\ell}$, and the risks being polyhedral follows from $\ell$ being discrete.
 	
 	First, we show that for all $p \in \simplex$, we have $(1) \inf_{u \in \reals^d}\inprod{p}{L(u)} = (2) \inf_{r \in \R}\inprod{p}{L(\varphi(r))}$, and the equality of risks follows.
 	$(1) \leq (2)$ follows from the fact that $\varphi(\R) \subset \reals^d$ and definition of infimum. 
 	Consider that if we had $(1) < (2)$ for some $p \in \simplex$, then there would be no $r$ such that $\varphi(r) \in \Gamma(p)$ \jessie{BUG: NEED THE INFIMUM TO BE ATTAINED}, and therefore, we would have $\gamma(p) = \emptyset$, yielding a contradiction. 
-	This gives us $(1) = (2)$, so we have $\risk{L} = \risk{L|_{\varphi(\R)}} = \risk{\ell(r)}$ by construction of $\ell$.
+	This gives us $(1) = (2)$, so we have $\risk{L} = \risk{L|_{\varphi(\R)}} = \risk{\ell}$.
 	%
 	%Now consider the property $\Gamma' := p \mapsto \Gamma(p) \cap \varphi(\R)$.
 	%We have $\Gamma'$ nondegenerate since $\Gamma$ embedding $\gamma$ implies that, for all $p \in \simplex$, there is some $r \in \R$ such that $\varphi(r) \in \Gamma(p)$.
@@ -868,10 +834,10 @@ However, Lemma~\ref{lem:embed-defs-equiv} shows an equivalence follows without l
 
 By Lemma~\ref{lem:embed-defs-equiv}, we can work directly with properties and set aside the losses which elicit them, which is often more convenient.
 Moreover, we can assume that finite properties are non-redundant without much loss of generality.
-\begin{definition}[Finite property, non-redundant]
-	\jessie{Feels like this should be earlier}
-	A property $\gamma:\simplex\toto\R$ is \emph{redundant} if for some $r,r'\in\R$ with $r \neq r'$, we have $\gamma_r \subseteq \gamma_{r'}$, and \emph{non-redundant} otherwise.
-	$\gamma$ is \emph{finite} if it is non-redundant and $\R$ is a finite set.
+\begin{definition}[Finite property]
+	\jessie{Should be earlier}
+	A property $\gamma:\simplex\toto\R$ %is \emph{redundant} if for some $r,r'\in\R$ with $r \neq r'$, we have $\gamma_r \subseteq \gamma_{r'}$, and \emph{non-redundant} otherwise.  $\gamma$ 
+	is \emph{finite} if $\R$ is a finite set.
 \end{definition}
 
 When working with convex losses which are not strictly convex, one quickly encounters redundant properties: if $\inprod{p}{L(\cdot)}$ is minimized by a point where $\inprod{p}{L}$ is flat, then there will be an uncountable set of reports which also minimize the expected loss.
@@ -885,7 +851,7 @@ As results in property elicitation typically assume properties are non-redundant
 %Take note that the unlabeled property $\trim(\Gamma)$ is non-redundant, meaning that for any $\theta \in \trim(\Gamma)$, there is no level set $\theta' \in \trim(\Gamma)$ such that $\theta \subset \theta'$; this is a corollary of Proposition~\ref{prop:embed-trim}.
 
 
-Before we state Proposition~\ref{prop:embed-trim}, which is needed to prove many of the statements in \S~\ref{sec:poly-loss-embed}, we will need to general lemmas about properties and their losses.
+Before we state Proposition~\ref{prop:embed-trim}, we will need to general lemmas about properties and their losses.
 The first follows from standard results relating finite properties to power diagrams (see Theorem~\ref{thm:aurenhammer}), and its proof is omitted.
 The second is closely related to the definition of the trim operator: it states that if some subset of the reports are always represented among the minimizers of a loss, then one may remove all other reports and elicit the same property (with those other reports removed).
 
@@ -896,12 +862,14 @@ The second is closely related to the definition of the trim operator: it states 
 \end{lemma}
 
 
-\btw{JESSIE: Again, figures/an example might help clarify this}
+\btw{JESSIE: Figures/an example might help clarify this}
 When a property $\Gamma$ embeds a finite property $\gamma$, we can show that the level sets of $\gamma$ correspond exactly to their embedded level sets of $\Gamma$, and that these embedded level sets are exactly $\trim(\Gamma)$.
 \jessiet{This lemma new to journal version}
 \begin{lemma}\label{lem:embedded-level-sets-trim}
 	Let $\Gamma$ be an elicitable property.
 	If $\Gamma$ embeds a (non-redundant) finite property $\gamma : \simplex \toto \R$ by the injection $\varphi$, then $\{\gamma_r : r \in \R\} = \{\Gamma_u : u \in \varphi(\R)\} = \trim(\Gamma)\proposedadd{=\trim(\gamma)}$.
+	\proposedadd{RETRY: Let $\Gamma$ be an elicitable property.
+		If $\Gamma$ embeds a finite property $\gamma : \simplex \toto \R$ by the injection $\varphi$, then there is a set $\Sc$ such that $\Sc$ is representative for $\gamma$\jessiet{Need to define this, technically} and $\{\gamma_r : r \in \Sc\} = \{\Gamma_u : u \in \varphi(\Sc)\} = \trim(\Gamma)=\trim(\gamma)$.}
 \end{lemma}
 \begin{proof}
 	Let $L$ elicit $\Gamma$.
@@ -919,14 +887,17 @@ When a property $\Gamma$ embeds a finite property $\gamma$, we can show that the
 	%Therefore, we must have $\Gamma_u \subset \Gamma_{\varphi(r)}$ for some $r \in \R$, and therefore $\Gamma_u \not \in \trim(\Gamma)$.
 	
 	Second, $\Gamma_u = \Gamma_{\varphi(r)}$ for some $r \in \R$, then the level set is in both $\{\Gamma_{\varphi(r)} : r \in \R\}$ and $\trim(\Gamma)$.
-	%		
-	%		\item[$\supseteq$] Take $u'$ so that $\Gamma_{u'} \not \in \{\Gamma_u : u \in \varphi(\R)\}$.
-	%		We proceed in 3 cases: first, if there exists a $u$ such that $\Gamma_{u'} \subsetneq \Gamma_u$, then $\Gamma_{u'} \not \in \trim(\Gamma)$.
-	%		If there is a $u \in \varphi(\R)$ such that $\Gamma_u = \Gamma_{u'}$, then we have $\Gamma_{u'}$ in the original set, as well as in $\trim(\Gamma)$ by Lemma~\ref{lem:fdls-in-trim}, since $\Gamma_{u'}$ must then be full-dimensional.
-	%		In the final case, we have $\Gamma_{u'}$ not a subset of any $\Gamma_\varphi(r)$.
-	%		Then by nondegeneracy of $\gamma$ (and in turn, of $\Gamma$) spans the interior of multiple level sets in $\{\Gamma_u : u \in \varphi(\R)\}$, which contradicts the elicitability of $\Gamma$ by Lemma~\ref{lem:elicitable-level-sets}.
-	%		Thus, we cannot observe this case.
-	%	\end{itemize}
+
+\proposedadd{First, construct $\Sc$ as in the proof of Proposition~\ref{prop:embed-bayes-risks}; this is a minimal representative set in the sense that removing any element $r$ corresponding to the facet $F_r$ from $\Sc$ leads to $\gamma(p) \cap \Sc = \emptyset$ for all $p \in \inter{F_r}$. Moreover, we have $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p)$ by embedding, and therefore $\gamma_r = \Gamma_{\varphi(r)}$, yielding $\{\gamma_r \mid r \in \Sc\} = \{\Gamma_{\varphi(r)} \mid r \in \Sc\}$ as this is true for all $r \in \Sc$.}
+
+\proposedadd{TO SHOW: $T := \{\gamma_r \mid r \in \Sc\} = \trim(\gamma)$. 
+	First, if $\gamma_r \in T$, then it is not a subset of any level set as $\gamma_r$ is full-dimensional in the simplex as it corresponds to a facet of the epigraph of the negative risk $E_\ell$, and the supporting hyperplane is therefore unique.
+	Now, if $\theta \in \trim(\gamma)$, then there is some report $r'$ such that $\theta = \gamma_{r'}$.
+	If $r' \not \in \Sc$, we want to claim there is some $r$ such that $\gamma_{r'} = \gamma_r$.
+	As $\theta$ is a maximal level set, it has a nonempty interior.
+	Therefore, for any $p \in \inter{\theta}$ (and one such $p$ must exist), the hyperplane $p \mapsto (p, \ell(r'))$ uniquely supports the hyperplane.
+	If $r' \not \in \Sc$, then there must be some $r \in \Sc$ such that $p \mapsto (p, \ell(r))$ also supports the same facet of $E_\ell$; if no such $r \in \Sc$ existed, we would contradict our claim that $\Sc$ is representative for $\ell$.
+Similarly, we have $\{\Gamma_u \mid u \in \varphi(\Sc)\} = \trim(\Gamma)$ by the same logic.}
 \end{proof}
 
 We now state a useful result for proving the existence of an embedding loss, which shows remarkable structure of embeddable properties, and the properties that embed them.
@@ -955,12 +926,10 @@ Finally, we have an important converse: if $\Gamma$ has finitely many full-dimen
 	%\jessie{Loss intuition: Let $L$ elicit $\Gamma$.  If $\Gamma$ embeds a finite $\gamma'$, $L$ must embed a discrete loss $\ell$ such that $\ell(r) = L(\varphi(r))$.  Therefore, $\risk{L} = \risk{\ell}$ is polyhedral. Moreover, we have $\Gamma$ also embedding the finite property $\prop{\ell} := \gamma$ as a corollary of the definition of embedding properties. We claim $\trim(\Gamma) = \{\gamma_r : r \in \R\}$ (Lemma~\ref{lem:embedded-level-sets-trim}), and since the latter set is finitely generated (as $\R$ is finite), we have have $\trim(\Gamma)$ is finite.  Moreover, as $\gamma$ is nondegenerate (since it is defined over the simplex), we have that $\cup_{r \in \R} \gamma_r = \simplex$.}
 	If $\Gamma$ embeds a finite $\gamma$, then Lemma~\ref{lem:embed-defs-equiv} says there is a discrete loss $\ell$ embedded by $L$ such that $\ell$ elicits $\gamma$.
 	\raft{Again, a bit too brief.  Consider adding some of this statement into the Lemma. \jessie{Is this better?}}
-	By Lemma~\ref{lem:embedded-level-sets-trim}, we then observe that $\trim(\Gamma) = \{\Gamma_{\varphi(r)} : r \in \R \} = \{\gamma_r : r \in \R\}$.
-	%  \raft{Replace with ``As $\R$ is finite, we conclude $\trim(\Gamma)$ is finite.'' or similar}
+	By Lemma~\ref{lem:embedded-level-sets-trim}, we then observe that there is a minimal representative set $\Sc$ such that $\trim(\Gamma) = \{\Gamma_{\varphi(r)} : r \in \Sc \} = \{\gamma_r : r \in \Sc\}$.
 	As $\R$ is finite, we conclude that $\trim(\Gamma)$ is also finite.
 	%  Since the latter set is finitely generated (as $\R$ is finite), we have have $\trim(\Gamma)$ is finite.
-	\raft{Why is it nonempty though?  \jessie{Just above definition 2, we specify that properties are nonempty}}
-	Moreover, as $\gamma$ is nondegenerate (recall that $\gamma: \simplex \toto \R$ is shorthand for $\gamma: \simplex \to 2^\R \setminus \{\emptyset\}$), we have that $\cup \trim(\Gamma) = \cup_{r \in \R} \gamma_r = \simplex$.
+	Moreover, as $\gamma$ is nondegenerate (recall that $\gamma: \simplex \toto \R$ is shorthand for $\gamma: \simplex \to 2^\R \setminus \{\emptyset\}$ and $\Sc$ is representative), we have that $\cup \trim(\Gamma) = \cup_{r \in \Sc} \gamma_r = \simplex$.\jessie{Needs more/different justification, since we union over $\Sc$ instead of $\R$ }
 	
 	\raft{These next two directions together seem like what we did before for $2\Rightarrow 3$, correct?  (Not as complete though; see the step where we justify the conditions of Lemma~\ref{lem:loss-restrict}.)  I'm actually happy for them to be separated, but let's make sure the argument is just as complete. \jessie{Added in the conditions of Lemma 3 to be a bit more thorough.}}
 	2 $\Rightarrow$ 1:
