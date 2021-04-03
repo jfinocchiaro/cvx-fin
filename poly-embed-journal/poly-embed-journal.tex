@@ -454,7 +454,8 @@ In this particular case, it is known $(\hinge,\psi)$ is calibrated for $\psi(u) 
 \label{sec:poly-loss-embed}
 
 In this section, we establish a tight relationship between the technique of embedding and the use of polyhedral (piecewise-linear convex) surrogate losses.
-We defer the question of when such surrogates are consistent to \S~\ref{sec:calibration}.
+We defer the question of when such surrogates are consistent to \S~\ref{sec:calibration}. 
+Throughout this section, unless specified otherwise, we use $\ell:\R\to\reals^\Y$ and $L:\reals^d\to\reals^\Y$
 
 In Proposition~\ref{prop:embed-bayes-risks}, we show an equivalent condition to embedding, whose proof relies on the following Lemma about the Bayes risk of a ``restricted'' surrogate, shown here.
 \begin{lemma}\label{lem:loss-restrict}
@@ -476,6 +477,26 @@ In Proposition~\ref{prop:embed-bayes-risks}, we show an equivalent condition to 
 	Finally, the equality of the Bayes risks $\min_{u\in\R_1} \inprod{p}{L(u)} = \min_{u\in\R_2} \inprod{p}{L(u)}$ follows immediately by the above, as $\emptyset \neq \Gamma(p)\cap\R_2 \subseteq \Gamma(p)$ for all $p\in\simplex$.
 \end{proof}
 
+\jessie{Adding new statements}
+\begin{definition}
+	Suppose a generic loss $L : \R \to \reals^\Y$ is given with polyhedral risk $-\risk{L}$.
+	Construct the set $\Sc(L)$ as follows:
+	Each facet $F$ of the epigraph of negative risk $E_L$ must be full dimensional by definition of a facet.
+	Take $p \in \inter{F}$, and observe that it must by uniquely supported by some hyperplane $p \mapsto (p, L(u))$ for some $u \in \R$.
+	Add $u$ to $\Sc(L)$, and repeat, iterating over each of $E_L$'s finitely many facets.
+\end{definition}
+
+\begin{proposition}
+	If loss $L: \R \to \reals^\Y_+$ has polyhedral risk, $\Sc(L)$ is a minimal representative set for $L$.
+\end{proposition}
+\begin{proof}\jessiet{I don't like this proof, but meh.}
+	If $\Sc(L)$ was not a minimal set, then we could remove some $s$ from $\Sc$ such that $\Sc' := \Sc \setminus \{s\}$ is also a representative set for $L$.
+	By construction, we have some distribution $p$ such that the hyperplane $p \mapsto (p, L(s))$ uniquely supports $E_L$.
+	We particularly have $\Gamma(p) \cap \Sc' = \emptyset$, since any other element $s'$ of $\Sc'$ being in $\Gamma(p)$ would imply $p \mapsto (p, L(s'))$ also supports $E_L$, but this hyperplane must be unique, and therefore either $s$ or $s'$ would not be in $\Sc$.
+\end{proof}
+
+\jessie{End additions}
+
 Our first main result, Proposition~\ref{prop:embed-bayes-risks}, focuses on matching the values of Bayes Risks, while the following result from~\citet{aurenhammer1987power} allows us to move towards understanding the projection of the Bayes Risk onto the simplex $\simplex$.
 
 \begin{theorem}[Aurenhammer~\cite{aurenhammer1987power}]\label{thm:aurenhammer}
@@ -485,8 +506,6 @@ Our first main result, Proposition~\ref{prop:embed-bayes-risks}, focuses on matc
 To begin, we observe that our embedding condition in Definition~\ref{def:loss-embed} is equivalent to merely matching Bayes risks.
 % For example, one can check that $\risk{\hinge} = 2\min\{p_1,p_2\} = 2\risk{\ellzo}$.
 This useful fact will drive many of our results.
-
-\raf{We should probably add the type of $\ell$ and $L$ in each lemma/prop/thm statement, or add something like: ``throughout this section, unless specified otherwise, we use $\ell:\R\to\reals^\Y$ and $L:\reals^d\to\reals^\Y$''.}
 
 
 \begin{proposition}\label{prop:embed-bayes-risks}
@@ -499,7 +518,7 @@ This useful fact will drive many of our results.
 \begin{proof}
   \raft{4/2/2021 first part of the proof should be done now.}
   Define $\Gamma = \prop{L}$ and $\gamma = \prop{\ell}$.
-  Suppose $L$ embeds $\ell$, so we have some $\Sc\subseteq \R$ which is representative for $\ell$ and an embedding $\varphi:S\to\reals^d$.
+  Suppose $L$ embeds $\ell$, so we have some $\Sc\subseteq \R$ which is representative for $\ell$ and an embedding $\varphi:\Sc\to\reals^d$.
   By Lemma~\ref{lem:loss-restrict}, we have $\risk{\ell} = \risk{\ell|_{\Sc}}$.
   Since $\Sc$ is representative for $\ell$, for all $p\in\simplex$ we have some $r \in \Sc \cap \gamma(p)$ and thus we have $\varphi(r) \in \U \cap \Gamma(p)$.
   In particular, $\U \cap \Gamma(p)\neq \emptyset$ for all $p\in\simplex$, so $\U$ is representative for $L$.
@@ -512,7 +531,7 @@ This useful fact will drive many of our results.
     \risk{\ell}(p) = \risk{\ell|_\Sc}(p) = \min_{r \in \Sc}\inprod{p}{\ell(r)} = \min_{r \in \Sc}\inprod{p}{L(\varphi(r))} = \min_{u \in \U}\inprod{p}{L(u)} = \risk{L|_\U}(p) = \risk{L}(p)~.
   \end{equation*}
   
-    \btw{RF: This is on the informal side, mostly because of the ``working in the affine hull'' bit.  It can all be formalized though, probably should be for the journal version: just take an appropriate linear projection of $\reals^n$ to $\reals^{n-1}$, and work with the projected versions of everything, and then project back.}
+    %\btw{RF: This is on the informal side, mostly because of the ``working in the affine hull'' bit.  It can all be formalized though, probably should be for the journal version: just take an appropriate linear projection of $\reals^n$ to $\reals^{n-1}$, and work with the projected versions of everything, and then project back.}
   For the reverse implication, assume that $\risk{L} = \risk{\ell}$.
   In what follows, we implicitly work in the affine hull of $\simplex$ by taking an appropriate invertible linear projection to an affine subspace $A : \reals^n_+ \to \reals^{n-1}_+$, so that interiors are well-defined, and $\risk{\ell}$ may be differentiable on the interior of $\simplex$.
   (For intuition, one can consider the relative interiors in $\reals^\Y_+$, but we need to consider interiors in order to apply previous results.)
@@ -530,7 +549,7 @@ This useful fact will drive many of our results.
   To see that the loss values match, we merely note that the supporting hyperplanes to the facets of $E_L$ and $E_\ell$ are the same, and the loss values are uniquely determined by the supporting hyperplane.
   In particular, if $h$ supports the facet corresponding to $\gamma_r$, we have $\ell(r)_y = L(u_r)_y = h(\delta_y)$, where $\delta_y$ is the point distribution on outcome $y$.
 
-\proposedadd{For the reverse implication, assume $\risk{L} = \risk{\ell}$ are polyhedral functions.  Since $\risk{\ell}$ is polyhedral, the epigraph of its negation, $E_\ell$, has a finite set of facets, which by definition have well-defined interiors.  For each facet, there must then be some distribution $p_r$ and report $r \in \R$ such that the hyperplane $p_r \mapsto (p_r, \inprod{p_r}{-\ell(r)})$ uniquely supports $E_\ell$.  Form $\Sc$ from the set of such reports $r$, iterating over each facet.  We have $\Sc$ representative of $\ell$ since the union of projected epigraph facets equals the simplex, and these facets and their projections are closed. Therefore, every $p \in \simplex$ is contained in some facet of the epigraph, and thus there is some $r \in \Sc$ so that $r \in \gamma(p)$.
+\proposedadd{For the reverse implication, assume $\risk{L} = \risk{\ell}$ are polyhedral functions.  Since $\risk{\ell}$ is polyhedral, the epigraph of its negation, $E_\ell$, has a finite set of facets, which by definition have well-defined interiors.  For each facet, there must then be some distribution $p_r$ and report $r \in \R$ such that the hyperplane $p_r \mapsto (p_r, \inprod{p_r}{-\ell(r)})$ uniquely supports $E_\ell$.  Form $\Sc$ from the set of such reports $r$, iterating over each facet.  We have $\Sc$ representative for $\ell$ since the union of projected epigraph facets equals the simplex, and these facets and their projections are closed. Therefore, every $p \in \simplex$ is contained in some facet of the epigraph, and thus there is some $r \in \Sc$ so that $r \in \gamma(p)$.
 As the risks are equal, the same is true for $E_L$, e.g., for each facet, there is some $u_r$ so that $p_r \mapsto (p_r, \inprod{p_r}{L(u_r)})$, and one can construct the embedding $\varphi: r \mapsto u_r$ for each $r \in \Sc$.}
 
 \proposedadd{To verify matching losses, observe $\risk \ell (\delta_y) = \risk L (\delta_y)$ for each $y \in \Y$, and these risks are attained by some report $r$ and its embedding $u_r$, respectively.
@@ -628,7 +647,7 @@ This allows us to reason about the range of the property elicited by a polyhedra
 	Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss, and $\Gamma = \prop{L}$.
 	By Lemma~\ref{lem:polyhedral-range-gamma}, $\U = \Gamma(\simplex)$ is finite.
 	For each $U\in \U$, select $u_U \in U$, and let $\Sc' = \{u_U : U \in\U\}$.
-	$\Sc$ is representative of $L$\raft{let's use ``representative for'' to be consistent; can always find/replace to change later \#burn}, so Lemma~\ref{lem:loss-restrict} gives us $\risk{L} = \risk{L|_{\Sc}}$, which is polyhedral as $\Sc$ is finite.
+	$\Sc$ is representative for $L$, so Lemma~\ref{lem:loss-restrict} gives us $\risk{L} = \risk{L|_{\Sc}}$, which is polyhedral as $\Sc$ is finite.
 \end{proof}
 
 From the more succinct embedding condition in Proposition~\ref{prop:embed-risk-poly}, we can in turn simplify the condition that a loss embeds \emph{some} discrete loss: it does if and only if its Bayes risk is polyhedral.
