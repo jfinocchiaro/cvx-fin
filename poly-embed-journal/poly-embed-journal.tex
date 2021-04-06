@@ -17,6 +17,7 @@
 %\usepackage[thmmarks, thref, amsthm]{ntheorem}
 \usepackage{color}
 \definecolor{darkblue}{rgb}{0.0,0.0,0.2}
+\definecolor{darkgreen}{rgb}{0.0,0.3,0.0}
 \hypersetup{colorlinks,breaklinks,
             linkcolor=darkblue,urlcolor=darkblue,
             anchorcolor=darkblue,citecolor=darkblue}
@@ -33,7 +34,7 @@
 \newcommand{\mynote}[2]{\ifnum\Comments=1\textcolor{#1}{#2}\fi}
 \newcommand{\mytodo}[2]{\ifnum\Comments=1%
   \todo[linecolor=#1!80!black,backgroundcolor=#1,bordercolor=#1!80!black]{#2}\fi}
-\newcommand{\raf}[1]{\mynote{green}{[RF: #1]}}
+\newcommand{\raf}[1]{\mynote{darkgreen}{[RF: #1]}}
 \newcommand{\raft}[1]{\mytodo{green!20!white}{RF: #1}}
 \newcommand{\jessie}[1]{\mynote{purple}{[JF: #1]}}
 \newcommand{\jessiet}[1]{\mytodo{purple!20!white}{JF: #1}}
@@ -478,7 +479,7 @@ In Proposition~\ref{prop:embed-bayes-risks}, we show an equivalent condition to 
 \end{proof}
 
 \jessie{Adding new statements}
-\begin{definition}
+\begin{definition}[$\Sc(L)$]\label{cons:rep-set}
 	Suppose a generic loss $L : \R \to \reals^\Y$ is given with polyhedral risk $-\risk{L}$.
 	Construct the set $\Sc(L)$ as follows:
 	Each facet $F$ of the epigraph of negative risk $E_L$ must be full dimensional by definition of a facet.
@@ -490,9 +491,15 @@ In Proposition~\ref{prop:embed-bayes-risks}, we show an equivalent condition to 
 	If loss $L: \R \to \reals^\Y_+$ has polyhedral risk, $\Sc(L)$ is a minimal representative set for $L$.
 \end{proposition}
 \begin{proof}\jessiet{I don't like this proof, but meh.}
+	First, we have to show that $\Sc(L)$ is a representative set.
+	As facets are closed and the hyperplane $p_F \mapsto (p_F, \inprod{p_F}{L(u_F)})$ supports $E_L$ (epigraph of negative risk) over the entire facet (and therefore $\Gamma(p) \cap \Sc(L) \ni u_F$ for all $p$ such that the hyperplane supports $E_L$ at $p$), we have $\Sc(L)$ representative for $L$.
+	
+	
 	If $\Sc(L)$ was not a minimal set, then we could remove some $s$ from $\Sc$ such that $\Sc' := \Sc \setminus \{s\}$ is also a representative set for $L$.
-	By construction, we have some distribution $p$ such that the hyperplane $p \mapsto (p, L(s))$ uniquely supports $E_L$.
-	We particularly have $\Gamma(p) \cap \Sc' = \emptyset$, since any other element $s'$ of $\Sc'$ being in $\Gamma(p)$ would imply $p \mapsto (p, L(s'))$ also supports $E_L$, but this hyperplane must be unique, and therefore either $s$ or $s'$ would not be in $\Sc$.
+	By the construction of $\Sc$ over facets of $E_L$, we have some distribution $p$ such that the hyperplane $p \mapsto (p, L(s))$ uniquely supports $E_L$.
+	We particularly have $\Gamma(p) \cap \Sc' = \emptyset$, since any other element $s'$ of $\Sc'$ being in $\Gamma(p)$ would imply $p \mapsto (p, L(s'))$ also supports $E_L$, but this hyperplane must be unique, so these are equal.
+	By construction of $\Sc$, we must have only added at most one of these to the set.
+	Therefore, $\Sc(L)$ is a minimal representative set.
 \end{proof}
 
 \jessie{End additions}
@@ -549,11 +556,16 @@ This useful fact will drive many of our results.
   To see that the loss values match, we merely note that the supporting hyperplanes to the facets of $E_L$ and $E_\ell$ are the same, and the loss values are uniquely determined by the supporting hyperplane.
   In particular, if $h$ supports the facet corresponding to $\gamma_r$, we have $\ell(r)_y = L(u_r)_y = h(\delta_y)$, where $\delta_y$ is the point distribution on outcome $y$.
 
-\proposedadd{For the reverse implication, assume $\risk{L} = \risk{\ell}$ are polyhedral functions.  Since $\risk{\ell}$ is polyhedral, the epigraph of its negation, $E_\ell$, has a finite set of facets, which by definition have well-defined interiors.  For each facet, there must then be some distribution $p_r$ and report $r \in \R$ such that the hyperplane $p_r \mapsto (p_r, \inprod{p_r}{-\ell(r)})$ uniquely supports $E_\ell$.  Form $\Sc$ from the set of such reports $r$, iterating over each facet.  We have $\Sc$ representative for $\ell$ since the union of projected epigraph facets equals the simplex, and these facets and their projections are closed. Therefore, every $p \in \simplex$ is contained in some facet of the epigraph, and thus there is some $r \in \Sc$ so that $r \in \gamma(p)$.
-As the risks are equal, the same is true for $E_L$, e.g., for each facet, there is some $u_r$ so that $p_r \mapsto (p_r, \inprod{p_r}{L(u_r)})$, and one can construct the embedding $\varphi: r \mapsto u_r$ for each $r \in \Sc$.}
+\proposedadd{ALTERNATE PROOF FOR REVERSE IMPLICATION: 
+	For the reverse implication, assume $\risk{L} = \risk{\ell}$, which are polyhedral functions as $\ell$ is discrete.  
+	Construct $\Sc := \Sc(\ell)$ as in Definition~\ref{cons:rep-set}, and $\U := \Sc(L)$, with the embedding $\varphi : r \mapsto u_r$ if the hyperplanes $p \mapsto (p, \inprod{p}{\ell(r)})$ and $p \mapsto (p, \inprod{p}{L(u_r)})$ are equal.
+	Such an embedding is well-defined as the facets are the same since the risks are equal.
+	%Since $\risk{\ell}$ is polyhedral, the epigraph of its negation, $E_\ell$, has a finite set of facets, which by definition have well-defined interiors.  For each facet, there must then be some distribution $p_r$ and report $r \in \R$ such that the hyperplane $p_r \mapsto (p_r, \inprod{p_r}{-\ell(r)})$ uniquely supports $E_\ell$.  Form $\Sc$ from the set of such reports $r$, iterating over each facet.  We have $\Sc$ representative for $\ell$ since the union of projected epigraph facets equals the simplex, and these facets and their projections are closed. Therefore, every $p \in \simplex$ is contained in some facet of the epigraph, and thus there is some $r \in \Sc$ so that $r \in \gamma(p)$.
+%As the risks are equal, the same is true for $E_L$, e.g., for each facet, there is some $u_r$ so that $p_r \mapsto (p_r, \inprod{p_r}{L(u_r)})$, and one can construct the embedding $\varphi: r \mapsto u_r$ for each $r \in \Sc$.
+}
 
 \proposedadd{To verify matching losses, observe $\risk \ell (\delta_y) = \risk L (\delta_y)$ for each $y \in \Y$, and these risks are attained by some report $r$ and its embedding $u_r$, respectively.
-Matching optimality is true by construction, since the optimal reports support the epigraph of negative Bayes risk on exactly the same distributions, meaning a report and its embedding are optimal at exactly the same distributions.}
+Matching optimality is true by construction, since the optimal reports support the epigraph of negative Bayes risk on exactly the same distributions, meaning a report and its embedding are optimal at exactly the same distributions.}\jessie{This feels like it's missing a detail about how $\Sc$ is minimal.}
 \end{proof}
 
 \raf{Something like this:}\\
@@ -577,9 +589,10 @@ In particular, one can consider the epigraph of a polyhedral convex function on 
 \end{proposition}
 \begin{proof}
   If $L$ embeds a discrete $\ell$, Proposition~\ref{prop:embed-bayes-risks} gives us $\risk{L} = \risk{\ell}$ and polyhedral.
-  For the converse, let $\risk{L}$ be polyhedral; we again examine the proof of Proposition~\ref{prop:embed-bayes-risks}.
-  \proposedadd{Form the set $\Sc$ by iterating over the facets of $E_L$, the epigraph of $-\risk{L}$.
-  For each facet of $E_L$, which is full-dimensional, there must be some interior distribution $p$ such that $p \mapsto (p, \inprod{p}{L(u)})$ uniquely supports $E_L$, and such a $u$ must exist or else the Bayes risk is not attained.  Take $\Sc$ to be the collection of such reports $u$, and observe $\Sc$ is representative for $L$.  By Corollary~\ref{cor:representative-embeds-restriction}, $L$ embeds $L|_\Sc$, which is finite by construction.}
+  For the converse, let $\risk{L}$ be polyhedral.%; we again examine the proof of Proposition~\ref{prop:embed-bayes-risks}.
+  \proposedadd{Form the set $\Sc := \Sc(L)$ as in Definition~\ref{cons:rep-set}.
+  %For each facet of $E_L$, which is full-dimensional, there must be some interior distribution $p$ such that $p \mapsto (p, \inprod{p}{L(u)})$ uniquely supports $E_L$, and such a $u$ must exist or else the Bayes risk is not attained.  Take $\Sc$ to be the collection of such reports $u$, and observe $\Sc$ is representative for $L$.  
+  By Corollary~\ref{cor:representative-embeds-restriction}, $L$ embeds $L|_\Sc$, which is finite by construction.}
 %  The projection of the epigraph of $\risk{L}$ onto $\simplex$ forms a power diagram by Theorem~\ref{thm:aurenhammer} with finitely many cells $C_1,\ldots,C_k$, which we can index by $\R := \{1,\ldots,k\}$.
 %  Defining the property $\gamma:\simplex\toto\R$ by $\gamma_r = C_r$ for $r\in\R$, we see that the same construction gives us points $u_r \in\reals^d$ such that $u_r \in \Gamma(p) \iff r \in \gamma(p)$.
 %  Define $\ell:\R\to\reals^\Y_+$ by $\ell(r) = L(u_r)$, the same proof shows that $L$ embeds $\ell$.
@@ -697,7 +710,7 @@ Recent work~\citep{ramaswamy2016convex,finocchiaro2020embedding,finocchiaro2021u
   \btw{FUTURE: to get $n-1$, just use the same trick as before and note that the Bayes risk doesn't change.  Should be a couple lines.}
 \end{proof}
 
-\proposedadd{Moreover, to construct an embedding of dimension $n-1$ instead of $n$ (see~\citet{finocchiaro2020embedding} for significance of dimension),  we use the same trick as in the proof of Proposition~\ref{prop:embed-bayes-risks}.
+\proposedadd{Moreover, to construct an embedding of dimension $n-1$ instead of $n$ (see~\citet{finocchiaro2020embedding} for significance of dimension),  we use the same technique as in the proof of Proposition~\ref{prop:embed-bayes-risks}.
 Consider some invertible linear transformation $A : \reals^n \to \reals^{n-1}$ that reduces to an affine subspace.
 Take $L' : \reals^{n-1} \to \reals^\Y$ as $x \mapsto L(A^{-1}(x))$ and $L$ defined as above, so that $\inprod{\ell(r)}{p} = \inprod{L(\varphi(r))}{p} = \inprod{L'(A^{-1}(\varphi(r)))}{p} $ for all $p \in \simplex$.
 The Bayes risks $\risk{L}(p)$ and $\risk{L'}(p)$ are equal for all $p \in \simplex$; thus, the result holds in $n-1$ dimensions as well.}\jessiet{Leaving this change in the macro for proofreading.}
@@ -837,10 +850,9 @@ By condition (ii.) of Definition~\ref{def:loss-embed}, we then have $L$ embeddin
 However, Definitions~\ref{def:loss-embed} and~\ref{def:prop-embed} are not immediately equivalent because property embedding does not capture the requirement of matching losses on embedded points; i.e., that $L(\varphi(r)) = \ell(r)$ for all $r \in \R$.  
 However, Lemma~\ref{lem:embed-defs-equiv} shows an equivalence follows without loss of generality.
 
-\jessiet{New to journal version}
 \begin{lemma}\label{lem:embed-defs-equiv}
 	%  \raft{Introduce $L$}
-	Let $L : \reals^d \to \reals^\Y_+$ be a loss function \proposedadd{whose infimum is attained in expectation for all $p \in \simplex$}\raft{Ah, good call! \#burn}.
+	Let $L : \reals^d \to \reals^\Y_+$ be a loss function whose infimum is attained in expectation for all $p \in \simplex$.
 	If the property $\Gamma := \prop{L}$ embeds the finite property $\gamma : \simplex \toto \R$, then there is a discrete loss $\ell:\R \to \reals^\Y_+$ such that $\ell$ elicits $\gamma$ and $L$ embeds $\ell$.
 \end{lemma}
 \begin{proof}
@@ -850,7 +862,7 @@ However, Lemma~\ref{lem:embed-defs-equiv} shows an equivalence follows without l
 	
 	First, we show that for all $p \in \simplex$, we have $(1) \inf_{u \in \reals^d}\inprod{p}{L(u)} = (2) \inf_{r \in \R}\inprod{p}{L(\varphi(r))}$, and the equality of risks follows.
 	$(1) \leq (2)$ follows from the fact that $\varphi(\R) \subset \reals^d$ and definition of infimum. 
-	Consider that if we had $(1) < (2)$ for some $p \in \simplex$, then there would be no $r$ such that $\varphi(r) \in \Gamma(p)$ \jessie{BUG: NEED THE INFIMUM TO BE ATTAINED}, and therefore, we would have $\gamma(p) = \emptyset$, yielding a contradiction. 
+	Consider that if we had $(1) < (2)$ for some $p \in \simplex$, then there would be no $r$ such that $\varphi(r) \in \Gamma(p)$, and therefore, we would have $\gamma(p) = \emptyset$, yielding a contradiction. 
 	This gives us $(1) = (2)$, so we have $\risk{L} = \risk{L|_{\varphi(\R)}} = \risk{\ell}$.
 	%
 	%Now consider the property $\Gamma' := p \mapsto \Gamma(p) \cap \varphi(\R)$.
@@ -867,13 +879,6 @@ However, Lemma~\ref{lem:embed-defs-equiv} shows an equivalence follows without l
 	%	The final condition of matching loss values is satisfied by considering the equality of the expected loss on each $\delta_y$ distribution.
 \end{proof}
 
-By Lemma~\ref{lem:embed-defs-equiv}, we can work directly with properties and set aside the losses which elicit them, which is often more convenient.
-Moreover, we can assume that finite properties are non-redundant without much loss of generality.
-\begin{definition}[Finite property]
-	\jessie{Should be earlier}
-	A property $\gamma:\simplex\toto\R$ %is \emph{redundant} if for some $r,r'\in\R$ with $r \neq r'$, we have $\gamma_r \subseteq \gamma_{r'}$, and \emph{non-redundant} otherwise.  $\gamma$ 
-	is \emph{finite} if $\R$ is a finite set.
-\end{definition}
 
 When working with convex losses which are not strictly convex, one quickly encounters redundant properties: if $\inprod{p}{L(\cdot)}$ is minimized by a point where $\inprod{p}{L}$ is flat, then there will be an uncountable set of reports which also minimize the expected loss.
 As results in property elicitation typically assume properties are non-redundant (e.g.~\cite{frongillo2014general,frongillo2015elicitation}), it is useful to consider a transformation which removes redundant level sets, captured by the \emph{trim} operation.
@@ -904,7 +909,7 @@ When a property $\Gamma$ embeds a finite property $\gamma$, we can show that the
 	Let $\Gamma$ be an elicitable property.
 	If $\Gamma$ embeds a (non-redundant) finite property $\gamma : \simplex \toto \R$ by the injection $\varphi$, then $\{\gamma_r : r \in \R\} = \{\Gamma_u : u \in \varphi(\R)\} = \trim(\Gamma)\proposedadd{=\trim(\gamma)}$.
 	\proposedadd{RETRY: Let $\Gamma$ be an elicitable property.
-		If $\Gamma$ embeds a finite property $\gamma : \simplex \toto \R$ by the injection $\varphi$, then there is a set $\Sc$ such that $\Sc$ is representative for $\gamma$\jessiet{Need to define this, technically} and $\{\gamma_r : r \in \Sc\} = \{\Gamma_u : u \in \varphi(\Sc)\} = \trim(\Gamma)=\trim(\gamma)$.}
+		If $\Gamma$ embeds a finite property $\gamma : \simplex \toto \R$ by the injection $\varphi$, then there is a set $\Sc$ such that $\Sc$ is representative for $\gamma$ and $\{\gamma_r : r \in \Sc\} = \{\Gamma_u : u \in \varphi(\Sc)\} = \trim(\Gamma)=\trim(\gamma)$.}
 \end{lemma}
 \begin{proof}
 	Let $L$ elicit $\Gamma$.
@@ -923,14 +928,14 @@ When a property $\Gamma$ embeds a finite property $\gamma$, we can show that the
 	
 	Second, $\Gamma_u = \Gamma_{\varphi(r)}$ for some $r \in \R$, then the level set is in both $\{\Gamma_{\varphi(r)} : r \in \R\}$ and $\trim(\Gamma)$.
 
-\proposedadd{First, construct $\Sc$ as in the proof of Proposition~\ref{prop:embed-bayes-risks}; this is a minimal representative set in the sense that removing any element $r$ corresponding to the facet $F_r$ from $\Sc$ leads to $\gamma(p) \cap \Sc = \emptyset$ for all $p \in \inter{F_r}$. Moreover, we have $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p)$ by embedding, and therefore $\gamma_r = \Gamma_{\varphi(r)}$, yielding $\{\gamma_r \mid r \in \Sc\} = \{\Gamma_{\varphi(r)} \mid r \in \Sc\}$ as this is true for all $r \in \Sc$.}
+\proposedadd{First, construct $\Sc := \Sc(L)$ as Definition~\ref{cons:rep-set}; this is a minimal representative set in the sense that removing any element $r$ corresponding to the facet $F_r$ from $\Sc$ leads to $\gamma(p) \cap \Sc = \emptyset$ for all $p \in \inter{F_r}$. Moreover, we have $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p)$ by embedding, and therefore $\gamma_r = \Gamma_{\varphi(r)}$, yielding $\{\gamma_r \mid r \in \Sc\} = \{\Gamma_{\varphi(r)} \mid r \in \Sc\}$ as this is true for all $r \in \Sc$.}
 
-\proposedadd{TO SHOW: $T := \{\gamma_r \mid r \in \Sc\} = \trim(\gamma)$. 
+\proposedadd{Now let $T := \{\gamma_r \mid r \in \Sc\} = \trim(\gamma)$. 
 	First, if $\gamma_r \in T$, then it is not a subset of any level set as $\gamma_r$ is full-dimensional in the simplex as it corresponds to a facet of the epigraph of the negative risk $E_\ell$, and the supporting hyperplane is therefore unique.
 	Now, if $\theta \in \trim(\gamma)$, then there is some report $r'$ such that $\theta = \gamma_{r'}$.
 	If $r' \not \in \Sc$, we want to claim there is some $r$ such that $\gamma_{r'} = \gamma_r$.
 	As $\theta$ is a maximal level set, it has a nonempty interior.
-	Therefore, for any $p \in \inter{\theta}$ (and one such $p$ must exist), the hyperplane $p \mapsto (p, \ell(r'))$ uniquely supports the hyperplane.
+	Therefore, for any $p \in \inter{\theta}$ (and one such $p$ must exist), the hyperplane $p \mapsto (p, \ell(r'))$ uniquely supports the epigraph of negative risk.
 	If $r' \not \in \Sc$, then there must be some $r \in \Sc$ such that $p \mapsto (p, \ell(r))$ also supports the same facet of $E_\ell$; if no such $r \in \Sc$ existed, we would contradict our claim that $\Sc$ is representative for $\ell$.
 Similarly, we have $\{\Gamma_u \mid u \in \varphi(\Sc)\} = \trim(\Gamma)$ by the same logic.}
 \end{proof}
