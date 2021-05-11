@@ -425,18 +425,75 @@ The goal of this section is to show that if a polyhedral surrogate is consistent
 \section{Lower Bounds for Smooth Surrogates}
 
 \begin{definition}[Strong Convexity and Strong Smoothness]
-  Let $f:\reals^d\to\reals$ be a differentiable convex function.
-  We say $f$ is $\alpha$-\emph{strongly convex} if
+  Let $f:\reals^d\to\reals$ be a differentiable function.
+  We say $f$ is $\alpha$-\emph{strongly convex} if $f$ is convex and
   \begin{equation}
     \label{eq:strong-convexity}
-    \|\nabla f(x) - \nabla f(x')\|_2 \geq \alpha \|x-x'\|_2 \quad \forall x,x'\in\reals^d~.
+    \|\nabla f(x') - \nabla f(x)\|_2 \geq \alpha \|x'-x\|_2 \quad \forall x,x'\in\reals^d~,
+  \end{equation}
+  where $\|\cdot\|_2$ denotes the Euclidean norm.
+  We say $f$ is $\beta$-\emph{strongly smooth} if
+  \begin{equation}
+    \label{eq:strong-convexity}
+    \|\nabla f(x') - \nabla f(x)\|_2 \leq \beta \|x'-x\|_2 \quad \forall x,x'\in\reals^d~.
   \end{equation}
   
 \end{definition}
 
 \begin{theorem}
-  Let $L:\reals^d \to \reals^\Y_+$ be a surrogate such that for all $y\in\Y$, the function $L(\cdot)_y$ is differentiable, $\alpha$-strongly convex, and $\beta$-strongly smooth.\raft{I think differentiability follows from smoothness...}
+  Let $L:\reals^d \to \reals^\Y_+$ be a surrogate such that for all $y\in\Y$, the function $L(\cdot)_y$ is differentiable, $\alpha$-strongly convex, and $\beta$-strongly smooth for some $\alpha,\beta>0$.\raft{I think differentiability follows from smoothness...}
+  Let $\ell:\R \to \reals^\Y_+$ be a target loss, and $\psi:\reals^d\to\R$ a link.
+  If there is a surrogate regret bound between $L$ and $\ell$ with function $\zeta:\reals_+\to\reals_+$, then there exists $c > 0$ such that for sufficiently small $\epsilon>0$ we have
+  \begin{equation}
+    \label{eq:regret-lower-bound}
+    \zeta(\epsilon) \geq c \cdot \sqrt{\epsilon}~.
+  \end{equation}
 \end{theorem}
+\begin{proof}
+  Let $\gamma := \prop{\ell}$.
+  Fix reports $r,r'$ such that there exists $p_0 \in \gamma_r \cap \gamma_{r'}$.
+  Define $u_0$ to be the unique minimizer of $\inprod{p_0}{L(\cdot)}$ on $\reals^d$, the existence of which follows from strong (and hence strict) convexity.
+  Assume without loss of generality that $\psi(u_0) = r'$; otherwise, swap the roles of $r$ and $r'$.
+  As $\ell$ is non-redundant by assumption, there exists some $p_1 \in \inter{\gamma_r}$.
+  We therefore have $R_\ell(r',p_1) = \inprod{p_1}{\ell(r')-\ell(r)} =: c_\ell > 0$, and $R_\ell(r',p_0) = 0$.
+  Let $p_\lambda := (1-\lambda) p_0 + \lambda p_1$.
+  By convexity of $\gamma_r$, we have $p_\lambda \in \gamma_r$ for all $\lambda \in [0,1]$, which gives $R_\ell(r',p_\lambda) = \lambda c_\ell$.
+  We will upper bound $R_L(u_0,p_\lambda)$ by $O(\lambda^2)$, which will imply the result.
+  % Our goal is to find some $c>0$ and some path of reports $u_\lambda \in \reals^d$ such that $\psi(u_\lambda)=r'$ and $R_L(u_\lambda,p_\lambda) \geq c\cdot\sqrt{\lambda \epsilon_1}$, for $\lambda$ sufficiently small.
+
+  Let $L_\lambda:\reals^d\to\reals_+$ be given by $L_\lambda(u) = \inprod{p_\lambda}{L(u)} = (1-\lambda) \inprod{p_0}{L(u)} + \lambda \inprod{p_1}{L(u)}$.
+  Extending our definition of $u_0$, let $u_\lambda$ be the unique minimizer of $L_\lambda$ on $\reals^d$.
+  Then $\risk{L}(p_\lambda) = L_\lambda(u_\lambda)$, and thus $R_L(u_0,p_\lambda) = L_\lambda(u_0) - L_\lambda(u_\lambda)$.
+
+  We first upper bound $\|u_\lambda - u_0\|_2$, and then apply strong smoothness to upper bound $L_\lambda(u_0) - L_\lambda(u_\lambda)$.
+  Consider the first-order optimality condition of $L_\lambda$:
+  \begin{align*}
+    \label{eq:first-order-opt-smooth}
+    & 0 = \nabla L_\lambda(u_\lambda) = (1-\lambda) \nabla L_0(u_\lambda) + \lambda \nabla L_1(u_\lambda)
+    \\
+    & \implies (1-\lambda) \|\nabla L_0(u_\lambda)\|_2 = \lambda \|\nabla L_1(u_\lambda)\|_2~.
+  \end{align*}
+  By optimality of $u_0$ and $u_1$, strong convexity and smoothness, and the triangle inequality, we have
+  \begin{align*}
+    \|\nabla L_0(u_\lambda)\|_2 &= \|\nabla L_0(u_\lambda) - \nabla L_0(u_0)\|_2 \geq \alpha \|u_\lambda - u_0\|_2~,
+    \\
+    \|\nabla L_1(u_\lambda)\|_2 &= \|\nabla L_0(u_\lambda) - \nabla L_1(u_1)\|_2 \leq \beta \|u_\lambda - u_1\|_2
+    \\
+    &\leq \beta \left( \|u_\lambda - u_0\|_2 + \|u_0 - u_1\|_2 \right)~.
+  \end{align*}
+  Combining, and taking $\lambda \leq \tfrac 1 2 \tfrac {\alpha}{\alpha+\beta}$, we have
+  \begin{align*}
+    \|u_\lambda - u_0\|_2 \leq \frac{\lambda\beta}{(1-\lambda)\alpha-\lambda\beta} \|u_0 - u_1\|_2  \leq \lambda \frac{2\beta}{\alpha} \|u_0 - u_1\|_2 ~.
+  \end{align*}
+  Finally, from strong smoothness and optimality of $u_\lambda$, we have
+  \begin{align*}
+    L_\lambda(u_0) - L_\lambda(u_\lambda) \leq \frac{\beta}{2} \|u_0 - u_\lambda\|_2^2 \leq \frac{\beta}{2} \left(\lambda \frac{2\beta}{\alpha} \|u_0 - u_1\|_2\right)^2 = c_L \lambda^2~,
+  \end{align*}
+  where $c_L = \frac{2\beta^3}{\alpha^2} \|u_0 - u_1\|_2^2$.
+  Take $c = \frac{c_\ell}{\sqrt{c_L}} = \frac{c_\ell \alpha}{\|u_0 - u_1\|_2 \sqrt{2\beta^3}}$.
+  Recall $R_\ell(r',p_\lambda) = c_\ell \lambda$ and $R_L(u_0,p_\lambda) \leq c_L \lambda^2$.
+  Then letting $\epsilon = R_L(u_0,p_\lambda)$, we have $\zeta(\epsilon) \geq R_\ell(r',p_\lambda) \geq c \sqrt{\epsilon}$.
+\end{proof}
 
 
 
