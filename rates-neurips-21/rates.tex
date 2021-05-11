@@ -1,0 +1,301 @@
+\documentclass{article}
+
+%\usepackage[preprint]{neurips_2021}  % for arxiv
+%\usepackage[final]{neurips_2021}     % camera ready
+\usepackage{neurips_2021}             % USE THIS for paper submission
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{xcolor}         % colors
+
+\usepackage{amsmath,amsfonts}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+
+\newtheorem{definition}{Definition}
+
+\newcommand{\Comments}{1}
+\newcommand{\mynote}[2]{\ifnum\Comments=1\textcolor{#1}{#2}\fi}
+\newcommand{\mytodo}[2]{\ifnum\Comments=1%
+  \todo[linecolor=#1!80!black,backgroundcolor=#1,bordercolor=#1!80!black]{#2}\fi}
+\newcommand{\raf}[1]{\mynote{green}{[RF: #1]}}
+\newcommand{\raft}[1]{\mytodo{green!20!white}{RF: #1}}
+\newcommand{\proposedadd}[1]{\mynote{orange}{#1}}
+\newcommand{\bo}[1]{\mynote{blue}{[Bo: #1]}}
+\newcommand{\botodo}[1]{\mytodo{blue!20!white}{[Bo: #1]}}
+\newcommand{\btw}[1]{\mytodo{gray!20!white}{BTW: #1}}%TURN OFF FOR NOW \mytodo{gray}{#1}}
+%\ifnum\Comments=1               % fix margins for todonotes
+%  \setlength{\marginparwidth}{1in}
+%\fi
+
+
+\DeclareMathOperator{\E}{\mathbb{E}}  % expectation
+
+\newcommand{\reals}{\mathbb{R}}
+\newcommand{\simplex}{\Delta_\Y}
+
+\newcommand{\D}{\mathcal{D}}
+\newcommand{\R}{\mathcal{R}}
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\Y}{\mathcal{Y}}
+
+\newcommand{\risk}[1]{\underline{#1}}
+\newcommand{\inprod}[2]{\langle #1, #2 \rangle}%\mathrm{int}(#1)}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{Rate Transfers with Polyhedral Surrogate Losses}
+
+% \And separates authors; \AND separates with forced line break
+\author{%
+  Rafael Frongillo \\
+  U. Colorado, Boulder \\
+  \texttt{raf@colorado.edu} \\
+  \And
+  Bo Waggoner \\
+  U. Colorado, Boulder \\
+  \texttt{bwag@colorado.edu}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+  In supervised machine learning, often a target problem is solved by minimizing a surrogate loss on a dataset.
+  Study of convergence rates, which bound generalization error as a function of dataset size, typically neglects the relationship between the target and surrogate problems.
+  We consider the transfer of rate guarantees from the surrogate loss to the target problem.
+  We show that any consistent piecewise-linear convex (i.e. polyhedral) surrogate achieves a linear transfer rate, i.e. fast convergence of excess risk in the surrogate implies fast convergence in the target.
+  Simple counterexamples show that transfer rates can be much slower, e.g. quadratic, when the surrogate is smooth or strongly convex.
+\end{abstract}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+Machine learning is important.
+
+Mention that the techniques focus on the ``conditional problem''.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Setting}
+
+\paragraph{Target problems.}
+We consider supervised machine learning problems where data points have features in $\X$ and labels in $\Y$, a finite space.
+The set of probability distributions on $\Y$ is denoted $\simplex\subseteq\reals^{\Y}_+$, represented as vectors $p$ with $\|p\|_1 = 1$.
+
+The goal or \emph{target problem} is to learn a hypothesis mapping $\X$ to a finite \emph{report (or prediction) space} $\R$, possibly different from $\Y$.
+For example, in classification with an abstain option, $\R = \Y \cup \{\bot\}$ where $\bot$ represents abstaining from choosing a label.
+In a ranking problem, $\R$ is the set of all permutations of $\Y$.
+
+We suppose the target problem is specified by a \emph{discrete loss function} $\ell:\R\to\reals^\Y_+$, which maps a report (prediction) $r \in \R$ to the vector $\ell(r)$ of nonnegative loss values for each label, i.e. $\ell(r) = (\ell(r)_y)_{y\in\Y}$.
+We will assume throughout that the target loss is \emph{non-redundant}, meaning every report $r \in \R$ is uniquely optimal (uniquely minimizes expected loss) for some distribution $p\in\simplex$.
+
+\paragraph{Surrogate losses.}
+Because optimizing discrete loss on a dataset is typically intractable, the usual approach is to instead learn a hypothesis of the form $h: \X \to \reals^d$ by minimizing a \emph{surrogate loss function} $L:\reals^d\to\reals^\Y_+$.
+A surrogate loss is associated with a \emph{link function} $\psi: \reals^d \to \R$.
+If the learned hypothesis predicts $h(x) \in \reals^d$, then the implied prediction for the target problem is $\psi(h(x)) \in \R$.
+For example, in binary classification, the target problem is to predict a label from $\R = \Y = \{-1,+1\}$ and one often uses the link $\psi(u) = \mathrm{sign}(u)$, which maps negative predictions to $-1$ and nonnegative predictions to $+1$.
+We will typically abstract away from the hypothesis $h$, as this paper focuses on properties of the losses $\ell(r)$ and $L(u)$ as functions of the predictions $r \in \R$ and $u \in \reals^d$.
+
+\paragraph{Expected loss and Bayes risk.}
+When $Y \sim p$, we write the expected target loss of prediction $r$ and expected surrogate loss of prediction $u$ respectively as $\inprod{p}{\ell(r)}$ and $\inprod{p}{L(u)}$.
+The \emph{Bayes risk} of a discrete target loss $\ell: \R \to \reals^{\Y}_+$ is the function $\risk{\ell}: \simplex \to \reals_+$ given by $\risk{\ell}(p) = \inf_{r \in \R} \inprod{p}{\ell(r)}$.
+Similarly, the Bayes risk of a surrogate $L: \reals^d \to \reals^{\Y}_+$ is given by $\risk{L}(p) = \inf_{u\in\reals^d} \inprod{p}{L(u)}$.
+Note that we define Bayes risk pointwise, i.e. we have abstracted away from the role of the features $\X$ and focus directly on conditional distributions $p$ on $\Y$.
+
+\paragraph{Polyhedral surrogates.}
+We say a surrogate $L$ is \emph{polyhedral} if it is piecewise linear and convex.
+To introduce this definition more formally, let us recall some definitions from convex geometry.
+In $\reals^d$, a \emph{polyhedral set} or \emph{polyhedron} is the intersection of a finite number of closed halfspaces.
+% A \emph{polytope} is a bounded polyhedral set.
+A convex function $f:\reals^d\to\reals$ is \emph{polyhedral} if its epigraph is polyhedral, or equivalently, if it can be written as a pointwise maximum of a finite set of affine functions~\cite{rockafellar1997convex}.
+
+\begin{definition}[Polyhedral loss]
+  A loss $L: \reals^d \to \reals^{\Y}_+$ is \emph{polyhedral} if $L(u)_y$ is a polyhedral (convex) function of $u$ for each $y\in\Y$.
+  \bo{Can we omit ``(convex)''?}
+\end{definition}
+
+
+\subsection{Surrogate regrets and transfer rates}
+
+In supervised machine learning we are given a data set $S_m = ((x_1,y_1), \dots, (x_m,y_m)) \sim \D^m$, that is, $m$ points drawn i.i.d. from a distribution $\D$ on $\X \times \Y$.
+Write $\D_{\X}$ for the marginal distribution of $\D$ on $\X$, and for $(X,Y) \sim \D$, write $p_x$ for the conditional distribution on $Y$ given $X=x$.
+
+Given a target loss $\ell: \R \to \reals^{\Y}_+$, our goal is to output a hypothesis $g: \X \to \R$ minimizing \emph{target risk} $E_{X \sim \D_\X} \inprod{p_X}{\ell(g(X))}$.
+Then we can define the \emph{excess risk} or \emph{regret} of $g$ as the risk of $g$, minus the risk of the Bayes optimal predictor.
+\begin{definition}[Regret] \label{def:full-regret}
+  For a loss $\ell: \R \to \reals^{\Y}_+$ and distribution $p \in \simplex$, the \emph{conditional regret} of a prediction $r \in \R$ is given by $R_{\ell}(r,p) = \inprod{p}{\ell(r)} - \risk{\ell}(p)$.
+
+  In slight abuse of notation, the \emph{regret} of a hypothesis $g: \X \to \R$ is given by $R_{\ell}(g, \D) = \E_{X \sim \D_{\X}} R_{\ell}(g(X), p_X)$.
+\end{definition}
+Naturally, the same definitions hold with the notation of surrogate losses, i.e. we have conditional regret $R_L(u,p) = \inprod{p}{L(u)} - \risk{L}(p)$ and we have regret $R_L(h,\D) = E_{X \sim \D_{\X}} R_L(h(X), p_X)$.
+
+
+%The primary focus of this paper is on surrogate regret bounds, which bound the excess target loss in terms of the excess surrogate loss.
+%
+%\begin{definition}[Regret]\label{def:regret}
+%  For loss $L:\R\to\reals^\Y_+$ and distribution $p\in\simplex$, the \emph{regret} of a prediction $r\in\R$ is given by $R_L(r,p) = \inprod{p}{L(r)} - \risk{L}(p)$.
+%\end{definition}
+%
+%\begin{definition}[Surrogate Regret Bound]\label{def:regret-bound}
+%  A \emph{surrogate regret bound} between target $\ell:\R\to\reals^\Y$ and surrogate $L:\reals^d\to\reals^\Y$, together with a link $\psi : \reals^d \to \R$, is the statement
+%  \begin{equation}
+%    \label{eq:regret-bound-general}
+%    \forall p\in\simplex, u\in\reals^d, \quad R_\ell(\psi(u),p) \leq \zeta(\, R_L(u,p) \,)~,
+%  \end{equation}
+%  for some function $\zeta : \reals_+ \to \reals_+$ which is continuous at $0$ and satisfies $\zeta(0) = 0$.
+%\end{definition}
+%
+%
+%
+%\subsection{Property elicitation and consistency}
+%
+%Given a target problem specified by $\ell$, when is it appropriate to use a surrogate $L$?
+%A key necessary condition is \emph{consistency} \bo{cite}, which roughly states that 
+%
+%
+
+%$\Gamma: \simplex \toto \R$ is shorthand for $\Gamma: \simplex \to 2^{\R} \setminus \{\emptyset\}$.
+%
+%\begin{definition}[Property, level set]\label{def:property}
+%  A \emph{property} is a function $\Gamma:\simplex\toto\R$.
+%  The \emph{level set} of $\Gamma$ for report $r$ is the set $\Gamma_r \defeq \{p \in \simplex : r \in \Gamma(p)\}$.
+%\end{definition}
+%
+%\begin{definition}[Elicits]
+%  \label{def:elicits}
+%  A loss $L:\R\to\reals^\Y_+$, \emph{elicits} a property $\Gamma:\simplex \toto \R$ if
+%  \begin{equation}
+%    \forall p\in\simplex,\;\;\;\Gamma(p) = \argmin_{r \in \R} \inprod{p}{L(r)}~.
+%  \end{equation}
+%  As $L$ elicits a unique property, we write $\prop{L}$ to refer to the property elicited by a loss $L$.
+%\end{definition}
+%
+%\begin{definition}[Embedding a loss]\label{def:loss-embed}
+%  A loss $L:\reals^d\to\reals^\Y$ \emph{embeds} a loss $\ell:\R\to\reals^\Y$ if there exists some injective embedding $\varphi:\R\to\reals^d$ such that
+%  (i) for all $r\in\R$ we have $L(\varphi(r)) = \ell(r)$, and (ii) for all $p\in\simplex,r\in\R$ we have
+%  \begin{equation}\label{eq:embed-loss}
+%    r \in \prop{\ell}(p) \iff \varphi(r) \in \prop{L}(p)~.
+%  \end{equation}
+%\end{definition}
+%%
+%
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% Acknowledgements (automatically hidden in submission)
+%\begin{ack}
+%
+%\end{ack}
+
+\section*{References}
+
+\bibliography{references}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Checklist}
+
+%%% BEGIN INSTRUCTIONS %%%
+The checklist follows the references.  Please
+read the checklist guidelines carefully for information on how to answer these
+questions.  For each question, change the default \answerTODO{} to \answerYes{},
+\answerNo{}, or \answerNA{}.  You are strongly encouraged to include a {\bf
+justification to your answer}, either by referencing the appropriate section of
+your paper or providing a brief inline description.  For example:
+\begin{itemize}
+  \item Did you include the license to the code and datasets? \answerYes{See Section~\ref{gen_inst}.}
+  \item Did you include the license to the code and datasets? \answerNo{The code and the data are proprietary.}
+  \item Did you include the license to the code and datasets? \answerNA{}
+\end{itemize}
+Please do not modify the questions and only use the provided macros for your
+answers.  Note that the Checklist section does not count towards the page
+limit.  In your paper, please delete this instructions block and only keep the
+Checklist section heading above along with the questions/answers below.
+%%% END INSTRUCTIONS %%%
+
+\begin{enumerate}
+
+\item For all authors...
+\begin{enumerate}
+  \item Do the main claims made in the abstract and introduction accurately reflect the paper's contributions and scope?
+    \answerTODO{}
+  \item Did you describe the limitations of your work?
+    \answerTODO{}
+  \item Did you discuss any potential negative societal impacts of your work?
+    \answerTODO{}
+  \item Have you read the ethics review guidelines and ensured that your paper conforms to them?
+    \answerTODO{}
+\end{enumerate}
+
+\item If you are including theoretical results...
+\begin{enumerate}
+  \item Did you state the full set of assumptions of all theoretical results?
+    \answerTODO{}
+	\item Did you include complete proofs of all theoretical results?
+    \answerTODO{}
+\end{enumerate}
+
+\item If you ran experiments...
+\begin{enumerate}
+  \item Did you include the code, data, and instructions needed to reproduce the main experimental results (either in the supplemental material or as a URL)?
+    \answerTODO{}
+  \item Did you specify all the training details (e.g., data splits, hyperparameters, how they were chosen)?
+    \answerTODO{}
+	\item Did you report error bars (e.g., with respect to the random seed after running experiments multiple times)?
+    \answerTODO{}
+	\item Did you include the total amount of compute and the type of resources used (e.g., type of GPUs, internal cluster, or cloud provider)?
+    \answerTODO{}
+\end{enumerate}
+
+\item If you are using existing assets (e.g., code, data, models) or curating/releasing new assets...
+\begin{enumerate}
+  \item If your work uses existing assets, did you cite the creators?
+    \answerTODO{}
+  \item Did you mention the license of the assets?
+    \answerTODO{}
+  \item Did you include any new assets either in the supplemental material or as a URL?
+    \answerTODO{}
+  \item Did you discuss whether and how consent was obtained from people whose data you're using/curating?
+    \answerTODO{}
+  \item Did you discuss whether the data you are using/curating contains personally identifiable information or offensive content?
+    \answerTODO{}
+\end{enumerate}
+
+\item If you used crowdsourcing or conducted research with human subjects...
+\begin{enumerate}
+  \item Did you include the full text of instructions given to participants and screenshots, if applicable?
+    \answerTODO{}
+  \item Did you describe any potential participant risks, with links to Institutional Review Board (IRB) approvals, if applicable?
+    \answerTODO{}
+  \item Did you include the estimated hourly wage paid to participants and the total amount spent on participant compensation?
+    \answerTODO{}
+\end{enumerate}
+
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\input{appendix}
+
+
+
+\end{document}
+
