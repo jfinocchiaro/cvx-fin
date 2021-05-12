@@ -469,11 +469,11 @@ Consider that on the polytope $P^\pi_a$, we fix $u_y \in [0,1]$ or $u_y >1$ for 
 \begin{proof}
 	For all $p \in \simplex$ and $u \in \U^\circ$, we know that 
 	\begin{equation}
-	\inprod{p}{L^{top-k}(u)} = 1 - \bar u + \inprod{p}{u + \frac 1 k \min{u,\ones}}~.~
+	\inprod{p}{L^{top-k}(u)} = 1 + \bar u - \inprod{p}{u + \frac 1 k \min{u,\ones}}~.~
 	\end{equation}
 	For any $p$, if $u_i \in [0,1]$, we then have 
 	\begin{align*}
-	\inprod{p}{L^{top-k}(u)} &= 1 + \bar u - \inprod{p}{u + \frac 1 k \min{u,\ones}}\\
+	\inprod{p}{L^{top-k}(u)} &= 1 + \bar u - \inprod{p}{u + \frac 1 k \min(u,\ones)}\\
 	 &= 1 + \bar u - \sum_{y \neq i}p_y (u_y + \frac 1 k \min(u_y, 1)) - p_i \frac {k+1} k u_i~,~
 	\end{align*}
 	which is linear on $u_i$.
@@ -483,14 +483,15 @@ Consider that on the polytope $P^\pi_a$, we fix $u_y \in [0,1]$ or $u_y >1$ for 
 
 \begin{theorem}\label{thm:finite-set}
 	Consider the loss $L^{top-k} : \reals^n \times \Y \to \reals_+$ given in Equation~\ref{eq:top-k-surrogate}.  
-	For all $p \in \simplex$, there is a report in the following report set $\R$ minimizing $\inprod{p}{L^{top-k}(\cdot)}$.
+	The finite set
 	\begin{align*}
 	\R := \left\{ \frac{|M| + k -1}{k - |H|} \mathbf{1}_H + \mathbf{1}_M : H, M \subset [n], H\cap M = \emptyset, |H| + |M| \leq k \right\}
 	\end{align*}
+	is representative for $L^{top-k}$.
 \end{theorem}
 \begin{proof}[Proof Sketch.]
 %	The above work tells us that when $p_y > \frac 1 {k+1}$, it is optimal to set $u_y > 0$, and otherwise, it is optimal to set $u_y = 0$.
-	Since $L^{top-k}$ is linear on $[0,1]$ and $[1, c]$ for some $c \geq 1$ and all dimensions $i \in [n]$, we know that the optimum is on the boundary of such reports, so when we bump $u_y$ up to some number greater than $0$, it should either be one $1$ or $c$ to be an optimal report.
+	Since $L^{top-k}$ is linear in $i$ on $[0,1]$ and $[1, c]$ for some $c \geq 1$ and all dimensions $i \in [n]$, we know that the optimum is on the boundary of such reports, so when we bump $u_y$ up to some number greater than $0$, it should either be one $1$ or $c$ to be an optimal report.
 	$H$ represents the elements of the report that are bumped up to $c$, and $M$ represents the elements of the report that are bumped up to $1$.
 	We know that the size of $H \cup M$ must be less than or equal to $k$ by Assumption~\ref{assum:nonneg}, and $H \cap M$ is empty by each element of $u$ being real-valued, so for $c > 1$, $u_i$ cannot simultaneously be equal to $c$ and $1$, hence the restrictions on $\R$.
 	Note that if $c = 1$, then we can say $H = \emptyset$.
@@ -613,6 +614,61 @@ where $c(u) = \frac{|M(u)| + k - 1}{k - |H(u)|}$ with $M(u)$ is the number of el
 	$\min(u, \ones) = \min(\phi(u), \ones)$
 	If $u$ minimizes $L(u;p)$, then $\inprod{p}{u} \geq \inprod{p}{\phi(u)}$.
 \end{proof}
+
+
+\section{Property elicited by $L^{top-k}$}
+Consider that we have $\R$ as above, but we are not sure when to ``bump'' reports up or down from one group to another.
+There is sometimes a benefit in expected loss to artificially bumping up from the ``low'' to ``middle'' bin when possible because doing so cranks up the constant on the ``high'' reports, yielding better expected loss.
+
+Note that ``bumping down'' does not happen because of how the original bins are set, but we can ''bump up'' from low to medium or medium to high.
+
+Given $p \in \simplex$, we have the original bins
+\begin{align*}
+\bar H(p) &:= \{i \mid p_i \geq \frac 1 k\}\\
+\bar M(p) &:= \{i \mid p_i \in [\frac 1 {k+1}, \frac 1 k]\} \\
+\bar L(p) &:= \{i \mid p_i \leq \frac 1 {k+1}\}~,~
+\end{align*}
+dropping $p$ from the notation where it can be understood from context.
+
+Now we want to modify this bins so that we can ``bump'' reports up to a higher bin if beneficial.
+One can verify that it is never beneficial to bump from middle to high, so we need only concern ourselves with bumping from $L$ to $M$.
+To understand when to bump $j$ from lower to middle, taking $u \to u'$, we can ask when we have
+\begin{align*}
+\inprod{p}{L(u)} &\geq \inprod{p}{L(u')}\\
+\sum_{i \in \bar H} \frac{|\bar M| + k -1}{k-|\bar H|} - p_i \left(\frac{k(|\bar M| + k -1)+ 1}{k(k- |\bar H|)}\right) + \sum_{i \in \bar M} \left(\frac 1 k - p_i \left( \frac {k+1}{k}\right)\right) &\geq \sum_{i \in \bar H} \frac{|\bar M| + k }{k-|\bar H|} - p_i \left(\frac{k(|\bar M| + k)+ 1}{k(k- |\bar H|)}\right) + \sum_{i \in \bar M'} \left(\frac 1 k - p_i \left( \frac {k+1}{k}\right)\right)\\
+\frac{|\bar H|(|\bar M| + k - 1)}{k(k- |\bar H|)} + p_H \frac{-k(|\bar M| + k - 1) - 1}{k(k - |\bar H|)} &\geq \frac{|\bar H|(|\bar M| + k)}{k(k - |\bar H)} + p_H \left(\frac{-k(|\bar M| + k)-1}{k (k - |\bar H|)}\right) + \left(\frac 1 k - p_j \left(\frac {k+1}{k}\right)\right) \\
+\frac{-|\bar H|}{k (k - |\bar H|)} + \frac{p_H}{k - |\bar H|} &\geq \frac 1 k - p_j \left(\frac{k+1}{k}\right)~,~
+\end{align*}
+where $p_H := \sum_{i \in \bar H} p_i$.
+Thus, we can take the set 
+\begin{align}
+B(p) &:= \left\{i : p_i \leq \frac{1}{k+1} \wedge \frac{p_H k- |\bar H|}{k(k- |\bar H|)} \geq \frac 1 k - p_i\left(\frac{k+1}{k}\right) \right\}
+\end{align}
+
+Now take the sets
+\begin{align*}
+H(p) &:= \bar H(p) \\
+M(p) &:= \bar H(p) \cup B(p) \\
+L(p) &:= \bar L(p) \setminus B(p)\\
+\end{align*}
+and take the function 
+\begin{align}
+\phi(p) := \frac{|M(p)| + k - 1}{k-|H(p)|} \ones_{H(p)} + \ones_{M(p)}~.~
+\end{align}
+\jessie{Fix with algorithm}
+
+
+\begin{proposition}
+	For all $p \in \simplex$, we have $\phi(p) \in \Gamma(p) \cap \R$.
+\end{proposition}
+\begin{proof}
+	To see $\phi(p) \in \R$ by construction. 
+\end{proof}
+
+
+\begin{corollary}
+	$\phi(\simplex)$ is a finite representative set.
+\end{corollary}
 
 \end{document}
 %%% Local Variables:
