@@ -139,9 +139,10 @@ Similarly, surrogate losses will be written $L:\reals^d\to\reals^\Y_+$, typicall
 We write the corresponding expected loss when $Y \sim p$ as $\inprod{p}{\ell(r)}$ and $\inprod{p}{L(u)}$.
 The \emph{Bayes risk} of a loss $L:\reals^d\to\reals^\Y_+$ is the function $\risk{L}:\simplex\to\reals_+$ given by $\risk{L}(p) \defeq \inf_{u\in\reals^d} \inprod{p}{L(u)}$; naturally for discrete losses we write $\risk{\ell}$ with the infimum over $\R$.
 
-Most of the surrogates $L$ we consider will be \emph{polyhedral}, meaning piecewise linear and convex; we therefore briefly recall the relevant definitions.
+We say a surrogates $L$ is \emph{polyhedral} if it is piecewise linear and convex.
+To introduce this definition more formally, let us recall some definitions from convex geometry.
 In $\reals^d$, a \emph{polyhedral set} or \emph{polyhedron} is the intersection of a finite number of closed halfspaces.
-A \emph{polytope} is a bounded polyhedral set.
+% A \emph{polytope} is a bounded polyhedral set.
 A convex function $f:\reals^d\to\reals$ is \emph{polyhedral} if its epigraph is polyhedral, or equivalently, if it can be written as a pointwise maximum of a finite set of affine functions~\cite{rockafellar1997convex}.
 
 \begin{definition}[Polyhedral loss]
@@ -173,6 +174,26 @@ $\Gamma: \simplex \toto \R$ is shorthand for $\Gamma: \simplex \to 2^{\R} \setmi
 \end{definition}
 %
 
+
+\subsection{Surrogate regret bound}
+
+The primary focus of this paper is on surrogate regret bounds, which bound the excess target loss in terms of the excess surrogate loss.
+
+\begin{definition}[Regret]\label{def:regret}
+  For loss $L:\R\to\reals^\Y_+$ and distribution $p\in\simplex$, the \emph{regret} of a prediction $r\in\R$ is given by $R_L(r,p) = \inprod{p}{L(r)} - \risk{L}(p)$.
+\end{definition}
+
+\begin{definition}[Surrogate Regret Bound]\label{def:regret-bound}
+  A \emph{surrogate regret bound} between target $\ell:\R\to\reals^\Y$ and surrogate $L:\reals^d\to\reals^\Y$, together with a link $\psi : \reals^d \to \R$, is the statement
+  \begin{equation}
+    \label{eq:regret-bound-general}
+    \forall p\in\simplex, u\in\reals^d, \quad R_\ell(\psi(u),p) \leq \zeta(\, R_L(u,p) \,)~,
+  \end{equation}
+  for some function $\zeta : \reals_+ \to \reals_+$ which is continuous at $0$ and satisfies $\zeta(0) = 0$.
+\end{definition}
+
+
+
 \section{Main result}
 
 \subsection{Statement}
@@ -182,10 +203,6 @@ $\Gamma: \simplex \toto \R$ is shorthand for $\Gamma: \simplex \to 2^{\R} \setmi
   We say a link $\psi:\reals^d\to\R$
   % Let $L:\reals^d \to \reals^\Y_+$, $\gamma:\simplex\toto\R$, and link $\psi:\reals^d\to\R$ be given.
   is \emph{$\epsilon$-separated} if for all $u\in\reals^d$ with $\psi(u)\notin\gamma(p)$, we have $d_\infty(u,\Gamma(p)) > \epsilon$, where $d_\infty(u,A) \defeq \inf_{a\in A} \|u-a\|_\infty$.
-\end{definition}
-
-\begin{definition}[Regret]\label{def:regret}
-  For loss $L:\R\to\reals^\Y_+$ and distribution $p\in\simplex$, the \emph{regret} of a prediction $r\in\R$ is given by $R_L(r,p) = \inprod{p}{L(r)} - \risk{L}(p)$.
 \end{definition}
 
 The goal of this section is to show that if a polyhedral surrogate is consistent for a discrete loss, then it achieves linear regret bounds (Theorem~\ref{thm:regret-bound-poly-consistent}).
@@ -404,6 +421,79 @@ The goal of this section is to show that if a polyhedral surrogate is consistent
   completing the proof.
 \end{proof}
 
+
+\section{Lower Bounds for Smooth Surrogates}
+
+\begin{definition}[Strong Convexity and Strong Smoothness]
+  Let $f:\reals^d\to\reals$ be a differentiable function.
+  We say $f$ is $\alpha$-\emph{strongly convex} if $f$ is convex and
+  \begin{equation}
+    \label{eq:strong-convexity}
+    \|\nabla f(x') - \nabla f(x)\|_2 \geq \alpha \|x'-x\|_2 \quad \forall x,x'\in\reals^d~,
+  \end{equation}
+  where $\|\cdot\|_2$ denotes the Euclidean norm.
+  We say $f$ is $\beta$-\emph{strongly smooth} if
+  \begin{equation}
+    \label{eq:strong-convexity}
+    \|\nabla f(x') - \nabla f(x)\|_2 \leq \beta \|x'-x\|_2 \quad \forall x,x'\in\reals^d~.
+  \end{equation}
+  
+\end{definition}
+
+\begin{theorem}
+  Let $L:\reals^d \to \reals^\Y_+$ be a surrogate such that for all $y\in\Y$, the function $L(\cdot)_y$ is differentiable, $\alpha$-strongly convex, and $\beta$-strongly smooth for some $\alpha,\beta>0$.\raft{I think differentiability follows from smoothness...}
+  Let $\ell:\R \to \reals^\Y_+$ be a target loss, and $\psi:\reals^d\to\R$ a link.
+  If there is a surrogate regret bound between $L$ and $\ell$ with function $\zeta:\reals_+\to\reals_+$, then there exists $c > 0$ such that for sufficiently small $\epsilon>0$ we have
+  \begin{equation}
+    \label{eq:regret-lower-bound}
+    \zeta(\epsilon) \geq c \cdot \sqrt{\epsilon}~.
+  \end{equation}
+\end{theorem}
+\begin{proof}
+  Let $\gamma := \prop{\ell}$.
+  Fix reports $r,r'$ such that there exists $p_0 \in \gamma_r \cap \gamma_{r'}$.
+  Define $u_0$ to be the unique minimizer of $\inprod{p_0}{L(\cdot)}$ on $\reals^d$, the existence of which follows from strong (and hence strict) convexity.
+  Assume without loss of generality that $\psi(u_0) = r'$; otherwise, swap the roles of $r$ and $r'$.
+  As $\ell$ is non-redundant by assumption, there exists some $p_1 \in \inter{\gamma_r}$.
+  We therefore have $R_\ell(r',p_1) = \inprod{p_1}{\ell(r')-\ell(r)} =: c_\ell > 0$, and $R_\ell(r',p_0) = 0$.
+  Let $p_\lambda := (1-\lambda) p_0 + \lambda p_1$.
+  By convexity of $\gamma_r$, we have $p_\lambda \in \gamma_r$ for all $\lambda \in [0,1]$, which gives $R_\ell(r',p_\lambda) = \lambda c_\ell$.
+  We will upper bound $R_L(u_0,p_\lambda)$ by $O(\lambda^2)$, which will imply the result.
+  % Our goal is to find some $c>0$ and some path of reports $u_\lambda \in \reals^d$ such that $\psi(u_\lambda)=r'$ and $R_L(u_\lambda,p_\lambda) \geq c\cdot\sqrt{\lambda \epsilon_1}$, for $\lambda$ sufficiently small.
+
+  Let $L_\lambda:\reals^d\to\reals_+$ be given by $L_\lambda(u) = \inprod{p_\lambda}{L(u)} = (1-\lambda) \inprod{p_0}{L(u)} + \lambda \inprod{p_1}{L(u)}$.
+  Extending our definition of $u_0$, let $u_\lambda$ be the unique minimizer of $L_\lambda$ on $\reals^d$.
+  Then $\risk{L}(p_\lambda) = L_\lambda(u_\lambda)$, and thus $R_L(u_0,p_\lambda) = L_\lambda(u_0) - L_\lambda(u_\lambda)$.
+
+  We first upper bound $\|u_\lambda - u_0\|_2$, and then apply strong smoothness to upper bound $L_\lambda(u_0) - L_\lambda(u_\lambda)$.
+  Consider the first-order optimality condition of $L_\lambda$:
+  \begin{align*}
+    \label{eq:first-order-opt-smooth}
+    & 0 = \nabla L_\lambda(u_\lambda) = (1-\lambda) \nabla L_0(u_\lambda) + \lambda \nabla L_1(u_\lambda)
+    \\
+    & \implies (1-\lambda) \|\nabla L_0(u_\lambda)\|_2 = \lambda \|\nabla L_1(u_\lambda)\|_2~.
+  \end{align*}
+  By optimality of $u_0$ and $u_1$, strong convexity and smoothness, and the triangle inequality, we have
+  \begin{align*}
+    \|\nabla L_0(u_\lambda)\|_2 &= \|\nabla L_0(u_\lambda) - \nabla L_0(u_0)\|_2 \geq \alpha \|u_\lambda - u_0\|_2~,
+    \\
+    \|\nabla L_1(u_\lambda)\|_2 &= \|\nabla L_0(u_\lambda) - \nabla L_1(u_1)\|_2 \leq \beta \|u_\lambda - u_1\|_2
+    \\
+    &\leq \beta \left( \|u_\lambda - u_0\|_2 + \|u_0 - u_1\|_2 \right)~.
+  \end{align*}
+  Combining, and taking $\lambda \leq \tfrac 1 2 \tfrac {\alpha}{\alpha+\beta}$, we have
+  \begin{align*}
+    \|u_\lambda - u_0\|_2 \leq \frac{\lambda\beta}{(1-\lambda)\alpha-\lambda\beta} \|u_0 - u_1\|_2  \leq \lambda \frac{2\beta}{\alpha} \|u_0 - u_1\|_2 ~.
+  \end{align*}
+  Finally, from strong smoothness and optimality of $u_\lambda$, we have
+  \begin{align*}
+    L_\lambda(u_0) - L_\lambda(u_\lambda) \leq \frac{\beta}{2} \|u_0 - u_\lambda\|_2^2 \leq \frac{\beta}{2} \left(\lambda \frac{2\beta}{\alpha} \|u_0 - u_1\|_2\right)^2 = c_L \lambda^2~,
+  \end{align*}
+  where $c_L = \frac{2\beta^3}{\alpha^2} \|u_0 - u_1\|_2^2$.
+  Take $c = \frac{c_\ell}{\sqrt{c_L}} = \frac{c_\ell \alpha}{\|u_0 - u_1\|_2 \sqrt{2\beta^3}}$.
+  Recall $R_\ell(r',p_\lambda) = c_\ell \lambda$ and $R_L(u_0,p_\lambda) \leq c_L \lambda^2$.
+  Then letting $\epsilon = R_L(u_0,p_\lambda)$, we have $\zeta(\epsilon) \geq R_\ell(r',p_\lambda) \geq c \sqrt{\epsilon}$.
+\end{proof}
 
 
 
