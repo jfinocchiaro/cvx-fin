@@ -14,7 +14,7 @@
 \usepackage{microtype}      % microtypography
 \usepackage{xcolor}         % colors
 
-\usepackage{amsmath,amsfonts}
+\usepackage{amsmath,amsfonts,amssymb}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
@@ -39,9 +39,14 @@
 
 
 \DeclareMathOperator{\E}{\mathbb{E}}  % expectation
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\arginf}{arg\,inf}
 
 \newcommand{\reals}{\mathbb{R}}
 \newcommand{\simplex}{\Delta_\Y}
+
+\newcommand{\prop}[1]{\mathrm{prop}[#1]}
 
 \newcommand{\D}{\mathcal{D}}
 \newcommand{\R}{\mathcal{R}}
@@ -50,7 +55,7 @@
 
 \newcommand{\risk}[1]{\underline{#1}}
 \newcommand{\inprod}[2]{\langle #1, #2 \rangle}%\mathrm{int}(#1)}
-
+\newcommand{\toto}{\rightrightarrows}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -191,50 +196,35 @@ A convex function $f:\reals^d\to\reals$ is \emph{polyhedral} if its epigraph is 
 \end{definition}
 
 
-\subsection{Surrogate regrets and transfer rates}
+\subsection{Property elicitation and consistency}
+Our technical approach is based on property elicitation, which studies the structure of $\ell$ and $L$ as they relate to $\simplex$.
+In the below, $\Gamma: \simplex \toto \R$ is shorthand for $\Gamma: \simplex \to 2^{\R} \setminus \{\emptyset\}$.
+
+\begin{definition}[Property, level set]\label{def:property}
+  A \emph{property} is a function $\Gamma:\simplex\toto\R$.
+  The \emph{level set} of $\Gamma$ for report $r$ is the set $\Gamma_r = \{p \in \simplex : r \in \Gamma(p)\}$.
+\end{definition}
+
+\begin{definition}[Elicits]
+  \label{def:elicits}
+  A loss $L:\R\to\reals^\Y_+$, \emph{elicits} a property $\Gamma:\simplex \toto \R$ if
+  \begin{equation}
+    \forall p\in\simplex,\;\;\;\Gamma(p) = \argmin_{r \in \R} \inprod{p}{L(r)}~.
+  \end{equation}
+  As $L$ elicits a unique property, we write $\prop{L}$ to refer to the property elicited by a loss $L$.
+\end{definition}
+
+\bo{Wrap this in an Assumption environment. I didn't think it fit well above...} We will assume throughout that the target loss is \emph{non-redundant}, meaning every report $r \in \R$ is uniquely optimal (uniquely minimizes expected loss) for some distribution $p\in\simplex$.
+
+\begin{definition}[Embedding a loss]\label{def:loss-embed}
+  A loss $L:\reals^d\to\reals^\Y$ \emph{embeds} a loss $\ell:\R\to\reals^\Y$ if there exists some injective embedding $\varphi:\R\to\reals^d$ such that
+  (i) for all $r\in\R$ we have $L(\varphi(r)) = \ell(r)$, and (ii) for all $p\in\simplex,r\in\R$ we have
+  \begin{equation}\label{eq:embed-loss}
+    r \in \prop{\ell}(p) \iff \varphi(r) \in \prop{L}(p)~.
+  \end{equation}
+\end{definition}
 
 
-%The primary focus of this paper is on surrogate regret bounds, which bound the excess target loss in terms of the excess surrogate loss.
-%
-%\begin{definition}[Regret]\label{def:regret}
-%  For loss $L:\R\to\reals^\Y_+$ and distribution $p\in\simplex$, the \emph{regret} of a prediction $r\in\R$ is given by $R_L(r,p) = \inprod{p}{L(r)} - \risk{L}(p)$.
-%\end{definition}
-%
-
-%
-%
-%\subsection{Property elicitation and consistency}
-%
-%Given a target problem specified by $\ell$, when is it appropriate to use a surrogate $L$?
-%A key necessary condition is \emph{consistency} \bo{cite}, which roughly states that 
-%
-%
-%We will assume throughout that the target loss is \emph{non-redundant}, meaning every report $r \in \R$ is uniquely optimal (uniquely minimizes expected loss) for some distribution $p\in\simplex$.
-%$\Gamma: \simplex \toto \R$ is shorthand for $\Gamma: \simplex \to 2^{\R} \setminus \{\emptyset\}$.
-%
-%\begin{definition}[Property, level set]\label{def:property}
-%  A \emph{property} is a function $\Gamma:\simplex\toto\R$.
-%  The \emph{level set} of $\Gamma$ for report $r$ is the set $\Gamma_r \defeq \{p \in \simplex : r \in \Gamma(p)\}$.
-%\end{definition}
-%
-%\begin{definition}[Elicits]
-%  \label{def:elicits}
-%  A loss $L:\R\to\reals^\Y_+$, \emph{elicits} a property $\Gamma:\simplex \toto \R$ if
-%  \begin{equation}
-%    \forall p\in\simplex,\;\;\;\Gamma(p) = \argmin_{r \in \R} \inprod{p}{L(r)}~.
-%  \end{equation}
-%  As $L$ elicits a unique property, we write $\prop{L}$ to refer to the property elicited by a loss $L$.
-%\end{definition}
-%
-%\begin{definition}[Embedding a loss]\label{def:loss-embed}
-%  A loss $L:\reals^d\to\reals^\Y$ \emph{embeds} a loss $\ell:\R\to\reals^\Y$ if there exists some injective embedding $\varphi:\R\to\reals^d$ such that
-%  (i) for all $r\in\R$ we have $L(\varphi(r)) = \ell(r)$, and (ii) for all $p\in\simplex,r\in\R$ we have
-%  \begin{equation}\label{eq:embed-loss}
-%    r \in \prop{\ell}(p) \iff \varphi(r) \in \prop{L}(p)~.
-%  \end{equation}
-%\end{definition}
-%%
-%
 
 
 
