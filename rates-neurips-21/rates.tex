@@ -135,7 +135,7 @@ We define the \emph{excess risk} or \emph{regret} of $g$ as the risk of $g$, min
 \end{definition}
 Naturally, the same definitions hold for the surrogate problem of minimizing \emph{surrogate risk} $\E_{X \sim \D_\X} \inprod{p_X}{L(h(x))}$, i.e. we have conditional regret $R_L(u,p) = \inprod{p}{L(u)} - \risk{L}(p)$ and we have regret $R_L(h;\D) = E_{X \sim \D_{\X}} R_L(h(X), p_X)$.
 
-\bo{We are assuming Bayes in class here. Should comment about it, maybe discuss!}
+\bo{We are assuming Bayes in class here. In the sense that usually regret or excess risk is defined as excess beyond the best in the class. Should comment about it, maybe discuss!}
 
 \paragraph{Surrogate transfer bounds.}
 Central to supervised machine learning is the \emph{rate of convergence} of regret as a function of $m$, the number of data points.
@@ -147,19 +147,36 @@ However, much less is known about the relationship between surrogate and target 
 Given a convergence rate for surrogate regret $R_L(\hat{h}_m;\D)$, what is the implied convergence rate for target regret $R_{\ell}(\hat{g}_m;\D)$, where $\hat{g}_m(x) = \psi(\hat{h}_m(x))$?
 \bo{Prior work to mention here?}
 
-To systematize the investigation of this problem, we formalize the notion of \emph{surrogate transfer bounds}.
+To systematize the investigation of this problem, we introduce \emph{rate transfer bounds}.
 
-%\begin{definition}[Surrogate Regret Bound]\label{def:regret-bound}
-%  A \emph{surrogate regret bound} between target $\ell:\R\to\reals^\Y$ and surrogate $L:\reals^d\to\reals^\Y$, together with a link $\psi : \reals^d \to \R$, is the statement
-%  \begin{equation}
-%    \label{eq:regret-bound-general}
-%    \forall p\in\simplex, u\in\reals^d, \quad R_\ell(\psi(u),p) \leq \zeta(\, R_L(u,p) \,)~,
-%  \end{equation}
-%  for some function $\zeta : \reals_+ \to \reals_+$ which is continuous at $0$ and satisfies $\zeta(0) = 0$.
-%\end{definition}
-%
+\begin{definition}[Rate Transfer]\label{def:transfer}
+  A function $\zeta : \reals_+ \to \reals_+$ which is continuous at $0$ and satisfies $\zeta(0) = 0$ is called a \emph{rate transfer function.}
+	Given a target $\ell:\R\to\reals^\Y$ and rate transfer function $\zeta$, we say surrogate $L:\reals^d\to\reals^\Y$ and link $\psi : \reals^d \to \R$, we say $(L,\psi)$ satisfy a \emph{conditional rate transfer} of $\zeta$ for $\ell$ if
+  \begin{equation}
+    \label{eq:conditional-transfer}
+    \forall p\in\simplex, \forall u\in\reals^d, \quad R_\ell(\psi(u),p) \leq \zeta(\, R_L(u,p) \,)~.
+  \end{equation}
+  We say $(L,\psi)$ satisfy a \emph{rate transfer} of $\zeta$ for $\ell$ if
+  \begin{equation}
+    \label{eq:transfer}
+    \forall \D, \forall h, \quad R_\ell(\psi \circ h;\D) \leq \zeta(\, R_L(h;\D) \,)~.
+  \end{equation}
+\end{definition}
+In particular, we say $(L,\psi)$ satisfy a \emph{linear} rate transfer for $\ell$ if $\zeta(t) \leq Ct$ for some $C > 0$.
+Such a transfer implies $R_{\ell}(\psi \circ h;\D) \leq C R_L(h;\D)$, i.e. the convergence rate of a surrogate learning problem transfers directly to the target problem.
+This appears to us to be the best one can hope for, except perhaps for some strange artificial construction.
 
+We emphasize that (a) we are interested in the behavior of the transfer function close to zero, and (b) a smaller transfer function (close to zero) is better.
+Thus, for example, a transfer of $O(\sqrt{\cdot})$ is \emph{worse} than a linear transfer rate -- quadratically worse!
+A fast-rate surrogate learning algorithm with an $O(\sqrt{\cdot})$ transfer function results in a slow rate guarantee for the target problem:
+  \[ R_{\ell}(\psi \circ h; \D) ~\leq~ O\left(\sqrt{R_L(h;\D)}\right) ~\leq~ O\left(\sqrt{\frac{1}{m}}\right) . \]
 
+\bo{mention prior work on specific surrogates, if any?}
+The general research program is to understand when surrogates can guarantee good transfer rates.
+While it seems very difficult to characterize the transfer rate of an arbitrary loss function, we will be able to make significant progress for an important subclass: \emph{polyhedral} losses, discussed next.
+
+\vskip1em
+\bo{I AM HERE. 2021-05-12 11am}
 
 \paragraph{Polyhedral surrogates.}
 We say a surrogate $L$ is \emph{polyhedral} if it is piecewise linear and convex.
