@@ -14,6 +14,7 @@
 \usepackage{microtype}      % microtypography
 \usepackage{xcolor}         % colors
 
+\usepackage[colorinlistoftodos,textsize=tiny]{todonotes} % need xargs for below
 \usepackage{bbm}
 \usepackage{amsmath,amsfonts,amssymb}
 
@@ -127,8 +128,9 @@ Mention that the techniques focus on the ``conditional problem''.
 \section{Setting}
 
 \paragraph{Target problems.}
-We consider supervised machine learning problems where data points have features in $\X$ and labels in $\Y$, a finite space.
-The \emph{target problem} is to learn a hypothesis mapping $\X$ to a finite \emph{report (or prediction) space} $\R$, possibly different from $\Y$.
+We consider supervised machine learning problems where data points have features in $\X$ and labels in $\Y$, a finite set.
+The \emph{target problem} is to learn a hypothesis mapping $\X$ to a \emph{report} (or \emph{prediction}) \emph{space} $\R$, possibly different from $\Y$.
+In this paper, we assume $\R$ is a finite set.
 For example, standard binary classification has $\Y = \R = \{-1,+1\}$.
 In classification with an abstain option, $\R = \Y \cup \{\bot\}$ where $\bot$ represents abstaining from choosing a label.
 In a ranking problem, $\R$ is the set of all permutations of $\Y$.
@@ -152,20 +154,22 @@ Given a target problem, we would like to design surrogates which efficiently sol
 A standard tool to establish this efficiency is a \emph{surrogate regret bound}.
 We define the \emph{regret} of a hypothesis $h: \X \to \reals^d$ as the expected loss relative to the best possible.
 Formally, the \emph{surrogate regret} of $h$ with respect to data distribution $\D$ is given by $R_L(h;\D) = \E_{(X,Y)\sim\D} L(h(X))_Y - \inf_{h':\X\to\reals^d} \E_{(X,Y)\sim\D} L(h'(X))_Y$, where the minimum is taken over all measurable functions.
-\bo{Notation changed: $L(h(X),Y) \to L(h(X))_Y$. Replaced E with expectation symbol.}
+\botodo{Notation changed: $L(h(X),Y) \to L(h(X))_Y$.}
+\raft{Good call, though I wonder if we should ditch the vector notation for this paper, since it really makes this hard to read...}
 (One may equivalently assume the Bayes optimal hypothesis is in the function class.)
 The \emph{target regret} of $h$ is thus $R_\ell(\psi\circ h;\D) = \E_{(X,Y)\sim\D} \ell(\psi(h(X)))_Y - \inf_{h':\X\to\R} \E_{(X,Y)\sim\D} \ell(h'(X))_Y$, where we recall that $\psi$ is the link function.
 
 A surrogate regret bound answers the following question: when we minimize the surrogate regret at a rate $f(n)$, given $n$ data points, how fast does the target regret diminish?
 Formally, a surrogate regret bound is given by a function $\zeta : \reals_+ \to \reals_+$, such that
-\bo{Why drop the definition ``transfer function''? I think it's very useful here.}
 \begin{equation}
   \label{eq:surrogate-regret-bound}
   \forall \D, \forall h:\X\to\reals^d, \quad R_\ell(\psi\circ h;\D) \leq \zeta(\, R_L(h;\D) \,)~.
 \end{equation}
+We will refer to $\zeta$ as the \emph{rate transfer function}.
 A minimal requirement is that $(L,\psi)$ is \emph{consistent} with $\ell$, meaning $\zeta$ is continuous at $0$ and satisfies $\zeta(0) = 0$.
 
 \bo{I think the discussion I had on sqrt and fast rates would be useful...also the notation of $m$ data points and a hypothesis $\hat{h}_m$, and $\hat{g}_m = \psi \circ \hat{h}_m$.}
+\raf{Agreed that generalization rates should be discussed earlier, probably above (where I do introduce $n=$\#datapts; BTW, $n$ is more standard from what I've seen) as well as below in examples.}
 
 Many works have tried to go beyond consistency and understand the lowest possible $\zeta$ for a given target and surrogate.
 For example, it is known that $\zeta$ \raf{examples: logistic, exponential, and hinge}.
@@ -175,12 +179,14 @@ Lacking, however, is a general understanding of what $\zeta$ one can expect from
 We give two main results to deepen this understanding.
 The first is that polyhedral (piecewise-linear and convex) surrogates always yield \emph{linear} regret bounds.
 \begin{theorem}
-  
+  Let $L$ be a polyhedral surrogate and $\psi$ a link function such that $(L,\psi)$ is consistent for a target loss $\ell$.
+  Then there exists a surrogate regret bound with a linear transfer function $\zeta$.
 \end{theorem}
 The second is that sufficiently convex and smooth losses (i.e., ``non-polyhedral'') require $\zeta(\epsilon) = \Omega(\sqrt{\epsilon})$.
 
 \begin{theorem}
-  
+  Let $L$ be a differentiable convex surrogate, with locally Lipschitz gradient, which is locally strongly convex.
+  If $\zeta$ is a transfer function in a surrogate regret bound for $L$ to a target loss $\ell$, then there exists $c>0$ such that, for arbitrarily small $\epsilon>0$, we have $\zeta(\epsilon) \geq c\cdot\sqrt{\epsilon}$.
 \end{theorem}
 
 \raf{Paragraph on implication for rates here.  Maybe Huber example?}
