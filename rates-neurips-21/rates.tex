@@ -14,6 +14,7 @@
 \usepackage{microtype}      % microtypography
 \usepackage{xcolor}         % colors
 
+\usepackage{bbm}
 \usepackage{amsmath,amsfonts,amssymb}
 
 \newtheorem{theorem}{Theorem}
@@ -38,24 +39,52 @@
 %\fi
 
 
-\DeclareMathOperator{\E}{\mathbb{E}}  % expectation
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator*{\arginf}{arg\,inf}
 
 \newcommand{\reals}{\mathbb{R}}
-\newcommand{\simplex}{\Delta_\Y}
+\newcommand{\posreals}{\reals_{>0}}%{\reals_{++}}
+\newcommand{\dom}{\mathrm{dom}}
+\newcommand{\defeq}{\doteq}%\vcentcolon=} % define equals
 
 \newcommand{\prop}[1]{\mathrm{prop}[#1]}
 
+\newcommand{\simplex}{\Delta_\Y}
+
+% alphabetical order, by convention
+\newcommand{\A}{\mathcal{A}}
+\newcommand{\C}{\mathcal{C}}
 \newcommand{\D}{\mathcal{D}}
+\DeclareMathOperator{\E}{\mathbb{E}}  % expectation
+%\newcommand{\E}{\mathbb{E}}
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\I}{\mathcal{I}}
+\newcommand{\N}{\mathcal{N}}
+\renewcommand{\P}{\mathcal{P}}
+\newcommand{\Q}{\mathcal{Q}}
 \newcommand{\R}{\mathcal{R}}
+\newcommand{\Sc}{\mathcal{S}}
+\newcommand{\U}{\mathcal{U}}
 \newcommand{\X}{\mathcal{X}}
 \newcommand{\Y}{\mathcal{Y}}
 
+
 \newcommand{\risk}[1]{\underline{#1}}
 \newcommand{\inprod}[2]{\langle #1, #2 \rangle}%\mathrm{int}(#1)}
+\newcommand{\inter}[1]{\mathring{#1}}%\mathrm{int}(#1)}
+%\newcommand{\expectedv}[3]{\overline{#1}(#2,#3)}
+\newcommand{\expectedv}[3]{\E_{Y\sim{#3}} {#1}(#2,Y)}
 \newcommand{\toto}{\rightrightarrows}
+\newcommand{\strip}{\mathrm{strip}}
+\newcommand{\trim}{\mathrm{trim}}
+\newcommand{\fplc}{finite-piecewise-linear and convex\xspace} %xspace for use in text
+\newcommand{\conv}{\mathrm{conv}}
+\newcommand{\indopp}{\bar{\mathbbm{1}}}
+\newcommand{\ones}{\mathbbm{1}}
+% \DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+
+\newcommand{\regret}[3]{R_{#1}(#2,#3)}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -100,7 +129,8 @@ Mention that the techniques focus on the ``conditional problem''.
 \paragraph{Target problems.}
 We consider supervised machine learning problems where data points have features in $\X$ and labels in $\Y$, a finite space.
 The \emph{target problem} is to learn a hypothesis mapping $\X$ to a finite \emph{report (or prediction) space} $\R$, possibly different from $\Y$.
-For example, in classification with an abstain option, $\R = \Y \cup \{\bot\}$ where $\bot$ represents abstaining from choosing a label.
+For example, standard binary classification has $\Y = \R = \{-1,+1\}$.
+In classification with an abstain option, $\R = \Y \cup \{\bot\}$ where $\bot$ represents abstaining from choosing a label.
 In a ranking problem, $\R$ is the set of all permutations of $\Y$.
 
 We suppose the target problem is specified by the \emph{target loss} $\ell:\R\to\reals^\Y_+$, which maps a report (prediction) $r \in \R$ to the vector $\ell(r)$ of nonnegative loss values for each label, i.e. $\ell(r) = (\ell(r)_y)_{y\in\Y}$.
@@ -113,11 +143,46 @@ Then, one minimizes it to learn a hypothesis of the form $h: \X \to \reals^d$.
 Finally, one applies a \emph{link function} $\psi: \reals^d \to \R$ that is associated with the surrogate loss.
 If the learned hypothesis predicts $h(x) \in \reals^d$, then the implied prediction for the target problem is $\psi(h(x)) \in \R$.
 
-For example, in binary classification, the target problem is to predict a label from $\R = \Y = \{-1,+1\}$ with $0$-$1$ loss.
-The surrogate prediction space is typically $\reals$ and common surrogate losses include hinge loss and logistic loss.
+For example, in binary classification, the target problem is given by $0$-$1$ loss, $\ell(r)_y = \ones\{r\neq y\}$, with surrogate losses typically defined over $\reals$.
+Common surrogate losses include hinge loss and logistic loss.
 These surrogates are typically associated with the link $\psi(u) = \mathrm{sign}(u)$, which maps negative predictions to $-1$ and nonnegative predictions to $+1$.
-In general, given a target problem, the question is how to design a ``good'' surrogate loss $L$ and link $\psi$.
-We will address one aspect of this question in this paper.
+
+\paragraph{Surrogate regret bounds.}
+Given a target problem, we would like to design surrogates which efficiently solve it.
+A standard tool to establish this efficiency is a \emph{surrogate regret bound}.
+We define the \emph{regret} of a hypothesis $h: \X \to \reals^d$ as the expected loss relative to the best possible.
+Formally, for a surrogate $L$, the regret of $h$ with respect to data distribution $\D$ is given by $R_L(h;\D) = E_{(X,Y)\sim\D} L(h(X), Y) - \inf_{h':\X\to\reals^d} E_{(X,Y)\sim\D} L(h'(X),Y)$, where the minimum is taken over all measurable functions.
+(One may equivalently assume the Bayes optimal hypothesis is in the function class.)
+The target regret of $h$ is thus $R_\ell(\psi\circ h;\D) = E_{(X,Y)\sim\D} \ell(\psi(h(X)), Y) - \inf_{h':\X\to\R} E_{(X,Y)\sim\D} \ell(h'(X),Y)$, where we recall that $\psi$ is the link function.
+
+A surrogate regret bound answers the following question: if we can minimize the true surrogate regret at a rate $f(n)$, given $n$ data points, how fast does the corresponding hypothesis $h_n$ minimize the target regret?
+Formally, a surrogate regret bound is given by a function $\zeta : \reals_+ \to \reals_+$, such that
+\begin{equation}
+  \label{eq:surrogate-regret-bound}
+  \forall \D, \forall h:\X\to\reals^d, \quad R_\ell(\psi\circ h;\D) \leq \zeta(\, R_L(h;\D) \,)~.
+\end{equation}
+A minimal requirement is that $(L,\psi)$ is \emph{consistent} with $\ell$, meaning $\zeta$ is continuous at $0$ and satisfies $\zeta(0) = 0$.
+
+Many works have tried to go beyond consistency and understand the lowest possible $\zeta$ for a given target and surrogate.
+For example, it is known that $\zeta$ \raf{examples: logistic, exponential, and hinge}.
+Some general bounds are known for classes of surrogates, e.g. \raf{refs}.
+Lacking, however, is a general understanding of what $\zeta$ one can expect from a surrogates, especially for arbitrary target losses.
+
+We give two main results to deepen this understanding.
+The first is that polyhedral (piecewise-linear and convex) surrogates always yield \emph{linear} regret bounds.
+\begin{theorem}
+  
+\end{theorem}
+The second is that sufficiently convex and smooth losses (i.e., ``non-polyhedral'') require $\zeta(\epsilon) = \Omega(\sqrt{\epsilon})$.
+\begin{theorem}
+  
+\end{theorem}
+
+\raf{Paragraph on implication for rates here.  Maybe Huber example?}
+
+
+\raf{\hrule}
+\raf{OLD STUFF starting here}
 
 \paragraph{Bayes risk, regret, and the conditional perspective.}
 In supervised machine learning, we are given a data set $S_m = ((x_1,y_1), \dots, (x_m,y_m)) \sim \D^m$, that is, $m$ points drawn i.i.d. from a distribution $\D$ on $\X \times \Y$.
