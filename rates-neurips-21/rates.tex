@@ -154,25 +154,31 @@ Given a target problem, we would like to design surrogates which efficiently sol
 A standard tool to establish this efficiency is a \emph{surrogate regret bound}.
 We define the \emph{regret} of a hypothesis $h: \X \to \reals^d$ as the expected loss relative to the best possible.
 Formally, the \emph{surrogate regret} of $h$ with respect to data distribution $\D$ is given by $R_L(h;\D) = \E_{(X,Y)\sim\D} L(h(X))_Y - \inf_{h':\X\to\reals^d} \E_{(X,Y)\sim\D} L(h'(X))_Y$, where the minimum is taken over all measurable functions.
-\botodo{Notation changed: $L(h(X),Y) \to L(h(X))_Y$.}
-\raft{Good call, though I wonder if we should ditch the vector notation for this paper, since it really makes this hard to read...}
 (One may equivalently assume the Bayes optimal hypothesis is in the function class.)
 The \emph{target regret} of $h$ is thus $R_\ell(\psi\circ h;\D) = \E_{(X,Y)\sim\D} \ell(\psi(h(X)))_Y - \inf_{h':\X\to\R} \E_{(X,Y)\sim\D} \ell(h'(X))_Y$, where we recall that $\psi$ is the link function.
 
-A surrogate regret bound answers the following question: when we minimize the surrogate regret at a rate $f(n)$, given $n$ data points, how fast does the target regret diminish?
-Formally, a surrogate regret bound is given by a function $\zeta : \reals_+ \to \reals_+$, such that
+A central concern for learning algorithms is the \emph{rate of convergence} of regret.
+If $h_n$ denotes an algorithm's output on $n$ data points, then a typical bound is of the form $R_L(h_n;\D) \leq O\left(\frac{1}{n^{\alpha}}\right)$, usually for some $\alpha$ between $\tfrac{1}{2}$ (``slow'') and $1$ (``fast'').
+However, such bounds for the surrogate leave open the question of the implied rate of convergence for the target problem.
+
+This is the question we address by studying \emph{surrogate regret bounds}.
+%A surrogate regret bound answers the following question: when we minimize the surrogate regret at a rate $f(n)$, given $n$ data points, how fast does the target regret diminish?
+Formally, we say that $(L,\psi)$ guarantees a \emph{regret transfer rate of $\zeta$} for $\ell$, for a function $\zeta : \reals_+ \to \reals_+$, if
 \begin{equation}
   \label{eq:surrogate-regret-bound}
   \forall \D, \forall h:\X\to\reals^d, \quad R_\ell(\psi\circ h;\D) \leq \zeta(\, R_L(h;\D) \,)~.
 \end{equation}
-We will refer to $\zeta$ as the \emph{rate transfer function}.
-A minimal requirement is that $(L,\psi)$ is \emph{consistent} with $\ell$, meaning $\zeta$ is continuous at $0$ and satisfies $\zeta(0) = 0$.
+We will refer to $\zeta$ as the \emph{rate transfer function} and require that $\zeta$ be continuous at $0$ with $\zeta(0)=0$.
+%A minimal requirement is that $(L,\psi)$ is \emph{consistent} with $\ell$, meaning $\zeta$ is continuous at $0$ and satisfies $\zeta(0) = 0$.
 
-\bo{I think the discussion I had on sqrt and fast rates would be useful...also the notation of $m$ data points and a hypothesis $\hat{h}_m$, and $\hat{g}_m = \psi \circ \hat{h}_m$.}
-\raf{Agreed that generalization rates should be discussed earlier, probably above (where I do introduce $n=$\#datapts; BTW, $n$ is more standard from what I've seen) as well as below in examples.}
+As a classic minimal requirement \bo{cite}, $(L,\psi)$ are \emph{consistent} for $\ell$ if there exists any regret transfer rate $\zeta$ guaranteed by $(L,\psi)$ for $\ell$.
+However, consistency alone could be compatible with slow transfer functions such as $\zeta(\epsilon) = \epsilon^{1/4}$.
+For such transfers, a ``fast'' learning rate of e.g. $O\left(\tfrac{1}{n}\right)$ in the surrogate problem would only transfer to a very slow rate of $O\left(\tfrac{1}{n^{1/4}}\right)$ in the target.
+On the other hand, we could hope to choose surrogates with as fast as a linear transfer rate, $\zeta(\epsilon) \leq C \cdot \epsilon$, implying $R_{\ell}(\psi \circ h;\D) \leq C \cdot R_L(h;\D)$.
 
-Many works have tried to go beyond consistency and understand the lowest possible $\zeta$ for a given target and surrogate.
-For example, it is known that $\zeta$ \raf{examples: logistic, exponential, and hinge}.
+\bo{I wonder if this paragraph can go elsewhere...}
+Surrogate regret bounds have been well studied in some settings.
+It is known that $\zeta$ \raf{examples: logistic, exponential, and hinge}.
 Some general bounds are known for classes of surrogates, e.g. \raf{refs}.
 Lacking, however, is a general understanding of what $\zeta$ one can expect from a surrogates, especially for arbitrary target losses.
 
@@ -180,84 +186,20 @@ We give two main results to deepen this understanding.
 The first is that polyhedral (piecewise-linear and convex) surrogates always yield \emph{linear} regret bounds.
 The second is that sufficiently convex and smooth losses (i.e., ``non-polyhedral'') require $\zeta(\epsilon) = \Omega(\sqrt{\epsilon})$.
 
-\begin{theorem}
-  Let $L$ be a polyhedral surrogate and $\psi$ a link function such that $(L,\psi)$ is consistent for a target loss $\ell$.
-  Then there exists a surrogate regret bound with a linear transfer function $\zeta$.
+\begin{theorem}[Main surrogate regret bound]
+  Let $L$ be any polyhedral surrogate and $\psi$ any link function such that $(L,\psi)$ is consistent for the target loss $\ell$.
+  Then $(L,\psi)$ guarantee a linear regret transfer rate for $\ell$.
+  %Then there exists a surrogate regret bound with a linear transfer function $\zeta$.
 \end{theorem}
-\begin{theorem}
+
+\begin{theorem}[Main counterexample]
   Let $L$ be a differentiable convex surrogate, with locally Lipschitz gradient, which is locally strongly convex.
-  If $\zeta$ is a transfer function in a surrogate regret bound for $L$ to a target loss $\ell$, then there exists $c>0$ such that, for arbitrarily small $\epsilon>0$, we have $\zeta(\epsilon) \geq c\cdot\sqrt{\epsilon}$.
+  If $L$ satisfies a regret transfer rate of $\zeta$ for a target loss $\ell$, then there exists $c>0$ such that, for arbitrarily small $\epsilon>0$, we have $\zeta(\epsilon) \geq c\cdot\sqrt{\epsilon}$.
+%  If $\zeta$ is a transfer function in a surrogate regret bound for $L$ to a target loss $\ell$, then there exists $c>0$ such that, for arbitrarily small $\epsilon>0$, we have $\zeta(\epsilon) \geq c\cdot\sqrt{\epsilon}$.
 \end{theorem}
 
 \raf{Paragraph on implication for rates here.  Maybe Huber example?}
 
-
-\raf{\hrule}
-\raf{OLD STUFF starting here}
-
-\paragraph{Bayes risk, regret, and the conditional perspective.}
-In supervised machine learning, we are given a data set $S_m = ((x_1,y_1), \dots, (x_m,y_m)) \sim \D^m$, that is, $m$ points drawn i.i.d. from a distribution $\D$ on $\X \times \Y$.
-The set of probability distributions on $\Y$ is denoted $\simplex\subseteq\reals^{\Y}_+$, represented as vectors $p$ with $\|p\|_1 = 1$.
-Write $\D_{\X}$ for the marginal distribution of $\D$ on $\X$, and for $(X,Y) \sim \D$, write $p_x \in \simplex$ for the conditional distribution on $Y$ given $X=x$.
-
-We note here that, to examine properties of loss functions $\ell(r)$ and $L(u)$, we will often abstract away from the role of the features $\X$ and the hypothesis $h$.
-That is, rather than considering $x$, $p_x$, $h(x)$, $L(h(x))$, and so on, we will often simply consider some conditional distribution $p \in \simplex$, some report (prediction) $u \in \reals^d$, its loss $L(u)$, and so on.
-
-When $Y \sim p$, we write the expected target loss of prediction $r$ as $\inprod{p}{\ell(r)}$ and the expected surrogate loss of prediction $u$ as $\inprod{p}{L(u)}$.
-The (conditional) \emph{Bayes risk} of a discrete target loss $\ell: \R \to \reals^{\Y}_+$ is the function $\risk{\ell}: \simplex \to \reals_+$ given by $\risk{\ell}(p) = \inf_{r \in \R} \inprod{p}{\ell(r)}$.
-Similarly, the Bayes risk of a surrogate $L: \reals^d \to \reals^{\Y}_+$ is given by $\risk{L}(p) = \inf_{u\in\reals^d} \inprod{p}{L(u)}$.
-
-Given $\ell$, the target problem is to output a hypothesis $g: \X \to \R$ minimizing \emph{target risk} $\E_{X \sim \D_\X} \inprod{p_X}{\ell(g(X))}$.
-We define the \emph{excess risk} or \emph{regret} of $g$ as the risk of $g$, minus the risk of the Bayes optimal predictor:
-\begin{definition}[Regret] \label{def:full-regret}
-  For a loss $\ell: \R \to \reals^{\Y}_+$ and distribution $p \in \simplex$, the \emph{conditional regret} of a prediction $r \in \R$ is given by $R_{\ell}(r,p) = \inprod{p}{\ell(r)} - \risk{\ell}(p)$. \bo{Or just call it regret?}
-
-  In slight abuse of notation, the \emph{regret} of a hypothesis $g: \X \to \R$ is written $R_{\ell}(g; \D) = \E_{X \sim \D_{\X}} R_{\ell}(g(X), p_X)$.
-\end{definition}
-Naturally, the same definitions hold for the surrogate problem of minimizing \emph{surrogate risk} $\E_{X \sim \D_\X} \inprod{p_X}{L(h(x))}$, i.e. we have conditional regret $R_L(u,p) = \inprod{p}{L(u)} - \risk{L}(p)$ and we have regret $R_L(h;\D) = E_{X \sim \D_{\X}} R_L(h(X), p_X)$.
-
-\bo{We are assuming Bayes in class here. In the sense that usually regret or excess risk is defined as excess beyond the best in the class. Should comment about it, maybe discuss!}
-
-\paragraph{Surrogate transfer bounds.}
-Central to supervised machine learning is the \emph{rate of convergence} of regret as a function of $m$, the number of data points.
-If a learning algorithm's output is denoted $\hat{h}_m$ on $m$ data points, then a typical bound is of the form $R_L(\hat{h}_m;\D) \leq O\left(\frac{1}{m^{\alpha}}\right)$ with high probability.
-If $\alpha = \frac{1}{2}$, then regret tends to zero with the inverse square root of the dataset size; this is considered a ``slow rate'' and is guaranteed e.g. by classical PAC learning bounds..
-On the other hand, $\alpha = 1$ is considered a ``fast rate'' and is achieveable under a variety of conditions \bo{cite}.
-
-However, much less is known about the relationship between surrogate and target regret.
-Given a convergence rate for surrogate regret $R_L(\hat{h}_m;\D)$, what is the implied convergence rate for target regret $R_{\ell}(\hat{g}_m;\D)$, where $\hat{g}_m(x) = \psi(\hat{h}_m(x))$?
-\bo{Prior work to mention here?}
-
-To systematize the investigation of this problem, we introduce \emph{rate transfer bounds}.
-
-\begin{definition}[Rate Transfer]\label{def:transfer}
-  A function $\zeta : \reals_+ \to \reals_+$ which is continuous at $0$ and satisfies $\zeta(0) = 0$ is called a \emph{rate transfer function.}
-	Given a target $\ell:\R\to\reals^\Y$ and rate transfer function $\zeta$, we say surrogate $L:\reals^d\to\reals^\Y$ and link $\psi : \reals^d \to \R$ satisfy a \emph{conditional rate transfer} of $\zeta$ for $\ell$ if
-  \begin{equation}
-    \label{eq:conditional-transfer}
-    \forall p\in\simplex, \forall u\in\reals^d, \quad R_\ell(\psi(u),p) \leq \zeta(\, R_L(u,p) \,)~.
-  \end{equation}
-  We say $(L,\psi)$ satisfy a \emph{rate transfer} of $\zeta$ for $\ell$ if
-  \begin{equation}
-    \label{eq:transfer}
-    \forall \D, \forall h, \quad R_\ell(\psi \circ h;\D) \leq \zeta(\, R_L(h;\D) \,)~.
-  \end{equation}
-\end{definition}
-In particular, we say $(L,\psi)$ satisfy a \emph{linear} rate transfer for $\ell$ if $\zeta(t) \leq Ct$ for some $C > 0$.
-Such a transfer implies $R_{\ell}(\psi \circ h;\D) \leq C R_L(h;\D)$, i.e. the convergence rate of a surrogate learning problem transfers directly to the target problem.
-This appears to us to be the best one can hope for, except perhaps for some strange artificial construction.
-
-We emphasize that (a) we are interested in the behavior of the transfer function close to zero, and (b) a smaller transfer function (close to zero) is better.
-Thus, for example, a transfer of $O(\sqrt{\cdot})$ is \emph{worse} than a linear transfer rate -- quadratically worse!
-A fast-rate surrogate learning algorithm with an $O(\sqrt{\cdot})$ transfer function results in a slow rate guarantee for the target problem:
-  \[ R_{\ell}(\psi \circ h; \D) ~\leq~ O\left(\sqrt{R_L(h;\D)}\right) ~\leq~ O\left(\sqrt{\frac{1}{m}}\right) . \]
-
-\bo{mention prior work on specific surrogates, if any?}
-The general research program is to understand when surrogates can guarantee good transfer rates.
-While it seems very difficult to characterize the transfer rate of an arbitrary loss function, we will be able to make significant progress for an important subclass: \emph{polyhedral} losses, discussed next.
-
-\vskip1em
-\bo{I AM HERE. 2021-05-12 11am}
 
 \paragraph{Polyhedral surrogates.}
 We say a surrogate $L$ is \emph{polyhedral} if it is piecewise linear and convex.
