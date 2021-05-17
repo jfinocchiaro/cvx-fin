@@ -1,7 +1,7 @@
-\documentclass{article} % Anonymized submission
+\documentclass[11pt]{article} % Anonymized submission
 % \renewcommand{\includegraphics}[1][1]{}
 
-\usepackage{neurips_2021}
+\usepackage[nonatbib]{neurips_2021}
 
 % The following packages will be automatically loaded:
 % amsmath, amssymb, natbib, graphicx, url, algorithm2e
@@ -15,21 +15,32 @@
 \usepackage{microtype}      % microtypography
 \usepackage{graphicx}
 
-\PassOptionsToPackage{numbers, sort, compress}{natbib}
+\usepackage[numbers, sort, compress]{natbib}
 
 \usepackage{mathtools, verbatim}
 %\usepackage[thmmarks, thref, amsthm]{ntheorem}
-\usepackage{color}
+%\usepackage{color}
+\usepackage[dvipsnames]{xcolor}
 \definecolor{darkblue}{rgb}{0.0,0.0,0.2}
 \hypersetup{colorlinks,breaklinks,
 	linkcolor=darkblue,urlcolor=darkblue,
 	anchorcolor=darkblue,citecolor=darkblue}
+\definecolor{myblue}{rgb}{0,0.3,0.8} \definecolor{myorange}{rgb}{0.9,0.5,0}
 \usepackage{wrapfig}
 \usepackage[small]{caption}
 \usepackage[colorinlistoftodos,textsize=tiny]{todonotes} % need xargs for below
 %\usepackage{accents}
 \usepackage{bbm}
 \usepackage{xspace}
+
+\usepackage{tikz,pgfplots,tikz-3dplot}
+\usetikzlibrary{arrows.meta,shapes.misc,positioning,fit,calc,intersections,through,decorations.markings}
+\tdplotsetmaincoords{55}{135}        % for simplex diagrams
+
+\tikzstyle{cell}=[dashed,thick]
+\tikzstyle{simplex}=[thick]
+\newcommand{\tikzfigscale}{2.2}
+\newcommand{\placefiglabel}[1]{\node at (1.1,0,1.7) {#1};}
 \usetikzlibrary{arrows}
 \usetikzlibrary{shapes}
 
@@ -485,6 +496,11 @@ We then observe that Definition~\ref{def:consistent-ell} is subsumed by Definiti
 %\botodo{On the right side, is measurable enough? I guess we need $\psi \circ f$ to be measurable...on the other hand, we don't want to constrain $f$ based on $\psi$. Do we need a condition on $\psi$ that guarantees $\psi \circ f$ is measurable?}
 %\raft{I think okay as written -- if $\psi$ is restrictive, you won't achieve consistency.  And typically $f$ is much more expressive anyway, e.g. $\reals^\Y$ for classification.}
 
+\jessie{If, instead of a target loss $\ell$, we have a target property as in Quadrants 2 and 4, we might want to equivalently define consistency with respect to a property.  
+Intuitively, this definition is similar, but is equipped with a metric-like function to measure equivalence to a target property value.  
+See Appendix~\ref{} for our precise definition, which we show is equivalent to consistency with respect to target loss.
+This allows us to ``translate'' results about target losses to be about the properties these losses elicit, and therefore apply our results to all four Quadrants.}\jessiet{Suggestion: replace following text up to Lemma 1 with this.}
+
 Instead of a target loss $\ell$, one may want to learn a target property, i.e. a conditional statistic such as the expected value, variance, or entropy.
 In this case, following the tradition in the statistics literature on conditional estimation~\citep{gyorfi2006distribution,fan1998efficient,ruppert1997local},
 we formalize consistency as converging to the correct conditional estimates of the property.
@@ -514,7 +530,7 @@ As the main focus of this paper is lower bounds on the prediction dimension, i.e
 
 Given a target loss $\ell$, we can define a statistic $\gamma$, the property it elicits.
 Intuitively, consistency of a surrogate $L$ with respect to $\ell$ and $\gamma$ are equivalent, i.e. in both cases estimates should converge to values that minimize $\ell$-loss.
-We formalize this by letting $\propdis$ be the $\ell$-regret, yielding Lemma~\ref{lem:consistent-loss-implies-prop}, proven in Appendix~\ref{app:misc-omitted-proofs}.
+We formalize this by letting $\propdis$ be the $\ell$-regret, yielding Lemma~\ref{lem:consistent-loss-implies-prop}, proven in Appendix~\ref{app:misc-omitted-proofs}.\jessiet{Move this proof if property consistency is moving to its own appendix as well.}
 %If $\gamma$ is a property elicited by a target loss $\ell$, then taking $\propdis$ to be the $\ell$-regret makes the two definitions are equivalent, as stated in Lemma~\ref{lem:consistent-loss-implies-prop}, proven in Appendix~\ref{app:misc-omitted-proofs}.% for the appropriate choice of $\propdis$.
 
 
@@ -688,117 +704,177 @@ If there is no $d$-flat $F$ with $p \in F \subseteq \gamma_r$, then $\conscvx(\g
 %This witness $W$ takes the form of a matrix whose columns are selection of subgradients of $L$, and thus $u$ must also be optimal for any other distribution in the flat defined by the kernel of $W$.
 %As we show next, the original statement of~\citet[Theorem 16]{ramaswamy2016convex}, which uses the stronger notion of calibration and thus applies only to discrete target losses, actually follows as a special case of Theorem~\ref{thm:cvx-flats}. \jessiet{How to rephrase this?}
 
-\section{Discrete-valued predictions}\label{sec:finite-calib}
+\section{Illustration: geometric intuition for the four quadrants}
+We can apply Lemma~\ref{lem:convex-flats-inf-dim} to construct lower bounds on convex consistency dimension for targets across all four quadrants.
+This is demonstrated in Figure~\ref{tab:illustrate-quadrant-apps}.
 
-The main known technique for lower bounds on surrogate dimensions is given by \citet{ramaswamy2016convex} for the Quadrant 1 (target loss and discrete predictions).
-The proof heavily builds around the ``limits of sequences'' in the definition of calibration.
-By restricting slightly to the broad class of minimizable losses $\Lcvx$, we show their bound follows relatively directly from Corollary~\ref{cor:Pcodim-flat-elic-relint-prop}.
-(We conjecture that the minimizability restriction to $\Lcvx$ can be lifted; see \S~\ref{sec:conclusions}.)
-%\citet{ramaswamy2016convex} give lower bounds on the convex calibration dimension, or equivalently the dimension of a convex and consistent surrogate\jessiet{should probably cite the original calibration iff consistent in discrete setting result; have it earlier in the paper now. \bo{Ideally we've explained the connection earlier and don't need to say it here.}}, by constructing what they call the subspace of feasible dimensions and giving bounds in terms of its dimension.
-\citet{ramaswamy2016convex} construct what they call the subspace of feasible dimensions and give bounds in terms of its dimension.
-\begin{definition}[Subspace of feasible directions]\label{def:subspace-feas}
-	The \emph{subspace of feasible directions} $\Sc_\C(p)$ of a convex set $\C \subseteq \reals^n$ at $p \in \C$ is $\Sc_\C(p) = \{ v \in \reals^n : \exists \epsilon_0 > 0 $ such that $p + \epsilon v \in \C \; \forall \epsilon \in (-\epsilon_0,\epsilon_0) \}$.
-\end{definition}
+\begin{figure}
+  \begin{tikzpicture} [scale=\tikzfigscale, thick, tdplot_main_coords]
+% standard tikz coordinate definition using x, y, z coords
+\coordinate (orig) at (0,0,0);
 
-\citet{ramaswamy2016convex} gives a lower bound on the dimensionality of all consistent convex surrogates, i.e. $\conscvx(\ell) \geq \|p\|_0 - \dim(\Sc_{\gamma_r}(p)) - 1$ for all $p$ and $r \in \gamma(p)$, particularly in the setting where one is given a discrete prediction problem and target loss over finite outcomes.
-It turns out that the subspace of feasible directions is essentially a special case of a flat described by Lemma~\ref{lem:convex-flats-inf-dim}.
-So, by making a slight restriction to the class of minimizable convex surrogates $\Lcvx$, we can derive this lower bound from our general technique in a way that we find shorter and simpler.
-%Due to the infimum in the definition of calibration (their proof tool), the original proof requires careful taking of sequences and the approximate subdifferentials, while indirect elicitation allows us to work with exact minimizers of the surrogate.
+\pgfmathsetmacro{\ph}{0.54}
+\pgfmathsetmacro{\pm}{0.23}
+\pgfmathsetmacro{\pl}{0.23}
+\coordinate (p) at (\ph,\pm,\pl);
+\coordinate[label=below:${y=-1\!\!\!\!}$] (h) at (1,0,0);
+\coordinate[label=below:${y=1}$] (m) at (0,1,0);
+\coordinate[label=above:${y=0}$] (l) at (0,0,1);
 
-%\jessie{I think this Lemma can be moved to the Appendix; just leaving it here for now to make sure it gets eyes on it.}
-%\begin{lemma}\label{lem:Pcodim-codim-finite}
-%	Suppose we are given a property $\gamma: \P \toto \R$, distribution $p \in \P$ and report $r$ such that $r \in \gamma(p)$, where $\P$ is defined over finite $\Y$.
-%	For any flat $F$ such that $p \in F \subseteq \gamma_r$ with $\Pcodim(F) \leq d \leq n$, there is a matrix $W \in \reals^{d \times n}$ such that $\{p \in \P : Wp = \vec 0\} = F$ and $\codim(W) = \rank(W) \leq d$.
-%\end{lemma}
-%\begin{proof}
-%	First, let us construct $W$ by taking the function $V$ constructed in the finite $\Y$ case of the proof of Theorem~\ref{lem:convex-flats-inf-dim} (recall $F = \zeros{V}$).
-%	Construct the $y^{th}$ column of $W$ to be $V(y)$ for each $y \in \Y$.
-%	
-%	We can observe that $Wp = \vec 0 \iff \E_p V = \vec 0$ by definition of expectation and its linearity, so $F = \{p \in \P : \E_p V = \vec 0\} = \{p \in \P : Wp = \vec 0\}$. 
-%	Moreover, by the rank-nullity theorem, we have $\codim(W) = \rank(W) \leq d$.
-%\end{proof}
+% draw axes
+\draw[simplex] (h) -- (m) -- (l) -- (h);
 
-\begin{restatable}[\cite{ramaswamy2016convex} Theorem 18]{corollary}{hariresult}\label{cor:fsd-bound}
-  Let $\ell:\R \times \Y \to \reals$ be a discrete loss eliciting $\gamma:\simplex \toto \R$ with $\Y$ finite.
-  % , and let $L \in \Lcvx_d$ be consistent with respect to $\ell$.
-  Then for all $p \in \simplex$ and $r \in \gamma(p)$,
-  \begin{equation}
-    \conscvx(\gamma) \geq \|p\|_0 - \dim(\Sc_{\gamma_r}(p)) - 1~.~
-    % d \geq \|p\|_0 - \dim(\Sc_{\gamma_r}(p)) - 1~.~
-  \end{equation}
-\end{restatable}
-\begin{proof}[Sketch]
-  If $\conscvx(\gamma) \leq d$, then there is a $L \in \Lcvx_d$ so that $L$ is consistent with respect to $\gamma$, and in turn, indirectly elicits $\gamma$.
-  Lemma~\ref{lem:convex-flats-inf-dim} says that there is some $d$-flat $F = \zeros{V}$ such that $p \in F \subseteq \gamma_r$.
-  In particular, if $p \in \relint{\simplex}$, we can see $\dim(F) = \dim(\Sc_{\gamma_r}(p))$.
-  Since $\affhull(\simplex)$ has dimension $|\Y| - 1 = \|p\|_0 - 1$, by rank-nullity and $\rank(V) \leq d$ (more precisely, the corresponding linear map $q\mapsto \E_q V$) we have $d \geq \|p\|_0-1-\dim(\Sc_{\gamma_r}(p))$.
-  
-  When $p \not \in \relint{\simplex}$, we can project down to the subsimplex on the support of $p$, again of dimension $\|p\|_0 - 1$, and modify $L$ and $\ell$ accordingly.
-  Now $p$ is in the relative interior of this subsimplex, so the above gives $\conscvx(\gamma) \geq \|p\|_0 - 1 - \dim(\Sc_{\gamma_r}(p))$, where now $\Sc$ is relative to $\reals^{\supp(p)}$.
-  Finally, the feasible subspace dimension in the projected space is the same as in the original space because of $p$'s location on a face of $\simplex$.
-\end{proof}
+\begin{scope}
+\clip (h) -- (m) -- (l) -- (h);
+\foreach \c in {0,0.05,...,1}
+{
+	\pgfmathsetmacro\aa{\c}
+	\coordinate (A) at ($(\aa,1-\aa,0)$);
+	\coordinate (B) at ($(\aa,1-\aa,2)$);
+	\draw[myblue,thin] (A) -- (B);
+}
+\draw[orange, very thick,dashed] (0.3,0.7,0) -- (0.3,0.7,2);
+%\draw[orange, very thick] (0.7,0.3,0) -- (0.7,0.3,2);
+\end{scope}
+\node[inner sep=2pt] (levset1) at (0.3,0.7,-.3) {$\Gamma_{0.4}\!\!$};
+%\node[inner sep=2pt] (levset2) at (0.7,0.3,-.3) {$\Gamma_{\!\!-0.4}\!\!\!\!$};
+%\draw[-latex,thin] (levset2) edge[in=270,out=90] (0.7,0.3,0);
+\draw[-latex,thin] (levset1) edge[in=270,out=90] (0.3,0.7,0);
+\placefiglabel{(Q3)}
+\end{tikzpicture}
+\hfill
+\begin{tikzpicture} [scale=\tikzfigscale, thick, tdplot_main_coords]
+% standard tikz coordinate definition using x, y, z coords
+\coordinate (orig) at (0,0,0);
 
-There are some cases where the bound provided by Corollaries~\ref{cor:Pcodim-flat-single-val-prop} and~\ref{cor:Pcodim-flat-elic-relint-prop} is strictly tighter than the bound provided by feasible subspace dimension in Corollary~\ref{cor:fsd-bound}.
-For an example of how Corollary~\ref{cor:Pcodim-flat-single-val-prop} applies to a discrete property for which there is no target loss -- a non-elicitable property, i.e. Quadrant 2, which is not considered by \citet{ramaswamy2018consistent} -- we refer the reader to Appendix~\ref{app:omitted-examples}.
+\pgfmathsetmacro{\ph}{0.54}
+\pgfmathsetmacro{\pm}{0.23}
+\pgfmathsetmacro{\pl}{0.23}
+\coordinate (p) at (\ph,\pm,\pl);
+\coordinate[label=below:${y=-1\!\!\!\!}$] (h) at (1,0,0);
+\coordinate[label=below:${y=1}$] (m) at (0,1,0);
+\coordinate[label=above:${y=0}$] (l) at (0,0,1);
 
-\paragraph{Example: High-confidence classification.}\label{subsec:examples-finite}
-Given the target loss $\ell^{abs}(r,y) := \Ind{r \not \in \{y, \bot\}} + (1/2)\Ind{r = \bot}$,  we can consider the \emph{abstain property} it elicits, where one predicts the most likely outcome $y$ if $Pr[Y=y|x] \geq 1/2$ and ``abstain'' by predicting $\bot$ otherwise.
-\citet{ramaswamy2016convex} present a convex surrogate for the abstain loss that takes as input a prediction whose dimension is logarithmic in the number of outcomes, yielding new upper bounds on $\conscvx(\ell^{abs})$ which are an exponential improvement over previous results, e.g.,~\cite{crammer2001algorithmic}.
+% draw axes
+\draw[simplex] (h) -- (m) -- (l) -- (h);
 
-To lower bound the dimension of convex surrogates, we can consider two different distributions; in the first, our bound yields a strict gap over the feasible subspace dimension bound, and in the second, the bounds are equal.
-First, we choose $p = \bullet$ to be the uniform distribution (see Figure~\ref{fig:fsd-flats-abstain}).
-In this case, the bound by feasible subspace dimension yields $\conscvx(\ell^{abs}) \geq 3 - 2 - 1 = 0$, as the feasible subspace dimension is $2$ since we are on the relative interior of the level set and simplex, as shown in Figure~\ref{fig:fsd-flats-abstain} (L).
+\begin{scope}
+\clip (h) -- (m) -- (l) -- (h);
+\foreach \c in {0,0.1,...,1}
+{
+	\pgfmathsetmacro\aa{0.5*(sqrt(1-\c)+1)}
+	\pgfmathsetmacro\bb{0.5*\c}
+	\coordinate (A) at ($(\aa,1-\aa,0)$);
+	\coordinate (B) at ($(1-\aa,\aa,0)$);
+	\coordinate (C) at ($(\bb,\bb,1-2*\bb)$);
+	\draw[myblue,thin] (C) parabola (A);
+	\draw[myblue,thin] (C) parabola (B);
+}
+\def\c{0.8}
+\pgfmathsetmacro\aa{0.5*(sqrt(1-\c)+1)}
+\pgfmathsetmacro\bb{0.5*\c}
+\coordinate (A) at ($(\aa,1-\aa,0)$);
+\coordinate (B) at ($(1-\aa,\aa,0)$);
+\coordinate (C) at ($(\bb,\bb,1-2*\bb)$);
+\draw[myorange, very thick] (C) parabola (A);
+\draw[myorange, very thick] (C) parabola (B);
+\draw[myorange, dashed] (A) -- (0,1/3,2/3);
+\end{scope}
+\def\c{0.8}
+\pgfmathsetmacro\aa{0.5*(sqrt(1-\c)+1)}
+\pgfmathsetmacro\bb{0.5*\c}
+\node (levset) at (0.5,0.5,-.3) {$\Gamma_{0.8}$};
+\draw[-latex,thin] (levset) edge[in=270,out=180] ($(\aa,1-\aa,0)$);
+\draw[-latex,thin] (levset) edge[in=270,out=0] ($(1-\aa,\aa,0)$);
+\placefiglabel{(Q4)}
+\end{tikzpicture}
+\hfill
+\begin{tikzpicture} [scale=\tikzfigscale, thick, tdplot_main_coords]
+% standard tikz coordinate definition using x, y, z coords
+\coordinate (orig) at (0,0,0);
 
-%% Bo: resolved on Jun 1, afternoon
-%\raft{This is a bit of a strawman, since the FSD technique as a whole gives $\geq 1$ here, for e.g.\ $p=(1/4,1/4,1/2)$; let's maybe discuss both $p$'s for both techniques?}\jessiet{Added both distributions.}
+\pgfmathsetmacro{\ph}{0.54}
+\pgfmathsetmacro{\pm}{0.23}
+\pgfmathsetmacro{\pl}{0.23}
+\coordinate (p) at (\ph,\pm,\pl);
+\coordinate (uniform) at (1/3,1/3,1/3);
+\coordinate[label=below:${y=-1\!\!\!\!}$] (h) at (1,0,0);
+\coordinate[label=below:${y=1}$] (m) at (0,1,0);
+\coordinate[label=above:${y=0}$] (l) at (0,0,1);
 
-However, consider any $1$-flat containing $\bullet$.
-When intersected with the simplex, one can see that any line (a $1$-flat, since $\bullet \in \relint{\simplex}$) in the simplex through $\bullet$ also leaves the cell $\gamma_\bot$, which contains $p$.
-See Figure~\ref{fig:fsd-flats-abstain} (R) for intuition; a $1$-flat through $p \in \relint{\simplex}$ would be a line in such a figure.
-Therefore, we have no $1$-flat containing $p$ staying in $\gamma_\bot$, so we obtain a better lower bound, $\conscvx(\ell^{abs}) \geq 2$.
-Combining this with the upper bounds given by~\cite{ramaswamy2018consistent}, we observe the bound $\conscvx(\ell^{abs}) = 2$ is tight in this case with $|\Y|=3$.
+% draw axes
+\draw[simplex] (h) -- (m) -- (l) -- (h);
 
-Our bounds sometimes match those of~\citep{ramaswamy2016convex}; consider the distribution ${\color{blue}\star} = (1/4, 1/4, 1/2)$, shown in Figure~\ref{fig:fsd-flats-abstain}.
-The feasible subspace dimension of both $\gamma_\bot$ and $\gamma_3$ at ${\color{blue}\star}$ is $1$, since one only moves toward the distributions $(0,1/2, 1/2)$ and $(1/2, 0, 1/2)$ without leaving the level sets, and the three points are collinear in $\affhull(\simplex)$, suggesting $\Sc_{\gamma_\bot}(q) = 1$.  
-This yields $\conscvx(\ell^{abs}) \geq 3 - 1- 1 = 1$.
-The same line segment defines a flat contained in both $\gamma_\bot$ and $\gamma_3$, so we have $\conscvx(\ell^{abs}) \geq 1$ by Corollary~\ref{cor:Pcodim-flat-elic-relint-prop}, matching the feasible subspace dimension bound.
+\begin{scope}
+\clip (h) -- (m) -- (l) -- (h);
+\draw[myblue] (1/2,1/2,0) -- (1/2, 0, 1/2);
+\draw[myblue] (0,1/2,1/2) -- (1/2, 0, 1/2);
+\draw[myblue] (0,1/2,1/2) -- (1/2,1/2, 0);
+\draw[myorange, dashed] (1/2,0,1/2) -- (0,1,0);
+\draw[myorange, dashed] (2/3,1/3,0) -- (0,1/3,2/3);
+\node (uniformdot) at (1/3,1/3,1/3) {$\bullet$};
+%\draw[orange, very thick] (0.7,0.3,0) -- (0.7,0.3,2);
+\end{scope}
+\node[inner sep=2pt] (levset1) at (3/4,1/8,1/8) {$\Gamma_{1}$};
+\node[inner sep=2pt] (levsetabs) at (5/12,5/12,1/6) {$\Gamma_{\bot}$};
+%\draw[-latex,thin] (levset2) edge[in=270,out=90] (0.7,0.3,0);
+%\draw[-latex,thin] (levset1) edge[in=270,out=90] (0.3,0.7,0);
+\placefiglabel{(Q1)}
+\end{tikzpicture}
+\hfill
+\begin{tikzpicture} [scale=\tikzfigscale, thick, tdplot_main_coords]
+% standard tikz coordinate definition using x, y, z coords
+\coordinate (orig) at (0,0,0);
 
-Bounds using $d$-flats appear to work well at distributions where previous bounds via feasible subspace dimension would have been vacuous.
-In essence, flats allow us a ``global'' view of the property we are eliciting, while the feasible subspace method only permits a ``local'' look at the property, so we find our method works better for distributions in $\relint\simplex$.
+\pgfmathsetmacro{\ph}{0.54}
+\pgfmathsetmacro{\pm}{0.23}
+\pgfmathsetmacro{\pl}{0.23}
+\coordinate (p) at (\ph,\pm,\pl);
+\coordinate (uniform) at (1/3,1/3,1/3);
+\coordinate[label=below:${y=-1\!\!\!\!}$] (h) at (1,0,0);
+\coordinate[label=below:${y=1}$] (m) at (0,1,0);
+\coordinate[label=above:${y=0}$] (l) at (0,0,1);
 
+% draw axes
+\draw[simplex] (h) -- (m) -- (l) -- (h);
 
-%\begin{figure}[ht]
-%\begin{minipage}{0.45\linewidth}
-%	\centering
-%	\includegraphics[width=\linewidth]{tikz/fsd-bound.pdf}
-%	\caption{%Since the uniform distribution is in the relative interior of the simplex and the level set $\gamma_\bot$, 
-%          $\dim(\Sc_{\gamma_\bot}($\textbullet$)) = 2$ and $\dim(\Sc_{\gamma_\bot}({\color{blue}\star})) = 1$.}
-%	\label{fig:fsd-bound}
-%\end{minipage}
-%\hfill
-%\begin{minipage}{0.45\linewidth}
-%	\centering
-%	\includegraphics[width=\linewidth]{tikz/flats-bound.pdf}
-%	\caption{Any $1$-flat $F$ through \textbullet leaves $\gamma_\bot$.
-%	However, there is a $1$-flat containing ${\color{blue}\star}$ that is a subset of $\gamma_\bot$ and $\gamma_3$.
-%	}
-%	\label{fig:flats-bound}
-%\end{minipage}
+\begin{scope}
+\clip (h) -- (m) -- (l) -- (h);
+\draw[myblue,thin] (1/4,0,3/4) -- (0,1/4, 3/4);
+\draw[myblue,thin] (1/8,1/8,3/4) -- (1/2, 1/2,0);
+\def\e{1/16};
+\draw[orange, dashed] (1/8 + \e, 0, 1 - 1/8 - \e) -- (0, 1 - 1/8 - \e, 1/8 + \e);
+\draw[orange, dashed] (1/2 + \e, 1/2- \e, 0) -- (\e, 0,1- \e);
+\node (point) at (1/8 + \e, 1/8 -\e/2, 3/4 - \e/2) {$\bullet$};
+%\draw[orange, very thick] (0.3,0.7,0) -- (0.3,0.7,2);
+%\draw[orange, very thick] (0.7,0.3,0) -- (0.7,0.3,2);
+\end{scope}
+\node[inner sep=2pt] (levsetmin1) at (1/2, 1/4,1/4) {$\Gamma_{-1}$};
+\node[inner sep=2pt] (levset1) at (1/4,1/2,1/4) {$\Gamma_{1}\!\!$};
+%\draw[-latex,thin] (levset2) edge[in=270,out=90] (0.7,0.3,0);
+%\draw[-latex,thin] (levset1) edge[in=270,out=90] (0.3,0.7,0);
+\placefiglabel{(Q2)}
+\end{tikzpicture}
+\end{figure}
+%\end{tabular}\label{tab:quadrants-simplices}
 %\end{figure}
 
+\section{Breadth of framework: Discrete-valued predictions}\label{sec:discrete-predictions-refactored}
+In discrete prediction settings (Quadrants 1 and 2), we can apply Lemma~\ref{lem:convex-flats-inf-dim} to observe lower bounds on convex prediction dimension that subsume previous bounds given by~\citet{ramaswamy2016convex}.
+Their lower bound 
+%(the only non-trivial one to our knowledge) 
+is given by the co-dimension of the \emph{feasible subspace dimension} $\Sc_\C(p)$ of a convex set $\C$ at a given distribution $p$ such that $p \in \C$, which is loosely the highest dimension subspace of $\C$ containing a neighborhood around $p$.
+The feasible subspace dimension uses ``local'' information of the property to construct lower bounds, while $d$-flats allow us to also use ``global'' information, while subsuming the previous results about local information.
 
-\begin{figure}[htb]
-	\centering
-	\begin{tabular}{cc}
-%		\includegraphics[width=.35\textwidth]{tikz/fsd-bound.pdf} &
-%		\includegraphics[width=.35\textwidth]{tikz/flats-bound.pdf} \\
-	\end{tabular}
-	\caption{(Left) Feasible subspace dimension $\Sc_{\gamma_\bot}(\bullet) = 2$ and $\Sc_{\gamma_\bot}({\color{blue}\star}) = 1$, giving the bound $\conscvx(\ell^{abs}) \geq 3- 1-1 = 1$.
-          (Right) No $1$-flat through $\bullet$ (a line since $\bullet \in \relint{\simplex})$  stays fully contained in $\gamma_\bot$, so $\conscvx(\ell^{abs}) \geq 2$.}
-	\label{fig:fsd-flats-abstain}
-\end{figure}
+\begin{proposition}\label{prop:discrete-bound-subsumes-ramaswamy}
+	Suppose we are given a \jessie{elicitable?} property $\gamma: \simplex \toto \R$.
+	Fix $p \in \simplex$ and take $r \in \R$ such that $p \in \gamma_r$.  
+	If there is a $d$-flat $F$ such that $p \in F \subseteq \gamma_r$, then $\codim(\Sc_{\gamma_r}(p)) \leq d$.
+\end{proposition}
 
-\section{Continuous-valued predictions}\label{sec:contin-consis}
+In Appendix~\ref{sec:finite-calib}, we show examples where the $d$-flats bound both matches the feasible subspace dimension bound and strictly improves it in order to emphasize that our result is strictly broader.
+
+\section{Strength of framework: Continuous-valued predictions}\label{sec:contin-consis}
 
 %commented out Jun 1 2020
 %Theorem~\ref{thm:consistent-implies-indir-elic} allows us to use convex elicitation complexity as a tool to understand efficiency of consistent convex surrogates for a given property, which is more often what is given in a continuous estimation setting.
@@ -966,7 +1042,7 @@ Moreover, the practical reason why consistency is desired is to ensure the guara
 %adam, nishant, nsf grants/fellowship
 %\end{ack}
 
-%\bibliographystyle{plainnat}
+\bibliographystyle{plainnat}
 \bibliography{diss,extra}
 
 \newpage
@@ -1154,6 +1230,117 @@ Moreover, we have calibration implying indirect elicitation.
 \end{proof}
 
 Combining the two results, we can observe the result of Theorem~\ref{thm:consistent-implies-indir-elic} another way: \emph{through calibration}.
+
+\section{Previous lower bounds and comparisons}\label{sec:finite-calib}
+
+The main known technique for lower bounds on surrogate dimensions is given by \citet{ramaswamy2016convex} for the Quadrant 1 (target loss and discrete predictions).
+The proof heavily builds around the ``limits of sequences'' in the definition of calibration.
+By restricting slightly to the broad class of minimizable losses $\Lcvx$, we show their bound follows relatively directly from Corollary~\ref{cor:Pcodim-flat-elic-relint-prop}.
+(We conjecture that the minimizability restriction to $\Lcvx$ can be lifted; see \S~\ref{sec:conclusions}.)
+%\citet{ramaswamy2016convex} give lower bounds on the convex calibration dimension, or equivalently the dimension of a convex and consistent surrogate\jessiet{should probably cite the original calibration iff consistent in discrete setting result; have it earlier in the paper now. \bo{Ideally we've explained the connection earlier and don't need to say it here.}}, by constructing what they call the subspace of feasible dimensions and giving bounds in terms of its dimension.
+\citet{ramaswamy2016convex} construct what they call the subspace of feasible dimensions and give bounds in terms of its dimension.
+\begin{definition}[Subspace of feasible directions]\label{def:subspace-feas}
+	The \emph{subspace of feasible directions} $\Sc_\C(p)$ of a convex set $\C \subseteq \reals^n$ at $p \in \C$ is $\Sc_\C(p) = \{ v \in \reals^n : \exists \epsilon_0 > 0 $ such that $p + \epsilon v \in \C \; \forall \epsilon \in (-\epsilon_0,\epsilon_0) \}$.
+\end{definition}
+
+\citet{ramaswamy2016convex} gives a lower bound on the dimensionality of all consistent convex surrogates, i.e. $\conscvx(\ell) \geq \|p\|_0 - \dim(\Sc_{\gamma_r}(p)) - 1$ for all $p$ and $r \in \gamma(p)$, particularly in the setting where one is given a discrete prediction problem and target loss over finite outcomes.
+It turns out that the subspace of feasible directions is essentially a special case of a flat described by Lemma~\ref{lem:convex-flats-inf-dim}.
+So, by making a slight restriction to the class of minimizable convex surrogates $\Lcvx$, we can derive this lower bound from our general technique in a way that we find shorter and simpler.
+%Due to the infimum in the definition of calibration (their proof tool), the original proof requires careful taking of sequences and the approximate subdifferentials, while indirect elicitation allows us to work with exact minimizers of the surrogate.
+
+%\jessie{I think this Lemma can be moved to the Appendix; just leaving it here for now to make sure it gets eyes on it.}
+%\begin{lemma}\label{lem:Pcodim-codim-finite}
+%	Suppose we are given a property $\gamma: \P \toto \R$, distribution $p \in \P$ and report $r$ such that $r \in \gamma(p)$, where $\P$ is defined over finite $\Y$.
+%	For any flat $F$ such that $p \in F \subseteq \gamma_r$ with $\Pcodim(F) \leq d \leq n$, there is a matrix $W \in \reals^{d \times n}$ such that $\{p \in \P : Wp = \vec 0\} = F$ and $\codim(W) = \rank(W) \leq d$.
+%\end{lemma}
+%\begin{proof}
+%	First, let us construct $W$ by taking the function $V$ constructed in the finite $\Y$ case of the proof of Theorem~\ref{lem:convex-flats-inf-dim} (recall $F = \zeros{V}$).
+%	Construct the $y^{th}$ column of $W$ to be $V(y)$ for each $y \in \Y$.
+%	
+%	We can observe that $Wp = \vec 0 \iff \E_p V = \vec 0$ by definition of expectation and its linearity, so $F = \{p \in \P : \E_p V = \vec 0\} = \{p \in \P : Wp = \vec 0\}$. 
+%	Moreover, by the rank-nullity theorem, we have $\codim(W) = \rank(W) \leq d$.
+%\end{proof}
+
+\begin{restatable}[\cite{ramaswamy2016convex} Theorem 18]{corollary}{hariresult}\label{cor:fsd-bound}
+	Let $\ell:\R \times \Y \to \reals$ be a discrete loss eliciting $\gamma:\simplex \toto \R$ with $\Y$ finite.
+	% , and let $L \in \Lcvx_d$ be consistent with respect to $\ell$.
+	Then for all $p \in \simplex$ and $r \in \gamma(p)$,
+	\begin{equation}
+	\conscvx(\gamma) \geq \|p\|_0 - \dim(\Sc_{\gamma_r}(p)) - 1~.~
+	% d \geq \|p\|_0 - \dim(\Sc_{\gamma_r}(p)) - 1~.~
+	\end{equation}
+\end{restatable}
+\begin{proof}[Sketch]
+	If $\conscvx(\gamma) \leq d$, then there is a $L \in \Lcvx_d$ so that $L$ is consistent with respect to $\gamma$, and in turn, indirectly elicits $\gamma$.
+	Lemma~\ref{lem:convex-flats-inf-dim} says that there is some $d$-flat $F = \zeros{V}$ such that $p \in F \subseteq \gamma_r$.
+	In particular, if $p \in \relint{\simplex}$, we can see $\dim(F) = \dim(\Sc_{\gamma_r}(p))$.
+	Since $\affhull(\simplex)$ has dimension $|\Y| - 1 = \|p\|_0 - 1$, by rank-nullity and $\rank(V) \leq d$ (more precisely, the corresponding linear map $q\mapsto \E_q V$) we have $d \geq \|p\|_0-1-\dim(\Sc_{\gamma_r}(p))$.
+	
+	When $p \not \in \relint{\simplex}$, we can project down to the subsimplex on the support of $p$, again of dimension $\|p\|_0 - 1$, and modify $L$ and $\ell$ accordingly.
+	Now $p$ is in the relative interior of this subsimplex, so the above gives $\conscvx(\gamma) \geq \|p\|_0 - 1 - \dim(\Sc_{\gamma_r}(p))$, where now $\Sc$ is relative to $\reals^{\supp(p)}$.
+	Finally, the feasible subspace dimension in the projected space is the same as in the original space because of $p$'s location on a face of $\simplex$.
+\end{proof}
+
+There are some cases where the bound provided by Corollaries~\ref{cor:Pcodim-flat-single-val-prop} and~\ref{cor:Pcodim-flat-elic-relint-prop} is strictly tighter than the bound provided by feasible subspace dimension in Corollary~\ref{cor:fsd-bound}.
+For an example of how Corollary~\ref{cor:Pcodim-flat-single-val-prop} applies to a discrete property for which there is no target loss -- a non-elicitable property, i.e. Quadrant 2, which is not considered by \citet{ramaswamy2018consistent} -- we refer the reader to Appendix~\ref{app:omitted-examples}.
+
+\paragraph{Example: High-confidence classification.}\label{subsec:examples-finite}
+Given the target loss $\ell^{abs}(r,y) := \Ind{r \not \in \{y, \bot\}} + (1/2)\Ind{r = \bot}$,  we can consider the \emph{abstain property} it elicits, where one predicts the most likely outcome $y$ if $Pr[Y=y|x] \geq 1/2$ and ``abstain'' by predicting $\bot$ otherwise.
+\citet{ramaswamy2016convex} present a convex surrogate for the abstain loss that takes as input a prediction whose dimension is logarithmic in the number of outcomes, yielding new upper bounds on $\conscvx(\ell^{abs})$ which are an exponential improvement over previous results, e.g.,~\cite{crammer2001algorithmic}.
+
+To lower bound the dimension of convex surrogates, we can consider two different distributions; in the first, our bound yields a strict gap over the feasible subspace dimension bound, and in the second, the bounds are equal.
+First, we choose $p = \bullet$ to be the uniform distribution (see Figure~\ref{fig:fsd-flats-abstain}).
+In this case, the bound by feasible subspace dimension yields $\conscvx(\ell^{abs}) \geq 3 - 2 - 1 = 0$, as the feasible subspace dimension is $2$ since we are on the relative interior of the level set and simplex, as shown in Figure~\ref{fig:fsd-flats-abstain} (L).
+
+%% Bo: resolved on Jun 1, afternoon
+%\raft{This is a bit of a strawman, since the FSD technique as a whole gives $\geq 1$ here, for e.g.\ $p=(1/4,1/4,1/2)$; let's maybe discuss both $p$'s for both techniques?}\jessiet{Added both distributions.}
+
+However, consider any $1$-flat containing $\bullet$.
+When intersected with the simplex, one can see that any line (a $1$-flat, since $\bullet \in \relint{\simplex}$) in the simplex through $\bullet$ also leaves the cell $\gamma_\bot$, which contains $p$.
+See Figure~\ref{fig:fsd-flats-abstain} (R) for intuition; a $1$-flat through $p \in \relint{\simplex}$ would be a line in such a figure.
+Therefore, we have no $1$-flat containing $p$ staying in $\gamma_\bot$, so we obtain a better lower bound, $\conscvx(\ell^{abs}) \geq 2$.
+Combining this with the upper bounds given by~\cite{ramaswamy2018consistent}, we observe the bound $\conscvx(\ell^{abs}) = 2$ is tight in this case with $|\Y|=3$.
+
+Our bounds sometimes match those of~\citep{ramaswamy2016convex}; consider the distribution ${\color{blue}\star} = (1/4, 1/4, 1/2)$, shown in Figure~\ref{fig:fsd-flats-abstain}.
+The feasible subspace dimension of both $\gamma_\bot$ and $\gamma_3$ at ${\color{blue}\star}$ is $1$, since one only moves toward the distributions $(0,1/2, 1/2)$ and $(1/2, 0, 1/2)$ without leaving the level sets, and the three points are collinear in $\affhull(\simplex)$, suggesting $\Sc_{\gamma_\bot}(q) = 1$.  
+This yields $\conscvx(\ell^{abs}) \geq 3 - 1- 1 = 1$.
+The same line segment defines a flat contained in both $\gamma_\bot$ and $\gamma_3$, so we have $\conscvx(\ell^{abs}) \geq 1$ by Corollary~\ref{cor:Pcodim-flat-elic-relint-prop}, matching the feasible subspace dimension bound.
+
+Bounds using $d$-flats appear to work well at distributions where previous bounds via feasible subspace dimension would have been vacuous.
+In essence, flats allow us a ``global'' view of the property we are eliciting, while the feasible subspace method only permits a ``local'' look at the property, so we find our method works better for distributions in $\relint\simplex$.
+
+
+%\begin{figure}[ht]
+%\begin{minipage}{0.45\linewidth}
+%	\centering
+%	\includegraphics[width=\linewidth]{tikz/fsd-bound.pdf}
+%	\caption{%Since the uniform distribution is in the relative interior of the simplex and the level set $\gamma_\bot$, 
+%          $\dim(\Sc_{\gamma_\bot}($\textbullet$)) = 2$ and $\dim(\Sc_{\gamma_\bot}({\color{blue}\star})) = 1$.}
+%	\label{fig:fsd-bound}
+%\end{minipage}
+%\hfill
+%\begin{minipage}{0.45\linewidth}
+%	\centering
+%	\includegraphics[width=\linewidth]{tikz/flats-bound.pdf}
+%	\caption{Any $1$-flat $F$ through \textbullet leaves $\gamma_\bot$.
+%	However, there is a $1$-flat containing ${\color{blue}\star}$ that is a subset of $\gamma_\bot$ and $\gamma_3$.
+%	}
+%	\label{fig:flats-bound}
+%\end{minipage}
+%\end{figure}
+
+
+\begin{figure}[htb]
+	\centering
+	\begin{tabular}{cc}
+		%		\includegraphics[width=.35\textwidth]{tikz/fsd-bound.pdf} & 
+		%		\includegraphics[width=.35\textwidth]{tikz/flats-bound.pdf} \\
+	\end{tabular}
+	\caption{(Left) Feasible subspace dimension $\Sc_{\gamma_\bot}(\bullet) = 2$ and $\Sc_{\gamma_\bot}({\color{blue}\star}) = 1$, giving the bound $\conscvx(\ell^{abs}) \geq 3- 1-1 = 1$.
+		(Right) No $1$-flat through $\bullet$ (a line since $\bullet \in \relint{\simplex})$  stays fully contained in $\gamma_\bot$, so $\conscvx(\ell^{abs}) \geq 2$.\jessie{FIX FIGURES}}
+	\label{fig:fsd-flats-abstain}
+\end{figure}
+
 
 \section{Reconstructing \citet[Thm.\ 16]{ramaswamy2016convex}}
 
