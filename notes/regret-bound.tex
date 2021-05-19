@@ -448,7 +448,7 @@ The goal of this section is to show that if a polyhedral surrogate is consistent
   
 \end{definition}
 
-\begin{theorem}
+\begin{theorem}[old theorem; stronger assumptions]
   Let $L:\reals^d \to \reals^\Y_+$ be a surrogate such that for all $y\in\Y$, the function $L(\cdot)_y$ is differentiable, $\alpha$-strongly convex, and $\beta$-strongly smooth for some $\alpha,\beta>0$.\raft{I think differentiability follows from smoothness...}
   Let $\ell:\R \to \reals^\Y_+$ be a target loss, and $\psi:\reals^d\to\R$ a link.
   If there is a surrogate regret bound between $L$ and $\ell$ with function $\zeta:\reals_+\to\reals_+$, then there exists $c > 0$ such that for sufficiently small $\epsilon>0$ we have
@@ -457,10 +457,19 @@ The goal of this section is to show that if a polyhedral surrogate is consistent
     \zeta(\epsilon) \geq c \cdot \sqrt{\epsilon}~.
   \end{equation}
 \end{theorem}
+
+\begin{theorem}[new version; weaker assumptions]
+  Let $L:\reals^d \to \reals^\Y_+$ be a surrogate such that for all $y\in\Y$, the function $L(\cdot)_y$ is differentiable with a locally Lipschitz gradient.
+  Let $\ell:\R \to \reals^\Y_+$ be a target loss and $\psi:\reals^d\to\R$ a link.
+  Let $\Gamma := \prop{L}$, $\gamma := \prop{\ell}$.
+  Suppose that there exist reports $r,r'$, distribution $p_0 \in \gamma_r \cap \gamma_{r'}$, and surrogate report $u_0 \in \Gamma(p_0)$ such that $u \mapsto \inprod{p}{L(u)}$ is $\alpha$-strongly convex in an open neighborhood of $u_0$.
+  Then for any surrogate regret bound between $L$ and $\ell$ with function $\zeta:\reals_+\to\reals_+$, there exists $c > 0$ such that for sufficiently small $\epsilon>0$ we have
+  \begin{equation}
+    \label{eq:regret-lower-bound}
+    \zeta(\epsilon) \geq c \cdot \sqrt{\epsilon}~.
+  \end{equation}
+\end{theorem}
 \begin{proof}
-  Let $\gamma := \prop{\ell}$.
-  Fix reports $r,r'$ such that there exists $p_0 \in \gamma_r \cap \gamma_{r'}$.
-  Define $u_0$ to be the unique minimizer of $\inprod{p_0}{L(\cdot)}$ on $\reals^d$, the existence of which follows from strong (and hence strict) convexity.
   Assume without loss of generality that $\psi(u_0) = r'$; otherwise, swap the roles of $r$ and $r'$.
   As $\ell$ is non-redundant by assumption, there exists some $p_1 \in \inter{\gamma_r}$.
   We therefore have $R_\ell(r',p_1) = \inprod{p_1}{\ell(r')-\ell(r)} =: c_\ell > 0$, and $R_\ell(r',p_0) = 0$.
@@ -470,8 +479,8 @@ The goal of this section is to show that if a polyhedral surrogate is consistent
   % Our goal is to find some $c>0$ and some path of reports $u_\lambda \in \reals^d$ such that $\psi(u_\lambda)=r'$ and $R_L(u_\lambda,p_\lambda) \geq c\cdot\sqrt{\lambda \epsilon_1}$, for $\lambda$ sufficiently small.
 
   Let $L_\lambda:\reals^d\to\reals_+$ be given by $L_\lambda(u) = \inprod{p_\lambda}{L(u)} = (1-\lambda) \inprod{p_0}{L(u)} + \lambda \inprod{p_1}{L(u)}$.
-
-  \raf{NEW: assuming $L_0$ is strongly convex on $B_\delta(u_0)$}
+  Let $\delta >0$ such that the above open neighborhood of $u_0$ contains the ball $B_\delta(u_0)$ of radius $\delta$.
+  Let $u_1 \in \Gamma(p_1)$.
   For any $u\notin B_\delta(u_0)$, we have
   \begin{align*}
     L_\lambda(u) - L_\lambda(u_0)
@@ -488,11 +497,14 @@ The goal of this section is to show that if a polyhedral surrogate is consistent
   $\lambda^* := \alpha \delta^2 / (\alpha \delta^2 + 2L_1(u_0) - 2L_1(u_1))$,
   we have that $L_\lambda$ is minimized within $B_\delta(u_0)$.
   By $\alpha$-strong convexity of $L_0$ on $B_\delta(u_0)$, $L_\lambda$ is therefore $\alpha^*$-strongly convex on $B_\delta(u_0)$ for $\lambda \leq \lambda^*$, where $\alpha^* = (1-\lambda^*)\alpha$.\raft{Need to double-check this statement}
+  For the remainder of the proof, let $\lambda \leq \lambda^*$.
 
-  Extending our definition of $u_0$, let $u_\lambda$ be the unique minimizer of $L_\lambda$ on $\reals^d$.
+  From strong (and hence strict) convexity, we observe that $u_0$ is the unique minimizer of $\inprod{p_0}{L(\cdot)}$ on $\reals^d$.
+  Extending our definition of $u_0$ and $u_1$, let $u_\lambda \in \Gamma(p_\lambda)$, which (as $\lambda \leq \lambda^*$) is the unique minimizer of $L_\lambda$ on $\reals^d$.
+  Moreover, by the previous paragraph, we have $u_\lambda \in B_\delta(u_0)$.
   Then $\risk{L}(p_\lambda) = L_\lambda(u_\lambda)$, and thus $R_L(u_0,p_\lambda) = L_\lambda(u_0) - L_\lambda(u_\lambda)$.
 
-  We first upper bound $\|u_\lambda - u_0\|_2$, and then apply strong smoothness to upper bound $L_\lambda(u_0) - L_\lambda(u_\lambda)$.
+  We now upper bound $\|u_\lambda - u_0\|_2$, and then apply strong smoothness \raft{last hole to fill: use \emph{locally} Lipschitz instead of smoothness; should be fine since we apply it in a bounded region, e.g. around $u_1$} to upper bound $L_\lambda(u_0) - L_\lambda(u_\lambda)$.
   Consider the first-order optimality condition of $L_\lambda$:
   \begin{align*}
     \label{eq:first-order-opt-smooth}
