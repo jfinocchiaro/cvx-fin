@@ -178,7 +178,12 @@ This could be viewed as a partial converse, providing evidence that some element
 \bo{example/discussion?}
 
 \paragraph{Other related work.}
-\bo{Any?}
+Surrogate regret bounds have been well studied in some settings.
+It is known that $\zeta$ \raf{examples: logistic, exponential, and hinge}.
+Some general bounds are known for classes of surrogates, e.g. \raf{refs}.
+Lacking, however, is a general understanding of what $\zeta$ one can expect from a surrogates, especially for arbitrary target losses.
+
+\bo{other?}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -214,48 +219,50 @@ Formally, the \emph{surrogate regret} of $h$ with respect to data distribution $
 (One may equivalently assume the Bayes optimal hypothesis is in the function class.)
 The \emph{target regret} of $h$ is thus $R_\ell(\psi\circ h;\D) = \E_{(X,Y)\sim\D} \ell(\psi(h(X)))_Y - \inf_{h':\X\to\R} \E_{(X,Y)\sim\D} \ell(h'(X))_Y$, where we recall that $\psi$ is the link function.
 
-A central concern for learning algorithms is the \emph{rate of convergence} of regret.
-If $h_n$ denotes an algorithm's output on $n$ data points, then a typical bound is of the form $R_L(h_n;\D) \leq O\left(\frac{1}{n^{\alpha}}\right)$, usually for some $\alpha$ between $\tfrac{1}{2}$ (``slow'') and $1$ (``fast'').
-However, such bounds for the surrogate leave open the question of the implied rate of convergence for the target problem.
+%% Addressed in intro instead
+%A central concern for learning algorithms is the \emph{rate of convergence} of regret.
+%If $h_n$ denotes an algorithm's output on $n$ data points, then a typical bound is of the form $R_L(h_n;\D) \leq O\left(\frac{1}{n^{\alpha}}\right)$, usually for some $\alpha$ between $\tfrac{1}{2}$ (``slow'') and $1$ (``fast'').
+%However, such bounds for the surrogate leave open the question of the implied rate of convergence for the target problem.
+%This is the question we address by studying \emph{surrogate regret bounds}.
 
-This is the question we address by studying \emph{surrogate regret bounds}.
-%A surrogate regret bound answers the following question: when we minimize the surrogate regret at a rate $f(n)$, given $n$ data points, how fast does the target regret diminish?
-Formally, we say that $(L,\psi)$ guarantees a \emph{regret transfer rate of $\zeta$} for $\ell$, for a function $\zeta : \reals_+ \to \reals_+$, if
+A surrogate regret bound answers the following question: when we minimize the surrogate regret at a rate $f(n)$, given $n$ data points, how fast does the target regret diminish?
+Formally, we say that $\zeta : \reals_+ \to \reals_+$ is a \emph{rate transfer function} if $\zeta$ is continuous at $0$ and satisfies $\zeta(0) = 0$.
+Given a rate transfer function $\zeta$, we say that $(L,\psi)$ guarantees a \emph{regret transfer rate of $\zeta$} for $\ell$ if
 \begin{equation}
   \label{eq:surrogate-regret-bound}
   \forall \D, \forall h:\X\to\reals^d, \quad R_\ell(\psi\circ h;\D) \leq \zeta(\, R_L(h;\D) \,)~.
 \end{equation}
-We will refer to $\zeta$ as the \emph{rate transfer function} and require that $\zeta$ be continuous at $0$ with $\zeta(0)=0$.
-%A minimal requirement is that $(L,\psi)$ is \emph{consistent} with $\ell$, meaning $\zeta$ is continuous at $0$ and satisfies $\zeta(0) = 0$.
+We note that a classic minimal requirement for $(L,\psi)$ is that they be \emph{consistent} for $\ell$, which is the case if there exists any regret transfer rate $\zeta$ guaranteed by $(L,\psi)$ for $\ell$.\bo{cite}
 
-As a classic minimal requirement \bo{cite}, $(L,\psi)$ are \emph{consistent} for $\ell$ if there exists any regret transfer rate $\zeta$ guaranteed by $(L,\psi)$ for $\ell$.
-However, consistency alone could be compatible with slow transfer functions such as $\zeta(\epsilon) = \epsilon^{1/4}$.
-For such transfers, a ``fast'' learning rate of e.g. $O\left(\tfrac{1}{n}\right)$ in the surrogate problem would only transfer to a very slow rate of $O\left(\tfrac{1}{n^{1/4}}\right)$ in the target.
-On the other hand, we could hope to choose surrogates with as fast as a linear transfer rate, $\zeta(\epsilon) \leq C \cdot \epsilon$, implying $R_{\ell}(\psi \circ h;\D) \leq C \cdot R_L(h;\D)$.
+%% Addressed in intro
+%However, consistency alone could be compatible with slow transfer functions such as $\zeta(\epsilon) = \epsilon^{1/4}$.
+%For such transfers, a ``fast'' learning rate of e.g. $O\left(\tfrac{1}{n}\right)$ in the surrogate problem would only transfer to a very slow rate of $O\left(\tfrac{1}{n^{1/4}}\right)$ in the target.
+%On the other hand, we could hope to choose surrogates with as fast as a linear transfer rate, $\zeta(\epsilon) \leq C \cdot \epsilon$, implying $R_{\ell}(\psi \circ h;\D) \leq C \cdot R_L(h;\D)$.
 
-\bo{I wonder if this paragraph can go elsewhere...}
-Surrogate regret bounds have been well studied in some settings.
-It is known that $\zeta$ \raf{examples: logistic, exponential, and hinge}.
-Some general bounds are known for classes of surrogates, e.g. \raf{refs}.
-Lacking, however, is a general understanding of what $\zeta$ one can expect from a surrogates, especially for arbitrary target losses.
+%% Moved to intro
+%Surrogate regret bounds have been well studied in some settings.
+%It is known that $\zeta$ \raf{examples: logistic, exponential, and hinge}.
+%Some general bounds are known for classes of surrogates, e.g. \raf{refs}.
+%Lacking, however, is a general understanding of what $\zeta$ one can expect from a surrogates, especially for arbitrary target losses.
 
-We give two main results to deepen this understanding.
-The first is that polyhedral (piecewise-linear and convex) surrogates always yield \emph{linear} regret bounds.
-The second is that sufficiently convex and smooth losses (i.e., ``non-polyhedral'') require $\zeta(\epsilon) = \Omega(\sqrt{\epsilon})$.
-
-\begin{theorem}[Main surrogate regret bound]
-  Let $L$ be any polyhedral surrogate and $\psi$ any link function such that $(L,\psi)$ is consistent for the target loss $\ell$.
-  Then $(L,\psi)$ guarantee a linear regret transfer rate for $\ell$.
-  %Then there exists a surrogate regret bound with a linear transfer function $\zeta$.
-\end{theorem}
-
-\begin{theorem}[Main counterexample]
-  Let $L$ be a differentiable convex surrogate, with locally Lipschitz gradient, which is locally strongly convex.
-  If $L$ satisfies a regret transfer rate of $\zeta$ for a target loss $\ell$, then there exists $c>0$ such that, for arbitrarily small $\epsilon>0$, we have $\zeta(\epsilon) \geq c\cdot\sqrt{\epsilon}$.
-%  If $\zeta$ is a transfer function in a surrogate regret bound for $L$ to a target loss $\ell$, then there exists $c>0$ such that, for arbitrarily small $\epsilon>0$, we have $\zeta(\epsilon) \geq c\cdot\sqrt{\epsilon}$.
-\end{theorem}
-
-\raf{Paragraph on implication for rates here.  Maybe Huber example?}
+%% Addressed in intro
+%We give two main results to deepen this understanding.
+%The first is that polyhedral (piecewise-linear and convex) surrogates always yield \emph{linear} regret bounds.
+%The second is that sufficiently convex and smooth losses (i.e., ``non-polyhedral'') require $\zeta(\epsilon) = \Omega(\sqrt{\epsilon})$.
+%
+%\begin{theorem}[Main surrogate regret bound]
+%  Let $L$ be any polyhedral surrogate and $\psi$ any link function such that $(L,\psi)$ is consistent for the target loss $\ell$.
+%  Then $(L,\psi)$ guarantee a linear regret transfer rate for $\ell$.
+%  %Then there exists a surrogate regret bound with a linear transfer function $\zeta$.
+%\end{theorem}
+%
+%\begin{theorem}[Main counterexample]
+%  Let $L$ be a differentiable convex surrogate, with locally Lipschitz gradient, which is locally strongly convex.
+%  If $L$ satisfies a regret transfer rate of $\zeta$ for a target loss $\ell$, then there exists $c>0$ such that, for arbitrarily small $\epsilon>0$, we have $\zeta(\epsilon) \geq c\cdot\sqrt{\epsilon}$.
+%%  If $\zeta$ is a transfer function in a surrogate regret bound for $L$ to a target loss $\ell$, then there exists $c>0$ such that, for arbitrarily small $\epsilon>0$, we have $\zeta(\epsilon) \geq c\cdot\sqrt{\epsilon}$.
+%\end{theorem}
+%
+%\raf{Paragraph on implication for rates here.  Maybe Huber example?}
 
 
 \paragraph{Polyhedral surrogates.}
