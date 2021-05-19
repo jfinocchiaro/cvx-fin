@@ -20,6 +20,7 @@
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
+\newtheorem{fact}{Fact}
 \newtheorem{proposition}{Proposition}
 \newtheorem{corollary}{Corollary}
 
@@ -277,11 +278,14 @@ Formally, a function $f: \reals^d \to \reals$ is called \emph{polyhedral} if it 
 The epigraph of a polyhedral function is a polyhedral set, i.e. the intersection of a finite set of closed halfspaces; thus polyhedral functions are always convex.
 We say a surrogate loss $L: \reals^d \to \reals_+^{\Y}$ is \emph{polyhedral} if, for each fixed $y \in \Y$, the loss as a function of prediction, i.e. $r \mapsto L(r)_y$, is polyhedral.
 
-\subsection{Property elicitation and consistency}
+\subsection{Property elicitation and the conditional approach}
 Our technical approach is based on property elicitation, which studies the structure of $\ell$ and $L$ as they relate to $\simplex$.
 This involves a \emph{conditional} perspective.
 Given a data distribution $\D$ on $\X \times \Y$, for $(X,Y) \sim \D$, we consider the format of possible target predictions $g(x) = r \in \R$; surrogate predictions $h(x) = u \in \reals^d$; and conditional distributions $\Pr[ \cdot \mid X] = p \in \simplex$.
 By dropping the role of the hypotheses and the feature space $\X$, we can focus on the relationships of the functions $\ell(r)_y$ and $L(u)_y$ on the conditional distribution $p$.
+
+In particular, the \emph{Bayes risk} of $L$ is $\risk{L}(p) = \inf_{u \in \reals^d} \inprod{p}{L(u)}$, and similarly the Bayes risk of $\ell$ is $\risk{\ell}(p) = \inf_{r \in \R} \inprod{p}{\ell(r)}$.
+We abuse notation to define the \emph{conditional surrogate regret} $R_L(u,p) = \inprod{p}{L(u)} - \risk{L}(p)$, and similarly the \emph{conditional target regret} $R_{\ell}(r,p) = \inprod{p}{\ell(r)} - \risk{\ell}(p)$.
  
 To begin, we define a \emph{property}, which is essentially a statistic or summary of a distribution, such as the mode.
 We then define what it means for a loss function to \emph{elicit} a property.
@@ -313,6 +317,30 @@ In particular, we will consistently use the notation $\Gamma = \prop{L}$ where $
 We will assume throughout that the target loss is \emph{non-redundant}, meaning that all $r \in \R$ are possibly uniquely optimal.
 Formally, we suppose that for all $r \in \R$, there exists $p \in \simplex$ with $\gamma(p) = \{r\}$.
 
+\paragraph{Calibration and consistency.}
+It is known that consistency implies the weaker condition of \emph{calibration}, which implies the still-weaker, but very useful, condition of \emph{indirect elicitation}.
+To define these conditions, consider $L,\psi,\ell$ and $\gamma = \prop{\ell}$.
+Recall that $\gamma(p)$ of target reports that are optimal for $p$.
+If $\psi(u) \not\in \gamma(p)$, then $u$ is a ``bad'' (suboptimal) surrogate prediction.
+Let $B_{L,\psi,\ell}(p) = \{\inprod{p}{L(u)} ~:~ \psi(u) \not\in \gamma(p)\}$, the set of expected surrogate losses resulting from bad predictions.
+\begin{definition}[Indirectly elicits, Calibrated]
+  A surrogate-link pair $(L,\psi)$ \emph{indirectly elicits} a target $\ell$ if $0 \not\in B_{L,\psi,\ell}(p)$ for all $p \in \simplex$.
+  Meanwhile, $(L,\psi)$ is \emph{calibrated} for $\ell$ if $0 < \inf B_{L,\psi,\ell}(p)$ for all $p \in \simplex$.
+%  \begin{equation}
+%    \inf_{u : \psi(u) \not\in \gamma(p)} \inprod{p}{L(u)} > \risk{L}(p)$ .
+%  \end{equation}
+%  Throughout, $\Gamma = \prop{L}$ and $\gamma = \prop{\ell}$.
+\end{definition}
+Equivalently, $(L,\psi)$ indirectly elicits $\ell$ if $u \in \Gamma(p) \implies \psi(u) \in \gamma(p)$.
+Calibration is the slightly more subtle condition that there is a nonzero gap between the expected loss of a ``good'' report and that of any bad one.
+%Observe that indirect elicitation is the condition that $0 \not\in \{\inprod{p}{L(u)} ~:~ \psi(u) \not\in \gamma(p)\}$.
+%Calibration is the slightly stronger condition that $0$ is not the infimum of the set.
+\begin{fact}[\bo{cite who?}]
+  Let $\ell: \R \to \reals_+^{\Y}$ be a target loss with finite $\R$ and $\Y$.
+  If a surrogate and link $(L,\psi)$ are consistent for $\ell$, then $(L,\psi)$ are calibrated for $L$.
+  If $(L,\psi)$ are calibrated for $\ell$, then they indirectly elicit $\ell$.
+\end{fact}
+
 %% move to inline where used
 %\begin{definition}[Embedding a loss]\label{def:loss-embed}
 %  A loss $L:\reals^d\to\reals^\Y$ \emph{embeds} a loss $\ell:\R\to\reals^\Y$ if there exists some injective embedding $\varphi:\R\to\reals^d$ such that
@@ -322,9 +350,28 @@ Formally, we suppose that for all $r \in \R$, there exists $p \in \simplex$ with
 %  \end{equation}
 %\end{definition}
 
+\bo{Define conditional transfer rate in this section?}
+
 
 \section{Upper bound: polyhedral surrogates}
+In this section, we develop the proof of Theorem \ref{thm:main-upper}.
+At a high level, the proof has two parts:
+\begin{enumerate}
+  \item Fix $p \in \simplex$.
+        Prove that $R_{\ell}(\psi(u),p) \leq \alpha_p R_L(u,p)$ for some constant $\alpha_p$.
+  \item Apply this result to a finite subset $P$ of $\simplex$, namely the vertices of the level sets of $\gamma$.
+        Argue (carefully) that, because a general $p$ is a convex combination of vertices of its own level set, $R_{\ell}(\psi(u),p) \leq \left(\max_{p' \in P} \alpha_{p'}\right) R_L(u,p)$.
+        This implies a linear conditional transfer rate with constant $\max_{p' \in P} \alpha_{p'}$; it immediately implies a linear transfer rate as promised.
+\end{enumerate}
 
+\subsection{Part 1: fixed $p$}
+\bo{include this proof sketch? Maybe not!}
+\begin{enumerate}
+  \item If $L$ is polyhedral, then the set of minimizers of $\inprod{p}{L(\cdot)}$ is a nice, convex, actually polyhedral subset of $\reals^d$.
+  \item In addition, expected loss increases linearly with the distance of a prediction $u$ to this set.
+  \item If $(L,\psi)$ is calibrated for $\ell$, then $\psi$ must be $\epsilon$-separated (Definition \bo{ref} below): all predictions with $\epsilon$ of the optimal set must link to an optimal target prediction in $\gamma(p)$.
+  \item So conditional target regret is nonzero only for surrogate predictions that are $\epsilon$-far from the optimal set, which 
+\end{enumerate}
 
 
 
