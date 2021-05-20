@@ -199,7 +199,7 @@
 
   \raf{Notes}
   The prediction dimension of a surrogate is the lowest dimension $d$ such that we can construct a convex surrogate $L : \reals^d \times \Y \to \reals$ that is consistent with respect to a given prediction task.
-  We present a new tool based on property elicitation to study the prediction dimension of surrogate loss functions.
+  We present a new tool based on property elicitation to study the prediction dimension of convex surrogate loss functions.
   Our tool unifies results on prediction dimension for various settings, including continuous vs discrete predictions.
   We apply our tool in continuous estimation settings to yield a new lower bound on prediction dimension in risk measures, resolving a stated open question in the literature~\citep{frongillo2015elicitation}.
   In discrete prediction settings, this tool also recovers previous lower bounds on prediction dimension attained by feasible subspace dimension~\citep{ramaswamy2016convex}.
@@ -227,18 +227,18 @@ To demonstrate the strength of our bounds, we show new results for the predictio
 %supervised learning blah
 A surrogate loss function is an error measure that is related but not identical to one's target problem of interest.
 Selecting a hypothesis by minimizing surrogate risk is one of the most widespread techniques in supervised machine learning.
-There are two main reasons why a surrogate loss is necessary: (1) the target loss does not satisfy some desiderata, such as convexity, or (2) the goal is to estimate some target statistic and there is no target loss, as in many continuous estimation problems.
+There are two main reasons why a surrogate loss is necessary: (I) the target loss does not satisfy some desiderata, such as convexity, or (II) the goal is to estimate some target statistic and there is no target loss, as in many continuous estimation problems.
 %(1) often occurs in discrete settings such as classification, while (2) is commone in continuous prediction problems when one seeks to estimate a target conditional statistic.%\raft{I felt we needed a sentence like this to justify \emph{why} we need a surrogate. And given that we need it, we can't really avoid hinting at the quadrants...}
 In both settings, a key criteria for choosing a surrogate loss is \emph{consistency}, a precursor to excess risk bounds and convergence rates.
-Roughly speaking, consistency means that minimizing surrogate risk corresponds to solving the target problem of interest, i.e. in (1) the target risk is also minimized, or in (2) the continuous prediction approaches the true conditional statistic.
+Roughly speaking, consistency means that minimizing surrogate risk corresponds to solving the target problem of interest, i.e. in (I) the target risk is also minimized, or in (II) the continuous prediction approaches the true conditional statistic.
 
 % examples of problems where we care a lot about prediction dimension (that happen to be finite discrete)
 Despite the ubiquity of surrogate losses, we lack general frameworks to design and analyze consistent surrogates.
 This state of affairs is especially dire when one seeks low \emph{prediction dimension}, the dimension of the surrogate prediction domain.
 For example, in multiclass classification with $n$ labels, the prediction domain might be $\reals^n$.
-In many type (1) settings, such as structured prediction and extreme classification, the prediction dimension can easily become intractably large, forcing one to sacrifice consistency for computational efficiency.
+In many type (I) settings, such as structured prediction and extreme classification, the prediction dimension can easily become intractably large, forcing one to sacrifice consistency for computational efficiency.
 To understand whether this sacrifice is necessary, recent work developed tools like the feasible subspace dimension to lower bound the prediction dimension of any consistent convex surrogate~\citep{ramaswamy2016convex}.
-Challenges of type (2) include risk measures such as conditional value at risk (CVaR), with applications in financial regulation, robust engineering design, and algorithmic fairness.
+Challenges of type (II) include risk measures such as conditional value at risk (CVaR), with applications in financial regulation, robust engineering design, and algorithmic fairness.
 Risk measures provably cannot be specified via a target loss, and thus we seek a surrogate loss of low (or at least finite) prediction dimension.
 Recent work~\citep{fissler2016higher,frongillo2020elicitation} gives prediction dimension bounds for some of these risk measures, but without the requirement that the surrogate be convex: bounds for convex surrogates are left as a major open question.
 
@@ -361,7 +361,13 @@ We discuss the additional relationship of elicitation and calibration in Appendi
 \label{fig:results-flow}
 \end{figure}
 
-\jessie{Broader impacts}
+\paragraph{Broader Impacts via influence on downstream research.}
+This paper takes a step toward an impactful general program: to understand and design \emph{useful} (i.e. convex, consistent, calibrated, etc.) surrogate losses of low dimensionality.
+The theory in this paper may help practitioners in a number of ways.
+Understanding how to design consistent convex surrogates for different target losses and properties we wish to learn, and when this is impossible, can lead to understanding the tradeoffs that are often made in the current ad-hoc design of surrogates.
+These ad-hoc surrogates are consistent with respect to \emph{some property}, although it may not be the one we wish to elicit, either directly or indirectly.
+As a general prediction task arises, one might be able to use property elicitation to understand what question they are actually answering (in the best case, with sufficient data that matches the real-world data distribution) by minimizing their surrogate loss and how it differs from the question they are actually trying to answer.
+Of course, improvements in general machine learning algorithms can be put to many uses in many societal contexts, so a more specific analysis of potential broader impacts appears very difficult to forecast.
 
 \section{Setting}\label{sec:related-work}
 
@@ -463,7 +469,7 @@ In Quadrant 1, \citet{ramaswamy2016convex} introduce a special case of convex co
   Given target loss $\ell:\R \times\Y \to \reals$ or property $\gamma: \P \toto \R$, its \emph{convex consistency dimension} $\conscvx(\cdot)$ is the minimum dimension $d$ such that $\exists L \in \Lcvx_d$ and link $\psi$ such that $(L,\psi)$ is consistent with respect to $\ell$ or $\gamma$.
 %	\btw{Maybe take out of definition environment, but (a) I'd worry that people wouldn't be able to find the definition when we use it later, and (b) I'm hoping we can make the distinction very clear, which now is achieved by the parallel definitions}
 \end{definition}
-\emph{Consistency} is defined for a target loss in Definition~\ref{def:consistent-ell} and for a target property in Definition~\ref{def:consistent-prop}.
+\emph{Consistency} is defined for a target loss in Definition~\ref{def:consistent-ell} and for a target property in Definition~\ref{def:consistent-prop} in Appendix~\ref{sec:consis-implies-indir}.
 
 In the case of a target property $\gamma$, i.e. a statistic, \citet{lambert2008eliciting} similarly introduce the notion of \emph{elicitation complexity}, later generalized by \citet{frongillo2020elicitation}, which captures the lowest prediction dimension of a surrogate which indirectly elicits $\gamma$.
 This notion is quite general as it includes continuous estimation settings and does not inherently depend on a target loss being given. 
@@ -496,11 +502,10 @@ Moreover, \citet{finocchiaro2019embedding} study surrogate losses which \emph{em
 We now turn to the question of bounding the prediction dimension of a consistent convex surrogate.
 From Theorem \ref{thm:consistent-implies-indir-elic}, in Appendix~\ref{sec:consis-implies-indir}, given a target property $\gamma$ or loss $\ell$ with $\gamma = \prop{\ell}$, this task reduces to lower bounding the prediction dimension of a convex surrogate indirectly eliciting $\gamma$.
 %We now explore two tools, Corollaries~\ref{cor:Pcodim-flat-single-val-prop} and~\ref{cor:Pcodim-flat-elic-relint-prop}, for proving such convex elicitation lower bounds.
-Lemma~\ref{lem:convex-flats-inf-dim}, crystallized from the proofs of \citet[Theorem 16]{ramaswamy2016convex} and \citet[Theorem~9]{agarwal2015consistent}, is to consider a particular distribution~$p$ and surrogate prediction $u \in \reals^d$ with is optimal for $p$.
+Lemma~\ref{lem:convex-flats-inf-dim}, crystallized from the proofs of \citet[Theorem 16]{ramaswamy2016convex} and \citet[Theorem 9]{agarwal2015consistent}, considers a particular distribution~$p$ and surrogate prediction $u \in \reals^d$ with is optimal for $p$.
 Lemma~\ref{lem:convex-flats-inf-dim} will show that if $d$ is small, then the level set $\{p \in \P : u \in \argmin_{u'} \exploss{L}{u'}{p}\}$ must be large; in fact, it must roughly contain a high-dimensional \emph{flat}.
 By definition of indirect elicitation, there is some level set $\gamma_r$ (where $u$ is linked to $r$) containing this flat as well.
 The use of this result is to leverage the contrapositive: if $\gamma$ has a level set intricate enough to not contain any high-dimensional flats, then $\gamma$ cannot have a low-dimensional consistent surrogate.
-\jessie{Edit this paragraph if Cors 2 and 3 move to the Appendix}
 
 %Recall $\affhull(\simplex) = \{\sum_{i=1}^n \alpha_i p_i : p_i \in \simplex, \alpha_i \in \reals, \sum_{i=1}^n \alpha_i = 1\}$, which has dimension $n-1$.
 %Moreover, $\ker(W) = \{p \in \spn(\P): Wp = \vec 0\}$ is the kernel of matrix $W$.
@@ -511,9 +516,9 @@ The use of this result is to leverage the contrapositive: if $\gamma$ has a leve
   For $d\in\mathbb N$, a \emph{$d$-flat}, or simply \emph{flat}, is a nonempty set $F = \zeros{W} := \{q \in \P : \E_q W = \vec 0\}$ for some measurable $W:\Y \to \reals^d$.
 \end{definition}
 
-We state our elicitation lower bounds in Corollaries~\ref{cor:Pcodim-flat-single-val-prop} and~\ref{cor:Pcodim-flat-elic-relint-prop}, which when combined with Theorem \ref{thm:consistent-implies-indir-elic}, yield consistency bounds.
-A similar result is \citet[Theorem 9]{agarwal2015consistent}, which bounds the dimension of level sets of a single-valued $\prop{L}$.
-Corollaries~\ref{cor:Pcodim-flat-single-val-prop} and~\ref{cor:Pcodim-flat-elic-relint-prop} instead bound the dimension of flats contained in the level sets, an additional power which we leverage in our examples.
+The following Lemma yields Corollaries~\ref{cor:Pcodim-flat-single-val-prop} and~\ref{cor:Pcodim-flat-elic-relint-prop} (in Appendix~\ref{app:implications-of-bounds}), which when combined with Theorem\jessie{prop?} \ref{thm:consistent-implies-indir-elic}, yield consistency bounds.
+A similar result is found in \citet[Theorem 9]{agarwal2015consistent}, which bounds the dimension of level sets of a single-valued $\prop{L}$.
+Lemma~\ref{lem:convex-flats-inf-dim} instead bounds the dimension of flats contained in the level sets, an additional power which we leverage in our examples.
 
 
 \begin{lemma}
@@ -550,7 +555,7 @@ Corollaries~\ref{cor:Pcodim-flat-single-val-prop} and~\ref{cor:Pcodim-flat-elic-
   To see $F \subseteq \Gamma_u$, from the chain of equivalences above, we have for any $q\in\P$ that $q \in \zeros{V_{u,p}} \implies \vec 0 \in \partial \E_q L(u,Y) \implies u \in \Gamma(q) \implies q \in \Gamma_u$.
 \end{proof}
 
-Knowing indirect elicitation implies the existence of such a flat, we now apply  Theorem~\ref{thm:consistent-implies-indir-elic} and Lemma~\ref{lem:convex-flats-inf-dim} to construct lower bounds on convex consistency dimension.
+%Knowing indirect elicitation implies the existence of such a flat, we now apply  Theorem~\ref{thm:consistent-implies-indir-elic} and Lemma~\ref{lem:convex-flats-inf-dim} to construct lower bounds on convex consistency dimension.
 
 %\begin{lemma}
 %	Let $\gamma$ be indirectly elicited by some $d$-convex-elicitable $\Gamma$ for $d\in\mathbb{N}$.
@@ -560,9 +565,8 @@ Knowing indirect elicitation implies the existence of such a flat, we now apply 
 
 
 \subsection{Illustration: geometric intuition for the four quadrants}
-\jessiet{At this rate, doesn't need to be in a section header of its own?}
 We can apply Lemma~\ref{lem:convex-flats-inf-dim} to construct lower bounds on convex consistency dimension for targets across all four quadrants by Corollaries~\ref{cor:Pcodim-flat-elic-relint-prop} (for discrete prediction problems; Q1, Q2) and~\ref{cor:Pcodim-flat-single-val-prop} (for continuous estimation problems; Q3, Q4).
-This is demonstrated in Table~\ref{tab:quadrants-simplices}.\jessie{Ref is wrong}
+This is demonstrated in Table~\ref{tab:quadrants-simplices}.
 These illustrations are simply intended to show how Lemma~\ref{lem:convex-flats-inf-dim} can be applied to results in all four quadrants of problem types-- making it the first lower bound to our knowledge to do so.
 
 \paragraph{Q1: Abstain}
@@ -597,8 +601,7 @@ Since squared loss is a $1$-dimensional loss, we can verify that for all $p \in 
 See Corollary~\ref{cor:variance} in Appendix~\ref{app:omitted-examples} to see our framework applied to derive lower bounds for convex consistency dimension of the variance.
 
 \paragraph{Q4: Variance}
-\paragraph{Example: Variance.}
-As a warm-up, let us see how to show $\eliccvx(\Var)=2$, meaning the lowest dimension of a convex loss to estimate conditional variance is 2. %~\citep{osband1985providing,lambert2018elicitation}.
+We can show $\eliccvx(\Var)=2$, meaning the lowest dimension of a convex loss to estimate conditional variance is 2. %~\citep{osband1985providing,lambert2018elicitation}.
 This lower bound will follow from Theorem~\ref{thm:bayes-risk-lower-bound} using that variance is the Bayes risk of squared loss $L(r,y) = (r-y)^2$, which elicits the mean $\Gamma(p) = \E_p Y$.
 Interestingly, while perhaps intuitively obvious, even this simple result is novel.
 In particular, the well-known fact that the variance is not elicitable does not yield a lower bound of 2, as it does not rule out the variance being a link of a real-valued convex-elicitable property; cf.~\citet[Remark 1]{frongillo2020elicitation}.
@@ -762,7 +765,7 @@ In particular, the well-known fact that the variance is not elicitable does not 
 \end{tikzpicture}
 %\\
 %\hline
-\end{tabular}\label{tab:quadrants-simplices}
+\end{tabular}
 \caption{Example properties for each of the quadrants. 
 In (Q1), we fix $p$ uniform in the abstain level set $\Gamma_\bot$. 
 We cannot fit a line ($1$-flat) through $p$ without leaving the level set $\Gamma_\bot$.  
@@ -771,7 +774,7 @@ Therefore, there is no $1$-dimensional consistent convex surrogate for abstain b
 In (Q3), we can fit a $1$-flat through any $p \in \simplex$ for least squares, eliciting expected value.
 In (Q4), we look at the variance, and take the distribution $p = \bullet \in \Gamma_{0.6}$.
 Since $\Gamma_{0.6}$ (solid orange) is curved, we cannot draw a $1$-flat contained in the level set, and conclude there is not a $1$-dimensional consistent convex surrogate w.r.t. the variance.
-}
+}\label{tab:quadrants-simplices}
 \end{SCtable}
 
 \subsection{Breadth of framework: Discrete-valued predictions}\label{sec:discrete-predictions-refactored}
@@ -893,16 +896,19 @@ As first shown by \citet{fissler2016higher}, the pair $(\CVaR_\alpha,q_\alpha)$ 
 We conjecture the stronger statement $\eliccvx(\CVaR_\alpha) \geq 3$, which if true would constitute an interesting gap between elicitation complexity for identifiable and convex-elicitable properties.
 
 \section{Conclusions and future work}\label{sec:conclusions}
-In this work, we show that indirect property elicitation can be a powerful necessary condition for the existence of a consistent surrogate loss (Theorem~\ref{thm:consistent-implies-indir-elic}).
-Furthermore, we introduce a new lower bound (Corollaries~\ref{cor:Pcodim-flat-single-val-prop} and~\ref{cor:Pcodim-flat-elic-relint-prop}
-\jessie{Lemma~\ref{lem:convex-flats-inf-dim}}) on convex consistency dimension that is generally applicable and extends previous results from both the discrete (Corollary~\ref{cor:fsd-bound}) and continuous (Corollaries~\ref{cor:variance} and \ref{cor:spectral-risks}) estimation settings.
+In this work, we introduce a new tool to generate lower bounds on the convex consistency dimension of general prediction tasks.
+This tool is simultaneously broader, stronger, and easier to understand than previous results.
+Its breadth is demonstrated by applying to multiple problem types simultaneously (\S~\ref{sec:char-convex}), while its strength is demonstrated by proving new bounds on prediction dimension(\S~\ref{sec:contin-consis}), and ease is apparent when observing that indirect elicitation is a strictly weaker notion than calibration -- the most common proxy for consistency.
+We then apply our framework to yield new bounds on convex consistency dimension for entropy and risk measures.
+%Furthermore, we introduce a new lower bound (Corollaries~\ref{cor:Pcodim-flat-single-val-prop} and~\ref{cor:Pcodim-flat-elic-relint-prop}
+%\jessie{Lemma~\ref{lem:convex-flats-inf-dim}}) on convex consistency dimension that is generally applicable and extends previous results from both the discrete (Corollary~\ref{cor:fsd-bound}) and continuous (Corollaries~\ref{cor:variance} and \ref{cor:spectral-risks}) estimation settings.
 
 Several important questions remain open.
 Particularly for the discrete settings, we would like to know whether one can lift the restriction that surrogates always achieve a minimum; we conjecture positively.
 %For continuous settings, it would be especially interesting to extend to the case $\Y=\reals$, which would require a more careful analysis in Theorem~\ref{thm:bayes-risk-lower-bound}.\jessie{Flagging this bc we take care of it I hope}
 Of course, we would like to characterize $\conscvx$ and $\eliccvx$ and develop a general framework for constructing surrogates achieving the best possible prediction dimension.
 Moreover, the practical reason why consistency is desired is to ensure the guarantee of empirical risk minimization (ERM) rates; however, the relationship between ERM rates and property elicitation has not been studied.
-\btw{for neurips and colt, we had commented out everything below this for space}
+\jessie{Not sure if there will be a citation for the rates paper...?}
 %One might be able to further tighten these bounds by property elicitation by studying monotonicity and adjacency of level sets.
 %In discrete predictions, these bounds might also be tightened if the equivalence of convex consistency dimension and embedding dimension of~\citet{finocchiaro2020embedding} is shown; the current embedding dimension bounds are not tight either, but additional structure is imposed by considering the embedding framework.
 
@@ -981,10 +987,6 @@ We then observe that Definition~\ref{def:consistent-ell} is subsumed by Definiti
 %\botodo{On the right side, is measurable enough? I guess we need $\psi \circ f$ to be measurable...on the other hand, we don't want to constrain $f$ based on $\psi$. Do we need a condition on $\psi$ that guarantees $\psi \circ f$ is measurable?}
 %\raft{I think okay as written -- if $\psi$ is restrictive, you won't achieve consistency.  And typically $f$ is much more expressive anyway, e.g. $\reals^\Y$ for classification.}
 
-\jessie{If, instead of a target loss $\ell$, we have a target property as in Quadrants 2 and 4, we might want to equivalently define consistency with respect to a property.  
-	Intuitively, this definition is similar, but is equipped with a metric-like function to measure equivalence to a target property value.  
-	See Appendix~\ref{} for our precise definition, which we show is equivalent to consistency with respect to target loss.
-	This allows us to ``translate'' results about target losses to be about the properties these losses elicit, and therefore apply our results to all four Quadrants.}\jessiet{Suggestion: replace following text up to Lemma 1 with this.}
 
 Instead of a target loss $\ell$, one may want to learn a target property, i.e. a conditional statistic such as the expected value, variance, or entropy.
 In this case, following the tradition in the statistics literature on conditional estimation~\citep{gyorfi2006distribution,fan1998efficient,ruppert1997local},
@@ -992,7 +994,6 @@ we formalize consistency as converging to the correct conditional estimates of t
 Convergence is measured by functions $\propdis(r, p)$ that formalize how close $r$ is to ``correct'' for conditional distribution $p$.
 In particular we should have $\propdis(r,p) = 0 \iff r \in \gamma(p)$.
 \btw{Bo: Would be nice to give some natural special cases: for a finite property, $\propdis(r,p) = \Ind{r \in \gamma(p)}$, and for single-valued properties with a distance metric on $\R$, $\propdis(r,p) = \text{dist}(r, \gamma(p))$.}
-\jessie{Move this statement to appendix, and modify above paragraph to give hand-waving description.}
 
 \begin{definition}[Consistent: property]\label{def:consistent-prop}
 	Suppose we are given a loss $L \in \L$, link function $\psi: \reals^d \to \R$, and property $\gamma:\P \toto \R$.
@@ -1016,7 +1017,7 @@ As the main focus of this paper is lower bounds on the prediction dimension, i.e
 
 Given a target loss $\ell$, we can define a statistic $\gamma$, the property it elicits.
 Intuitively, consistency of a surrogate $L$ with respect to $\ell$ and $\gamma$ are equivalent, i.e. in both cases estimates should converge to values that minimize $\ell$-loss.
-We formalize this by letting $\propdis$ be the $\ell$-regret, yielding Lemma~\ref{lem:consistent-loss-implies-prop}, proven in Appendix~\ref{app:misc-omitted-proofs}.\jessiet{Move this proof if property consistency is moving to its own appendix as well.}
+We formalize this by letting $\propdis$ be the $\ell$-regret, yielding Lemma~\ref{lem:consistent-loss-implies-prop}.
 %If $\gamma$ is a property elicited by a target loss $\ell$, then taking $\propdis$ to be the $\ell$-regret makes the two definitions are equivalent, as stated in Lemma~\ref{lem:consistent-loss-implies-prop}, proven in Appendix~\ref{app:misc-omitted-proofs}.% for the appropriate choice of $\propdis$.
 
 
@@ -1031,11 +1032,23 @@ We formalize this by letting $\propdis$ be the $\ell$-regret, yielding Lemma~\re
 	\btw{Note: don't actually need $\gamma$ nonempty here.}
 \end{restatable}
 
-\jessie{Comment on how this lets us ``shift'' Q1 to Q2, and Q3 to Q4.  This is a subtlety missing in Table~\ref{tab:quadrants-simplices} too.}
+\begin{proof}
+	First, observe that $\propdis(r,p) = 0 \iff \exploss{\ell}{r}{p} = \inf_{r' \in \R} \exploss{\ell}{r'}{p} \iff r \in \gamma(p)$.
+	Now suppose $(L, \psi)$ are consistent with respect to $\ell$, and take any sequence $\{f_m\}$ of measurable hypotheses.
+	Rewriting the right-hand side of Definition~\ref{def:consistent-ell},
+	\begin{align}
+	&\; \E_D \ell(\psi \circ f_m(X), Y)\to \inf\nolimits_f \E_D \ell(\psi \circ f(X), Y)   \label{eqn:cons-loss-cond} \\
+	&\iff \E_X R_\ell(\psi \circ f_m(X), D_X) \to 0                               \nonumber  \\
+	&\iff \E_X \propdis(\psi \circ f_m(X), D_X) \to 0~.~                          \label{eqn:cons-prop-cond}
+	\end{align}
+	Therefore, $\mathbb{E}_D L(f_m(X),Y) \to \inf_f \mathbb{E}_D L(f(X),Y)$ implies (\ref{eqn:cons-loss-cond}) if and only if it implies (\ref{eqn:cons-prop-cond}).
+	Observe that the assumptions on $\L$ allow us to apply the Fubini-Tonelli Theorem~\cite[Theorem 2.37]{folland1999real}, which yields the equivalence of eq.~\ref{eqn:cons-loss-cond} to the next line.
+\end{proof}
+
 %Lemma~\ref{lem:consistent-loss-implies-prop} confirms that consistency with respect to a target property is a strictly broader notion than with respect to a target loss.
 Because each target loss in $\L$ elicits some property, but not all target properties can be elicited by a loss (e.g. the variance), consistency with respect to a property is the strictly broader notion.
+In a loose sense, Proposition~\ref{lem:consistent-loss-implies-prop} lets us translate problems about target losses to be about the properties these losses elicit.
 This points to indirect elicitation as a natural necessary condition for consistency, as formalized in Proposition~\ref{thm:consistent-implies-indir-elic}.
-
 
 \consistencyimpliesindirelic*
 
@@ -1067,7 +1080,7 @@ This result allows us to state elicitation complexity as a lower bound for conve
 %The primary reason we desire $\P$ more general than $\simplex$ is when there are infinitely many possible outcomes; for example, squared loss only elicits the expected value on distributions whose variance is finite.
 %In this case, we still do not find the assumption very restrictive, and find it covers most cases one might practically be interested in.
 
-\section{Implications of convex indirect elicitation bounds}
+\section{Implications of convex indirect elicitation bounds}\label{app:implications-of-bounds}
 \begin{corollary}\label{cor:Pcodim-flat-single-val-prop}
 	Let target property $\gamma:\P \toto \R$ and $d\in\mathbb N$ be given.
 	Let $\Y$ be either a finite set, or $\Y = \reals$, in which case we assume each $p\in\P$ admits a Lebesgue density supported on the same set for all $p\in\P$.
@@ -1411,8 +1424,8 @@ In essence, flats allow us a ``global'' view of the property we are eliciting, w
 \begin{figure}[htb]
 	\centering
 	\begin{tabular}{cc}
-		%		\includegraphics[width=.35\textwidth]{tikz/fsd-bound.pdf} & 
-		%		\includegraphics[width=.35\textwidth]{tikz/flats-bound.pdf} \\
+%				\includegraphics[width=.35\textwidth]{tikz/fsd-bound.pdf} & 
+%				\includegraphics[width=.35\textwidth]{tikz/flats-bound.pdf} \\
 	\end{tabular}
 	\caption{(Left) Feasible subspace dimension $\Sc_{\gamma_\bot}(\bullet) = 2$ and $\Sc_{\gamma_\bot}({\color{blue}\star}) = 1$, giving the bound $\conscvx(\ell^{abs}) \geq 3- 1-1 = 1$.
 		(Right) No $1$-flat through $\bullet$ (a line since $\bullet \in \relint{\simplex})$  stays fully contained in $\gamma_\bot$, so $\conscvx(\ell^{abs}) \geq 2$.\jessie{FIX FIGURES}}
@@ -1822,21 +1835,6 @@ Then for all properties $\gamma$, if $\elic_{\C^*}(\gamma) < \infty$, we have $\
 
 \section{Miscellaneous omitted proofs}\label{app:misc-omitted-proofs}
 
-\setcounter{theorem}{6}
-\consistentlossimpliesprop*
-\begin{proof}
-	First, observe that $\propdis(r,p) = 0 \iff \exploss{\ell}{r}{p} = \inf_{r' \in \R} \exploss{\ell}{r'}{p} \iff r \in \gamma(p)$.
-	Now suppose $(L, \psi)$ are consistent with respect to $\ell$, and take any sequence $\{f_m\}$ of measurable hypotheses.
-	Rewriting the right-hand side of Definition~\ref{def:consistent-ell},
-	\begin{align}
-	&\; \E_D \ell(\psi \circ f_m(X), Y)\to \inf\nolimits_f \E_D \ell(\psi \circ f(X), Y)   \label{eqn:cons-loss-cond} \\
-	&\iff \E_X R_\ell(\psi \circ f_m(X), D_X) \to 0                               \nonumber  \\
-	&\iff \E_X \propdis(\psi \circ f_m(X), D_X) \to 0~.~                          \label{eqn:cons-prop-cond}
-	\end{align}
-	Therefore, $\mathbb{E}_D L(f_m(X),Y) \to \inf_f \mathbb{E}_D L(f(X),Y)$ implies (\ref{eqn:cons-loss-cond}) if and only if it implies (\ref{eqn:cons-prop-cond}).
-	Observe that the assumptions on $\L$ allow us to apply the Fubini-Tonelli Theorem~\cite[Theorem 2.37]{folland1999real}, which yields the equivalence of eq.~\ref{eqn:cons-loss-cond} to the next line.
-\end{proof}
-\setcounter{theorem}{37}
 
 A hyperplane weakly separates two sets if its two closed halfspaces respectively contain the two sets.
 \begin{lemma}\label{lem:intersect-levelsets}
@@ -1896,7 +1894,7 @@ A hyperplane weakly separates two sets if its two closed halfspaces respectively
 
 
 \section{Omitted Examples}\label{app:omitted-examples}
-\paragraph{Discrete problem with no target loss (Quadrant 2).}
+\subsection{Risk-averse classification (Q2)}
 Consider the following scenario where someone is deciding how to dress for the weather based on a meteorologist's forecast.
 Consider the three outcomes $\Y = \{$rainy, sunny, snowy$\}$, and we suppose we want to have some bias towards health and safety, so the meteorologist should only predict sunny weather if $Pr[$sunny $|$ weather data$] \geq 3/4$.
 Otherwise, they should predict whatever is more likely  given the weather data: rain or snow.
