@@ -109,6 +109,16 @@
 \maketitle
 
 \begin{abstract}
+  Surrogate risk minimization is an ubiquitous paradigm in supervised machine learning, wherein a target problem is solved by minimizing a surrogate loss on a dataset.
+  Surrogate regret bounds are a common tool to prove generalization rates for surrogate risk minimization.
+  While surrogate regret bounds have been developed for certain classes of loss functions, such as proper losses, general results are relatively sparse.
+  We provide two general results.
+  The first gives a linear surrogate regret bound for any polyhedral (piecewise-linear convex) surrogate, meaning that surrogate generalization rates translate directly to target rates.
+  The second shows that for ``non-polyhedral'' surrogates, the regret bound is a square root, meaning fast surrogate generalization rates translate to slow rates for the target.
+  Together, these results suggest polyhedral surrogates are weakly optimal in many cases.
+\end{abstract}
+
+\begin{abstract}
   In supervised machine learning, often a target problem is solved by minimizing a surrogate loss on a dataset.
   Study of convergence rates, which bound generalization error as a function of dataset size, typically neglects the relationship between the target and surrogate problems.
   We consider the transfer of rate guarantees from the surrogate loss to the target problem.
@@ -366,16 +376,17 @@ At a high level, the proof has two parts:
 \begin{enumerate}
   \item Fix $p \in \simplex$.
         Prove that $R_{\ell}(\psi(u),p) \leq \alpha_p R_L(u,p)$ for some constant $\alpha_p$.
-  \item Apply this result to a finite subset $P$ of $\simplex$, namely the vertices of the level sets of $\Gamma$.
-        Argue (carefully) that, because a general $p$ is a convex combination of vertices of its own level set, $R_{\ell}(\psi(u),p) \leq \left(\max_{p' \in P} \alpha_{p'}\right) R_L(u,p)$.
-        This implies a linear conditional transfer rate with constant $\max_{p' \in P} \alpha_{p'}$.
+  \item Apply this result to a carefully chosen finite subset of $\simplex$. Argue that the maximum over the $\alpha_p$'s in this finite set gives the constant factor for the transfer rate.
 \end{enumerate}
 We view both parts as relatively surprising.
 The first part will actually hold for any calibrated surrogate.
-The second part relies on a crucial fact about polyhedral losses $L$: their properties $\Gamma$ have only a finite number of full-dimensional level sets.
-In other words, although the prediction space $\reals^d$ is infinite, one can pick out just a finite set of prediction points that can act as minimizers of expected loss.
+The second part relies on a crucial fact about polyhedral losses $L$: their properties $\Gamma$ cover the whole simplex with a finite number of polyhedral level sets.
+In other words, although the prediction space $\reals^d$ is infinite, one can restrict to just a finite set of prediction points and always have a global minimizer of expected loss.
+This is related to embeddings \bo{cite}.
 
 \paragraph{Part 1.}
+First, we establish a linear transfer rate for any fixed conditional distribution $p$.
+This holds for any calibrated surrogate, not necessarily polyhedral.
 \begin{lemma} \label{lemma:fixed-p}
   Let $\ell: \R \to \reals_+^{\Y}$ be a discrete target loss and suppose the surrogate $L: \reals^d \to \reals_+^{\Y}$ and link $\psi: \reals^d \to \R$ are calibrated for $\ell$.
   Then for any $p \in \simplex$, there exists $\alpha_p \geq 0$ such that, for all $u \in \reals^d$,
@@ -406,14 +417,16 @@ In \bo{Section TODO}, we investigate the constant $\alpha_p$ for polyhedral loss
 
 \paragraph{Part 2.}
 Given Lemma \ref{lemma:fixed-p}, we might hope to obtain that, for any calibrated surrogate, there exists $\alpha = \sup_p \alpha_p$ such that $R_{\ell}(\psi(u),p') \leq \alpha R_L(u,p')$ for all $p'$.
-However, we know this is false in general: not all surrogates yield linear surrogate regret transfer rates!
+However, we know this is false in general: not all surrogates yield linear transfer rates!
 Indeed, for many surrogates, the supremum will be $+\infty$.
 
 However, polyhedral surrogates have a special structure that allows us to show $\alpha$ is finite.
 We first present several general lemmas, then the key implication from $L$ being polyhedral.
 The general results are known \bo{cite}.
+
+\bo{For these lemmas, I tried to state no more than we need.}
 \begin{lemma} \label{lemma:refines}
-  If $(L,\psi)$ indirectly elicits $\ell$, then $\Gamma = \prop{L}$ \emph{refines} $\gamma = \prop{\ell}$ in the sense that, for all $u \in \reals^d$, there exists $r \in \R$ such that $\Gamma_u \subseteq \Gamma_r$.
+  If $(L,\psi)$ indirectly elicits $\ell$, then $\Gamma = \prop{L}$ \emph{refines} $\gamma = \prop{\ell}$ in the sense that, for all $u \in \reals^d$, there exists $r \in \R$ such that $\Gamma_u \subseteq \gamma_r$.
 \end{lemma}
 \begin{proof}
   For any $u$, let $r = \psi(u)$.
@@ -427,8 +440,8 @@ By combining this fact with Lemma \ref{lemma:refines}, we obtain that target reg
   Then for any fixed $u,u^* \in \reals^d$ and $r \in \R$, the functions $R_L(u,\cdot)$ and $R_{\ell}(u,\cdot)$ are linear in their second arguments on $\Gamma_{u^*}$.
 \end{lemma}
 \begin{proof}
-  Let, $p \in \Gamma_{u^*}$.
-  By definition on $\Gamma_{u^*}$, $\risk{L}(p) = \inprod{p}{L(u^*)}$.
+  Let $u^* \in \reals^d$ and $p \in \Gamma_{u^*}$.
+  By definition, for all $p \in \Gamma_{u^*}$, $\risk{L}(p) = \inprod{p}{L(u^*)}$.
   So for fixed $u$,
     \[ R_L(u,p) = \inprod{p}{L(u)} - \inprod{p}{L(u^*)} = \inprod{p}{L(u) - L(u^*)} , \]
   a linear function of $p$.
@@ -436,8 +449,7 @@ By combining this fact with Lemma \ref{lemma:refines}, we obtain that target reg
   By the same argument, for fixed $r$, $R_{\ell}(r,p) = \inprod{p}{\ell(r) - \ell(r^*)}$, a linear function.
 \end{proof}
 
-We now arrive at the key property of polyhedral losses: \emph{although the prediction space is $\reals^d$, we can identify a finite set of predictions that characterize $L$.} \bo{wording?}
-Here, a level set is \emph{full-dimensional} if it has affine dimension $|\Y|-1$, the same as the simplex $\simplex$.
+We now arrive at the key property of polyhedral losses.
 \begin{lemma} \label{lemma:polyhedral-finite}
   If $L: \reals^d \to \reals_+^{\Y}$ is polyhedral, then $\Gamma = \prop{L}$ has a finite set of level sets that union to $\simplex$. Also, these level sets are polytopes.
 \end{lemma}
@@ -447,7 +459,7 @@ Here, a level set is \emph{full-dimensional} if it has affine dimension $|\Y|-1$
 
 We are now ready to restate and prove the main upper bound.
 \begin{theorem}[Theorem \ref{thm:main-upper} restated]
-  Let the surrogate loss $L: \reals^d \to \reals_+^{\Y}$ and link $\psi: \reals^d \to \R$ be consistent for the target loss $\ell: \R \to \reals_+^{\Y}$.
+  Suppose the surrogate loss $L: \reals^d \to \reals_+^{\Y}$ and link $\psi: \reals^d \to \R$ are consistent for the target loss $\ell: \R \to \reals_+^{\Y}$.
   If $L$ is polyhedral, then $(L,\psi)$ guarantee a linear regret transfer rate for $\ell$, i.e. there exists $\alpha > 0$ such that, for all $\D$ and all measurable $h: \X \to \reals^d$,
     \[ R_{\ell}(\psi \circ h ; \D) \leq \alpha R_L(h ; \D) . \]
 \end{theorem}
@@ -456,50 +468,37 @@ We are now ready to restate and prove the main upper bound.
   Next, by Observation \ref{obs:transfer}, it suffices to show a linear \emph{conditional} regret transfer rate, i.e. for all $p \in \simplex$ and $u \in \reals^d$, we show $R_{\ell}(\psi(u),p) \leq \alpha R_L(u,p)$.
   
   By Lemma \ref{lemma:polyhedral-finite}, the polyhedral loss $L$ has a finite set $U \subset \reals^d$ of predictions such that (a) for each $u \in U$, the level set $\Gamma_u$ is a polytope, and (b) $\cup_{u \in U} \Gamma_u = \simplex$.
-  Let $\mathcal{Q}_u \subseteq \simplex$ be the finite set of vertices of the polytope $\Gamma_u$, and let $\mathcal{Q} = \cup_{u \in U} \mathcal{Q}_u$.
+  Let $\mathcal{Q}_u \subset \simplex$ be the finite set of vertices of the polytope $\Gamma_u$, and define the finite set $\mathcal{Q} = \cup_{u \in U} \mathcal{Q}_u$.
   
-  By Lemma \ref{lemma:fixed-p}, for each $p \in \mathcal{Q}$, there exists $\alpha_p \geq 0$ such that $R_{\ell}(\psi(u),p) \leq \alpha_p R_L(u,p)$ for all $u$.
+  By Lemma \ref{lemma:fixed-p}, for each $q \in \mathcal{Q}$, there exists $\alpha_q \geq 0$ such that $R_{\ell}(\psi(u),q) \leq \alpha_p R_L(u,q)$ for all $u$.
   We choose
-    \[ \alpha = \max_{p \in \mathcal{Q}} \alpha_p . \]
+    \[ \alpha = \max_{q \in \mathcal{Q}} \alpha_q . \]
   To prove the conditional transfer rate, consider any $p \in \simplex$ and any $u \in \reals^d$.
-  There exists $u \in U$ such that $p \in \Gamma_u$, so we can write $p$ as a convex combination of the vertices, i.e.
-    \[ p = \sum_{p' \in \mathcal{Q}_u} \beta(p') p' \]
+  There exists $u \in U$ such that $p \in \Gamma_u$, a polytope.
+  So we can write $p$ as a convex combination of its vertices, i.e.
+    \[ p = \sum_{q \in \mathcal{Q}_u} \beta(q) q \]
   for some probability distribution $\beta$.
   Because $\mathcal{Q}_u \subseteq \Gamma_u$, $R_L$ and $R_{\ell}$ are linear on it by Lemma \ref{lemma:linear-on-levelset}.
   So:
   \begin{align*}
     R_{\ell}(u,p)
-    &=    R_{\ell}\left(\psi(u) ~,~ \sum_{p' \in \mathcal{Q}_u} \beta(p') p'\right)  \\
-    &=    \sum_{p' \in \mathcal{Q}_u} \beta(p') R_{\ell}(\psi(u),p')  \\
-    &\leq \sum_{p' \in \mathcal{Q}_u} \beta(p') \alpha_{p'} R_L(u,p')  \\
-    &\leq \alpha \sum_{p' \in \mathcal{Q}_u} \beta(p') R_L(u,p')  \\
+    &=    R_{\ell}\left(\psi(u) ~,~ \sum_{q \in \mathcal{Q}_u} \beta(q) q\right)  \\
+    &=    \sum_{q \in \mathcal{Q}_u} \beta(q) R_{\ell}(\psi(u),q)  \\
+    &\leq \sum_{q \in \mathcal{Q}_u} \beta(q) \alpha_{q} R_L(u,q)  \\
+    &\leq \alpha \sum_{q \in \mathcal{Q}_u} \beta(q) R_L(u,q)  \\
     &=    \alpha R_L(u, p) .
   \end{align*}
 \end{proof}
 
 
+\section{Lower bound}
 
 
-\subsection{Part 1: fixed $p$}
-
-We begin with the following key fact, a sort of ``pointwise'' conditional transfer bound.
-\begin{proposition} \label{prop:fix-p}
-  Suppose the surrogate and link $(L,\psi)$ are consistent for the target $\ell$.
-  Then for any $p \in \simplex$, there exists $\alpha_p \geq 0$ such that, for all $u \in \reals^d$, $R_{\ell}(\psi(u),p) \leq \alpha_p R_L(u,p)$.
-\end{proposition}
-
-For intuition, observe that $R_{\ell}(\psi(u),p)$ takes on only finitely many values as we vary $p$, as the range $\R$ of $\psi$ is finite.
-Therefore, it suffices to find a constant $C$ such that, if $R_{\ell}(\psi(u),p) > 0$, then $R_L(u,p) \geq C$.
-
-\bo{include this proof sketch? Maybe not!}
-\begin{enumerate}
-  \item If $L$ is polyhedral, then the set of minimizers of $\inprod{p}{L(\cdot)}$ is a nice, convex, actually polyhedral subset of $\reals^d$.
-  \item In addition, expected loss increases linearly with the distance of a prediction $u$ to this set.
-  \item If $(L,\psi)$ is calibrated for $\ell$, then $\psi$ must be $\epsilon$-separated (Definition \bo{ref} below): all predictions with $\epsilon$ of the optimal set must link to an optimal target prediction in $\gamma(p)$.
-  \item So conditional target regret is nonzero only for surrogate predictions that are $\epsilon$-far from the optimal set, which 
-\end{enumerate}
 
 
+\section{Determining the constant for polyhedral losses}
+
+\bo{Stuff about Hoffman constants, etc}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
