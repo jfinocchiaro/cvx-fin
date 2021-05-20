@@ -130,6 +130,37 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
+In supervised learning, our goal is to learn a hypothesis that solves some target problem given labeled data.
+This target problem is given by a target loss, which is often discrete in the sense that the prediction lies in a finite set: classes, rankings, etc.
+As minimizing target losses over a data set is typically NP-hard, we instead turn to the general paradigm of \emph{surrogate risk minimization}.
+Here a surrogate loss function is chosen, and one minimizes the surrogate loss over the data instead of the target.
+A link function then maps the surrogate predictions to target predictions.
+
+Naturally, a central question in surrogate risk minimization is how to choose the surrogate loss.
+A minimal requirement is statistical \emph{consistency}, which roughly says that approaching the best possible surrogate loss will eventually lead to the best possible target loss.
+More generally, we would like to understand the rate at which this minimization occurs, called the \emph{generalization rate}: in terms of the number of data points, how quickly the target loss approaches the best possible.
+In other words, if we define the \emph{regret} of a hypothesis $h$ to be its performance relative to the best possible, 
+
+Surrogate regret bounds are a common tool to prove generalization rates for surrogate risk minimization.
+We define the \emph{regret}
+Informally, a surrogate regret bound takes the form
+\begin{equation}
+  \label{eq:surrogate-regret-bound-informal}
+  \forall \text{ hypotheses } h:\X\to\reals^d, \quad \mathrm{Regret}_\ell(\psi\circ h) \leq \zeta(\, \mathrm{Regret}_L(h) \,)~,
+\end{equation}
+where the regret transfer function $\zeta : \reals_+ \to \reals_+$ controls how surrogate regret translates to target regret.
+For example, \bo{cite} studies the \bo{??} surrogate loss for the \bo{??} problem, achieving a guarantee of $\zeta(\epsilon) \leq O\left(\sqrt{\epsilon}\right)$.
+
+
+Here regret is the difference between a hypothesis
+  While surrogate regret bounds have been developed for certain classes of loss functions, such as proper losses, general results are relatively sparse.
+  We provide two general results.
+  The first gives a linear surrogate regret bound for any polyhedral (piecewise-linear convex) surrogate, meaning that surrogate generalization rates translate directly to target rates.
+  The second shows that for ``non-polyhedral'' surrogates, the regret bound is a square root, meaning fast surrogate generalization rates translate to slow rates for the target.
+  Together, these results suggest polyhedral surrogates are weakly optimal in many cases.
+
+
+\section{Introduction}
 \paragraph{The surrogate risk framework.}
 In supervised learning, data is of the form $(x,y)$ and the goal is to learn a hypothesis $g(x)$.
 This paper considers the common setting where the space of labels $y$ is finite, as is the space of predictions $g(x)$, and accuracy is measured with a \emph{target loss function} $\ell(g(x),y)$.
@@ -370,21 +401,22 @@ Calibration is the slightly more subtle condition that there is a nonzero gap be
 %\end{definition}
 
 
-\section{Upper bound: polyhedral surrogates}
+\section{Upper Bound: Polyhedral Surrogates}
 In this section, we develop the proof of Theorem \ref{thm:main-upper}.
 At a high level, the proof has two parts:
 \begin{enumerate}
   \item Fix $p \in \simplex$.
-        Prove that $R_{\ell}(\psi(u),p) \leq \alpha_p R_L(u,p)$ for some constant $\alpha_p$.
-  \item Apply this result to a carefully chosen finite subset of $\simplex$. Argue that the maximum over the $\alpha_p$'s in this finite set gives the constant factor for the transfer rate.
+        Prove that there is some constant $\alpha_p$ such that $R_{\ell}(\psi(u),p) \leq \alpha_p R_L(u,p)$ for all $u\in\reals^d$.
+      \item Apply this result to each $p$ in a carefully chosen finite subset of $\simplex$.
+        Argue that the maximum $\alpha_p$ from this finite set suffices for the slope of the linear transfer function.
 \end{enumerate}
-We view both parts as relatively surprising.
+\raft{On ``We view both parts as relatively surprising'' I'm not sure the first part is.  I mean, it is to \textbf{us}, but as you point out, in retrospect it follows immediately from the definition...}
 The first part will actually hold for any calibrated surrogate.
-The second part relies on a crucial fact about polyhedral losses $L$: their properties $\Gamma$ cover the whole simplex with a finite number of polyhedral level sets.
+The second part relies on a crucial fact about polyhedral losses $L$: their properties $\Gamma=\prop{L}$ cover the whole simplex with only a finite number of polyhedral level sets.
 In other words, although the prediction space $\reals^d$ is infinite, one can restrict to just a finite set of prediction points and always have a global minimizer of expected loss.
-This is related to embeddings \bo{cite}.
+This observation is related to embeddings \bo{cite}.
 
-\paragraph{Part 1.}
+\subsection{Part 1: Linear transfer for fixed $p$}
 First, we establish a linear transfer rate for any fixed conditional distribution $p$.
 This holds for any calibrated surrogate, not necessarily polyhedral.
 \begin{lemma} \label{lemma:fixed-p}
@@ -415,14 +447,14 @@ This holds for any calibrated surrogate, not necessarily polyhedral.
 While the above proof has the advantage of being quite short, it is also somewhat nonconstructive and potentially loose.
 In \bo{Section TODO}, we investigate the constant $\alpha_p$ for polyhedral losses in particular.
 
-\paragraph{Part 2.}
+\subsection{Part 2: Linear overall transfer function}
 Given Lemma \ref{lemma:fixed-p}, we might hope to obtain that, for any calibrated surrogate, there exists $\alpha = \sup_p \alpha_p$ such that $R_{\ell}(\psi(u),p') \leq \alpha R_L(u,p')$ for all $p'$.
 However, we know this is false in general: not all surrogates yield linear transfer rates!
 Indeed, for many surrogates, the supremum will be $+\infty$.
 
 However, polyhedral surrogates have a special structure that allows us to show $\alpha$ is finite.
 We first present several general lemmas, then the key implication from $L$ being polyhedral.
-The general results are known \bo{cite}.
+The general results are known \bo{cite}\raft{Not sure what this sentence means}.
 
 \bo{For these lemmas, I tried to state no more than we need.}
 \begin{lemma} \label{lemma:refines}
