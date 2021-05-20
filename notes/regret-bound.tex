@@ -462,7 +462,7 @@ The goal of this section is to show that if a polyhedral surrogate is consistent
   Let $L:\reals^d \to \reals^\Y_+$ be a surrogate such that for all $y\in\Y$, the function $L(\cdot)_y$ is differentiable with a locally Lipschitz gradient.
   Let $\ell:\R \to \reals^\Y_+$ be a target loss and $\psi:\reals^d\to\R$ a link.
   Let $\Gamma := \prop{L}$, $\gamma := \prop{\ell}$.
-  Suppose that there exist reports $r,r'$, distribution $p_0 \in \gamma_r \cap \gamma_{r'}$, and surrogate report $u_0 \in \Gamma(p_0)$ such that $u \mapsto \inprod{p}{L(u)}$ is $\alpha$-strongly convex in an open neighborhood of $u_0$.
+  Suppose that there exist reports $r,r'\in\R$, distribution $p_0 \in \gamma_r \cap \gamma_{r'}$, and surrogate report $u_0 \in \Gamma(p_0)$ such that $u \mapsto \inprod{p}{L(u)}$ is $\alpha$-strongly convex in an open neighborhood of $u_0$.
   Then for any surrogate regret bound between $L$ and $\ell$ with function $\zeta:\reals_+\to\reals_+$, there exists $c > 0$ such that for sufficiently small $\epsilon>0$ we have
   \begin{equation}
     \label{eq:regret-lower-bound}
@@ -479,7 +479,7 @@ The goal of this section is to show that if a polyhedral surrogate is consistent
   % Our goal is to find some $c>0$ and some path of reports $u_\lambda \in \reals^d$ such that $\psi(u_\lambda)=r'$ and $R_L(u_\lambda,p_\lambda) \geq c\cdot\sqrt{\lambda \epsilon_1}$, for $\lambda$ sufficiently small.
 
   Let $L_\lambda:\reals^d\to\reals_+$ be given by $L_\lambda(u) = \inprod{p_\lambda}{L(u)} = (1-\lambda) \inprod{p_0}{L(u)} + \lambda \inprod{p_1}{L(u)}$.
-  Let $\delta >0$ such that the above open neighborhood of $u_0$ contains the ball $B_\delta(u_0)$ of radius $\delta$.
+  Let $\delta >0$ such that the above open neighborhood of $u_0$ contains the Euclidean ball $B_\delta(u_0)$ of radius $\delta$ around $u_0$.
   Let $u_1 \in \Gamma(p_1)$.
   For any $u\notin B_\delta(u_0)$, we have
   \begin{align*}
@@ -494,9 +494,9 @@ The goal of this section is to show that if a polyhedral surrogate is consistent
   \end{align*}
   where we used local strong convexity and the optimality of $u_1$.
   Thus, for $\lambda \leq \lambda^*$, where
-  $\lambda^* := \alpha \delta^2 / (\alpha \delta^2 + 2L_1(u_0) - 2L_1(u_1))$,
+  $\lambda^* := \alpha \delta^2 / (2 \alpha \delta^2 + 4 L_1(u_0) - 4 L_1(u_1))$,
   we have that $L_\lambda$ is minimized within $B_\delta(u_0)$.
-  By $\alpha$-strong convexity of $L_0$ on $B_\delta(u_0)$, $L_\lambda$ is therefore $\alpha^*$-strongly convex on $B_\delta(u_0)$ for $\lambda \leq \lambda^*$, where $\alpha^* = (1-\lambda^*)\alpha$.\raft{Need to double-check this statement}
+  By $\alpha$-strong convexity of $L_0$ on $B_\delta(u_0)$, $L_\lambda$ is therefore $\alpha^*$-strongly convex on $B_\delta(u_0)$ for $\lambda \leq \lambda^*$, where $\alpha^* = (1-\lambda^*)\alpha$.\raft{Need to double-check this statement; also need to propagate $\alpha^*$ where appropriate}
   For the remainder of the proof, let $\lambda \leq \lambda^*$.
 
   From strong (and hence strict) convexity, we observe that $u_0$ is the unique minimizer of $\inprod{p_0}{L(\cdot)}$ on $\reals^d$.
@@ -504,7 +504,12 @@ The goal of this section is to show that if a polyhedral surrogate is consistent
   Moreover, by the previous paragraph, we have $u_\lambda \in B_\delta(u_0)$.
   Then $\risk{L}(p_\lambda) = L_\lambda(u_\lambda)$, and thus $R_L(u_0,p_\lambda) = L_\lambda(u_0) - L_\lambda(u_\lambda)$.
 
-  We now upper bound $\|u_\lambda - u_0\|_2$, and then apply strong smoothness \raft{last hole to fill: use \emph{locally} Lipschitz instead of smoothness; should be fine since we apply it in a bounded region, e.g. around $u_1$} to upper bound $L_\lambda(u_0) - L_\lambda(u_\lambda)$.
+  By assumption, the gradient of $L_y$ is locally Lipschitz for all $y\in\Y$.
+  We will apply this fact to the compact set $\mathcal C = \{u \in \reals^d : \|u - u_1\| \leq \|u_0 - u_1\| + \delta\}$.
+  By compactness, we have a finite subcover of open neighborhoods; let $\beta$ be the minimum Lipschitz constant over this finite set of neighborhoods.
+  We thus have that $L_y$ is $\beta$-strongly smooth on $\mathcal C$, and hence so is $L_\lambda$ for any $\lambda \in [0,1]$.
+  
+  We now upper bound $\|u_\lambda - u_0\|_2$, and then apply strong smoothness to upper bound $L_\lambda(u_0) - L_\lambda(u_\lambda)$.
   Consider the first-order optimality condition of $L_\lambda$:
   \begin{align*}
     \label{eq:first-order-opt-smooth}
@@ -516,11 +521,22 @@ The goal of this section is to show that if a polyhedral surrogate is consistent
   \begin{align*}
     \|\nabla L_0(u_\lambda)\|_2 &= \|\nabla L_0(u_\lambda) - \nabla L_0(u_0)\|_2 \geq \alpha \|u_\lambda - u_0\|_2~,
     \\
-    \|\nabla L_1(u_\lambda)\|_2 &= \|\nabla L_0(u_\lambda) - \nabla L_1(u_1)\|_2 \leq \beta \|u_\lambda - u_1\|_2
+    \|\nabla L_1(u_\lambda)\|_2 &= \|\nabla L_1(u_\lambda) - \nabla L_1(u_1)\|_2 \leq \beta \|u_\lambda - u_1\|_2
     \\
     &\leq \beta \left( \|u_\lambda - u_0\|_2 + \|u_0 - u_1\|_2 \right)~.
   \end{align*}
-  Combining, and taking $\lambda \leq \tfrac 1 2 \tfrac {\alpha}{\alpha+\beta}$, we have
+  Combining, we have
+  \begin{align*}
+    (1-\lambda) \alpha \|u_\lambda - u_0\|_2
+    &\leq
+      (1-\lambda) \|\nabla L_0(u_\lambda)\|_2
+    \\
+    &= \lambda \|\nabla L_1(u_\lambda)\|_2
+    \\
+    &\leq
+      \lambda \beta \left( \|u_\lambda - u_0\|_2 + \|u_0 - u_1\|_2 \right)~.
+  \end{align*}
+  Now rearranging and taking $\lambda \leq \tfrac 1 2 \tfrac {\alpha}{\alpha+\beta}$, we have
   \begin{align*}
     \|u_\lambda - u_0\|_2 \leq \frac{\lambda\beta}{(1-\lambda)\alpha-\lambda\beta} \|u_0 - u_1\|_2  \leq \lambda \frac{2\beta}{\alpha} \|u_0 - u_1\|_2 ~.
   \end{align*}
