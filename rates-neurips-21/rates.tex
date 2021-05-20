@@ -16,7 +16,7 @@
 
 \usepackage[colorinlistoftodos,textsize=tiny]{todonotes} % need xargs for below
 \usepackage{bbm}
-\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{amsmath,amsthm,amsfonts,amssymb}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
@@ -201,6 +201,7 @@ In this paper, we assume $\R$ is a finite set.
 We suppose the target problem is specified by the \emph{target loss} $\ell:\R\to\reals^\Y_+$, which maps a report (prediction) $r \in \R$ to the vector $\ell(r)$ of nonnegative loss values for each label, i.e. $\ell(r) = (\ell(r)_y)_{y\in\Y}$.
 Given a hypothesis $g: \X \to \R$ and a data point $(x,y) \in \X \times \Y$, the loss is $\ell(g(x))_y$.
 \bo{We will make a minimal non-redundancy assumption on $\ell$ in [Ref].}
+We may refer to $\ell$ as a \emph{discrete} target loss to emphasize our assumption that $\R$ and $\Y$ are finite.
 
 \bo{given the intro, perhaps we can omit examples? but we do need to emphasize that $\R \neq \Y$ generally.}
 
@@ -313,7 +314,6 @@ In general, a loss $f: R \to \reals^{\Y}$, for some prediction (or ``report'') s
   \forall p\in\simplex,\;\;\;\Gamma(p) = \argmin_{r \in \R} \inprod{p}{f(r)}~.
 \end{equation}
 
-\bo{all in progress}
 The following definition applies both to target losses and surrogate losses.
 \begin{definition}[Elicits, report space]
   \label{def:elicits}
@@ -330,7 +330,7 @@ It is known that consistency implies the weaker condition of \emph{calibration},
 To define these conditions, consider $L,\psi,\ell$ and $\gamma = \prop{\ell}$.
 Recall that $\gamma(p)$ of target reports that are optimal for $p$.
 If $\psi(u) \not\in \gamma(p)$, then $u$ is a ``bad'' (suboptimal) surrogate prediction.
-Let $B_{L,\psi,\ell}(p) = \{\inprod{p}{L(u)} ~:~ \psi(u) \not\in \gamma(p)\}$, the set of expected surrogate losses resulting from bad predictions.
+Let $B_{L,\psi,\ell}(p) = \{R_L(u,p) ~:~ \psi(u) \not\in \gamma(p)\}$, the set of expected surrogate losses resulting from bad predictions.
 \begin{definition}[Indirectly elicits, Calibrated]
   A surrogate-link pair $(L,\psi)$ \emph{indirectly elicits} a target $\ell$ if $0 \not\in B_{L,\psi,\ell}(p)$ for all $p \in \simplex$.
   Meanwhile, $(L,\psi)$ is \emph{calibrated} for $\ell$ if $0 < \inf B_{L,\psi,\ell}(p)$ for all $p \in \simplex$.
@@ -344,6 +344,7 @@ Calibration is the slightly more subtle condition that there is a nonzero gap be
 %Observe that indirect elicitation is the condition that $0 \not\in \{\inprod{p}{L(u)} ~:~ \psi(u) \not\in \gamma(p)\}$.
 %Calibration is the slightly stronger condition that $0$ is not the infimum of the set.
 \begin{fact}[\bo{cite who?}]
+  \label{fact:consistent-calibrated-elicits}
   Let $\ell: \R \to \reals_+^{\Y}$ be a target loss with finite $\R$ and $\Y$.
   If a surrogate and link $(L,\psi)$ are consistent for $\ell$, then $(L,\psi)$ are calibrated for $L$.
   If $(L,\psi)$ are calibrated for $\ell$, then they indirectly elicit $\ell$.
@@ -365,14 +366,119 @@ At a high level, the proof has two parts:
 \begin{enumerate}
   \item Fix $p \in \simplex$.
         Prove that $R_{\ell}(\psi(u),p) \leq \alpha_p R_L(u,p)$ for some constant $\alpha_p$.
-  \item Apply this result to a finite subset $P$ of $\simplex$, namely the vertices of the level sets of $\gamma$.
+  \item Apply this result to a finite subset $P$ of $\simplex$, namely the vertices of the level sets of $\Gamma$.
         Argue (carefully) that, because a general $p$ is a convex combination of vertices of its own level set, $R_{\ell}(\psi(u),p) \leq \left(\max_{p' \in P} \alpha_{p'}\right) R_L(u,p)$.
-        This implies a linear conditional transfer rate with constant $\max_{p' \in P} \alpha_{p'}$; it immediately implies a linear transfer rate as promised.
+        This implies a linear conditional transfer rate with constant $\max_{p' \in P} \alpha_{p'}$.
 \end{enumerate}
-\bo{Not sure what to say here.}
 We view both parts as relatively surprising.
-The first contains several important technical steps, as we will outline next.
-Intuitively, it is not clear why the first part should imply the main result: it might be that $\sup_p \alpha_p = \infty$, for example, by approaching a boundary.
+The first part will actually hold for any calibrated surrogate.
+The second part relies on a crucial fact about polyhedral losses $L$: their properties $\Gamma$ have only a finite number of full-dimensional level sets.
+In other words, although the prediction space $\reals^d$ is infinite, one can pick out just a finite set of prediction points that can act as minimizers of expected loss.
+
+\paragraph{Part 1.}
+\begin{lemma} \label{lemma:fixed-p}
+  Let $\ell: \R \to \reals_+^{\Y}$ be a discrete target loss and suppose the surrogate $L: \reals^d \to \reals_+^{\Y}$ and link $\psi: \reals^d \to \R$ are calibrated for $\ell$.
+  Then for any $p \in \simplex$, there exists $\alpha_p \geq 0$ such that, for all $u \in \reals^d$,
+    \[ R_{\ell}(\psi(u),p) \leq \alpha_p R_L(u,p) . \]
+\end{lemma}
+\begin{proof}
+  Fix $p \in \simplex$.
+  Let $C_p = \max_{r \in \R} R_{\ell}(r,p)$.
+  The maximum exists because $\ell$ is discrete, i.e. $\R$ is finite.
+  Meanwhile, recall that, when defining calibration, we let $B_{L,\psi,\ell}(p) = \{R_L(u,p) ~:~ \psi(u) \not\in \gamma(p)\}$.
+  Let $B_p = \inf B_{L,\psi,\ell}(p)$.
+  By definition of calibration, we have $B_p > 0$.
+
+  To combine these bounds, let $\alpha_p = \frac{C_p}{B_p}$.
+  Let $u \in \reals^d$.
+  There are two cases.
+  If $\psi(u) \in \gamma(p)$, then $R_{\ell}(\psi(u),p) = 0 \leq R_L(u,p)$ immediately.
+  If $\psi(u) \not\in \gamma(p)$, then
+  \begin{align*}
+    R_{\ell}(\psi(u),p)
+    &\leq C_p \\
+    &=    \alpha_p \cdot B_p  \\
+    &\leq \alpha_p R_L(u,p) .
+  \end{align*}
+\end{proof}
+While the above proof has the advantage of being quite short, it is also somewhat nonconstructive and potentially loose.
+In \bo{Section TODO}, we investigate the constant $\alpha_p$ for polyhedral losses in particular.
+
+\paragraph{Part 2.}
+Given Lemma \ref{lemma:fixed-p}, we might hope to obtain that, for any calibrated surrogate, there exists $\alpha = \sup_p \alpha_p$ such that $R_{\ell}(\psi(u),p') \leq \alpha R_L(u,p')$ for all $p'$.
+However, we know this is false in general: not all surrogates yield linear surrogate regret transfer rates!
+Indeed, for many surrogates, the supremum will be $+\infty$.
+
+However, polyhedral surrogates have a special structure that allows us to show $\alpha$ is finite.
+We first present several general lemmas, then the key implication from $L$ being polyhedral.
+The general results are known \bo{cite}.
+\begin{lemma} \label{lemma:refines}
+  If $(L,\psi)$ indirectly elicits $\ell$, then $\Gamma = \prop{L}$ \emph{refines} $\gamma = \prop{\ell}$ in the sense that, for all $u \in \reals^d$, there exists $r \in \R$ such that $\Gamma_u \subseteq \Gamma_r$.
+\end{lemma}
+\begin{proof}
+  For any $u$, let $r = \psi(u)$.
+  By indirect elicitation, $u \in \Gamma(p) \implies r \in \gamma(p)$.
+  Phrased differently, $\Gamma_u = \{p ~:~ u \in \Gamma(p)\} \subseteq \{p ~:~ r \in \gamma(p)\} = \gamma_r$.
+\end{proof}
+The next lemma states that surrogate regret is linear in $p$ on any fixed level set $\Gamma_{u^*}$ of $\Gamma = \prop{L}$.
+By combining this fact with Lemma \ref{lemma:refines}, we obtain that target regret is linear on these level sets as well.
+\begin{lemma} \label{lemma:linear-on-levelset}
+  Suppose $(L,\psi)$ indirectly elicits $\ell$ and let $\Gamma = \prop{L}$.
+  Then for any fixed $u,u^* \in \reals^d$ and $r \in \R$, the functions $R_L(u,\cdot)$ and $R_{\ell}(u,\cdot)$ are linear in their second arguments on $\Gamma_{u^*}$.
+\end{lemma}
+\begin{proof}
+  Let, $p \in \Gamma_{u^*}$.
+  By definition on $\Gamma_{u^*}$, $\risk{L}(p) = \inprod{p}{L(u^*)}$.
+  So for fixed $u$,
+    \[ R_L(u,p) = \inprod{p}{L(u)} - \inprod{p}{L(u^*)} = \inprod{p}{L(u) - L(u^*)} , \]
+  a linear function of $p$.
+  Next, by Lemma \ref{lemma:refines}, there exists $r^*$ such that $\Gamma_{u^*} \subseteq \gamma_{r^*}$.
+  By the same argument, for fixed $r$, $R_{\ell}(r,p) = \inprod{p}{\ell(r) - \ell(r^*)}$, a linear function.
+\end{proof}
+
+We now arrive at the key property of polyhedral losses: \emph{although the prediction space is $\reals^d$, we can identify a finite set of predictions that characterize $L$.} \bo{wording?}
+Here, a level set is \emph{full-dimensional} if it has affine dimension $|\Y|-1$, the same as the simplex $\simplex$.
+\begin{lemma} \label{lemma:polyhedral-finite}
+  If $L: \reals^d \to \reals_+^{\Y}$ is polyhedral, then $\Gamma = \prop{L}$ has a finite set of level sets that union to $\simplex$. Also, these level sets are polytopes.
+\end{lemma}
+\begin{proof}
+  \bo{prove, cite, etc}
+\end{proof}
+
+We are now ready to restate and prove the main upper bound.
+\begin{theorem}[Theorem \ref{thm:main-upper} restated]
+  Let the surrogate loss $L: \reals^d \to \reals_+^{\Y}$ and link $\psi: \reals^d \to \R$ be consistent for the target loss $\ell: \R \to \reals_+^{\Y}$.
+  If $L$ is polyhedral, then $(L,\psi)$ guarantee a linear regret transfer rate for $\ell$, i.e. there exists $\alpha > 0$ such that, for all $\D$ and all measurable $h: \X \to \reals^d$,
+    \[ R_{\ell}(\psi \circ h ; \D) \leq \alpha R_L(h ; \D) . \]
+\end{theorem}
+\begin{proof}
+  We first recall that by Fact \ref{fact:consistent-calibrated-elicits}, consistency implies that $(L,\psi)$ are calibrated for $\ell$ and that $(L,\psi)$ indirectly elicit $\ell$.
+  Next, by Observation \ref{obs:transfer}, it suffices to show a linear \emph{conditional} regret transfer rate, i.e. for all $p \in \simplex$ and $u \in \reals^d$, we show $R_{\ell}(\psi(u),p) \leq \alpha R_L(u,p)$.
+  
+  By Lemma \ref{lemma:polyhedral-finite}, the polyhedral loss $L$ has a finite set $U \subset \reals^d$ of predictions such that (a) for each $u \in U$, the level set $\Gamma_u$ is a polytope, and (b) $\cup_{u \in U} \Gamma_u = \simplex$.
+  Let $\mathcal{Q}_u \subseteq \simplex$ be the finite set of vertices of the polytope $\Gamma_u$, and let $\mathcal{Q} = \cup_{u \in U} \mathcal{Q}_u$.
+  
+  By Lemma \ref{lemma:fixed-p}, for each $p \in \mathcal{Q}$, there exists $\alpha_p \geq 0$ such that $R_{\ell}(\psi(u),p) \leq \alpha_p R_L(u,p)$ for all $u$.
+  We choose
+    \[ \alpha = \max_{p \in \mathcal{Q}} \alpha_p . \]
+  To prove the conditional transfer rate, consider any $p \in \simplex$ and any $u \in \reals^d$.
+  There exists $u \in U$ such that $p \in \Gamma_u$, so we can write $p$ as a convex combination of the vertices, i.e.
+    \[ p = \sum_{p' \in \mathcal{Q}_u} \beta(p') p' \]
+  for some probability distribution $\beta$.
+  Because $\mathcal{Q}_u \subseteq \Gamma_u$, $R_L$ and $R_{\ell}$ are linear on it by Lemma \ref{lemma:linear-on-levelset}.
+  So:
+  \begin{align*}
+    R_{\ell}(u,p)
+    &=    R_{\ell}\left(\psi(u) ~,~ \sum_{p' \in \mathcal{Q}_u} \beta(p') p'\right)  \\
+    &=    \sum_{p' \in \mathcal{Q}_u} \beta(p') R_{\ell}(\psi(u),p')  \\
+    &\leq \sum_{p' \in \mathcal{Q}_u} \beta(p') \alpha_{p'} R_L(u,p')  \\
+    &\leq \alpha \sum_{p' \in \mathcal{Q}_u} \beta(p') R_L(u,p')  \\
+    &=    \alpha R_L(u, p) .
+  \end{align*}
+\end{proof}
+
+
+
 
 \subsection{Part 1: fixed $p$}
 
