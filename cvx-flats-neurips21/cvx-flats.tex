@@ -574,13 +574,15 @@ We can apply Lemma~\ref{lem:convex-flats-inf-dim} to construct lower bounds on c
 The illustrations in Table~\ref{tab:quadrants-simplices} are simply intended to show how Lemma~\ref{lem:convex-flats-inf-dim} can be applied to results in all four quadrants of problem types-- making it the first lower bound to our knowledge to do so.
 
 \paragraph{Q1: Abstain}
-The abstain target loss is a well-studied variation of 0-1 loss that allows for an ``abstain'' report that gives a lesser punishment $\alpha \in (0,1)$ for abstaining, $r = \bot$.
-Given the target loss $\ell^{\alpha}(r,y) := \Ind{r \not \in \{y, \bot\}} + \alpha\Ind{r = \bot}$,  we can consider the \emph{abstain property} $\gamma$ it elicits, where one predicts the most likely outcome $y$ if $Pr[Y=y|x] \geq 1-\alpha$ and ``abstain'' by predicting $\bot$ otherwise.
-\citet{ramaswamy2016convex} present a convex surrogate for the abstain loss with $\alpha = 1/2$ that takes as input a prediction whose dimension is logarithmic in the number of outcomes, yielding new upper bounds on $\conscvx(\ell^{1/2})$ which are an exponential improvement over previous results, e.g.,~\citep{crammer2001algorithmic,rifkin2004defense}.
+The abstain target loss is a well-studied variation of 0-1 loss that allows for an ``abstain'' report that gives a lesser punishment $1/2$ for abstaining, $r = \bot$.
+Given the target loss $\ell^{1/2}(r,y) := \Ind{r \not \in \{y, \bot\}} + (1/2)\Ind{r = \bot}$,  we can consider the \emph{abstain property} $\gamma$ it elicits, where one predicts the most likely outcome $y$ if $Pr[Y=y|x] \geq 1/2$ and ``abstain'' by predicting $\bot$ otherwise.
+Since we are given a discrete target loss, this problem fits nicely into Quadrant 1.
 
-When $n =3$, the property $\gamma$ elicited by $\ell^{1/2}$ is depicted in Table~\ref{tab:quadrants-simplices} (Q1).
-Upon closer inspection, the level set boundaries are found at the set of distribution where is a $y$ such that $p_y = 1/2 = 1-\alpha$.
-For any distribution $p \in \relint{\gamma_\bot}$, we can derive a lower bound on convex consistency dimension by trying to fir a $1$-flat through this point; however, by the global geometry of the property and location of the abstain cell relative to other cells, we cannot fit a $1$-flat (line in the 2-d projection of the simplex here) fully contained in $\gamma_\bot$ that passes through $p = \bullet$.
+When $n =3$, the property $\gamma^{1/2}$ elicited by $\ell^{1/2}$ is depicted in Table~\ref{tab:quadrants-simplices} (Q1).
+Upon closer inspection, the level set boundaries are found at the set of distribution where is a $y$ such that $p_y = 1/2$.
+For any distribution $p \in \relint{\gamma_\bot}$, we can derive a lower bound on convex consistency dimension by trying to fit a $1$-flat through this point; however, by the global geometry of the property and location of the abstain cell relative to other cells, we cannot fit a $1$-flat (line in the 2-d projection of the simplex here) fully contained in $\gamma_\bot$ that passes through $p = \bullet$.
+By Corollary~\ref{cor:Pcodim-flat-elic-relint-prop}, we can conclude $\conscvx(\gamma^{1/2}) \geq 2$ over $3$ outcomes.
+\citet{ramaswamy2016convex} present a convex surrogate for the abstain loss yielding a logarithmic upper bound on $\conscvx(\ell^{1/2})$, so this bound is tight.% which are an exponential improvement over previous results, e.g.,~\citep{crammer2001algorithmic,rifkin2004defense}.
 
 \paragraph{Q2: High confidence classification}
 Consider the following scenario where someone is deciding how to dress for the weather based on a meteorologist's forecast: a forecaster is choosing between three outcomes $\Y = \{$rainy, sunny, snowy$\}$, and we suppose we want to have some bias towards health and safety, so the meteorologist should only predict sunny weather if $Pr[$sunny $|$ weather data$] \geq 3/4$.
@@ -596,19 +598,22 @@ We can now model this problem by a property with the reports $\R = \Y$, and have
 \end{align*} 
 
 This property is shown in Table~\ref{tab:quadrants-simplices} (Q2), and we can observe the point $p = \bullet = (0.3,0.3,0.4)$ that, like abstain, we cannot fit a $1$-flat entirely contained in the level set $\gamma_{\text{snowy}}$ through $p$.
+Therefore, we can apply Corollary~\ref{cor:Pcodim-flat-single-val-prop} to conclude that $\conscvx(\gamma) = 2$.
 
 \paragraph{Q3: Least-squares regression}
-While least squares regression is commonly used in machine learning and statistics for continuous estimation, it might not be immediately \emph{why} we do so until we study the property estimated by squared loss, which turns out to be the expected value.
+\jessie{Define property, discuss briefly why in the quadrant.  Move to how results apply and what they say}
+While least squares regression is commonly used in machine learning and statistics for continuous estimation, it might not be immediately \emph{why} we do so, prompting us to study this smooth convex loss in Quadrant 3.
+Evaluating the derivative of squared loss, we can observe that it elicits the expected value $\Gamma(p) = \E_p[Y]$.
 With $\Y = \{-1,0,1\}$, we can visualize the level sets of the expected value as in Table~\ref{tab:quadrants-simplices} (Q3).
-
 Since squared loss is a $1$-dimensional loss, we can verify that for all $p \in \simplex$, we can fit a $1$-flat (precisely equal to the level set) through $p$, as demonstrated in the Table.
-See Corollary~\ref{cor:variance} in Appendix~\ref{app:omitted-examples} to see our framework applied to derive lower bounds for convex consistency dimension of the variance.
 
 \paragraph{Q4: Variance}
-We can show $\eliccvx(\Var)=2$, meaning the lowest dimension of a convex loss to estimate conditional variance is 2. %~\citep{osband1985providing,lambert2018elicitation}.
-This lower bound will follow from Theorem~\ref{thm:bayes-risk-lower-bound} using that variance is the Bayes risk of squared loss $L(r,y) = (r-y)^2$, which elicits the mean $\Gamma(p) = \E_p Y$.
+In understanding uncertainty, one might reasonably want to estimate the variance $\Gamma^\Var(p) = \E_p[Y^2] - \E_p[Y]^2$.
+This property is continuous in the simplex $\simplex$, and therefore belongs in Quadrant 4.
+The well-known fact that the variance is not elicitable does not yield a lower bound on elicitation complexity of 2, as it does not rule out the variance being a link of a real-valued convex-elicitable property; cf.~\citet[Remark 1]{frongillo2020elicitation}.
+However, in Appendix~\ref{app:omitted-examples}, we show $\eliccvx(\Gamma^\Var)=2$, meaning the lowest dimension of a convex loss to estimate conditional variance is 2. %~\citep{osband1985providing,lambert2018elicitation}.
+This lower bound will follow from Theorem~\ref{thm:bayes-risk-lower-bound} using the fact that variance is the Bayes risk of squared loss $L(r,y) = (r-y)^2$, which elicits the mean $\Gamma(p) = \E_p Y$.
 Interestingly, while perhaps intuitively obvious, even this simple result is novel.
-In particular, the well-known fact that the variance is not elicitable does not yield a lower bound of 2, as it does not rule out the variance being a link of a real-valued convex-elicitable property; cf.~\citet[Remark 1]{frongillo2020elicitation}.
 
 \begin{SCtable}
 \begin{tabular}{c|c}
@@ -665,9 +670,9 @@ In particular, the well-known fact that the variance is not elicitable does not 
 	
 	\begin{scope}
 	\clip (h) -- (m) -- (l) -- (h);
-	\draw[myblue,thin] (1/2,0,1/2) -- (0,1/2, 1/2);
+	\draw[myblue,thick] (1/2,0,1/2) -- (0,1/2, 1/2);
 	\def\e{1/16};
-	\draw[myblue] (1/4,1/4,1/2) -- (1/2, 1/2, 0);
+	\draw[myblue,thick] (1/4,1/4,1/2) -- (1/2, 1/2, 0);
 	\coordinate (point) at (0.3,0.4, 0.3);
 	\draw[orange, dashed,shorten >= -3cm, shorten <=-3cm] (0.4, 0.6, 0.) -- (point);
 	\draw[orange, dashed,shorten >= -3cm, shorten <=-3cm] (0,0.4,0.6) -- (point);
@@ -753,10 +758,10 @@ In particular, the well-known fact that the variance is not elicitable does not 
 \coordinate (C) at ($(\bb,\bb,1-2*\bb)$);
 \coordinate (Cleft) at ($(\bb + 2,\bb,1-2*\bb)$);
 \coordinate (Cright) at ($(\bb,\bb + 2,1-2*\bb)$);
-\coordinate (centerdot) at (0.3,0.3, 0.4);
+\coordinate (centerdot) at (0.21,0.445, 0.345);
 \draw[myorange, very thick] (C) parabola (A);
 \draw[myorange, very thick] (C) parabola (B);
-\draw[orange, dashed,shorten >= -3cm, shorten <=-3cm] (3/4,0,1/4) -- (centerdot);
+\draw[orange, dashed,shorten >= -3cm, shorten <=-3cm] (1/10,9/10,0) -- (centerdot);
 \node at (centerdot) {$\bullet$};
 \end{scope}
 \def\c{0.6}
@@ -771,7 +776,7 @@ In particular, the well-known fact that the variance is not elicitable does not 
 %\hline
 \end{tabular}
 \caption{Example properties for each of the quadrants. 
-In (Q1), we fix $p$ uniform in the abstain level set $\Gamma_\bot$. 
+In (Q1), we fix $p = \bullet$ in the abstain level set $\Gamma_\bot$. 
 We cannot fit a line ($1$-flat) through $p$ without leaving the level set $\Gamma_\bot$.  
 Therefore, there is no $1$-dimensional consistent convex surrogate for abstain by Lemma~\ref{lem:convex-flats-inf-dim}.  
 (Q2) is similar to (Q1) but has no target loss since it is not elicitable.
@@ -872,8 +877,8 @@ In particular, we recover their main lower bound for the large class of Bayes ri
 %   So $k \geq d + 1$.
 % \end{proof}
 
-We now illustrate the theorem with two important examples: variance and conditional value at risk.
-Several other applications from \citet{frongillo2020elicitation}, such as spectral risk measures, entropy, and norms, follow similarly.
+We now illustrate the theorem's application to conditional value at risk.
+Several other applications from \citet{frongillo2020elicitation}, such as risk measures, entropy, and norms, follow similarly.
 
 
 \paragraph{Conditional Value at Risk.}
@@ -1085,6 +1090,62 @@ This result allows us to state elicitation complexity as a lower bound for conve
 %In this case, we still do not find the assumption very restrictive, and find it covers most cases one might practically be interested in.
 
 \section{Implications of convex indirect elicitation bounds}\label{app:implications-of-bounds}
+In order to apply Lemma~\ref{lem:convex-flats-inf-dim} to various properties, we need the following lemmas about separating hyperplanes.
+
+A hyperplane weakly separates two sets if its two closed halfspaces respectively contain the two sets.
+\begin{lemma}\label{lem:intersect-levelsets}
+	If $\gamma: \P \toto \R$ is an elicitable property, then for any pair of predictions $r, r' \in \R$ where $\gamma_r \neq \gamma_{r'}$, there is a hyperplane $H = \{x \in \reals^{\Y} : v \cdot x = 0\}$, for some $v \in \reals^\Y$, that weakly separates $\gamma_r$ and $\gamma_{r'}$ and has $\gamma_r \cap H = \gamma_{r'} \cap H = \gamma_r \cap \gamma_{r'}$.
+\end{lemma}
+\begin{proof}
+	\btw{Bo: the proof holds as written for the case where the level sets have empty intersection.}
+	Let $\ell$ elicit $\gamma$.
+	Let $v = \ell(r, \cdot) - \ell(r', \cdot)$, interpreted as a nonzero vector in $\reals^\Y$.
+	Let $H = \{ q : v \cdot q = 0 \}$.
+	If $v \cdot q < 0$, then $r'$ cannot be optimal, so $q \not\in \gamma_{r'}$.
+	So $\gamma_{r'} \subseteq \{ q : v \cdot q \geq 0 \}$.
+	Symmetrically, $\gamma_r \subseteq \{ q : v \cdot q \leq 0 \}$.
+	This is weak separation, and it immediately implies that $\gamma_r \cap \gamma_{r'} \subseteq H$.
+	Finally, if and only if $v \cdot q = 0$, i.e. $q \in H$, by definition the expected losses of both reports are the same.
+	So $q \in \gamma_r \cap H \iff q \in \gamma_{r'} \cap H$.
+	This gives $\gamma_r \cap H = \gamma_{r'} \cap H = \gamma_r \cap \gamma_{r'} \cap H = \gamma_r \cap \gamma_{r'}$.
+\end{proof}
+
+\begin{lemma}\label{lem:set-valued-prop-flats}
+	Suppose we are given an elicitable property $\gamma : \P \toto \R$, where $\Y$ is finite, and distribution $p \in \relint\P$ such that $p \in \gamma_r \cap \gamma_{r'}$ for $r,r' \in \R$.
+	Then for any flat $F$ containing $p$, $F \subseteq \gamma_r \iff F \subseteq \gamma_{r'}$.
+\end{lemma}
+\begin{proof}
+	If $\gamma_r = \gamma_{r'}$, we are done.
+	Otherwise, Lemma \ref{lem:intersect-levelsets} gives a hyperplane $H = \{ x \in \reals^\Y : v \cdot x = 0\}$ and a guarantee that $\gamma_r \subseteq \{ q \in \simplex : v \cdot q \leq 0\}$, while $\gamma_{r'} \subseteq \{ q \in \simplex : v \cdot q \geq 0 \}$, and finally $\gamma_r \cap \gamma_{r'} \subseteq H$.
+	
+	Suppose $F \subseteq \gamma_r$; we wish to show $F \subseteq \gamma_{r'}$.
+	Let $q \in F$.
+	By Lemma~\ref{lem:finite-relint-dim}(i), we have $p \in \relint{F}$, so there exists $\epsilon > 0$ so that $q' = p - \epsilon (q-p) \in F$.
+	
+	Now, suppose for contradiction that $q \not\in \gamma_{r'}$.\jessiet{I think this can be made more concise, but is clearest this way; it's a bit tricky with the movement between discussing flats and hyperplanes and being subsets of level sets, etc.}
+	Then $v \cdot q < 0$: containment in $\gamma_r$ gives $v \cdot q \leq 0$, and if $v \cdot q = 0$ then $q \in \gamma_r \cap H \implies q \in \gamma_{r'}$, a contradiction.
+	But, noting that $p \in H$, we have $v \cdot q' = -\epsilon (v \cdot q) > 0$, so $q'$ is not in $\gamma_{r}$.
+	This contradicts the assumption $F \subseteq \gamma_r$.
+	Therefore, we must have $q \in \gamma_{r'}$, so we have shown $F \subseteq \gamma_{r'}$.
+	Because $r$ and $r'$ were completely symmetric, this completes the proof.
+	%
+	% %commented out 01.22.2021 - Jessie; incorporating Lemma that says p in relint(F)	
+	%	Suppose $F \subseteq \gamma_r$.
+	%	We show $F \subseteq \gamma_{r'}$.
+	%	Let $q \in F$.
+	%	We claim that for small enough $\epsilon$, the point $q' = p - \epsilon (q-p)$ is in $F$ as well.
+	%	Containment in $F$ follows because both $p$ and $q$ are in $F$ and it is a flat, while containment in $\P$ follows because $p \in \relint\P$. \jessie{Does $\relint{F}$ actually come in here?}
+	%	
+	%	Now, suppose for contradiction that $q \not\in \gamma_{r'}$.
+	%	Then $v \cdot q < 0$: containment in $\gamma_r$ gives $v \cdot q \leq 0$, and if $v \cdot q = 0$ then $q \in \gamma_r \cap H \implies q \in \gamma_{r'}$, a contradiction.
+	%	But, noting that $p \in H$, we have $v \cdot q' = -\epsilon (v \cdot q) > 0$, so $q'$ is not in $\gamma_{r}$.
+	%	This contradicts the assumption $F \subseteq \gamma_r$.
+	%	Therefore, we must have $q \in \gamma_{r'}$, so we have shown $F \subseteq \gamma_{r'}$.
+	%	Because $r$ and $r'$ were completely symmetric, this completes the proof.
+\end{proof}
+
+Now we can understand the application of Lemma~\ref{lem:convex-flats-inf-dim}.
+
 \begin{corollary}\label{cor:Pcodim-flat-single-val-prop}
 	Let target property $\gamma:\P \toto \R$ and $d\in\mathbb N$ be given.
 	Let $\Y$ be either a finite set, or $\Y = \reals$, in which case we assume each $p\in\P$ admits a Lebesgue density supported on the same set for all $p\in\P$.
@@ -1326,7 +1387,7 @@ Moreover, we have calibration implying indirect elicitation.
 
 Combining the two results, we can observe the result of Theorem~\ref{thm:consistent-implies-indir-elic} another way: \emph{through calibration}.
 
-\section{Previous lower bounds and comparisons}\label{sec:finite-calib}
+\section{Q1: Previous lower bounds and comparisons}\label{sec:finite-calib}
 
 The main known technique for lower bounds on surrogate dimensions is given by \citet{ramaswamy2016convex} for the Quadrant 1 (target loss and discrete predictions).
 The proof heavily builds around the ``limits of sequences'' in the definition of calibration.
@@ -1379,7 +1440,7 @@ So, by making a slight restriction to the class of minimizable convex surrogates
 There are some cases where the bound provided by Corollaries~\ref{cor:Pcodim-flat-single-val-prop} and~\ref{cor:Pcodim-flat-elic-relint-prop} is strictly tighter than the bound provided by feasible subspace dimension in Corollary~\ref{cor:fsd-bound}.
 For an example of how Corollary~\ref{cor:Pcodim-flat-single-val-prop} applies to a discrete property for which there is no target loss -- a non-elicitable property, i.e. Quadrant 2, which is not considered by \citet{ramaswamy2018consistent} -- we refer the reader to Appendix~\ref{app:omitted-examples}.
 
-\paragraph{Example: High-confidence classification.}\label{subsec:examples-finite}
+\paragraph{Example: Abstain}\label{subsec:examples-finite}
 Recall the abstain target loss $\ell^{abs}(r,y) := \Ind{r \not \in \{y, \bot\}} + (1/2)\Ind{r = \bot}$,  we can consider the \emph{abstain property} it elicits, where one predicts the most likely outcome $y$ if $Pr[Y=y|x] \geq 1/2$ and ``abstain'' by predicting $\bot$ otherwise.
 \citet{ramaswamy2016convex} present a convex surrogate for the abstain loss that takes as input a prediction whose dimension is logarithmic in the number of outcomes, yielding new upper bounds on $\conscvx(\ell^{abs})$ which are an exponential improvement over previous results, e.g.,~\cite{crammer2001algorithmic}.
 
@@ -1838,59 +1899,6 @@ Then for all properties $\gamma$, if $\elic_{\C^*}(\gamma) < \infty$, we have $\
 
 
 \section{Miscellaneous omitted proofs}\label{app:misc-omitted-proofs}
-
-
-A hyperplane weakly separates two sets if its two closed halfspaces respectively contain the two sets.
-\begin{lemma}\label{lem:intersect-levelsets}
-	If $\gamma: \P \toto \R$ is an elicitable property, then for any pair of predictions $r, r' \in \R$ where $\gamma_r \neq \gamma_{r'}$, there is a hyperplane $H = \{x \in \reals^{\Y} : v \cdot x = 0\}$, for some $v \in \reals^\Y$, that weakly separates $\gamma_r$ and $\gamma_{r'}$ and has $\gamma_r \cap H = \gamma_{r'} \cap H = \gamma_r \cap \gamma_{r'}$.
-\end{lemma}
-\begin{proof}
-	\btw{Bo: the proof holds as written for the case where the level sets have empty intersection.}
-	Let $\ell$ elicit $\gamma$.
-	Let $v = \ell(r, \cdot) - \ell(r', \cdot)$, interpreted as a nonzero vector in $\reals^\Y$.
-	Let $H = \{ q : v \cdot q = 0 \}$.
-	If $v \cdot q < 0$, then $r'$ cannot be optimal, so $q \not\in \gamma_{r'}$.
-	So $\gamma_{r'} \subseteq \{ q : v \cdot q \geq 0 \}$.
-	Symmetrically, $\gamma_r \subseteq \{ q : v \cdot q \leq 0 \}$.
-	This is weak separation, and it immediately implies that $\gamma_r \cap \gamma_{r'} \subseteq H$.
-	Finally, if and only if $v \cdot q = 0$, i.e. $q \in H$, by definition the expected losses of both reports are the same.
-	So $q \in \gamma_r \cap H \iff q \in \gamma_{r'} \cap H$.
-	This gives $\gamma_r \cap H = \gamma_{r'} \cap H = \gamma_r \cap \gamma_{r'} \cap H = \gamma_r \cap \gamma_{r'}$.
-\end{proof}
-
-\begin{lemma}\label{lem:set-valued-prop-flats}
-	Suppose we are given an elicitable property $\gamma : \P \toto \R$, where $\Y$ is finite, and distribution $p \in \relint\P$ such that $p \in \gamma_r \cap \gamma_{r'}$ for $r,r' \in \R$.
-	Then for any flat $F$ containing $p$, $F \subseteq \gamma_r \iff F \subseteq \gamma_{r'}$.
-\end{lemma}
-\begin{proof}
-	If $\gamma_r = \gamma_{r'}$, we are done.
-	Otherwise, Lemma \ref{lem:intersect-levelsets} gives a hyperplane $H = \{ x \in \reals^\Y : v \cdot x = 0\}$ and a guarantee that $\gamma_r \subseteq \{ q \in \simplex : v \cdot q \leq 0\}$, while $\gamma_{r'} \subseteq \{ q \in \simplex : v \cdot q \geq 0 \}$, and finally $\gamma_r \cap \gamma_{r'} \subseteq H$.
-	
-	Suppose $F \subseteq \gamma_r$; we wish to show $F \subseteq \gamma_{r'}$.
-	Let $q \in F$.
-	By Lemma~\ref{lem:finite-relint-dim}(i), we have $p \in \relint{F}$, so there exists $\epsilon > 0$ so that $q' = p - \epsilon (q-p) \in F$.
-	
-	Now, suppose for contradiction that $q \not\in \gamma_{r'}$.\jessiet{I think this can be made more concise, but is clearest this way; it's a bit tricky with the movement between discussing flats and hyperplanes and being subsets of level sets, etc.}
-	Then $v \cdot q < 0$: containment in $\gamma_r$ gives $v \cdot q \leq 0$, and if $v \cdot q = 0$ then $q \in \gamma_r \cap H \implies q \in \gamma_{r'}$, a contradiction.
-	But, noting that $p \in H$, we have $v \cdot q' = -\epsilon (v \cdot q) > 0$, so $q'$ is not in $\gamma_{r}$.
-	This contradicts the assumption $F \subseteq \gamma_r$.
-	Therefore, we must have $q \in \gamma_{r'}$, so we have shown $F \subseteq \gamma_{r'}$.
-	Because $r$ and $r'$ were completely symmetric, this completes the proof.
-	%
-	% %commented out 01.22.2021 - Jessie; incorporating Lemma that says p in relint(F)	
-	%	Suppose $F \subseteq \gamma_r$.
-	%	We show $F \subseteq \gamma_{r'}$.
-	%	Let $q \in F$.
-	%	We claim that for small enough $\epsilon$, the point $q' = p - \epsilon (q-p)$ is in $F$ as well.
-	%	Containment in $F$ follows because both $p$ and $q$ are in $F$ and it is a flat, while containment in $\P$ follows because $p \in \relint\P$. \jessie{Does $\relint{F}$ actually come in here?}
-	%	
-	%	Now, suppose for contradiction that $q \not\in \gamma_{r'}$.
-	%	Then $v \cdot q < 0$: containment in $\gamma_r$ gives $v \cdot q \leq 0$, and if $v \cdot q = 0$ then $q \in \gamma_r \cap H \implies q \in \gamma_{r'}$, a contradiction.
-	%	But, noting that $p \in H$, we have $v \cdot q' = -\epsilon (v \cdot q) > 0$, so $q'$ is not in $\gamma_{r}$.
-	%	This contradicts the assumption $F \subseteq \gamma_r$.
-	%	Therefore, we must have $q \in \gamma_{r'}$, so we have shown $F \subseteq \gamma_{r'}$.
-	%	Because $r$ and $r'$ were completely symmetric, this completes the proof.
-\end{proof}
 
 
 
