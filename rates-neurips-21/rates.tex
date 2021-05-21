@@ -88,7 +88,7 @@
 % \DeclarePairedDelimiter\ceil{\lceil}{\rceil}
 
 \newcommand{\regret}[3]{R_{#1}(#2,#3)}
-
+\newcommand{\Reg}{\mathrm{Regret}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \title{Rate Transfers with Polyhedral Surrogate Losses /\\
@@ -118,53 +118,66 @@
   Together, these results suggest polyhedral surrogates are weakly optimal in many cases.
 \end{abstract}
 
-\begin{abstract}
-  In supervised machine learning, often a target problem is solved by minimizing a surrogate loss on a dataset.
-  Study of convergence rates, which bound generalization error as a function of dataset size, typically neglects the relationship between the target and surrogate problems.
-  We consider the transfer of rate guarantees from the surrogate loss to the target problem.
-  We show that any consistent piecewise-linear convex (i.e. polyhedral) surrogate achieves a linear transfer rate, i.e. fast convergence of excess risk in the surrogate implies fast convergence in the target.
-  Simple counterexamples show that transfer rates can be much slower, e.g. quadratic, when the surrogate is smooth or strongly convex.
-\end{abstract}
+% \begin{abstract}
+%   In supervised machine learning, often a target problem is solved by minimizing a surrogate loss on a dataset.
+%   Study of convergence rates, which bound generalization error as a function of dataset size, typically neglects the relationship between the target and surrogate problems.
+%   We consider the transfer of rate guarantees from the surrogate loss to the target problem.
+%   We show that any consistent piecewise-linear convex (i.e. polyhedral) surrogate achieves a linear transfer rate, i.e. fast convergence of excess risk in the surrogate implies fast convergence in the target.
+%   Simple counterexamples show that transfer rates can be much slower, e.g. quadratic, when the surrogate is smooth or strongly convex.
+% \end{abstract}
 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 In supervised learning, our goal is to learn a hypothesis that solves some target problem given labeled data.
-This target problem is given by a target loss, which is often discrete in the sense that the prediction lies in a finite set: classes, rankings, etc.
-As minimizing target losses over a data set is typically NP-hard, we instead turn to the general paradigm of \emph{surrogate risk minimization}.
-Here a surrogate loss function is chosen, and one minimizes the surrogate loss over the data instead of the target.
-A link function then maps the surrogate predictions to target predictions.
+This target problem is given by a target loss $\ell$, which is often discrete in the sense that the prediction lies in a finite set, such as with classification, ranking, and structured prediction.
+As minimizing the target $\ell$ over a data set is typically NP-hard, we instead turn to the general paradigm of \emph{surrogate risk minimization}.
+Here a surrogate loss function $L$ is chosen and minimized instead of the target $\ell$.
+A link function $\psi$ then maps the surrogate predictions to target predictions.
 
-Naturally, a central question in surrogate risk minimization is how to choose the surrogate loss.
+Naturally, a central question in surrogate risk minimization is how to choose the surrogate $L$.
 A minimal requirement is statistical \emph{consistency}, which roughly says that approaching the best possible surrogate loss will eventually lead to the best possible target loss.
 More generally, we would like to understand the rate at which this minimization occurs, called the \emph{generalization rate}: in terms of the number of data points, how quickly the target loss approaches the best possible.
-In other words, if we define the \emph{regret} of a hypothesis $h$ to be its performance relative to the best possible, 
-
-\begin{itemize}
-\item best possible (Bayes optimal)
-\item use $L$, $\ell$, $\psi$
-\end{itemize}
-
+In other words, if we define the \emph{regret} of a hypothesis to be its performance relative to the Bayes optimal hypothesis, we wish to know how quickly the $\ell$-regret approaches zero.
 
 Surrogate regret bounds are a common tool to prove generalization rates for surrogate risk minimization.
-We define the \emph{regret}
-Informally, a surrogate regret bound takes the form
+The idea is that we have ample results to quantify the rate at which surrogate regret approaches zero, and if we could bound the target regret in terms of the surrogate regret, we would arrive at an overall generalization rate.
+Roughly speaking, a surrogate regret bound takes the form
 \begin{equation}
   \label{eq:surrogate-regret-bound-informal}
-  \forall \text{ hypotheses } h:\X\to\reals^d, \quad \mathrm{Regret}_\ell(\psi\circ h) \leq \zeta(\, \mathrm{Regret}_L(h) \,)~,
+  \forall \text{ surrogate hypotheses } h, \quad \Reg_\ell(\psi\circ h) \leq \zeta(\, \Reg_L(h) \,)~,\qquad
 \end{equation}
 where the regret transfer function $\zeta : \reals_+ \to \reals_+$ controls how surrogate regret translates to target regret.
-For example, \bo{cite} studies the \bo{??} surrogate loss for the \bo{??} problem, achieving a guarantee of $\zeta(\epsilon) \leq O\left(\sqrt{\epsilon}\right)$.
+For example, if we have a sequence of surrogate hypothesis $h_n$ achieving a fast rate $\Reg_L(h_n) = O(1/n)$, and $\zeta(\epsilon) = \sqrt{\epsilon}$, then we can guarante an overall slow rate of $\Reg_\ell(\psi \circ h_n) = O(1/\sqrt{n})$.
 
+As the above example illustrates, understanding the behavior of $\zeta$ near $0$ is crucial to analyzing the overall generalization rate; were $\zeta$ linear, the overall rate would have been a fast $O(1/n)$.
+While much is known about surrogate regret bounds for important classes of losses, like proper losses\raf{Bob, others} and margin losses\raf{refs}, general results spanning very broad classes of loss functions are sparse.
+Lacking such results, authors instead often prove bounds for specific losses from scratch, e.g. \raf{abstain}.
 
-Here regret is the difference between a hypothesis
-  While surrogate regret bounds have been developed for certain classes of loss functions, such as proper losses, general results are relatively sparse.
-  We provide two general results.
-  The first gives a linear surrogate regret bound for any polyhedral (piecewise-linear convex) surrogate, meaning that surrogate generalization rates translate directly to target rates.
-  The second shows that for ``non-polyhedral'' surrogates, the regret bound is a square root, meaning fast surrogate generalization rates translate to slow rates for the target.
-  Together, these results suggest polyhedral surrogates are weakly optimal in many cases.
+We take a large step toward general surrogate regret bounds, with two broad results.
+The first gives a linear surrogate regret bound for any polyhedral (piecewise-linear convex) surrogate, meaning that surrogate generalization rates translate directly to target rates.
+  % \begin{theorem}[Linear bounds for polyhedral surrogates]
+\begin{theorem}[Linear bound for polyhedral]
+  \label{thm:main-upper}
+  Let $L$ be any polyhedral surrogate and $\psi$ any link function such that $(L,\psi)$ is consistent for the target loss $\ell$.
+  Then there is a linear regret transfer function $\zeta$.
+  % Then $(L,\psi)$ guarantee a linear regret transfer function $\zeta$ to $\ell$.
+  %Then there exists a surrogate regret bound with a linear transfer function $\zeta$.
+\end{theorem}
 
+The second shows that $\zeta$ cannot be smaller than a square root for sufficiently ``non-polyhedral'' surrogates, which are smooth and locally strongly convex.
+For these losses, therefore, fast surrogate generalization rates will likely still translate to slow rates for the target.
+This result could be viewed as a partial converse to the first, providing evidence that some element of piecewise-linearity is necessary for optimal surrogate regret bounds.
+\begin{theorem}[Lower bound for non-polyhedral]
+  \label{thm:main-lower}
+  Let $L$ be a locally strongly convex surrogate, with locally Lipschitz gradient.
+  If $L$ satisfies a regret transfer rate of $\zeta$ for a target loss $\ell$, then there exists $c>0$ such that, for arbitrarily small $\epsilon>0$, we have $\zeta(\epsilon) \geq c\cdot\sqrt{\epsilon}$.
+%  If $\zeta$ is a transfer function in a surrogate regret bound for $L$ to a target loss $\ell$, then there exists $c>0$ such that, for arbitrarily small $\epsilon>0$, we have $\zeta(\epsilon) \geq c\cdot\sqrt{\epsilon}$.
+\end{theorem}
+\raf{Comments on general implications?}
+
+\raf{Some comments about our proof techniques, with forward refs to sections / outline sprinkled in?}
 
 \section{Introduction}
 \paragraph{The surrogate risk framework.}
@@ -183,21 +196,21 @@ These surrogates are typically associated with the link $\psi(u) = \mathrm{sign}
 
 \paragraph{Rates of convergence.}
 Given $n$ data points and a surrogate loss $L$, a learning algorithm should produce a hypothesis $h_n$ whose loss converges to the optimal possible as $n$ increases.
-Specifically, we can define $\mathrm{Regret}_{L}(h)$ as the expected loss of $h$ on the data distribution, minus the expected loss of the Bayes optimal predictor, i.e. the measurable function with least loss.
-Then a primary goal is to bound the \emph{convergence rate} of this algorithm, i.e. provide a bound of the form $\mathrm{Regret}_{L}(h_n) \leq O\left(\tfrac{1}{n^{\alpha}}\right)$.
+Specifically, we can define $\Reg_{L}(h)$ as the expected loss of $h$ on the data distribution, minus the expected loss of the Bayes optimal predictor, i.e. the measurable function with least loss.
+Then a primary goal is to bound the \emph{convergence rate} of this algorithm, i.e. provide a bound of the form $\Reg_{L}(h_n) \leq O\left(\tfrac{1}{n^{\alpha}}\right)$.
 Such bounds for $\alpha = \tfrac{1}{2}$ are considered ``slow'' rates and are guaranteed by e.g. VC-dimension bounds.\bo{cite}
 Faster rates such as $\alpha = 1$ are obtainable is some settings.\bo{cite}
 
 \paragraph{Problem: relating surrogate and target regret.}
 However, results of the above form do not guarantee the success of the learning framework for the original, target problem.
-Even if the surrogate regret $\mathrm{Regret}_L(h_n)$ is small, we actually care about the induced target hypothesis $g_n = \psi \circ h_n$.
+Even if the surrogate regret $\Reg_L(h_n)$ is small, we actually care about the induced target hypothesis $g_n = \psi \circ h_n$.
 Will the target regret necessarily be small?
 Motivated by this problem, this paper will study \emph{surrogate regret bounds}.\bo{cite}
 %A surrogate regret bound answers the following question: when we minimize the \emph{surrogate} regret at a given rate, how fast does the \emph{target} regret diminish?
 Informally, a surrogate regret bound takes the form
 \begin{equation}
   \label{eq:surrogate-regret-bound-informal}
-  \forall \text{ hypotheses } h:\X\to\reals^d, \quad \mathrm{Regret}_\ell(\psi\circ h) \leq \zeta(\, \mathrm{Regret}_L(h) \,)~,
+  \forall \text{ hypotheses } h:\X\to\reals^d, \quad \Reg_\ell(\psi\circ h) \leq \zeta(\, \Reg_L(h) \,)~,
 \end{equation}
 where the regret transfer function $\zeta : \reals_+ \to \reals_+$ controls how surrogate regret translates to target regret.
 For example, \bo{cite} studies the \bo{??} surrogate loss for the \bo{??} problem, achieving a guarantee of $\zeta(\epsilon) \leq O\left(\sqrt{\epsilon}\right)$.
