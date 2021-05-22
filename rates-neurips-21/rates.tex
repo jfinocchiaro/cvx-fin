@@ -25,7 +25,8 @@
 \newtheorem{proposition}{Proposition}
 \newtheorem{corollary}{Corollary}
 
-\newtheorem{definition}{Definition}
+\theoremstyle{definition}\newtheorem{definition}{Definition}
+\theoremstyle{definition}\newtheorem{assumption}{Assumption}
 
 \newcommand{\Comments}{1}
 \newcommand{\mynote}[2]{\ifnum\Comments=1\textcolor{#1}{#2}\fi}
@@ -549,7 +550,118 @@ We are now ready to restate and prove the main upper bound.
 
 \section{Lower bound}
 
+In this section, we show that if a surrogate loss is sufficiently ``non-polyhedral'', then the best regret transfer it can achieve is $\sqrt{\epsilon}$.
+Specifically, we consider a relaxation of $L$ being both strongly smooth and strongly convex.
 
+We next formalize this relaxation.
+It will assume $L$ is strongly smooth everywhere and strongly convex around some \emph{boundary prediction}, which we define to be a $u_0 \in \reals^d$ such that, for some $r,r' \in \R$, there exists a distribution $p_0 \in \Gamma_{u_0} \cap \gamma_r \cap \gamma_{r'}$.
+Here $\Gamma = \prop{L}$ and $\gamma = \prop{\ell}$.
+The upshot of this definition is that for the conditional distribution $p_0$, $u_0$ minimizes expected $L$-loss, and it may link to either $r$ or $r'$, as either of these minimize expected $\ell$-loss.
+We also note that an \emph{open neighborhood} of $u_0$ is an open set in $\reals^d$ containing $u_0$.
+
+\begin{assumption} \label{assumption:lower}
+  $L: \reals^d \to \reals^{\Y}_+$ is a surrogate and $\psi: \reals^d \to \R$ a link, consistent with the discrete target $\ell: \R \to \reals^{\Y}_+$, satisfying the following: (i) For all $y \in \Y$, the function $L(\cdot)_y$ is differentiable with a locally Lipschitz gradient.\bo{footnote def of locally lipschitz} (ii) For some $\alpha > 0$ and some $u_0 \in \reals^d$, the expected loss function $u \mapsto \inprod{p}{L(u)}$ is $\alpha$-strongly convex on an open neighborhood \bo{define neighborhood} of one of its boundary prediction $u_0$.
+\end{assumption}
+
+\begin{observation} \label{obs:lower-implied}
+  If $L$ is strongly smooth and $\alpha$ strongly convex, then it satisfies Assumption \ref{assumption:lower} for any link $\psi$ and discrete target loss $\ell$ such that $(L,\psi)$ are consistent for $\ell$.
+\end{observation}
+Observation \ref{obs:lower-implied} follows because boundary points are guaranteed to exist for $L,\psi,\ell$.
+This holds because $\ell$ has a finite report space $\R$, so for example the fact that its full-dimensional level sets union to the simplex \bo{cite?} implies the existence of $r,r' \in \R$ and $p_0 \in \gamma_r \cap \gamma_{r'}$; and some surrogate prediction $u_0$ minimizes expected surrogate loss on $p_0$.
+
+The following result is our main lower bound.
+With Observation \ref{obs:lower-implied}, it immediately implies Theorem \ref{thm:main-lower} from the introduction.
+\begin{theorem}
+  Suppose the surrogate loss $L$ and link $\psi$ satisfy a regret transfer of $\zeta$ for a target loss $\ell$.
+  If $L$, $\psi$, and $\ell$ satisfy Assumption \ref{assumption:lower}, then there exists $c > 0$ such that, for arbitrarily small $\epsilon$, $\zeta(\epsilon) \geq c \sqrt{\epsilon}$.
+\end{theorem}
+By ``arbitrarily small'', we mean that for any $\epsilon_0 > 0$, we can find $\epsilon$ with $0 < \epsilon < \epsilon_0$ such that $\zeta(\epsilon) \geq c \sqrt{\epsilon}$.
+Thus, there is no neighborhood of zero where $\zeta$ shrinks faster than on the order of $\sqrt{\cdot}$.
+\begin{proof}
+  Obtain $\alpha, u_0, p_0, r, r'$, and an open neighborhood of $u_0$ from Assumption \ref{assumption:lower} and the definition of boundary point.
+  Assume without loss of generality that $\psi(u_0) = r'$; otherwise, swap the roles of $r$ and $r'$.
+
+  \paragraph{Linearity of $R_{\ell}(r',p_{\lambda})$.}
+  As $\ell$ is non-redundant by assumption, there exists some $p_1 \in \inter{\gamma_r}$, the relative interior of the full-dimensional level set $\gamma_r$.
+  We therefore have $R_\ell(r',p_1) = \inprod{p_1}{\ell(r')-\ell(r)} =: c_\ell > 0$, and $R_\ell(r',p_0) = 0$.
+  Let $p_\lambda := (1-\lambda) p_0 + \lambda p_1$.
+  By convexity of $\gamma_r$, we have $p_\lambda \in \gamma_r$ for all $\lambda \in [0,1]$, which gives $R_\ell(r',p_\lambda) = \lambda c_\ell$.
+  \bo{move to proof sketch: We will upper bound $R_L(u_0,p_\lambda)$ by $O(\lambda^2)$, which will imply the result.}
+  % Our goal is to find some $c>0$ and some path of reports $u_\lambda \in \reals^d$ such that $\psi(u_\lambda)=r'$ and $R_L(u_\lambda,p_\lambda) \geq c\cdot\sqrt{\lambda \epsilon_1}$, for $\lambda$ sufficiently small.
+
+  \paragraph{Obtaining the global minimizer $u_{\lambda}$ of $L_{\lambda}$.}
+  Let $L_\lambda:\reals^d\to\reals_+$ be given by $L_\lambda(u) = \inprod{p_\lambda}{L(u)} = (1-\lambda) \inprod{p_0}{L(u)} + \lambda \inprod{p_1}{L(u)}$.
+  Let $\delta >0$ such that the above open neighborhood of $u_0$ contains the Euclidean ball $B_\delta(u_0)$ of radius $\delta$ around $u_0$.
+  Let $u_1 \in \Gamma(p_1)$.
+  We argue that for all small enough $\lambda$, $L_{\lambda}(u)$ is uniquely minimized by some $u_{\lambda} \in B_{\delta}(u_0)$.
+  For any $u\notin B_\delta(u_0)$, we have, using local strong convexity and the optimality of $u_1$,
+  \begin{align*}
+    L_\lambda(u) - L_\lambda(u_0)
+    &=
+      (1-\lambda) \left( L_0(u) - L_0(u_0) \right)
+      + \lambda \left( L_1(u) - L_1(u_0) \right)
+    \\
+    &\geq
+      (1-\lambda) \left( \frac \alpha 2 \delta^2 \right)
+      + \lambda \left( L_1(u_1) - L_1(u_0) \right)~  \\
+    &> 0
+  \end{align*}
+  if $\lambda < \lambda^* := \alpha \delta^2 / (2 \alpha \delta^2 + 4 L_1(u_0) - 4 L_1(u_1))$.
+  For the remainder of the proof, let $\lambda < \lambda^*$.
+  Then any $u\notin B_{\delta}(u_0)$ has $L_{\lambda}(u) > L_{\lambda}(u_0)$, hence is suboptimal.
+  By $\alpha$-strong convexity of $L_0$ on $B_\delta(u_0)$, $L_\lambda$ is stricly convex on $B_\delta(u_0)$.
+  So it has a unique minimizer $u_{\lambda}$, and by the above argument this is the global minimizer of $L_{\lambda}$.
+%  Extending our definition of $u_0$ and $u_1$, let $u_\lambda \in \Gamma(p_\lambda)$, which, as $\lambda \leq \lambda^*$ and thus $u_\lambda \in B_\delta(u_0)$, is the unique minimizer of $L_\lambda$ on $\reals^d$.
+  % Moreover, by the previous paragraph, we have $u_\lambda \in B_\delta(u_0)$.
+  Then $\risk{L}(p_\lambda) = L_\lambda(u_\lambda)$, and thus $R_L(u_0,p_\lambda) = L_\lambda(u_0) - L_\lambda(u_\lambda)$.
+
+  By assumption, the gradient of $L_y$ is locally Lipschitz for all $y\in\Y$.
+  We will apply this fact to the compact set $\mathcal C = \{u \in \reals^d : \|u - u_1\| \leq \|u_0 - u_1\| + \delta\}$.
+  By compactness, we have a finite subcover of open neighborhoods; let $\beta$ be the minimum Lipschitz constant over this finite set of neighborhoods.
+  We thus have that $L_y$ is $\beta$-strongly smooth on $\mathcal C$, and hence so is $L_\lambda$ for any $\lambda \in [0,1]$.
+  \bo{I thought maybe strong smoothness is equivalent to locally lipschitz gradient? If so this gets easier and it lets us assume the parameter $\beta$ from the beginning, which is nice because we get a somewhat constructive $c$ at the end.}
+  
+  We now upper bound $\|u_\lambda - u_0\|_2$, and then apply strong smoothness to upper bound $L_\lambda(u_0) - L_\lambda(u_\lambda)$.
+  Consider the first-order optimality condition of $L_\lambda$:
+  \begin{align*}
+    \label{eq:first-order-opt-smooth}
+    & 0 = \nabla L_\lambda(u_\lambda) = (1-\lambda) \nabla L_0(u_\lambda) + \lambda \nabla L_1(u_\lambda)
+    \\
+    & \implies (1-\lambda) \|\nabla L_0(u_\lambda)\|_2 = \lambda \|\nabla L_1(u_\lambda)\|_2~.
+  \end{align*}
+  By optimality of $u_0$ and $u_1$, strong convexity of $L_0$ and strong smoothness of $L_1$, and the triangle inequality, we have
+  \begin{align*}
+    \|\nabla L_0(u_\lambda)\|_2 &= \|\nabla L_0(u_\lambda) - \nabla L_0(u_0)\|_2 \geq \alpha \|u_\lambda - u_0\|_2~,
+    \\
+    \|\nabla L_1(u_\lambda)\|_2 &= \|\nabla L_1(u_\lambda) - \nabla L_1(u_1)\|_2 \leq \beta \|u_\lambda - u_1\|_2
+    \\
+    &\leq \beta \left( \|u_\lambda - u_0\|_2 + \|u_0 - u_1\|_2 \right)~.
+  \end{align*}
+  Combining,
+  \begin{align*}
+    (1-\lambda) \alpha \|u_\lambda - u_0\|_2
+    &\leq
+      (1-\lambda) \|\nabla L_0(u_\lambda)\|_2
+    \\
+    &= \lambda \|\nabla L_1(u_\lambda)\|_2
+    \\
+    &\leq
+      \lambda \beta \left( \|u_\lambda - u_0\|_2 + \|u_0 - u_1\|_2 \right)~.
+  \end{align*}
+  Now rearranging and taking $\lambda \leq \tfrac 1 2 \tfrac {\alpha}{\alpha+\beta}$, we have
+  \begin{align*}
+    \|u_\lambda - u_0\|_2 \leq \frac{\lambda\beta}{(1-\lambda)\alpha-\lambda\beta} \|u_0 - u_1\|_2  \leq \lambda \frac{2\beta}{\alpha} \|u_0 - u_1\|_2 ~.
+  \end{align*}
+  Finally, from strong smoothness of $L_\lambda$ and optimality of $u_\lambda$,
+  \begin{align*}
+    L_\lambda(u_0) - L_\lambda(u_\lambda) \leq \frac{\beta}{2} \|u_0 - u_\lambda\|_2^2 \leq \frac{\beta}{2} \left(\lambda \frac{2\beta}{\alpha} \|u_0 - u_1\|_2\right)^2 = c_L \lambda^2~,
+  \end{align*}
+  where $c_L = \frac{2\beta^3}{\alpha^2} \|u_0 - u_1\|_2^2$.
+  Take $c = \frac{c_\ell}{\sqrt{c_L}} = \frac{c_\ell \alpha}{\|u_0 - u_1\|_2 \sqrt{2\beta^3}}$.
+  Recall $R_\ell(r',p_\lambda) = c_\ell \lambda$ and $R_L(u_0,p_\lambda) \leq c_L \lambda^2$.
+  Then letting $\epsilon = R_L(u_0,p_\lambda)$, we have $\zeta(\epsilon) \geq R_\ell(r',p_\lambda) \geq c \sqrt{\epsilon}$.
+
+\end{proof}
 
 
 \section{Unpacking the constant for polyhedral losses}
