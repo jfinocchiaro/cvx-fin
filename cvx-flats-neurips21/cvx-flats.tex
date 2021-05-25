@@ -208,9 +208,11 @@ The prediction dimension of a supervised learning task is the lowest dimension $
 
 \section{Introduction}\label{sec:intro}
 %supervised learning blah
-A surrogate loss function is an error measure that is related but not identical to one's target problem of interest.
+%A surrogate loss function is an error measure that is related but not identical to one's target problem of interest.
+A loss function is called a \emph{surrogate} when it is used to solve a related, but not identical, ``target'' problem of interest.
 Selecting a hypothesis by minimizing surrogate risk is one of the most widespread techniques in supervised machine learning.
-There are two main reasons why a surrogate loss is necessary: (I) the target loss does not satisfy some desiderata, such as convexity, or (II) the goal is to estimate some target statistic and there is no target loss, as in many continuous estimation problems.
+%There are two main reasons why a surrogate loss is necessary: (I) the target loss does not satisfy some desiderata, such as convexity, or (II) the goal is to estimate some target statistic and there is no target loss, as in many continuous estimation problems.
+There are two main reasons why a surrogate loss is necessary: (I) the target problem is to minimize a loss, the \emph{target loss}, that does not satisfy some desiderata such as convexity; or (II) the target problem is to estimate some \emph{target statistic} and some associated surrogate loss is required to do so, as in many continuous estimation problems.
 %(1) often occurs in discrete settings such as classification, while (2) is commone in continuous prediction problems when one seeks to estimate a target conditional statistic.%\raft{I felt we needed a sentence like this to justify \emph{why} we need a surrogate. And given that we need it, we can't really avoid hinting at the quadrants...}
 In both settings, a key criteria for choosing a surrogate loss is \emph{consistency}, a precursor to excess risk bounds and convergence rates.
 Roughly speaking, consistency means that minimizing surrogate risk corresponds to solving the target problem of interest, i.e. in (I) the target risk is also minimized, or in (II) the continuous prediction approaches the true conditional statistic.
@@ -262,15 +264,16 @@ In the context of these quadrants, Figure~\ref{fig:results-flow} gives a roadmap
 \paragraph{Literature on consistency and calibration.}% \label{subsec:consistency}
 %\bo{Citation help appreciated!} \jessie{\cite{fisher1922mathematical,zhang2004statistical,bartlett2006convexity,tewari2007consistency,steinwart2007compare,ramaswamy2016convex} -- these are the ones I know of that discuss consistency in slightly various forms.  I believe the definition we run with is most similar to \cite{ramaswamy2016convex}.}
 %\jessiet{Make this subsection more concise?}
-We focus on consistent surrogate losses $L: \reals^d \times \Y \to \reals$, roughly meaning that minimizing $L$-loss corresponds to solving the target problem of interest.
+We focus on surrogate losses $L: \reals^d \times \Y \to \reals$ that are consistent, roughly meaning that minimizing $L$-loss corresponds to solving the target problem of interest.
 When given a \emph{target loss} $\ell$, we roughly define $L$ to be consistent if minimizing $L$, and applying a link function, minimizes $\ell$ (Def.~\ref{def:consistent-ell}, \S~\ref{sec:consis-implies-indir})~\citep{zhang2004statistical,bartlett2006convexity,tewari2007consistency,steinwart2007compare,ramaswamy2016convex}.
-When given a target statistic such as the conditional quantile or variance, but no target loss, we introduce a notion of consistency in line with classical statistics (Def.~\ref{def:consistent-prop}, \S~\ref{sec:consis-implies-indir}) \citep{gyorfi2006distribution, fan1998efficient,ruppert1997local}.
-Here we will define $L$ to be consistent if minimizing $L$ and applying a link function yields estimates converging to the correct statistic value.
+When given instead a target statistic such as the conditional quantile or variance, we introduce a notion of consistency in line with classical statistics (Def.~\ref{def:consistent-prop}, \S~\ref{sec:consis-implies-indir}) \citep{gyorfi2006distribution, fan1998efficient,ruppert1997local}.
+Here we define $L$ to be consistent if minimizing $L$ and applying a link function yields estimates converging to the correct statistic value.
 
 \jessiet{Do we still want this following paragraph?}
 \raft{Good question.  I edited a bit, but still up for discussion.}
-A priori, it is not clear that compatible definitions of consistency could be given for both target statistics and target losses.
-In fact, a key observation which underpins our approach is that consistency for target losses is a special case of consistency for target statistics (\S~\ref{sec:consis-implies-indir}), suggesting property elicitation (see \S~\ref{subsec:properties}) a useful tool to study general lower bounds.
+%A priori, it is not clear that compatible definitions of consistency could be given for both target statistics and target losses.
+The key observation which underpins our approach is that consistency for target losses is a special case of consistency for target statistics (\S~\ref{sec:consis-implies-indir}).
+Therefore, property elicitation -- which studies the relationship between target losses, target statistics, surrogate losses, and surrogate statistics, see \S~\ref{subsec:properties}  -- allows us to study general lower bounds that apply across all four quadrants.
 %Most prior work on convex consistency dimension focuses on problems in Quadrant 1~\citep{zhang2004statistical,bartlett2006convexity,tewari2007consistency,ramaswamy2015hierarchical,ramaswamy2016convex,ramaswamy2018consistent}.
 
 
@@ -281,9 +284,11 @@ In fact, a key observation which underpins our approach is that consistency for 
     \begin{tabular}{p{12ex}ll}
       & \emph{Target loss}  & \emph{Target statistic}\\
       \cmidrule[1pt]{2-3}
-      \parbox{12ex}{\emph{Discrete \\ prediction}} & \textbf{Q1:} Classification  & \textbf{Q2:} Hierarchical classification variant\\ 
+%      \parbox{12ex}{\emph{Discrete \\ prediction}} & \textbf{Q1:} Classification  & \textbf{Q2:} Hierarchical classification variant\\ 
+      \parbox{12ex}{\emph{Discrete \\ prediction}} & \textbf{Q1}, e.g. classification  & \textbf{Q2}, e.g. hierarchical classification variant\\ 
       \cmidrule{2-3}
-      \parbox{12ex}{\emph{Continuous \\ estimation}} & \textbf{Q3:} Least-squares regression & \textbf{Q4:} Variance estimation\\ 
+%      \parbox{12ex}{\emph{Continuous \\ estimation}} & \textbf{Q3:} Least-squares regression & \textbf{Q4:} Variance estimation\\ 
+      \parbox{12ex}{\emph{Continuous \\ estimation}} & \textbf{Q3}, e.g. least-squares regression & \textbf{Q4}, e.g. variance estimation\\ 
       \cmidrule[1pt]{2-3}
       \\
     \end{tabular}
@@ -369,11 +374,15 @@ Of course, improvements in general machine learning algorithms can be put to man
 
 \section{Setting}\label{sec:related-work}
 
-We consider supervised learning problems in the space $\X \times \Y$, for some \emph{feature space} $\X$ and a \emph{label space} $\Y$, with data drawn from a distribution $D$ over $\X \times \Y$.
-The task is to produce a hypothesis $f: \X \to \R$, for some \emph{prediction space} $\R$, which may be different from $\Y$.
+We work against the backdrop of supervised learning, where data comes from a distribution $D$ over the space $\X \times \Y$ and the goal is to produce a hypothesis $f: \X \to \R$.
+Here $\X$ is the \emph{feature space}, $\Y$ the \emph{label space}, and $\R$ the \emph{report} or \emph{prediction space}, possibly different from $\Y$.
+%consider supervised learning problems in the space $\X \times \Y$, for some \emph{feature space} $\X$ and a \emph{label space} $\Y$, with data drawn from a distribution $D$ over $\X \times \Y$.
+%The task is to produce a hypothesis $f: \X \to \R$, for some \emph{prediction space} $\R$, which may be different from $\Y$.
 For example, in ranking problems, $\R$ may be all $|\Y|!$ permutations over the $|\Y|$ labels forming $\Y$.
-As we focus on conditional distributions $p := D_x = \Pr[Y|X=x]$ over $\Y$ given some $x \in X$, we often abstract away $x$, working directly with a convex set of distributions over outcomes $\P \subseteq \simplex$.
-We then write e.g.\ $\E_p L(\cdot,Y)$ to mean the expectation when $Y\sim p$.
+
+We focus on surrogate losses, target problems, and their relationships to conditional distributions $p := D_x = \Pr[Y|X=x]$ over $\Y$ given some $x \in X$.
+We often abstract away $x$, working directly with a convex set of distributions over outcomes $\P \subseteq \simplex$.
+We then write e.g.\ $\E_p \ell(r,Y)$ to mean the expected loss of prediction $r \in \R$ when $Y\sim p$.
 
 If given, we use $\ell: \R \times \Y \to \reals$ to denote a \emph{target loss}, with predictions $r\in\R$.
 %where the goal is minimize expected loss, $\E ~ \ell(f(X),Y)$ for pairs $X,Y$ drawn from some distribution.
@@ -402,7 +411,8 @@ A loss $\ell: \R\times \Y \to \reals$ is \emph{discrete} if $\R$ is a finite set
 Arising from the statistics and economics literature, property elicitation is similar to calibration, but only characterizes exact minimizers of a surrogate~\citep{savage1971elicitation,osband1985information-eliciting,lambert2008eliciting,lambert2009eliciting,lambert2018elicitation,frongillo2015vector-valued,frongillo2014general}.
 Specifically, given a statistic or \emph{property} $\Gamma$ of interest, which maps a distribution $p \in \P \subseteq \simplex$ to the set of desired or correct predictions, the minimizers of $L$ should precisely coincide with $\Gamma$.
 For example, squared loss $L(r,y) = (r-y)^2$ elicits the mean $\Gamma(p) = \E_p Y$.
-For intuition, to relate to consistency, one can think of $p = \Pr[Y|X=x]$ as a conditional distribution, though the definition is also applied to point prediction settings.
+%% Bo: we already mentioned this about p above. I think it's confusing here.
+%For intuition, to relate to consistency, one can think of $p = \Pr[Y|X=x]$ as a conditional distribution, though the definition is also applied to point prediction settings.
 
 \begin{definition}[Property, elicits]
 	A \emph{property} is a set-valued function $\Gamma : \P \to 2^\R \setminus \{\emptyset\}$, which we denote $\Gamma: \P \toto \R$.
@@ -444,7 +454,7 @@ See \S~\ref{sec:consis-implies-indir} for definitions and the proof.
 Implicit in the above elicitation definitions is that $L\in\L$, meaning $L$ is minimizable: since $\Gamma = \prop[\P]{L}$ is nonempty everywhere, the expected loss $\exploss{L}{\cdot}{p}$ always achieves a minimum.
 This restriction is also implicit in previous work, e.g.,~\citep{agarwal2015consistent}.
 While some popular surrogates such as logistic and exponential loss are not minimizable, these losses are still covered in Corollary~\ref{cor:Pcodim-flat-elic-relint-prop} and Theorem~\ref{thm:bayes-risk-lower-bound} as $\Gamma(p) \neq \emptyset$ when $p\in\P := \relint\simplex$; moreover, by thresholding $L'(u,y) = \max(L(u,y),\epsilon)$ for sufficiently small $\epsilon>0$ we can achieve $L'\in\L$ for both.
-We expect that a generalization of property elicitation which allows for ``infinite'' predictions (e.g., along a prescribed ray) would allow us to assume minimizability without loss of generality, as convex losses would always admit this more general minimizer.
+We expect that a generalization of property elicitation which allows for ``infinite'' predictions (e.g., along a prescribed ray) would allow us to assume minimizability without loss of generality, as convex losses would always admit this more general minimizer.\bo{I think this is too much here. It could go in a discussion section but it bogs this down.}
 \btw{Some refs / related work commented out here.  I think not as relevant as elicitation complexity.}
 
 % Property elicitation of a single property is well-understood~\citep{savage1971elicitation,osband1985information-eliciting,lambert2008eliciting, lambert2009eliciting, lambert2018elicitation}, and \citet{finocchiaro2018convex} are among the first to consider \emph{convex} elicitable properties.
@@ -493,7 +503,7 @@ This notion is quite general as it includes continuous estimation settings and d
 Moreover, \citet{finocchiaro2019embedding} study surrogate losses which \emph{embed} a discrete loss, which is a special case of indirect elicitation.
 %They construct calibrated link functions from embeddings, which together with observations about indirect elicitation, imply that for polyhedral (piecewise linear and convex) losses, calibration and indirect elicitation are equivalent.
 \citet{finocchiaro2020embedding} further introduce the notion of \emph{embedding dimension}, which is a lower bound on both convex elicitation complexity of discrete properties and convex consistency dimension of discrete losses and finite statistics.
-%\btw{Bo: commented out what I felt was an unnecessary sentence}
+\bo{It's not clear exactly why we mention this.}
 %Since embedding is a special case of indirect elicitation, we have the chain of inequalities, embedding dimension $\leq$  ``polyhedral calibration dimension'' $\leq$ convex calibration dimension; it is an open problem whether any of these inequalities can be strict.
 
 
