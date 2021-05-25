@@ -122,6 +122,8 @@
 \newcommand{\im}{\mathrm{im}}
 \newcommand{\Var}{\mathrm{Var}}
 \newcommand{\CVaR}{\mathrm{CVaR}}
+\newcommand{\mode}{\Gamma_{\mathrm{mode}}}
+
 
 \newcommand{\exploss}[3]{\E_{#3} #1(#2,Y)}
 \newcommand{\risk}[1]{\underline{#1}}
@@ -527,9 +529,9 @@ Theorem~\ref{thm:convex-flats-inf-dim} instead bounds the dimension of flats con
     Any such assumption would suffice, and we suspect even that condition can be relaxed.}
   For all $u\in\range\Gamma$ and $p\in\Gamma_u$, there is some $V_{u,p}:\Y\to\reals^d$ such that $p \in \zeros{V_{u,p}} \subseteq \Gamma_u$.
 \end{restatable}
-\begin{proof}[Sketch]
+\begin{proof}[Finite case]
+  We will prove the result for the case of finite $\Y$, and defer the $Y=\reals$ case to Appendix~\ref{app:implications-of-bounds}.
   As $L$ is convex and elicits $\Gamma$, we have $u \in \Gamma(p) \iff \vec 0 \in \partial \exploss{L}{u}{p}$. 
-  Here, we show the result for finite $\Y$, and defer the full proof to Appendix~\ref{app:implications-of-bounds}.
   With $\Y$ finite, this is additionally equivalent to $\vec 0 \in \oplus_y p_y \partial L(u,y)$, where $\oplus$ denotes the Minkowski sum~\citep[Theorem 4.1.1]{hiriart2012fundamentals}.\footnote{$\partial$ represents the subdifferential $\partial f(x) = \{z : f(x') - f(x) \geq \inprod{z}{x'-x}\; \forall x' \}$.}
   Expanding, we have $\oplus_y p_y \partial L(u,y) = \{ \sum_{y\in\Y} p_y x_y \mid x_y \in \partial L(u,y) \; \forall y\in\Y\}$, and thus $W p = \sum_y p_y x_y = \vec 0$ where $W = [x_1, \ldots, x_n] \in \reals^{d\times n}$; cf.~\cite[$\mathbf{A}^m$ in Theorem 16]{ramaswamy2016convex}.
   Let $V_{u,p} : \Y \to \reals^d, y \mapsto W_y$ be the function encoding the columns of $W$.
@@ -868,7 +870,7 @@ In Appendix~\ref{sec:finite-calib}, we show examples where the $d$-flats bound b
 The feasible subspace dimension bound uses ``local'' information of the property to construct lower bounds, while $d$-flats in Theorem~\ref{thm:convex-flats-inf-dim} allow us to also use ``global'' information, while subsuming the previous results about local information.
 
 
-\section{Application: Convex Consistency Bounds for Risk Measures}\label{sec:contin-consis}
+\section{Application: Risk Measures, Mode, and Modal Interval}\label{sec:contin-consis}
 
 %commented out Jun 1 2020
 %Theorem~\ref{thm:consistent-implies-indir-elic} allows us to use convex elicitation complexity as a tool to understand efficiency of consistent convex surrogates for a given property, which is more often what is given in a continuous estimation setting.
@@ -896,6 +898,7 @@ Thus, the general logic of~\citet{frongillo2020elicitation} can still apply.
 In particular, we recover their main lower bound for the large class of Bayes risks.
 \btw{Old version for finite $\Y$ is in the NeurIPS 2020 submission; especially lots more detail on variance / norm / entropy examples}
 
+\subsection{Risk measures}
 
 \begin{definition}
   \label{def:bayes-risk}
@@ -961,6 +964,38 @@ Under mild assumptions, we find that there is no consistent real-valued convex s
 \end{corollary}
 As first shown by \citet{fissler2016higher}, the pair $(\CVaR_\alpha,q_\alpha)$ is jointly identifiable and elicitable, but not by any convex loss~\citep[Prop.\ 4.2.31]{fissler2017higher}.
 We conjecture the stronger statement $\eliccvx(\CVaR_\alpha) \geq 3$, which if true would constitute an interesting gap between elicitation complexity for identifiable and convex-elicitable properties.
+
+\subsection{Mode and modal interval}
+
+\raf{Define the mode.}
+\citet{dearborn2020indirect} recently showed that the mode....
+
+\begin{corollary}\label{cor:mode}
+  The mode has $\conscvx(\mode) = \eliccvx(\mode) = \infty$ (countably infinite) with respect to $\P$, the class of probability measures on $\Y=\reals$ which admit a smooth and bounded density and such that $\mode$ is single-valued.
+\end{corollary}
+\begin{proof}
+  The proof of \citet[Theorem 1]{dearborn2020indirect} gives a distribution $p\in\P$ with $\mode(p) = 0 =: u$.
+  It then introduces an arbitrary identification function $V:\hat\R\times\Y\to\reals^k$, $k\in\mathbb{N}$, and value $r\in\hat\R$ such that $p \in \zeros{V(r,\cdot)}$.
+  Letting $F = \zeros{V(r,\cdot)}$, we therefore have an arbitrary $k$-flat containing $p$.
+  The proof then proceeds to construct some $p'\in F$ with $\mode(p') \neq u$.
+  Corollary~\ref{cor:Pcodim-flat-elic-relint-prop} now gives $\conscvx(\mode) \geq \eliccvx(\mode) \geq k+1$.
+  \raft{PROBLEM: the set $\P$ is not convex.  Take two univariance Gaussians centered at 0 and 1: they are each in $\P$ but their mixture is not.  Do we really need $\P$ to be convex for Theorem~\ref{thm:convex-flats-inf-dim}?}
+  As $k$ was arbitrary, the result follows.
+\end{proof}
+
+
+\raf{Introduce modal interval}
+... $\Gamma_\epsilon$ is elicited by the target loss $\ell_\epsilon(r,y) = \ones\{|r-y| > \epsilon\}$
+... so $\Gamma_\epsilon$ could be thought of as being in Quadrant 3.
+
+As observed in \citet[Corollary 1]{dearborn2020indirect}, the properties $\mode$ and $\Gamma_\epsilon$ coincide with the family of distributions needed in their Theorem 1, meaning the conclusion of Corollary~\ref{cor:mode} transfers to the modal interval as well.
+\begin{corollary}\label{cor:modal-interval}
+  For any $\epsilon > 0$, the modal midpoint, $\Gamma_\epsilon: \P_\epsilon \to \reals$, has  $\conscvx(\Gamma_\epsilon) = \eliccvx(\Gamma_\epsilon) = \infty$ (countably infinite) with respect to $\P_\epsilon$, the class of unimodal probability measures on $\Y=\reals$ which admit a smooth and bounded density, and such that $\mode$ and $\Gamma_\epsilon$ are single-valued.
+\end{corollary}
+
+Thus, while $\Gamma_\epsilon$ is elicitable, it does not have any consistent finite-dimensional convex surrogate.
+\raf{Discussion of why this sort of makes sense as a limit of 0-1 loss and the mode.}
+
 
 \section{Conclusions and future work}\label{sec:conclusions}
 In this work, we introduce a new tool to generate lower bounds on the convex consistency dimension of general prediction tasks.
