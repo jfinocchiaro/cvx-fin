@@ -597,7 +597,7 @@ We now illustrate how to apply Theorem~\ref{thm:convex-flats-inf-dim} to constru
 % by Corollaries~\ref{cor:Pcodim-flat-single-val-prop} (for continuous estimation problems; Q3, Q4) and~\ref{cor:Pcodim-flat-elic-relint-prop} (for discrete prediction problems; Q1, Q2).
 % The illustrations in Figure~\ref{fig:quadrants-simplices} are simply intended to show how Lemma~\ref{lem:convex-flats-inf-dim} can be applied to results in all four quadrants of problem types-- making it the first lower bound to our knowledge to do so.
 Throughout the examples, we will have $|\Y|=3$ so that the probability simplex can be visualized in two dimensions (Figure~\ref{fig:quadrants-simplices}).
-For each, we take $d=1$, and thus ask whether a $1$-flat (a line in the figures) exists through the point $p$ while staying within the corresponding level set.
+For each, we take $d=1$, and thus ask whether any $1$-flat (a line in the figures) passes through the point $p$ while staying within the corresponding level set.
 
 \paragraph{Q1: Classification with an abstain option.}
 The abstain target loss is a well-studied variation of 0-1 loss that allows for an ``abstain'' report that gives a lesser punishment $1/2$ for abstaining, $r = \bot$~\citep{ramaswamy2018consistent,ramaswamy2016convex,madras2018predict,chow1957optimum,cortes2016learning}.
@@ -606,26 +606,30 @@ Since we are given a discrete target loss, this problem fits nicely into Quadran
 
 To apply Theorem~\ref{thm:convex-flats-inf-dim}, we first consider the abstain property $\gamma$ elicited by $\ell^{1/2}$, where one predicts the most likely outcome $y$ if $Pr[Y=y] \geq 1/2$ and otherwise ``abstains'' by predicting $\bot$.
 % Upon closer inspection, the level set boundaries are found at the set of distribution where is a $y$ such that $p_y = 1/2$.
-For the depicted distribution $p \in \relint{\gamma_\bot}$, we can derive a lower bound on convex consistency dimension as we cannot fit a $1$-flat (line) fully contained in $\gamma_\bot$ that passes through $p$.
-By Corollary~\ref{cor:Pcodim-flat-elic-relint-prop}, we can conclude $\conscvx(\gamma^{1/2}) \geq 2$ when $|\Y|=3$, which matches the upper bound from the convex surrogate of
-\citet{ramaswamy2016convex}.\raft{Jessie: see if you can match the style of the revised abstain example for the others.  In particular, I think we can leave the definition of $p$ to the figure, and avoid referencing $\bullet$ or anything -- the figure can make clear that $p=\bullet$.  Probably it's only Q2 that needs to change. \jessie{Took a pass! Feel free to burn}}
-%present a convex surrogate for the abstain loss yielding a logarithmic upper bound on $\conscvx(\ell^{1/2})$, so this bound is tight.% which are an exponential improvement over previous results, e.g.,~\citep{crammer2001algorithmic,rifkin2004defense}.
+For the depicted distribution $p \in \relint{\gamma_\bot}$, we cannot fit a $1$-flat (line) fully contained in $\gamma_\bot$ that passes through $p$.
+By Corollary~\ref{cor:Pcodim-flat-elic-relint-prop}, we can conclude $\conscvx(\gamma^{1/2}) \geq 2$ when $|\Y|=3$, meaning there is no consistent convex surrogate in 1 dimension.
+This lower bound matches the upper bound from the convex surrogate of
+\citet{ramaswamy2016convex}.
+
 
 \paragraph{Q2: Variation of hierarchical classification.}
 \jessiet{I don't like this phrasing, since it seems like we're pointing to Q1 then swerve to Q2}
-\citet{ramaswamy2015hierarchical} studies a discrete target loss for hierarchical classification tasks~\citep{xiao2007hierarchical,burkhardt2005database}, such as the task in Figure~\ref{fig:hierarchical-tree}, in which one wishes to predict the deepest node in a tree that is ``likely enough.''
-Consider the mild variation of this task where one wants to predict an outcome if it is likely enough, and otherwise proceed in a different direction and classify from another binary substructure as depicted in Figure~\ref{fig:quadrants-simplices} (Q2). 
-Here, we take the reports and outcomes $\R = \Y$ to be the leaves of the tree in Figure~\ref{fig:hierarchical-tree}.
-\citet{osband1985providing} notes that a property is elicitable if and only if its level sets form a power diagram projected onto the simplex, so there is no discrete target loss eliciting the described property, hence it belongs in Q2.
-
-We can now model this problem by a property with the reports $\R = \Y$, and have 
+\raft{Good point; reworded}
+\citet{ramaswamy2015hierarchical} study hierarchical classification tasks, in which labels are arranged in a tree and one wishes to predict the deepest node in a tree that is ``likely enough'' \citep{xiao2007hierarchical,burkhardt2005database}.
+Consider the variation of this task where one can only predict leaves of this tree.
+For example, Figure~\ref{fig:hierarchical-tree} depicts a speech classification task where speech is either active or non-active, and non-active is further subdivided into median and passive.
+It is natural to predict active if that label is more likely than both non-active labels combined, and otherwise to predict the most likely of median and passive:
 \begin{align*}
 \gamma(p) &= \begin{cases}
 \text{active} & p_{\text{active}} \geq 1/2 \\
 \text{median} & p_{\text{active}} \leq 1/2 \wedge p_{\text{median}} \geq p_{\text{passive}} \\
 \text{passive} & p_{\text{active}} \leq 1/2 \wedge p_{\text{passive}} \geq p_{\text{median}} \\
-\end{cases}~,~
+\end{cases}~.
 \end{align*} 
+This ``T-shaped'' property is depicted in Figure~\ref{fig:quadrants-simplices} (Q2).
+This task falls under Quadrant 2, as this property is not elicited by any target loss.%
+\footnote{The cells of every finite elicitable property form a power diagram, which disallow this ``T-shaped'' configuration~\cite{lambert2009eliciting,frongillo2014general}.}
+Like abstain, we cannot fit a $1$-flat (line) entirely contained in the level set $\gamma_{\text{passive}}$ through the depicted $p$, so Theorem~\ref{thm:convex-flats-inf-dim} again gives $\conscvx(\gamma) = 2$.
 
 \begin{SCfigure}
 	\centering
@@ -651,8 +655,6 @@ We can now model this problem by a property with the reports $\R = \Y$, and have
 	\label{fig:hierarchical-tree}
 \end{SCfigure}
 
-In Figure~\ref{fig:quadrants-simplices} (Q2), we see that, like abstain, we cannot fit a $1$-flat (line) entirely contained in the level set $\gamma_{\text{passive}}$ through $p$.
-Therefore, we can apply Theorem~\ref{thm:convex-flats-inf-dim} to conclude that $\conscvx(\gamma) = 2$.
 \jessiet{Old narrative in comment}
 %Consider the following scenario where someone is deciding how to dress for the weather based on a meteorologist's forecast: a forecaster is choosing between three outcomes $\Y = \{$rainy, sunny, snowy$\}$, and we suppose we want to have some bias towards health and safety, so the meteorologist should only predict sunny weather if $Pr[$sunny $|$ weather data$] \geq 3/4$.
 %Otherwise, they should predict whatever is more likely  given the weather data: rain or snow.
@@ -671,18 +673,19 @@ Therefore, we can apply Theorem~\ref{thm:convex-flats-inf-dim} to conclude that 
 %Therefore, we can apply Theorem~\ref{thm:convex-flats-inf-dim} to conclude that $\conscvx(\gamma) = 2$.
 
 \paragraph{Q3: Least-squares regression}
-%\jessiet{Define property, discuss briefly why in the quadrant.  Move to how results apply and what they say}
-While least squares regression is commonly used in machine learning and statistics for continuous estimation, it might not be immediately \emph{why} we do so, prompting us to study this smooth convex loss in Quadrant 3.
-Evaluating the derivative of squared loss, we observe that it elicits the expected value $\Gamma(p) = \E_p[Y]$.
-With $\Y = \{-1,0,1\}$, we can visualize the level sets of the expected value as in Figure~\ref{fig:quadrants-simplices} (Q3).
-Since squared loss is a $1$-dimensional loss, we can verify that for all $p \in \simplex$, we can fit a $1$-flat (precisely equal to the level set) through $p$, as demonstrated in Figure~\ref{fig:quadrants-simplices}.
+% \jessiet{Define property, discuss briefly why in the quadrant.  Move to how results apply and what they say}
+Squared loss is commonly used in machine learning and statistics for continuous estimation, making it the canonical choice for Quadrant 3.
+Squared loss is a $1$-dimensional convex loss which elicits the mean $\Gamma(p) = \E_p[Y]$.
+Theorem~\ref{thm:convex-flats-inf-dim} therefore states that we can fit a $1$-flat through any distribution $p$ while staying within the corresponding level set.
+In fact, the level sets of the mean are all exactly $1$-flats, as demonstrated in Figure~\ref{fig:quadrants-simplices} (Q3).
+
 
 \paragraph{Q4: Variance}
-One might reasonably want to estimate the variance $\Gamma^\Var(p) = \E_p[Y^2] - \E_p[Y]^2$, though a loss function to elicit the variance is not immediately obvious.
-This property is continuous in $\simplex$, and therefore belongs in Quadrant 4.
-The well-known fact that the variance is not elicitable does not yield a lower bound on elicitation complexity of 2, as it does not rule out the variance being a link of a real-valued convex-elicitable property; cf.~\citet[Remark 1]{frongillo2020elicitation}.
-However, in Appendix~\ref{app:omitted-examples}, we show $\eliccvx(\Gamma^\Var)=2$, meaning the lowest dimension of a convex loss to estimate conditional variance is 2. %~\citep{osband1985providing,lambert2018elicitation}.
-This lower bound will follow from Theorem~\ref{thm:bayes-risk-lower-bound} in Section~\ref{sec:contin-consis} using the fact that variance is the Bayes risk of squared loss $L(r,y) = (r-y)^2$, which elicits the mean $\Gamma(p) = \E_p Y$.
+Consider the task of estimating the variance $\Gamma^\Var(p) = \E_p[Y^2] - \E_p[Y]^2$.
+Interestingly, the variance is not elicitable as its level sets are not convex~\cite{osband1985providing,lambert2008eliciting}, meaning this task falls under Quadrant 4.
+The fact that the variance is not elicitable does not yield a lower bound on elicitation complexity of 2, as it does not rule out the variance being a link of a real-valued convex-elicitable property; cf.~\citet[Remark 1]{frongillo2020elicitation}.
+In Appendix~\ref{app:omitted-examples}, we show $\eliccvx(\Gamma^\Var)=2$, meaning the lowest dimension of a convex loss to estimate conditional variance is 2. %~\citep{osband1985providing,lambert2018elicitation}.
+This lower bound will follow from Theorem~\ref{thm:bayes-risk-lower-bound} in Section~\ref{sec:contin-consis} using the fact that variance is the Bayes risk of squared loss. % $L(r,y) = (r-y)^2$, which elicits the mean $\Gamma(p) = \E_p Y$.
 Interestingly, while perhaps intuitively obvious, even this simple result is novel.
 
 \begin{SCfigure}
@@ -861,7 +864,7 @@ Theorem~\ref{thm:convex-flats-inf-dim} implies that there is no $1$-dimensional 
 }\label{fig:quadrants-simplices}
 \end{SCfigure}
 
-\subsection{Breadth of framework: Discrete-valued predictions}\label{sec:discrete-predictions-refactored}
+\subsection{Relation to feasible subspace dimension}\label{sec:discrete-predictions-refactored}
 
 In Quadrant 1,~\citet{ramaswamy2016convex} give a lower bound on convex consistency dimension roughly by the co-dimension of the \emph{subspace of feasible directions} $\Sc_{\C}(p)$ of a convex set $\C$ at a given distribution $p$ such that $p \in \C$, which is loosely the ``most full'' subspace of $\C$ containing a neighborhood around $p$.
 
@@ -869,7 +872,7 @@ In Quadrant 1,~\citet{ramaswamy2016convex} give a lower bound on convex consiste
 \Sc_\C(p) = \{v \in \reals^n \mid \exists \epsilon_0 > 0 \textrm{ such that } p + \epsilon v \in \C\forall \epsilon \in (-\epsilon_0, \epsilon_0) \}
 \end{equation*}
 
-Theorem~\ref{thm:convex-flats-inf-dim} subsumes the  bounds given by~\citet{ramaswamy2016convex} by showing that, if there is a $d$-flat fully contained in the level set (so we can apply Theorem~\ref{thm:convex-flats-inf-dim}) then the co-dimension of the subspace of feasible directions at the same $p \in \C := \gamma_r$ has co-dimension at most $d$.
+Theorem~\ref{thm:convex-flats-inf-dim} subsumes the  bounds given by~\citet{ramaswamy2016convex} by showing that, if there is a $d$-flat through $p$ fully contained in a level set $\gamma_r$ (so we can apply Theorem~\ref{thm:convex-flats-inf-dim}) then the subspace of feasible directions at the same $p \in \C := \gamma_r$ has co-dimension at most $d$.
 
 \begin{proposition}\label{prop:discrete-bound-subsumes-ramaswamy}
 	Suppose we are given a discrete loss $\ell : \R \times \Y \to \reals$ eliciting the property $\gamma: \simplex \toto \R$.
@@ -881,13 +884,37 @@ Theorem~\ref{thm:convex-flats-inf-dim} subsumes the  bounds given by~\citet{rama
 \end{proposition}
 
 In other words, any $d$-flat through $p$ is a subspace of feasible directions of co-dimension at most $d$, so Theorem~\ref{thm:convex-flats-inf-dim} provides a weakly tighter lower bound on convex consistency dimension than~\citet[Theorem 16]{ramaswamy2016convex}.
-In Appendix~\ref{sec:finite-calib}, we show examples where the $d$-flats bound both matches the feasible subspace dimension bound and strictly improves it in order to emphasize that our result is strictly broader than previous bounds for Quadrant 1 from~\citet{ramaswamy2016convex}.
-
-The feasible subspace dimension bound uses ``local'' information of the property to construct lower bounds, while $d$-flats in Theorem~\ref{thm:convex-flats-inf-dim} allow us to also use ``global'' information, while subsuming the previous results about local information.
+In fact, the $d$-flats bound can be strictly tighter; in Appendix~\ref{sec:finite-calib} we show that the abstain example from Figure~\ref{fig:quadrants-simplices} (Q1) yields a $d$-flats lower bound of 2 and a feasible subspace dimension lower bound of 1.
+This gap stems from the fact that feasible subspace dimension uses only local information of the property to construct lower bounds, while $d$-flats in Theorem~\ref{thm:convex-flats-inf-dim} allow us to additionally use global information.
+See Figure~\ref{fig:fsd-flats-abstain} in Appendix~\ref{sec:finite-calib} for an illustration.
 
 
 \section{Application: Risk Measures, Mode, and Modal Interval}\label{sec:contin-consis}
 
+\raf{New intro... something along these lines}
+
+We now turn to two main applications of Theorem~\ref{thm:convex-flats-inf-dim}: new lower bounds on the convex consistency dimension of risk measures (\S~\ref{sec:risk-measures}), and the mode and modal interval (\S~\ref{sec:mode-modal-interval}).
+In both cases, we build on previous results due to \citet{frongillo2020elicitation} and \citet{dearborn2020indirect} which showed lower bounds with respect to \emph{identifiable} properties;
+a property is $d$-identifiable if its level sets are all $d$-flats, as in Figure~\ref{fig:quadrants-simplices} (Q3).
+In contrast, properties elicited by non-smooth convex losses are generally not identifiable.
+For example, the properties elicited by hinge loss and the abstain surrogate are not identifiable, as their level sets are not flats; see Figure~\ref{fig:quadrants-simplices} (Q1).
+It therefore might appear that entirely new ideas are needed.
+Indeed, both papers above pose developing similar bounds with respect to convex-elicitable properties as a major open question.
+
+Using our framework, we establish such bounds, resolving both open questions.
+The central observation, from Theorem~\ref{thm:convex-flats-inf-dim}, is that the level sets of $d$-dimensional convex-elicitable properties, if not $d$-flats themselves, are \emph{unions} of $d$-flats.
+Using this observation, we can modify the arguments of~\citet{frongillo2020elicitation} and~\citet{dearborn2020indirect} to give similar bounds.
+In all cases, our lower bounds match the identifiable case, though we conjecture they are not tight in all cases.
+
+
+\raf{MOVE}
+
+\citet{frongillo2020elicitation} rely on finding a dimension $d$ such that the level sets of certain risk measures $\gamma$ have too much curvature to contain any $d$-flat.
+Thus, the elicitation complexity with respect to identifiable properties is greater than $d$.
+In particular, we recover their main lower bound for the large class of Bayes risks.
+
+
+\raf{OLD intro}
 %commented out Jun 1 2020
 %Theorem~\ref{thm:consistent-implies-indir-elic} allows us to use convex elicitation complexity as a tool to understand efficiency of consistent convex surrogates for a given property, which is more often what is given in a continuous estimation setting.
 %For example, when one wants to learn an $\alpha$-quantile, we start with the property rather than a loss.
@@ -915,6 +942,7 @@ In particular, we recover their main lower bound for the large class of Bayes ri
 \btw{Old version for finite $\Y$ is in the NeurIPS 2020 submission; especially lots more detail on variance / norm / entropy examples}
 
 \subsection{Risk measures}
+\label{sec:risk-measures}
 
 \begin{definition}
   \label{def:bayes-risk}
@@ -982,6 +1010,7 @@ As first shown by \citet{fissler2016higher}, the pair $(\CVaR_\alpha,q_\alpha)$ 
 We conjecture the stronger statement $\eliccvx(\CVaR_\alpha) \geq 3$, which if true would constitute an interesting gap between elicitation complexity for identifiable and convex-elicitable properties.
 
 \subsection{Mode and modal interval}
+\label{sec:mode-modal-interval}
 
 \raf{Define the mode.}
 \citet{dearborn2020indirect} recently showed that the mode....
