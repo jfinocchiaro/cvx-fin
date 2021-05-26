@@ -639,11 +639,11 @@ The last fact will use the properties of strong smoothness and strong convexity 
 \section{Unpacking the constant for polyhedral losses}
 
 Our main upper bound for polyhedral losses, Theorem \ref{thm:main-upper}, is mostly nonconstructive: it says polyhedral surrogates have some $\alpha$ such that $R_{\ell}(\psi \circ h; \D) \leq \alpha \cdot R_L(h;\D)$.
-In this section, we make the result constructive by unpacking the implications of consistency (or more precisely, calibration).
+In this section, we make the result constructive by unpacking the implications of consistency (or more precisely, calibration) for polyhedral surrogates.
 
 We will give a bound on the constant of the form $\alpha \leq \alpha_{\ell} \cdot \alpha_L \cdot \alpha_{\psi}$, i.e. one component each relating to the structure of the target loss, surrogate loss, and link.
 First, we will derive $\alpha_L$ using the theory of \emph{Hoffman constants} from linear optimization.
-Then, we will show that \emph{any} link for a consistent polyhedral loss must satisfy a condition called $\epsilon$-separation introduced in \cite{finocchiario2020}.
+Then, we will show that \emph{any} link for a consistent polyhedral loss must satisfy a condition called $\epsilon$-separation, introduced in \cite{finocchiario2020}.
 We will set $\alpha_{\psi} = \frac{1}{\epsilon}$.
 With $\alpha_{\ell}$ simply an upper bound on the target loss, we will finally prove $\alpha \leq \alpha_{\ell} \cdot \alpha_L \cdot \alpha_{\psi}$.
 
@@ -730,11 +730,16 @@ The definition was introduced in \cite{finocchiaro2020} and is rephrased in term
   is \emph{$\epsilon$-separated} if for all $u\in\reals^d$ with $\psi(u)\notin\gamma(p)$, we have $d_\infty(u,\Gamma(p)) > \epsilon$, where $d_\infty(u,A) \defeq \inf_{a\in A} \|u-a\|_\infty$.
 \end{definition}
 
-\cite{finocchiaro2020} showed that, if $L$ indirectly elicits $\ell$, then there exists an $\epsilon$-separated link $\psi$ such that $(L,\psi)$ is consistent for $L$.
-Here, we give a strengthening and converse that we believe is of independent interest: not only that link, but \emph{any} link making $L$ consistent is $\epsilon$-separated for some $\epsilon > 0$.
+Recall from the previous subsection that Hoffman constants allowed us to show that polyhedral expected losses grow linearly as we move away from the optimal set.
+Now, $\epsilon$-separated link functions allow us to guarantee that we move at least a constant distance from the optimal set before we start linking to an ``incorrect'' report $r' \in \R$.
+But when does a polyhedral loss have an associated $\epsilon$-separated link?
+
+\paragraph{Existence of separated links.}
+\cite{finocchiaro2020} showed that in fact, if $L$ indirectly elicits $\ell$, then there always exists an $\epsilon$-separated link $\psi$ such that $(L,\psi)$ is consistent for $L$.
+Here, we strengthen this result much further, and give a converse that we believe is of independent interest: if $L$ indirectly elicits $\ell$, then \emph{every} link making $L$ consistent is $\epsilon$-separated for some $\epsilon > 0$.
 Then, we show that this separation implies linear regret transfers (with a concrete constant).
 
-\begin{lemma}\label{lem:calibrated-eps-sep}
+\begin{lemma}\label{lemma:calibrated-eps-sep}
   Let polyhedral surrogate $L:\reals^d \to \reals^\Y_+$, discrete loss $\ell:\R\to\reals^\Y_+$, and link $\psi:\reals^d\to\R$ be given such that $(L,\psi)$ is calibrated with respect to $\ell$.
   Then there exists $\epsilon>0$ such that $\psi$ is $\epsilon$-separated with respect to   $\Gamma \defeq \prop{L}$ and $\gamma \defeq \prop{\ell}$.
 \end{lemma}
@@ -771,8 +776,12 @@ Then, we show that this separation implies linear regret transfers (with a concr
 
 \subsection{Combining the loss and link}
 We can now follow the general proof strategy of the main upper bound, but constructively.
-We will need one more ingredient, an upper bound on the regret of $\ell$.
-\begin{definition}
+Given Lemma \ref{lemma:lem:calibrated-eps-sep}, we can make the following definition.
+\begin{definition}[$\epsilon_{\psi}$]
+  If $(L,\psi)$ are calibrated for $\ell$, then let $\epsilon_{\psi} = \sup \{ \epsilon ~:~ \text{$\psi$ is $\epsilon$-separated}\}$.
+\end{definition}
+We will also need an upper bound on the regret of $\ell$.
+\begin{definition}[$C_{\ell}$]
   Given a discrete target loss $\ell: \R \to \reals_+^{\Y}$, define $C_{\ell} = \max_{r,r' \in \R, y \in \Y} \ell(r)_y - \ell(r')_y$.
 \end{definition}
 Observe that $C_{\ell} = \max_{r,p} R_{\ell}(r,p)$.
@@ -803,21 +812,22 @@ Recall that Lemma \ref{lemma:polyhedral-finite} gave that, if $L$ is polyhedral,
 
 \begin{theorem}[Constructive linear transfer] \label{thm:separated-constant}
   Let $\ell: \R \to \reals_+^{\Y}$ be a discrete target loss, $L: \reals^d \to \reals_+^{\Y}$ be a polyhedral surrogate loss, and $\psi: \reals^d \to \R$ a link function.
-  If $(L,\psi)$ indirectly elicit $\ell$ and $\psi$ is $\epsilon$-separated, then
-    \[ (\forall h,\D) \quad R_{\ell}(\psi \circ h ; \D) \leq \frac{C_{\ell} H_L}{\epsilon} R_L(h ; \D) ~. \]
+  If $(L,\psi)$ are consistent for $\ell$, then
+    \[ (\forall h,\D) \quad R_{\ell}(\psi \circ h ; \D) \leq \frac{C_{\ell} H_L}{\epsilon_{\psi}} R_L(h ; \D) ~. \]
 \end{theorem}
 The proof closely mirrors the proof of the nonconstructive upper bound, Theorem \ref{thm:main-upper}.
 \begin{proof}
-  By Lemma \ref{lemma:separated-constant-p}, for each $p \in \mathcal{Q}$, $R_{\ell}(\psi(u),p) \leq \frac{C_{\ell} H_L}{\epsilon} R_L(u,p)$ for all $u$.
+  By Lemma \ref{lemma:calibrated-eps-sep}, $\psi$ is separated and $\epsilon_{\psi}$ well-defined.
+  By Lemma \ref{lemma:separated-constant-p}, for each $p \in \mathcal{Q}$, $R_{\ell}(\psi(u),p) \leq \frac{C_{\ell} H_L}{\epsilon_{\psi}} R_L(u,p)$ for all $u$.
   Now consider a general $p$, which is in some full-dimensional polytope level set $\Gamma_u$.
   Write $p = \sum_{q \in \mathcal{Q}_u} \beta(q) q$ for some probability distribution $\beta$, where $\mathcal{Q}_u$ is the set of vertices of $\Gamma_u$.
   By Lemma \ref{lemma:linear-on-levelset}, $R_L$ and $R_{\ell}$ are linear in $p$ on $\Gamma_u$, so for any $u'$,
   \begin{align*}
     R_{\ell}(\psi(u'),p)
     &=    \sum_{q \in \mathcal{Q}_u} \beta(q) R_{\ell}(\psi(u'), q)  \\
-    &\leq \sum_{q \in \mathcal{Q}_u} \beta(q) \frac{C_{\ell} H_{L,p}}{\epsilon} R_L(u', q)  \\
-    &\leq \frac{C_{\ell} H_L}{\epsilon} \sum_{q \in \mathcal{Q}_u} \beta(q) R_L(u', q)  \\
-    &\leq \frac{C_{\ell} H_L}{\epsilon} R_L(u', p) .
+    &\leq \sum_{q \in \mathcal{Q}_u} \beta(q) \frac{C_{\ell} H_{L,p}}{\epsilon_{\psi}} R_L(u', q)  \\
+    &\leq \frac{C_{\ell} H_L}{\epsilon_{\psi}} \sum_{q \in \mathcal{Q}_u} \beta(q) R_L(u', q)  \\
+    &\leq \frac{C_{\ell} H_L}{\epsilon_{\psi}} R_L(u', p) .
   \end{align*}
   This conditional regret transfer implies a full regret transfer with the same constant by Observation \ref{obs:transfer}.
 \end{proof}
@@ -832,11 +842,13 @@ To summarize, we have shown the following.
     \item $(L,\psi)$ indirectly elicit $\ell$ and $\psi$ is $\epsilon$-separated for some $\epsilon > 0$.
     \item $(L,\psi)$ guarantee a linear regret transfer for $\ell$.
   \end{enumerate}
-  Furthermore, if any of the above hold, then in particular $(L,\psi)$ guarantee the regret transfer $\zeta(t) = \left(\frac{C_{\ell} H_L}{\epsilon}\right) t$.
+  Furthermore, if any of the above hold, then in particular $(L,\psi)$ guarantee the regret transfer $\zeta(t) = \left(\frac{C_{\ell} H_L}{\epsilon_{\psi}}\right) t$.
 \end{theorem}
 
 \subsection{Examples}
 \bo{TODO}
+
+\bo{Observe that our theory gives some useful way to compare link functions that may not have existed before, i.e. bigger $\epsilon$ seems to be better. Full stop?}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
