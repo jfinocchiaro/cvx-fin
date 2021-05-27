@@ -125,15 +125,15 @@
   Together, these results suggest polyhedral surrogates are weakly optimal in many cases.
 \end{abstract}
 
-Some references; will move:
+Some references by setting.  P = polyhedral.  Surrogate regret bound: L = linear, Q = quadratic (sqrt).  LB = gives a ``lower bound'' for the surrogate regret too.
 \begin{itemize}
 \item Binary classification.
   \begin{itemize}
   \item \citet{zhang2004statistical} -- early analysis, didn't use ``surrogate'' but had some quantitative bounds that implied consistency
   \item \citet{bartlett2006convexity} -- some bounds for margin losses
   \item \citet{reid2009surrogate} -- tight (?) bounds for general proper composite losses
+  \item \citet{mahdavi2014binary} -- consider the generalization rate of the surrogate together with the ``excess risk bound'' (surrogate regret bound) (\textbf{and} the optimization actually), both as a function of the smoothness parameter of the surrogate.  They don't seem to give lower bounds on the excess risk bound though, just a degrading upper bound on it.  Still, very close to our work (and more generally the ``full stack'' idea!) in spirit.
   \end{itemize}
-
   
 \item Weighted / cost-sensitive variants
   \begin{itemize}
@@ -147,13 +147,49 @@ Some references; will move:
   \item \citet{menon2016bipartite} -- different sort of regret bound, same problem
   \end{itemize}
   
-\item Polyhedral regret bounds
+\item Abstain
   \begin{itemize}
-  \item \citet{ramaswamy2018consistent} -- Abstain paper; shows bounds for 3 different surrogates, all linear, each ``from scratch''.  (Should we see what bounds we get??)
-  \item 
+  \item[P,L] \citet{ramaswamy2018consistent} -- Abstain paper; shows bounds for 3 different surrogates, all \textbf{linear}, each ``from scratch''.
+  \item[Q] \citet{yuan2010classification} -- Smooth? losses and characterizations for abstain; \textbf{binary classification only}
+  \item[P,L] \citet{bartlett2008classification} -- The OG abstain paper, with a polyhedral hinge-like loss.  \textbf{Linear} regret bound.
+  \end{itemize}
+
+\item Ordinal regression
+  \begin{itemize}
+  \item \citet{pedregosa2017consistency} -- Pretty fascinating paper actually, about ordinal regression, i.e., when the label is the ordinal rank of the outcome, and how to construct surrogates.  For a class of surrogates based on binary classification, which is also cool, they get similar excess risk bounds to \citet{bartlett2006convexity}.
+  \end{itemize}
+
+\item List ranking
+  \begin{itemize}
+  \item[Q] \citet[Theorem 10]{ravikumar2011ndcg}
   \end{itemize}
   
-\item Fast rates for exp-concave surrogates ($O(d/n)$ where $d$ is the dimension) \citep{koren2015fast}.  Note here exp-concavex is in the \emph{parameter}.  So $F(\theta) = L(h_\theta(x),y)$ should be exp-concave in $\theta$.  For $\alpha>0$ we say $f$ is $\alpha$-exp-concave if $x \mapsto \exp(-\alpha f(x))$ is concave.
+\item Structured prediction (covering lots of target problems simultaneously)
+  \begin{itemize}
+  \item[Q,LB] \citet[Theorem 7]{osokin2017structured} -- Prove excess risk bounds for a broad family of structured prediction problems, using a specific quadratic surrogate.  Also give an upper bound on the calibration function, i.e. a lower bound in the sense that we prove (Theorem 8).
+  \item[Q] \citet{ciliberto2016consistent} -- Calibration function for a similar quadratic surrogate, for a similarly general class of structed pred problems.
+  \item[Q,LB] \citet[Theorem 4.4]{nowak2019general} -- Even more general than the previous Bach paper \cite{osokin2017structured} (e.g. includes ordinal regression).  Quadratic risk bound for a proper loss for the mean from a strongly-convex potential/entropy.
+    Also give a matching lower bound in our sense (Theorem 4.5).
+  \item[Q] \citet[Proposition 5]{blondel2019structured} -- Tighter losses, still quadratic, still quadratic excess risk.
+  \end{itemize}
+
+\item Polyhedral surrogates without risk/regret bounds
+  \begin{itemize}
+  \item \citet{wang2020weston} -- Weston--Watkins: calibrated for ordered partition
+  \item \citet{yu2018lovasz} -- Lov\'asz hinge: calibrated for an abstain-like loss (from our paper)
+  \item Top-$k$ losses, like \citet{lapin2016loss} and any others from \citet{yang2018consistency}
+  \end{itemize}
+  
+\item Fast rates
+  \begin{itemize}
+  \item \citet{koren2015fast} -- fast rates for exp-concave surrogates ($O(d/n)$ where $d$ is the dimension) .  Note here exp-concavex is in the \emph{parameter}.  So $F(\theta) = L(h_\theta(x),y)$ should be exp-concave in $\theta$.  For $\alpha>0$ we say $f$ is $\alpha$-exp-concave if $x \mapsto \exp(-\alpha f(x))$ is concave.
+  \item Tim et al paper than Anish referenced!
+  \end{itemize}
+  
+\item Misc / didn't read
+  \begin{itemize}
+  \item Excess Risk Bounds for Exponentially Concave Losses \url{https://arxiv.org/pdf/1401.4566.pdf}
+  \end{itemize}
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -166,12 +202,11 @@ A link function $\psi$ then maps the surrogate predictions to target predictions
 
 Naturally, a central question in surrogate risk minimization is how to choose the surrogate $L$.
 A minimal requirement is statistical \emph{consistency}, which roughly says that approaching the best possible surrogate loss will eventually lead to the best possible target loss.
-A more precise goal is to understand the rate at which this minimization occurs, called the \emph{generalization rate}: in terms of the number of data points, how quickly the target loss approaches the best possible.
+A more precise goal is to understand the rate at which this minimization occurs, called the \emph{generalization rate}: how quickly the target loss approaches the best possible, in terms of the number of data points.
 In other words, if we define the \emph{regret} of a hypothesis to be its performance relative to the Bayes optimal hypothesis, we wish to know how quickly the $\ell$-regret approaches zero.
 
-Surrogate regret bounds are a common tool to prove generalization rates for surrogate risk minimization.
-The idea is to bound the target regret as a function of the surrogate regret.
-This allows results on surrogate losses---of which there are many, often leveraging properties of $L$ like strong convexity and smoothness---to imply rates of convergence for the target problem.
+Surrogate regret bounds are a common tool to prove generalization rates for surrogate risk minimization, by bounding the target regret as a function of the surrogate regret.
+This bound allows generalization rates for surrogate losses---of which there are many, often leveraging properties of $L$ like strong convexity and smoothness---to imply rates for the target problem.
 %The idea is that we have ample results to quantify the rate at which surrogate regret approaches zero, and if we could bound the target regret in terms of the surrogate regret, we would arrive at an overall generalization rate.
 Roughly speaking, a surrogate regret bound takes the form
 \begin{equation}
@@ -180,18 +215,18 @@ Roughly speaking, a surrogate regret bound takes the form
 \end{equation}
 where the \emph{regret transfer function} $\zeta : \reals_+ \to \reals_+$ controls how surrogate regret translates to target regret.
 For example, if we have a sequence of surrogate hypotheses $h_n$ achieving a fast rate $\Reg_L(h_n) = O(1/n)$, and we have a regret transfer of $\zeta(\epsilon) = \sqrt{\epsilon}$, then we can only guarantee a slower target rate of $\Reg_\ell(\psi \circ h_n) = O(1/\sqrt{n})$.
-Better would have been a \emph{linear} regret transfer, i.e. $\zeta(\epsilon) = C \cdot \epsilon$ for some $C > 0$, which would have directly translated the fast-rate guarantee to the target.
+The ideal regret transfer is \emph{linear}, i.e. $\zeta(\epsilon) = C \cdot \epsilon$ for some $C > 0$, which would have directly translated the fast-rate guarantee to the target.
 
 %As the above example illustrates, understanding the behavior of $\zeta$ near $0$ is crucial to analyzing the overall generalization rate; were $\zeta$ linear near $0$, the overall rate would have been a fast $O(1/n)$.
 \raft{Maybe a good place to cite the IEEE rates paper}
-While much is known about surrogate regret bounds for important classes of losses, like proper losses\raf{Bob, others} and margin losses\raf{refs}, general results spanning very broad classes of loss functions are sparse.
-Lacking such results, authors instead often prove bounds for specific losses from scratch, e.g. \raf{abstain}.
+While much is known about surrogate regret bounds for particular problems, such as binary classification and bipartite ranking, general results which span multiple target problems are sparse.
+Lacking such results, authors instead often prove bounds for specific surrogate losses from scratch, e.g. \raf{abstain, others?}.
 \bo{Furthermore, to this point, linear transfer guarantees have been relatively rare in the literature? True?}
 
 %\botodo{I don't love the below phrasing. I think I prefer the approach I took of saying, wouldn't it be cool if we could get linear regret bounds? Actually, we can for this special class of surrogates. I'm not sold that this result is a step toward more general bounds. And it's interesting for its own reasons, not just as a step.}
 %\raft{Yeah, I think I agree.  This phrasing omits the coolness that polyhedral losses are basically optimal when it comes to the regret transfer.  Yet I do think our results are impressive for their generality---previous work assumed a lot of structure on the target problem, and on the form of the loss (I mean, arguably polyhedral is a lot of structure, but I'd still argue less than differentiable 1d margin losse).  Let's maybe try for a compromise of the two?}
 \botodo{I think it's obvious that the results are general; doesn't need more emphasis than this in my opinion.}
-This paper considers the general class of \emph{polyhedral} surrogates, those that can be written as maxima over finitely many affine functions (informally, they are piecewise-linear convex).
+We prove a general surrogate regret bound for the broad class of \emph{polyhedral} surrogates, those that can be written as maxima over finitely many affine functions (i.e., piecewise-linear and convex).
 Examples include hinge loss, the abstain loss of \bo{cite ramaswamy}, \bo{and others?}
 Perhaps suprisingly, we show that \emph{every} consistent surrogate in this class achieves a linear regret transfer, meaning that surrogate generalization rates translate directly to target rates.
   % \begin{theorem}[Linear bounds for polyhedral surrogates]
