@@ -170,14 +170,16 @@ A more precise goal is to understand the rate at which this minimization occurs,
 In other words, if we define the \emph{regret} of a hypothesis to be its performance relative to the Bayes optimal hypothesis, we wish to know how quickly the $\ell$-regret approaches zero.
 
 Surrogate regret bounds are a common tool to prove generalization rates for surrogate risk minimization.
-The idea is that we have ample results to quantify the rate at which surrogate regret approaches zero, and if we could bound the target regret in terms of the surrogate regret, we would arrive at an overall generalization rate.
+The idea is to bound the target regret as a function of the surrogate regret.
+This allows results on surrogate losses---of which there are many, often leveraging properties of $L$ like strong convexity and smoothness---to imply rates of convergence for the target problem.
+%The idea is that we have ample results to quantify the rate at which surrogate regret approaches zero, and if we could bound the target regret in terms of the surrogate regret, we would arrive at an overall generalization rate.
 Roughly speaking, a surrogate regret bound takes the form
 \begin{equation}
   \label{eq:surrogate-regret-bound-informal}
   \forall \text{ surrogate hypotheses } h, \quad \Reg_\ell(\psi\circ h) \leq \zeta(\, \Reg_L(h) \,)~,\qquad
 \end{equation}
 where the \emph{regret transfer function} $\zeta : \reals_+ \to \reals_+$ controls how surrogate regret translates to target regret.
-For example, if we have a sequence of surrogate hypothesis $h_n$ achieving a fast rate $\Reg_L(h_n) = O(1/n)$, and we have a regret transfer of $\zeta(\epsilon) = \sqrt{\epsilon}$, then we can only guarantee a slower target rate of $\Reg_\ell(\psi \circ h_n) = O(1/\sqrt{n})$.
+For example, if we have a sequence of surrogate hypotheses $h_n$ achieving a fast rate $\Reg_L(h_n) = O(1/n)$, and we have a regret transfer of $\zeta(\epsilon) = \sqrt{\epsilon}$, then we can only guarantee a slower target rate of $\Reg_\ell(\psi \circ h_n) = O(1/\sqrt{n})$.
 Better would have been a \emph{linear} regret transfer, i.e. $\zeta(\epsilon) = C \cdot \epsilon$ for some $C > 0$, which would have directly translated the fast-rate guarantee to the target.
 
 %As the above example illustrates, understanding the behavior of $\zeta$ near $0$ is crucial to analyzing the overall generalization rate; were $\zeta$ linear near $0$, the overall rate would have been a fast $O(1/n)$.
@@ -241,20 +243,19 @@ Lacking, however, is a general understanding of what $\zeta$ one can expect from
 
 \paragraph{Target problems.}
 We consider supervised machine learning problems where data points have features in $\X$ and labels in $\Y$, a finite set.
-The \emph{target problem} is to learn a hypothesis mapping $\X$ to a \emph{report} (or \emph{prediction}) \emph{space} $\R$, possibly different from $\Y$.
+The \emph{target problem} is to learn a hypothesis mapping $\X$ to a \emph{report} (or \emph{prediction}) \emph{space} $\R$, possibly different from $\Y$.\footnote{For example, $\R$ may be the set of rankings (permutations) of $\Y$.}
 In this paper, we assume $\R$ is a finite set.
 %For example, standard binary classification has $\Y = \R = \{-1,+1\}$, whereas in a ranking problem, $\R$ is the set of all permutations of $\Y$.
 We suppose the target problem is specified by the \emph{target loss} $\ell:\R\to\reals^\Y_+$, which maps a report (prediction) $r \in \R$ to the vector $\ell(r)$ of nonnegative loss values for each label, i.e. $\ell(r) = (\ell(r)_y)_{y\in\Y}$.
 Given a hypothesis $g: \X \to \R$ and a data point $(x,y) \in \X \times \Y$, the loss is $\ell(g(x))_y$.
-We make a minimal non-redundancy assumption on $\ell$, formalized in Ssection \ref{subsec:elic}.
+We make a minimal non-redundancy assumption on $\ell$, formalized in Section \ref{subsec:elic}.
 We may refer to $\ell$ as a \emph{discrete} target loss to emphasize our assumption that $\R$ and $\Y$ are finite.
-We also emphasize that while $\R = \Y$ in classification, in general the prediction space may differ, e.g. the set of rankings of $\Y$.
 
 \paragraph{Surrogate problems.}
 We recall the surrogate risk minimization framework.
 First, one constructs a \emph{surrogate loss function} $L:\reals^d\to\reals^\Y_+$.
 Then, one minimizes it to learn a hypothesis of the form $h: \X \to \reals^d$.
-Finally, one applies a \emph{link function} $\psi: \reals^d \to \R$ that is associated with the surrogate loss.
+Finally, one applies a \emph{link function} $\psi: \reals^d \to \R$.
 If the learned hypothesis predicts $h(x) \in \reals^d$, then the implied prediction for the target problem is $\psi(h(x)) \in \R$.
 For example, in binary classification, the target problem is given by $0$-$1$ loss, $\ell(r)_y = \ones\{r\neq y\}$, with surrogate losses typically defined over $\reals$.
 Common surrogate losses include hinge loss and logistic loss.
@@ -262,7 +263,7 @@ These surrogates are typically associated with the link $\psi(u) = \mathrm{sign}
 
 \paragraph{Surrogate regret bounds.}
 The efficiency of a chosen surrogate is often quantified with a \emph{surrogate regret bound}.
-We define the \emph{regret} of a hypothesis $h: \X \to \reals^d$ as the expected loss relative to the best possible.
+%We define the \emph{regret} of a hypothesis $h: \X \to \reals^d$ as the expected loss relative to the best possible.
 Formally, the \emph{surrogate regret} of $h$ with respect to data distribution $\D$ is given by $R_L(h;\D) = \E_{(X,Y)\sim\D} L(h(X))_Y - \inf_{h':\X\to\reals^d} \E_{(X,Y)\sim\D} L(h'(X))_Y$, where the minimum is taken over all measurable functions.
 (One may equivalently assume the Bayes optimal hypothesis is in the function class.)
 Given $h$, the \emph{target regret} of the implied hypothesis $\psi \circ h$ is $R_\ell(\psi\circ h;\D) = \E_{(X,Y)\sim\D} \ell(\psi(h(X)))_Y - \inf_{h':\X\to\R} \E_{(X,Y)\sim\D} \ell(h'(X))_Y$, where we recall that $\psi$ is the link function.
@@ -836,6 +837,13 @@ To summarize, we have shown the following.
 \bo{TODO}
 
 \bo{Observe that our theory gives some useful way to compare link functions that may not have existed before, i.e. bigger $\epsilon$ seems to be better. Full stop?}
+
+
+\section{Broader Impacts}
+As a theoretical work, this papers' impacts are mostly in the form of downstream research and applications.
+Instead of direct applications, we anticipate this work leading to more investigation of surrogate losses to improve discrete prediction tasks.
+Of course, such machine learning tasks can be solved for ethical or unethical purposes.
+We do not know of particular risk of unethical use of this work more so than general supervised machine learning.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
