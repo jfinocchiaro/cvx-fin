@@ -158,11 +158,8 @@ Some references; will move:
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
-\bo{todo: ensure consistent terminology ``regret transfer function'' not ``transfer rate'' or anything else.}
-\bo{TODO change argument of $\zeta$ to something other than $\epsilon$? Just a slight conflict with $\epsilon$-separated.}
-
 In supervised learning, our goal is to learn a hypothesis that solves some target problem given labeled data.
-This target problem is given by a target loss $\ell$, which is often discrete in the sense that the prediction lies in a finite set, such as with classification, ranking, and structured prediction.
+The problem is often specified by a target loss $\ell$ that is discrete in the sense that the prediction lies in a finite set, as with classification, ranking, and structured prediction.
 As minimizing the target $\ell$ over a data set is typically NP-hard, we instead turn to the general paradigm of \emph{surrogate risk minimization}.
 Here a surrogate loss function $L$ is chosen and minimized instead of the target $\ell$.
 A link function $\psi$ then maps the surrogate predictions to target predictions.
@@ -180,41 +177,56 @@ Roughly speaking, a surrogate regret bound takes the form
   \forall \text{ surrogate hypotheses } h, \quad \Reg_\ell(\psi\circ h) \leq \zeta(\, \Reg_L(h) \,)~,\qquad
 \end{equation}
 where the \emph{regret transfer function} $\zeta : \reals_+ \to \reals_+$ controls how surrogate regret translates to target regret.
-For example, if we have a sequence of surrogate hypothesis $h_n$ achieving a fast rate $\Reg_L(h_n) = O(1/n)$, and $\zeta(\epsilon) = \sqrt{\epsilon}$, then we can guarante an overall slow rate of $\Reg_\ell(\psi \circ h_n) = O(1/\sqrt{n})$.
+For example, if we have a sequence of surrogate hypothesis $h_n$ achieving a fast rate $\Reg_L(h_n) = O(1/n)$, and we have a regret transfer of $\zeta(\epsilon) = \sqrt{\epsilon}$, then we can only guarantee a slower target rate of $\Reg_\ell(\psi \circ h_n) = O(1/\sqrt{n})$.
+Better would have been a \emph{linear} regret transfer, i.e. $\zeta(\epsilon) = C \cdot \epsilon$ for some $C > 0$, which would have directly translated the fast-rate guarantee to the target.
 
-As the above example illustrates, understanding the behavior of $\zeta$ near $0$ is crucial to analyzing the overall generalization rate; were $\zeta$ linear near $0$, the overall rate would have been a fast $O(1/n)$.
+%As the above example illustrates, understanding the behavior of $\zeta$ near $0$ is crucial to analyzing the overall generalization rate; were $\zeta$ linear near $0$, the overall rate would have been a fast $O(1/n)$.
 \raft{Maybe a good place to cite the IEEE rates paper}
 While much is known about surrogate regret bounds for important classes of losses, like proper losses\raf{Bob, others} and margin losses\raf{refs}, general results spanning very broad classes of loss functions are sparse.
 Lacking such results, authors instead often prove bounds for specific losses from scratch, e.g. \raf{abstain}.
+\bo{Furthermore, to this point, linear transfer guarantees have been relatively rare in the literature? True?}
 
-\botodo{I don't love the below phrasing. I think I prefer the approach I took of saying, wouldn't it be cool if we could get linear regret bounds? Actually, we can for this special class of surrogates. I'm not sold that this result is a step toward more general bounds. And it's interesting for its own reasons, not just as a step.}
-\raft{Yeah, I think I agree.  This phrasing omits the coolness that polyhedral losses are basically optimal when it comes to the regret transfer.  Yet I do think our results are impressive for their generality---previous work assumed a lot of structure on the target problem, and on the form of the loss (I mean, arguably polyhedral is a lot of structure, but I'd still argue less than differentiable 1d margin losse).  Let's maybe try for a compromise of the two?}
-We take a large step toward general surrogate regret bounds, with two broad results.
-The first gives a linear surrogate regret bound for any polyhedral (piecewise-linear convex) surrogate, meaning that surrogate generalization rates translate directly to target rates.
+%\botodo{I don't love the below phrasing. I think I prefer the approach I took of saying, wouldn't it be cool if we could get linear regret bounds? Actually, we can for this special class of surrogates. I'm not sold that this result is a step toward more general bounds. And it's interesting for its own reasons, not just as a step.}
+%\raft{Yeah, I think I agree.  This phrasing omits the coolness that polyhedral losses are basically optimal when it comes to the regret transfer.  Yet I do think our results are impressive for their generality---previous work assumed a lot of structure on the target problem, and on the form of the loss (I mean, arguably polyhedral is a lot of structure, but I'd still argue less than differentiable 1d margin losse).  Let's maybe try for a compromise of the two?}
+\botodo{I think it's obvious that the results are general; doesn't need more emphasis than this in my opinion.}
+This paper considers the general class of \emph{polyhedral} surrogates, those that can be written as maxima over finitely many affine functions (informally, they are piecewise-linear convex).
+Examples include hinge loss, the abstain loss of \bo{cite ramaswamy}, \bo{and others?}
+Perhaps suprisingly, we show that \emph{every} consistent surrogate in this class achieves a linear regret transfer, meaning that surrogate generalization rates translate directly to target rates.
   % \begin{theorem}[Linear bounds for polyhedral surrogates]
 \begin{theorem}[Linear bound for polyhedral]
   \label{thm:main-upper}
   Let $L$ be any polyhedral surrogate and $\psi$ any link function such that $(L,\psi)$ is consistent for the target loss $\ell$.
-  Then there is a linear regret transfer function $\zeta$.
+  Then $L$ satisfies Equation \ref{eq:surrogate-regret-bound-informal} with a linear $\zeta$.
+  %Then there is a linear regret transfer function $\zeta$.
   % Then $(L,\psi)$ guarantee a linear regret transfer function $\zeta$ to $\ell$.
-  %Then there exists a surrogate regret bound with a linear transfer function $\zeta$.
 \end{theorem}
 
-The second shows that $\zeta$ cannot be smaller than a square root for sufficiently ``non-polyhedral'' surrogates, which are smooth and locally strongly convex.
-For these losses, therefore, fast surrogate generalization rates will likely still translate to slow rates for the target.
-This result could be viewed as a partial converse to the first, providing evidence that some element of piecewise-linearity is necessary for optimal surrogate regret bounds.
+We also give a partial converse: If the surrogate is sufficiently ``non-polyhedral'', i.e. smooth and locally strongly convex, then $\zeta$ cannot shrink faster than a square root.
+For these losses, therefore, even fast surrogate generalization rates sometimes translate to slow rates for the target.
+%This result could be viewed as a partial converse to the first, providing evidence that some element of piecewise-linearity is necessary for optimal surrogate regret bounds.
 \begin{theorem}[Lower bound for non-polyhedral]
   \label{thm:main-lower}
-  Let $L$ be a locally strongly convex surrogate, with locally Lipschitz gradient.
-  If $L$ satisfies a regret transfer of $\zeta$ for a target loss $\ell$, then there exists $c>0$ such that, for arbitrarily small $\epsilon>0$, we have $\zeta(\epsilon) \geq c\cdot\sqrt{\epsilon}$.
+  Let $L$ be a locally strongly convex surrogate with locally Lipschitz gradient.
+  If $L$ satisfies Equation \ref{eq:surrogate-regret-bound-informal} for a target loss $\ell$, then there exists $c>0$ such that, for arbitrarily small $\epsilon>0$, we have $\zeta(\epsilon) \geq c\cdot\sqrt{\epsilon}$.
 %  If $\zeta$ is a transfer function in a surrogate regret bound for $L$ to a target loss $\ell$, then there exists $c>0$ such that, for arbitrarily small $\epsilon>0$, we have $\zeta(\epsilon) \geq c\cdot\sqrt{\epsilon}$.
 \end{theorem}
-\raf{Comments on general implications, e.g. ``optimality'' of polyhedral?}
+Thus, polyhedral losses are not only order-optimal in terms of regret transfer, but a significant element of piecewise-linearity seems \emph{necesseary} for optimal transfer.
+This result may be at odds with the smoothness and strong convexity properties often used to show fast convergence rates for convex surrogates \bo{cite?}.
+We leave to other work the possibility of an inherent tradeoff between fast surrogate convergence and optimal regret transfer; this question is explored to an extent in \bo{IEEE paper}.
 
-\raf{Some comments about our proof techniques, with forward refs to sections / outline sprinkled in?}
+The proof of Theorem \ref{thm:main-upper}, presented in Section \ref{sec:upper}, relies on techniques from \emph{information elicitation} and the structure of optimal prediction sets for polyhedral losses.
+In particular, a polyhedral loss has some finite set of reports which always contains a minimizer.
+This is related to the embeddings framework of \cite{finocchiaro2020embedding}.
+Theorem \ref{thm:main-lower}, presented in Section \ref{sec:lower}, uses curvature of the expected loss to construct a counterexample where convergence of target regret is quadratically slower than that of surrogate regret.
 
+Our proof of the upper bound, Theorem \ref{thm:main-upper}, is nonconstructive.
+We make it constructive in Section \ref{sec:constant}.
+Specifically, a polyhedral loss's regret transfer function can be bounded by $\zeta(t) \leq \alpha \cdot t$ where the constant is of the form $\alpha = \alpha_{\ell} \cdot \alpha_L \cdot \alpha_{\psi}$.
+Each component of $\alpha$ is constructed as a function of its respective object $\ell$, $L$, and $\psi$.
+A corollary of the derivation is that a polyhedral loss $L$ and link $\psi$ are consistent for $\ell$ if and only if they satisfy the weak indirect elicitation criterion and $\psi$ is \emph{$\epsilon$-separated}, a condition introduced in \cite{finocchiaro2020embedding}.
 
 \paragraph{Other related work.}
+\bo{not sure if you wanted to keep this. Would rather move things here than inline if they're not that important to the narrative of the intro.}
 Surrogate regret bounds have been well studied in some settings.
 It is known that $\zeta$ \raf{examples: logistic, exponential, and hinge}.
 Some general bounds are known for classes of surrogates, e.g. \raf{refs}.
@@ -224,7 +236,8 @@ Lacking, however, is a general understanding of what $\zeta$ one can expect from
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Preliminaries}
 
-In what follows, we introduce our notation while recalling the motivation behind surrogate risk minimization and surrogate regret bounds.
+%% Bo: I thought we could skip this sentence.
+%In this section, we introduce our notation while recalling the motivation behind surrogate risk minimization and surrogate regret bounds.
 
 \paragraph{Target problems.}
 We consider supervised machine learning problems where data points have features in $\X$ and labels in $\Y$, a finite set.
@@ -233,28 +246,22 @@ In this paper, we assume $\R$ is a finite set.
 %For example, standard binary classification has $\Y = \R = \{-1,+1\}$, whereas in a ranking problem, $\R$ is the set of all permutations of $\Y$.
 We suppose the target problem is specified by the \emph{target loss} $\ell:\R\to\reals^\Y_+$, which maps a report (prediction) $r \in \R$ to the vector $\ell(r)$ of nonnegative loss values for each label, i.e. $\ell(r) = (\ell(r)_y)_{y\in\Y}$.
 Given a hypothesis $g: \X \to \R$ and a data point $(x,y) \in \X \times \Y$, the loss is $\ell(g(x))_y$.
-\bo{We will make a minimal non-redundancy assumption on $\ell$ in [Ref].}
+We make a minimal non-redundancy assumption on $\ell$, formalized in Ssection \ref{subsec:elic}.
 We may refer to $\ell$ as a \emph{discrete} target loss to emphasize our assumption that $\R$ and $\Y$ are finite.
-
-\bo{given the intro, perhaps we can omit examples? but we do need to emphasize that $\R \neq \Y$ generally.}
-
-
+We also emphasize that while $\R = \Y$ in classification, in general the prediction space may differ, e.g. the set of rankings of $\Y$.
 
 \paragraph{Surrogate problems.}
-\bo{Given the intro, this paragraph can probably be shortened.}
-Because optimizing a discrete target loss on a dataset is typically intractable, the usual approach is \emph{surrogate risk minimization}.
+We recall the surrogate risk minimization framework.
 First, one constructs a \emph{surrogate loss function} $L:\reals^d\to\reals^\Y_+$.
 Then, one minimizes it to learn a hypothesis of the form $h: \X \to \reals^d$.
 Finally, one applies a \emph{link function} $\psi: \reals^d \to \R$ that is associated with the surrogate loss.
 If the learned hypothesis predicts $h(x) \in \reals^d$, then the implied prediction for the target problem is $\psi(h(x)) \in \R$.
-
 For example, in binary classification, the target problem is given by $0$-$1$ loss, $\ell(r)_y = \ones\{r\neq y\}$, with surrogate losses typically defined over $\reals$.
 Common surrogate losses include hinge loss and logistic loss.
 These surrogates are typically associated with the link $\psi(u) = \mathrm{sign}(u)$, which maps negative predictions to $-1$ and nonnegative predictions to $+1$.
 
 \paragraph{Surrogate regret bounds.}
-Given a target problem, we would like to design surrogates which efficiently solve it.
-A standard tool to establish this efficiency is a \emph{surrogate regret bound}.
+The efficiency of a chosen surrogate is often quantified with a \emph{surrogate regret bound}.
 We define the \emph{regret} of a hypothesis $h: \X \to \reals^d$ as the expected loss relative to the best possible.
 Formally, the \emph{surrogate regret} of $h$ with respect to data distribution $\D$ is given by $R_L(h;\D) = \E_{(X,Y)\sim\D} L(h(X))_Y - \inf_{h':\X\to\reals^d} \E_{(X,Y)\sim\D} L(h'(X))_Y$, where the minimum is taken over all measurable functions.
 (One may equivalently assume the Bayes optimal hypothesis is in the function class.)
@@ -267,8 +274,8 @@ Given $h$, the \emph{target regret} of the implied hypothesis $\psi \circ h$ is 
 %This is the question we address by studying \emph{surrogate regret bounds}.
 
 A surrogate regret bound answers the following question: when we minimize the surrogate regret at a rate $f(n)$, given $n$ data points, how fast does the target regret diminish?
-Formally, we say that $\zeta : \reals_+ \to \reals_+$ is a \emph{rate transfer function} if $\zeta$ is continuous at $0$ and satisfies $\zeta(0) = 0$.
-Given a rate transfer function $\zeta$, we say that $(L,\psi)$ guarantees a \emph{regret transfer of $\zeta$} for $\ell$ if
+Formally, we say that $\zeta : \reals_+ \to \reals_+$ is a \emph{regret transfer function} if $\zeta$ is continuous at $0$ and satisfies $\zeta(0) = 0$.
+Given a rerget transfer function $\zeta$, we say that $(L,\psi)$ guarantees a \emph{regret transfer of $\zeta$} for $\ell$ if
 \begin{equation}
   \label{eq:surrogate-regret-bound}
   \forall \D, \forall h:\X\to\reals^d, \quad R_\ell(\psi\circ h;\D) \leq \zeta(\, R_L(h;\D) \,)~.
@@ -308,22 +315,22 @@ In other words, consistency implies that $R_L(h;\D) \to 0 \implies R_{\ell}(\psi
 
 
 \paragraph{Polyhedral surrogates.}
-In this paper, we consider the class of polyhedral surrogates, which includes hinge loss.\bo{And?}
-Formally, a function $f: \reals^d \to \reals$ is called \emph{polyhedral} if it can be written as a pointwise maximum of a finite set of affine functions~\cite{rockafellar1997convex}.\bo{theorem/chapter?}
+A function $f: \reals^d \to \reals$ is called \emph{polyhedral} if it can be written as a pointwise maximum of a finite set of affine functions,~\cite{rockafellar1997convex}.\bo{theorem/chapter?}
 The epigraph of a polyhedral function is a polyhedral set, i.e. the intersection of a finite set of closed halfspaces; thus polyhedral functions are always convex.
 We say a surrogate loss $L: \reals^d \to \reals_+^{\Y}$ is \emph{polyhedral} if, for each fixed $y \in \Y$, the loss as a function of prediction, i.e. $r \mapsto L(r)_y$, is polyhedral.
 
-\subsection{Property elicitation and the conditional approach}
+\subsection{Property elicitation and the conditional approach} \label{subsec:elic}
 Our technical approach is based on property elicitation, which studies the structure of $\ell$ and $L$ as they relate to $\simplex$.
 This involves a \emph{conditional} perspective.
 Given a data distribution $\D$ on $\X \times \Y$, for $(X,Y) \sim \D$, we consider the format of possible target predictions $g(x) = r \in \R$; surrogate predictions $h(x) = u \in \reals^d$; and conditional distributions $\Pr[ \cdot \mid X] = p \in \simplex$.
 By dropping the role of the hypotheses and the feature space $\X$, we can focus on the relationships of the functions $\ell(r)_y$ and $L(u)_y$ and the conditional distribution $p$.
 
-In particular, the \emph{Bayes risk} of $L$ is $\risk{L}(p) = \inf_{u \in \reals^d} \inprod{p}{L(u)}$, and similarly the Bayes risk of $\ell$ is $\risk{\ell}(p) = \inf_{r \in \R} \inprod{p}{\ell(r)}$.
+In particular, the expected $L$-loss of prediction $u$ on distribution $p$ is simply the inner product $\inprod{p}{L(u)}$.
+The \emph{Bayes risk} of $L$ is $\risk{L}(p) = \inf_{u \in \reals^d} \inprod{p}{L(u)}$, and similarly the Bayes risk of $\ell$ is $\risk{\ell}(p) = \inf_{r \in \R} \inprod{p}{\ell(r)}$.
 We abuse notation to define the \emph{conditional surrogate regret} $R_L(u,p) = \inprod{p}{L(u)} - \risk{L}(p)$, and similarly the \emph{conditional target regret} $R_{\ell}(r,p) = \inprod{p}{\ell(r)} - \risk{\ell}(p)$.
-Given a rate transfer function $\zeta$, we say $(L,\psi)$ guarantees a \emph{conditional regret transfer} of $\zeta$ for $\ell$ if, for all $p \in \simplex$ and all $u \in \reals^d$, $R_{\ell}(\psi(u),p) \leq \zeta(R_L(u,p))$.
+Given a regret transfer function $\zeta$, we say $(L,\psi)$ guarantees a \emph{conditional regret transfer} of $\zeta$ for $\ell$ if, for all $p \in \simplex$ and all $u \in \reals^d$, $R_{\ell}(\psi(u),p) \leq \zeta(R_L(u,p))$.
 
-The following is a direct result of Jensen's inequality, using that $R_L(h;\D) = \E_X R_L(h(x),p_X)$ where $p_X$ is the conditional distribution on $Y$ given $X$.
+The following is a direct result of Jensen's inequality, using that $R_L(h;\D) = \E_X R_L(h(X),p_X)$ where $p_X$ is the conditional distribution on $Y$ given $X$.
 \begin{observation} \label{obs:transfer}
   If $(L,\psi)$ guarantee a conditional regret transfer of $\zeta$ for $\ell$, and $\zeta$ is concave, then $(L,\psi)$ guarantee a regret transfer of $\zeta$ for $\ell$.
 \end{observation}
@@ -331,25 +338,21 @@ The following is a direct result of Jensen's inequality, using that $R_L(h;\D) =
 \paragraph{Property elicitation.}
 To begin, we define a \emph{property}, which is essentially a statistic or summary of a distribution, such as the mode.
 We then define what it means for a loss function to \emph{elicit} a property.
-We write $\Gamma: \simplex \toto \R$ as shorthand for $\Gamma: \simplex \to 2^{\R} \setminus \{\emptyset\}$.
-We write $\inprod{p}{L(u)}$ for the expected surrogate loss of prediction $u$ on distribution $p \in \simplex$, and similarly $\inprod{p}{\ell(r)}$ is the expected target loss of $r$.
-
+We write $\Gamma: \simplex \toto R$ as shorthand for $\Gamma: \simplex \to 2^{R} \setminus \{\emptyset\}$.
 
 \begin{definition}[Property, level set]\label{def:property}
-  A \emph{property} is a function $\Gamma:\simplex\toto\R$.
+  A \emph{property} is a function $\Gamma:\simplex\toto R$, for some set $R$.
   The \emph{level set} of $\Gamma$ for report $r$ is the set $\Gamma_r = \{p \in \simplex : r \in \Gamma(p)\}$.
 \end{definition}
-In general, a loss $f: R \to \reals^{\Y}$, for some prediction (or ``report'') space $R$, is said to \emph{elicit} a property $\Gamma$ if
-\begin{equation}
-  \forall p\in\simplex,\;\;\;\Gamma(p) = \argmin_{r \in \R} \inprod{p}{f(r)}~.
-\end{equation}
-
 The following definition applies both to target losses and surrogate losses.
 \begin{definition}[Elicits, report space]
   \label{def:elicits}
   A loss function $f:R\to\reals^\Y_+$, where the domain $R$ is called the \emph{report space}, \emph{elicits} a property $\Gamma:\simplex \toto \R$ if
-  As each $f$ elicits a unique property, we refer to it as $\prop{f}$.
+  \begin{equation}
+    \forall p\in\simplex,\;\;\;\Gamma(p) = \argmin_{r \in R} \inprod{p}{f(r)}~.
+  \end{equation}
 \end{definition}
+As each loss $f$ elicits a unique property, we refer to it as $\prop{f}$.
 In particular, we will consistently use the notation $\Gamma = \prop{L}$ where $L$ is a surrogate loss with report space $\reals^d$, and we will use $\gamma = \prop{\ell}$ where $\ell$ is a target loss with finite report space $\R$.
 
 We will assume throughout that the target loss is \emph{non-redundant}, meaning that all $r \in \R$ are possibly uniquely optimal.
@@ -358,22 +361,16 @@ Formally, we suppose that for all $r \in \R$, there exists $p \in \simplex$ with
 \paragraph{Calibration and consistency.}
 It is known that consistency implies the weaker condition of \emph{calibration}, which implies the still-weaker, but very useful, condition of \emph{indirect elicitation}.
 To define these conditions, consider $L,\psi,\ell$ and $\gamma = \prop{\ell}$.
-Recall that $\gamma(p)$ of target reports that are optimal for $p$.
-If $\psi(u) \not\in \gamma(p)$, then $u$ is a ``bad'' (suboptimal) surrogate prediction.
+Recall that $\gamma(p)$ is the set of target reports that are optimal for $p$.
+If $\psi(u) \not\in \gamma(p)$, then $u$ is a ``bad'' (suboptimal) surrogate prediction for $p$.
 Let $B_{L,\psi,\ell}(p) = \{R_L(u,p) ~:~ \psi(u) \not\in \gamma(p)\}$, the set of expected surrogate losses resulting from bad predictions.
 \begin{definition}[Indirectly elicits, Calibrated]
   A surrogate-link pair $(L,\psi)$ \emph{indirectly elicits} a target $\ell$ if $0 \not\in B_{L,\psi,\ell}(p)$ for all $p \in \simplex$.
   Meanwhile, $(L,\psi)$ is \emph{calibrated} for $\ell$ if $0 < \inf B_{L,\psi,\ell}(p)$ for all $p \in \simplex$.
-%  \begin{equation}
-%    \inf_{u : \psi(u) \not\in \gamma(p)} \inprod{p}{L(u)} > \risk{L}(p)$ .
-%  \end{equation}
-%  Throughout, $\Gamma = \prop{L}$ and $\gamma = \prop{\ell}$.
 \end{definition}
 Equivalently, $(L,\psi)$ indirectly elicits $\ell$ if $u \in \Gamma(p) \implies \psi(u) \in \gamma(p)$.
 Calibration is the slightly more subtle condition that there is a nonzero gap between the expected loss of a ``good'' report and that of any bad one.
-%Observe that indirect elicitation is the condition that $0 \not\in \{\inprod{p}{L(u)} ~:~ \psi(u) \not\in \gamma(p)\}$.
-%Calibration is the slightly stronger condition that $0$ is not the infimum of the set.
-\begin{fact}[\bo{cite who?}\raf{see fig 1 (left-hand double arrow) from flats paper}]
+\begin{fact}[\cite{bartlett2006convexity,steinwart2008support}]
   \label{fact:consistent-calibrated-elicits}
   Let $\ell: \R \to \reals_+^{\Y}$ be a target loss with finite $\R$ and $\Y$.
   If a surrogate and link $(L,\psi)$ are consistent for $\ell$, then $(L,\psi)$ are calibrated for $L$.
@@ -390,20 +387,18 @@ Calibration is the slightly more subtle condition that there is a nonzero gap be
 %\end{definition}
 
 
-\section{Upper Bound: Polyhedral Surrogates}
-In this section, we develop the proof of Theorem \ref{thm:main-upper}.
+\section{Upper Bound: Polyhedral Surrogates} \label{sec:upper}
+In this section, we develop the proof of Theorem \ref{thm:main-upper}, that polyhedral surrogates guarantee linear regret transfers.
 At a high level, the proof has two parts:
 \begin{enumerate}
   \item Fix $p \in \simplex$.
         Prove that there is some constant $\alpha_p$ such that $R_{\ell}(\psi(u),p) \leq \alpha_p R_L(u,p)$ for all $u\in\reals^d$.
       \item Apply this result to each $p$ in a carefully chosen finite subset of $\simplex$.
-        Argue that the maximum $\alpha_p$ from this finite set suffices for the slope of the linear transfer function.
+        Argue that the maximum $\alpha_p$ from this finite set suffices.
 \end{enumerate}
-\raft{On ``We view both parts as relatively surprising'' I'm not sure the first part is.  I mean, it is to \textbf{us}, but as you point out, in retrospect it follows immediately from the definition...}
 The first part will actually hold for any calibrated surrogate.
 The second part relies on a crucial fact about polyhedral losses $L$: their properties $\Gamma=\prop{L}$ cover the whole simplex with only a finite number of polyhedral level sets.
 In other words, although the prediction space $\reals^d$ is infinite, one can restrict to just a finite set of prediction points and always have a global minimizer of expected loss.
-This observation is related to embeddings \bo{cite}.
 
 \subsection{Part 1: Linear transfer for fixed $p$}
 First, we establish a linear transfer for any fixed conditional distribution $p$.
@@ -434,7 +429,7 @@ This holds for any calibrated surrogate, not necessarily polyhedral.
   \end{align*}
 \end{proof}
 While the above proof has the advantage of being quite short, it is also somewhat nonconstructive and potentially loose.
-In \bo{Section TODO}, we investigate the constant $\alpha_p$ for polyhedral losses in particular.
+In Section \ref{sec:constant}, we investigate the constant $\alpha_p$ for polyhedral losses in particular.
 
 \subsection{Part 2: Linear overall transfer function}
 Given Lemma \ref{lemma:fixed-p}, we might hope to obtain that, for any calibrated surrogate, there exists $\alpha = \sup_p \alpha_p$ such that $R_{\ell}(\psi(u),p') \leq \alpha R_L(u,p')$ for all $p'$.
@@ -442,32 +437,31 @@ However, we know this is false in general: not all surrogates yield linear regre
 Indeed, for many surrogates, the supremum will be $+\infty$.
 
 However, polyhedral surrogates have a special structure that allows us to show $\alpha$ is finite.
-We first present several general lemmas, then the key implication from $L$ being polyhedral.
-The general results are known \bo{cite}\raft{Not sure what this sentence means. \bo{I mean that the ``general lemmas'' are already-known facts about elicitation. The fact about polyhedral losses is close to known too...}}.
+We first present some tools that hold for general surrogates, then the key implication from $L$ being polyhedral.
+%The general results are known \bo{cite}\raft{Not sure what this sentence means. \bo{I mean that the ``general lemmas'' are already-known facts about elicitation. The fact about polyhedral losses is close to known too...}}.
 
-\bo{For these lemmas, I tried to state no more than we need.}
 \begin{lemma} \label{lemma:refines}
   If $(L,\psi)$ indirectly elicits $\ell$, then $\Gamma = \prop{L}$ \emph{refines} $\gamma = \prop{\ell}$ in the sense that, for all $u \in \reals^d$, there exists $r \in \R$ such that $\Gamma_u \subseteq \gamma_r$.
 \end{lemma}
 \begin{proof}
   For any $u$, let $r = \psi(u)$.
   By indirect elicitation, $u \in \Gamma(p) \implies r \in \gamma(p)$.
-  Phrased differently, $\Gamma_u = \{p ~:~ u \in \Gamma(p)\} \subseteq \{p ~:~ r \in \gamma(p)\} = \gamma_r$.
+  So $\Gamma_u = \{p ~:~ u \in \Gamma(p)\} \subseteq \{p ~:~ r \in \gamma(p)\} = \gamma_r$.
 \end{proof}
 The next lemma states that surrogate regret is linear in $p$ on any fixed level set $\Gamma_{u^*}$ of $\Gamma = \prop{L}$.
 By combining this fact with Lemma \ref{lemma:refines}, we obtain that target regret is linear on these level sets as well.
 \begin{lemma} \label{lemma:linear-on-levelset}
   Suppose $(L,\psi)$ indirectly elicits $\ell$ and let $\Gamma = \prop{L}$.
-  Then for any fixed $u,u^* \in \reals^d$ and $r \in \R$, the functions $R_L(u,\cdot)$ and $R_{\ell}(u,\cdot)$ are linear in their second arguments on $\Gamma_{u^*}$.
+  Then for any fixed $u,u^* \in \reals^d$ and $r \in \R$, the functions $R_L(u,\cdot)$ and $R_{\ell}(r,\cdot)$ are linear in their second arguments on $\Gamma_{u^*}$.
 \end{lemma}
 \begin{proof}
   Let $u^* \in \reals^d$ and $p \in \Gamma_{u^*}$.
   By definition, for all $p \in \Gamma_{u^*}$, $\risk{L}(p) = \inprod{p}{L(u^*)}$.
   So for fixed $u$,
     \[ R_L(u,p) = \inprod{p}{L(u)} - \inprod{p}{L(u^*)} = \inprod{p}{L(u) - L(u^*)} , \]
-  a linear function of $p$.
+  a linear function of $p$ on $\Gamma_{u^*}$.
   Next, by Lemma \ref{lemma:refines}, there exists $r^*$ such that $\Gamma_{u^*} \subseteq \gamma_{r^*}$.
-  By the same argument, for fixed $r$, $R_{\ell}(r,p) = \inprod{p}{\ell(r) - \ell(r^*)}$, a linear function.
+  By the same argument, for fixed $r$, $R_{\ell}(r,p) = \inprod{p}{\ell(r) - \ell(r^*)}$, a linear function of $p$ on $\gamma_{r^*}$ and thus on $\Gamma_{u^*}$.
 \end{proof}
 
 We now arrive at the key property of polyhedral losses.
@@ -481,7 +475,7 @@ We now arrive at the key property of polyhedral losses.
 We are now ready to restate and prove the main upper bound.
 \begin{theorem}[Theorem \ref{thm:main-upper} restated]
   Suppose the surrogate loss $L: \reals^d \to \reals_+^{\Y}$ and link $\psi: \reals^d \to \R$ are consistent for the target loss $\ell: \R \to \reals_+^{\Y}$.
-  If $L$ is polyhedral, then $(L,\psi)$ guarantee a linear regret transfer for $\ell$, i.e. there exists $\alpha > 0$ such that, for all $\D$ and all measurable $h: \X \to \reals^d$,
+  If $L$ is polyhedral, then $(L,\psi)$ guarantee a linear regret transfer for $\ell$, i.e. there exists $\alpha \geq 0$ such that, for all $\D$ and all measurable $h: \X \to \reals^d$,
     \[ R_{\ell}(\psi \circ h ; \D) \leq \alpha R_L(h ; \D) . \]
 \end{theorem}
 \begin{proof}
@@ -499,7 +493,7 @@ We are now ready to restate and prove the main upper bound.
   So we can write $p$ as a convex combination of its vertices, i.e.
     \[ p = \sum_{q \in \mathcal{Q}_u} \beta(q) q \]
   for some probability distribution $\beta$.
-  Because $\mathcal{Q}_u \subseteq \Gamma_u$, $R_L$ and $R_{\ell}$ are linear on it by Lemma \ref{lemma:linear-on-levelset}.
+  Recall that $\mathcal{Q}_u \subseteq \Gamma_u$ and $R_L$ and $R_{\ell}$ are linear in $p$ on $\Gamma_u$ by Lemma \ref{lemma:linear-on-levelset}.
   So, for any $u'$:
   \begin{align*}
     R_{\ell}(\psi(u'),p)
@@ -512,9 +506,9 @@ We are now ready to restate and prove the main upper bound.
 \end{proof}
 
 
-\section{Lower bound}
+\section{Lower bound} \label{sec:lower}
 
-In this section, we show that if a surrogate loss is sufficiently ``non-polyhedral'', then the best regret transfer it can achieve is $\sqrt{\epsilon}$.
+In this section, we show that if a surrogate loss is sufficiently ``non-polyhedral'', then the best regret transfer it can achieve is $\zeta(\epsilon)$ on the order of $\sqrt{\epsilon}$.
 Specifically, we consider a relaxation of $L$ being both strongly smooth and strongly convex.
 
 We next formalize this relaxation.
@@ -524,18 +518,14 @@ The upshot of this definition is that for the conditional distribution $p_0$, $u
 We also note that an \emph{open neighborhood} of $u_0$ is an open set in $\reals^d$ containing $u_0$.
 
 \begin{assumption} \label{assumption:lower}
-  $L: \reals^d \to \reals^{\Y}_+$ is a surrogate and $\psi: \reals^d \to \R$ a link, consistent with the discrete target $\ell: \R \to \reals^{\Y}_+$, satisfying the following: (i) For all $y \in \Y$, the function $L(\cdot)_y$ is differentiable with a locally Lipschitz gradient.\bo{footnote def of locally lipschitz} (ii) For some $\alpha > 0$ and some $u_0 \in \reals^d$, a boundary prediction for $L,\ell$, the expected loss function $u \mapsto \inprod{p}{L(u)}$ is $\alpha$-strongly convex on an open neighborhood \bo{define neighborhood} of $u_0$.
+  $L: \reals^d \to \reals^{\Y}_+$ is a surrogate and $\psi: \reals^d \to \R$ a link, consistent with the discrete target $\ell: \R \to \reals^{\Y}_+$, satisfying the following: (i) For all $y \in \Y$, the function $L(\cdot)_y$ is differentiable with a locally Lipschitz gradient.\bo{footnote def of locally lipschitz} (ii) For some $\alpha > 0$ and some $u_0 \in \reals^d$, a boundary prediction for $L,\ell$, the expected loss function $u \mapsto \inprod{p}{L(u)}$ is $\alpha$-strongly convex on an open neighborhood of $u_0$.
 \end{assumption}
 
-\begin{observation} \label{obs:lower-implied}
-  If $L$ is strongly smooth and $\alpha$ strongly convex, then it satisfies Assumption \ref{assumption:lower} for any link $\psi$ and discrete target loss $\ell$ such that $(L,\psi)$ are consistent for $\ell$.
-\end{observation}
-Observation \ref{obs:lower-implied} follows because boundary points are guaranteed to exist for $L,\psi,\ell$.
+We observe that boundary points are guaranteed to exist if $(L,\psi)$ indirectly elicit $\ell$.
 This holds because $\ell$ has a finite report space $\R$, so for example the fact that its full-dimensional level sets union to the simplex \bo{cite?} implies the existence of $r,r' \in \R$ and $p_0 \in \gamma_r \cap \gamma_{r'}$; and some surrogate prediction $u_0$ minimizes expected surrogate loss on $p_0$.
 
 The following result is our main lower bound.
-With Observation \ref{obs:lower-implied}, it immediately implies Theorem \ref{thm:main-lower} from the introduction.
-\begin{theorem}
+\begin{theorem}[Theorem \ref{thm:main-lower} restated.]
   Suppose the surrogate loss $L$ and link $\psi$ satisfy a regret transfer of $\zeta$ for a target loss $\ell$.
   If $L$, $\psi$, and $\ell$ satisfy Assumption \ref{assumption:lower}, then there exists $c > 0$ such that, for arbitrarily small $\epsilon$, $\zeta(\epsilon) \geq c \sqrt{\epsilon}$.
 \end{theorem}
@@ -592,7 +582,7 @@ The last fact will use the properties of strong smoothness and strong convexity 
   We will apply this fact to the compact set $\mathcal C = \{u \in \reals^d : \|u - u_1\| \leq \|u_0 - u_1\| + \delta\}$.
   By compactness, we have a finite subcover of open neighborhoods; let $\beta$ be the minimum Lipschitz constant over this finite set of neighborhoods.
   We thus have that $L_y$ is $\beta$-strongly smooth on $\mathcal C$, and hence so is $L_\lambda$ for any $\lambda \in [0,1]$.
-  \bo{I thought maybe strong smoothness is equivalent to locally lipschitz gradient? If so this gets easier and it lets us assume the parameter $\beta$ from the beginning, which is nice because we get a somewhat constructive $c$ at the end.}
+%  \bo{I thought maybe strong smoothness is equivalent to locally lipschitz gradient? If so this gets easier and it lets us assume the parameter $\beta$ from the beginning, which is nice because we get a somewhat constructive $c$ at the end.}
   
   We now upper bound $\|u_\lambda - u_0\|_2$, and then apply strong smoothness to upper bound $L_\lambda(u_0) - L_\lambda(u_\lambda)$.
   Consider the first-order optimality condition of $L_\lambda$:
@@ -636,14 +626,14 @@ The last fact will use the properties of strong smoothness and strong convexity 
 \end{proof}
 
 
-\section{Unpacking the constant for polyhedral losses}
+\section{Unpacking the constant for polyhedral losses} \label{sec:constant}
 
 Our main upper bound for polyhedral losses, Theorem \ref{thm:main-upper}, is mostly nonconstructive: it says polyhedral surrogates have some $\alpha$ such that $R_{\ell}(\psi \circ h; \D) \leq \alpha \cdot R_L(h;\D)$.
-In this section, we make the result constructive by unpacking the implications of consistency (or more precisely, calibration) for polyhedral surrogates.
+In this section, we make the result constructive by unpacking the implications of consistency for polyhedral surrogates.
 
 We will give a bound on the constant of the form $\alpha \leq \alpha_{\ell} \cdot \alpha_L \cdot \alpha_{\psi}$, i.e. one component each relating to the structure of the target loss, surrogate loss, and link.
 First, we will derive $\alpha_L$ using the theory of \emph{Hoffman constants} from linear optimization.
-Then, we will show that \emph{any} link for a consistent polyhedral loss must satisfy a condition called $\epsilon$-separation, introduced in \cite{finocchiario2020}.
+Then, we will show that \emph{any} link for a consistent polyhedral loss must satisfy a condition called $\epsilon$-separation, introduced in \cite{finocchiaro2020embedding}.
 We will set $\alpha_{\psi} = \frac{1}{\epsilon}$.
 With $\alpha_{\ell}$ simply an upper bound on the target loss, we will finally prove $\alpha \leq \alpha_{\ell} \cdot \alpha_L \cdot \alpha_{\psi}$.
 
@@ -720,8 +710,8 @@ In the same way, we will be able to set the ``loss'' constant $\alpha_L = \max_p
 First, however, we will need to investigate separated links.
 
 \subsection{Separated link functions}
-A link $\psi$ is $\epsilon$-separated if, when $\psi(u^*)$ is an optimal target prediction for distribution $p$ and $\psi(u)$ is not, then $\|u^* - u\|_{\infty} > \epsilon$.
-The definition was introduced in \cite{finocchiaro2020} and is rephrased in terms of the properties $\Gamma = \prop{L}$ and $\gamma = \prop{\ell}$.
+A link $\psi$ is $\epsilon$-separated if, when $\psi(u^*)$ is an optimal target prediction and $\psi(u)$ is not, then $\|u^* - u\|_{\infty} > \epsilon$.
+The definition was introduced in \cite{finocchiaro2020embedding} and is rephrased in terms of the properties $\Gamma = \prop{L}$ and $\gamma = \prop{\ell}$.
 
 \begin{definition}[Separated Link]\label{def:sep-link}
   Let properties $\Gamma:\simplex\toto\reals^d$ and $\gamma:\simplex\toto\R$ be given.
@@ -735,7 +725,7 @@ Now, $\epsilon$-separated link functions allow us to guarantee that we move at l
 But when does a polyhedral loss have an associated $\epsilon$-separated link?
 
 \paragraph{Existence of separated links.}
-\cite{finocchiaro2020} showed that in fact, if $L$ indirectly elicits $\ell$, then there always exists an $\epsilon$-separated link $\psi$ such that $(L,\psi)$ is consistent for $L$.
+\cite{finocchiaro2020embedding} showed that in fact, if $L$ indirectly elicits $\ell$, then there always exists an $\epsilon$-separated link $\psi$ such that $(L,\psi)$ is consistent for $L$.
 Here, we strengthen this result much further, and give a converse that we believe is of independent interest: if $L$ indirectly elicits $\ell$, then \emph{every} link making $L$ consistent is $\epsilon$-separated for some $\epsilon > 0$.
 
 \begin{lemma}\label{lemma:calibrated-eps-sep}
@@ -785,7 +775,6 @@ We will also need an upper bound on the regret of $\ell$.
 \end{definition}
 Observe that $C_{\ell} = \max_{r,p} R_{\ell}(r,p)$.
 \bo{needs justification?}
-\bo{We could have $C_{\ell} = 0$ but then everything is optimal and the regret transfer is zero.}
 
 For the proof, we first give a bound for any fixed $p$.
 \begin{lemma} \label{lemma:separated-constant-p}
@@ -803,7 +792,6 @@ For the proof, we first give a bound for any fixed $p$.
   So $R_{\ell}(\psi(u),p) \leq C_{\ell} \leq \frac{C_{\ell} H_{L,p}}{\epsilon} R_L(u,p)$.
 \end{proof}
 
-Now we can give a bound on the constant of any polyhedral surrogate's linear regret transfer.
 Recall that Lemma \ref{lemma:polyhedral-finite} gave that, if $L$ is polyhedral, then $\Gamma = \prop{L}$ has a finite set of full-dimensional level sets, each a polytope, that union to the simplex.
 \begin{definition}[$H_L$]
   Given a polyhedral surrogate loss $L: \reals^d \to \reals_+^{\Y}$, let $\mathcal{Q}$ be the set of all vertices of the full-dimensional level sets of $\Gamma = \prop{L}$, and define $H_L \defeq \max_{p \in \mathcal{Q}} H_{L,p}$.
@@ -860,7 +848,7 @@ To summarize, we have shown the following.
   \raf{Jessie Finocchiaro for discussions}
 \end{ack}
 
-\section*{References}
+%\section*{References}
 
 \bibliographystyle{plainnat}
 \bibliography{diss,extra}
