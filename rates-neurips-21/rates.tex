@@ -836,30 +836,43 @@ To summarize, we have shown the following.
 \subsection{Further tightening}
 While our goal is not to focus on exact constants for specific problems, we remark on a few ways Theorem \ref{thm:separated-constant} may be loose and how one could compute the tightest possible constant $\alpha^*$ for which $R_{\ell}(\psi \circ h;\D) \leq \alpha^* R_L(h;\D)$ for all $h$ and $\D$.
 In general, for a fixed $p$, there is some smallest $\alpha_p^*$ such that $R_{\ell}(\psi(u),p) \leq \alpha_p^* R_L(u,p)$ for all $u$.
-It is clear that $\alpha^* = \max_{p \in \mathcal{Q}} \alpha_p^*$ for the finite set $\mathcal{Q}$ used in the proof, i.e. the vertices of the full-dimensional level sets of $\Gamma = \prop{L}$.
+Then, it follows from our results that $\alpha^* = \max_{p \in \mathcal{Q}} \alpha_p^*$ for the finite set $\mathcal{Q}$ used in the proof, i.e. the vertices of the full-dimensional level sets of $\Gamma = \prop{L}$.
 
 Above, we bounded $\alpha_p^* \leq \frac{C_{\ell} H_{L,p}}{\epsilon_{\psi}}$.
 The intuition is that some $u$ at distance $\geq \epsilon_{\psi}$ from $\Gamma(p)$, the optimal set, may link to a ``bad'' report $r = \psi(u) \not\in \gamma(p)$.
-The rate at which $L$ grows is at least $H_{L,p}$, so the surrogate loss at $u$ may be as small as $\frac{\epsilon_{\psi}}{H_{L,p}}$, while the target loss may be as high as $C_{\ell}$.
+The rate at which $L$ grows is at least $H_{L,p}$, so the surrogate loss at $u$ may be as small as $\frac{\epsilon_{\psi}}{H_{L,p}}$, while the target regret may be as high as $C_{\ell} = \max_{r',p'} R_{\ell}(r',p')$.
+The ratio of regrets is therefore bounded by $\frac{H_{L,p} C_{\ell}}{\epsilon_{\psi}}$.
 
 The tightest possible bound, on the other hand, is $\alpha^* = \sup_{u: \psi(u) \not\in \gamma(p)} \frac{R_{\ell}(\psi(u),p)}{R_L(u,p)}$.
 This can be smaller if the values of numerator and denominator are correlated across $u$.
-For example, $u$ may only be as close to the optimal set as $\epsilon_{\psi}$ when it links to reports $\psi(u)$ with lower target regret; or $L$ may have a smaller slope in the direction where the link's separation is larger than $\epsilon$.
+For example, $u$ may only be $\epsilon_{\psi}$-close to the optimal set when it links to reports $\psi(u)$ with lower target regret; or $L$ may have a smaller slope in the direction where the link's separation is larger than $\epsilon$.
 
-To illustrate with a concrete example, consider the REB surrogate of \cite{ramaswamy2018} for the abstain loss, $\ell(r,y) = \frac{1}{2}$ if $r = \bot$, otherwise $\ell(r,y) = \ones[r \neq y]$.
-\bo{TODO finish}
+To illustrate with a concrete example, consider the \emph{binary encoded predictions (BEP) surrogate} of \cite{ramaswamy2018consistent} for the abstain target loss, $\ell(r,y) = \frac{1}{2}$ if $r = \bot$, otherwise $\ell(r,y) = \ones[r \neq y]$.
+The surrogate involves an injective map $B: \Y \to \{-1,1\}^d$ for $d = \lceil \log_2 |\Y| \rceil$.
+It is $L(u)_y = \max_{j=1\dots d} (1 - u_d B(y)_d)_+$, where $(\cdot)_+$ indicates taking the maximum of the argument and zero.
+The associated link is $\psi(u) = \bot$ if $\min_{j=1\dots d} |u_j| \leq \tfrac{1}{2}$, otherwise $\psi(u) = \argmin_{y \in \Y} \|B(y) - u\|_{\infty}$.
 
+One can show that for $p = \delta_y$, i.e. the distribution with full support on some $y \in \Y$, $L(u)_y = d_{\infty}(u,\Gamma(p))$ exactly, giving $H_{L,p} = 1$.
+It is almost immediate that $\epsilon_{\psi} = \tfrac{1}{2}$.
+Meanwhile, $R_{\ell}(r,p) \leq 1$, giving us an upper bound $\alpha^*_p \leq \frac{(1)(1)}{1/2} = 2$.
+In fact, this is slightly loose; the exact constant, given in \cite{ramaswamy2018consistent} is $1$.
+The looseness stems from the fact that for $p = \delta_y$, the closest reports $u$ to the optimal set, i.e. at distance only $\epsilon_{\psi} = \tfrac{1}{2}$ away, do not link to reports maximizing target regret; they link to the abstain report $\bot$, which has regret only $\tfrac{1}{2}$.
+With this correction, and an observation that all $u$ linking to reports $y' \neq y$ are at distance at least $\tfrac{3}{2}$ from $\Gamma(p)$, we restore the tight bound $\alpha^*_p \leq 1$.
+A similar but slightly more involved calculation can be carried out for the other vertices $p \in \mathcal{Q}$, which turn out to be all vertices of the form $\tfrac{1}{2} \delta_y + \tfrac{1}{2} \delta_{y'}$.
 
 \paragraph{Different norms.}
-\bo{Perhaps mention.}
+This paper uses $L_{\infty}$ norm for the minimum-slope $H_L$ and the $\epsilon$-separated link.
+One reason is that it is easiest to prove the former by reduction to existence of Hoffman constants; another reason is compatibility of both with the abstain loss example above.
+However, all definitions hold for other $L_p$ norms and so does the main upper bound, as existence of an $H_L$ and $\epsilon_{\psi}$ in $L_{\infty}$ imply existence of constants in $L_p$ for $p \geq 1$.
+The optimal constant may change if the distance measure changes.
 
 
 \section{Broader Impacts}
 As a theoretical work, this papers' impacts are mostly in the form of downstream research and applications.
 Instead of direct applications, we anticipate this work leading to more investigation of surrogate losses to improve discrete prediction tasks.
+It may inform practitioners' choices of which surrogate losses they use for supervised learning tasks.
 Of course, such machine learning tasks can be solved for ethical or unethical purposes.
-We do not know of particular risk of unethical use of this work more so than general supervised machine learning.
-\bo{Make this more positive: we will broadly impact the world to be happier.}
+We do not know of particular risk of negative impacts of this work beyond risks of supervised machine learning in general.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
