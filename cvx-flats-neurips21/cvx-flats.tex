@@ -196,16 +196,14 @@
 
 \begin{document}
 
-\maketitle
-\jessiet{Rethink the title? Try: Unifying lower bounds on convex consistency dimension via $d$-flats.  Not a huge fan because $d$-flats doesn't signal too much until after someone has read the paper/abstract.}
-\raft{I think okay for now -- $d$-flats is mentioned in the abstract}
-\jessiet{What is okay for now?  The abstract doesn't mention prediction dimension}
 \begin{abstract}
 The convex consistency dimension of a supervised learning task is the lowest prediction dimension $d$ such that there exists a convex surrogate $L : \mathbb{R}^d \times \mathcal{Y} \to \mathbb{R}$ that is consistent for the given task.
   We present a new tool based on property elicitation, $d$-flats, for lower-bounding convex consistency dimension.
   This tool unifies approaches from a variety of domains, including continuous and discrete prediction problems.
   We use $d$-flats to obtain a new lower bound on the convex consistency dimension of risk measures, resolving an open question due to Frongillo and Kash (NeurIPS 2015).
   In discrete prediction settings, we show that the $d$-flats approach recovers and even tightens previous lower bounds using feasible subspace dimension.
+  \jessiet{Rethink the title? Try: Unifying lower bounds on convex consistency dimension via $d$-flats.  Not a huge fan because $d$-flats doesn't signal too much until after someone has read the paper.}
+\raft{I think okay for now -- $d$-flats is mentioned in the abstract}
 \end{abstract}
 
 \section{Introduction}\label{sec:intro}
@@ -320,13 +318,13 @@ See \S~\ref{subsec:complexity} for a review of previous work pertaining to notio
 
     % vertices
     \node[vertex] (consistent) at  (-11,2) {Consistency};
-    \node[vertex] (calibrated) at  (-11,-2) {Calibration (Q 1,3)};
+    \node[vertex] (calibrated) at  (-11,-2) {Calibration (Q1)};
     \node[vertex] (indir-elic) at  (-5,0) {Indirect elicitation};
 
 
     \node[vertex] (d-flats) at  (5,0) {$d$-flats in level sets};
-    \node[vertex, text width=30mm] (q1-bounds) at (12,2) {$\conscvx$ bounds for Q1,2. (Cor.~\ref{cor:fsd-bound})};
-    \node[vertex, text width=30mm] (q4-bounds) at (12,-2) {$\conscvx$ bounds for Q3,4. (Thm.~\ref{thm:bayes-risk-lower-bound})};
+    \node[vertex, text width=30mm] (q1-bounds) at (12,2) {$\conscvx$ bounds for Q1, Q2. (Cor.~\ref{cor:fsd-bound})};
+    \node[vertex, text width=30mm] (q4-bounds) at (12,-2) {$\conscvx$ bounds for Q3, Q4. (Thm.~\ref{thm:bayes-risk-lower-bound},~\ref{thm:mode})};
 
     % edges
     \path[->,bend angle=10]
@@ -337,7 +335,7 @@ See \S~\ref{subsec:complexity} for a review of previous work pertaining to notio
     (d-flats) edge[bend right] node[below, sloped]{Cor.~\ref{cor:Pcodim-flat-elic-relint-prop}} (q4-bounds)
     (d-flats) edge[bend left] node[above, sloped]{Cor.~\ref{cor:Pcodim-flat-single-val-prop}} (q1-bounds);
   \end{tikzpicture}
-\caption{Flow and implications of our results. Compared to calibration, we suggest indirect elicitation as a simpler but almost-as-powerful necessary condition for consistency. In particular, we obtain a testable condition (Theorem~\ref{thm:convex-flats-inf-dim}), based on $d$-flats, for the existence of a $d$-dimensional consistent convex surrogate. This condition recovers and strengthens existing calibration-based results, while simultaneously applying to other settings (Q2,4).\jessie{Is there a way to emphasize the $\conscvx$ bounds for Q3, Q4?}}
+\caption{Flow and implications of our results. Compared to calibration, we suggest indirect elicitation as a simpler but almost-as-powerful necessary condition for consistency. In particular, we obtain a testable condition (Theorem~\ref{thm:convex-flats-inf-dim}), based on $d$-flats, for the existence of a $d$-dimensional consistent convex surrogate. This condition recovers and strengthens existing calibration-based results for Q1, while simultaneously applying to other quadrants. We illustrate the breadth and power of $d$-flats by resolving two open questions for Q3 and Q4 in \S~\ref{sec:contin-consis}.}
 \label{fig:results-flow}
 \end{figure}
 
@@ -380,14 +378,13 @@ Of course, improvements in general machine learning algorithms can be put to man
 
 \section{Setting}\label{sec:related-work}
 
-We work against the backdrop of supervised learning, where data comes from a distribution $\D$ over the space $\X \times \Y$ and the goal is to produce a hypothesis $f: \X \to \R$.
+In supervised learning, data is drawn from a distribution $\D$ over the space $\X \times \Y$ and the goal is to produce a hypothesis $f: \X \to \R$.
 Here $\X$ is the \emph{feature space}, $\Y$ the \emph{label space}, and $\R$ the \emph{report} or \emph{prediction space}, possibly different from $\Y$.
 %consider supervised learning problems in the space $\X \times \Y$, for some \emph{feature space} $\X$ and a \emph{label space} $\Y$, with data drawn from a distribution $D$ over $\X \times \Y$.
 %The task is to produce a hypothesis $f: \X \to \R$, for some \emph{prediction space} $\R$, which may be different from $\Y$.
 For example, in ranking problems, $\R$ may be all $|\Y|!$ permutations over the $|\Y|$ labels forming $\Y$.
-
 We focus on surrogate losses, target problems, and their relationships to conditional distributions $p := \D_x = \Pr[Y|X=x]$ over $\Y$ given some $x \in X$.
-We often abstract away $x$, working directly with a set of distributions over outcomes $\P \subseteq \simplex$.
+We can often abstract away $x$, working directly with a set of (conditional) distributions over outcomes $\P \subseteq \simplex$.
 We then write e.g.\ $\E_p \ell(r,Y)$ to mean the expected loss of prediction $r \in \R$ when $Y\sim p$.
 
 If given, we use $\ell: \R \times \Y \to \reals$ to denote a \emph{target loss}, with predictions $r\in\R$.
@@ -610,9 +607,8 @@ It is natural to predict active if that label is more likely than both non-activ
 \text{passive} & p_{\text{active}} \leq 1/2 \wedge p_{\text{passive}} \geq p_{\text{median}} \\
 \end{cases}~.
 \end{align*} 
-This ``T-shaped'' property is depicted in Figure~\ref{fig:quadrants-simplices} (Q2).
-This task falls under Quadrant 2, as this property is not elicited by any target loss.%
-\footnote{The cells of every finite elicitable property form a power diagram, which disallow this ``T-shaped'' configuration~\cite{lambert2009eliciting,frongillo2014general}.}
+This ``T-shaped'' property, depicted in Figure~\ref{fig:quadrants-simplices} (Q2), falls under Quadrant 2, as it is not elicited by any target loss.%
+\footnote{The cells of finite elicitable properties form power diagrams, a generalization of Voronoi diagrams, which disallow this ``T-shaped'' configuration~\cite{lambert2009eliciting,frongillo2014general}.}
 Like abstain, we cannot fit a $1$-flat (line) entirely contained in the level set $\gamma_{\text{passive}}$ through the depicted $p$, so 
 %Theorem~\ref{thm:convex-flats-inf-dim} 
 Corollary~\ref{cor:Pcodim-flat-elic-relint-prop} gives $\conscvx(\gamma) = 2$.
