@@ -215,95 +215,30 @@ A corollary of the derivation is that a polyhedral loss $L$ and link $\psi$ are 
 \subsection{Literature on surrogate regret bounds}
 \label{sec:related-work}
 
-\raf{Basic outline, to flesh out tomorrow!}
-\begin{itemize}
-\item It all started with binary classification (Zhang), where we know the most.  Bartlett gave a nice closed form expression for $\zeta$ for margin losses, and Reid+W for the mostly broader class of composite proper losses.  So we have tight $\zeta$ functions for nearly every consistent surrogate.
-\item By extension, we know a lot about close variants of binary classification, like cost-sensitive binary classification, binary classification with an abstain option~\cite{bartlett2008classification}, and bipartite ranking.
-\item The next step is multiclass classification, yet commonly-used surrogates are actually not consistent.  For example, the common practice of one-versus-all hinge loss is actually consistent for multiclass classification with an abstain option; \citet{ramaswamy2018consistent} give a linear surrogate regret bound for this polyhedral surrogate, as well as two others for the same problem.  Related: hierarchical classification, which also has a polyhedral surrogate and linear regret bound.  Our results would have greatly simplified the development of these regret bounds; we describe how to recover the main BEP bound in \S.
-\item Finally, structured prediction be pumpin out surrogates.... general results... but usually quadratic losses.  Show lower bounds like our Thm 2 in those two papers.
-\end{itemize}
+Surrogate regret bounds were perhaps developed first by \citet{zhang2004statistical}, as a method to prove statistical consistency for various surrogate losses for binary classification.
+These results were then generalized by \citet{bartlett2006convexity} for margin losses, and \citet{reid2009surrogate} for composite proper losses.
+These latter works and others give a fairly complete picture for binary classification: a characterization of calibrated surrogates, and precise closed forms for the optimal $\zeta$ for each.
+By extension, close variations on binary classification are also well-understood, such as  cost-sensitive binary classification~\citep{scott2012calibrated}, binary classification with an abstain option~\citep{bartlett2008classification,yuan2010classification}, bipartite ranking~\citep{agarwal2014surrogate,menon2016bipartite}, and ordinal regression via reduction to binary classification~\citep{pedregosa2017consistency}.
+For multiclass classification, we have nice consistency characterizations with respect to 0-1 loss~\citep{tewari2007consistency}, with some surrogate regret bounds~\citep{pires2013cost,duchi2018multiclass}.
 
-~\citep{zhang2004statistical,bartlett2006convexity,reid2009surrogate,mahdavi2014binary}
+Beyond binary classification and 0-1 loss, our knowledge drops off precipitously, with few general results.
+There are some works which provide partial understand for specific target problems.
+For example, in the problem of multiclass classification with an abstain option, \citet{ramaswamy2018consistent} give three consistent polyhedral surrogates (two of which are commonly used as inconsistent surrogates for 0-1 loss), along with linear surrogate regret bounds.
+\citet{ramaswamy2015hierarchical} show how to extend these surrogates to nested, hierarchical versions, again providing linear regret bounds.
+Motivated by these polyhedral surrogates, together with examples arising in top-$k$ prediction~\citep{lapin2016loss,yang2018consistency} and other structured prediction problems~\citep{yu2018lovasz}, \citet{finocchiaro2019embedding} introduce an embedding framework for polyhedral surrogates.
+This framework shows that all polyhedral surrogates are consistent for some discrete target problem, and vice versa, but do not provide surrogate regret bounds.
+Our results fill this gap, giving linear regret bounds for all polyhedral losses, and thus all discrete target problems.
 
-Surrogate regret bounds have been well studied in some settings.
-It is known that $\zeta$ \raf{examples: logistic, exponential, and hinge}.
-Some general bounds are known for classes of surrogates, e.g. \raf{refs}.
-Lacking, however, is a general understanding of what $\zeta$ one can expect from a surrogates, especially for arbitrary target losses.
-
-
-% 1. super general
-% 2. lower bound could explain why you get sqrt or linear
-%   - take exp: not strong convex or strong smooth, so why sqrt??
-% 3. polyhedral pipeline
-
-Some references by setting.  P = polyhedral.  Surrogate regret bound: L = linear, Q = quadratic (sqrt).  $\leq$ = gives a ``lower bound'' for the surrogate regret too.
-\begin{itemize}
-\item Binary classification.
-  \begin{itemize}
-  \item \citet{zhang2004statistical} -- early analysis, didn't use ``surrogate'' but had some quantitative bounds that implied consistency
-  \item \citet{bartlett2006convexity} -- tight bounds for \textbf{all margin losses}
-  \item \citet{reid2009surrogate} -- tight bounds for \textbf{all proper composite losses}
-  \item \citet{mahdavi2014binary} -- consider the generalization rate of the surrogate together with the ``excess risk bound'' (surrogate regret bound) (\textbf{and} the optimization actually), both as a function of the smoothness parameter of the surrogate.  They don't seem to give lower bounds on the excess risk bound though, just a degrading upper bound on it.  Still, very close to our work (and more generally the ``full stack'' idea!) in spirit.
-  \end{itemize}
-  
-\item Weighted / cost-sensitive variants
-  \begin{itemize}
-  \item \citet{scott2011surrogate} -- weird example-dependent problem
-  \item \citet{scott2012calibrated} -- general cost-sensitive binary classification
-  \end{itemize}
-  
-\item Bipartite ranking (which is basically a set of pairwise binary classifications)
-  \begin{itemize}
-  \item \citet{agarwal2014surrogate} -- builds on binary classification losses (Mark + Bob), introduces strongly proper
-  \item \citet{menon2016bipartite} -- different sort of regret bound, same problem
-  \end{itemize}
-  
-\item Abstain and hierarchical
-  \begin{itemize}
-  \item[P,L] \citet{ramaswamy2018consistent} -- Abstain paper; shows bounds for 3 different surrogates, all \textbf{linear}, each ``from scratch''.
-  \item[Q] \citet{yuan2010classification} -- Smooth? losses and characterizations for abstain; \textbf{binary classification only}
-  \item[P,L] \citet{bartlett2008classification} -- The OG abstain paper, with a polyhedral hinge-like loss.  \textbf{Linear} regret bound.
-  \item[P,L] \citet{ramaswamy2015hierarchical} -- Nested OvA surrogate; linear bound
-  \end{itemize}
-
-\item Ordinal regression
-  \begin{itemize}
-  \item \citet{pedregosa2017consistency} -- Pretty fascinating paper actually, about ordinal regression, i.e., when the label is the ordinal rank of the outcome, and how to construct surrogates.  For a class of surrogates based on binary classification, which is also cool, they get similar excess risk bounds to \citet{bartlett2006convexity}.
-  \end{itemize}
-
-\item List ranking
-  \begin{itemize}
-  \item[Q] \citet[Theorem 10]{ravikumar2011ndcg}
-  \end{itemize}
-  
-\item Structured prediction (covering lots of target problems simultaneously)
-  \begin{itemize}
-  \item[Q,$\leq$] \citet[Theorem 7]{osokin2017structured} -- Prove excess risk bounds for a broad family of structured prediction problems, using a specific quadratic surrogate.  Also give an upper bound on the calibration function, i.e. a lower bound in the sense that we prove (Theorem 8).
-  \item[Q] \citet{ciliberto2016consistent} -- Calibration function for a similar quadratic surrogate, for a similarly general class of structed pred problems.
-  \item[Q,$\leq$] \citet[Theorem 4.4]{nowak2019general} -- Even more general than the previous Bach paper \cite{osokin2017structured} (e.g. includes ordinal regression).  Quadratic risk bound for a proper loss for the mean from a strongly-convex potential/entropy.
-    Also give a matching lower bound in our sense (Theorem 4.5).
-  \item[Q] \citet[Proposition 5]{blondel2019structured} -- Tighter losses, still quadratic, still quadratic excess risk.
-  \end{itemize}
-
-\item Polyhedral surrogates without risk/regret bounds
-  \begin{itemize}
-  \item \citet{wang2020weston} -- Weston--Watkins: calibrated for ordered partition
-  \item \citet{yu2018lovasz} -- Lov\'asz hinge: calibrated for an abstain-like loss (from our paper)
-  \item Top-$k$ losses, like \citet{lapin2016loss} and any others from \citet{yang2018consistency}
-  \end{itemize}
-  
-\item Fast rates
-  \begin{itemize}
-  \item \citet{koren2015fast} -- fast rates for exp-concave surrogates ($O(d/n)$ where $d$ is the dimension) .  Note here exp-concavex is in the \emph{parameter}.  So $F(\theta) = L(h_\theta(x),y)$ should be exp-concave in $\theta$.  For $\alpha>0$ we say $f$ is $\alpha$-exp-concave if $x \mapsto \exp(-\alpha f(x))$ is concave.
-  \item \citet{grunwald2015fast} -- Tim et al paper than Anish referenced!  
-  \end{itemize}
-  
-\item Misc / didn't read
-  \begin{itemize}
-  \item Excess Risk Bounds for Exponentially Concave Losses \url{https://arxiv.org/pdf/1401.4566.pdf}
-  \end{itemize}
-\end{itemize}
-
+Perhaps closest in spirit to our work are several recent works on general structured prediction problems.
+\citet[Theorem 2]{ciliberto2016consistent} and \citet[Theorem 7]{osokin2017structured} give surrogate regret bounds for a quadratic surrogate, for a general class of structed prediction problems.
+\citet[Proposition 5]{blondel2019structured} gives surrogate regret bounds for a tighter class of quadratic surrogates based on projection oracles.
+\citet[Theorem 4.4]{nowak2019general} give even more general bounds, using a broader class of surrogates based on estimating a vector-valued expectation.
+All of these works apply to a broad range of discrete target problems.
+The main difference to our work is that their upper bounds are all for strongly convex surrogates,%
+\footnote{These works express surrogate regret bounds with $\zeta^{-1}$ appearing on the left-hand side of eq.~\eqref{eq:surrogate-regret-bound-informal}, and thus the terms ``upper bound'' and ``lower bound'' are opposite from their terminology.}
+whereas ours are for polyhedral surrogates.
+\citet[Theeorem 8]{osokin2017structured} and \citet[Theorem 4.5]{nowak2019general} also provide lower bounds, in the same spirit as our Theorem~\ref{thm:main-lower} but only for the classes of surrogates they study.
+In particular, our results recover their bounds up to a constant factor.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
