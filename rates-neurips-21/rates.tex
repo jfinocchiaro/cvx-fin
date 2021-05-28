@@ -123,13 +123,13 @@
 
 \begin{abstract}
   Surrogate risk minimization is an ubiquitous paradigm in supervised machine learning, wherein a target problem is solved by minimizing a surrogate loss on a dataset.
-  Surrogate regret bounds are a common tool to prove generalization or excess risk rates for surrogate risk minimization.
+  Surrogate regret bounds, also called excess risk bounds, are a common tool to prove generalization rates for surrogate risk minimization.
   While surrogate regret bounds have been developed for certain classes of loss functions, such as proper losses, general results are relatively sparse.
   We provide two general results.
   The first gives a linear surrogate regret bound for any polyhedral (piecewise-linear convex) surrogate, meaning that surrogate generalization rates translate directly to target rates.
   The second shows that for sufficiently non-polyhedral surrogates, the regret bound is a square root, meaning fast surrogate generalization rates translate to slow rates for the target.
   Together, these results suggest polyhedral surrogates are weakly optimal in many cases.
-  \raft{need to add keyword and/or mention: ``excess risk bounds'' (more common in the literature actually) \bo{Did above}}
+  \raft{need to add keyword and/or mention: ``excess risk bounds'' (more common in the literature actually) \bo{Did above} \raf{I wasn't clear; fixed}}
 \end{abstract}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -208,7 +208,7 @@ In particular, our results suggest that polyhedral losses may be weakly optimal 
 %Theorem \ref{thm:main-lower}, presented in \S~\ref{sec:lower}, uses curvature of the expected loss to construct a counterexample where convergence of target regret is quadratically slower than that of surrogate regret.
 
 Our proof of the upper bound, Theorem \ref{thm:main-upper}, is nonconstructive.
-After presenting the main results (Sections \ref{sec:upper} and \ref{sec:lower}), we make it constructive in Section \ref{sec:constant}.
+After proving the main results (Sections \ref{sec:upper} and \ref{sec:lower}), we make it constructive in Section \ref{sec:constant}.
 Specifically, a polyhedral loss's regret transfer function can be bounded by $\zeta(t) \leq \alpha \cdot t$ where the constant is of the form $\alpha = \alpha_{\ell} \cdot \alpha_L \cdot \alpha_{\psi}$.
 Each component of $\alpha$ is constructed as a function of its respective object $\ell$, $L$, and $\psi$.
 A corollary of the derivation is that a polyhedral loss $L$ and link $\psi$ are consistent for $\ell$ if and only if they satisfy the weak indirect elicitation criterion and $\psi$ is \emph{$\epsilon$-separated}, a condition introduced in \citet{finocchiaro2019embedding}.
@@ -236,7 +236,7 @@ Perhaps closest in spirit to our work are several recent works on general struct
 \citet[Theorem 4.4]{nowak2019general} give even more general bounds, using a broader class of surrogates based on estimating a vector-valued expectation.
 All of these works apply to a broad range of discrete target problems.
 The main difference to our work is that their upper bounds are all for strongly convex surrogates,%
-\footnote{These works express surrogate regret bounds with $\zeta^{-1}$ appearing on the left-hand side of eq.~\eqref{eq:surrogate-regret-bound-informal}, and thus the terms ``upper bound'' and ``lower bound'' are opposite from their terminology.}
+\footnote{These works express surrogate regret bounds with $\zeta^{-1}$ appearing on the left-hand side of eq.~\eqref{eq:surrogate-regret-bound-informal}, and thus the terms ``upper bound'' and ``lower bound'' are reversed from their terminology.}
 whereas ours are for polyhedral surrogates.
 \citet[Theeorem 8]{osokin2017structured} and \citet[Theorem 4.5]{nowak2019general} also provide lower bounds, in the same spirit as our Theorem~\ref{thm:main-lower} but only for the classes of surrogates they study.
 In particular, our results recover their bounds up to a constant factor.
@@ -250,10 +250,12 @@ In particular, our results recover their bounds up to a constant factor.
 
 \paragraph{Target problems.}
 We consider supervised machine learning problems where data points have features in $\X$ and labels in $\Y$, a finite set.
-The \emph{target problem} is to learn a hypothesis mapping $\X$ to a \emph{report} (or \emph{prediction}) \emph{space} $\R$, possibly different from $\Y$.\footnote{For example, $\R$ may be the set of rankings (permutations) of $\Y$.}
+The \emph{target problem} is to learn a hypothesis mapping $\X$ to a \emph{report} (or \emph{prediction}) \emph{space} $\R$, possibly different from $\Y$.
+For example, binary classification has $\Y = \R = \{-1,+1\}$, whereas for ranking problems $\R$ may be the set of permutations of $\Y$.
+%, or $\R=\Y\cup\{\bot\}$ for classification with an abstain option.
 In this paper, we assume $\R$ is a finite set.
 %For example, standard binary classification has $\Y = \R = \{-1,+1\}$, whereas in a ranking problem, $\R$ is the set of all permutations of $\Y$.
-We suppose the target problem is specified by the \emph{target loss} $\ell:\R\to\reals^\Y_+$, which maps a report (prediction) $r \in \R$ to the vector $\ell(r)$ of nonnegative loss values for each label, i.e. $\ell(r) = (\ell(r)_y)_{y\in\Y}$.
+The target problem is specified by the \emph{target loss} $\ell:\R\to\reals^\Y_+$, which maps a report (prediction) $r \in \R$ to the vector $\ell(r)$ of nonnegative loss values for each label, i.e. $\ell(r) = (\ell(r)_y)_{y\in\Y}$.
 Given a hypothesis $g: \X \to \R$ and a data point $(x,y) \in \X \times \Y$, the loss is $\ell(g(x))_y$.
 We make a minimal non-redundancy assumption on $\ell$, formalized in Section \ref{subsec:elic}.
 We may refer to $\ell$ as a \emph{discrete} target loss to emphasize our assumption that $\R$ and $\Y$ are finite.
@@ -262,14 +264,14 @@ We may refer to $\ell$ as a \emph{discrete} target loss to emphasize our assumpt
 We recall the surrogate risk minimization framework.
 First, one constructs a \emph{surrogate loss function} $L:\reals^d\to\reals^\Y_+$.
 Then, one minimizes it to learn a hypothesis of the form $h: \X \to \reals^d$.
-Finally, one applies a \emph{link function} $\psi: \reals^d \to \R$.
-If the learned hypothesis predicts $h(x) \in \reals^d$, then the implied prediction for the target problem is $\psi(h(x)) \in \R$.
+Finally, one applies a \emph{link function} $\psi: \reals^d \to \R$, which maps $h$ to the implied target hypothesis $\psi \circ h$.
+In other words, if a surrogate prediction $h(x) \in \reals^d$ implies a prediction $\psi(h(x)) \in \R$ for the target problem.
 For example, in binary classification, the target problem is given by $0$-$1$ loss, $\ell(r)_y = \ones\{r\neq y\}$, with surrogate losses typically defined over $\reals$.
 Common surrogate losses include hinge loss and logistic loss.
 These surrogates are typically associated with the link $\psi(u) = \mathrm{sign}(u)$, which maps negative predictions to $-1$ and nonnegative predictions to $+1$.
 
 \paragraph{Surrogate regret bounds.}
-The efficiency of a chosen surrogate is often quantified with a \emph{surrogate regret bound}.
+The suitability and efficiency of a chosen surrogate is often quantified with a \emph{surrogate regret bound}.
 %We define the \emph{regret} of a hypothesis $h: \X \to \reals^d$ as the expected loss relative to the best possible.
 Formally, the \emph{surrogate regret} of $h$ with respect to data distribution $\D$ is given by $R_L(h;\D) = \E_{(X,Y)\sim\D} L(h(X))_Y - \inf_{h':\X\to\reals^d} \E_{(X,Y)\sim\D} L(h'(X))_Y$, where the minimum is taken over all measurable functions.
 (One may equivalently assume the Bayes optimal hypothesis is in the function class.)
@@ -288,7 +290,7 @@ Given a rerget transfer function $\zeta$, we say that $(L,\psi)$ guarantees a \e
   \label{eq:surrogate-regret-bound}
   \forall \D, \forall h:\X\to\reals^d, \quad R_\ell(\psi\circ h;\D) \leq \zeta(\, R_L(h;\D) \,)~.
 \end{equation}
-We note that a classic minimal requirement for $(L,\psi)$ is that they be \emph{consistent} for $\ell$, which is the case if there exists any regret transfer $\zeta$ guaranteed by $(L,\psi)$ for $\ell$.\bo{cite - Steinwart?}
+We note that a classic minimal requirement for $(L,\psi)$ is that they be \emph{consistent} for $\ell$, which is the case if there exists any regret transfer $\zeta$ guaranteed by $(L,\psi)$ for $\ell$~\cite{steinwart2008support}.
 In other words, consistency implies that $R_L(h;\D) \to 0 \implies R_{\ell}(\psi \circ h;\D) \to 0$, but says nothing about the relative rates.
 
 %% Addressed in intro
@@ -323,7 +325,7 @@ In other words, consistency implies that $R_L(h;\D) \to 0 \implies R_{\ell}(\psi
 
 
 \paragraph{Polyhedral surrogates.}
-A function $f: \reals^d \to \reals$ is called \emph{polyhedral} if it can be written as a pointwise maximum of a finite set of affine functions~\citep{rockafellar1997convex}.\botodo{theorem/chapter?}
+A function $f: \reals^d \to \reals$ is called \emph{polyhedral} if it can be written as a pointwise maximum of a finite set of affine functions~\citep[\S~19]{rockafellar1997convex}.
 The epigraph of a polyhedral function is a polyhedral set, i.e. the intersection of a finite set of closed halfspaces; thus polyhedral functions are always convex.
 We say a surrogate loss $L: \reals^d \to \reals_+^{\Y}$ is \emph{polyhedral} if, for each fixed $y \in \Y$, the loss as a function of prediction, i.e. $r \mapsto L(r)_y$, is polyhedral.
 
@@ -333,7 +335,7 @@ This involves a \emph{conditional} perspective.
 Given a data distribution $\D$ on $\X \times \Y$, for $(X,Y) \sim \D$, we consider the format of possible target predictions $g(x) = r \in \R$; surrogate predictions $h(x) = u \in \reals^d$; and conditional distributions $\Pr[ \cdot \mid X] = p \in \simplex$.
 By dropping the role of the hypotheses and the feature space $\X$, we can focus on the relationships of the functions $\ell(r)_y$ and $L(u)_y$ and the conditional distribution $p$.
 
-In particular, the expected $L$-loss of prediction $u$ on distribution $p$ is simply the inner product $\inprod{p}{L(u)}$.
+In particular, in our notation the expected $L$-loss of prediction $u$ on distribution $p$ is simply the inner product $\inprod{p}{L(u)}$.
 The \emph{Bayes risk} of $L$ is $\risk{L}(p) = \inf_{u \in \reals^d} \inprod{p}{L(u)}$, and similarly the Bayes risk of $\ell$ is $\risk{\ell}(p) = \inf_{r \in \R} \inprod{p}{\ell(r)}$.
 We abuse notation to define the \emph{conditional surrogate regret} $R_L(u,p) = \inprod{p}{L(u)} - \risk{L}(p)$, and similarly the \emph{conditional target regret} $R_{\ell}(r,p) = \inprod{p}{\ell(r)} - \risk{\ell}(p)$.
 Given a regret transfer function $\zeta$, we say $(L,\psi)$ guarantees a \emph{conditional regret transfer} of $\zeta$ for $\ell$ if, for all $p \in \simplex$ and all $u \in \reals^d$, $R_{\ell}(\psi(u),p) \leq \zeta(R_L(u,p))$.
@@ -357,14 +359,15 @@ The following definition applies both to target losses and surrogate losses.
   \label{def:elicits}
   A loss function $f:R\to\reals^\Y_+$, where the domain $R$ is called the \emph{report space}, \emph{elicits} a property $\Gamma:\simplex \toto \R$ if
   \begin{equation}
-    \forall p\in\simplex,\;\;\;\Gamma(p) = \argmin_{r \in R} \inprod{p}{f(r)}~.
+    \forall p\in\simplex,\;\;\;\Gamma(p) = \argmin_{r \in R} \inprod{p}{f(r)} =: \prop{f}(p)~.
   \end{equation}
 \end{definition}
 As each loss $f$ elicits a unique property, we refer to it as $\prop{f}$.
 In particular, we will consistently use the notation $\Gamma = \prop{L}$ where $L$ is a surrogate loss with report space $\reals^d$, and we will use $\gamma = \prop{\ell}$ where $\ell$ is a target loss with finite report space $\R$.
 
 We will assume throughout that the target loss is \emph{non-redundant}, meaning that all $r \in \R$ are possibly uniquely optimal.
-Formally, we suppose that for all $r \in \R$, there exists $p \in \simplex$ with $\gamma(p) = \{r\}$.
+Formally, we suppose that for all $r \in \R$, there exists $p \in \simplex$ with $\gamma(p) = \{r\}$.%
+\footnote{Technically, this definition differs from the one given in literature~\cite{frongillo2014general,finocchiaro2019embedding}, but the two are equivalent for finite elicitable properties.}
 
 \paragraph{Calibration and consistency.}
 It is known that consistency implies the weaker condition of \emph{calibration}, which implies the still-weaker, but very useful, condition of \emph{indirect elicitation}.
