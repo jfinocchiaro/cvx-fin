@@ -196,15 +196,14 @@
 
 \begin{document}
 
-\maketitle
-\jessiet{Rethink the title? Try: Unifying lower bounds on convex consistency dimension via $d$-flats.  Not a huge fan because $d$-flats doesn't signal too much until after someone has read the paper.}
-\raft{I think okay for now -- $d$-flats is mentioned in the abstract}
 \begin{abstract}
 The convex consistency dimension of a supervised learning task is the lowest prediction dimension $d$ such that there exists a convex surrogate $L : \mathbb{R}^d \times \mathcal{Y} \to \mathbb{R}$ that is consistent for the given task.
   We present a new tool based on property elicitation, $d$-flats, for lower-bounding convex consistency dimension.
   This tool unifies approaches from a variety of domains, including continuous and discrete prediction problems.
   We use $d$-flats to obtain a new lower bound on the convex consistency dimension of risk measures, resolving an open question due to Frongillo and Kash (NeurIPS 2015).
   In discrete prediction settings, we show that the $d$-flats approach recovers and even tightens previous lower bounds using feasible subspace dimension.
+  \jessiet{Rethink the title? Try: Unifying lower bounds on convex consistency dimension via $d$-flats.  Not a huge fan because $d$-flats doesn't signal too much until after someone has read the paper.}
+\raft{I think okay for now -- $d$-flats is mentioned in the abstract}
 \end{abstract}
 
 \section{Introduction}\label{sec:intro}
@@ -319,13 +318,13 @@ See \S~\ref{subsec:complexity} for a review of previous work pertaining to notio
 
     % vertices
     \node[vertex] (consistent) at  (-11,2) {Consistency};
-    \node[vertex] (calibrated) at  (-11,-2) {Calibration (Q 1,3)};
+    \node[vertex] (calibrated) at  (-11,-2) {Calibration (Q1)};
     \node[vertex] (indir-elic) at  (-5,0) {Indirect elicitation};
 
 
     \node[vertex] (d-flats) at  (5,0) {$d$-flats in level sets};
-    \node[vertex, text width=30mm] (q1-bounds) at (12,2) {$\conscvx$ bounds for Q1,2. (Cor.~\ref{cor:fsd-bound})};
-    \node[vertex, text width=30mm] (q4-bounds) at (12,-2) {$\conscvx$ bounds for Q3,4. (Thm.~\ref{thm:bayes-risk-lower-bound})};
+    \node[vertex, text width=30mm] (q1-bounds) at (12,2) {$\conscvx$ bounds for Q1, Q2. (Cor.~\ref{cor:fsd-bound})};
+    \node[vertex, text width=30mm] (q4-bounds) at (12,-2) {$\conscvx$ bounds for Q3, Q4. (Thm.~\ref{thm:bayes-risk-lower-bound},~\ref{thm:mode})};
 
     % edges
     \path[->,bend angle=10]
@@ -336,7 +335,7 @@ See \S~\ref{subsec:complexity} for a review of previous work pertaining to notio
     (d-flats) edge[bend right] node[below, sloped]{Cor.~\ref{cor:Pcodim-flat-elic-relint-prop}} (q4-bounds)
     (d-flats) edge[bend left] node[above, sloped]{Cor.~\ref{cor:Pcodim-flat-single-val-prop}} (q1-bounds);
   \end{tikzpicture}
-\caption{Flow and implications of our results. Compared to calibration, we suggest indirect elicitation as a simpler but almost-as-powerful necessary condition for consistency. In particular, we obtain a testable condition (Theorem~\ref{thm:convex-flats-inf-dim}), based on $d$-flats, for the existence of a $d$-dimensional consistent convex surrogate. This condition recovers and strengthens existing calibration-based results, while simultaneously applying to other settings (Q2,4).\jessie{Is there a way to emphasize the $\conscvx$ bounds for Q3, Q4?}}
+\caption{Flow and implications of our results. Compared to calibration, we suggest indirect elicitation as a simpler but almost-as-powerful necessary condition for consistency. In particular, we obtain a testable condition (Theorem~\ref{thm:convex-flats-inf-dim}), based on $d$-flats, for the existence of a $d$-dimensional consistent convex surrogate. This condition recovers and strengthens existing calibration-based results for Q1, while simultaneously applying to other quadrants. We illustrate the breadth and power of $d$-flats by resolving two open questions for Q3 and Q4 in \S~\ref{sec:contin-consis}.}
 \label{fig:results-flow}
 \end{figure}
 
@@ -379,14 +378,13 @@ Of course, improvements in general machine learning algorithms can be put to man
 
 \section{Setting}\label{sec:related-work}
 
-We work against the backdrop of supervised learning, where data comes from a distribution $\D$ over the space $\X \times \Y$ and the goal is to produce a hypothesis $f: \X \to \R$.
+In supervised learning, data is drawn from a distribution $\D$ over the space $\X \times \Y$ and the goal is to produce a hypothesis $f: \X \to \R$.
 Here $\X$ is the \emph{feature space}, $\Y$ the \emph{label space}, and $\R$ the \emph{report} or \emph{prediction space}, possibly different from $\Y$.
 %consider supervised learning problems in the space $\X \times \Y$, for some \emph{feature space} $\X$ and a \emph{label space} $\Y$, with data drawn from a distribution $D$ over $\X \times \Y$.
 %The task is to produce a hypothesis $f: \X \to \R$, for some \emph{prediction space} $\R$, which may be different from $\Y$.
 For example, in ranking problems, $\R$ may be all $|\Y|!$ permutations over the $|\Y|$ labels forming $\Y$.
-
 We focus on surrogate losses, target problems, and their relationships to conditional distributions $p := \D_x = \Pr[Y|X=x]$ over $\Y$ given some $x \in X$.
-We often abstract away $x$, working directly with a set of distributions over outcomes $\P \subseteq \simplex$.
+We can often abstract away $x$, working directly with a set of (conditional) distributions over outcomes $\P \subseteq \simplex$.
 We then write e.g.\ $\E_p \ell(r,Y)$ to mean the expected loss of prediction $r \in \R$ when $Y\sim p$.
 
 If given, we use $\ell: \R \times \Y \to \reals$ to denote a \emph{target loss}, with predictions $r\in\R$.
@@ -394,7 +392,7 @@ If given, we use $\ell: \R \times \Y \to \reals$ to denote a \emph{target loss},
 Similarly, $L: \reals^d \times \Y \to \reals$ will typically denote a \emph{surrogate} loss, with surrogate predictions $u \in \reals^d$.
 In this case, $d$ is the prediction dimension of $d$.
 We write $\L_d $ for the set of $\mathcal{B}(\reals^d) \otimes \Y$-measurable and lower semi-continuous surrogates $L : \reals^d \times\Y \to \reals$ such that $\E_{Y \sim p} L(u,Y) < \infty$ for all $u \in \reals^d, p \in \P$, that are minimizable in that $\argmin_{u} \exploss{L}{u}{p}$ is nonempty for all $p\in\P$.
-(See \S~\ref{app:minnable-assumption} for a discussion of this assumption.)\jessiet{Change order so it's App A?}\raft{No need, but I think we should consolodate this discussion and the variance example into one ``omitted discussion and examples'' section}
+(See \S~\ref{app:minnable-assumption} for a discussion of this assumption.)
 Moreover, $\Lcvx_d \subseteq \L_d$ is the set of convex (in $\reals^d$ for every $y \in \Y$) losses in $\L_d$.
 \btw{Sufficient condition for $\A$-normal convex integrand: $L$ is lower semi-continuous and $\mathcal{B}(\A) \otimes \Y$-measurable; $\E_p L(u,Y)$ finite for all $u, p$, there exists a $u_0$ for each $p$ so that $\E_p L(u_0, Y)$ is finite and continuous for Rockefellar's corollary, though it's stricter than Ioffe and Tokhimorov IIRC}
 %Similarly, let $\L_d^{fin}$ be surrogates $L: \reals^d \times \Y \to \reals$ that are $\mathcal{B}(\reals^d) \otimes \Y$-measurable and minimizable, in the sense that $\argmin_{u} \exploss{L}{u}{p}$ is nonempty for all $p\in\P$-- we use this class of losses with finite $\Y$ in mind.
@@ -609,9 +607,8 @@ It is natural to predict active if that label is more likely than both non-activ
 \text{passive} & p_{\text{active}} \leq 1/2 \wedge p_{\text{passive}} \geq p_{\text{median}} \\
 \end{cases}~.
 \end{align*} 
-This ``T-shaped'' property is depicted in Figure~\ref{fig:quadrants-simplices} (Q2).
-This task falls under Quadrant 2, as this property is not elicited by any target loss.%
-\footnote{The cells of every finite elicitable property form a power diagram, which disallow this ``T-shaped'' configuration~\cite{lambert2009eliciting,frongillo2014general}.}
+This ``T-shaped'' property, depicted in Figure~\ref{fig:quadrants-simplices} (Q2), falls under Quadrant 2, as it is not elicited by any target loss.%
+\footnote{The cells of finite elicitable properties form power diagrams, a generalization of Voronoi diagrams, which disallow this ``T-shaped'' configuration~\cite{lambert2009eliciting,frongillo2014general}.}
 Like abstain, we cannot fit a $1$-flat (line) entirely contained in the level set $\gamma_{\text{passive}}$ through the depicted $p$, so 
 %Theorem~\ref{thm:convex-flats-inf-dim} 
 Corollary~\ref{cor:Pcodim-flat-elic-relint-prop} gives $\conscvx(\gamma) = 2$.
@@ -1399,16 +1396,6 @@ Now we can understand the application of Theorem~\ref{thm:convex-flats-inf-dim}.
 %This witness $W$ takes the form of a matrix whose columns are selection of subgradients of $L$, and thus $u$ must also be optimal for any other distribution in the flat defined by the kernel of $W$.
 %As we show next, the original statement of~\citet[Theorem 16]{ramaswamy2016convex}, which uses the stronger notion of calibration and thus applies only to discrete target losses, actually follows as a special case of Theorem~\ref{thm:cvx-flats}. \jessiet{How to rephrase this?}
 
-\section{Note on restricting minimizable assumption}\label{app:minnable-assumption}
-While some popular surrogates such as logistic and exponential loss are not minimizable, these losses are still covered in Corollary~\ref{cor:Pcodim-flat-elic-relint-prop} and Theorem~\ref{thm:bayes-risk-lower-bound} as $\Gamma(p) \neq \emptyset$ when $p\in\P := \relint\simplex$; moreover, by thresholding $L'(u,y) = \max(L(u,y),\epsilon)$ for sufficiently small $\epsilon>0$ we can achieve $L'\in\L$ for both.
-We expect that a generalization of property elicitation which allows for ``infinite'' predictions (e.g., along a prescribed ray) would allow us to assume minimizability without loss of generality, as convex losses would always admit this more general minimizer.
-%\botodo{I think this is too much here. It could go in a discussion section but it bogs this down.}
-\btw{Some refs / related work commented out here.  I think not as relevant as elicitation complexity.}
-
-% Property elicitation of a single property is well-understood~\citep{savage1971elicitation,osband1985information-eliciting,lambert2008eliciting, lambert2009eliciting, lambert2018elicitation}, and \citet{finocchiaro2018convex} are among the first to consider \emph{convex} elicitable properties.
-% Additionally, \citet{agarwal2015consistent} are the first to our knowledge to formally relate property elicitation to the consistency of a surrogate loss, although they only consider settings with $|\Y| < \infty$. \jessiet{right?}
-%However, their assumptions are more restrictive than ours; they only consider losses defined on the real line.% and assume the properties to be identifiable: an assumption we do not need.
-
 
 
 \section{Notes on calibration}\label{app:calibration}
@@ -2171,7 +2158,21 @@ Then for all properties $\gamma$, if $\elic_{\C^*}(\gamma) < \infty$, we have $\
 %
 %This example also extends to other decision-tree-like properties that do not have an explicit or easily constructed target loss.
 
-\section{Lower-bounding the convex consistency dimension of the variance}\label{app:variance}
+\section{Omitted discussion and examples}\label{app:omitted}
+
+\subsection{Note on restricting minimizable assumption}\label{app:minnable-assumption}
+While some popular surrogates such as logistic and exponential loss are not minimizable, these losses are still covered in Corollary~\ref{cor:Pcodim-flat-elic-relint-prop} and Theorem~\ref{thm:bayes-risk-lower-bound} as $\Gamma(p) \neq \emptyset$ when $p\in\P := \relint\simplex$; moreover, by thresholding $L'(u,y) = \max(L(u,y),\epsilon)$ for sufficiently small $\epsilon>0$ we can achieve $L'\in\L$ for both.
+We expect that a generalization of property elicitation which allows for ``infinite'' predictions (e.g., along a prescribed ray) would allow us to assume minimizability without loss of generality, as convex losses would always admit this more general minimizer.
+%\botodo{I think this is too much here. It could go in a discussion section but it bogs this down.}
+\btw{Some refs / related work commented out here.  I think not as relevant as elicitation complexity.}
+
+% Property elicitation of a single property is well-understood~\citep{savage1971elicitation,osband1985information-eliciting,lambert2008eliciting, lambert2009eliciting, lambert2018elicitation}, and \citet{finocchiaro2018convex} are among the first to consider \emph{convex} elicitable properties.
+% Additionally, \citet{agarwal2015consistent} are the first to our knowledge to formally relate property elicitation to the consistency of a surrogate loss, although they only consider settings with $|\Y| < \infty$. \jessiet{right?}
+%However, their assumptions are more restrictive than ours; they only consider losses defined on the real line.% and assume the properties to be identifiable: an assumption we do not need.
+
+
+
+\subsection{Lower-bounding the convex consistency dimension of the variance}\label{app:variance}
 \begin{corollary}
 	\label{cor:variance}
 	Let $\P$ be a set of continuous Lebesgue densities on $\Y=\reals$ with all $p \in \P$ having the same support.
