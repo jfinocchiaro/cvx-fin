@@ -40,7 +40,7 @@
 \theoremstyle{definition}\newtheorem{definition}{Definition}
 \theoremstyle{definition}\newtheorem{assumption}{Assumption}
 
-\newcommand{\Comments}{1}
+\newcommand{\Comments}{0}
 \newcommand{\mynote}[2]{\ifnum\Comments=1\textcolor{#1}{#2}\fi}
 \newcommand{\mytodo}[2]{\ifnum\Comments=1%
   \todo[linecolor=#1!80!black,backgroundcolor=#1,bordercolor=#1!80!black]{#2}\fi}
@@ -129,7 +129,9 @@
   The first gives a linear surrogate regret bound for any polyhedral (piecewise-linear convex) surrogate, meaning that surrogate generalization rates translate directly to target rates.
   The second shows that for sufficiently non-polyhedral surrogates, the regret bound is a square root, meaning fast surrogate generalization rates translate to slow rates for the target.
   Together, these results suggest polyhedral surrogates are weakly optimal in many cases.
-  \raft{need to add keyword and/or mention: ``excess risk bounds'' (more common in the literature actually) \bo{Did above} \raf{I wasn't clear; fixed}}
+  \raf{Todos:
+    * cite IEEE paper (doh...)
+    * cite Zalinescu~\cite{zalinescu2003sharp} for Hoffman constants}
 \end{abstract}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -414,7 +416,7 @@ The first part will actually hold for any calibrated surrogate.
 The second part relies on a crucial fact about polyhedral losses $L$: their properties $\Gamma=\prop{L}$ cover the whole simplex with only a finite number of polyhedral level sets.
 In other words, although the prediction space $\reals^d$ is infinite, one can restrict to just a finite set of prediction points and always have a global minimizer of expected loss.
 
-\paragraph{Part 1: Linear transfer for fixed $p$.}
+\subsection{Linear transfer for fixed $p$}
 First, we establish a linear transfer for any fixed conditional distribution $p$.
 This holds for any calibrated surrogate, not necessarily polyhedral.
 \begin{lemma} \label{lemma:fixed-p}
@@ -425,7 +427,7 @@ This holds for any calibrated surrogate, not necessarily polyhedral.
 While this result is nice, it is also somewhat nonconstructive and potentially loose.
 In Section \ref{sec:constant}, we investigate the constant $\alpha_p$ for polyhedral losses in particular.
 
-\paragraph{Part 2: Linear overall transfer function.}
+\subsection{Linear overall transfer function}
 Given Lemma \ref{lemma:fixed-p}, we might hope to obtain that, for any calibrated surrogate, there exists $\alpha = \sup_p \alpha_p$ such that $R_{\ell}(\psi(u),p') \leq \alpha R_L(u,p')$ for all $p'$.
 However, we know this is false in general: not all surrogates yield linear regret transfers!
 Indeed, for many surrogates, the supremum will be $+\infty$.
@@ -434,14 +436,14 @@ However, polyhedral surrogates have a special structure that allows us to show $
 We first present some tools that hold for general surrogates, then the key implication from $L$ being polyhedral.
 
 \begin{lemma} \label{lemma:refines}
-  If $(L,\psi)$ indirectly elicits $\ell$, then $\Gamma = \prop{L}$ \emph{refines} $\gamma = \prop{\ell}$ in the sense that, for all $u \in \reals^d$, there exists $r \in \R$ such that $\Gamma_u \subseteq \gamma_r$.
+  If $(L,\psi)$ indirectly elicits $\gamma$, then $\Gamma = \prop{L}$ \emph{refines} $\gamma$ in the sense that, for all $u \in \reals^d$, there exists $r \in \R$ such that $\Gamma_u \subseteq \gamma_r$.
 \end{lemma}
 
 The next lemma states that surrogate regret is linear in $p$ on any fixed level set $\Gamma_{u^*}$ of $\Gamma = \prop{L}$.
 By combining this fact with Lemma \ref{lemma:refines}, we obtain that target regret is linear on these level sets as well.
 \begin{lemma} \label{lemma:linear-on-levelset}
-  Suppose $(L,\psi)$ indirectly elicits $\ell$ and let $\Gamma = \prop{L}$.
-  Then for any fixed $u,u^* \in \reals^d$ and $r \in \R$, the functions $R_L(u,\cdot)$ and $R_{\ell}(r,\cdot)$ are linear in their second arguments on $\Gamma_{u^*}$.
+  Suppose $(L,\psi)$ indirectly elicits $\gamma = \prop{\ell}$ and let $\Gamma = \prop{L}$.
+  Then for any fixed $u,u^* \in \reals^d$ and $r \in \R$, the functions $R_L(u,\cdot)$ and $R_{\ell}(r,\cdot)$ are linear on $\Gamma_{u^*}$ in their second arguments.
 \end{lemma}
 
 We now arrive at the key property of polyhedral losses.
@@ -484,7 +486,7 @@ We observe that boundary points are guaranteed to exist if $(L,\psi)$ indirectly
 This holds because $\ell$ has a finite report space $\R$, so for example the fact that its full-dimensional level sets union to the simplex \bo{cite?} implies the existence of $r,r' \in \R$ and $p_0 \in \gamma_r \cap \gamma_{r'}$; and some surrogate prediction $u_0$ minimizes expected surrogate loss on $p_0$.
 
 The following result is our main lower bound.
-\begin{theorem}[Theorem \ref{thm:main-lower} restated.] \label{thm:main-lower-details}
+\begin{theorem}[Stronger version of Theorem \ref{thm:main-lower}.] \label{thm:main-lower-details}
   Suppose the surrogate loss $L$ and link $\psi$ satisfy a regret transfer of $\zeta$ for a target loss $\ell$.
   If $L$, $\psi$, and $\ell$ satisfy Assumption \ref{assumption:lower}, then there exists $c > 0$ such that, for some $\epsilon^* > 0$, for all $0 \leq \epsilon < \epsilon^*$, $\zeta(\epsilon) \geq c \sqrt{\epsilon}$.
 \end{theorem}
@@ -494,8 +496,9 @@ This holds roughly because expected surrogate loss is strongly convex in some ne
 
 We observe that Assumption \ref{assumption:lower} captures a wide range of surrogate losses beyond those that are strongly convex and strongly smooth.
 For example, exponential loss is not strongly convex, but does satisfy Assumption \ref{assumption:lower}. \bo{more to say?}
-Another example is Huber loss\bo{cite?}, which is strongly convex when the prediction is ``close'' to the observation in some sense and linear when ``far''.
-For classification with $\Y = \{\pm 1\}$ and prediction space $\reals$, Huber loss can be defined by letting the hinge loss be $t = \max\{0, 1-ry\}$ and setting $L(r)_y = t^2$ if $t \leq 2$, else $4(t-1)$.
+As another example, consider Huber loss for binary classification;
+here $\Y = \{\pm 1\}$ and the prediction space is $\reals$, and Huber loss can be defined by letting the hinge loss be $t = \max\{0, 1-ry\}$ and setting $L(r)_y = t^2$ if $t \leq 2$, else $4(t-1)$.
+Theorem~\ref{thm:main-lower-details} does capture Huber, but needs the strength of Assumption~\ref{assumption:lower}(ii) as Huber is strongly convex on $[-1,1]$ but linear outside that interval. 
 
 \section{Unpacking the constant for polyhedral losses} \label{sec:constant}
 
