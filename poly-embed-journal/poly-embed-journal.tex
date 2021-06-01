@@ -12,6 +12,7 @@
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
 \usepackage[normalem]{ulem}
+\usepackage{thm-restate}
 
 \usepackage{mathtools, amsmath, amssymb, amsthm, graphicx, verbatim}
 %\usepackage[thmmarks, thref, amsthm]{ntheorem}
@@ -618,59 +619,25 @@ In particular, one can consider the epigraph of a polyhedral convex function on 
 \end{proof}
 
 
-\raf{Here's what I'm thinking for the text from here to Lemma~\ref{lem:poly-loss-poly-risk} (let's not implement just yet though): Let's move Lemma~\ref{lem:polyhedral-pd-same} to the appendix, and state Lemma~\ref{lem:polyhedral-range-gamma} but move the proof to the appendix.  Then we can keep the proof of Lemma~\ref{lem:poly-loss-poly-risk}.}
-We extend Theorem~\ref{thm:aurenhammer} to a weighted sum of convex functions, showing that the induced power diagram is the same for any choice of strictly positive weights.
 
-\begin{lemma}\label{lem:polyhedral-pd-same}
-	Let $f_1,\ldots,f_m:\reals^d\to\reals$ be polyhedral convex functions.
-	The power diagram induced by $\sum_{i=1}^m p_i f_i$ is the same for all $p \in \inter\simplex$.
-\end{lemma}
-\begin{proof}
-	For any convex function $g$ with epigraph $P$, the proof of~\citet[Theorem 4]{aurenhammer1987power} shows that the power diagram induced by $g$ is determined by the facets of $P$.
-	Let $F$ be a facet of $P$, and $F'$ its projection down to $\reals^d$.
-	It follows that $g|_{F'}$ is affine, and thus $g$ is differentiable on $\inter F'$ with constant derivative $d\in\reals^d$.
-	Conversely, for any subgradient $d'$ of $g$, the set of points $\{x\in\reals^d : d'\in\partial g(x)\}$ is the projection of a face of $P$; we conclude that $F = \{(x,g(x))\in\reals^{d+1} : d\in\partial g(x)\}$ and $F' = \{x\in\reals^d : d\in\partial g(x)\}$.
-	
-	Now let $f := \sum_{i=1}^k f_i$ with epigraph $P$, and $f' := \sum_{i=1}^k p_i f_i$ with epigraph $P'$.
-	By Rockafellar~\cite{rockafellar1997convex}, $f,f'$ are polyhedral.
-	We now show that $f$ is differentiable whenever $f'$ is differentiable:
-	\begin{align*}
-	\partial f(x) = \{d\}
-	&\iff \sum_{i=1}^k \partial f_i(x) = \{d\} \\
-	&\iff \forall i\in\{1,\ldots,k\}, \; \partial f_i(x) = \{d_i\} \\
-	&\iff \forall i\in\{1,\ldots,k\}, \; \partial p_i f_i(x) = \{p_id_i\} \\
-	&\iff \sum_{i=1}^k \partial p_if_i(x) = \left\{\sum_{i=1}^k p_id_i\right\} \\
-	&\iff \partial f'(x) = \left\{\sum_{i=1}^k p_id_i\right\}~.
-	\end{align*}
-	From the above observations, every facet of $P$ is determined by the derivative of $f$ at any point in the interior of its projection, and vice versa.
-	Letting $x$ be such a point in the interior, we now see that the facet of $P'$ containing $(x,f'(x))$ has the same projection, namely $\{x'\in\reals^d : \nabla f(x) \in \partial f(x')\} = \{x'\in\reals^d : \nabla f'(x) \in \partial f'(x')\}$.
-	Thus, the power diagrams induced by $f$ and $f'$ are the same.
-	The conclusion follows from the observation that the above held for any strictly positive weights $p$, and $f$ was fixed.
-\end{proof}
 
 This allows us to reason about the range of the property elicited by a polyhedral loss; in particular, it is finite.
+See \S~\ref{app:power-diagrams} for the full proof.
 
-\begin{lemma}
+\begin{restatable}{lemma}{polyhedralrangegamma}
 	\label{lem:polyhedral-range-gamma}
 	Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss, and let $\Gamma = \prop{L}$.
 	Then the range of $\Gamma$, $\U = \Gamma(\simplex) = \{\Gamma(p) \subseteq \reals^d : p\in\simplex\}$, is a finite set of closed polyhedra.
         \raft{Leave this statement and add a proof sketch; move other dependencies to appendix}
-\end{lemma}
-\begin{proof}
-	For all $p$, let $P(p)$ be the epigraph of the convex function $u\mapsto \inprod{p}{L(u)}$.
-	From Lemma~\ref{lem:polyhedral-pd-same}, we have that the power diagram $D_\Y$ induced by the projection of $P(p)$ onto $\reals^d$ is the same for any $p\in\inter\simplex$.
-	Let $\F_\Y$ be the set of faces of $D_\Y$, which by the above are the set of faces of $P(p)$ projected onto $\reals^d$ for any $p\in\inter\simplex$.
-	
-	We claim for all $p\in\inter\simplex$, that $\Gamma(p) \in \F_\Y$.
-	To see this, let $u \in \Gamma(p)$, and $u' = (u,\inprod{p}{L(u)}) \in P(p)$.
-	The optimality of $u$ is equivalent to $u'$ being contained in the face $F$ of $P(p)$ exposed by the normal $(0,\ldots,0,-1)\in\reals^{d+1}$.
-	Thus, $\Gamma(p) = \argmin_{u\in\reals^d} \inprod{p}{L(u)}$ is a projection of $F$ onto $\reals^d$, which is an element of $\F_\Y$.
-	
-	Now for $p \not \in \inter{\simplex}$, consider $\Y'\subsetneq \Y$, $\Y'\neq\emptyset$.
-	Applying the above argument, we have a similar guarantee: a finite set $\F_{\Y'}$ such that $\Gamma(p) \in \F_{\Y'}$ for all $p$ with support exactly $\Y'$.
-	Taking $\F = \bigcup\{\F_{\Y'} | \Y'\subseteq\Y, \Y'\neq\emptyset\}$, we have for all $p\in\simplex$ that $\Gamma(p) \in \F$, giving $\U \subseteq \F$.
-	As $\F$ is finite, so is $\U$, and the elements of $\U$ are closed polyhedra as faces of $D_{\Y'}$ for some $\Y'\subseteq\Y$.
+\end{restatable}
+\begin{proof}[Sketch]
+	With $\Y$ finite, there are only finitely many supporting sets over $\simplex$.
+	For $p \in \simplex$, the power diagram induced by projecting the epigraph of expected loss onto $\reals^d$ is the same for any $p$ of the same support (Lemma~\ref{lem:polyhedral-pd-same}).
+	Moreover, we have $\Gamma(p)$ being exactly one of the faces of the projected epigraph since the hyperplane $u \mapsto (u, \inprod{p}{L(u)})$ supports the epigraph of the expected loss at exactly the property value.
+	Since this epigraph has finitely many faces, the range of $\Gamma$ is then (a subset) of elements of a finitely generated (finite supports) set of finite elements (finite faces).
 \end{proof}
+
+This insight lets us delve further into understanding characteristics of polyhedral surrogates.
 
 \begin{lemma}
 	\label{lem:poly-loss-poly-risk}
@@ -1886,7 +1853,7 @@ This material is based upon work supported by the National Science Foundation un
 \appendix
 
 \newpage
-\section{Power diagrams}
+\section{Power diagrams}\label{app:power-diagrams}
 First, we present several definitions from Aurenhammer~\cite{aurenhammer1987power}.
 \begin{definition}\label{def:cell-complex}
   A \emph{cell complex} in $\reals^d$ is a set $C$ of faces (of dimension $0,\ldots,d$) which (i) union to $\reals^d$, (ii) have pairwise disjoint relative interiors, and (iii) any nonempty intersection of faces $F,F'$ in $C$ is a face of $F$ and $F'$ and an element of $C$.
@@ -1909,6 +1876,55 @@ Proposition~\ref{prop:embed-bayes-risks}, focuses on matching the values of Baye
 \begin{theorem}[Aurenhammer~\cite{aurenhammer1987power}]\label{thm:aurenhammer}
 	A cell complex is affinely equivalent to a convex polyhedron if and only if it is a power diagram.
 \end{theorem}
+
+\raf{Here's what I'm thinking for the text from here to Lemma~\ref{lem:poly-loss-poly-risk} (let's not implement just yet though): Let's move Lemma~\ref{lem:polyhedral-pd-same} to the appendix, and state Lemma~\ref{lem:polyhedral-range-gamma} but move the proof to the appendix.  Then we can keep the proof of Lemma~\ref{lem:poly-loss-poly-risk}.}
+We extend Theorem~\ref{thm:aurenhammer} to a weighted sum of convex functions, showing that the induced power diagram is the same for any choice of strictly positive weights.
+
+\begin{lemma}\label{lem:polyhedral-pd-same}
+	Let $f_1,\ldots,f_m:\reals^d\to\reals$ be polyhedral convex functions.
+	The power diagram induced by $\sum_{i=1}^m p_i f_i$ is the same for all $p \in \inter\simplex$.
+\end{lemma}
+\begin{proof}
+	For any convex function $g$ with epigraph $P$, the proof of~\citet[Theorem 4]{aurenhammer1987power} shows that the power diagram induced by $g$ is determined by the facets of $P$.
+	Let $F$ be a facet of $P$, and $F'$ its projection down to $\reals^d$.
+	It follows that $g|_{F'}$ is affine, and thus $g$ is differentiable on $\inter F'$ with constant derivative $d\in\reals^d$.
+	Conversely, for any subgradient $d'$ of $g$, the set of points $\{x\in\reals^d : d'\in\partial g(x)\}$ is the projection of a face of $P$; we conclude that $F = \{(x,g(x))\in\reals^{d+1} : d\in\partial g(x)\}$ and $F' = \{x\in\reals^d : d\in\partial g(x)\}$.
+	
+	Now let $f := \sum_{i=1}^k f_i$ with epigraph $P$, and $f' := \sum_{i=1}^k p_i f_i$ with epigraph $P'$.
+	By Rockafellar~\cite{rockafellar1997convex}, $f,f'$ are polyhedral.
+	We now show that $f$ is differentiable whenever $f'$ is differentiable:
+	\begin{align*}
+	\partial f(x) = \{d\}
+	&\iff \sum_{i=1}^k \partial f_i(x) = \{d\} \\
+	&\iff \forall i\in\{1,\ldots,k\}, \; \partial f_i(x) = \{d_i\} \\
+	&\iff \forall i\in\{1,\ldots,k\}, \; \partial p_i f_i(x) = \{p_id_i\} \\
+	&\iff \sum_{i=1}^k \partial p_if_i(x) = \left\{\sum_{i=1}^k p_id_i\right\} \\
+	&\iff \partial f'(x) = \left\{\sum_{i=1}^k p_id_i\right\}~.
+	\end{align*}
+	From the above observations, every facet of $P$ is determined by the derivative of $f$ at any point in the interior of its projection, and vice versa.
+	Letting $x$ be such a point in the interior, we now see that the facet of $P'$ containing $(x,f'(x))$ has the same projection, namely $\{x'\in\reals^d : \nabla f(x) \in \partial f(x')\} = \{x'\in\reals^d : \nabla f'(x) \in \partial f'(x')\}$.
+	Thus, the power diagrams induced by $f$ and $f'$ are the same.
+	The conclusion follows from the observation that the above held for any strictly positive weights $p$, and $f$ was fixed.
+\end{proof}
+
+We now include the full proof of Lemma~\ref{lem:polyhedral-range-gamma}.
+
+\polyhedralrangegamma*
+\begin{proof}
+	For all $p$, let $P(p)$ be the epigraph of the convex function $u\mapsto \inprod{p}{L(u)}$.
+	From Lemma~\ref{lem:polyhedral-pd-same}, we have that the power diagram $D_\Y$ induced by the projection of $P(p)$ onto $\reals^d$ is the same for any $p\in\inter\simplex$.
+	Let $\F_\Y$ be the set of faces of $D_\Y$, which by the above are the set of faces of $P(p)$ projected onto $\reals^d$ for any $p\in\inter\simplex$.
+	
+	We claim for all $p\in\inter\simplex$, that $\Gamma(p) \in \F_\Y$.
+	To see this, let $u \in \Gamma(p)$, and $u' = (u,\inprod{p}{L(u)}) \in P(p)$.
+	The optimality of $u$ is equivalent to $u'$ being contained in the face $F$ of $P(p)$ exposed by the normal $(0,\ldots,0,-1)\in\reals^{d+1}$.
+	Thus, $\Gamma(p) = \argmin_{u\in\reals^d} \inprod{p}{L(u)}$ is a projection of $F$ onto $\reals^d$, which is an element of $\F_\Y$.
+	
+	Now for $p \not \in \inter{\simplex}$, consider $\Y'\subsetneq \Y$, $\Y'\neq\emptyset$.
+	Applying the above argument, we have a similar guarantee: a finite set $\F_{\Y'}$ such that $\Gamma(p) \in \F_{\Y'}$ for all $p$ with support exactly $\Y'$.
+	Taking $\F = \bigcup\{\F_{\Y'} | \Y'\subseteq\Y, \Y'\neq\emptyset\}$, we have for all $p\in\simplex$ that $\Gamma(p) \in \F$, giving $\U \subseteq \F$.
+	As $\F$ is finite, so is $\U$, and the elements of $\U$ are closed polyhedra as faces of $D_{\Y'}$ for some $\Y'\subseteq\Y$.
+\end{proof}
 
 \iffalse
 \section{Embedding properties}\label{app:embed-props}
