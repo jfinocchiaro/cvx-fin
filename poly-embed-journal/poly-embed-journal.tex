@@ -225,7 +225,7 @@ However,~\citet{agarwal2015consistent} consider single-valued properties in fini
 %   However, we will mention relevant results inline.
 
 
-\section{Setting}
+\section{Setting and Main Results}
 \label{sec:setting}
 
 For discrete prediction problems like classification, due to hardness of directly optimizing a given discrete loss, many machine learning algorithms minimize a surrogate loss function with better optimization qualities, e.g., convexity.
@@ -239,7 +239,7 @@ Consistency is a prerequisite to obtain empirical risk minimization bounds, moti
 Let $\Y$ be a finite label space, and throughout let $n=|\Y|$.
 The set of probability distributions on $\Y$ is denoted $\simplex\subseteq\reals^{\Y}_+$, represented as vectors of probabilities (requiring $\|p\|_1 = 1$).
 We write $p_y$ for the probability of outcome $y \in \Y$ drawn from $p \in \simplex$.
-We first discuss the conditional setting, with just labels $\Y$ and no features $\X$, and show in \S~\ref{sec:links-embeddings} how these notions relate to the usual $\X\times\Y$ setting considering features.
+We first discuss the conditional setting, with just labels $\Y$ and no features $\X$, and show in \S~\ref{sec:calibration} how these notions relate to the usual $\X\times\Y$ setting considering features.
 
 We assume that a given discrete prediction problem, such as classification, is given in the form of a \emph{discrete loss}\jessiet{discrete vs target?} $\ell:\R\to\reals^\Y_+$, which maps a report (prediction) $r$ from a finite set $\R$ to the vector of loss values $\ell(r) = (\ell(r)_y)_{y\in\Y}$ for each possible outcome $y\in\Y$.
 We will assume throughout that the given discrete loss is \emph{non-redundant}, meaning every report is uniquely optimal (minimizes expected loss) for some distribution $p\in\simplex$.
@@ -304,8 +304,9 @@ For general properties and losses, we will also use $\Gamma$ and $L$, as above.
 % Often we will work with two properties simultaneously, a finite property $\gamma:\simplex\toto\R$, and its embedded version $\Gamma:\simplex\toto\reals^d$.
 % In this case, we write the embedded reports as $u\in\reals^d$, reserving $r\in\R$ for the finite property.
 
-\subsection{Calibration and consistency \jessie{Change}}
-\label{sec:links-embeddings}
+\subsection{Calibration and Links}
+\label{sec:calibration}
+
 
 To assess whether a surrogate and link function align with the original loss, we turn to the common condition of \emph{calibration}.
 Roughly, a surrogate and link are calibrated if the best possible expected loss achieved by linking to an incorrect report is strictly suboptimal, which require that the excess loss of some report is bounded by (a constant times) the excess loss of the linked report.
@@ -341,23 +342,24 @@ Let $L^*$ be the best possible expected $L$-loss achieved by any hypothesis $H:\
 Then $(L,\psi)$ is consistent if a sequence of surrogate hypotheses $H_1,H_2,\ldots$ whose $L$-loss limits to $L^*$, then the $\ell$-loss of $\psi\circ H_1,\psi \circ H_2, \ldots$ limits to $\ell^*$.
 As Definition~\ref{def:calibrated} does not involve the feature space $\X$, we will drop it for the remainder of the paper.
 Note that in the finite-outcome setting, calibration is necessary and sufficient for consistency from a generalization of~\citet{tewari2007consistency} given by~\citet{ramaswamy2016convex}.  
+
+\raf{Suggest moving / incorporating below}
 While our notion of embedding is sufficient for calibration (and therefore consistency), it is worth noting that it is not \emph{necessary} for these conditions.  
 For example, while logistic loss does not embed 0-1 loss, the surrogate and link for logistic loss are consistent with respect to 0-1 loss.
 
-\subsection{Embeddings}
-Several consistent convex surrogates in the literature can be thought of as ``embeddings'', wherein one maps the discrete reports to a vector space, and finds a convex loss which agrees with the original loss.
-A key condition is that the original reports should be optimal exactly when the corresponding embedded points are optimal.
-We formalize this notion as follows.
+\subsection{Embedding and Main Results}
 
-
+Several consistent convex surrogates in the literature can be thought of as \emph{embeddings}, wherein one maps the discrete reports to a vector space, and finds a convex loss which agrees with the original loss.
+To allow for ``redundant'' reports, in both the target and surrogate, we first introduce the notions of representative sets; see Proposition~\ref{prop:tfae-min-rep-nonredundant} for a formal connection.
 \begin{definition}
-  \raft{For Bo: added this def, changed def embedding}
   Let $L:\R\to\reals^\Y_+$ be a generic loss.
   We say $\Sc \subseteq \R$ is \emph{representative for $L$} if we have $\prop{L}(p) \cap \Sc \neq \emptyset$ for all $p\in \simplex$.
   We further say $\Sc$ is a \emph{minimum representative set} if it has the smallest cardinality among all representative sets.
 \end{definition}
-Minimum representative sets are essentially the same as \emph{maximally informative sets} from~\citet{wang2020weston}, but we found the name minimum representative set to give more intuition about being the smallest such set.
+\raft{Maybe discussion about minimum representative sets and \emph{maximally informative sets} from~\citet{wang2020weston} here, though maybe best to leave it until later.  BTW, I think their latest version might use different terminology.}
 
+We now formally introduce the concept of an embedding.
+In addition to matching loss values, a key condition for consistency is that the original reports should be optimal exactly when the corresponding embedded points are optimal.
 \begin{definition}[Embedding a loss]\label{def:loss-embed}
   A loss $L:\reals^d\to\reals^\Y$ \emph{embeds} a loss $\ell:\R\to\reals^\Y$ over a representative set $\Sc$ if there exists some injective embedding $\varphi:\Sc\to\reals^d$ such that
   (i) for all $r\in\Sc$ we have $L(\varphi(r)) = \ell(r)$, and (ii) for all $p\in\simplex,r\in\Sc$ we have
@@ -369,13 +371,6 @@ Minimum representative sets are essentially the same as \emph{maximally informat
   \end{equation}
   We simply say $L$ \emph{embeds} $\ell$ if there is some representative set $\Sc$ for $\ell$ such that $L$ embeds $\ell$ over $\Sc$.
 \end{definition}
-
-%
-
-It is not immediately clear if embeddings give rise to calibrated links; indeed, apart from mapping the embedded points back to their original reports via $\psi(\varphi(r)) = r$, how to map the remaining values is far from obvious.
-We address the question of when embeddings lead to calibrated links in \S~\ref{sec:calibration}.
-%\bo{I think in Section \ref{sec:calibration} ?}
-
 
 To illustrate the idea of embedding, let us examine hinge loss in detail as a surrogate for 0-1 loss for binary classification.
 Recall that we have $\R = \Y = \{-1, +1\}$, with $\hinge(u)_y = (1 - uy)_+$ and $\ellzo(r)_y := \Ind{r\neq y}$, typically with link function $\psi(u) = \sgn(u)$.
@@ -409,6 +404,7 @@ With both conditions of Definition~\ref{def:loss-embed} satisfied, we conclude t
 In this particular case, it is known $(\hinge,\psi)$ is calibrated for $\psi(u) = \sgn(u)$; in \S~\ref{sec:calibration} we show that, perhaps surprisingly, all embeddings imply the existence of a link so that the surrogate is calibrated.
 
 \begin{figure}
+  \raf{Let's make into a single figure with 3 subfigures}\\
 	\begin{minipage}{0.3\linewidth}
 		\centering
 		\includegraphics[width=0.9\linewidth]{figs/0-1-br.pdf}
@@ -430,6 +426,14 @@ In this particular case, it is known $(\hinge,\psi)$ is calibrated for $\psi(u) 
 	\label{fig:logistic-br}
 \end{minipage}
 \end{figure}
+
+
+
+It is not immediately clear if embeddings give rise to calibrated links; indeed, apart from mapping the embedded points back to their original reports via $\psi(\varphi(r)) = r$, how to map the remaining values is far from obvious.
+We address the question of when embeddings lead to calibrated links in \S~\ref{sec:calibration}.
+%\bo{I think in Section \ref{sec:calibration} ?}
+
+
 
 % Taking $\R = \{-1,1\}$ and the above embedding, we can write the expected loss over each report
 % \begin{center}
