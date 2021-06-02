@@ -844,6 +844,8 @@ In \S~\ref{sec:poly-loss-embed}, we discuss some implications of a representativ
   A loss $L : \R \to \reals^\Y_+$ eliciting $\Gamma:\simplex \toto \R$ is \emph{redundant} if there are reports $r, r' \in \R$ such that $\Gamma_r \subseteq \Gamma_{r'}$, and \emph{non-redundant} otherwise.
 \end{definition}
 
+This motivates us to think about what it means to embed a non-redundant loss, and consider the implications this has for representative set.
+
 \begin{definition}[Tight embedding]\label{def:tight-embedding}
   We say that a loss $L : \reals^d \to \reals_+^\Y$ \emph{tightly embeds} a discrete loss $\ell : \R \to \reals_+^\Y$ via the injection $\varphi :\R \to \reals^d$ if $L$ embeds $\ell$ and $\ell$ is non-redundant.
 \end{definition}
@@ -888,11 +890,11 @@ In \S~\ref{sec:poly-loss-embed}, we discuss some implications of a representativ
 
 \begin{proposition}\label{prop:tfae-min-rep-nonredundant}
   Let $\U$ be a finite representative set for $L$ eliciting $\Gamma$.
-  $\U$ is a minimum representative set for $L$ if and only if $L|_{U}$ is non-redundant.
+  $\U$ is a minimum representative set for $L$ if and only if $L|_{\U}$ is non-redundant.
 \end{proposition}
-\begin{proof}[Sketch]
+\begin{proof}
   $\Rightarrow$  
-  We show the contrapositive: suppose $L|_{U}$ is redundant.
+  We show the contrapositive: suppose $L|_{\U}$ is redundant.
   Then there is a $r,r' \in \U$ such that $\Gamma_r \subseteq \Gamma_{r'}$.
   Then for all $p \in \Gamma_r$, we have $\{r, r'\} \subseteq \Gamma(p)$.
   Therefore, $\U \setminus \{r\}$ still a representative set, so $\U$ is not minimum.
@@ -911,9 +913,9 @@ In \S~\ref{sec:poly-loss-embed}, we discuss some implications of a representativ
   
   $\Leftarrow$
   \btw{Commented out version relying on hyperplanes without power diagrams; it was incorrect - Jessie 1 June 21}
-  Since $\U$ is a finite representative set, we know $L|_\U$ is embedded by $L$ nu Corollary~\ref{cor:representative-embeds-restriction}.
-  Therefore, $\Gamma := \prop{L}$ embeds $\Gamma|_\U := \prop{L|_\U}$, and by assumption $\Gamma|_\U$ is non-redundant.
-  By Proposition~\ref{prop:embed-trim}\jessiet{BTW: Forward ref}, $\U$ is a minimum representative set for $L$.
+  Since $\U$ is a finite representative set, we know $L|_\U$ is embedded by $L$ in Corollary~\ref{cor:representative-embeds-restriction}.
+  Therefore, $\Gamma := \prop{L}$ embeds $\Gamma|_\U := \prop{L|_\U}$ (see Definition~\ref{def:prop-embed} in \S~\ref{app:embed-props}).
+  Since $\Gamma|_\U$ is non-redundant by assumption, we can apply Proposition~\ref{prop:embed-trim}\jessiet{BTW: Forward ref}, $\U$ is a minimum representative set for $L$.
 %  Since $\R^*$ is finite, it suffices to show that for all $r \in \R^*$, there exists some $p_r \in \simplex$ such that $\{r\} = \Gamma(p_r)$.
 %  This implies the result, as removing $r$ from $\R^*$ would make $\Gamma(p_r) = \emptyset$, and therefore $\R^* \setminus \{r\}$ would not be representative.
 %  
@@ -934,25 +936,27 @@ In \S~\ref{sec:poly-loss-embed}, we discuss some implications of a representativ
 \end{proof}
 
 
-\begin{corollary}
+\begin{corollary}\label{cor:tight-embed-min-rep}
   If $\R$ is a minimum representative set for $L$, then $L$ tightly embeds $L|_\R$.
 \end{corollary}
 Tightly embedding the restricted loss seems to make embedding construction slightly easier.
 While $L|_\R$ is not always the target loss of interest, there should now be a \emph{bijection} from $\R$ to the target reports.
-While an embedding only has to be constructed once and is considered an offline computation, its construction might be made easier 
+While an embedding only has to be constructed once and is considered an offline computation, its construction might be made easier by a tight embedding.
+
+We now present a concept called the $\trim$ of a loss (see Definition~\ref{def:trim-prop} for an analogous definition for properties in \S~\ref{app:embed-props}) which lets us focus on a unique set of loss vectors (resp., property values) induced by any minimum representative set.
 
 \begin{proposition}\label{prop:trim-unique}
   Suppose $\R$ and $\R'$ are finite minimum representative sets for the loss $L$.
   Then $\{L(r) \mid r \in \R\} = \{L(r') \mid r' \in \R'\}$.
 \end{proposition}
-\begin{proof}[Sketch]
+\begin{proof}
   It suffices to show $\{L(r) \mid r \in \R\} \subseteq \{L(r') \mid r' \in \R'\}$, and equality will follow by symmetry.
   Consider $r\in \R$, and we want to show $L(r) \in \{L(r') \mid r' \in \R'\}$.
   Since $\R$ and $\R'$ are minimum representative sets, all the level sets must be full-dimensional, and therefore have well-defined interiors (Proposition~\ref{prop:tfae-min-rep-nonredundant}).
   In particular, we must have $\Gamma_r = \Gamma_{r'}$ for some $r' \in \R'$.
   If $L(r) \neq L(r')$, then there would be a distribution $p \in \inter{\Gamma_r}$ such that $\inprod{p}{L(r)} \neq \inprod{p}{L(r')}$. \jessiet{This needs more detail}
-  If $\inprod{p}{L(r)} > \inprod{p}{L(r')}$, then $r' \not \in \Gamma(p)$, and $\R'$ is therefore not a representative set.
-  Similarly, if the inequality were flipped, we would contradict $\R$ being a representative set.
+  If $\inprod{p}{L(r)} > \inprod{p}{L(r')}$, then $r' \not \in \Gamma(p)$, and $\R'$ is therefore either not a representative set or not minimum.
+  Similarly, if the inequality were flipped, we would contradict either $\R$ being a representative set or minimum.
   Therefore, we must have the losses equal, and $L(r) \in \{L(r') \mid r' \in \R'\}$.
 \end{proof}
 
@@ -990,6 +994,7 @@ While an embedding only has to be constructed once and is considered an offline 
   %	Therefore, we must have $u=u'$, so $L(u') = L(u) \in \trim(L)$.
 \end{proof}
 
+It turns out that the $\trim$ of two losses being equal is equivalent to embedding, and additionally implies the existence of a tight embedding for a loss restricted to any minimum representative set.
 
 \begin{proposition}\label{prop:embed-iff-trims-equal}
   Let the discrete loss $\ell$ be given.
@@ -1018,13 +1023,15 @@ Suppose $\gamma := \prop{\ell}$ and $\Gamma := \prop{L}$, and $\R$ a minimum rep
                                         &\iff \varphi(r) \in \argmin_{u} \inprod{p}{L(u)}
   \end{align*}
   
-  Finally, consider that $\trim(L) = \trim(\ell)$ implies $L$ embeds $\ell$, and if $\R^*$ is a minimum representative set for $\ell$ then $\trim(\ell) = \trim(\ell|_{\R^*})$ and $\ell|_{\R^*}$ is non-redundant.
+  Finally, consider that $\trim(L) = \trim(\ell)$ implies $L$ embeds $\ell$, and if $\R^*$ is a minimum representative set for $\ell$ then $\trim(L) = \trim(\ell) = \trim(\ell|_{\R^*})$ so $L$ tightly embeds $\ell|_{\R^*}$ by Corollary~\ref{cor:tight-embed-min-rep} and composing the embeddings.
+  % and $\ell|_{\R^*}$ is non-redundant by Proposition~\ref{prop:tfae-min-rep-nonredundant}.
   Therefore, $L$ tightly embeds $\ell|_{\R^*}$.
 \end{proof}
 
-As we define one loss embedding another, one can imagine an analogous definition where one property embeds another, and we can define $\trim(\Gamma)$ as the set of level sets generated by a minimum representative set.
-Even when using the language of properties, similar results to those above hold; for intuition, the level sets of a property correspond to the subgradients of the Bayes Risk of the loss eliciting it.
-Since embedding also means matching Bayes Risks, the $\trim$s matching follows since the subgradients also trivially match.
+As we define one loss embedding another, one can imagine an analogous definition where one property embeds another (Definition~\ref{def:prop-embed}), and we can define $\trim(\Gamma)$ as the set of level sets generated by a minimum representative set (Definition~\ref{def:trim-prop}).
+See \S~\ref{app:embed-props} for precise definitions and discussion.
+Even when using the language of properties, similar results to those above hold; for intuition, the level sets of a property correspond to the subgradients of the Bayes risk of the loss eliciting it.
+Since embedding also means matching Bayes risks, the $\trim$s matching follows since the subgradients also trivially match.
 
 We now state a useful result for proving the existence of an embedding loss, which shows remarkable structure of embeddable properties, and the properties that embed them.
 First, we conclude that any embeddable property must be elicitable.
@@ -1038,7 +1045,7 @@ Finally, we have an important converse: if $\Gamma$ has finitely many full-dimen
 	Let $\Gamma:\simplex\toto\reals^d$ be an elicitable property.
 	The following are equivalent:
 	\begin{enumerate}\setlength{\itemsep}{0pt}
-		\item $\Gamma$ embeds a \jessie{nonredundant} finite property $\gamma:\simplex \toto \R$.
+		\item $\Gamma$ embeds a \jessie{non-redundant} finite property $\gamma:\simplex \toto \R$.
 		\item $\trim(\Gamma)$ is a finite set, and $\cup\,\trim(\Gamma) = \simplex$.
 		\item There is a finite minimum representative set $\U$ for $\Gamma$.
 		\item There is a finite set of full-dimensional level sets $\Theta$ of $\Gamma$, and $\cup\,\Theta = \simplex$.
@@ -1079,6 +1086,7 @@ Finally, we have an important converse: if $\Gamma$ has finitely many full-dimen
 	3 $\Rightarrow$ 1:
 	Since $\U$ is representative, we have $\Gamma(p) \cap \U$ nonempty for all $p \in \simplex$, and therefore, $\Gamma$ embeds $\Gamma|_\U$, which is finite as $\U$ is finite.
 	Since $\U$ is minimum, the constructed $\Gamma_\U$ is additionally non-redundant.
+	\jessiet{Want more details here.  It's the forward implication of Prop 4, but since this is used in the reverse implication of prop 4, don't want to create cyclic dependencies.}
 	
 	1 $\Rightarrow$ 4:
 %	Let $\varphi: \R \to \reals^d$ be the embedding function, and take $\Theta = \{\Gamma_{\varphi(r)} : r \in \R\}$.
@@ -1702,7 +1710,7 @@ We thank Arpit Agarwal and Peter Bartlett for many early discussions, which led 
 % Additionally, we thank Arpit Agarwal for early insights and bringing out attention to the abstain property.
 We thank Eric Balkanski for help with a lemma about submodular functions. %Lemma~\ref{lem:bar-f}\jessie{We don't have the Lov\'asz hinge appendix here?}.
 This material is based upon work supported by the National Science Foundation under Grants No.\ 1657598 and No.\ DGE 1650115.
-\raf{Nishant, anyone else now?}
+\raf{Nishant, anyone else now?}\jessie{Stephen}
 \newpage
 \bibliographystyle{plainnat}
 \bibliography{diss,extra}
@@ -1785,7 +1793,7 @@ We now include the full proof of Lemma~\ref{lem:polyhedral-range-gamma}.
 	As $\F$ is finite, so is $\U$, and the elements of $\U$ are closed polyhedra as faces of $D_{\Y'}$ for some $\Y'\subseteq\Y$.
 \end{proof}
 
-\iffalse
+
 \section{Embedding properties}\label{app:embed-props}
 
 While Definition~\ref{def:loss-embed} gives the notion of one \emph{loss} embedding another, we now define the notion of one \emph{property} embedding another.
@@ -1796,13 +1804,13 @@ While Definition~\ref{def:loss-embed} gives the notion of one \emph{loss} embedd
 By condition (ii.) of Definition~\ref{def:loss-embed}, we then have $L$ embedding $\ell$ implies $\prop{L}$ embeds $\prop{\ell}$.
 
 
-It is often convenient to work directly with properties and set aside the losses which elicit them.
-To this end, we say a property to embeds another if eq.~\eqref{eq:embed-loss} holds.
-We begin with the notion of redundancy.
-\begin{definition}[Finite property, non-redundant]
-  A property $\gamma:\simplex\toto\R$ is \emph{redundant} if for some $r,r'\in\R$ with $r \neq r'$, we have $\gamma_r \subseteq \gamma_{r'}$, and \emph{non-redundant} otherwise.
-  $\gamma$ is \emph{finite} if it is non-redundant and $\R$ is a finite set.
-\end{definition}
+%It is often convenient to work directly with properties and set aside the losses which elicit them.
+%To this end, we say a property to embeds another if eq.~\eqref{eq:embed-loss} holds.
+%We begin with the notion of redundancy.
+%\begin{definition}[Finite property, non-redundant]
+%  A property $\gamma:\simplex\toto\R$ is \emph{redundant} if for some $r,r'\in\R$ with $r \neq r'$, we have $\gamma_r \subseteq \gamma_{r'}$, and \emph{non-redundant} otherwise.
+%  $\gamma$ is \emph{finite} if it is non-redundant and $\R$ is a finite set.
+%\end{definition}
 
 %With the terminology of properties in hand, we can restate our definition of embedding.
 %First, we formalize the notion of embedding properties.
@@ -1816,13 +1824,14 @@ When working with convex losses which are not strictly convex, one quickly encou
 As results in property elicitation typically assume non-redundant properties (e.g.~\cite{frongillo2014general,frongillo2015elicitation}), it is useful to consider a transformation which removes redundant level sets.
 We capture this transformation as the trim operator presented below.
 
-\begin{definition}\label{def:trim}
-  Given an elicitable property $\Gamma:\simplex \toto\R$, we define $\trim(\Gamma) = \{\Gamma_u : u \in \R \text{ s.t. } \neg\exists u'\in\R,u'\neq u,\, \Gamma_u \subsetneq \Gamma_{u'}\}$ as the set of maximal level sets of $\Gamma$.
+\begin{definition}\label{def:trim-prop}
+  Given an elicitable property $\Gamma:\simplex \toto\R$, we define $\trim(\Gamma) = \{\Gamma_u : u \in \U \}$ as the set of maximal level sets of $\Gamma$ for any minimum representative set $\U \subseteq \R$.
 \end{definition}
 
 \btw{RF: Note for later: should be able to show that the union of trim is the simplex.\jessie{This is part of the proposition statement 2 now.}}
 Take note that the unlabeled property $\trim(\Gamma)$ is non-redundant, meaning that for any $\theta \in \trim(\Gamma)$, there is no level set $\theta' \in \trim(\Gamma)$ such that $\theta \subset \theta'$.
 
+\iffalse
 \hrule
 \bigskip
 \jessie{Add results (subsection?) relating trim and positive normal sets.  From here until the hrule}
@@ -2389,7 +2398,7 @@ In the rest of the section, for shorthand, we write $L(u;p) := \langle p, L(u) \
 %	%	The final condition of matching loss values is satisfied by considering the equality of the expected loss on each $\delta_y$ distribution.
 % \end{proof}
 
-
+\jessiet{GO THROUGH THIS}
 When working with convex surrogates which are not strictly convex, one quickly encounters redundant properties: if $\inprod{p}{L(\cdot)}$ is minimized by a point where $\inprod{p}{L}$ is flat, then there will be an uncountable set of reports which also minimize the expected loss.
 As results in property elicitation typically assume properties are non-redundant (e.g.~\cite{frongillo2014general,frongillo2015elicitation}), 
 % it is useful to consider a transformation which removes redundant level sets, captured by the \emph{trim} operation.
@@ -2413,47 +2422,47 @@ The second is closely related to the definition of the trim operator: it states 
   In particular, the level sets of $\gamma$ are full-dimensional in $\simplex$ (i.e.,\ of dimension $n-1$).
 \end{lemma}
 
+\btw{Commented out result about old trim def = new trim def - Jessie 2 June 21}
+%\btw{JESSIE: Figures/an example might help clarify this}
+%When a property $\Gamma$ embeds a finite property $\gamma$, we can show that the level sets of $\gamma$ correspond exactly to their embedded level sets of $\Gamma$, and that these embedded level sets are exactly $\trim(\Gamma)$.
+%\jessiet{This lemma new to journal version}
+%\begin{lemma}\label{lem:embedded-level-sets-trim}
+%  Let $\Gamma$ be an elicitable property.
+%  If $\Gamma$ embeds a (non-redundant) finite property $\gamma : \simplex \toto \R$ by the injection $\varphi$, then $\{\gamma_r : r \in \R\} = \{\Gamma_u : u \in \varphi(\R)\} = \trim(\Gamma)\proposedadd{=\trim(\gamma)}$.
+%  \proposedadd{RETRY: Let $\Gamma$ be an elicitable property.
+%    If $\Gamma$ embeds a finite property $\gamma : \simplex \toto \R$ by the injection $\varphi$, then for any minimum representative set $\Sc$ for $\gamma$, we have $\{\gamma_r : r \in \Sc\} = \{\Gamma_u : u \in \varphi(\Sc)\} = \trim(\Gamma)=\trim(\gamma)$.}
+%\end{lemma}
+%\begin{proof}
+%  Let $L$ elicit $\Gamma$.
+%  Take $\ell$ to be the loss embedded by $L$ from Lemma~\ref{lem:embed-defs-equiv}.
+%  Moreover, by Proposition~\ref{prop:embed-bayes-risks}, we have $\risk{L} = \risk{\ell}$.
+%  % \raft{Implicitly? Justify the claim.  \jessie{In definition of finite properties, we say that we assume we are talking about non-redundant.}}
+%  As $\gamma$ is finite (and non-redundant by assumption), we know that each level set of $\gamma$ must be full-dimensional in $\affhull(\simplex)$. 
+%  For all $r \in \R$, we know $\gamma_r = \Gamma_{\varphi(r)}$, so we must also have $\Gamma_{\varphi(r)}$ full-dimensional.
+%  Moreover, we have $\{\gamma_r : r \in \R\} = \{\Gamma_{\varphi(r)} : r \in \R\}$ as a corollary since this is true for each $r \in \R$.
+%  \raft{The main action is here.  (1) Epigraph of $-\risk{L}$. (2) There is really only one case: every level set is a face of the power diagram, which must be contained (weakly, so $\subseteq$) in a facet. (3) To show that level sets are faces, you'll want to appeal to some piece of a proof in the prev section.}
+%  Since the cell $\Gamma_{\varphi(r)}$ is the projection of a facet of the epigraph of $-\risk{L}$, which is convex, any other level set intersecting $\Gamma_{\varphi(r)}$ can be considered as faces of the epigraph of $-\risk{L}$, and therefore a face of the induced power diagram.
+%  Therefore, we remove lower-dimensional faces, as they are proper subsets of the level sets of embedded reports, and conclude such $\Gamma_u \not \in \trim(\Gamma)$.
+%  % in one of two cases:
+%  % First, if the level set $\Gamma_u$ (for $u \not \in \varphi(\R)$) is a projection of a lower-dimensional face of $\risk{L}$, which is contained in a facet of the epigraph.
+%  % Therefore, we must have $\Gamma_u \subset \Gamma_{\varphi(r)}$ for some $r \in \R$, and therefore $\Gamma_u \not \in \trim(\Gamma)$.
+%  
+%  Second, $\Gamma_u = \Gamma_{\varphi(r)}$ for some $r \in \R$, then the level set is in both $\{\Gamma_{\varphi(r)} : r \in \R\}$ and $\trim(\Gamma)$.
+%
+%  \proposedadd{First, construct $\Sc := \Sc(L)$ as Definition~\ref{cons:rep-set}\jessiet{Argue there is a bijection from this set to any other minimum representative set}, which is a minimum representative set by Proposition~\ref{prop:SL-minimum}. 
+%    Moreover, we have $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p)$ by embedding, and therefore $\gamma_r = \Gamma_{\varphi(r)}$, yielding $\{\gamma_r \mid r \in \Sc\} = \{\Gamma_{\varphi(r)} \mid r \in \Sc\}$ as this is true for all $r \in \Sc$.}
+%
+%  \proposedadd{Now let $T := \{\gamma_r \mid r \in \Sc\} = \trim(\gamma)$. 
+%    First, if $\gamma_r \in T$, then it is not a subset of any level set as $\gamma_r$ is full-dimensional in the simplex as it corresponds to a facet of the epigraph of the negative risk $E_\ell$, and the supporting hyperplane is therefore unique.
+%    Now, if $\theta \in \trim(\gamma)$, then there is some report $r'$ such that $\theta = \gamma_{r'}$.
+%    If $r' \not \in \Sc$, we want to claim there is some $r$ such that $\gamma_{r'} = \gamma_r$.
+%    As $\theta$ is a maximal level set, it has a nonempty interior.
+%    Therefore, for any $p \in \inter{\theta}$ (and one such $p$ must exist), the hyperplane $p \mapsto (p, \ell(r'))$ uniquely supports the epigraph of negative risk.
+%    If $r' \not \in \Sc$, then there must be some $r \in \Sc$ such that $p \mapsto (p, \ell(r))$ also supports the same facet of $E_\ell$; if no such $r \in \Sc$ existed, we would contradict our claim that $\Sc$ is representative for $\ell$.
+%    Similarly, we have $\{\Gamma_u \mid u \in \varphi(\Sc)\} = \trim(\Gamma)$ by the same logic.}
+%\end{proof}
 
-\btw{JESSIE: Figures/an example might help clarify this}
-When a property $\Gamma$ embeds a finite property $\gamma$, we can show that the level sets of $\gamma$ correspond exactly to their embedded level sets of $\Gamma$, and that these embedded level sets are exactly $\trim(\Gamma)$.
-\jessiet{This lemma new to journal version}
-\begin{lemma}\label{lem:embedded-level-sets-trim}
-  Let $\Gamma$ be an elicitable property.
-  If $\Gamma$ embeds a (non-redundant) finite property $\gamma : \simplex \toto \R$ by the injection $\varphi$, then $\{\gamma_r : r \in \R\} = \{\Gamma_u : u \in \varphi(\R)\} = \trim(\Gamma)\proposedadd{=\trim(\gamma)}$.
-  \proposedadd{RETRY: Let $\Gamma$ be an elicitable property.
-    If $\Gamma$ embeds a finite property $\gamma : \simplex \toto \R$ by the injection $\varphi$, then for any minimum representative set $\Sc$ for $\gamma$, we have $\{\gamma_r : r \in \Sc\} = \{\Gamma_u : u \in \varphi(\Sc)\} = \trim(\Gamma)=\trim(\gamma)$.}
-\end{lemma}
-\begin{proof}
-  Let $L$ elicit $\Gamma$.
-  Take $\ell$ to be the loss embedded by $L$ from Lemma~\ref{lem:embed-defs-equiv}.
-  Moreover, by Proposition~\ref{prop:embed-bayes-risks}, we have $\risk{L} = \risk{\ell}$.
-  % \raft{Implicitly? Justify the claim.  \jessie{In definition of finite properties, we say that we assume we are talking about non-redundant.}}
-  As $\gamma$ is finite (and non-redundant by assumption), we know that each level set of $\gamma$ must be full-dimensional in $\affhull(\simplex)$. 
-  For all $r \in \R$, we know $\gamma_r = \Gamma_{\varphi(r)}$, so we must also have $\Gamma_{\varphi(r)}$ full-dimensional.
-  Moreover, we have $\{\gamma_r : r \in \R\} = \{\Gamma_{\varphi(r)} : r \in \R\}$ as a corollary since this is true for each $r \in \R$.
-  \raft{The main action is here.  (1) Epigraph of $-\risk{L}$. (2) There is really only one case: every level set is a face of the power diagram, which must be contained (weakly, so $\subseteq$) in a facet. (3) To show that level sets are faces, you'll want to appeal to some piece of a proof in the prev section.}
-  Since the cell $\Gamma_{\varphi(r)}$ is the projection of a facet of the epigraph of $-\risk{L}$, which is convex, any other level set intersecting $\Gamma_{\varphi(r)}$ can be considered as faces of the epigraph of $-\risk{L}$, and therefore a face of the induced power diagram.
-  Therefore, we remove lower-dimensional faces, as they are proper subsets of the level sets of embedded reports, and conclude such $\Gamma_u \not \in \trim(\Gamma)$.
-  % in one of two cases:
-  % First, if the level set $\Gamma_u$ (for $u \not \in \varphi(\R)$) is a projection of a lower-dimensional face of $\risk{L}$, which is contained in a facet of the epigraph.
-  % Therefore, we must have $\Gamma_u \subset \Gamma_{\varphi(r)}$ for some $r \in \R$, and therefore $\Gamma_u \not \in \trim(\Gamma)$.
-  
-  Second, $\Gamma_u = \Gamma_{\varphi(r)}$ for some $r \in \R$, then the level set is in both $\{\Gamma_{\varphi(r)} : r \in \R\}$ and $\trim(\Gamma)$.
-
-  \proposedadd{First, construct $\Sc := \Sc(L)$ as Definition~\ref{cons:rep-set}\jessiet{Argue there is a bijection from this set to any other minimum representative set}, which is a minimum representative set by Proposition~\ref{prop:SL-minimum}. 
-    Moreover, we have $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p)$ by embedding, and therefore $\gamma_r = \Gamma_{\varphi(r)}$, yielding $\{\gamma_r \mid r \in \Sc\} = \{\Gamma_{\varphi(r)} \mid r \in \Sc\}$ as this is true for all $r \in \Sc$.}
-
-  \proposedadd{Now let $T := \{\gamma_r \mid r \in \Sc\} = \trim(\gamma)$. 
-    First, if $\gamma_r \in T$, then it is not a subset of any level set as $\gamma_r$ is full-dimensional in the simplex as it corresponds to a facet of the epigraph of the negative risk $E_\ell$, and the supporting hyperplane is therefore unique.
-    Now, if $\theta \in \trim(\gamma)$, then there is some report $r'$ such that $\theta = \gamma_{r'}$.
-    If $r' \not \in \Sc$, we want to claim there is some $r$ such that $\gamma_{r'} = \gamma_r$.
-    As $\theta$ is a maximal level set, it has a nonempty interior.
-    Therefore, for any $p \in \inter{\theta}$ (and one such $p$ must exist), the hyperplane $p \mapsto (p, \ell(r'))$ uniquely supports the epigraph of negative risk.
-    If $r' \not \in \Sc$, then there must be some $r \in \Sc$ such that $p \mapsto (p, \ell(r))$ also supports the same facet of $E_\ell$; if no such $r \in \Sc$ existed, we would contradict our claim that $\Sc$ is representative for $\ell$.
-    Similarly, we have $\{\Gamma_u \mid u \in \varphi(\Sc)\} = \trim(\Gamma)$ by the same logic.}
-\end{proof}
-
-\jessiet{03.01.21 - Old version of Prop~\ref{prop:embed-trim} moved to comment}
+%\jessiet{03.01.21 - Old version of Prop~\ref{prop:embed-trim} moved to comment}
 % \jessiet{Can we remove this?}
 % \begin{proof}[Original]
 %   Let $L$ elicit $\Gamma$.
