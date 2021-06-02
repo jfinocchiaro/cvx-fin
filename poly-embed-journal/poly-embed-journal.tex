@@ -304,7 +304,7 @@ For general properties and losses, we will also use $\Gamma$ and $L$, as above.
 % Often we will work with two properties simultaneously, a finite property $\gamma:\simplex\toto\R$, and its embedded version $\Gamma:\simplex\toto\reals^d$.
 % In this case, we write the embedded reports as $u\in\reals^d$, reserving $r\in\R$ for the finite property.
 
-\subsection{Links and Embeddings}
+\subsection{Calibration and consistency \jessie{Change}}
 \label{sec:links-embeddings}
 
 To assess whether a surrogate and link function align with the original loss, we turn to the common condition of \emph{calibration}.
@@ -344,6 +344,7 @@ Note that in the finite-outcome setting, calibration is necessary and sufficient
 While our notion of embedding is sufficient for calibration (and therefore consistency), it is worth noting that it is not \emph{necessary} for these conditions.  
 For example, while logistic loss does not embed 0-1 loss, the surrogate and link for logistic loss are consistent with respect to 0-1 loss.
 
+\subsection{Embeddings}
 Several consistent convex surrogates in the literature can be thought of as ``embeddings'', wherein one maps the discrete reports to a vector space, and finds a convex loss which agrees with the original loss.
 A key condition is that the original reports should be optimal exactly when the corresponding embedded points are optimal.
 We formalize this notion as follows.
@@ -353,7 +354,7 @@ We formalize this notion as follows.
   \raft{For Bo: added this def, changed def embedding}
   Let $L:\R\to\reals^\Y_+$ be a generic loss.
   We say $\Sc \subseteq \R$ is \emph{representative for $L$} if we have $\prop{L}(p) \cap \Sc \neq \emptyset$ for all $p\in \simplex$.
-  We further say $\Sc$ is a \emph{minimum representative set}\jessiet{Propogate change} if it has the smallest cardinality among all representative sets.
+  We further say $\Sc$ is a \emph{minimum representative set} if it has the smallest cardinality among all representative sets.
 \end{definition}
 Minimum representative sets are essentially the same as \emph{maximally informative sets} from~\citet{wang2020weston}, but we found the name minimum representative set to give more intuition about being the smallest such set.
 
@@ -460,7 +461,7 @@ In this particular case, it is known $(\hinge,\psi)$ is calibrated for $\psi(u) 
 
 In this section, we establish a tight relationship between the technique of embedding and the use of polyhedral (piecewise-linear convex) surrogate losses.
 We defer the question of when such surrogates are consistent to \S~\ref{sec:calibration}. 
-Throughout this section, unless specified otherwise, we use $\ell:\R\to\reals^\Y$ and $L:\reals^d\to\reals^\Y$
+Throughout this section, unless specified otherwise, we use $\ell:\R\to\reals^\Y$ for discrete target losses and $L:\reals^d\to\reals^\Y$ for surrogates.
 
 In Proposition~\ref{prop:embed-bayes-risks}, we show an equivalent condition to embedding, whose proof relies on the following Lemma about the Bayes risk of a ``restricted'' surrogate, shown here.
 \begin{lemma}\label{lem:loss-restrict}
@@ -492,7 +493,7 @@ In Proposition~\ref{prop:embed-bayes-risks}, we show an equivalent condition to 
 %	Add $u$ to $\Sc(L)$, and repeat, iterating over each of $E_L$'s finitely many facets.
 %\end{definition}
 
-\begin{proposition}\label{prop:SL-minimal}
+\begin{proposition}\label{prop:SL-minimum}
   A loss $L: \R \to \reals^\Y_+$ has a polyhedral Bayes risk if and only if it has a finite minimum representive set.
   Moreover, for any minimum representative set $\Sc$ for $L$, there is a bijection between $\Sc$ and the facets of the epigraph of $-\risk{L}$.
   \raft{Jessie: prove :-].  Note: min rep $\implies$ poly risk is immediate from Lemma~\ref{lem:loss-restrict}.  Move the construction into the proof. \jessie{Done; ready for a look}}
@@ -501,19 +502,20 @@ In Proposition~\ref{prop:embed-bayes-risks}, we show an equivalent condition to 
 	Finite minimum representative implies polyhedral Bayes risk as a corollary of Lemma~\ref{lem:loss-restrict}.
 	
 	To show that $L$ has a polyhedral Bayes risk implies it has a finite minimum representative set, we construct the set $\Sc$ as follows:
-	Each facet $F$ of the epigraph of negative risk $E_L$ must be full dimensional by definition of a facet.
-	Take $p \in \inter{F}$, and observe that it must by uniquely supported by some hyperplane $p \mapsto (p, L(u))$ for some $u \in \R$.
+	since the epigraph of negative Bayes risk $E_L$ is polyhedral, it has finitely many facets, and we iterate over these.
+	Each facet $F$ of $E_L$ must be full dimensional by definition of a facet, and therefore there must be some $p \in \inter{F}$.
+	Observe that $p$ must by uniquely supported by some hyperplane $p \mapsto (p, L(u))$ for some $u \in \R$, since it is in the interior of the facet (and therefore $\risk{L}$ is differentiable at $p$).
 	Add $u$ to $\Sc$, and repeat, iterating over each of $E_L$'s finitely many facets.
-	We show $\Sc$ is a minimum representative set (it is finite as $L$ polyhedral implies it has finitely many facts, so $\Sc$ is generated over a finite set.)
+	We now show $\Sc$ is a minimum representative set.
 	
 	First, we have to show that $\Sc$ is a representative set.
-	As facets are closed, for each facet $F$ and $p_F \in F$, there is a report $u_F \in \Sc$ by construction and closedness of facets so that the hyperplane $p_F \mapsto (p_F, \inprod{p_F}{L(u_F)})$ supports $E_L$ (epigraph of negative risk) exactly on facet (and therefore $u_F \in \Gamma(p) \cap \Sc(L)$ for all $p$ such that the hyperplane supports $E_L$ at $p$), we have $\Sc(L)$ representative for $L$.
-	Representativeness follows the facets of $E_L$ union to the simplex.
+	As facets are closed, for each facet $F$ and $p_F \in F$, there is a report $u_F \in \Sc$ by construction and closedness of facets so that the hyperplane $p_F \mapsto (p_F, \inprod{p_F}{L(u_F)})$ supports $E_L$ exactly on the facet. Therefore $u_F \in \Gamma(p) \cap \Sc$ for all $p$ such that the hyperplane supports $E_L$ at $p$.
+	Representativeness follows as the facets of $E_L$ union to the simplex.
 	
-	If $\Sc$ was not a minimum set, then we could remove some $s$ from $\Sc$ such that $\Sc' := \Sc \setminus \{s\}$ is also a representative set for $L$.
+	If $\Sc$ was not a \emph{minimum} representative set, then we could remove some $s$ from $\Sc$ such that $\Sc' := \Sc \setminus \{s\}$ is also a representative set for $L$.
 	By the construction of $\Sc$ over facets of $E_L$, this report $s$ corresponds to a facet $F$ of $E_L$ since facets are full-dimensional and thus have well-defined nonempty interiors.
 	There is then some distribution $p_F \in \inter F$ such that the hyperplane $p \mapsto (p, L(s))$ uniquely supports $E_L$ at $p_F$.
-	We particularly have $\Gamma(p) \cap \Sc' = \emptyset$, since any other element $s'$ of $\Sc'$ being in $\Gamma(p)$ would imply $p \mapsto (p, L(s'))$ also supports $E_L$, but this hyperplane supporting $E_L$ must be unique, so these are equal.
+	We claim $\Gamma(p) \cap \Sc' = \emptyset$, since any other element $s'$ of $\Sc'$ being in $\Gamma(p)$ would imply $p \mapsto (p, L(s'))$ also supports $E_L$, but this hyperplane supporting $E_L$ must be unique, so these are equal.
 	By construction of $\Sc$, we must have only added at most one of these to the set.
 	Therefore, $\Sc$ is a minimum representative set.
 	
@@ -573,9 +575,10 @@ This useful fact will drive many of our results.
 %  To see that the loss values match, we merely note that the supporting hyperplanes to the facets of $E_L$ and $E_\ell$ are the same, and the loss values are uniquely determined by the supporting hyperplane.
 %  In particular, if $h$ supports the facet corresponding to $\gamma_r$, we have $\ell(r)_y = L(u_r)_y = h(\delta_y)$, where $\delta_y$ is the point distribution on outcome $y$.
 
+	\jessiet{Not sure how much this matters, but technically, the $\Sc$ here might be different from the $\Sc$ in the forward implication, and might even be different cardinalities. Not sure if we want to change the notation to reflect this, or if that would just add confusion.}
 	For the reverse implication, assume $\risk{L} = \risk{\ell}$, which are polyhedral functions as $\ell$ is discrete.  
-	Construct $\Sc$ via a bijection from the facets of $E_\ell$ as in the proof of Proposition~\ref{prop:SL-minimal}, and $\U$ similarly from $E_L$, with the embedding $\varphi : r \mapsto u_r$ if the hyperplanes $p \mapsto (p, \inprod{p}{\ell(r)})$ and $p \mapsto (p, \inprod{p}{L(u_r)})$ are equal.
-	Such an embedding is well-defined as the facets are the same since the risks are equal.
+	Construct a minimum representative set $\Sc$ via a bijection from the facets of $E_\ell$ as in the proof of Proposition~\ref{prop:SL-minimum}, and $\U$ similarly from $E_L$, with the embedding $\varphi : r \mapsto u_r$ if the hyperplanes $p \mapsto (p, \inprod{p}{\ell(r)})$ and $p \mapsto (p, \inprod{p}{L(u_r)})$ are equal.
+	Such an embedding is well-defined as it is the composition of the bijections from reports in $\Sc$ and $\U$ to facets.
 	%Since $\risk{\ell}$ is polyhedral, the epigraph of its negation, $E_\ell$, has a finite set of facets, which by definition have well-defined interiors.  For each facet, there must then be some distribution $p_r$ and report $r \in \R$ such that the hyperplane $p_r \mapsto (p_r, \inprod{p_r}{-\ell(r)})$ uniquely supports $E_\ell$.  Form $\Sc$ from the set of such reports $r$, iterating over each facet.  We have $\Sc$ representative for $\ell$ since the union of projected epigraph facets equals the simplex, and these facets and their projections are closed. Therefore, every $p \in \simplex$ is contained in some facet of the epigraph, and thus there is some $r \in \Sc$ so that $r \in \gamma(p)$.
 %As the risks are equal, the same is true for $E_L$, e.g., for each facet, there is some $u_r$ so that $p_r \mapsto (p_r, \inprod{p_r}{L(u_r)})$, and one can construct the embedding $\varphi: r \mapsto u_r$ for each $r \in \Sc$.
 
@@ -585,7 +588,7 @@ To verify matching losses, consider that the hyperplanes $p \mapsto (p, \inprod{
 This implies $\ell(r) = L(\varphi(r))$ for all $r \in \Sc$ such that the hyperplanes support $E_\ell$ and $E_L$ on a facet.
 Since $\Sc$ and $\U$ are minimum representative sets, this holds for all $r \in \Sc$.
 %To verify matching losses, observe $\risk \ell (\delta_y) = \risk L (\delta_y)$ for each $y \in \Y$, and these risks are attained by some report $r$ and its embedding $u_r$, respectively.
-%\jessie{This feels like it's missing a detail about how $\Sc$ is minimal and how level sets are full-dimensional.}
+%\jessie{This feels like it's missing a detail about how $\Sc$ is minimum and how level sets are full-dimensional.}
 \end{proof}
 
 \raf{Something like this:}\\
@@ -601,8 +604,6 @@ Together, Lemma~\ref{lem:loss-restrict} and Proposition~\ref{prop:embed-bayes-ri
 
 
 
-In particular, one can consider the epigraph of a polyhedral convex function on $\reals^d$ and the projection down to $\reals^d$; in this case we call the resulting power diagram \emph{induced} by the convex function.
-
 \raft{I wonder if we should demote this to a corollary.  We can write the proof of the reverse implication in Proposition~\ref{prop:embed-bayes-risks} like this: first show that if $\risk{L}$ is polyhedral, there is a finite $\U$ which is representative for $L$.  Then show that if $\risk{\ell} = \risk{L}$ then there is some $\Sc$ that is bijective to the particular $\U$ we constructed.  I'm not sure how this will go, but perhaps worth a try, since it would avoid the proof duplication too!}
 \begin{proposition}\label{prop:embed-risk-poly}
   A loss $L$ embeds a discrete loss $\ell : \R \to \reals^\Y_+$ if and only if $\risk{L}$ is polyhedral.
@@ -610,7 +611,7 @@ In particular, one can consider the epigraph of a polyhedral convex function on 
 \begin{proof}
   If $L$ embeds a discrete $\ell$, Proposition~\ref{prop:embed-bayes-risks} gives us $\risk{L} = \risk{\ell}$ and polyhedral.
   For the converse, let $\risk{L}$ be polyhedral. %; we again examine the proof of Proposition~\ref{prop:embed-bayes-risks}.
-  Form the finite set $\Sc$ as the proof of Proposition~\ref{prop:SL-minimal}.
+  Form the finite set $\Sc$ as the proof of Proposition~\ref{prop:SL-minimum}.
   %For each facet of $E_L$, which is full-dimensional, there must be some interior distribution $p$ such that $p \mapsto (p, \inprod{p}{L(u)})$ uniquely supports $E_L$, and such a $u$ must exist or else the Bayes risk is not attained.  Take $\Sc$ to be the collection of such reports $u$, and observe $\Sc$ is representative for $L$.  
   By Corollary~\ref{cor:representative-embeds-restriction}, $L$ embeds $L|_\Sc$, which is finite by construction.
 %  The projection of the epigraph of $\risk{L}$ onto $\simplex$ forms a power diagram by Theorem~\ref{thm:aurenhammer} with finitely many cells $C_1,\ldots,C_k$, which we can index by $\R := \{1,\ldots,k\}$.
@@ -620,15 +621,15 @@ In particular, one can consider the epigraph of a polyhedral convex function on 
 
 
 
-
-This allows us to reason about the range of the property elicited by a polyhedral loss; in particular, it is finite.
+Shifting our focus to \emph{polyhedral} (piecewise linear and convex) surrogates, we observe that these surrogates elicit finite properties, though they may have optimal sets that are infinite.
+This lets us apply results about finite representative sets to understand the structure of polyhedral surrogates and the losses they embed.
 See \S~\ref{app:power-diagrams} for the full proof.
 
 \begin{restatable}{lemma}{polyhedralrangegamma}
 	\label{lem:polyhedral-range-gamma}
 	Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss, and let $\Gamma = \prop{L}$.
 	Then the range of $\Gamma$, $\U = \Gamma(\simplex) = \{\Gamma(p) \subseteq \reals^d : p\in\simplex\}$, is a finite set of closed polyhedra.
-        \raft{Leave this statement and add a proof sketch; move other dependencies to appendix}
+        \raft{Leave this statement and add a proof sketch; move other dependencies to appendix \jessie{Done feel free to burn}}
 \end{restatable}
 \begin{proof}[Sketch]
 	With $\Y$ finite, there are only finitely many supporting sets over $\simplex$.
@@ -697,8 +698,7 @@ Recent work~\citep{ramaswamy2016convex,finocchiaro2020embedding,finocchiaro2021u
   \btw{FUTURE: to get $n-1$, just use the same trick as before and note that the Bayes risk doesn't change.  Should be a couple lines.}
 \end{proof}
 
-\proposedadd{Moreover, to construct an embedding of dimension $n-1$ instead of $n$ (see~\citet{finocchiaro2020embedding} for significance of dimension),  we use the same technique as in the proof of Proposition~\ref{prop:embed-bayes-risks}.
-Consider some invertible linear transformation $A : \reals^n \to \reals^{n-1}$ that reduces to an affine subspace.
+\proposedadd{Moreover, to construct an embedding of dimension $n-1$ instead of $n$ (see~\citet{finocchiaro2020embedding} for significance of dimension),  consider some invertible linear transformation $A : \reals^n \to \reals^{n-1}$ that maps to an affine subspace.
 Take $L' : \reals^{n-1} \to \reals^\Y$ as $x \mapsto L(A^{-1}(x))$ and $L$ defined as above, so that $\inprod{\ell(r)}{p} = \inprod{L(\varphi(r))}{p} = \inprod{L'(A^{-1}(\varphi(r)))}{p} $ for all $p \in \simplex$.
 The Bayes risks $\risk{L}(p)$ and $\risk{L'}(p)$ are equal for all $p \in \simplex$; thus, the result holds in $n-1$ dimensions as well.}\jessiet{Leaving this change in the macro for proofreading.}
 
@@ -828,7 +828,7 @@ We illustrate this formulaic approach in \S~\ref{sec:abstain}.
 % \jessie{Thinking about this: I think there is enough value to $\trim$ as an object to include it.  The concept makes a lot more intuitive sense if we defined it by $\trim_\Sc(\gamma) = \{\gamma_r : r \in \Sc\}$ and thinking about the importance of $\Sc$.
 % There are a few results that are well-explained by this:
 % \begin{itemize}
-%	\item $L$ embeds discrete $\ell$ over set $\Sc$ (minimally representative for $\ell$) iff $\trim_\Sc(\prop{\ell}) = \trim_{\varphi(\Sc)}(\prop{L})$
+%	\item $L$ embeds discrete $\ell$ over set $\Sc$ (minimum representative for $\ell$) iff $\trim_\Sc(\prop{\ell}) = \trim_{\varphi(\Sc)}(\prop{L})$
 %	\item $L$ is equivalent to discrete $\ell$ iff $\trim_{\R_1}(\prop{\ell}) = \trim_{\R_2}(\prop{L})$
 %	\item when is $\ell$ non-redundant? (no reports $r$ s.t. $\gamma_r$ is (a) empty, (b) not a strict subset of another level set, or (c) exactly equal to another level set.)
 %	\item can't have reports that are strict subsets and on a facet of the epigraph <-- less clear how this would follow in this section.
@@ -837,6 +837,8 @@ We illustrate this formulaic approach in \S~\ref{sec:abstain}.
 
 
 \jessie{How do we want to think about finiteness here? Just assume it? }
+
+In \S~\ref{sec:poly-loss-embed}, we discuss some implications of a representative set being minimum; here, we further investigate the relationship between minimum representative sets, non-redundancy of losses, and introduce what it means for an embedding to be tight.
 
 \begin{definition}[Non-redundancy]\label{def:nonredundant}
   A loss $L : \R \to \reals^\Y_+$ eliciting $\Gamma:\simplex \toto \R$ is \emph{redundant} if there are reports $r, r' \in \R$ such that $\Gamma_r \subseteq \Gamma_{r'}$, and \emph{non-redundant} otherwise.
@@ -963,7 +965,7 @@ While an embedding only has to be constructed once and is considered an offline 
 \end{corollary}
 \begin{proof}[Sketch]
   Let $\U := \{u \in \R \textrm{ s.t. } \neg\exists u'\in\R,u'\neq u,\, \Gamma_u \subsetneq \Gamma_{u'}\}$.
-  The only time $\U$ contains redundant elements is if there is $u,u' \in \U$ so that $\Gamma_u = \Gamma_{u'}$.  In such a case, removing duplicate elements of $\U$ to form $\U^*$ means $\{L(u) \mid u \in \U\} = \{L(u) \mid u \in \U^*\}$ and $L|_{U'}\}$ is nonredundant, and therefore $\U^*$ is a minimal representative set by Proposition~\ref{prop:tfae-min-rep-nonredundant}, and therefore equal to $\trim(L)$.
+  The only time $\U$ contains redundant elements is if there is $u,u' \in \U$ so that $\Gamma_u = \Gamma_{u'}$.  In such a case, removing duplicate elements of $\U$ to form $\U^*$ means $\{L(u) \mid u \in \U\} = \{L(u) \mid u \in \U^*\}$ and $L|_{U'}\}$ is nonredundant, and therefore $\U^*$ is a minimum representative set by Proposition~\ref{prop:tfae-min-rep-nonredundant}, and therefore equal to $\trim(L)$.
 
   % commented out 06 May 21	
   %	We have $\U$ representative since for any $r \in \R \setminus \U$, we must have $\Gamma_r \subsetneq \Gamma_{r'}$ for some other $r'$, and $r' \in \U$ by partial orderings of subsets, so $\Gamma(p) \cap \U$ is never empty.
@@ -1141,7 +1143,7 @@ Finally, we have an important converse: if $\Gamma$ has finitely many full-dimen
 %  Consider that if $\U$ is a finite representative set for $L$, then $L$ has a finite minimum representative set $\U' \subseteq \U$.
 %  We have $\Theta := \trim(\Gamma) = \{\Gamma_u \mid u \in \U'\}$.
 %  This is finite as $\U'$ is finite, and unions to the simplex by $\U'$ being representative.
-%  If there was a level set $\Gamma_u$ for some $u \in \varphi(\R')$ that was not full-dimensional, it would have to be a subset of some other level set $\Gamma_{u'}$, but this contradicts that $\U'$ is minimal. \jessie{Hand waving; make the argument you can't span relints of other level sets.}
+%  If there was a level set $\Gamma_u$ for some $u \in \varphi(\R')$ that was not full-dimensional, it would have to be a subset of some other level set $\Gamma_{u'}$, but this contradicts that $\U'$ is minimum. \jessie{Hand waving; make the argument you can't span relints of other level sets.}
 %  
 %  $(c \implies a)$ 
 %  For each $\theta \in \Theta$, there is some $u \in \R$ so that $\theta = \Gamma_u$; take $\U'$ to be the set of such $u$s.
@@ -1158,7 +1160,7 @@ Finally, we have an important converse: if $\Gamma$ has finitely many full-dimen
 %  % $(b \implies c)$
 %  % We have $\trim(\Gamma) = \{\Gamma_u \mid u \in \varphi(\R')\}$, and take $\Theta := \trim(\Gamma)$.
 %  % This is finite as $\varphi(\R')$ is finite, and unions to the simplex by $\varphi(\R')$ being representative.
-%  % If there was a level set $\Gamma_u$ for some $u \in \varphi(\R')$ that was not full-dimensional, it would have to be a subset of some other level set $\Gamma_{u'}$, but this contradicts that $\varphi(\R')$ is minimal. \jessie{Hand waving; make the argument you can't span relints of other level sets.}
+%  % If there was a level set $\Gamma_u$ for some $u \in \varphi(\R')$ that was not full-dimensional, it would have to be a subset of some other level set $\Gamma_{u'}$, but this contradicts that $\varphi(\R')$ is minimum. \jessie{Hand waving; make the argument you can't span relints of other level sets.}
 %  % 
 %  % 
 %  % $(c \implies a)$ \jessie{Not quite: we need the multiset to have no duplicate elements}
@@ -1674,7 +1676,7 @@ In particular, our link construction recovers the link function proposed by~\cit
 % \paragraph{Directions.}
 %\jessie{Getting rid of this given the COLT-20 paper}
 %\iffalse
-%One open question of particular interest involves the dimension of the surrogate prediction space; given a discrete loss, can we construct a surrogate that embeds it \emph{of minimal dimension}?
+%One open question of particular interest involves the dimension of the surrogate prediction space; given a discrete loss, can we construct a surrogate that embeds it \emph{of minimum dimension}?
 %If we na\"ively embed the reports into an $n$-dimensional space, the dimensionality of the problem scales linearly in the number of possible labels $n$.
 %As the dimension of the optimization problem is a function of this \emph{embedding dimension} $d$, a promising direction is to leverage tools from elicitation complexity~\cite{lambert2008eliciting,frongillo2015elicitation} and convex calibration dimension~\cite{ramaswamy2016convex} to understand when we can take $d <\!\!< n$.
 %\fi
@@ -1728,6 +1730,7 @@ First, we present several definitions from Aurenhammer~\cite{aurenhammer1987powe
 \end{definition}
 
 Proposition~\ref{prop:embed-bayes-risks}, focuses on matching the values of Bayes Risks, while the following result from~\citet{aurenhammer1987power} allows us to move towards understanding the projection of the Bayes Risk onto the simplex $\simplex$.
+In particular, one can consider the epigraph of a polyhedral convex function on $\reals^d$ and the projection down to $\reals^d$; in this case we call the resulting power diagram \emph{induced} by the convex function.
 
 \begin{theorem}[Aurenhammer~\cite{aurenhammer1987power}]\label{thm:aurenhammer}
 	A cell complex is affinely equivalent to a convex polyhedron if and only if it is a power diagram.
@@ -2394,7 +2397,7 @@ As results in property elicitation typically assume properties are non-redundant
 \begin{definition}\label{def:trim}
   Given an elicitable property $\Gamma:\simplex \toto\R$, we define $\trim(\Gamma) = \{\Gamma_u : u \in \R \text{ s.t. } \neg\exists u'\in\R,u'\neq u,\, \Gamma_u \subsetneq \Gamma_{u'}\}$ as the set of maximal level sets of $\Gamma$.
 \end{definition}
-\jessie{Do we want to re-define $\trim(\Gamma) = \{\Gamma_r \mid r \in \Sc\}$ for any minimal representative set $\Sc$?}
+\jessie{Do we want to re-define $\trim(\Gamma) = \{\Gamma_r \mid r \in \Sc\}$ for any minimum representative set $\Sc$?}
 
 % \btw{RF: Note for later: should be able to show that the union of trim is the simplex.\jessie{This is part of the proposition statement 2 now.}}
 % Take note that the unlabeled property $\trim(\Gamma)$ is non-redundant, meaning that for any $\theta \in \trim(\Gamma)$, there is no level set $\theta' \in \trim(\Gamma)$ such that $\theta \subset \theta'$; this is a corollary of Proposition~\ref{prop:embed-trim}.
@@ -2418,7 +2421,7 @@ When a property $\Gamma$ embeds a finite property $\gamma$, we can show that the
   Let $\Gamma$ be an elicitable property.
   If $\Gamma$ embeds a (non-redundant) finite property $\gamma : \simplex \toto \R$ by the injection $\varphi$, then $\{\gamma_r : r \in \R\} = \{\Gamma_u : u \in \varphi(\R)\} = \trim(\Gamma)\proposedadd{=\trim(\gamma)}$.
   \proposedadd{RETRY: Let $\Gamma$ be an elicitable property.
-    If $\Gamma$ embeds a finite property $\gamma : \simplex \toto \R$ by the injection $\varphi$, then for any minimal representative set $\Sc$ for $\gamma$, we have $\{\gamma_r : r \in \Sc\} = \{\Gamma_u : u \in \varphi(\Sc)\} = \trim(\Gamma)=\trim(\gamma)$.}
+    If $\Gamma$ embeds a finite property $\gamma : \simplex \toto \R$ by the injection $\varphi$, then for any minimum representative set $\Sc$ for $\gamma$, we have $\{\gamma_r : r \in \Sc\} = \{\Gamma_u : u \in \varphi(\Sc)\} = \trim(\Gamma)=\trim(\gamma)$.}
 \end{lemma}
 \begin{proof}
   Let $L$ elicit $\Gamma$.
@@ -2437,7 +2440,7 @@ When a property $\Gamma$ embeds a finite property $\gamma$, we can show that the
   
   Second, $\Gamma_u = \Gamma_{\varphi(r)}$ for some $r \in \R$, then the level set is in both $\{\Gamma_{\varphi(r)} : r \in \R\}$ and $\trim(\Gamma)$.
 
-  \proposedadd{First, construct $\Sc := \Sc(L)$ as Definition~\ref{cons:rep-set}\jessiet{Argue there is a bijection from this set to any other minimal representative set}, which is a minimal representative set by Proposition~\ref{prop:SL-minimal}. 
+  \proposedadd{First, construct $\Sc := \Sc(L)$ as Definition~\ref{cons:rep-set}\jessiet{Argue there is a bijection from this set to any other minimum representative set}, which is a minimum representative set by Proposition~\ref{prop:SL-minimum}. 
     Moreover, we have $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p)$ by embedding, and therefore $\gamma_r = \Gamma_{\varphi(r)}$, yielding $\{\gamma_r \mid r \in \Sc\} = \{\Gamma_{\varphi(r)} \mid r \in \Sc\}$ as this is true for all $r \in \Sc$.}
 
   \proposedadd{Now let $T := \{\gamma_r \mid r \in \Sc\} = \trim(\gamma)$. 
