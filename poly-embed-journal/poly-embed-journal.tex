@@ -217,7 +217,7 @@ Our proofs give explicit constructions for the surrogate (\S~\ref{sec:poly-loss-
 
 Moreover, given an existing polyhedral surrogate, we provide tools to find the discrete loss it embeds (Corollary~\ref{cor:representative-embeds-restriction}).
 In short, if one can identify a finite \emph{representative set} $\Sc$ of reports for a surrogate $L$, meaning $\Sc$ always contains an $L$-optimal report for any label distribution, then $L$ embeds $L|_\Sc$, the loss given by $L$ restricting to $\Sc$.
-We apply these tools to several polyhedral surrogates which have been proposed recently (\S~\ref{sec:examples}), showing that they are inconsistent for the desired target, but are consistent for a different target: the one embedded by the loss.
+We apply these tools to several polyhedral surrogates which have been proposed recently (\S~\ref{sec:applications}), showing that they are inconsistent for the desired target, but are consistent for a different target: the one embedded by the loss.
 
 Underpinning our results are several observations which formalize the idea that polyhedral losses ``behave like'' discrete losses.
 For example, discrete losses have polyhedral Bayes risks (as the minimum of finitely many linear functions), and so do polyhedral losses (Lemma~\ref{lem:poly-loss-poly-risk}).
@@ -378,7 +378,9 @@ Note that in the finite-outcome setting, calibration is necessary and sufficient
 While our notion of embedding is sufficient for calibration (and therefore consistency), it is worth noting that it is not \emph{necessary} for these conditions.  
 For example, while logistic loss does not embed 0-1 loss, the surrogate and link for logistic loss are consistent with respect to 0-1 loss.
 
-\subsection{Embedding and Main Results}
+\subsection{Embedding}
+
+\raf{If we like the intro (or even if not) we should rewrite this subsection a bit.  I think it's best to include definitions of non-redundancy and tight embeddings here, since then this first comment can be more precise, and we remove the section order dependency (we use tight embeddings in the applications section).  Not sure about the right order to define things in this subsection though, since we need rep sets to even define embeddings.}
 
 Several consistent convex surrogates in the literature can be thought of as \emph{embeddings}, wherein one maps the discrete reports to a vector space, and finds a convex loss which agrees with the original loss.
 To allow for ``redundant'' reports, in both the target and surrogate, we first introduce the notions of representative sets; see Proposition~\ref{prop:tfae-min-rep-nonredundant} for a formal connection.
@@ -458,10 +460,8 @@ In this particular case, it is known $(\hinge,\psi)$ is calibrated for $\psi(u) 
 \end{minipage}
 \end{figure}
 
-
-
 It is not immediately clear if embeddings give rise to calibrated links; indeed, apart from mapping the embedded points back to their original reports via $\psi(\varphi(r)) = r$, how to map the remaining values is far from obvious.
-We address the question of when embeddings lead to calibrated links in \S~\ref{sec:calibration}.
+In fact, we give a construction to map the remaining values in \S~\ref{sec:calibration}, showing that embeddings always yield calibration.
 %\bo{I think in Section \ref{sec:calibration} ?}
 
 
@@ -483,7 +483,7 @@ We address the question of when embeddings lead to calibrated links in \S~\ref{s
 
 
 
-% In another example, we consider the abstain loss and an embedding given by Ramaswamy et al.~\cite{ramaswamy2018consistent} in Section~\ref{sec:examples}, but note that the link function they provide is not unique.
+% In another example, we consider the abstain loss and an embedding given by Ramaswamy et al.~\cite{ramaswamy2018consistent} in Section~\ref{sec:applications}, but note that the link function they provide is not unique.
 % Essentially, the discrete abstain$(1/2)$ loss is minimized in expectation by predicting the most likely outcome $\argmax_y p_y$, conditioned on $p_y \geq 1/2$.
 % If the most likely outcome is not likely enough, the loss is minimized by ``abstaining'' from predicting; a situation one can imagine would be useful if a false positive is costly.
 
@@ -842,6 +842,354 @@ Note that the construction given above in Definition~\ref{def:eps-thick-link} is
 In practice this potential inefficiency is not typically a concern, as the family of losses typically has some closed form expression in terms of $n$, and thus the construction can proceed at the symbolic level.
 We illustrate this formulaic approach in \S~\ref{sec:abstain}.
 % \proposedadd{In general, we are not overly concerned with the computational complexity of computing the surrogate and link, since these calculations only need to be computed once.  They are generally derived mathematically, rather than computationally.  These symbolic calculations typically tend to be straightforward, but can sometimes be tricky.}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Application to Specific Surrogates}\label{sec:applications}
+
+Our results give a framework to construct consistent surrogates and link functions for any discrete loss, but they also provide a way to verify the consistency or inconsistency of given surrogates.
+Below, we illustrate the power of this framework with specific examples from the literature, as well as new examples.
+In some cases we simplify existing proofs, while in others we give new results, such as a new calibrated link for abstain loss, and the inconsistency of the recently proposed Lov\'asz hinge.
+\btw{RF: The top-k and hypercube/set examples (except abstain) have the link built in, e.g.\ as the sign function), and they just work around it.  Our results may suggest that it's worth thinking ``outside the box'' (HAH, genious...) and looking for embeddings which are not the hypercube. \jessie{Added a bit discussing this, starting at ``the examples in ...''.}}
+The examples in \S~\ref{sec:applications}, with the exception of the abstain surrogate given by~\citet{ramaswamy2018consistent}, all present a surrogate that use the link $\psi: u \mapsto \sgn(u)$.
+While this may sometimes yield a calibrated link, this is not always the case.
+In fact, we will see that most of these examples do not yield calibrated surrogates, although proving that there is \emph{no} calibrated link for a given surrogate is quite difficult.
+Our results suggest that it is possible that some of the given surrogates are calibrated, but perhaps one must use a nontraditional link in order to calibrate the loss, such as the thickening construction given here.
+\citet{wang2020weston} apply the embedding framework to show that the Weston-Watkins hinge loss embeds a discrete loss for ordered partitions.
+
+
+\subsection{Consistency of abstain surrogate and link construction}
+\label{sec:abstain}
+
+In classification settings with a large number of labels, several authors consider a variant of classification, with the addition of a ``reject'' or \emph{abstain} option.
+For example, \citet{ramaswamy2018consistent} study the loss $\ellabs{\alpha} : [n] \cup \{\bot\} \to \reals^\Y_+$ defined by $\ellabs{\alpha}(r)_y = 0$ if $r=y$, $\alpha$ if $r = \bot$, and 1 otherwise.
+%\begin{align}\label{eq:abstain-discrete}
+%$\ellabs{\alpha}(r)_y = \begin{cases}
+%0 & r = y\\
+%\alpha & r = \bot\\
+%1 & \text{otherwise}
+%\end{cases}~.$
+%\end{align}
+Here, the report $\bot$ corresponds to ``abstaining'' if no label is sufficiently likely, specifically, if no $y\in\Y$ has $p_y \geq 1-\alpha$.
+\citet{ramaswamy2018consistent} provide a polyhedral surrogate for $\ellabs{\alpha}$, which we present here for $\alpha=1/2$.
+Letting $d = \ceil{\log_2(n)}$ their surrogate is $L_{1/2} : \reals^d \to \reals^\Y_+$ given by
+\begin{equation}\label{eq:abstain-surrogate}
+L_{1/2}(u)_y = \left(\max\nolimits_{j \in [d]}B(y)_j u_j + 1\right)_+~,
+\end{equation}
+where $B:[n]\to\{-1,1\}^d$ is a arbitrary injection; let us assume $n = 2^d$ so that we have a bijection.
+Consistency is proven for the following link function,
+\begin{equation}\label{eq:abstain-link}
+  \psi(u) = \begin{cases}
+	\bot & \min_{i \in [d]} |u_i| \leq 1/2\\
+	B^{-1}(\sgn(-u)) &\text{otherwise}
+  \end{cases}~.
+\end{equation}
+
+In light of our framework, we can see that $L_{1/2}$ is an excellent example of an embedding, where $\varphi(y) = B(y)$ and $\varphi(\bot) = 0 \in \reals^d$.
+Moreover, the link function $\psi$ can be recovered from Theorem~\ref{thm:eps-thick-calibrated} with norm $\|\cdot\|_\infty$ and $\epsilon=1/2$; see Figure~\ref{fig:abstain-links}(L).
+Hence, our framework would have simplified the process of finding such a link, and the corresponding proof of consistency.
+To illustrate this point further, we give an alternate link $\psi_1$ corresponding to $\|\cdot\|_1$ and $\epsilon=1$, shown in Figure~\ref{fig:abstain-links}(R):
+\begin{equation}\label{eq:abstain-link-1}
+  \psi_1(u) = \begin{cases}
+	\bot & \|u\|_1 \leq 1\\
+	B^{-1}(\sgn(-u)) &\text{otherwise}
+  \end{cases}~.
+\end{equation}
+Theorem~\ref{thm:eps-thick-calibrated} immediately gives calibration of $(L_{1/2},\psi_1)$ with respect to $\ellabs{1/2}$.
+Aside from its simplicity, one possible advantage of $\psi_1$ is that it appears to yield the same constant in generalization bounds as $\psi$, yet assigns $\bot$ to much less of the surrogate space $\reals^d$.
+It would be interesting to compare the two links in practice.
+
+The embedding framework can also be applied to understand the hierarchical extension of the BEP surrogate given by~\citet{ramaswamy2015hierarchical}, who present a convex, calibrated surrogate for the hierarchical classification problem.
+Given a tree $H = ([n], E,W)$ over finite class labels, they consider the discrete loss 
+\begin{equation}\label{eq:tree-loss-discrete}
+	\ell^H(r,y) = \text{shortest path length in $H$ between $r$ and $y$}
+\end{equation}
+They generalize the BEP embedding to this problem and show their extension is consistent with respect to eq.~\eqref{eq:tree-loss-discrete}; we can also verify this is an embedding and subsume their result through Theorem~\ref{thm:poly-ie-implies-consistent}.
+
+
+\begin{figure}
+\begin{center}
+\begin{minipage}{0.32\linewidth}
+\includegraphics[width=\linewidth]{tikz/abstain-link-linf.pdf}
+\end{minipage}\hfill
+\begin{minipage}{0.32\linewidth}
+\includegraphics[width=\linewidth]{tikz/abstain-link-U-regions-l1.pdf}
+\end{minipage}\hfill
+\begin{minipage}{0.32\linewidth}
+\includegraphics[width=\linewidth]{tikz/abstain-link-l1.pdf}
+\end{minipage}\hfill
+\caption{Constructing links for the abstain surrogate $L_{1/2}$ with $d=2$. The embedding is shown in bold labeled by the corresponding reports. (L) The link envelope $\Psi$ resulting from Theorem~\ref{thm:eps-thick-calibrated} using $\|\cdot\|_\infty$ and $\epsilon = 1/2$, and a possible link $\psi$ which matches eq.~\eqref{eq:abstain-link} from~\cite{ramaswamy2018consistent}.  (M) An illustration of the thickened sets from Definition~\ref{def:eps-thick-link} for two sets $U \in \U$, using $\|\cdot\|_1$ and $\epsilon = 1$. (R) The $\Psi$ and $\psi$ from Theorem~\ref{thm:eps-thick-calibrated} using $\|\cdot\|_1$ and $\epsilon = 1$.}
+\label{fig:abstain-links}
+\end{center}
+\end{figure}
+
+
+\subsection{Inconsistency of Lov\'asz hinge}
+\label{sec:lovasz-hinge}
+
+Many structured prediction settings can be thought of as making multiple predictions at once, with a loss function that jointly measures error based on the relationship between these predictions~\cite{hazan2010direct, gao2011consistency, osokin2017structured}.
+In the case of $k$ binary predictions, these settings are typically formalized by taking the predictions and outcomes to be $\pm 1$ vectors, so $\R=\Y=\{-1,1\}^k$.
+One then defines a joint loss function, which is often merely a function of the set of mispredictions, meaning we may write $\ell^g(r)_y = g(\{i \in [k] : r_i \neq y_i\})$ for some set function $g:2^{[k]}\to\reals$.
+For example, Hamming loss is given by $g(S) = |S|$.
+In an effort to provide a general convex surrogate for these settings when $g$ is a submodular function, Yu and Blaschko~\cite{yu2018lovasz} introduce the \emph{Lov\'asz hinge}, which leverages the well-known convex Lov\'asz extension of submodular functions.
+While the authors provide theoretical justification and experiments, consistency of the Lov\'asz hinge is left open, which we resolve.
+
+Rather than formally define the Lov\'asz hinge, we defer the complete analysis to the full version of the paper~\cite{finocchiaro2019embedding}, and focus here on the $k=2$ case.
+For brevity, we write $g_\emptyset := g(\emptyset)$, $g_{1,2} := g(\{1,2\})$, etc.
+%\raft{Jessie: I meant \emph{our} paper :-].  Leaving this here:\cite{yu2015lovaszarxiv}}
+Assuming $g$ is normalized and increasing (meaning $g_{1,2} \geq \{g_1,g_2\} \geq g_\emptyset = 0$), the Lov\'asz hinge $L:\reals^k\to\reals^\Y_+$ is given by
+\begin{multline}
+  \label{eq:lovasz-hinge}
+  L^g(u)_y = \max\Bigl\{(1-u_1y_1)_+ g_1 + (1-u_2y_2)_+ (g_{1,2}-g_1),\\[-4pt] (1-u_2y_2)_+ g_2 + (1-u_1y_1)_+ (g_{1,2}-g_2)\Bigr\}~,
+\end{multline}
+where $(x)_+ = \max\{x,0\}$.
+We will explore the range of values of $g$ for which $L^g$ is consistent, where the link function $\psi:\reals^2\to\{-1,1\}^2$ is fixed as $\psi(u)_i = \sgn(u_i)$, with ties broken arbitrarily.
+
+Let us consider the coefficients $g_\emptyset = 0$, $g_1 = g_2 = g_{1,2} = 1$, for which $\ell^g$ is merely 0-1 loss on $\Y$.
+For consistency, for any distribution $p\in\simplex$, we must have that whenever $u \in \argmin_{u'\in\reals^2} \inprod{p}{L^g(u')}$, the outcome $\psi(u)$ must be the most likely, i.e., in $\argmax_{y\in\Y} p(y)$.
+Simplifying eq.~\eqref{eq:lovasz-hinge}, however, we have
+\begin{equation}
+  \label{eq:lovasz-hinge-abstain}
+  L^g(u)_y = \max\bigl\{(1-u_1y_1)_+,(1-u_2y_2)_+\bigr\} = \max\bigl\{1-u_1y_1,1-u_2y_2,0\bigr\}~,
+\end{equation}
+which is exactly the abstain surrogate~\eqref{eq:abstain-surrogate} for $d=2$.
+We immediately conclude that $L^g$ cannot be consistent with $\ell^g$, as the origin will be the unique optimal report for $L^g$ under distributions with $p_y < 0.5$ for all $y$, and one can simply take a distribution which disagrees with the way ties are broken in $\psi$.
+For example, if we take $\sgn(0) = 1$, then under $p((1,1)) = p((1,-1)) = p((-1,1)) = 0.2$ and $p((-1,-1)) = 0.4$, we have $\{0\} = \argmin_{u\in\reals^2} \inprod{p}{L^g(u)}$, yet we also have $\psi(0) = (1,1) \notin \{(-1,-1)\} = \argmin_{r\in\R} \inprod{p}{\ell^g(r)}$.
+
+In fact, this example is typical: using our embedding framework, and characterizing when $0\in\reals^2$ is an embedded point, one can show that $L^g$ is consistent if and only if $g_{1,2} = g_1 + g_2$.
+Moreover, in this linear case, which corresponds to $g$ being \emph{modular}, the Lov\'asz hinge reduces to weighted Hamming loss, which is trivially consistent from the consistency of hinge loss for 0-1 loss.
+In the full version of the paper~\cite{finocchiaro2019embedding}, we generalize this observation for all $k$: $L^g$ is consistent if and only if $g$ is modular.
+In other words, even for $k>2$, the only consistent Lov\'asz hinge is weighted Hamming loss.
+These results cast doubt on the effectiveness of the Lov\'asz hinge in practice.
+
+
+% \subsection{New surrogates for cost-sensitive classification}
+
+% \raf{I think we should cut this subsection, and maybe just remind the reader at the prelude to this section that Theorem~\ref{thm:discrete-loss-poly-embeddable} gives a construction for any discrete loss.}
+% The construction given in Theorem~\ref{thm:discrete-loss-poly-embeddable}, together with the calibrated link construction in Section~\ref{sec:calibration}, can generate consistent convex surrogates for arbitrary discrete losses.
+% For example, consider cost-sensitive classification; given an arbitrary loss matrix $C \in \reals^{n\times n}_+$ describing the loss $\ell_j(i) = C_{ij}$ of predicting label $i$ when the true label is $j$, we construct a convex surrogate based on the convex conjugate of $-\risk{\ell}$.
+% While of course several surrogates are known for this problem~\cite{pires2013cost}, they typically work in $n$ dimensions.
+% %\raf{Jessie, could you cite \url{http://proceedings.mlr.press/v28/avilapires13.pdf} here}
+% one advantage of our embedding framework is the ability to construct lower-dimensional surrogates when costs have certain geometric interpretations.
+% For example, if $v_1,\ldots,v_n \in \reals^k$ are on the unit sphere and $C_{ij} = \inprod{v_i}{v_j}$, we can simply take $L_j(u) = $\raf{aaaand Noah woke up}\raf{Just realized that this loss matrix has rank $k$ and thus is covered by AA15: just elicit the linear property $\E v_Y \in \reals^k$.}
+
+\subsection{Inconsistency of top-$k$ losses}
+% 7.14.19- proposed version for arXiv
+%\jessiet{The story we discussed: YK show $L'$ is inconsistent.  Our framework lets us ask: with what discrete loss \emph{is} $L'$ consistent?  (It also assures us that $L'$ is consistent for something...) Oh look, $L'$ embeds something which is $\elltopk$ plus some other term, so (a) we can see very clearly what $L'$ ``is doing'', and (b) we can see where to look for distributions yielding inconsistency, namely ones for which we actually prefer to report a set with $|r|<k$.}
+
+% As one instance, the top-$k$ classification problem is to predict the set of $k$ most likely labels; formally, we have $\R := \{r \subseteq [n] : |r| = k\}$, $\Y = [n]$, 
+% $1<k<n$, and discrete loss $\elltopk : r \mapsto \Ind{y \not\in r}$.
+In certain classification problems when ground truth may be ambiguous, such as object identification, it is common to predict a set of possible labels.
+As one instance, the top-$k$ classification problem is to predict the set of $k$ most likely labels; formally, we have $\R := \{r \in \{0,1\}^n : \|r\|_0 = k\}$, $1<k<n$, $\Y = [n]$, and discrete loss $\elltopk(r)_y = 1-r_y$.
+Surrogates for this problem commonly take reports $u\in\reals^n$, with the link $\psi(u) = \{u_{[1]},\ldots,u_{[k]}\}$, where $u_{[i]}$ is the $i^{th}$ largest entry of $u$.
+% , with ties broken arbitrarily.
+
+\citet{lapin2015top, lapin2016loss, lapin2018analysis} provide the following convex surrogate loss for this problem, which \citet{yang2018consistency} show to be inconsistent:%
+\footnote{\citet{yang2018consistency} also introduce a consistent surrogate, but it is non-convex.}
+\begin{align}\label{eq:L-2-surrogate}
+L^k(u)_y := \left( 1-u_y + \tfrac{1}{k} \textstyle\sum_{i=1}^k (u - e_y)_{[i]} \right)_+~,
+\end{align}
+where $e_y$ is $1$ in component $y$ and 0 elsewhere.
+With our framework, we can say more.
+Specifically, while $(L^k,\psi)$ is not consistent for $\elltopk$, since $L^k$ is polyhedral (Lemma~\ref{lem:top-k-polyhedral}), we know from Theorem~\ref{thm:poly-embeds-discrete} that it embeds \emph{some} discrete loss $\ell^k$, and from Theorem~\ref{thm:eps-thick-calibrated} there is a link $\psi'$ such that $(L^k,\psi')$ is calibrated (and consistent) for $\ell^k$.
+We therefore turn to deriving this discrete loss $\ell^k$.
+
+For concreteness, consider the case with $k = 2$ over $n=3$ outcomes.
+We can re-write $L^2(u)_y = \left(1 - u_y + \tfrac 1 2 (u_{[1]}+ u_{[2]} - \min(1,u_y))\right)_+$.
+By inspection, we can derive the properties elicited by $\elltop{2}$ and $L^2$, respectively, which reveals that the set $\R'$ consisting of all permutations of $(1,0,0)$, $(1,1,0)$, and $(2,1,0)$, are always represented among the minimizers of $L^2$.
+Thus, $L^2$ embeds the loss $\ell^2(r)_y = 0$ if $r_y = 2$ or $\ell^2(r)_y = 1 - r_y + \tfrac 1 2 \inprod{r}{\ones-e_y}$ otherwise.
+Observe that $\ell^2$ is just $\elltop{2}$ with an extra term punishing weight on elements other than $y$, and a reward for a weight of 2 on $y$.
+
+Moreover, we can visually inspect the corresponding properties (Fig.~\ref{fig:top-k-simplices}) to immediately see why $L^2$ is inconsistent: for distributions where the two least likely labels are roughly equally (un)likely, the minimizer will put all weight on the most likely label, and thus fail to distinguish the other two.
+More generally, $L^2$ cannot be consistent because the property it embeds does not ``refine'' (subdivide) the top-$k$ property, so not just $\psi$, but \emph{no} link function, could make $L^2$ consistent.
+
+\begin{figure}[H]
+	\begin{minipage}{0.45\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{tikz/original-top-k}
+		\label{fig:original-top-k}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.45\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{tikz/finite-surrogate-top-k}
+		\label{fig:finite-surrogate-top-k}
+	\end{minipage}
+	\caption{Minimizers of $\inprod{p}{\elltop{2}}$ and $\inprod{p}{\ell^2}$, respectively, varying $p$ over $\Delta_3$.}
+	\label{fig:top-k-simplices}
+\end{figure}
+
+\btw{Yutong's paper commented out here; mentioned at beginning of section- June 1 21}
+%\subsection{Embedding Ordered Partitions}
+%\citet*{wang2020weston} use embeddings to construct and prove the calibration of the Weston-Watkins surrogate for the \emph{Ordered Partition} loss.
+%
+%An ordered partition on $[n] := \{1, \ldots, n\}$ is an ordered list $S = (S_1, \ldots, S_l)$ of nonempty, pairwise disjoint sets such that $\cup_i S_i = [n]$, and assume $l \geq 2$.
+%The ordered partition target loss $\ell^{\OP}$ is defined, for $i \in [n]$ and $S = (S_1, \ldots, S_l) \in \OP_n$ by
+%\begin{align*}
+%\ell^\OP(S,y) &= |S_1| - 1 + \sum_{i=1}^{l-1} |S_1 \cup \ldots \cup S_{i+1}| \cdot \Ind{y \not \in S_1 \cup \ldots \cup S_i}~.~
+%\end{align*}
+%The summation in this ordered partition loss can be interpreted as a variation of 0-1 loss where one can report sets of sets, and increases the punishment for the outcome $y$ not being in the earlier sets in the ordering; outside the summation is a punishment for having a large prediction set on the first $S_1$.
+%This work presents an embedding for $\ell^\OP$ and uses this fact to show that the Weston-Watkins hinge loss~\citep{weston1999support} is in fact calibrated (and hence consistent, since the two are equivalent in Quadrant 1) with respect to $\ell^\OP$.
+%
+%The Weston-Watkins hinge loss takes predictions $u \in \reals^n$ and assigns loss
+%\begin{equation}\label{eq:ww-hinge}
+%L(u,y) = \sum_{i \in \Y : i \neq y} (1 - (u_y - u_i))_+~.~
+%\end{equation}
+%
+%\citet[Definition 2.3]{wang2020weston} takes the embedding $\varphi : \OP_n \to \reals^n$ entrywise so that for all $j \in S_i$, we have $\varphi(S)_j = -(i-1)$.
+%
+%\begin{figure}[H]
+%		\centering
+%		\includegraphics[width=0.5\linewidth]{tikz/ordered-partition}
+%	\caption{Level sets of the Weston Watkins hinge with embedding given by~\citet[Definition 2.3]{wang2020weston}.}
+%	\label{fig:ordered-partition}
+%\end{figure}
+
+
+\btw{Hierarchical surrogate commented out; just mention in 7.1 since it builds off of that example.}
+%\subsection{Embedding hierarchical classifications}
+%Our final example comes from \citet{ramaswamy2015hierarchical}, who present a convex, calibrated surrogate for the hierarchical classification problem.
+%Given a tree $H = ([n], E,W)$ over finite class labels, they consider the discrete loss 
+%\begin{equation}\label{eq:tree-loss-discrete}
+%	\ell^H(r,y) = \text{shortest path length in $H$ between $r$ and $y$}
+%\end{equation}
+%In this setting, the outcomes $\Y$ are composed of all nodes in the tree and not just the leaves.
+%
+%\begin{figure}
+%	\centering
+%		\includegraphics[width=0.7\linewidth]{tikz/example-tree-deeper.pdf}
+%		\caption{Tree $H$ with distribution $\vec p = (0, .2, .1, .4, .3)$. $\gamma^H(\vec p) = 3$.}\label{fig:example-tree-deeper}
+%\end{figure}
+%
+%
+%\begin{figure}
+%\begin{minipage}{0.45\linewidth}
+%	\centering
+%	\includegraphics[width=0.9\linewidth]{tikz/3-node-tree.pdf}
+%	\caption{3 node tree whose property we evaluate in next image.}
+%	\label{fig:3-node-tree}
+%\end{minipage}
+%\hfill
+%\begin{minipage}{0.45\linewidth}
+%	\centering
+%	\includegraphics[width=0.9\linewidth]{tikz/3-node-tree-prop.pdf}
+%	\caption{Property elicited by unweighted 3-node tree.}
+%	\label{fig:3-node-tree-prop}
+%\end{minipage}
+%\end{figure}
+%
+%In~\cite[Theorem 1]{ramaswamy2015hierarchical}, Ramaswamy et al. show the property $\gamma^H := \prop{\ell^H}$ is the deepest node $i$ in the tree $H$ such that the probability that node $i$ or one of its descendants is the outcome, denoted $S_i(p)$, is greater than or equal to $1/2$.
+%They additionally note that this property is agnostic to the weight $W$ of the tree.
+%As before, consider $p_i$ to be the probability that node $i$ is the ground truth label, and $S_i(p)$ to be the probability that node $i$ or one of its descendants is the ground truth.
+%For an example, see Figure~\ref{fig:example-tree-deeper}, where predicting node $3$ minimizes the expected tree loss over the distribution $\vec p = (0, 0.2, 0.1, 0.4, 0.3)$.
+%
+%Letting $h$ be the height of the tree $H$, Ramaswamy et al. present an embedding of $\ell^H$ that consists of learning $h$ $\abstain{1/2}$ embeddings, where the outcomes at the $j^{th}$ embedding are the nodes on level $j$ of the tree.
+%At each highest level, one proceeds down the path of the tree given by the prediction of the current abstain embedding.
+%If one predicts $\bot$ at level $j$, then we predict the node predicted at the $(j-1)^{st}$ level.
+%
+%Note that the given \emph{Cascade Surrogate} of~\citet[Equation 2]{ramaswamy2015hierarchical} simply requires the use of a surrogate that is calibrated with respect to $\abstain{1/2}$, so we can use the BEP surrogate of~\citet{ramaswamy2018consistent} to concatenate $h$ $\ceil{\log_2(n)}$ dimensional embeddings for the tree loss, yielding an embedding for $\ell^H$.
+%
+%It is worth noting that the cascade surrogate is not the always most efficient in terms of dimension.
+%For example, the cascading surrogate on the 3 node tree $H$ in Figure~\ref{fig:3-node-tree} takes two $1$-dimensional optimization problems for distributions $p$ such that $p_1 < 1/2$.
+%However, the property (Figure~\ref{fig:3-node-tree-prop}) elicited by tree distance for $H$ in Figure~\ref{fig:3-node-tree} is embeddable by a real-valued surrogate thanks to the characterization of \cite[\S~3]{finocchiaro2020embedding}, so one can see that the dimension cascade surrogate does not yield a tight bound.
+%This leaves the question of embedding dimension open for the hierarchical surrogate embedding the discrete tree loss $\ell^H$.
+%
+%% \jessie{Don't think we need the below addition for the camera ready, but will eventually want something along these lines for the arXiv version.}
+%% \proposedadd{To generalize this result, first consider that Lapin's surrogate is polyhedral, and we propose that each coordinate of an optimal report $u \in \reals_+^n$ must be at one of three points: $0$, $1$, or another ``high'' point that is a function of the number of high points and $M = |\{i : u_i = 1\}|$.  Since there are only a finite number of such optimal reports, $\R$, we know that this embeds a finite loss, namely $L^2_\R$.
+%% \begin{align*}
+%% \R := \left\{ \frac{|M| + k -1}{k - |H|} \mathbf{1}_H + \mathbf{1}_M : H, M \subset [n], H\cap M = \emptyset, |H| + |M| \leq k \right\}
+%% \end{align*}
+%% The discrete loss $\ell^{top-2} = L^2|_\R$ is then defined as follows:
+%% \begin{equation}
+%% \ell^{top-k}(r,y) = \begin{cases}
+%% 0 & r_y = \bar r_{-y} + 1\\
+%% \bar r - \frac 1 k & r_y = 1\\
+%% 1 + \bar r & r_y = 0
+%% \end{cases}~,~
+%% \end{equation}
+%% where $\bar r = \frac 1 k \sum_{i=1}^k r_{[i]}$.
+%% }
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Jessie's version here 7/16/2019
+
+% Figure~\ref{fig:top-k-simplices} (left) gives a map of the property values of $\gamma^{\text{top-2}} := \prop{\elltop{2}}$ over $\Delta_3$.
+% Similarly, for every distribution $p \in \Delta_3$, $\inprod{p}{L^2}$ has a minimizer in the set $\R'$ composed of the tuples shown in Figure~\ref{fig:top-k-simplices} (right), and thus $\risk{L^2} = \risk{\ell^2}$, where $\ell^2 := L^2|_{\R'}$, so Figure~\ref{fig:top-k-simplices} (right) shows $\gamma^2 := \prop{\ell^2}$.
+% %Therefore, we know $L^2$ embeds $\ell^2$ by Proposition~\ref{prop:embed-bayes-risks}.
+% %(Each cell in this simplex is a level set $\gamma^{\text{top-2}}_r$ and corresponds to a flat piece of the Bayes Risk $\risk{\elltop{2}}$.)
+
+% By visual inspection, we can observe there is no ``refining'' mapping from $\gamma^{\text{top-2}}$ to $\gamma^2$.
+% In refining, we loosely mean that, for some $j \in \R$, there is no $I \subseteq \reals^n$ such that $\cup_{i \in I}\gamma^2_i = \gamma^{\text{top-2}}_{j}$.
+% %If such a mapping existed, it would allude to one possible consistent link $\psi$ by which $L^2$ embeds $\elltop{2}$.
+% Conversely, we can ``refine'' $\prop{L^2}$ down to $\prop{\ell^2}$ by using the axiom of choice to construct $\R'$.
+
+% \jessie{Not sure if this is too much detail...}
+% Since $\prop{\elltop{2}}$ does not refine $\prop{L^2}$, then $L^2$ does not embed $\elltop{2}$.
+% For example, we can take distributions $p_1 \in \gamma^{top-2}_{\{1,2\}}$ and $p_2 \in \gamma^{top-2}_{\{1,3\}}$ such that $p_1, p_2 \in \Gamma_{(1,0,0)}$.
+% Regardless of $\psi((1,0,0))$, for either $p_1$ or $p_2$, we will observe $\psi((1,0,0)) \not \in \argmin_u \inprod{p_i}{\elltop{2}(u)}$.
+% Thus, we see that $L^2$ is not a consistent surrogate for $\elltop{2}$.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% old version submitted to NuerIPS%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\btw{The story we discussed: YK show $L'$ is inconsistent.  Our framework lets us ask: with what discrete loss \emph{is} $L'$ consistent?  (It also assures us that $L'$ is consistent for something...) Oh look, $L'$ embeds something which is $\elltopk$ plus some other term, so (a) we can see very clearly what $L'$ ``is doing'', and (b) we can see where to look for distributions yielding inconsistency, namely ones for which we actually prefer to report a set with $|r|<k$.}
+%
+%In certain classification problems, for example in information retrieval, it is common to predict a set of possible labels.
+%As one instance, for $k<n$ the top-$k$ classification problem has reports $\R := \{r \subseteq [n] : |r| = k\}$, with label $y \in [n]$.
+%The natural discrete loss $\elltopk:\R \to \reals^\Y_+$ is given by
+%\begin{align}\label{eq:top-k}
+%  \elltopk(r,y) = \Ind{y \not \in r}~,
+%\end{align}
+%which simply gives a penalty if the label was not in the reported set.
+%
+%Surrogates for this problem commonly take reports $u\in\reals^n$, with the link $\psi(u) = \{u_{[1]},\ldots,u_{[k]}\}$, where $x_{[u]}$ is the $i^{th}$ largest component of $u$, with ties broken arbitrarily.
+%\citet{lapin2015top, lapin2016loss, lapin2018analysis} provide the following convex surrogate loss for this problem, which \citet{yang2018consistency} show to be inconsistent:%
+%\footnote{Yang and Koyejo also introduce a consistent surrogate, but it is non-convex.}
+%\begin{align}\label{eq:L-2-surrogate}
+%  L'(u)_y := \left( \tfrac{1}{k} \textstyle\sum_{i=1}^k (u + \ones - e_y)_{[i]} - u_y \right)_+~,
+%\end{align}
+%where $e_y$ is $1$ in component $y$ and 0 elsewhere.
+%
+%With our framework, we can say more.
+%Specifically, while $(L',\psi)$ is not consistent for $\elltopk$, since $L'$ is polyhedral (Lemma~\ref{lem:top-k-polyhedral}), we know from Theorem~\ref{thm:poly-embeds-discrete} that it embeds \emph{some} discrete loss $\ell'$, and from Theorem~\ref{thm:eps-thick-calibrated} there is a link $\psi'$ such that $(L',\psi')$ is calibrated (and consistent) for $\ell'$.
+%We therefore turn to deriving this discrete loss $\ell'$.
+%
+%In Lemma~\ref{lem:top-k-optimal-corners}\jessiet{in the Appendix... remove ref for camera ready version}, we show that the set $\U = \{u \in \{0,1\}^n : \|u\|_0 \leq k\}$ is always represented among the optimizers of $L'$, meaning for all $p \in \simplex$ we have $\prop{L'}(p) \cap \U \neq \emptyset$.
+%From Lemma~\ref{lem:loss-restrict}\raft{was Lemma~\ref{lem:top-k-surrogate-embeds}}, then, $L'$ must embed $L'|_\U$, which gives us $\ell':\R'\to\reals^\Y_+$ via the natural embedding from sets $\R' = \{r \subseteq [n] : |r| \leq k\}$ to their indicator vectors:
+%\begin{align}\label{eq:ell-2}
+%\ell'(r)_y &= \Ind{y \not\in r} + \tfrac 1 k |r \setminus \{y\}| = (1+\tfrac 1 k)\Ind{y \not\in r} + \tfrac 1 k (|r|-1)~.
+%\end{align}
+%We now see that $\ell'$ is essentially $\elltopk$ (extended to sets smaller than $k$) plus an additional cardinality term which rewards smaller sets.
+%
+%Knowledge of what loss $L'$ actually embeds greatly simplifies the task of proving inconsistency with $\elltopk$.
+%Specifically, we see that $\ell'$ allows sets of cardinality strictly less than $k$, so we can look for a distribution making one of these smaller sets optimal.
+%Writing the expected loss, we have
+%%$\inprod{p}{\ell'(r)} = 1 - p(r) + \tfrac 1 k (|r|-p(r)) = 1 + \tfrac 1 k |r| - (1 + \tfrac 1 k) p(r)$,\\
+%$\inprod{p}{\ell'(r)} = (1+\tfrac 1 k)(1 - p(r)) + \tfrac 1 k (|r|-1) = 1 + \tfrac 1 k |r| - (1 + \tfrac 1 k) p(r)$, where $p(r) = \sum_{i\in r} p_i$.
+%% It is now easy to see that the optimal $r$ for any fixed cardinality $|r|=c$ is the $c$ most likely labels.
+%So let us ask when it is better to drop an element $i$ from $r$:
+%% If $i$ is the index of the $c$th most likely label (so $p_i = p_{[c]}$)
+%we have $\inprod{p}{\ell'(r)-\ell'(r\setminus\{i\})} = \tfrac 1 k - (1+\tfrac 1 k)p_i$, meaning we will drop elements from $r$ until they all have weight at least $\tfrac 1 {k+1}$.
+%In particular, for distributions close to uniform, $r=\emptyset$ is optimal, already giving us inconsistency\raft{If space (nope) we should spell this out like Jessie did: however ties are broken at $u=0$, pick a distribution with bumps going against the ties, and $u=0$ is still optimal.}.
+%More generally, as $k < n$, the set $P = \{p\in\simplex : \max_{r\in\R'} p(r) < k/(k+1)\}$ is full-dimensional and guarantees that at least one of the top $k$ labels has probability strictly less than $\tfrac 1 {k+1}$.
+%
+%% We now focus on the case where $k=1$; the top-$k$ loss reduces to 0-1 loss in this case.
+%% To show a set of distributions where $\prop{\ell'}(p) \neq \prop{\elltopk}(p)$, we claim that $\vec{0}~\in~\prop{\ell'} \implies \risk{\ell'}(p) = 1$ for any $p$ with $\max_y p_y \leq 1/2$.
+%% Additionally $\risk{\ell_{top-1}}(p) = 1 - \max_y p_y < 1 \implies \vec{0} \not\in \prop{\elltopk}(p)$.
+%
+%% First, $\ell(\vec{0}, \bar{p}) = 1$ for all $p \in \simplex$.
+%% Taking the set $\{y\}$ for any $y \in \Y$, the expected loss $\inprod{p}{\ell'(\{y\})} = 2 (1-p_y) \geq 1$ by assumption on $p$.
+%% %For any $r$ such that $|r| \geq 2$ \jessiet{In general, $|r| \geq k+1$}, we know that  $\ell'(r)_y \geq 1$ for all $y \in \Y$, so the expected loss much be greater than or equal to $1$.
+%% Therefore, we have that $\vec{0} \in \prop{\ell'}(p)$ but $\vec{0} \not\in \prop{\elltopk}(p)$ for any $p$ such that $\max_y p_y \leq 1/2$.
+%
+%
+%
+%%Since we can see that $\ell' \neq \elltopk$, we can then see that $L'$ is not consistent with respect to $\elltopk$.
+%%Similarly, given $L_4(u,y) := \max\left(\frac{1}{k} \sum_{i=1}^k (1 + u_{\setminus y})_{[i]} - s_y, 0\right)$, we can actually see that $L_4$ also embeds $\ell'$.
+%%We will double up on notation and call this discrete loss $\ell_4$ as well, for the sake of matching subscripts of discrete losses to the surrogates that embed them.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1343,350 +1691,6 @@ The above Theorem statement gives us a somewhat surprising result: when restrict
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Application to Specific Surrogates}\label{sec:examples}
-
-Our results give a framework to construct consistent surrogates and link functions for any discrete loss, but they also provide a way to verify the consistency or inconsistency of given surrogates.
-Below, we illustrate the power of this framework with specific examples from the literature, as well as new examples.
-In some cases we simplify existing proofs, while in others we give new results, such as a new calibrated link for abstain loss, and the inconsistency of the recently proposed Lov\'asz hinge.
-\btw{RF: The top-k and hypercube/set examples (except abstain) have the link built in, e.g.\ as the sign function), and they just work around it.  Our results may suggest that it's worth thinking ``outside the box'' (HAH, genious...) and looking for embeddings which are not the hypercube. \jessie{Added a bit discussing this, starting at ``the examples in ...''.}}
-The examples in \S~\ref{sec:examples}, with the exception of the abstain surrogate given by~\citet{ramaswamy2018consistent}, all present a surrogate that use the link $\psi: u \mapsto \sgn(u)$.
-While this may sometimes yield a calibrated link, this is not always the case.
-In fact, we will see that most of these examples do not yield calibrated surrogates, although proving that there is \emph{no} calibrated link for a given surrogate is quite difficult.
-Our results suggest that it is possible that some of the given surrogates are calibrated, but perhaps one must use a nontraditional link in order to calibrate the loss, such as the thickening construction given here.
-\citet{wang2020weston} apply the embedding framework to show that the Weston-Watkins hinge loss embeds a discrete loss for ordered partitions.
-
-
-\subsection{Consistency of abstain surrogate and link construction}
-\label{sec:abstain}
-
-In classification settings with a large number of labels, several authors consider a variant of classification, with the addition of a ``reject'' or \emph{abstain} option.
-For example, \citet{ramaswamy2018consistent} study the loss $\ellabs{\alpha} : [n] \cup \{\bot\} \to \reals^\Y_+$ defined by $\ellabs{\alpha}(r)_y = 0$ if $r=y$, $\alpha$ if $r = \bot$, and 1 otherwise.
-%\begin{align}\label{eq:abstain-discrete}
-%$\ellabs{\alpha}(r)_y = \begin{cases}
-%0 & r = y\\
-%\alpha & r = \bot\\
-%1 & \text{otherwise}
-%\end{cases}~.$
-%\end{align}
-Here, the report $\bot$ corresponds to ``abstaining'' if no label is sufficiently likely, specifically, if no $y\in\Y$ has $p_y \geq 1-\alpha$.
-\citet{ramaswamy2018consistent} provide a polyhedral surrogate for $\ellabs{\alpha}$, which we present here for $\alpha=1/2$.
-Letting $d = \ceil{\log_2(n)}$ their surrogate is $L_{1/2} : \reals^d \to \reals^\Y_+$ given by
-\begin{equation}\label{eq:abstain-surrogate}
-L_{1/2}(u)_y = \left(\max\nolimits_{j \in [d]}B(y)_j u_j + 1\right)_+~,
-\end{equation}
-where $B:[n]\to\{-1,1\}^d$ is a arbitrary injection; let us assume $n = 2^d$ so that we have a bijection.
-Consistency is proven for the following link function,
-\begin{equation}\label{eq:abstain-link}
-  \psi(u) = \begin{cases}
-	\bot & \min_{i \in [d]} |u_i| \leq 1/2\\
-	B^{-1}(\sgn(-u)) &\text{otherwise}
-  \end{cases}~.
-\end{equation}
-
-In light of our framework, we can see that $L_{1/2}$ is an excellent example of an embedding, where $\varphi(y) = B(y)$ and $\varphi(\bot) = 0 \in \reals^d$.
-Moreover, the link function $\psi$ can be recovered from Theorem~\ref{thm:eps-thick-calibrated} with norm $\|\cdot\|_\infty$ and $\epsilon=1/2$; see Figure~\ref{fig:abstain-links}(L).
-Hence, our framework would have simplified the process of finding such a link, and the corresponding proof of consistency.
-To illustrate this point further, we give an alternate link $\psi_1$ corresponding to $\|\cdot\|_1$ and $\epsilon=1$, shown in Figure~\ref{fig:abstain-links}(R):
-\begin{equation}\label{eq:abstain-link-1}
-  \psi_1(u) = \begin{cases}
-	\bot & \|u\|_1 \leq 1\\
-	B^{-1}(\sgn(-u)) &\text{otherwise}
-  \end{cases}~.
-\end{equation}
-Theorem~\ref{thm:eps-thick-calibrated} immediately gives calibration of $(L_{1/2},\psi_1)$ with respect to $\ellabs{1/2}$.
-Aside from its simplicity, one possible advantage of $\psi_1$ is that it appears to yield the same constant in generalization bounds as $\psi$, yet assigns $\bot$ to much less of the surrogate space $\reals^d$.
-It would be interesting to compare the two links in practice.
-
-The embedding framework can also be applied to understand the hierarchical extension of the BEP surrogate given by~\citet{ramaswamy2015hierarchical}, who present a convex, calibrated surrogate for the hierarchical classification problem.
-Given a tree $H = ([n], E,W)$ over finite class labels, they consider the discrete loss 
-\begin{equation}\label{eq:tree-loss-discrete}
-	\ell^H(r,y) = \text{shortest path length in $H$ between $r$ and $y$}
-\end{equation}
-They generalize the BEP embedding to this problem and show their extension is consistent with respect to eq.~\eqref{eq:tree-loss-discrete}; we can also verify this is an embedding and subsume their result through Theorem~\ref{thm:poly-ie-implies-consistent}.
-
-
-\begin{figure}
-\begin{center}
-\begin{minipage}{0.32\linewidth}
-\includegraphics[width=\linewidth]{tikz/abstain-link-linf.pdf}
-\end{minipage}\hfill
-\begin{minipage}{0.32\linewidth}
-\includegraphics[width=\linewidth]{tikz/abstain-link-U-regions-l1.pdf}
-\end{minipage}\hfill
-\begin{minipage}{0.32\linewidth}
-\includegraphics[width=\linewidth]{tikz/abstain-link-l1.pdf}
-\end{minipage}\hfill
-\caption{Constructing links for the abstain surrogate $L_{1/2}$ with $d=2$. The embedding is shown in bold labeled by the corresponding reports. (L) The link envelope $\Psi$ resulting from Theorem~\ref{thm:eps-thick-calibrated} using $\|\cdot\|_\infty$ and $\epsilon = 1/2$, and a possible link $\psi$ which matches eq.~\eqref{eq:abstain-link} from~\cite{ramaswamy2018consistent}.  (M) An illustration of the thickened sets from Definition~\ref{def:eps-thick-link} for two sets $U \in \U$, using $\|\cdot\|_1$ and $\epsilon = 1$. (R) The $\Psi$ and $\psi$ from Theorem~\ref{thm:eps-thick-calibrated} using $\|\cdot\|_1$ and $\epsilon = 1$.}
-\label{fig:abstain-links}
-\end{center}
-\end{figure}
-
-
-\subsection{Inconsistency of Lov\'asz hinge}
-\label{sec:lovasz-hinge}
-
-Many structured prediction settings can be thought of as making multiple predictions at once, with a loss function that jointly measures error based on the relationship between these predictions~\cite{hazan2010direct, gao2011consistency, osokin2017structured}.
-In the case of $k$ binary predictions, these settings are typically formalized by taking the predictions and outcomes to be $\pm 1$ vectors, so $\R=\Y=\{-1,1\}^k$.
-One then defines a joint loss function, which is often merely a function of the set of mispredictions, meaning we may write $\ell^g(r)_y = g(\{i \in [k] : r_i \neq y_i\})$ for some set function $g:2^{[k]}\to\reals$.
-For example, Hamming loss is given by $g(S) = |S|$.
-In an effort to provide a general convex surrogate for these settings when $g$ is a submodular function, Yu and Blaschko~\cite{yu2018lovasz} introduce the \emph{Lov\'asz hinge}, which leverages the well-known convex Lov\'asz extension of submodular functions.
-While the authors provide theoretical justification and experiments, consistency of the Lov\'asz hinge is left open, which we resolve.
-
-Rather than formally define the Lov\'asz hinge, we defer the complete analysis to the full version of the paper~\cite{finocchiaro2019embedding}, and focus here on the $k=2$ case.
-For brevity, we write $g_\emptyset := g(\emptyset)$, $g_{1,2} := g(\{1,2\})$, etc.
-%\raft{Jessie: I meant \emph{our} paper :-].  Leaving this here:\cite{yu2015lovaszarxiv}}
-Assuming $g$ is normalized and increasing (meaning $g_{1,2} \geq \{g_1,g_2\} \geq g_\emptyset = 0$), the Lov\'asz hinge $L:\reals^k\to\reals^\Y_+$ is given by
-\begin{multline}
-  \label{eq:lovasz-hinge}
-  L^g(u)_y = \max\Bigl\{(1-u_1y_1)_+ g_1 + (1-u_2y_2)_+ (g_{1,2}-g_1),\\[-4pt] (1-u_2y_2)_+ g_2 + (1-u_1y_1)_+ (g_{1,2}-g_2)\Bigr\}~,
-\end{multline}
-where $(x)_+ = \max\{x,0\}$.
-We will explore the range of values of $g$ for which $L^g$ is consistent, where the link function $\psi:\reals^2\to\{-1,1\}^2$ is fixed as $\psi(u)_i = \sgn(u_i)$, with ties broken arbitrarily.
-
-Let us consider the coefficients $g_\emptyset = 0$, $g_1 = g_2 = g_{1,2} = 1$, for which $\ell^g$ is merely 0-1 loss on $\Y$.
-For consistency, for any distribution $p\in\simplex$, we must have that whenever $u \in \argmin_{u'\in\reals^2} \inprod{p}{L^g(u')}$, the outcome $\psi(u)$ must be the most likely, i.e., in $\argmax_{y\in\Y} p(y)$.
-Simplifying eq.~\eqref{eq:lovasz-hinge}, however, we have
-\begin{equation}
-  \label{eq:lovasz-hinge-abstain}
-  L^g(u)_y = \max\bigl\{(1-u_1y_1)_+,(1-u_2y_2)_+\bigr\} = \max\bigl\{1-u_1y_1,1-u_2y_2,0\bigr\}~,
-\end{equation}
-which is exactly the abstain surrogate~\eqref{eq:abstain-surrogate} for $d=2$.
-We immediately conclude that $L^g$ cannot be consistent with $\ell^g$, as the origin will be the unique optimal report for $L^g$ under distributions with $p_y < 0.5$ for all $y$, and one can simply take a distribution which disagrees with the way ties are broken in $\psi$.
-For example, if we take $\sgn(0) = 1$, then under $p((1,1)) = p((1,-1)) = p((-1,1)) = 0.2$ and $p((-1,-1)) = 0.4$, we have $\{0\} = \argmin_{u\in\reals^2} \inprod{p}{L^g(u)}$, yet we also have $\psi(0) = (1,1) \notin \{(-1,-1)\} = \argmin_{r\in\R} \inprod{p}{\ell^g(r)}$.
-
-In fact, this example is typical: using our embedding framework, and characterizing when $0\in\reals^2$ is an embedded point, one can show that $L^g$ is consistent if and only if $g_{1,2} = g_1 + g_2$.
-Moreover, in this linear case, which corresponds to $g$ being \emph{modular}, the Lov\'asz hinge reduces to weighted Hamming loss, which is trivially consistent from the consistency of hinge loss for 0-1 loss.
-In the full version of the paper~\cite{finocchiaro2019embedding}, we generalize this observation for all $k$: $L^g$ is consistent if and only if $g$ is modular.
-In other words, even for $k>2$, the only consistent Lov\'asz hinge is weighted Hamming loss.
-These results cast doubt on the effectiveness of the Lov\'asz hinge in practice.
-
-
-% \subsection{New surrogates for cost-sensitive classification}
-
-% \raf{I think we should cut this subsection, and maybe just remind the reader at the prelude to this section that Theorem~\ref{thm:discrete-loss-poly-embeddable} gives a construction for any discrete loss.}
-% The construction given in Theorem~\ref{thm:discrete-loss-poly-embeddable}, together with the calibrated link construction in Section~\ref{sec:calibration}, can generate consistent convex surrogates for arbitrary discrete losses.
-% For example, consider cost-sensitive classification; given an arbitrary loss matrix $C \in \reals^{n\times n}_+$ describing the loss $\ell_j(i) = C_{ij}$ of predicting label $i$ when the true label is $j$, we construct a convex surrogate based on the convex conjugate of $-\risk{\ell}$.
-% While of course several surrogates are known for this problem~\cite{pires2013cost}, they typically work in $n$ dimensions.
-% %\raf{Jessie, could you cite \url{http://proceedings.mlr.press/v28/avilapires13.pdf} here}
-% one advantage of our embedding framework is the ability to construct lower-dimensional surrogates when costs have certain geometric interpretations.
-% For example, if $v_1,\ldots,v_n \in \reals^k$ are on the unit sphere and $C_{ij} = \inprod{v_i}{v_j}$, we can simply take $L_j(u) = $\raf{aaaand Noah woke up}\raf{Just realized that this loss matrix has rank $k$ and thus is covered by AA15: just elicit the linear property $\E v_Y \in \reals^k$.}
-
-\subsection{Inconsistency of top-$k$ losses}
-% 7.14.19- proposed version for arXiv
-%\jessiet{The story we discussed: YK show $L'$ is inconsistent.  Our framework lets us ask: with what discrete loss \emph{is} $L'$ consistent?  (It also assures us that $L'$ is consistent for something...) Oh look, $L'$ embeds something which is $\elltopk$ plus some other term, so (a) we can see very clearly what $L'$ ``is doing'', and (b) we can see where to look for distributions yielding inconsistency, namely ones for which we actually prefer to report a set with $|r|<k$.}
-
-% As one instance, the top-$k$ classification problem is to predict the set of $k$ most likely labels; formally, we have $\R := \{r \subseteq [n] : |r| = k\}$, $\Y = [n]$, 
-% $1<k<n$, and discrete loss $\elltopk : r \mapsto \Ind{y \not\in r}$.
-In certain classification problems when ground truth may be ambiguous, such as object identification, it is common to predict a set of possible labels.
-As one instance, the top-$k$ classification problem is to predict the set of $k$ most likely labels; formally, we have $\R := \{r \in \{0,1\}^n : \|r\|_0 = k\}$, $1<k<n$, $\Y = [n]$, and discrete loss $\elltopk(r)_y = 1-r_y$.
-Surrogates for this problem commonly take reports $u\in\reals^n$, with the link $\psi(u) = \{u_{[1]},\ldots,u_{[k]}\}$, where $u_{[i]}$ is the $i^{th}$ largest entry of $u$.
-% , with ties broken arbitrarily.
-
-\citet{lapin2015top, lapin2016loss, lapin2018analysis} provide the following convex surrogate loss for this problem, which \citet{yang2018consistency} show to be inconsistent:%
-\footnote{\citet{yang2018consistency} also introduce a consistent surrogate, but it is non-convex.}
-\begin{align}\label{eq:L-2-surrogate}
-L^k(u)_y := \left( 1-u_y + \tfrac{1}{k} \textstyle\sum_{i=1}^k (u - e_y)_{[i]} \right)_+~,
-\end{align}
-where $e_y$ is $1$ in component $y$ and 0 elsewhere.
-With our framework, we can say more.
-Specifically, while $(L^k,\psi)$ is not consistent for $\elltopk$, since $L^k$ is polyhedral (Lemma~\ref{lem:top-k-polyhedral}), we know from Theorem~\ref{thm:poly-embeds-discrete} that it embeds \emph{some} discrete loss $\ell^k$, and from Theorem~\ref{thm:eps-thick-calibrated} there is a link $\psi'$ such that $(L^k,\psi')$ is calibrated (and consistent) for $\ell^k$.
-We therefore turn to deriving this discrete loss $\ell^k$.
-
-For concreteness, consider the case with $k = 2$ over $n=3$ outcomes.
-We can re-write $L^2(u)_y = \left(1 - u_y + \tfrac 1 2 (u_{[1]}+ u_{[2]} - \min(1,u_y))\right)_+$.
-By inspection, we can derive the properties elicited by $\elltop{2}$ and $L^2$, respectively, which reveals that the set $\R'$ consisting of all permutations of $(1,0,0)$, $(1,1,0)$, and $(2,1,0)$, are always represented among the minimizers of $L^2$.
-Thus, $L^2$ embeds the loss $\ell^2(r)_y = 0$ if $r_y = 2$ or $\ell^2(r)_y = 1 - r_y + \tfrac 1 2 \inprod{r}{\ones-e_y}$ otherwise.
-Observe that $\ell^2$ is just $\elltop{2}$ with an extra term punishing weight on elements other than $y$, and a reward for a weight of 2 on $y$.
-
-Moreover, we can visually inspect the corresponding properties (Fig.~\ref{fig:top-k-simplices}) to immediately see why $L^2$ is inconsistent: for distributions where the two least likely labels are roughly equally (un)likely, the minimizer will put all weight on the most likely label, and thus fail to distinguish the other two.
-More generally, $L^2$ cannot be consistent because the property it embeds does not ``refine'' (subdivide) the top-$k$ property, so not just $\psi$, but \emph{no} link function, could make $L^2$ consistent.
-
-\begin{figure}[H]
-	\begin{minipage}{0.45\linewidth}
-		\centering
-		\includegraphics[width=\linewidth]{tikz/original-top-k}
-		\label{fig:original-top-k}
-	\end{minipage}
-	\hfill
-	\begin{minipage}{0.45\linewidth}
-		\centering
-		\includegraphics[width=\linewidth]{tikz/finite-surrogate-top-k}
-		\label{fig:finite-surrogate-top-k}
-	\end{minipage}
-	\caption{Minimizers of $\inprod{p}{\elltop{2}}$ and $\inprod{p}{\ell^2}$, respectively, varying $p$ over $\Delta_3$.}
-	\label{fig:top-k-simplices}
-\end{figure}
-
-\btw{Yutong's paper commented out here; mentioned at beginning of section- June 1 21}
-%\subsection{Embedding Ordered Partitions}
-%\citet*{wang2020weston} use embeddings to construct and prove the calibration of the Weston-Watkins surrogate for the \emph{Ordered Partition} loss.
-%
-%An ordered partition on $[n] := \{1, \ldots, n\}$ is an ordered list $S = (S_1, \ldots, S_l)$ of nonempty, pairwise disjoint sets such that $\cup_i S_i = [n]$, and assume $l \geq 2$.
-%The ordered partition target loss $\ell^{\OP}$ is defined, for $i \in [n]$ and $S = (S_1, \ldots, S_l) \in \OP_n$ by
-%\begin{align*}
-%\ell^\OP(S,y) &= |S_1| - 1 + \sum_{i=1}^{l-1} |S_1 \cup \ldots \cup S_{i+1}| \cdot \Ind{y \not \in S_1 \cup \ldots \cup S_i}~.~
-%\end{align*}
-%The summation in this ordered partition loss can be interpreted as a variation of 0-1 loss where one can report sets of sets, and increases the punishment for the outcome $y$ not being in the earlier sets in the ordering; outside the summation is a punishment for having a large prediction set on the first $S_1$.
-%This work presents an embedding for $\ell^\OP$ and uses this fact to show that the Weston-Watkins hinge loss~\citep{weston1999support} is in fact calibrated (and hence consistent, since the two are equivalent in Quadrant 1) with respect to $\ell^\OP$.
-%
-%The Weston-Watkins hinge loss takes predictions $u \in \reals^n$ and assigns loss
-%\begin{equation}\label{eq:ww-hinge}
-%L(u,y) = \sum_{i \in \Y : i \neq y} (1 - (u_y - u_i))_+~.~
-%\end{equation}
-%
-%\citet[Definition 2.3]{wang2020weston} takes the embedding $\varphi : \OP_n \to \reals^n$ entrywise so that for all $j \in S_i$, we have $\varphi(S)_j = -(i-1)$.
-%
-%\begin{figure}[H]
-%		\centering
-%		\includegraphics[width=0.5\linewidth]{tikz/ordered-partition}
-%	\caption{Level sets of the Weston Watkins hinge with embedding given by~\citet[Definition 2.3]{wang2020weston}.}
-%	\label{fig:ordered-partition}
-%\end{figure}
-
-
-\btw{Hierarchical surrogate commented out; just mention in 7.1 since it builds off of that example.}
-%\subsection{Embedding hierarchical classifications}
-%Our final example comes from \citet{ramaswamy2015hierarchical}, who present a convex, calibrated surrogate for the hierarchical classification problem.
-%Given a tree $H = ([n], E,W)$ over finite class labels, they consider the discrete loss 
-%\begin{equation}\label{eq:tree-loss-discrete}
-%	\ell^H(r,y) = \text{shortest path length in $H$ between $r$ and $y$}
-%\end{equation}
-%In this setting, the outcomes $\Y$ are composed of all nodes in the tree and not just the leaves.
-%
-%\begin{figure}
-%	\centering
-%		\includegraphics[width=0.7\linewidth]{tikz/example-tree-deeper.pdf}
-%		\caption{Tree $H$ with distribution $\vec p = (0, .2, .1, .4, .3)$. $\gamma^H(\vec p) = 3$.}\label{fig:example-tree-deeper}
-%\end{figure}
-%
-%
-%\begin{figure}
-%\begin{minipage}{0.45\linewidth}
-%	\centering
-%	\includegraphics[width=0.9\linewidth]{tikz/3-node-tree.pdf}
-%	\caption{3 node tree whose property we evaluate in next image.}
-%	\label{fig:3-node-tree}
-%\end{minipage}
-%\hfill
-%\begin{minipage}{0.45\linewidth}
-%	\centering
-%	\includegraphics[width=0.9\linewidth]{tikz/3-node-tree-prop.pdf}
-%	\caption{Property elicited by unweighted 3-node tree.}
-%	\label{fig:3-node-tree-prop}
-%\end{minipage}
-%\end{figure}
-%
-%In~\cite[Theorem 1]{ramaswamy2015hierarchical}, Ramaswamy et al. show the property $\gamma^H := \prop{\ell^H}$ is the deepest node $i$ in the tree $H$ such that the probability that node $i$ or one of its descendants is the outcome, denoted $S_i(p)$, is greater than or equal to $1/2$.
-%They additionally note that this property is agnostic to the weight $W$ of the tree.
-%As before, consider $p_i$ to be the probability that node $i$ is the ground truth label, and $S_i(p)$ to be the probability that node $i$ or one of its descendants is the ground truth.
-%For an example, see Figure~\ref{fig:example-tree-deeper}, where predicting node $3$ minimizes the expected tree loss over the distribution $\vec p = (0, 0.2, 0.1, 0.4, 0.3)$.
-%
-%Letting $h$ be the height of the tree $H$, Ramaswamy et al. present an embedding of $\ell^H$ that consists of learning $h$ $\abstain{1/2}$ embeddings, where the outcomes at the $j^{th}$ embedding are the nodes on level $j$ of the tree.
-%At each highest level, one proceeds down the path of the tree given by the prediction of the current abstain embedding.
-%If one predicts $\bot$ at level $j$, then we predict the node predicted at the $(j-1)^{st}$ level.
-%
-%Note that the given \emph{Cascade Surrogate} of~\citet[Equation 2]{ramaswamy2015hierarchical} simply requires the use of a surrogate that is calibrated with respect to $\abstain{1/2}$, so we can use the BEP surrogate of~\citet{ramaswamy2018consistent} to concatenate $h$ $\ceil{\log_2(n)}$ dimensional embeddings for the tree loss, yielding an embedding for $\ell^H$.
-%
-%It is worth noting that the cascade surrogate is not the always most efficient in terms of dimension.
-%For example, the cascading surrogate on the 3 node tree $H$ in Figure~\ref{fig:3-node-tree} takes two $1$-dimensional optimization problems for distributions $p$ such that $p_1 < 1/2$.
-%However, the property (Figure~\ref{fig:3-node-tree-prop}) elicited by tree distance for $H$ in Figure~\ref{fig:3-node-tree} is embeddable by a real-valued surrogate thanks to the characterization of \cite[\S~3]{finocchiaro2020embedding}, so one can see that the dimension cascade surrogate does not yield a tight bound.
-%This leaves the question of embedding dimension open for the hierarchical surrogate embedding the discrete tree loss $\ell^H$.
-%
-%% \jessie{Don't think we need the below addition for the camera ready, but will eventually want something along these lines for the arXiv version.}
-%% \proposedadd{To generalize this result, first consider that Lapin's surrogate is polyhedral, and we propose that each coordinate of an optimal report $u \in \reals_+^n$ must be at one of three points: $0$, $1$, or another ``high'' point that is a function of the number of high points and $M = |\{i : u_i = 1\}|$.  Since there are only a finite number of such optimal reports, $\R$, we know that this embeds a finite loss, namely $L^2_\R$.
-%% \begin{align*}
-%% \R := \left\{ \frac{|M| + k -1}{k - |H|} \mathbf{1}_H + \mathbf{1}_M : H, M \subset [n], H\cap M = \emptyset, |H| + |M| \leq k \right\}
-%% \end{align*}
-%% The discrete loss $\ell^{top-2} = L^2|_\R$ is then defined as follows:
-%% \begin{equation}
-%% \ell^{top-k}(r,y) = \begin{cases}
-%% 0 & r_y = \bar r_{-y} + 1\\
-%% \bar r - \frac 1 k & r_y = 1\\
-%% 1 + \bar r & r_y = 0
-%% \end{cases}~,~
-%% \end{equation}
-%% where $\bar r = \frac 1 k \sum_{i=1}^k r_{[i]}$.
-%% }
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Jessie's version here 7/16/2019
-
-% Figure~\ref{fig:top-k-simplices} (left) gives a map of the property values of $\gamma^{\text{top-2}} := \prop{\elltop{2}}$ over $\Delta_3$.
-% Similarly, for every distribution $p \in \Delta_3$, $\inprod{p}{L^2}$ has a minimizer in the set $\R'$ composed of the tuples shown in Figure~\ref{fig:top-k-simplices} (right), and thus $\risk{L^2} = \risk{\ell^2}$, where $\ell^2 := L^2|_{\R'}$, so Figure~\ref{fig:top-k-simplices} (right) shows $\gamma^2 := \prop{\ell^2}$.
-% %Therefore, we know $L^2$ embeds $\ell^2$ by Proposition~\ref{prop:embed-bayes-risks}.
-% %(Each cell in this simplex is a level set $\gamma^{\text{top-2}}_r$ and corresponds to a flat piece of the Bayes Risk $\risk{\elltop{2}}$.)
-
-% By visual inspection, we can observe there is no ``refining'' mapping from $\gamma^{\text{top-2}}$ to $\gamma^2$.
-% In refining, we loosely mean that, for some $j \in \R$, there is no $I \subseteq \reals^n$ such that $\cup_{i \in I}\gamma^2_i = \gamma^{\text{top-2}}_{j}$.
-% %If such a mapping existed, it would allude to one possible consistent link $\psi$ by which $L^2$ embeds $\elltop{2}$.
-% Conversely, we can ``refine'' $\prop{L^2}$ down to $\prop{\ell^2}$ by using the axiom of choice to construct $\R'$.
-
-% \jessie{Not sure if this is too much detail...}
-% Since $\prop{\elltop{2}}$ does not refine $\prop{L^2}$, then $L^2$ does not embed $\elltop{2}$.
-% For example, we can take distributions $p_1 \in \gamma^{top-2}_{\{1,2\}}$ and $p_2 \in \gamma^{top-2}_{\{1,3\}}$ such that $p_1, p_2 \in \Gamma_{(1,0,0)}$.
-% Regardless of $\psi((1,0,0))$, for either $p_1$ or $p_2$, we will observe $\psi((1,0,0)) \not \in \argmin_u \inprod{p_i}{\elltop{2}(u)}$.
-% Thus, we see that $L^2$ is not a consistent surrogate for $\elltop{2}$.
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% old version submitted to NuerIPS%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\btw{The story we discussed: YK show $L'$ is inconsistent.  Our framework lets us ask: with what discrete loss \emph{is} $L'$ consistent?  (It also assures us that $L'$ is consistent for something...) Oh look, $L'$ embeds something which is $\elltopk$ plus some other term, so (a) we can see very clearly what $L'$ ``is doing'', and (b) we can see where to look for distributions yielding inconsistency, namely ones for which we actually prefer to report a set with $|r|<k$.}
-%
-%In certain classification problems, for example in information retrieval, it is common to predict a set of possible labels.
-%As one instance, for $k<n$ the top-$k$ classification problem has reports $\R := \{r \subseteq [n] : |r| = k\}$, with label $y \in [n]$.
-%The natural discrete loss $\elltopk:\R \to \reals^\Y_+$ is given by
-%\begin{align}\label{eq:top-k}
-%  \elltopk(r,y) = \Ind{y \not \in r}~,
-%\end{align}
-%which simply gives a penalty if the label was not in the reported set.
-%
-%Surrogates for this problem commonly take reports $u\in\reals^n$, with the link $\psi(u) = \{u_{[1]},\ldots,u_{[k]}\}$, where $x_{[u]}$ is the $i^{th}$ largest component of $u$, with ties broken arbitrarily.
-%\citet{lapin2015top, lapin2016loss, lapin2018analysis} provide the following convex surrogate loss for this problem, which \citet{yang2018consistency} show to be inconsistent:%
-%\footnote{Yang and Koyejo also introduce a consistent surrogate, but it is non-convex.}
-%\begin{align}\label{eq:L-2-surrogate}
-%  L'(u)_y := \left( \tfrac{1}{k} \textstyle\sum_{i=1}^k (u + \ones - e_y)_{[i]} - u_y \right)_+~,
-%\end{align}
-%where $e_y$ is $1$ in component $y$ and 0 elsewhere.
-%
-%With our framework, we can say more.
-%Specifically, while $(L',\psi)$ is not consistent for $\elltopk$, since $L'$ is polyhedral (Lemma~\ref{lem:top-k-polyhedral}), we know from Theorem~\ref{thm:poly-embeds-discrete} that it embeds \emph{some} discrete loss $\ell'$, and from Theorem~\ref{thm:eps-thick-calibrated} there is a link $\psi'$ such that $(L',\psi')$ is calibrated (and consistent) for $\ell'$.
-%We therefore turn to deriving this discrete loss $\ell'$.
-%
-%In Lemma~\ref{lem:top-k-optimal-corners}\jessiet{in the Appendix... remove ref for camera ready version}, we show that the set $\U = \{u \in \{0,1\}^n : \|u\|_0 \leq k\}$ is always represented among the optimizers of $L'$, meaning for all $p \in \simplex$ we have $\prop{L'}(p) \cap \U \neq \emptyset$.
-%From Lemma~\ref{lem:loss-restrict}\raft{was Lemma~\ref{lem:top-k-surrogate-embeds}}, then, $L'$ must embed $L'|_\U$, which gives us $\ell':\R'\to\reals^\Y_+$ via the natural embedding from sets $\R' = \{r \subseteq [n] : |r| \leq k\}$ to their indicator vectors:
-%\begin{align}\label{eq:ell-2}
-%\ell'(r)_y &= \Ind{y \not\in r} + \tfrac 1 k |r \setminus \{y\}| = (1+\tfrac 1 k)\Ind{y \not\in r} + \tfrac 1 k (|r|-1)~.
-%\end{align}
-%We now see that $\ell'$ is essentially $\elltopk$ (extended to sets smaller than $k$) plus an additional cardinality term which rewards smaller sets.
-%
-%Knowledge of what loss $L'$ actually embeds greatly simplifies the task of proving inconsistency with $\elltopk$.
-%Specifically, we see that $\ell'$ allows sets of cardinality strictly less than $k$, so we can look for a distribution making one of these smaller sets optimal.
-%Writing the expected loss, we have
-%%$\inprod{p}{\ell'(r)} = 1 - p(r) + \tfrac 1 k (|r|-p(r)) = 1 + \tfrac 1 k |r| - (1 + \tfrac 1 k) p(r)$,\\
-%$\inprod{p}{\ell'(r)} = (1+\tfrac 1 k)(1 - p(r)) + \tfrac 1 k (|r|-1) = 1 + \tfrac 1 k |r| - (1 + \tfrac 1 k) p(r)$, where $p(r) = \sum_{i\in r} p_i$.
-%% It is now easy to see that the optimal $r$ for any fixed cardinality $|r|=c$ is the $c$ most likely labels.
-%So let us ask when it is better to drop an element $i$ from $r$:
-%% If $i$ is the index of the $c$th most likely label (so $p_i = p_{[c]}$)
-%we have $\inprod{p}{\ell'(r)-\ell'(r\setminus\{i\})} = \tfrac 1 k - (1+\tfrac 1 k)p_i$, meaning we will drop elements from $r$ until they all have weight at least $\tfrac 1 {k+1}$.
-%In particular, for distributions close to uniform, $r=\emptyset$ is optimal, already giving us inconsistency\raft{If space (nope) we should spell this out like Jessie did: however ties are broken at $u=0$, pick a distribution with bumps going against the ties, and $u=0$ is still optimal.}.
-%More generally, as $k < n$, the set $P = \{p\in\simplex : \max_{r\in\R'} p(r) < k/(k+1)\}$ is full-dimensional and guarantees that at least one of the top $k$ labels has probability strictly less than $\tfrac 1 {k+1}$.
-%
-%% We now focus on the case where $k=1$; the top-$k$ loss reduces to 0-1 loss in this case.
-%% To show a set of distributions where $\prop{\ell'}(p) \neq \prop{\elltopk}(p)$, we claim that $\vec{0}~\in~\prop{\ell'} \implies \risk{\ell'}(p) = 1$ for any $p$ with $\max_y p_y \leq 1/2$.
-%% Additionally $\risk{\ell_{top-1}}(p) = 1 - \max_y p_y < 1 \implies \vec{0} \not\in \prop{\elltopk}(p)$.
-%
-%% First, $\ell(\vec{0}, \bar{p}) = 1$ for all $p \in \simplex$.
-%% Taking the set $\{y\}$ for any $y \in \Y$, the expected loss $\inprod{p}{\ell'(\{y\})} = 2 (1-p_y) \geq 1$ by assumption on $p$.
-%% %For any $r$ such that $|r| \geq 2$ \jessiet{In general, $|r| \geq k+1$}, we know that  $\ell'(r)_y \geq 1$ for all $y \in \Y$, so the expected loss much be greater than or equal to $1$.
-%% Therefore, we have that $\vec{0} \in \prop{\ell'}(p)$ but $\vec{0} \not\in \prop{\elltopk}(p)$ for any $p$ such that $\max_y p_y \leq 1/2$.
-%
-%
-%
-%%Since we can see that $\ell' \neq \elltopk$, we can then see that $L'$ is not consistent with respect to $\elltopk$.
-%%Similarly, given $L_4(u,y) := \max\left(\frac{1}{k} \sum_{i=1}^k (1 + u_{\setminus y})_{[i]} - s_y, 0\right)$, we can actually see that $L_4$ also embeds $\ell'$.
-%%We will double up on notation and call this discrete loss $\ell_4$ as well, for the sake of matching subscripts of discrete losses to the surrogates that embed them.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusions} \label{sec:conclusion}
 % \paragraph{Summary.}
 \jessiet{18 Mar 21: Probably want to revisit before submitting, once re-org has settled}
