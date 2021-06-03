@@ -1,6 +1,6 @@
-\documentclass[12pt]{article}
-\PassOptionsToPackage{numbers, compress, sort}{natbib}
-\usepackage[final]{neurips_2019}
+\documentclass[11pt]{article}
+\usepackage[numbers, compress, sort]{natbib}
+\usepackage[margin=1.1in]{geometry}
 
 \usepackage{float}
 \usepackage[utf8]{inputenc} % allow utf-8 input
@@ -130,11 +130,11 @@
  Jessie Finocchiaro \\
  \texttt{jefi8453@colorado.edu}\\
  CU Boulder
- \And
+ \and
  Rafael Frongillo\\
  \texttt{raf@colorado.edu}\\
  CU Boulder
- \And
+ \and
  Bo Waggoner\\
  \texttt{bwag@colorado.edu}\\
  CU Boulder
@@ -147,9 +147,10 @@
 \begin{abstract}
 We formalize and study the natural approach of designing convex surrogate loss functions via embeddings for problems such as classification, ranking, or structured prediction. 
 In this approach, one embeds each of the finitely many predictions (e.g. classes) as a point in $\reals^d$, assigns the original loss values to these points, and ``convexifies'' the loss in some way to obtain a surrogate.
-We prove that this approach is equivalent, in a strong sense, to working with polyhedral (piecewise linear convex) losses.
+We prove that this approach is equivalent, in a strong sense, to working with polyhedral (piecewise-linear convex) losses.
 Moreover, given any polyhedral loss $L$, we give a construction of a link function through which $L$ is a consistent surrogate for the loss it embeds.
-We go on to illustrate the power of this embedding framework with succinct proofs of consistency or inconsistency of various polyhedral surrogates in the literature.
+Our framework yields succinct proofs of consistency or inconsistency of various polyhedral surrogates in the literature, and for further reveals the target problems that inconsistent surrogates are consistent for.
+We also show \raf{Newer stuff}
 \end{abstract}
 
 %\begin{keywords}%
@@ -197,12 +198,12 @@ If this embedding can be extended to a calibrated link function, which roughly m
 Common examples of this general construction include hinge loss as a surrogate for 0-1 loss and the abstain surrogate mentioned above~\citep{ramaswamy2018consistent}.
 
 
-\raf{Old version:} Using tools from property elicitation, we show a tight relationship between such embeddings and the class of polyhedral (piecewise-linear convex) loss functions.
-In particular, by focusing on Bayes risks, we show that every discrete loss is embedded by some polyhedral loss, and every polyhedral loss function embeds some discrete loss.
-Moreover, we show that any polyhedral loss gives rise to a calibrated link function to the loss it embeds,
-thus giving a very general framework to construct consistent convex surrogates for arbitrary losses.
+\raf{The old intro had just one more paragraph here, now commented out}
+% Using tools from property elicitation, we show a tight relationship between such embeddings and the class of polyhedral (piecewise-linear convex) loss functions.
+% In particular, by focusing on Bayes risks, we show that every discrete loss is embedded by some polyhedral loss, and every polyhedral loss function embeds some discrete loss.
+% Moreover, we show that any polyhedral loss gives rise to a calibrated link function to the loss it embeds,
+% thus giving a very general framework to construct consistent convex surrogates for arbitrary losses.
 
-\raf{New version starting here:}
 
 We prove that such an embedding scheme is intimitely related to the class of polyhedral (piecewise-linear and convex) loss functions.
 In particular, every discrete target loss is embedded by a polyhedral surrogate.
@@ -217,15 +218,18 @@ Our proofs give explicit constructions for the surrogate (\S~\ref{sec:poly-loss-
   Given any polyhedral loss $L$, let $\ell$ be the discrete target loss it embeds. There exists a link function $\psi$ such that $(L,\psi)$ is calibrated with respect to $\ell$.
 \end{theorem}
 
-Moreover, given an existing polyhedral surrogate, we provide tools to find the discrete loss it embeds (Corollary~\ref{cor:representative-embeds-restriction}).
+To better understand existing polyhedral surrogates, we provide tools to find the discrete losses they embed (Corollary~\ref{cor:representative-embeds-restriction}).
 In short, if one can identify a finite \emph{representative set} $\Sc$ of reports for a surrogate $L$, meaning $\Sc$ always contains an $L$-optimal report for any label distribution, then $L$ embeds $L|_\Sc$, the loss given by $L$ restricting to $\Sc$.
-We apply these tools to several polyhedral surrogates which have been proposed recently (\S~\ref{sec:applications}), showing that they are inconsistent for the desired target, but are consistent for a different target: the one embedded by the loss.
+We apply these tools to several polyhedral surrogates which have been proposed recently (\S~\ref{sec:applications}), showing in some cases that they are inconsistent for the desired target, but are consistent for a different target: the discrete loss they embed.
 
 Underpinning our results are several observations which formalize the idea that polyhedral losses ``behave like'' discrete losses.
 For example, discrete losses have polyhedral Bayes risks (as the minimum of finitely many linear functions), and so do polyhedral losses (Lemma~\ref{lem:poly-loss-poly-risk}).
-As a consequence, polyhedral losses always have finite representative sets.
-Aside from observations like these which we use to prove our main results, we provide several others through the lens of property elicitation which we view as conceptual contributions (\S~\ref{sec:min-rep-sets}).
-These latter observations culminate in the following result: when restricting to the class of polyhedral surrogates, indirect elicitation is both necessary and sufficient for consistency (Theorem~\ref{thm:poly-ie-implies-consistent} in \S~\ref{sec:poly-ie-consistency}).
+As a consequence, polyhedral losses always have finite representative sets, and restricting the loss to any such set is an embedding.
+
+We also provide several observations beyond what is needed to prove our main results, which we view as conceptual contributions (\S~\ref{sec:min-rep-sets},~\ref{sec:poly-ie-consistency}).
+Using tools from property elicitation, we show an equivalence between minumum reprosentative sets and ``non-redundancy'', wherein no report is dominated by another.
+We further show that, while the minimum representative set is not always unique, the loss values associated with it are unique, giving rise to a natural ``trim'' operation on losses.
+Finally, using our main results, we show the following result: when restricting to the class of polyhedral surrogates, indirect elicitation is both necessary and sufficient for consistency (Theorem~\ref{thm:poly-ie-implies-consistent}).
 
 Taken together, we view our contribution as both conceptual and practical.
 We uncover the remarkable structure of polyhedral surrogates, deepening our understanding of the relationship between surrogate and target losses.
@@ -258,7 +262,7 @@ However,~\citet{agarwal2015consistent} consider single-valued properties in fini
 %   However, we will mention relevant results inline.
 
 
-\section{Setting and Main Results}
+\section{Setting}
 \label{sec:setting}
 
 For discrete prediction problems like classification, due to hardness of directly optimizing a given discrete loss, many machine learning algorithms minimize a surrogate loss function with better optimization qualities, e.g., convexity.
@@ -386,7 +390,11 @@ For example, while logistic loss does not embed 0-1 loss, the surrogate and link
 \jessie{I'm a little conflicted.  Maybe this depends on section order, but I'm hesitant to introduce terminology here if we don't use it until multiple sections later.  (If we have examples first and show things about tight embeddings)}
 \jessie{Also, do we want to frame calibrated links as ``loose embeddings''? Lol}
 
-Several consistent convex surrogates in the literature can be thought of as \emph{embeddings}, wherein one maps the discrete reports to a vector space, and finds a convex loss which agrees with the original loss.
+Several consistent convex surrogates in the literature can be thought of as \emph{embeddings} of the target loss $\ell$, wherein one maps the discrete reports of $\ell$ to a vector space, and finds a convex loss which agrees with the original loss.
+It turns out that it will be convenient, especially in applications, to allow $\ell$ to have ``redundant'' reports, e.g., reports that are never optimal or never uniquely optimal.
+We first formalize two notions of non-redundancy, and then turn to our formal definition of embeddings.
+
+\raf{Story: Def non-redundant.  Then talk about rep sets.  If it is minimum, that's another way to formalize non-redundant. prove equivalence of these two in BLAH.  Use abstain loss for binary classification as a running example.}
 To allow for ``redundant'' reports, in both the target and surrogate, we first introduce the notions of representative sets; see Proposition~\ref{prop:tfae-min-rep-nonredundant} for a formal connection.
 \begin{definition}
   Let $L:\R\to\reals^\Y_+$ be a generic loss.
@@ -395,6 +403,7 @@ To allow for ``redundant'' reports, in both the target and surrogate, we first i
 \end{definition}
 \raft{Maybe discussion about minimum representative sets and \emph{maximally informative sets} from~\citet{wang2020weston} here, though maybe best to leave it until later.  BTW, I think their latest version might use different terminology.}
 
+\raf{Add ``tight'' to this def now}
 We now formally introduce the concept of an embedding.
 In addition to matching loss values, a key condition for consistency is that the original reports should be optimal exactly when the corresponding embedded points are optimal.
 \begin{definition}[Embedding a loss]\label{def:loss-embed}
