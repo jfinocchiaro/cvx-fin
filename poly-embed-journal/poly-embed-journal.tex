@@ -90,6 +90,8 @@
 \newcommand{\toto}{\rightrightarrows}
 \newcommand{\strip}{\mathrm{strip}}
 \newcommand{\trim}{\mathrm{trim}}
+\newcommand{\trimnonred}{\mathrm{trim}_{{\tt nonred}}}
+\newcommand{\trimcover}{\mathrm{trim}_{\tt cover}}
 \newcommand{\fplc}{finite-piecewise-linear and convex\xspace} %xspace for use in text
 \newcommand{\conv}{\mathrm{conv}}
 \newcommand{\indopp}{\bar{\mathbbm{1}}}
@@ -381,6 +383,8 @@ For example, while logistic loss does not embed 0-1 loss, the surrogate and link
 \subsection{Embedding}
 
 \raf{If we like the intro (or even if not) we should rewrite this subsection a bit.  I think it's best to include definitions of non-redundancy and tight embeddings here, since then this first comment can be more precise, and we remove the section order dependency (we use tight embeddings in the applications section).  Not sure about the right order to define things in this subsection though, since we need rep sets to even define embeddings.}
+\jessie{I'm a little conflicted.  Maybe this depends on section order, but I'm hesitant to introduce terminology here if we don't use it until multiple sections later.  (If we have examples first and show things about tight embeddings)}
+\jessie{Also, do we want to frame calibrated links as ``loose embeddings''? Lol}
 
 Several consistent convex surrogates in the literature can be thought of as \emph{embeddings}, wherein one maps the discrete reports to a vector space, and finds a convex loss which agrees with the original loss.
 To allow for ``redundant'' reports, in both the target and surrogate, we first introduce the notions of representative sets; see Proposition~\ref{prop:tfae-min-rep-nonredundant} for a formal connection.
@@ -437,29 +441,30 @@ With both conditions of Definition~\ref{def:loss-embed} satisfied, we conclude t
 In this particular case, it is known $(\hinge,\psi)$ is calibrated for $\psi(u) = \sgn(u)$; in \S~\ref{sec:calibration} we show that, perhaps surprisingly, all embeddings imply the existence of a link so that the surrogate is calibrated.
 
 \begin{figure}
-  \raf{Let's make into a single figure with 3 subfigures}\\
 	\begin{minipage}{0.3\linewidth}
-		\centering
-		\includegraphics[width=0.9\linewidth]{figs/0-1-br.pdf}
-		\caption{Bayes risk of the 0-1 loss.}
-		\label{fig:0-1-br}
+	\centering
+	\includegraphics[width=0.95\linewidth]{figs/0-1-br.pdf}
+%		\caption{Bayes risk of the 0-1 loss.}
+%		\label{fig:0-1-br}
 	\end{minipage}
 	\hfill
 	\begin{minipage}{0.3\linewidth}
-		\centering
-		\includegraphics[width=0.9\linewidth]{figs/hinge-br.pdf}
-		\caption{Bayes risk of hinge loss.}
-		\label{fig:hinge-br}
+	\centering		\includegraphics[width=0.95\linewidth]{figs/hinge-br.pdf}
+%		\caption{Bayes risk of hinge loss.}
+%		\label{fig:hinge-br}
 	\end{minipage}
 	\hfill
 	\begin{minipage}{0.3\linewidth}
 	\centering
-	\includegraphics[width=0.9\linewidth]{figs/logistic-br.pdf}
-	\caption{Bayes risk of the logistic loss.}
-	\label{fig:logistic-br}
+	\includegraphics[width=0.95\linewidth]{figs/logistic-br.pdf}
+%	\caption{Bayes risk of the logistic loss.}
+%	\label{fig:logistic-br}
 \end{minipage}
+\caption{Bayes risks of 0-1, hinge, and logistic losses, respectively, in binary classification setting.}
+\label{fig:bayes-risks-01}
 \end{figure}
 
+\jessie{Merge last paragraph of previous subsection with this one?}
 It is not immediately clear if embeddings give rise to calibrated links; indeed, apart from mapping the embedded points back to their original reports via $\psi(\varphi(r)) = r$, how to map the remaining values is far from obvious.
 In fact, we give a construction to map the remaining values in \S~\ref{sec:calibration}, showing that embeddings always yield calibration.
 %\bo{I think in Section \ref{sec:calibration} ?}
@@ -1327,7 +1332,7 @@ Tightly embedding the restricted loss seems to make embedding construction sligh
 While $L|_\R$ is not always the target loss of interest, there should now be a \emph{bijection} from $\R$ to the target reports.
 While an embedding only has to be constructed once and is considered an offline computation, its construction might be made easier by a tight embedding.
 
-We now present a concept called the $\trim$ of a loss (see Definition~\ref{def:trim-prop} for an analogous definition for properties in \S~\ref{app:embed-props}) which lets us focus on a unique set of loss vectors (resp., property values) induced by any minimum representative set.
+We now present a concept called the $\trim$ of a loss (see Definition~\ref{def:trim-prop-nonred} for an analogous definition for properties in \S~\ref{app:embed-props}) which lets us focus on a unique set of loss vectors (resp., property values) induced by any minimum representative set.
 
 \begin{proposition}\label{prop:trim-unique}
   Suppose $\R$ and $\R'$ are finite minimum representative sets for the loss $L$.
@@ -1345,11 +1350,11 @@ We now present a concept called the $\trim$ of a loss (see Definition~\ref{def:t
 \end{proof}
 
 \begin{definition}[Trim]\label{def:trim-loss}
-  Given a loss $L:\R \to \reals_+^\Y$ with a finite representative set, we define $\trim(L) = \{L(r) \mid r \in \R'\}$ given any minimum representative set $\R'$ for $L$.
+  Given a loss $L:\R \to \reals_+^\Y$ with a finite representative set, we define $\trimcover(L) = \{L(r) \mid r \in \R'\}$ given any minimum representative set $\R'$ for $L$.
 \end{definition}
 
 \begin{corollary}\label{prop:trim-loss-condition}
-  Given an loss $L : \R \to \reals^\Y_+$ with finite minimum representative set $R^*$, we have $\trim(L) = \{L(u) \mid u \in \R \textrm{ s.t. } \neg\exists u'\in\R,u'\neq u,\, \Gamma_u \subsetneq \Gamma_{u'}\}$.
+  Given an loss $L : \R \to \reals^\Y_+$ with finite minimum representative set $\R^*$, we have $\trimcover(L) = \{L(u) \mid u \in \R \textrm{ s.t. } \neg\exists u'\in\R,u'\neq u,\, \Gamma_u \subsetneq \Gamma_{u'}\} =: \trimnonred(L)$. \jessie{rename with $\trimnonred$ etc.}
 \end{corollary}
 \begin{proof}[Sketch]
   Let $\U := \{u \in \R \textrm{ s.t. } \neg\exists u'\in\R,u'\neq u,\, \Gamma_u \subsetneq \Gamma_{u'}\}$.
@@ -1429,21 +1434,39 @@ Finally, we have an important converse: if $\Gamma$ has finitely many full-dimen
 	Let $\Gamma:\simplex\toto\reals^d$ be an elicitable property.
 	The following are equivalent:
 	\begin{enumerate}\setlength{\itemsep}{0pt}
-		\item $\Gamma$ embeds a \jessie{non-redundant} finite property $\gamma:\simplex \toto \R$.
-		\item $\trim(\Gamma)$ is a finite set, and $\cup\,\trim(\Gamma) = \simplex$.
+		\item $\Gamma$ embeds a finite property $\gamma:\simplex \toto \R$.
+		\item $\trimnonred(\Gamma)$ is a finite set, and $\cup\,\trimnonred(\Gamma) = \simplex$.
 		\item There is a finite minimum representative set $\U$ for $\Gamma$.
 		\item There is a finite set of full-dimensional level sets $\Theta$ of $\Gamma$, and $\cup\,\Theta = \simplex$.
 	\end{enumerate}
 	% \raft{I see why you wanted this addition here, but (a) it's clear from the def of embedding, and (b) we don't have varphi defined.  So let's leave it out.}
-	Moreover, when any of the above hold, $\trim(\gamma) = \trim(\Gamma) = \{\Gamma_u : u\in\U\} = \Theta$, and $\gamma$ is elicitable.\jessiet{At the moment, don't show anything about $\gamma$ elicitable.}
+	Moreover, when any of the above hold, $\trimnonred(\gamma) = \trimnonred(\Gamma) = \{\Gamma_u : u\in\U\} = \Theta$, and $\gamma$ is elicitable.\jessiet{At the moment, don't show anything about $\gamma$ elicitable.}\jessiet{Also, should this statement be $\trimcover(\gamma) = \trimnonred(\gamma) = \trimcover(\Gamma) = \trimnonred(\Gamma) = \{\Gamma_u \mid u \in \U\} = \Theta$? But also, can we pull it out into its own statement? It should follow as a corollary of this and an analogous version of Prop 6.}
 \end{restatable}
 \begin{proof}
+	\jessie{Keep plus example in mind}
+	\jessie{Use trim nonredundant and trim covering macros}
+	\jessie{1 -> 2 -> 3 -> 1, 3 <=> 4}
 	Let $L$ elicit $\Gamma$.
 	
 	1 $\Rightarrow$ 2:
+	%
 	% \jessie{Loss intuition: Let $L$ elicit $\Gamma$.  If $\Gamma$ embeds a finite $\gamma'$, $L$ must embed a discrete loss $\ell$ such that $\ell(r) = L(\varphi(r))$.  Therefore, $\risk{L} = \risk{\ell}$ is polyhedral. Moreover, we have $\Gamma$ also embedding the finite property $\prop{\ell} := \gamma$ as a corollary of the definition of embedding properties. We claim $\trim(\Gamma) = \{\gamma_r : r \in \R\}$ (Lemma~\ref{lem:embedded-level-sets-trim}), and since the latter set is finitely generated (as $\R$ is finite), we have have $\trim(\Gamma)$ is finite.  Moreover, as $\gamma$ is nondegenerate (since it is defined over the simplex), we have that $\cup_{r \in \R} \gamma_r = \simplex$.}
-	If $\Gamma$ embeds a finite $\gamma$, then any representative set $\Sc \subseteq \R$ is finite, and so any minimum representative set is finite; $\trim$ is then finite as it is finitely generated.
-	$\cup \trim(\Gamma) = \simplex$ follows from representativeness.
+	%
+%	Since $\gamma$ is finite, it has a finite minimum representative set $\Sc$, and we can show $\trimnonred(\gamma) = \trimcover(\gamma) := \{\gamma_r \mid r \in \Sc\}$. 
+%	\jessiet{Hand waving}
+%	Moreover, since the embedding condition implies $\gamma_r = \Gamma_{\varphi(r)}$, we also have $\trimcover(\Gamma) = \trimcover(\gamma)$, which is finite as $\gamma$ is finite.
+%	Now we can show that $\trimcover(\Gamma)$ finite implies $\trimcover(\Gamma) = \trimnonred(\Gamma)$ and the result follows.
+%
+	%Since $\Gamma$ embeds a finite $\gamma$ over some minimum representative set $\Sc$, and each for each $r \in \Sc$, we have $\gamma_r = \Gamma_{\varphi(r)}$.
+	%
+	Since $\R$ is finite, we have $\trimnonred(\Gamma) \subseteq \{\Gamma_{\varphi(r)} \mid r \in \R\} = \{\gamma_r \mid r \in \R\}$.
+	As the last set is finite, so is $\trimnonred(\Gamma)$.
+	Moreover, as $\trimnonred$ only removes redundant reports, we have $\cup \trimnonred(\Gamma) = \simplex$.
+	
+
+\btw{Commenting out 3 June 21 to use old $\trimnonred$ definition.}
+%	If $\Gamma$ embeds a finite $\gamma$, then any representative set $\Sc \subseteq \R$ is finite, and so any minimum representative set is finite; $\trim$ is then finite as it is finitely generated.
+%	$\cup \trim(\Gamma) = \simplex$ follows from representativeness.
 
 \btw{Commenting out 2 $\Rightarrow$ 1 for now since I added 1-> 2 -> 3 ->1 for cyclicity.}
 %	\raft{These next two directions together seem like what we did before for $2\Rightarrow 3$, correct?  (Not as complete though; see the step where we justify the conditions of Lemma~\ref{lem:loss-restrict}.)  I'm actually happy for them to be separated, but let's make sure the argument is just as complete. \jessie{Added in the conditions of Lemma 3 to be a bit more thorough.}}\btw{Not sure how old this comment is, but feel free to burn if you're happy with thoroughness.}
@@ -1464,60 +1487,96 @@ Finally, we have an important converse: if $\Gamma$ has finitely many full-dimen
 	%	However, if there was a level set $\Gamma_{\varphi(\hat r)}$ that was not in $\trim(\Gamma)$ \jessie{\ldots}
 	
 	2 $\Rightarrow$ 3: 
-	Suppose $\trim(\Gamma) = \{\Gamma_u \mid u \in \U\}$.
-	Then we know $\U$ is a minimum representative set, and since $\trim(\Gamma)$ is finite, so is $\U$; if it was not, then $\U$ would not be minimum.
-	\jessie{Using the old definition of $\trim$, mirroring ish previous proofs: $\trim(\Gamma) = \{\Gamma_u \mid \neg \exists u' \neq u $s.t.$ \Gamma_u \subseteq \Gamma_{u'}\}$.
-	Take $\U' = \{u_1, \ldots, u_k\}$ to be the finite set of reports forming $\trim$.
-	Since $\cup \trim(\Gamma) = \cup_{u \in \U'} = \simplex$, we have $\U'$ representative.
-	If $\U'$ is not minimum, there is some $\U \subseteq \U'$ that is minimum with $\card(\U) \leq \card(\U') = k$, which is finite.}
+	%Suppose $\trimcover(\Gamma) = \{\Gamma_u \mid u \in \U\}$.
+	%Then we know $\U$ is a minimum representative set, and since $\trimcover(\Gamma)$ is finite, so is $\U$; if it was not, then $\U$ would not be minimum.
+	\jessie{Using the old definition of $\trim := \trimnonred$, mirroring ish previous proofs} 
+	As a reminder, we have $\trimnonred(\Gamma) = \{\Gamma_u \mid \neg \exists u' \neq u $ s.t. $ \Gamma_u \subsetneq \Gamma_{u'}\}$.
+	Take $\U^* = \{u_1, \ldots, u_k\}$ to be a finite set of reports forming $\trimnonred$.
+	Since $\cup \trimnonred(\Gamma) = \cup_{u \in \U^*} \Gamma_u = \simplex$, we have $\U^*$ representative.
+	We can now construct a minimum representative set $\U \subseteq \U^*$.
+	Form $\U$ by iterating over $\U^*$ and removing any element $u'$ of $\U^*$ if there is another $u$ remaining in $\U^*$ such that $\Gamma_u = \Gamma_{u'}$.
+	As we only remove exact duplicate level sets, we still have $\U$ representative, and proceed to show $\U$ is minimum.
+	
+	If $\U$ was not minimum, there would be some report $u' \in \U$ so that $\U' := \U \setminus \{u'\}$ is also representative.
+	Since $\Gamma$ is elicitable and $\trimnonred$ is finite, we know that the level sets of $\Gamma$ form a power diagram intersected with the simplex (Theorem~\ref{thm:aurenhammer}).
+	Therefore, every level set $\Gamma_u$ corresponds to a face of a convex polyhedron: we correspond in two cases, according to if $\Gamma_{u'}$ corresponds to a facet or some lower-dimensional face.
+	
+	First, suppose $\Gamma_{u'}$ does not correspond to a facet.
+	Since $\Gamma_{u'}$ does correspond to a face of a convex polytope, it must be contained in a facet, and therefore there is some $u$ such that $\Gamma_{u'} \subsetneq \Gamma_u$.
+	Thus, $\Gamma_u \not \in \trimnonred(\Gamma)$.
+	If $\Gamma_{u'}$ corresponds to a facet, then it has a well-defined nonempty interior, and by removing exactly duplicate reports in the construction of $\U$, we have a $p \in \inter{\Gamma_{u'}}$ such that $\{u'\} = \Gamma(p)$.
+	Therefore, $\U'$ would not be representative.
+	We conclude $\U$ as constructed must be a minimum representative set.
+	
 	
 	3 $\Rightarrow$ 1:
 	Since $\U$ is representative, we have $\Gamma|_\U(p) := \Gamma(p) \cap \U$ nonempty for all $p \in \simplex$, and therefore, $\Gamma$ embeds $\Gamma|_\U$, which is finite as $\U$ is finite.
 	Since $\U$ is minimum, the constructed $\Gamma_\U$ is additionally non-redundant.
 	\jessiet{Want more details here.  It's the forward implication of Prop 4, but since this is used in the reverse implication of prop 4, don't want to create cyclic dependencies.}
 	
-	1 $\Rightarrow$ 4:
+	
+	
+	\btw{Previous version commented out above because it relies on old definitions - Jessie 1 June 21, commenting out 1 $\iff$ 4 to replace with 3 $\iff$ 4 - 3 June 21}
+%	1 $\Rightarrow$ 4:
 %	Let $\varphi: \R \to \reals^d$ be the embedding function, and take $\Theta = \{\Gamma_{\varphi(r)} : r \in \R\}$.
 %	The latter set is equal to $\{\gamma_r : r \in \R\}$ by Lemma~\ref{lem:embedded-level-sets-trim}.
 %	Therefore, we know each $\theta \in \Theta = \gamma_r$ for some $r \in \R$, which is full-dimensional in the affine hull of the simplex.
 %	Moreover, since $\gamma$ is non-degenerate, we have $\cup \Theta = \cup_r \gamma_r = \simplex$.	
-	\btw{Previous version commented out above because it relies on old definitions - Jessie 1 June 21}
-	Since $\Gamma$ embeds a finite property $\gamma$, there is an embedding $\varphi$ and a finite minimum representative set $\Sc$ for $\gamma$ such that $\trim(\Gamma) = \{\Gamma_u \mid u \in \varphi(\Sc)\} = \{\gamma_r \mid r \in \Sc\}$.
-	(Embedding implies $\Sc$ is a minimum representative set for $\gamma$ iff $\varphi(\Sc)$ is minimum representative for $\Gamma$.)
-	Take $\Theta = \trim(\Gamma)$; since $\U$ is representative, we know $\cup \Theta = \simplex$.
-	Moreover, $\Theta$ is finite since $\Sc$ is finite.
-	It is just left to show each $\theta \in \Theta$ is full-dimensional.
-	Since $\gamma$ is a finite property, its level sets form a power diagram in the simplex (Theorem~\ref{thm:aurenhammer}).
-	If there was a $\theta = \gamma_r$ that was not full-dimensional, it must therefore be the face of another level set.
-	Since level sets of elicitable properties are closed\footnote{$\gamma_r = \Gamma_{\varphi(r)}$ for all $r \in \Sc$, we can use this characteristic about level sets of elicitable properties. \jessie{Adding this since we haven't shown $\gamma$ elicitable yet.}}, $\gamma_r$ must then be a face of some facet $\gamma_{r'}$.
-	Therefore, $\gamma_r \subseteq \gamma_{r'}$, contradicting $\Sc$ being minimum, so each $\theta \in \Theta$ must be full-dimensional.
-	
-	%	\hrule
-	%	Since $\Gamma$ embeds the finite property $\gamma$, Lemma~\ref{lem:embed-defs-equiv} yields a loss $\ell$ eliciting $\gamma$ embedded by $L$, and therefore $\risk{L} = \risk{\ell}$.
-	%	As in the proof of Proposition~\ref{prop:embed-bayes-risks}, we observe that every facet of the epigraph of $-\risk{\ell}$ projects onto the simplex as a full-dimensional level set of $\gamma$.
-	%	As the risks are equal, this is also true for $\Gamma$.
-	%	Observe each cell in the simplex of $\gamma$ has some report $r$ so the cell is $\gamma_r$.
-	%	If $\varphi: r \mapsto u_r$, then we must have $\gamma_r = \Gamma_{u_r}$.
-	%	Take $\Theta$ to be the set $\{\Gamma_{u_r} : u_r \in \varphi(\R)\}$.
-	%	We have shown each $\Gamma_{u_r}$ is full-dimensional, and as the union of these cells forms a power diagram on $\simplex$, we have $\cup \Theta = \simplex$.
-	
-	%	2 $\Rightarrow$ 3:
-	%	\jessie{New attempt: show that $\Gamma$ elicitable and $\trim(\Gamma)$ finite implies each $\Gamma_u \in \trim(\Gamma)$ is full-dimensional. }
-	% 
-	%	We claim every $\theta \in \trim(\Gamma)$ is full-dimensional, then take $\Theta = \trim(\Gamma)$ and the result holds.
-	%	Suppose there was a $u \in \reals^d$ so that $\Gamma_u \in \trim(\Gamma)$ and $\Gamma_u$ was not full-dimensional.
-	%	The only case in which this happens is if $\Gamma_u$ spans two level sets, as anything that did not would be a subset of a full-dimensional level set in $\trim(\Gamma)$.
-	%	However, if $\Gamma_u$ spans the relative interior of two full-dimensional level sets, we contradict the elicitability condition in Lemma~\ref{lem:elicitable-level-sets}.\jessiet{Need to be more careful here.}
-	%	(If $\Gamma_u$ spans only the boundary of one level set, then we have that $\Gamma_u$ is a subset of the full-dimensional level set by closure of level sets of elicitable properties.)
-	%	Therefore, we must have each $\Gamma_u \in \trim(\Gamma)$ full-dimensional if $\trim(\Gamma)$ is a finite set and $\Gamma$ is elicitable.
-	
-	
-	4 $\Rightarrow$ 1: 
-	Let $\Theta = \{\theta_1,\ldots,\theta_k\}$.
-	For all $i\in\{1,\ldots,k\}$ let $u_i\in\reals^d$ such that $\Gamma_{u_i} = \theta_i$.
-	Now define $\gamma:\simplex\toto\{1,\ldots,k\}$ by $\gamma(p) = \{i : p\in\theta_i\}$, which is non-degenerate as $\cup\,\Theta = \simplex$.
-	By construction, we have $\gamma_i = \theta_i = \Gamma_{u_i}$ for all $i$, so letting $\varphi(i) = u_i$ we satisfy the definition of embedding, namely statement (i.).
-	
+%	Suppose $\trimcover(\Gamma) = \{\Gamma_u \mid u \in \U\} = \simplex$.
+%	(Embedding implies $\Sc$ is a minimum representative set for $\gamma$ iff $\varphi(\Sc)$ is minimum representative for $\Gamma$.)
+%	Take $\Theta = \trimcover(\Gamma)$; since $\U$ is representative, we know $\cup \Theta = \simplex$.
+%	Moreover, $\Theta$ is finite since $\U$ is finite.
+%	It is just left to show each $\theta \in \Theta$ is full-dimensional.
+%	Since $\Gamma$ is elicitable and has a finite minimum representative set, 
+%	Since $\gamma$ is a finite property, its level sets form a power diagram in the simplex (Theorem~\ref{thm:aurenhammer}).
+%	If there was a $\theta = \gamma_r$ that was not full-dimensional, it must therefore be the face of another level set.
+	%Since level sets of elicitable properties are closed
+	%\footnote{$\gamma_r = \Gamma_{\varphi(r)}$ for all $r \in \Sc$, we can use this characteristic about level sets of elicitable properties. \jessie{Adding this since we haven't shown $\gamma$ elicitable yet.}}, 
+	%$\gamma_r$ must then be a face of some facet $\gamma_{r'}$.
+	%Therefore, $\gamma_r \subseteq \gamma_{r'}$, contradicting $\Sc$ being minimum, so each $\theta \in \Theta$ must be full-dimensional.
+%	
+%	%	\hrule
+%	%	Since $\Gamma$ embeds the finite property $\gamma$, Lemma~\ref{lem:embed-defs-equiv} yields a loss $\ell$ eliciting $\gamma$ embedded by $L$, and therefore $\risk{L} = \risk{\ell}$.
+%	%	As in the proof of Proposition~\ref{prop:embed-bayes-risks}, we observe that every facet of the epigraph of $-\risk{\ell}$ projects onto the simplex as a full-dimensional level set of $\gamma$.
+%	%	As the risks are equal, this is also true for $\Gamma$.
+%	%	Observe each cell in the simplex of $\gamma$ has some report $r$ so the cell is $\gamma_r$.
+%	%	If $\varphi: r \mapsto u_r$, then we must have $\gamma_r = \Gamma_{u_r}$.
+%	%	Take $\Theta$ to be the set $\{\Gamma_{u_r} : u_r \in \varphi(\R)\}$.
+%	%	We have shown each $\Gamma_{u_r}$ is full-dimensional, and as the union of these cells forms a power diagram on $\simplex$, we have $\cup \Theta = \simplex$.
+%	
+%	%	2 $\Rightarrow$ 3:
+%	%	\jessie{New attempt: show that $\Gamma$ elicitable and $\trim(\Gamma)$ finite implies each $\Gamma_u \in \trim(\Gamma)$ is full-dimensional. }
+%	% 
+%	%	We claim every $\theta \in \trim(\Gamma)$ is full-dimensional, then take $\Theta = \trim(\Gamma)$ and the result holds.
+%	%	Suppose there was a $u \in \reals^d$ so that $\Gamma_u \in \trim(\Gamma)$ and $\Gamma_u$ was not full-dimensional.
+%	%	The only case in which this happens is if $\Gamma_u$ spans two level sets, as anything that did not would be a subset of a full-dimensional level set in $\trim(\Gamma)$.
+%	%	However, if $\Gamma_u$ spans the relative interior of two full-dimensional level sets, we contradict the elicitability condition in Lemma~\ref{lem:elicitable-level-sets}.\jessiet{Need to be more careful here.}
+%	%	(If $\Gamma_u$ spans only the boundary of one level set, then we have that $\Gamma_u$ is a subset of the full-dimensional level set by closure of level sets of elicitable properties.)
+%	%	Therefore, we must have each $\Gamma_u \in \trim(\Gamma)$ full-dimensional if $\trim(\Gamma)$ is a finite set and $\Gamma$ is elicitable.
+%	
+%	
+%	4 $\Rightarrow$ 1: 
+%	Let $\Theta = \{\theta_1,\ldots,\theta_k\}$.
+%	For all $i\in\{1,\ldots,k\}$ let $u_i\in\reals^d$ such that $\Gamma_{u_i} = \theta_i$.
+%	Now define $\gamma:\simplex\toto\{1,\ldots,k\}$ by $\gamma(p) = \{i : p\in\theta_i\}$, which is non-degenerate as $\cup\,\Theta = \simplex$.
+%	By construction, we have $\gamma_i = \theta_i = \Gamma_{u_i}$ for all $i$, so letting $\varphi(i) = u_i$ we satisfy the definition of embedding, namely statement (i.).
+
+3 $\Rightarrow$ 4:
+It suffices to show that, for each $u \in \U$, $\Gamma_u$ is full-dimensional, so we can take $\Theta = \{\Gamma_u \mid u \in \U\}$.
+Since $\Gamma$ has a finite representative set, we know its level sets are faces of convex polyhedron by equivalence to a power diagram intersected with the simplex.
+If there is a $u \in \U$ such that $\Gamma_u$ is not full-dimensional, it must be a face of some facet corresponding to $\Gamma_{u'}$ for some $u' \in \U$, and hence we contradict $\U$ being minimum, as $\U \setminus \{u\}$ would be a representative set of strictly smaller cardinality.
+
+
+
+4 $\Rightarrow$ 3:
+We want to show that for each $\theta \in \Theta$, we cannot have $\Theta' := \Theta \setminus \{\theta\}$ be representative.
+Observe we have no duplicate elements of $\Theta$.
+Fix $\theta := \Gamma_u \in \Theta$.
+Since $\Gamma_u$ is full-dimensional, there is some $p \in \inter{\Gamma_u}$ so that $\{u\} = \Gamma(p)$.
+Therefore, $\Theta'$ is not representative, so $\Theta$ is a finite minimum representative set for $\Gamma$.
+
+
+Observe now that when one of these is true, $\Gamma|_\U$ is elicited by $L|_\U$, and that there is a bijection from $\Gamma|_\U$ to $\gamma$, and therefore $\gamma$ is also elicitable. 
 \end{proof}
 
 \btw{Commenting out remark to be replaced by Prop~\ref{prop:embed-trim} - Jessie, 1 June 21}
@@ -1875,9 +1934,20 @@ When working with convex losses which are not strictly convex, one quickly encou
 As results in property elicitation typically assume non-redundant properties (e.g.~\cite{frongillo2014general,frongillo2015elicitation}), it is useful to consider a transformation which removes redundant level sets.
 We capture this transformation as the trim operator presented below.
 
-\begin{definition}\label{def:trim-prop}
-  Given an elicitable property $\Gamma:\simplex \toto\R$, we define $\trim(\Gamma) = \{\Gamma_u : u \in \U \}$ as the set of maximal level sets of $\Gamma$ for any minimum representative set $\U \subseteq \R$.
+\begin{definition}\label{def:trim-prop-nonred}
+  Given an elicitable property $\Gamma:\simplex \toto\R$, we define $\trimnonred(\Gamma) = \{\Gamma_u \mid \neg \exists u' \neq u$ s.t. $\Gamma_u \subsetneq \Gamma_{'u}\}$.
+  %$\trimcover(\Gamma) = \{\Gamma_u : u \in \U \}$ as the set of maximal level sets of $\Gamma$ for any minimum representative set $\U \subseteq \R$.
 \end{definition}
+
+\begin{definition}\label{def:trim-prop-cover}
+	Given an elicitable property $\Gamma:\simplex \toto\R$, we define $\trimcover(\Gamma) = \{\Gamma_u : u \in \U \}$ as the set of maximal level sets of $\Gamma$ for any minimum representative set $\U \subseteq \R$.
+\end{definition}
+
+The following corollary follows from Corollary~\ref{cor:trim-loss-condition}.
+\begin{corollary}
+	Let $\Gamma$ be an elicitable property with a finite minimum representative set.
+	$\trimcover(\Gamma) = \trimnonred(\Gamma)$.
+\end{corollary}
 
 \btw{RF: Note for later: should be able to show that the union of trim is the simplex.\jessie{This is part of the proposition statement 2 now.}}
 Take note that the unlabeled property $\trim(\Gamma)$ is non-redundant, meaning that for any $\theta \in \trim(\Gamma)$, there is no level set $\theta' \in \trim(\Gamma)$ such that $\theta \subset \theta'$.
