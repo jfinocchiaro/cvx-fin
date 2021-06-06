@@ -293,7 +293,7 @@ The \emph{Bayes risk} of a loss $L:\reals^d\to\reals^\Y_+$ is the function $\ris
 For example, 0-1 loss is a discrete loss with $\R = \Y = \{-1,1\}$
 given by $\ellzo(r)_y = \Ind{r \neq y}$, with Bayes risk $\risk{\ellzo}(p) = 1-\max_{y\in\Y} p_y$.
 Two important surrogates for $\ellzo$ are hinge loss $\hinge(u)_y = (1-yu)_+$, where $(x)_+ = \max(x,0)$, and logistic loss $L(u)_y = \log(1+\exp(-yu))$ for $u\in\reals$.
-See Figures~\ref{fig:0-1-br},~\ref{fig:hinge-br}, and~\ref{fig:logistic-br} for a visualization of the Bayes risks of 0-1, Hinge, and Logistic losses, respectively.
+See Figure~\ref{fig:bayes-risks-01} for a visualization of the Bayes risks of 0-1, Hinge, and Logistic losses, respectively.
 
 Most of the surrogates $L$ we consider will be \emph{polyhedral}, meaning piecewise linear and convex; we therefore briefly recall the relevant definitions.
 In $\reals^d$, a \emph{polyhedral set} or \emph{polyhedron} is the intersection of a finite number of closed halfspaces.
@@ -786,7 +786,7 @@ We have now seen the tight relationship between polyhedral losses and embeddings
 The embedding itself tells us how to link the embedded points back to the discrete reports (map $\varphi(r)$ to $r$), but it is not clear when this link can be extended to the remaining reports, and whether such a link can lead to consistency.
 In this section, we give a construction to generate calibrated links for \emph{any} polyhedral loss.
 
-Appendix~\ref{app:calibration} contains the full proof; this section provides a sketch along with the main construction and result.
+\S~\ref{app:calibration} contains the full proof; this section provides a sketch along with the main construction and result.
 The first step is to give a link $\psi$ such that exactly minimizing expected surrogate loss $L$, followed by applying $\psi$, always exactly minimizes expected original loss $\ell$.
 The existence of such a link is somewhat subtle, because in general some point $u$ that is far from any embedding point can minimize expected loss for two very different distributions $p,p'$, making it unclear whether there exists a choice $\psi(u)\in\R$ that is $\ell$-optimal for both distributions.
 We show that as we vary $p$ over $\simplex$, there are only finitely many sets of the form $U = \argmin_{u \in \reals^d} \inprod{p}{L(u)}$ (Lemma~\ref{lem:polyhedral-range-gamma}).
@@ -1471,11 +1471,10 @@ Defining $\trimnonred(\Gamma)$... say $L$ elicits $\Gamma$
   \item There is a finite set of full-dimensional level sets $\Theta$ of $\Gamma$, and $\cup\,\Theta = \simplex$.
   \end{enumerate}
   % \raft{I see why you wanted this addition here, but (a) it's clear from the def of embedding, and (b) we don't have varphi defined.  So let's leave it out.}
-  Moreover, when any of the above hold, $\trimnonred(\gamma) = \trimnonred(\Gamma) = \{\Gamma_u : u\in\U\} = \Theta$.\jessiet{Also, should this statement be $\trimcover(\gamma) = \trimnonred(\gamma) = \trimcover(\Gamma) = \trimnonred(\Gamma) = \{\Gamma_u \mid u \in \U\} = \Theta$? But also, can we pull it out into its own statement? It should follow as a corollary of this and an analogous version of Prop 6.}
+  Moreover, when any of the above hold, $\trimnonred(\gamma) = \trimnonred(\Gamma) = \{\Gamma_u \mid u\in\U\} = \Theta$.
 \end{restatable}
 \begin{proof}
 	\jessie{Keep plus example in mind}
-	\jessie{Use trim nonredundant and trim covering macros}
 	\jessie{1 -> 2 -> 3 -> 1, 3 <=> 4}
 	Let $L$ elicit $\Gamma$.
 	
@@ -1490,10 +1489,34 @@ Defining $\trimnonred(\Gamma)$... say $L$ elicits $\Gamma$
 %
 	%Since $\Gamma$ embeds a finite $\gamma$ over some minimum representative set $\Sc$, and each for each $r \in \Sc$, we have $\gamma_r = \Gamma_{\varphi(r)}$.
 	%
-	Since $\R$ is finite, we have $\trimnonred(\Gamma) \subseteq \{\Gamma_{\varphi(r)} \mid r \in \R\} = \{\gamma_r \mid r \in \R\}$.
-	As the last set is finite, so is $\trimnonred(\Gamma)$.
-	Moreover, as $\trimnonred$ only removes redundant reports, we have $\cup \trimnonred(\Gamma) = \simplex$.
+
+	We show $\trimnonred(\gamma) = \trimnonred(\Gamma)$, and the result will follow, since $\gamma$ is a finite property, and therefore $\trim(\gamma)$ is also finite, but its level sets still union to the simplex since $\trimnonred(\cdot)$ only removes strictly redundant level sets.
+		
+	Suppose the finite loss $\ell$ elicits $\gamma$; the negative Bayes risk of $\ell$ is a convex polyhedral function, and the epigraph of negative risk $E_\ell$ is polyhedral.
+	Each face of $E_\ell$ corresponds to a level set of $\gamma$ as the hyperplane $H^\ell_r : p \mapsto (p, \inprod{p}{-\ell(r)})$ supports $E_\ell$ on exactly the level set $\gamma_r$.
+	Since the faces of $E_\ell$ are closed and convex polyhedron and $E_\ell$ is affinely equivalent to a power diagram (Theorem~\ref{thm:aurenhammer}), each each level set $\gamma_r$ is a face of a convex polyhedron.
+	Moreover, each $\gamma_r \in \trimnonred(\gamma)$ is a facet, since any lower-dimensional face is contained in a facet.
 	
+	By embedding, we have $H^L_{\varphi(r)} = H^\ell_r$ for all $r \in \R$, and similarly, we have every $\Gamma_u$ is a region of support for the hyperplane $H^L_u$ and is therefore a face of $E_L$.
+	
+	Since $\Gamma$ embeds $\gamma$ and $\gamma$ is elicitable, we have $\gamma_r = \Gamma_{\varphi(r)}$ for all $r \in \Sc$ and therefore $E_L$ is also  polyhedral since $\varphi(\Sc)$ is representative.\jessiet{Do we need to worry about the technicality of embedding over $\Sc \subset \R$ or are we fine with elicitability of $\gamma$?}
+	Observe that for any $s \in \R \setminus [\Sc]$\jessiet{$\{s' : s' \equiv s \in \Sc\}$}, $\gamma_{s} \not \in \trimnonred(\gamma)$ since $\Sc$ is representative\jessiet{hand waving}, which gives $\trimnonred(\Gamma) \supseteq \trimnonred(\gamma)$, and we just need to show the other direction of subset inclusion.
+	
+	Consider 2 cases: (a) $u \in \varphi(\R), u \in \U_\equiv$, (b) $u \not \in \varphi(\R), u \in \U_\equiv$.
+	For (a), given $u = \varphi(r)$, we have $\gamma_r = \Gamma_u$ by the embedding condition, so $\Gamma_u$ also supports $E_L$ on a facet and is therefore not a strict subset of any other level set.
+	Thus, $\Gamma_u \in \trimnonred(\gamma)$.
+	(b) follows similarly, except that there has to be some $u'$ such that $u \equiv u'$ such that $u' = \varphi(r)$; we conclude $\gamma_r = \Gamma_{u'} = \Gamma_u$ by embedding then equivalence of reports.
+	Therefore, $\Gamma_u \in \trimnonred(\gamma)$.
+	%For (c), if $u \not \in \U_\equiv$, then we have $\Gamma_u \not \in \trimnonred(\Gamma)$, and the statement follows vacuously.
+	We conclude $\trimnonred(\Gamma) = \trimnonred(\gamma)$, and (2) follows.
+	
+	
+%	Suppose for contradiction that there was a $u \in \U_\equiv$ (e.g., $\Gamma_u \in \trimnonred(\Gamma)$) such that $\Gamma_u \neq \gamma_r$ for any $r \in \R_\equiv$.
+%	We know that $\Gamma_u$ is not a subset of any other level set $\Gamma_{u'}$ for $u' \in \U_\equiv$.
+%	However, for any $p \in \Gamma_u$, there is some $r \in \R_\equiv$ such that $p \in \gamma_r \cap \Gamma_{\varphi(r)}$ by properties being nonempty and the embedding condition.
+%	Since we claim $u \not\equiv u'$, 
+	
+	 	
 
 \btw{Commenting out 3 June 21 to use old $\trimnonred$ definition.}
 %	If $\Gamma$ embeds a finite $\gamma$, then any representative set $\Sc \subseteq \R$ is finite, and so any minimum representative set is finite; $\trim$ is then finite as it is finitely generated.
@@ -1521,30 +1544,24 @@ Defining $\trimnonred(\Gamma)$... say $L$ elicits $\Gamma$
 	%Suppose $\trimcover(\Gamma) = \{\Gamma_u \mid u \in \U\}$.
 	%Then we know $\U$ is a minimum representative set, and since $\trimcover(\Gamma)$ is finite, so is $\U$; if it was not, then $\U$ would not be minimum.
 	\jessie{Using the old definition of $\trim := \trimnonred$, mirroring ish previous proofs} 
-	As a reminder, we have $\trimnonred(\Gamma) = \{\Gamma_u \mid \neg \exists u' \neq u $ s.t. $ \Gamma_u \subsetneq \Gamma_{u'}\}$.
-	Take $\U^* = \{u_1, \ldots, u_k\}$ to be a finite set of reports forming $\trimnonred$.
-	Since $\cup \trimnonred(\Gamma) = \cup_{u \in \U^*} \Gamma_u = \simplex$, we have $\U^*$ representative.
-	We can now construct a minimum representative set $\U \subseteq \U^*$.
-	Form $\U$ by iterating over $\U^*$ and removing any element $u'$ of $\U^*$ if there is another $u$ remaining in $\U^*$ such that $\Gamma_u = \Gamma_{u'}$.
-	As we only remove exact duplicate level sets, we still have $\U$ representative, and proceed to show $\U$ is minimum.
+	The result follows if we show $\U_\equiv$ is minimum.
+	Recall $\trimnonred(\Gamma) = \{\Gamma_u \mid u \in \U_\equiv\}$.
+	Since $\trimnonred(\Gamma)$ is finite and it is generated by $\U_\equiv$, so must $\U_\equiv$ by its construction containing no duplicate elements.
+	Take any $\U = \{u \mid [u] \in \U_\equiv\}$ to be any finite set of reports forming $\trimnonred(\Gamma)$.
+	Since $\cup \trimnonred(\Gamma) = \cup_{u \in \U} \Gamma_u = \simplex$, we have $\U$ representative, and just need to show $\U$ is minimum.
 	
-	If $\U$ was not minimum, there would be some report $u' \in \U$ so that $\U' := \U \setminus \{u'\}$ is also representative.
+	If $\U$ was not minimum, there would be some report $u \in \U$ so that $\U \setminus \{u\}$ is also representative.
 	Since $\Gamma$ is elicitable and $\trimnonred$ is finite, we know that the level sets of $\Gamma$ form a power diagram intersected with the simplex (Theorem~\ref{thm:aurenhammer}).
-	Therefore, every level set $\Gamma_u$ corresponds to a face of a convex polyhedron: we correspond in two cases, according to if $\Gamma_{u'}$ corresponds to a facet or some lower-dimensional face.
-	
-	First, suppose $\Gamma_{u'}$ does not correspond to a facet.
-	Since $\Gamma_{u'}$ does correspond to a face of a convex polytope, it must be contained in a facet, and therefore there is some $u$ such that $\Gamma_{u'} \subsetneq \Gamma_u$.
-	Thus, $\Gamma_u \not \in \trimnonred(\Gamma)$.
-	If $\Gamma_{u'}$ corresponds to a facet, then it has a well-defined nonempty interior, and by removing exactly duplicate reports in the construction of $\U$, we have a $p \in \inter{\Gamma_{u'}}$ such that $\{u'\} = \Gamma(p)$.
-	Therefore, $\U'$ would not be representative.
+	Therefore, every level set $\Gamma_u$ is a face of a convex polyhedron: we correspond in two cases, according to if $\Gamma_{u}$ corresponds to a facet or some lower-dimensional face.
+	If $\Gamma_{u}$ is not a facet (but must still be a face) of a convex polytope, it must be contained in a facet, and therefore there is some $u'$ such that $\Gamma_{u} \subsetneq \Gamma_{u'}$, so $\Gamma_u \not \in \trimnonred(\Gamma)$.
+	If $\Gamma_{u}$ corresponds to a facet, then it has a well-defined nonempty interior, and since there is no $u' \in \U$ such that $u' \equiv u$ by construction of $\U$, we have a $p \in \inter{\Gamma_{u}}$ such that $\{u\} = \Gamma(p)$.
+	Therefore, $\U \setminus \{u\}$ would not be representative.
 	We conclude $\U$ as constructed must be a minimum representative set.
 	
 	
 	3 $\Rightarrow$ 1:
-	Since $\U$ is representative, we have $\Gamma|_\U(p) := \Gamma(p) \cap \U$ nonempty for all $p \in \simplex$, and therefore, $\Gamma$ embeds $\Gamma|_\U$, which is finite as $\U$ is finite.
-	Since $\U$ is minimum, the constructed $\Gamma_\U$ is additionally non-redundant.
-	\jessiet{Want more details here.  It's the forward implication of Prop 4, but since this is used in the reverse implication of prop 4, don't want to create cyclic dependencies.}
-	
+	Since $\U$ is representative, we have $\gamma(p) := \Gamma(p) \cap \U$ nonempty for all $p \in \simplex$, and therefore, $\Gamma$ embeds $\Gamma|_\U$ via the identity, which is finite as $\U$ is finite.
+	Since $\U$ is minimum, we additionally have $\{\gamma_u \mid u \in \U\} =  \{\Gamma_u \mid u \in \U\} =\trimnonred(\gamma)$ by construction both of $\gamma$ and of $\U$.
 	
 	
 	\btw{Previous version commented out above because it relies on old definitions - Jessie 1 June 21, commenting out 1 $\iff$ 4 to replace with 3 $\iff$ 4 - 3 June 21}
@@ -1594,20 +1611,18 @@ Defining $\trimnonred(\Gamma)$... say $L$ elicits $\Gamma$
 
 3 $\Rightarrow$ 4:
 It suffices to show that, for each $u \in \U$, $\Gamma_u$ is full-dimensional, so we can take $\Theta = \{\Gamma_u \mid u \in \U\}$.
-Since $\Gamma$ has a finite representative set, we know its level sets are faces of convex polyhedron by equivalence to a power diagram intersected with the simplex.
+Since $\Gamma$ has a finite representative set, we know its level sets are faces of convex polyhedron by equivalence to a power diagram intersected with the simplex (Theorem~\ref{thm:aurenhammer}).
 If there is a $u \in \U$ such that $\Gamma_u$ is not full-dimensional, it must be a face of some facet corresponding to $\Gamma_{u'}$ for some $u' \in \U$, and hence we contradict $\U$ being minimum, as $\U \setminus \{u\}$ would be a representative set of strictly smaller cardinality.
 
 
 
 4 $\Rightarrow$ 3:
-We want to show that for each $\theta \in \Theta$, we cannot have $\Theta' := \Theta \setminus \{\theta\}$ be representative.
+We want to show that for each $\theta \in \Theta$, we cannot have $\Theta \setminus \{\theta\}$ be representative.
 Observe we have no duplicate elements of $\Theta$.
 Fix $\theta := \Gamma_u \in \Theta$.
 Since $\Gamma_u$ is full-dimensional, there is some $p \in \inter{\Gamma_u}$ so that $\{u\} = \Gamma(p)$.
-Therefore, $\Theta'$ is not representative, so $\Theta$ is a finite minimum representative set for $\Gamma$.
+Therefore, $\Theta \setminus \{\Gamma_u\}$ is not representative, so $\Theta$ is a finite minimum representative set for $\Gamma$.
 
-
-Observe now that when one of these is true, $\Gamma|_\U$ is elicited by $L|_\U$, and that there is a bijection from $\Gamma|_\U$ to $\gamma$, and therefore $\gamma$ is also elicitable. 
 \end{proof}
 
 \btw{Commenting out remark to be replaced by Prop~\ref{prop:embed-trim} - Jessie, 1 June 21}
