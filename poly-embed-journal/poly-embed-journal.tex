@@ -192,7 +192,7 @@ We also show \raf{Newer stuff}
 
 Convex surrogate losses are a central building block in machine learning for finite prediction problems such as classification and structured prediction tasks.
 A growing body of work seeks to design and analyze convex surrogates for given loss functions, and more broadly, understand the best empirical risk minimization bounds that can found for a surrogate, for which consistency is a necessary condition.
-For example, recent work has developed tools to bound the required number of dimensions of the surrogate's hypothesis space~\cite{frongillo2015elicitation,  ramaswamy2016convex}\jessie{I took dimension of the hypothesis space to be, e.g., the degree of the polynomial $k$ for $\H = \{h : |\X| \times k \to \reals\}$.  Not sure if we should change to surrogates prediction/report space?}.
+For example, recent work has developed tools to bound the prediction dimension of the surrogate, meaning the dimension of the range of the surrogate hypothesis~\cite{frongillo2015elicitation,  ramaswamy2016convex}\jessiet{I took dimension of the hypothesis space to be, e.g., the degree of the polynomial $k$ for $\H = \{h : |\X| \times k \to \reals\}$.  Not sure if we should change to surrogates prediction/report space?}\raft{Excellent point.  Changed to prediction dimension, with a bit of explanation.}
 Yet in some cases these bounds are far from tight, such as for \emph{abstain loss} (classification with an abstain option)~\citep{bartlett2008classification,yuan2010classification,ramaswamy2016convex,ramaswamy2018consistent,zhang2018reject}.
 Furthermore, the kinds of strategies available for constructing surrogates, and their relative power, are not well understood.
 
@@ -390,29 +390,28 @@ While our notion of embedding is sufficient for calibration (and therefore consi
 For example, while logistic loss does not embed 0-1 loss, the surrogate and link for logistic loss are consistent with respect to 0-1 loss.
 
 \subsection{Embedding}
-
-\raf{If we like the intro (or even if not) we should rewrite this subsection a bit.  I think it's best to include definitions of non-redundancy and tight embeddings here, since then this first comment can be more precise, and we remove the section order dependency (we use tight embeddings in the applications section).  Not sure about the right order to define things in this subsection though, since we need rep sets to even define embeddings.}
-\jessie{I'm a little conflicted.  Maybe this depends on section order, but I'm hesitant to introduce terminology here if we don't use it until multiple sections later.  (If we have examples first and show things about tight embeddings)}
-\jessie{Also, do we want to frame calibrated links as ``loose embeddings''? Lol}
+\jessiet{Also, do we want to frame calibrated links as ``loose embeddings''? Lol}
+\raft{Ew}
 
 Several consistent convex surrogates in the literature can be thought of as \emph{embeddings} of the target loss $\ell$, wherein one maps the discrete reports of $\ell$ to a vector space, and finds a convex loss which agrees with the original loss.
-It turns out that it will be convenient, especially in applications, to allow $\ell$ to have ``redundant'' reports, e.g., reports that are never optimal or never uniquely optimal.
-We first formalize two notions of non-redundancy, and then turn to our formal definition of embeddings.
-
-\raf{Story: Def non-redundant.  Then talk about rep sets.  If it is minimum, that's another way to formalize non-redundant. prove equivalence of these two in BLAH.  Use abstain loss for binary classification as a running example.}
-To allow for ``redundant'' reports, in both the target and surrogate, we first introduce the notions of representative sets; see Proposition~\ref{prop:tfae-min-rep-nonredundant} for a formal connection.
+A key notion to define an embedding is that of a \emph{representative set}: a set of reports $\Sc$ such that, for all label distributions, at least one report $r\in\Sc$ minimizes expected loss.
 \begin{definition}
   Let $L:\R\to\reals^\Y_+$ be a generic loss.
   We say $\Sc \subseteq \R$ is \emph{representative for $L$} if we have $\prop{L}(p) \cap \Sc \neq \emptyset$ for all $p\in \simplex$.
   We further say $\Sc$ is a \emph{minimum representative set} if it has the smallest cardinality among all representative sets.
 \end{definition}
-\raft{Maybe discussion about minimum representative sets and \emph{maximally informative sets} from~\citet{wang2020weston} here, though maybe best to leave it until later.  BTW, I think their latest version might use different terminology.}
+It turns out that it will be convenient, especially in applications, to allow the target $\ell:\R\to\reals^\Y_+$ to have reports which are ``redundant'' in some sense.
+One natural sense is that $\ell$ has a representative set that is a strict subset of $\R$, i.e., $\R$ is not a minimum representative set.
+\raft{Some discussion here about minimum representative sets and \emph{maximally informative sets} from~\citet{wang2020weston} here, though maybe best to leave it until later.  BTW, I think their latest version might use different terminology.}
+Another is that some reports $r$ are ``dominated'', meaning $r$ is never optimal or there is another report $r'$ which is always optimal when $r$ is optimal.
+A priori these alternate definitions may not seem closely related.
+In fact, we show in \S~\ref{sec:min-rep-sets} that they are equivalent in our setting.
 
-\raf{Add ``tight'' to this def now}
+
 We now formally introduce the concept of an embedding.
 In addition to matching loss values, a key condition for consistency is that the original reports should be optimal exactly when the corresponding embedded points are optimal.
 \begin{definition}[Embedding a loss]\label{def:loss-embed}
-  A loss $L:\reals^d\to\reals^\Y$ \emph{embeds} a loss $\ell:\R\to\reals^\Y$ over a representative set $\Sc$ if there exists some injective embedding $\varphi:\Sc\to\reals^d$ such that
+  A loss $L:\reals^d\to\reals^\Y$ \emph{embeds} a loss $\ell:\R\to\reals^\Y$ if there exists a representative set $\Sc$ for $\ell$ and an injective embedding $\varphi:\Sc\to\reals^d$ such that
   (i) for all $r\in\Sc$ we have $L(\varphi(r)) = \ell(r)$, and (ii) for all $p\in\simplex,r\in\Sc$ we have
   % \begin{equation}\label{eq:embed-loss}
   %   r \in \argmin_{r'\in\R} \inprod{p}{\ell(r')} \iff \varphi(r) \in \argmin_{u\in\reals^d} \inprod{p}{L(u)}~.
@@ -420,7 +419,8 @@ In addition to matching loss values, a key condition for consistency is that the
   \begin{equation}\label{eq:embed-loss}
     r \in \prop{\ell}(p) \iff \varphi(r) \in \prop{L}(p)~.
   \end{equation}
-  We simply say $L$ \emph{embeds} $\ell$ if there is some representative set $\Sc$ for $\ell$ such that $L$ embeds $\ell$ over $\Sc$.
+  If $\Sc$ is a minimal representative set, we say $L$ \emph{tightly embeds} $\ell$.
+  %if there is some representative set $\Sc$ for $\ell$ such that $L$ embeds $\ell$ over $\Sc$.
 \end{definition}
 
 To illustrate the idea of embedding, let us examine hinge loss in detail as a surrogate for 0-1 loss for binary classification.
@@ -452,7 +452,6 @@ For condition (ii), let us compute the property each loss elicits, i.e., the set
 % Now, take the embedding $\varphi$ to be the identity.  % := r$ if $r \in [-1,1]$, and $\sgn(r)$ otherwise.
 In particular, we see that $-1 \in \prop{\ellzo}(p) \iff p_1 \in [0, 1/2] \iff -1 \in \prop{\hinge}(p)$, and $1 \in \prop{\ellzo}(p) \iff p_1 \in [1/2,1] \iff 1 \in \prop{\hinge}(p)$.
 With both conditions of Definition~\ref{def:loss-embed} satisfied, we conclude that $\hinge$ embeds $2\ellzo$.
-In this particular case, it is known $(\hinge,\psi)$ is calibrated for $\psi(u) = \sgn(u)$; in \S~\ref{sec:calibration} we show that, perhaps surprisingly, all embeddings imply the existence of a link so that the surrogate is calibrated.
 
 \begin{figure}
 	\begin{minipage}{0.3\linewidth}
@@ -478,11 +477,11 @@ In this particular case, it is known $(\hinge,\psi)$ is calibrated for $\psi(u) 
 \label{fig:bayes-risks-01}
 \end{figure}
 
-\jessie{Merge last paragraph of previous subsection with this one?}
-It is not immediately clear if embeddings give rise to calibrated links; indeed, apart from mapping the embedded points back to their original reports via $\psi(\varphi(r)) = r$, how to map the remaining values is far from obvious.
-In fact, we give a construction to map the remaining values in \S~\ref{sec:calibration}, showing that embeddings always yield calibration.
-%\bo{I think in Section \ref{sec:calibration} ?}
-
+In this particular example, it is known $(\hinge,\psi)$ is calibrated for $\psi(u) = \sgn(u)$.
+More generally, however, it is not clear whether an arbitrary embedding yields a calibrated link.
+Indeed, apart from mapping the embedded points back to their original reports via $\psi(\varphi(r)) = r$, how to map the remaining values is far from obvious.
+When the surrogate is polyhedral, we give a construction to map the remaining values in \S~\ref{sec:calibration}, showing that embeddings always yield calibration.
+We first explore the connection between embeddings and polyhedral surrogates.
 
 
 % Taking $\R = \{-1,1\}$ and the above embedding, we can write the expected loss over each report
@@ -1602,10 +1601,10 @@ Since $\cup \Theta = \simplex$, we have $\U$ a finite representative set for $L$
 
 \jessie{Lemma X}
 \begin{lemma}
-  Let $f: \reals^n_+ \to \reals_+$ be a (concave) polyhedral function.
-  There exists a unique set of loss vectors $\V$ of minimum cardinality such that $f(p) = \min_{v \in \V} \inprod{v}{p}$.
+  Let $f: \simplex \to \reals_+$ be a (concave) polyhedral function.
+  There exists a unique set of loss vectors $\V$ of minimum cardinality such that $f(p) = \min_{v \in \V} \inprod{v}{p}$ for all $p\in\simplex$.
   Define $\theta(v) = \{p \in \simplex \mid \inprod{v}{p} = \risk L(p)\}$, and $\Theta := \{\theta(v) \mid v \in \V\}$.
-  Furthermore, let $L: \R \to \reals^\Y_+$ be any loss with Bayes risk $\risk L := f$ and let $\Gamma := \prop{L}$.
+  Furthermore, let $L: \R \to \reals^\Y_+$ be any loss with Bayes risk $\risk L=f$ and let $\Gamma := \prop{L}$.
   Then $L$ has a finite minimum representative set, and for any minimum representative set $\R^* \subseteq \R$,
   % Furthermore, for all losses $L: \R \to \reals^\Y_+$ with Bayes risk $\risk L : \reals^n_+ \to \reals_+$, letting $\Gamma := \prop{L}$, there exists an $\R^* \subseteq \R$ such that
   \begin{enumerate}
@@ -1615,6 +1614,45 @@ Since $\cup \Theta = \simplex$, we have $\U$ a finite representative set for $L$
   \item For any $r \in \R$, there exists $r^* \in \R^*$ such that $\Gamma_r \subseteq \Gamma_{r^*}$\jessie{power diagrams stuff}.
   \end{enumerate}
 \end{lemma}
+
+Phase 1: construct $\V$.
+\begin{itemize}\setlength{\itemsep}{0pt}
+\item Write $f(p) = \min_{v\in\hat\V} \inprod{p}{v}$ for some finite set $\hat\V \subseteq \reals^\Y_+$ \raf{show you can do this using the $h$ and $\delta$ representation from Rockafellar}
+\item Extend to $g(x) = \min_{v\in\hat\V} \inprod{x}{v}$ for $x \in \reals^\Y_+$ and $g(x) = \infty$ otherwise.  Def $g(0) = 0$.
+\item Define $G = \{(x,c) \mid c \leq g(x)\} \subseteq \reals^\Y \times \reals$ to be the hypograph of $g$.
+\item Let $H_{v}^+ := \{ (x,c) \in \reals^\Y \times \reals \mid \inprod{x}{v} - c \geq 0\}$.
+\item Let $H_y^+ := \{ (x,c) \in \reals^\Y \times \reals \mid x_y \geq 0\}$.
+\item Let $\H_{\hat \V} = \{H_v^+ \mid v\in\hat\V\}$, $\H_\Y = \{H_y^+ \mid y\in\Y\}$, $\H = \H_{\hat \V} \cup \H_\Y$.
+\item Then $G = \cap \H$.
+\item Since $G$ is a full-dimensional polyhedron, with a unique H-rep by [cite]
+\item Hence, there is some unique $\H' \subseteq \H$ such that $G = \cap \H'$.
+\item Argue $\H_\Y \subseteq \H'$.
+\item Then $\H' \setminus \H_\Y = \{H_v^+ : v\in\V\} =: \H_\V$ for some $\V \subseteq \hat \V$.
+\item That's the $\V$ we are looking for.  (And we've argued that it's uniquely determined by $f$.)
+\item Moreover, $F_v := H_v^+ \cap G$ is a facet of $G$ for each $v\in\V$.
+\item Define the projection $\pi:\reals^\Y\times \reals \to \reals^\Y, (x,c) \mapsto x$.
+\item Show that $\cup_{v\in\V} \pi(F_v) = \reals^\Y_+$.
+\item Note: $\theta(v) = \pi(F_v) \cap \simplex$.
+\end{itemize}
+
+Phase 2: Now given a loss $L:\R\to\reals^\Y_+$ with $\risk L = f$.
+\begin{itemize}\setlength{\itemsep}{0pt}
+\item Define $\hat\V = L(\R) \subseteq \reals^\Y_+$ and $\H_{\hat \V} = \{H_v^+ \mid v\in\hat\V\}$.  Unlike above, these could be infinite sets.
+\item Let $\H = \H_\Y \cup \H_{\hat \V}$.
+\item We once again have $G = \cap\H$ by definition of $\risk{L}$ \raf{prove}
+\item Argue that $\H_\V \subseteq \H$, since $\H_\Y \cup \H_\V$ is the unique min H-rep of $G$. \raf{not sure how to do this, since $\H$ could be infinite}
+\item Conclude there is some set $\R^* \subseteq \R$ such that $L(\R^*) = \V$ (without duplicates).
+\item Let $r$ be a report, and let $\hat v = L(r)$.
+\item As $H_{\hat v}^+ \in \H$, it supports $G$ or it is redundant in $\H$ (or both).
+\item If it does support $G$, then $F_{\hat v} = H_{\hat v}^+ \cap G$ is a face of $G$, and thus a subset of a facet.
+\item Argue that $F_{\hat v}$ must be a subset of one of the $\V$ facets $F_v$ (as opposed to the vertical ones)
+\item Thus, $\pi(F_{\hat v}) \subseteq \pi(F_v)$. \raf{This will show (3) once we translate back}
+\item Claim: $\R'$ is a rep set for $L$ if and only if $\V \subseteq L(\R')$.
+\item Corollary: $\R^*$ is a min rep set for $L$ if and only if $\V = L(\R^*)$. \raf{(1)}
+\item Argue $\theta(v)$ is full-dim in $\simplex$ if and only if $\pi(F_v)$ is $|\Y|$-dim, if and only if $F_v$ is a facet. \raf{(2)}
+\end{itemize}
+
+
 \newcommand{\epi}{\mathrm{epi}}
 \begin{proof}
   Since $\risk L$ is a concave polyhedral function, it is finitely generated by \citet[Corollary 19.1.2]{rockafellar1997convex}. %and therefore, the set of linear functions of minimum cardinality is well-defined and unique\jessiet{unique should be cite-able, but not sure where to find it.  My copy of Rockafellar is in COS right now.}.
