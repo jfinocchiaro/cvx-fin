@@ -153,7 +153,7 @@
 % \AND instead of \And before the third author name.
 
 %Indirect elicitation as a necessary condition for consistent surrogate losses
-\title{Lower bounds on convex surrogates for abstain loss}
+\title{Lower bounds on convex consistent surrogates for abstain loss}
 
 % Three or more authors with the same address:
 \coltauthor{\Name{Jessie Finocchiaro} \Email{jessica.finocchiaro@colorado.edu}\\
@@ -172,14 +172,16 @@ Particularly, we review lower bounds on the dimensionality required to learn con
 \end{abstract}
 
 \section{Introduction}
-Supervised machine learning algorithms typically learn to make predictions about future inputs by \emph{empirical risk minimization}, where one learns a hypothesis function that minimizes a given loss function over a labeled training dataset.
+In \emph{empirical risk minimization} (ERM), supervised machine learning algorithms learn to make predictions about future inputs by learning a hypothesis function that minimizes a given loss function over a labeled training dataset.
 The loss function used often naturally corresponds to the question at hand; 0-1 loss is used for multiclass classification, squared loss is used to predict the expected value, and pinball loss is used to learn quantiles.
-Here, we study the \emph{abstain problem}, where we want our machine learning algorithm to abstain and defer classification to a human when the data distribution has low confidence over the labels on a given input.
-We present and review some of the previous consistent surrogates for the abstain problem, and discuss the minimum dimension of a convex loss that learns this task in a statistically \emph{consistent} manner.
+The task at hand corresponds to the loss function optimized; often, these losses can be discrete, and therefore $NP$-hard to optimize, motivating the study of surrogate losses that are easier to optimize.
+In particular, we restrict to the study of \emph{consistent, convex} surrogate losses for the \emph{abstain problem}.
+In the abstain problem, we want our machine learning algorithm to abstain and defer classification to a human when the algorithm has low confidence over the labels on a given input.
+We present and review some of the previous consistent surrogates for the abstain problem, and discuss the minimum dimension of a convex loss that learns this task in a statistically consistent manner.
 
 We consider surrogates $L:\reals^d \times \Y \to \reals_+$ for a given discrete loss corresponding to the task of interest.
 Here, we call $d$ the dimension of the surrogate, and we aim to understand how to construct surrogates of low dimension (in the number of outcomes), as this contributes to lowering the complexity of the optimization problem as a whole.
-However, when we require surrogate to be consistent, this imposes a natural tension with finding a low-dimensional surrogate, as increasing the dimensional allows for more degrees of freedom to link surrogate predictions back to their discrete analogous predictions.
+However, when we require surrogate to be consistent, this imposes a natural tension with finding one that is efficient in the prediction dimension $d$, as increasing the dimensional allows for more degrees of freedom to link surrogate predictions back to their discrete analogous predictions.
 
 %\jessie{Discuss consistency and how elicitation is a necessary condition}
 %\subsection{Property elicitation}
@@ -196,7 +198,7 @@ However, when we require surrogate to be consistent, this imposes a natural tens
 
 \section{The abstain loss}
 In this work, we particularly focus on the \emph{abstain loss}.
-Given a pre-determined parameter $\alpha$, the abstain loss is a variation of cost-sensitive classification which allows for a constant punishment $\alpha \in (0,1)$ for abstaining, represented here by the report $\bot$.
+Given a constant $\alpha \in (0,1)$, the abstain loss is a variation of cost-sensitive classification which allows for a constant punishment $\alpha$ for ``abstaining,'' represented here by the report $\bot$.
 
 \begin{equation}
 \ell^\alpha(r,y) = \begin{cases}
@@ -206,10 +208,13 @@ Given a pre-determined parameter $\alpha$, the abstain loss is a variation of co
 \end{cases}\tag*{Abstain loss}
 \end{equation} 
 
-Ideally, one wants to learn a hypothesis function $h$ to minimize this loss in expectation for any distribution $D$ over $\X \times \Y$.
-However, if the hypothesis class $\H$ is sufficiently rich to contain the Bayes optimal classifier, we can focus on what the optimal classifier $h^*(x)$ should predict in order to minimize $\E_{Y \sim D_x} L(\cdot, Y)$ for all $x \in \X$.
-Therefore, for this paper, we focus on the marginal distributions $D_x =: p \in \simplex$ for any $x \in \X$, rather than taking the expectation over $D$.
-This allows us to study the abstain property, which yields the prediction that an optimal classifier should yield conditioned on any input $x$.
+In order to obtain ERM bounds on learning the abstain problem, we want to optimize a consistent surrogate $L^\alpha$, roughly meaning there is a link $\psi$ such that approaching the $L^\alpha$-optimal hypothesis implies applying the link $\psi$ leads to approaching the $\ell^\alpha$-optimal hypothesis.
+\citet{bartlett2006convexity,ramaswamy2016convex} \jessie{add full list here} show that consistency and \emph{calibration} are equivalent notions.
+
+%Ideally, one wants to learn a hypothesis function $h$ to minimize this loss in expectation for any distribution $D$ over $\X \times \Y$.
+%However, if the hypothesis class $\H$ is sufficiently rich to contain the Bayes optimal classifier, we can focus on what the optimal classifier $h^*(x)$ should predict in order to minimize $\E_{Y \sim D_x} L(\cdot, Y)$ for all $x \in \X$.
+%Therefore, for this paper, we focus on the marginal distributions $D_x =: p \in \simplex$ for any $x \in \X$, rather than taking the expectation over $D$.
+%This allows us to study the abstain property, which yields the prediction that an optimal classifier should yield conditioned on any input $x$.
 
 %\begin{definition}[Abstain property]
 %\begin{equation}
@@ -220,30 +225,47 @@ This allows us to study the abstain property, which yields the prediction that a
 %\end{equation} 
 %\end{definition}
 
-However, since it is typically computationally hard to optimize discrete losses, one typically wants to optimize ``nicer'' losses (i.e. continuous, convex, piecewise linear, etc.) 
-In particular, we are interested in constructing convex surrogate losses that yield statistical guarantees known as \emph{consistency}.
-In essence, a surrogate loss is consistent with respect to an original loss if there exists a link function from surrogate to original space so that, when one approaches the optimal hypothesis in surrogate space as they tend to infinite data, linking the surrogate hypothesis yields the optimal hypothesis in the original report space.
+%However, since it is typically computationally hard to optimize discrete losses, one typically wants to optimize ``nicer'' losses (i.e. continuous, convex, piecewise linear, etc.) 
+%In particular, we are interested in constructing convex surrogate losses that yield statistical guarantees known as \emph{consistency}.
+%In essence, a surrogate loss is consistent with respect to an original loss if there exists a link function from surrogate to original space so that, when one approaches the optimal hypothesis in surrogate space as they tend to infinite data, linking the surrogate hypothesis yields the optimal hypothesis in the original report space.
 
-\begin{definition}[Consistent]
-	A surrogate $L:\reals^d \times \Y \to \reals$ is \emph{consistent} with respect to a target loss $\ell:\R \times \Y \to \reals$ if there exists a link function $\psi : \reals^d \to \R$ such that for all distributions $D$ on $\X \times\Y$ and all sequences of (vector) functions $f_m : \X \to \reals^d$,
-	\begin{multline*}
-	\E_D L(f_m(X), Y) \to \inf_f \E_P L(f(X), Y) \implies \\
-	\E_D \ell(\psi  \circ f_m(X), Y) \to \inf_f \E_D \ell(\psi \circ f(X), Y)~.~
-	\end{multline*}
-\end{definition}
+%\begin{definition}[Consistent]
+%	A surrogate $L:\reals^d \times \Y \to \reals$ is \emph{consistent} with respect to a target loss $\ell:\R \times \Y \to \reals$ if there exists a link function $\psi : \reals^d \to \R$ such that for all distributions $D$ on $\X \times\Y$ and all sequences of (vector) functions $f_m : \X \to \reals^d$,
+%	\begin{multline*}
+%	\E_D L(f_m(X), Y) \to \inf_f \E_P L(f(X), Y) \implies \\
+%	\E_D \ell(\psi  \circ f_m(X), Y) \to \inf_f \E_D \ell(\psi \circ f(X), Y)~.~
+%	\end{multline*}
+%\end{definition}
 
-In discrete prediction settings, such as the abstain problem, previous work has repeatedly shown that consistency and calibration are equivalent~\citep{zhang2004statistical,bartlett2006convexity,tewari2007consistency,ramaswamy2016convex}.
+In discrete prediction settings, such as the abstain problem, previous work has repeatedly shown that consistency and calibration are equivalent in discrete prediction settings~\citep{zhang2004statistical,bartlett2006convexity,tewari2007consistency,ramaswamy2016convex}.
+Calibration is generally an easier condition to work with than consistency, and it allows us to abstract from distributions over $\X \times \Y$ to distributions over $\Y$, denoted $p \in \simplex$. 
 
 \begin{definition}[Calibrated]\label{def:calibrated}
-	Let $\ell : \R \times \Y \to \reals_+$ be a discrete loss eliciting the property $\gamma$.
+Let $\ell : \R \times \Y \to \reals_+$ be a discrete loss eliciting the property $\gamma$.
 A surrogate loss $L : \reals^d \times \Y \to \reals_+$ is \emph{calibrated} with respect to $\ell$ if there exists a link function $\psi: \reals^d \to \R$ such that
 \begin{equation}\label{eq:calibration}
-\forall p \in \simplex: \inf_{u \in \reals^d : \psi(u) \not \in \gamma(p)} L(u;p) > \inf_{u \in \reals^d} L(u;p)~.~
+\forall p \in \simplex: \inf_{u \in \reals^d : \psi(u) \not \in \argmin_{r \in \R}\E_p\ell(r,Y)} E_{Y\sim p}L(u,Y) > \inf_{u \in \reals^d} \E_{Y\sim p} L(u,Y)~.~
 \end{equation}	
-\jessiet{Fix notation $\gamma$}
 \end{definition}
 
-Calibration is generally an easier condition to work with than consistency, and it allows us to abstract from distributions over $\X \times \Y$ to distributions over $\Y$, denoted $p \in \simplex$. 
+To understand the measurement of complexity for convex calibrated surrogates, we use \emph{convex calibration dimension}.
+
+\begin{definition}\label{def:ccdim}
+	The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell : \R \times \Y \to \reals_+$ is the minimum dimension $d$ such that there is a convex surrogate $L : \reals^d \times \Y \to \reals$ such that $L$ is calibrated with respect to $\ell$.
+\end{definition}
+
+Moreover,~\citet{finocchiaro2019embedding} introduce a special case of calibration called \emph{embedding}, in which discrete predictions are mapped into the surrogate prediction space; these are tightly realted to polyhedral (piecewise linear and convex) surrogate losses as they have a finite set of optimal reports.
+
+\begin{definition}[Embeds]
+	A convex surrogate loss $L : \reals^d \times \Y \to \reals$ eliciting $\Gamma: \simplex \toto \reals^d$ \emph{embeds} a discrete loss $\ell : \R \times \Y \to \reals_+$ eliciting $\gamma : \simplex \toto \R$ if there exists an injective embedding $\varphi : \R \to \reals^d$ such that (i) for all $r \in \R$, we have $L(\varphi(r)) = \ell(r)$, and (ii) for all $p \in \simplex$ and $r \in \R$, we have $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p)$.
+\end{definition}
+
+Since embedding is simply a special case of calibration and not an equivalent condition, this leads to an analagous definition of complexity for embeddings, called \emph{embedding dimension.}
+
+\begin{definition}
+	The \emph{embedding dimension} $\embed(\ell)$ of a discrete loss is given by the minimum dimension $d$ such that there exists a surrogate loss $L : \reals^d \times \Y \to \reals$ embedding $\ell$.
+\end{definition}
+
 
 %Since we can use 
 %\begin{proposition}
@@ -276,63 +298,71 @@ Calibration is generally an easier condition to work with than consistency, and 
 \caption{With $n = 3$, we can visualize values of $\gamma^\alpha(p)$ as one varies $p$ over $\simplex$.   Here, we vary $\alpha$ in each figure. $\alpha = 3/10$ (L), $\alpha = 1/2$ (M), $\alpha = 3/5$ (R).}
 \end{figure*}
 
-\section{Calibrated surrogates for the abstain loss}
+\section{Upper bounds on convex prediction dimension for the abstain loss}
 
-\subsection{One-vs-all (oVa)}
-
-\subsection{Crammer-Singer}
-
-\subsection{Binary Encoded Prediction (BEP)}
-\cite{ramaswamy2018consistent} introduces the Binary Encoded Prediction (BEP) surrogate that is calibrated with respect to the abstain loss.
+\cite{ramaswamy2018consistent} introduces the Binary Encoded Prediction (BEP) surrogate or its natural extensions that is calibrated with respect to the abstain loss for $\alpha \in (0,1/2)$.
 For this loss, we assign each outcome into a corner of the $\{-1, +1\}^d$ hypercube by a bijection $B : [n] \to \{-1+1\}^d$, where $d := \lceil \lg(n) \rceil$.
 
 \begin{equation}
 L^{BEP}(u,y) = \left( \max_{j \in [d]} B_j(y) u_j + 1 \right)_+ \tag*{BEP} 
 \end{equation}
 
-\subsubsection{\jessie{Links for BEP?}}
 
 One of the primary strengths of this surrogate is the exponential reduction in the dimension $d$ of the surrogate report $u$, while still being calibrated over the entire simplex.
-The One-vs-all \jessie{cite if no subsection} and Crammer-Singer \jessie{cite if no subsection} surrogates both require the dimension of $u$ to grow linearly, rather than logarithmically, with the number of outcomes.
+Previous surrogates such as One-vs-all~\citep{rifkin2004defense} and Crammer-Singer~\citep{crammer2001algorithmic} both require the dimension of $u$ to grow linearly, rather than logarithmically, with the number of outcomes.
 Significant improvements to this dimensionality while the surrogate is consistent can lead to improvements in the efficiency of the optimization problem.
-This begs the following question: 
-\begin{quote}
-	What is the \emph{lowest} dimension in which we can construct a consistent (convex) surrogate for the abstain problem?
-\end{quote}
+Moreover, the BEP surrogate is an embedding for $\ell^\alpha$, and therefore moves the optimal upper bound for both convex calibration and embedding to $\Theta(\lg(n))$.
 
-\section{Bounds on consistent surrogates}
-\begin{definition}
-	The \emph{convex calibration dimension} $\ccdim(\ell)$ of a discrete loss $\ell : \R \times \Y \to \reals_+$ is the minimum dimension $d$ such that there is a convex surrogate $L : \reals^d \times \Y \to \reals$ such that $L$ is calibrated with respect to $\ell$.
-\end{definition}
+\begin{theorem}
+	$\embed(\ell^{\alpha}) \leq \lceil \lg(n) \rceil$ for values of $\alpha \in (0,1/2]$.
+\end{theorem}
+The upper bound is constructive and is true by the consistency of the BEP surrogate.
+\begin{corollary}
+	$\ccdim(\ell^{\alpha}) \leq \lceil \lg(n) \rceil$ for values of $\alpha \in (0,1/2]$.
+\end{corollary}
 
-\begin{definition}[Embeds]
-	A convex surrogate loss $L : \reals^d \times \Y \to \reals$ eliciting $\Gamma: \simplex \toto \reals^d$ \emph{embeds} a discrete loss $\ell : \R \times \Y \to \reals_+$ eliciting $\gamma : \simplex \toto \R$ if there exists an injective embedding $\varphi : \R \to \reals^d$ such that (i) for all $r \in \R$, we have $L(\varphi(r)) = \ell(r)$, and (ii) for all $p \in \simplex$ and $r \in \R$, we have $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p)$.
-\end{definition}
 
-\begin{definition}
-	The \emph{embedding dimension} $\embed(\ell)$ of a discrete loss $\ell$ is given by the minimum dimension $d$ such that there exists a surrogate loss $L : \reals^d \times \Y \to \reals$ embedding $\ell$.
-\end{definition}
+\section{Lower bounds on consistent surrogates}
 
-\jessie{Can verify this easily enough, so maybe don't have proof?}
-\begin{proposition}
-	The BEP surrogate \jessie{or an $\alpha$-appropriate variation} embeds $\ell^\alpha$ for $\alpha \in (0,1/2]$.
-\end{proposition}
+While abstain has a logarithmic upper bound on its convex calibration and embedding dimensions, to date there is a large gap between lower and upper bounds, especially as $n =: |\Y|$ grows.
+
+\begin{openq}
+	Construct a lower bound on $\ccdim(\ell^\alpha)$ for $\alpha \in (0,1/2)$.
+\end{openq}
+
+\begin{openq}
+	Construct a lower bound on $\ccdim(\ell^\alpha)$ for $\alpha \in (1/2, (n-1) / n)$.
+\end{openq}
+
+We conjecture the bound is tight, though, unlike upper bounds, lower bounds on convex calibration dimension are not constructive.
+
+\begin{conjecture}
+	For $\alpha = 1/2$, the bound $\ccdim(\ell^\alpha) = \lceil \lg(n) \rceil$ is tight.
+\end{conjecture}
+
+\begin{conjecture}
+	For $\alpha < 1/2$ and $n \geq 4$, we have $\ccdim(\ell^\alpha) < \lceil \lg(n) \rceil$. \jessiet{Is this true?  IIRC, we though it might be $\log_{1/\alpha}$ at one point.}
+\end{conjecture}
+
+Since embedding is a special case of convex calibration dimension, we also pose open questions on the embedding dimension; it is currently an open problem to understand if these two are equal.
+%\begin{proposition}
+%	The BEP surrogate \jessie{or an $\alpha$-appropriate variation} embeds $\ell^\alpha$ for $\alpha \in (0,1/2]$.
+%\end{proposition}
 
 
 \begin{proposition}
 	$\ccdim(\ell^\alpha) \leq \embed(\ell^\alpha)$.
 \end{proposition}
 \begin{proof}
-	If $L$ embeds $\ell$, then it is calibrated with respect to $\ell$ by~\cite{finocchiaro2019embedding} Theorem 3.
+	If $L$ embeds $\ell$, then it is calibrated with respect to $\ell$ by~\citep[Theorem 3]{finocchiaro2019embedding}.
 \end{proof}
 
-\subsection{Upper bounds}
-\begin{theorem}
-	$\ccdim(\ell^{\alpha}) \leq \lceil \lg(n) \rceil$ for values of $\alpha \in (0,1/2]$.
-\end{theorem}
-The upper bound is constructive and is true by the consistency of the BEP surrogate.
 
-\subsection{Lower bounds}
+\begin{openq}
+	Construct a lower bound on $\embed(\ell^\alpha)$ for $\alpha \in (0,1/2)$.
+\end{openq}
+
+\subsection{Baby steps} \jessie{move these up to serve as intuition for the conjectures?}
 \begin{theorem}[\citep{finocchiaro2020embedding} Proposition 1]
 	For $\alpha \leq 1/2$ with $n = 3$, we observe $\embed(\ell^\alpha) = 2$.
 \end{theorem}
@@ -342,18 +372,18 @@ The upper bound is constructive and is true by the consistency of the BEP surrog
 	For $\alpha = 1/2$ with $n \geq 5$, we observe $\embed(\ell^\alpha) \geq 3$.
 \end{theorem}
 
-\begin{openq}
-	Is $\ccdim(\ell^{1/2}) = \Theta(\lg(n))$?
-\end{openq}
-
-\begin{openq}
-	Given $\alpha \in (0,1/2]$, and $n$, what is $\ccdim(\ell^{\alpha})$?
-\end{openq}
+%\begin{openq}
+%	Is $\ccdim(\ell^{1/2}) = \Theta(\lg(n))$?
+%\end{openq}
+%
+%\begin{openq}
+%	Given $\alpha \in (0,1/2]$, and $n$, what is $\ccdim(\ell^{\alpha})$?
+%\end{openq}
 
 \section{Future work and Conclusions}
 \jessie{Note that actually strictly more efficient than learning the mode}
-While bounds on the convex calibration dimension of the abstain loss exist, they are far from tight.
-For $\alpha < 1/2$ and $n \geq 3$, the bounds we know simply state $2 \leq \ccdim(\ell^\alpha) \leq \embed(\ell^\alpha) \leq \lceil \lg(n) \rceil$.
+While upper bounds on the convex calibration dimension of the abstain loss exist, they are far from tight.
+For $\alpha \leq 1/2$ and $n \geq 3$, the bounds we know simply state $2 \leq \ccdim(\ell^\alpha) \leq \embed(\ell^\alpha) \leq \lceil \lg(n) \rceil$.
 As $n$ grows large, as in extreme classification, the gap provided by this bound is very large.
 
 The next conjecture suggests that embedding is a sufficient framework to study convex calibration dimension.
@@ -370,7 +400,7 @@ However, if tighter lower bounds come from monotonicity conditions concerned wit
 
 
 \newpage
-\bibliographystyle{ieeetr}
+\bibliographystyle{abbrvnat}
 \bibliography{diss,extra}
 
 
