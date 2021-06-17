@@ -592,7 +592,7 @@ This useful fact will drive many of our results.
 
 
 \begin{proposition}\label{prop:embed-bayes-risks}
-  Let discrete loss $\ell$ be given.
+  Let discrete loss $\ell$ and minimizable loss $L$ be given.
   Then $L$ embeds $\ell$ if and only if $\risk{L}=\risk{\ell}$.
   % Let discrete loss $\ell:\R\to\reals^Y$ be given.
   % Then $L:\reals^d\to\reals^\Y$ embeds $\ell$ if and only if $\risk{L}=\risk{\ell}$.
@@ -737,6 +737,7 @@ Recent work~\citep{ramaswamy2016convex,finocchiaro2020embedding,finocchiaro2021u
   Every discrete loss $\ell:\R \to \reals^\Y_+$ is embedded by a polyhedral loss.
 \end{theorem}
 \begin{proof}
+  \raf{We will apply Theorem (bayes-risk-matching), which we prove in \S~\ref{sec:min-rep-sets}}
   Let $n = |\Y|$, and let $C:\reals^n \to \reals$ be given by $(-\risk{\ell})^*$, the convex conjugate of $-\risk{\ell}$.
   From standard results in convex analysis, $C$ is polyhedral as $-\risk{\ell}$ is, and $C$ is finite on all of $\reals^\Y$ as the domain of $-\risk{\ell}$ is bounded~\cite[Corollary 13.3.1]{rockafellar1997convex}.
   Note that $-\risk{\ell}$ is a closed convex function, as the infimum of affine functions, and thus $(-\risk{\ell})^{**} = -\risk{\ell}$.
@@ -1219,9 +1220,15 @@ More generally, $L^2$ cannot be consistent because the property it embeds does n
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Minimum Representative Sets and Non-redundancy}
+
+\section{Additional Structure of Embeddings}
 \label{sec:min-rep-sets}
 
+\raf{Start w/ Lemma X}
+
+\subsection{Equivalent condition: matching Bayes risks}
+
+\subsection{Minimum Representative Sets and Non-redundancy}
 % commented out 19 Apr 21
 % \raf{Some thoughts on this section:
 % \begin{itemize}
@@ -1299,10 +1306,11 @@ This motivates us to think about what it means to embed a non-redundant loss, an
 % \end{proof}
 
 \begin{proposition}\label{prop:tfae-min-rep-nonredundant}
-  Let $\U$ be a finite representative set for $L$ eliciting $\Gamma$.
+  Let $\U$ be a finite representative set for $L$.
   $\U$ is a minimum representative set for $L$ if and only if $L|_{\U}$ is non-redundant.
 \end{proposition}
 \begin{proof}
+  Let $L$ elicit $\Gamma$.
   $\Rightarrow$  
   We show the contrapositive: suppose $L|_{\U}$ is redundant.
   Then there is a $r,r' \in \U$ such that $\Gamma_r \subseteq \Gamma_{r'}$.
@@ -3150,27 +3158,8 @@ Note that we can also take $\theta(v) = F_v \cap \simplex$.
 
 \subsection{Phase 1: construct $\V^*$}
 
-%Set up notation and define $g,G$
-Let $f:\reals^\Y\to\reals_+\cup\{-\infty\}$ be a polyhedral concave function with $\dom(f) = \simplex$.
-\begin{claim}
-	We may write $f(p) = \min_{v\in\V} \inprod{p}{v}$ for some finite set $\V \subseteq \reals^\Y_+$ \raf{show you can do this using the $h$ and $\delta$ representation from Rockafellar -- argue that because $p\in\simplex$ we can write $\inprod{p}{b_i}-\beta_i = \inprod{p}{b_i-\beta_i\ones}$.}
-\end{claim}
-\begin{proof}
-  We will think of $f$ as defined $f:\reals^\Y\to\reals_+\cup\{-\infty\}$  with $\dom(f) = \simplex$.
-  \raf{Make formal}
-  For $p \in \simplex$, we know $\sum_i p_i = 1$, and can write any inner product $\inprod{p}{b} - \beta = \inprod{p}{b} - \inprod{p}{\beta \ones} = \inprod{p}{b - \beta \ones}$.
-  If $p \not \in \simplex$, then $f(p) = -\infty$ and inner products are not used to compute $F$.
-  Moreover, since $f$ is polyhedral, it is finitely generated \citep[Proposition 19.1.2]{rockafellar1997convex} and can be written 
-	\begin{align*}
-	f(p) &= h(p) - \delta(p \mid C)\\
-		 &= \min(\inprod{p}{b_1} - \beta_1, \ldots, \inprod{p}{b_k} - \beta_k) - \delta(p \mid \simplex)\\
-		 &= \min(\inprod{p}{b_1 - \beta_1 \ones}, \ldots, \inprod{p}{b_k - \beta_k \ones}) - \delta(p \mid \simplex)~.~
-	\end{align*}
-\end{proof}
-
-We now extend $f$ from the simplex to the nonnegative reals.
 \begin{definition}
-	Define the function $g : \reals_+^\Y \to \reals_+$ by extending $-f$
+	Define the function $g : \reals_+^\Y \to \reals_+$ by
 	\begin{align*}
 	g(x) = \min_{v\in\V} \inprod{x}{v} - \delta(x \mid \reals_+^\Y)~,~
 	\end{align*}
@@ -3255,9 +3244,9 @@ The moreover follows immediately since $\H_{\V^*} \subseteq \H^*$ and every $H^+
 \end{proof}
 
 \subsection{Projections to the positive orthant}
-\begin{itemize}
-\item Define the projection $\pi:\reals^\Y\times \reals \to \reals^\Y, (x,c) \mapsto x$.
-\item 
+
+Define the projection $\pi:\reals^\Y\times \reals \to \reals^\Y, (x,c) \mapsto x$.
+
 \begin{claim}
 	For all $x\in\reals^\Y_+$, there exists $v\in\V^*$ such that $H_v$ supports $G$ at $(x,g(x))$.
 \end{claim}
@@ -3273,26 +3262,33 @@ As these halfspaces are vertical, we have $g(x) = -\infty$, which does not suppo
 %As we have shown both directions of set inclusion, we must have $\cup_{v \in \V}\pi(F_v) = \reals_+^\Y$.	
 \end{proof}
 
-\item 
 \begin{corollary}
 	$\cup_{v\in\V^*} \pi(F_v) = \reals^\Y_+$.
 	% \jessie{Not sure how to show this, but intuitively, this is saying that the projection of the facets union to $\reals^\Y_+$.}
 \end{corollary}
-\item Note: $\theta(v) = \pi(F_v) \cap \simplex$. \raf{But haven't def $\theta$ yet}
-\end{itemize}
 
-\subsection{Phase 2: Now given a minimizable loss $L:\R\to\reals^\Y_+$ with $\risk L = f$.}
+\subsection{Phase 2: Now given a minimizable loss $L:\R\to\reals^\Y_+$ with $\risk L_+ = g$ (1-homog extension).}
+
+
+For $x\in\reals^\Y_+$,
+$\risk{L}_+(x) := \inf_{r\in\R} \inprod{x}{L(r)}$
+
 \begin{itemize}\setlength{\itemsep}{0pt}
 \item Define $\V = L(\R) \subseteq \reals^\Y_+$ and $\H_{\V} = \{H_v^+ \mid v\in\V\}$.  Unlike above, these could be infinite sets.
 \item Let $\H = \H_\Y \cup \H_{\V}$.
-\item 
 \begin{claim}
 	$G = \cap\H$ by definition of $\risk{L}$ \raf{prove}
 \end{claim}
 \begin{proof}
+  \raf{Let $(x,c) \in G$.  Show $(x,c)\in\cap \H$.  Then vice versa.  Or maybe iff once you get the hang of it.}
+
+  $\implies$
+  Have $g(x) \geq c$... use $g=\risk{L}_+$... then for all loss vectors $v = L()$, $(x,c) \in H_v^+$.  Done.
+
+  Other dir: for any $(x,c) \in \cap \H$
 	\jessie{If $\H$ is redundant, there is still a finite $\H^*$ such that $\H^* \subseteq \H$... right?  weird if $\H$ is infinite.}
 \end{proof}
-\item 
+\item Need to use minimizable
 \begin{claim}
 	Argue that $\H_{\V^*} \subseteq \H$, since $\H_\Y \cup \H_{\V^*}$ is the unique min H-rep of $G$. \raf{not sure how to do this, since $\H$ could be infinite}
 \end{claim}
@@ -3311,10 +3307,31 @@ For all $v\in\reals^\Y_+$, if $H_v$ supports $G$,  $\dim(\pi(F_v)) = \dim(F_v)-1
 \item Thus, $\pi(F_{\hat v}) \subseteq \pi(F_v)$. \raf{This will show (3) once we translate back}
 \item Claim: $\R'$ is a rep set for $L$ if and only if $\V \subseteq L(\R')$.
 \item Corollary: $\R^*$ is a min rep set for $L$ if and only if $\V^* = L(\R^*)$. \raf{(1)}
-\item Argue $\theta(v)$ is full-dim in $\simplex$ if and only if $\pi(F_v)$ is $|\Y|$-dim, if and only if $F_v$ is a facet. \raf{(2)}
 \end{itemize}
 
+\subsection{Translating to properties}
 
+Let $f:\reals^\Y\to\reals_+\cup\{-\infty\}$ be a polyhedral concave function with $\dom(f) = \simplex$.
+\begin{claim}
+	We may write $f(p) = \min_{v\in\V} \inprod{p}{v}$ for some finite set $\V \subseteq \reals^\Y_+$ \raf{show you can do this using the $h$ and $\delta$ representation from Rockafellar -- argue that because $p\in\simplex$ we can write $\inprod{p}{b_i}-\beta_i = \inprod{p}{b_i-\beta_i\ones}$.}
+\end{claim}
+\begin{proof}
+  We will think of $f$ as defined $f:\reals^\Y\to\reals_+\cup\{-\infty\}$  with $\dom(f) = \simplex$.
+  \raf{Make formal}
+  For $p \in \simplex$, we know $\sum_i p_i = 1$, and can write any inner product $\inprod{p}{b} - \beta = \inprod{p}{b} - \inprod{p}{\beta \ones} = \inprod{p}{b - \beta \ones}$.
+  If $p \not \in \simplex$, then $f(p) = -\infty$ and inner products are not used to compute $F$.
+  Moreover, since $f$ is polyhedral, it is finitely generated \citep[Proposition 19.1.2]{rockafellar1997convex} and can be written 
+	\begin{align*}
+	f(p) &= h(p) - \delta(p \mid C)\\
+		 &= \min(\inprod{p}{b_1} - \beta_1, \ldots, \inprod{p}{b_k} - \beta_k) - \delta(p \mid \simplex)\\
+		 &= \min(\inprod{p}{b_1 - \beta_1 \ones}, \ldots, \inprod{p}{b_k - \beta_k \ones}) - \delta(p \mid \simplex)~.~
+	\end{align*}
+\end{proof}
+
+
+Note: $\theta(v) = \pi(F_v) \cap \simplex$. \raf{But haven't def $\theta$ yet}
+
+Argue $\theta(v)$ is full-dim in $\simplex$ if and only if $\pi(F_v)$ is $|\Y|$-dim, if and only if $F_v$ is a facet. \raf{(2)}
 \end{document}
 %%% Local Variables:
 %%% mode: latex
