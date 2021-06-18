@@ -94,8 +94,8 @@
 \newcommand{\toto}{\rightrightarrows}
 \newcommand{\strip}{\mathrm{strip}}
 \newcommand{\trim}{\mathrm{trim}}
-\newcommand{\trimnonred}{\mathrm{trim}_{{\tt nonred}}}
-\newcommand{\trimcover}{\mathrm{trim}_{\tt cover}}
+\newcommand{\trimred}{\mathrm{trim}_{{\tt red}}}
+\newcommand{\trimcover}{\mathrm{trim}}
 \newcommand{\fplc}{finite-piecewise-linear and convex\xspace} %xspace for use in text
 \newcommand{\conv}{\mathrm{conv}}
 \newcommand{\indopp}{\bar{\mathbbm{1}}}
@@ -1095,6 +1095,12 @@ More generally, $L^2$ cannot be consistent because the property it embeds does n
 
 \raf{Theme: expanding our results from polyhedral losses to polyhedral Bayes risks. We can start by observing that the latter is a weaker condition.}
 
+\raf{Moved}
+(We say a concave function is polyhedral if its negation is a polyhedral convex function.)
+Note that the Bayes risk, a function from distributions over $\Y$ to the reals, may be polyhedral even if the loss itself is not.
+For example, this can be seen by a loss that is polyhedral in the convex hull of $\varphi(\R)$, but smooth outside that region.
+
+
 \begin{lemma}
 	\label{lem:poly-loss-poly-risk}
 	If $L$ is polyhedral, $\risk{L}$ is polyhedral.
@@ -1122,29 +1128,31 @@ More generally, $L^2$ cannot be consistent because the property it embeds does n
   \item A set $\R'\subseteq\R$ is minimum representative if and only if $L(\R') = \V$.\label{item:X-min-V}
   \item A set $\R'\subseteq\R$ is representative if and only if $\Theta \subseteq \{\Gamma_r \mid r \in \R'\}$.\label{item:X-rep-Theta}
   \item A set $\R'\subseteq\R$ is minimum representative if and only if $\{\Gamma_r \mid r \in \R'\} = \Theta$.\label{item:X-min-Theta}
+  \item Every representative set for $L$ contains a minimum representative set for $L$.\label{item:X-rep-contain-min}
   \item The set of full-dimensional level sets of $\Gamma$ is exactly $\Theta$.\label{item:X-full-dim}
   \item For any $r \in \R$, there exists $\theta \in \Theta$ such that $\Gamma_r \subseteq \theta$.\label{item:X-redundant}
+  \item $L$ tightly embeds $\ell:\R'\to\reals^\Y_+$ if and only if $\ell$ is injective and $\ell(\R') = \V$.
   \end{enumerate}
 \end{lemma}
 
-\raf{Make a corollary.  THus we'll focus on finite rep sets.}
+As a finite representative set implies a polyhedral Bayes risk by Lemma~\ref{lem:loss-restrict}, Lemma~\ref{lem:X} shows that polyhedral Bayes risks are equivalent to having finite representative sets, which in turn gives an embedding by
+Proposition~\ref{prop:representative-embeds-restriction}.
+\begin{corollary}\label{cor:poly-risk-fin-rep}
+  The following are equivalent for any minimizable loss $L:\R\to\reals^\Y_+$.
+  \begin{enumerate}
+  \item $\risk{L}$ is polyhedral.
+  \item $L$ has a finite representative set.
+  \item $L$ embeds a discrete loss.
+  \end{enumerate}
+\end{corollary}
+As ``$L$ has a finite representative set'' is a more succinct condition than ``$L$ is minimizable and $\risk{L}$ is polyhedral'', we will use the former in the sequel.
+(Recall that having a finite representative set already implies minimizability.)
 
-\begin{proposition}\label{prop:SL-minimum}
-  A minimizable loss $L: \R \to \reals^\Y_+$ has a polyhedral Bayes risk if and only if it has a finite representive set.
-  % Moreover, for any minimum representative set $\Sc$ for $L$, there is a bijection between $\Sc$ and the facets of the epigraph of $-\risk{L}$.
-  % \raft{Jessie: prove :-].  Note: min rep $\implies$ poly risk is immediate from Lemma~\ref{lem:loss-restrict}.  Move the construction into the proof. \jessie{Done; ready for a look}}
-\end{proposition}
-\begin{proof}
-  A finite representative implies a polyhedral Bayes risk by Lemma~\ref{lem:loss-restrict}.
-  Lemma~\ref{lem:X} gives the converse.
-\end{proof}
 
 \subsection{Equivalent condition: matching Bayes risks}
 
 
-To begin, we observe that our embedding condition in Definition~\ref{def:loss-embed} is equivalent to merely matching Bayes risks.
-% For example, one can check that $\risk{\hinge} = 2\min\{p_1,p_2\} = 2\risk{\ellzo}$.
-This useful fact will drive many of our results.
+Lemma~\ref{lem:X} leads to another appealing equivalent condition to our embedding condition in Definition~\ref{def:loss-embed}: a surrogate embeds a discrete loss if and only if their Bayes risks match.
 
 
 \begin{proposition}\label{prop:embed-bayes-risks}
@@ -1181,260 +1189,96 @@ This useful fact will drive many of our results.
   giving condition (ii).
 \end{proof}
 
-
 %\btw{RF: matching risks is not necessary for \emph{consistency}, as evidenced by logistic loss for 0-1 loss.  Maybe we should just make the observation, earlier on, that \emph{embedding} is not necessary for consistency. \jessie{Added a few sentences above, when talking about consistency vs calibration.}}
 
 %\btw{RF: DKR (section 3.1) realized the importance of matching Bayes risks, but they could only give general results for strictly convex (concave I should say) risks, in part because they fixed the link function to be a generalization of $\sgn$.  In contrast, we focus exclusively on non-strictly-convex risks.}
 
+Previous work from~\citet[Proposition 4]{duchi2018multiclass} realized the significance of matching Bayes risks for calibration with respect to the 0-1 loss, but their result relies the Bayes risk of the surrogate being strictly concave.  As polyhedral functions are never strictly concave, Proposition~\ref{prop:embed-bayes-risk} extends their result to the embedding setting.
 
+\subsection{Trimming a loss}
 
-\raf{Demote to corollary?}
-\begin{proposition}\label{prop:embed-risk-poly}
-  A minimizable loss $L$ embeds a discrete loss $\ell$ if and only if $\risk{L}$ is polyhedral.
+Central to the structural results in Lemma~\ref{lem:X} is the existence of a canonical set of loss vectors $\V$ which match the loss vectors of any minimum representative set.
+This fact may seem surprising when one considers that losses may have many mimimum representative sets.
+For example, consider hinge loss with a spurious extra dimension, i.e., $L:\reals^2\to\reals^\Y$, $L(r)_y = \max(0,1-r_1y)$ for $\Y = \{-1,+1\}$.
+Here the minimum representative sets are $\{(-1,a),(1,b)\}$ for any $a,b\in\reals$.
+Lemma~\ref{lem:X}(\ref{item:X-min-V}) states that, while the minimum representative set is not unique, its loss vectors are.
+
+Motivated by this observation, let us define the ``trim'' of a loss to be this unique set of loss vectors induced by any minimum representative set.
+
+\begin{definition}[Trim]\label{def:trim-loss}
+  Given a loss $L:\R \to \reals_+^\Y$ with a finite representative set, we define $\trimcover(L) = \{L(r) \mid r \in \R'\}$ given any minimum representative set $\R'$ for $L$.
+\end{definition}
+
+Using this notion of trimming a loss, we can again recast our embedding condition: a loss embeds another if and only if they have the same $\trim$.
+
+\begin{proposition}\label{prop:embed-iff-trims-equal}
+  Let $L:\reals^d\to\reals^\Y_+$ have a finite representative set, and let $\ell:\R\to\reals^\Y_+$ be a discrete loss.
+  Then $L$ embeds a discrete loss $\ell$ if and only if $\trimcover(L) = \trimcover(\ell)$.
+  Furthermore, $L$ tightly embeds $\ell$ if and only if $\ell$ is injective and $\trimcover(L) = \ell(\R)$.
 \end{proposition}
 \begin{proof}
-  If $L$ embeds a discrete $\ell$, Proposition~\ref{prop:embed-bayes-risks} gives us $\risk{L} = \risk{\ell}$ and therefore $\risk{L}$ is polyhedral.
-  For the converse, let $\risk{L}$ be polyhedral. %; we again examine the proof of Proposition~\ref{prop:embed-bayes-risks}.
-  Lemma~\ref{lem:X} gives a finite representative set $\Sc$, and $L$ embeds $L|_\Sc$ by Proposition~\ref{prop:representative-embeds-restriction}.
+  As $L$ has a finite representative set, $\risk{L}$ is polyhedral, and Lemma~\ref{lem:X} applies; let $\V$ be the set of loss vectors uniquely determined by $\risk{L}$.
+  If $L$ embeds $\ell$, then we have $\risk{L} = \risk{\ell}$ from Proposition~\ref{prop:embed-bayes-risks}.
+  Thus, Lemma~\ref{lem:X}(\ref{item:X-min-V}) gives $\trim(L) = \trim(\ell)$.
+
+  \raf{Fill in the rest...}
 \end{proof}
 
-\raf{Moved; reorganize}
 
-From the more succinct embedding condition in Proposition~\ref{prop:embed-risk-poly}, we can in turn simplify the condition that a loss embeds \emph{some} discrete loss: it does if and only if its Bayes risk is polyhedral.
-(We say a concave function is polyhedral if its negation is a polyhedral convex function.)
-Note that the Bayes risk, a function from distributions over $\Y$ to the reals, may be polyhedral even if the loss itself is not.
-For example, this can be seen by a loss that is polyhedral in the convex hull of $\varphi(\R)$, but smooth outside that region.
+\subsection{Minimum representative sets and non-redundancy}
 
-Previous work from~\citet[Proposition 4]{duchi2018multiclass} realized the significance of matching Bayes risks for calibration with respect to the 0-1 loss, but their result relies the Bayes risk of the surrogate being strictly concave.  As polyhedral functions are never strictly concave, Proposition~\ref{prop:embed-risk-poly} extends their result to the embedding setting.
-
-
-Combining Proposition~\ref{prop:embed-risk-poly} with the observation that polyhedral losses have polyhedral Bayes risks (Lemma~\ref{lem:poly-loss-poly-risk}), we obtain the first direction of our equivalence between polyhedral losses and embedding.
-
-\subsection{Minimum Representative Sets and Non-redundancy}
-% commented out 19 Apr 21
-% \raf{Some thoughts on this section:
-% \begin{itemize}
-% \item It's unclear to me how much of the properties stuff is for funzies versus useful in the sense that it's clearer to dispense with the loss.
-% \item It seems nice to point out and explore the fact that our notion of embedding is, now, symmetric.
-%   \begin{itemize}
-%   \item So generally we could say $L_1:\R_1\to\reals^\Y$ and $L_2:\R_2\to\reals^\Y$ are \emph{equivalent} (name TBD) if there exist $\Sc_i\subseteq\R_i$ representative for $L_i$, $i\in\{1,2\}$, with a bijection $\varphi:\Sc_1\to\Sc_2$ such that (i) for all $r\in\Sc_1$ we have $L_2(\varphi(r)) = L_1(r)$, and (ii) for all $p\in\simplex, r\in\R_1$ we have $r\in\prop{L_1}(p) \iff \varphi(r)\in\prop{L_2}(p)$.
-%   \item Now since $\varphi$ is a bijection it's clear that this is an equivalence relation.
-%   \item Moreover, since we've already established (Prop~\ref{prop:embed-bayes-risks}) that if $L$ embeds discrete $\ell$ over $\Sc$, then $\Sc$ being representative for $\ell$ implies $\varphi(\Sc)$ is representative for $L$, meaning $L$ and $\ell$ are equivalent under this definition.
-%   \item What other results might hold more generally using this equivalence notion?  (Note: finiteness of $\Sc$ is not assumed now, though we could make that assumption.)
-%   \item I believe the Bayes risk matching result may hold: $L_1$ and $L_2$ are equivalent iff $\risk{L_1}=\risk{L_2}$.  Certainly the first direction (equivalent $\implies$ risk matching) goes through untouched.  For the converse, I think we need finiteness of $\trim$, or maybe more generally some condition about the differentiability of the risk, since we needed the uniqueness of the supporting hyperplane to $\risk{L}$ to deduce that the losses matched.  Otherwise, if the Bayes risk has a nondifferentiable point, and the the level set of $u$ is that point, and $u$ is not redundant, there will be multiple loss vectors at $u$ which achieve the same Bayes risk.
-%   \end{itemize}
-% \end{itemize}}
-% \jessie{Thinking about this: I think there is enough value to $\trim$ as an object to include it.  The concept makes a lot more intuitive sense if we defined it by $\trim_\Sc(\gamma) = \{\gamma_r : r \in \Sc\}$ and thinking about the importance of $\Sc$.
-% There are a few results that are well-explained by this:
-% \begin{itemize}
-%	\item $L$ embeds discrete $\ell$ over set $\Sc$ (minimum representative for $\ell$) iff $\trim_\Sc(\prop{\ell}) = \trim_{\varphi(\Sc)}(\prop{L})$
-%	\item $L$ is equivalent to discrete $\ell$ iff $\trim_{\R_1}(\prop{\ell}) = \trim_{\R_2}(\prop{L})$
-%	\item when is $\ell$ non-redundant? (no reports $r$ s.t. $\gamma_r$ is (a) empty, (b) not a strict subset of another level set, or (c) exactly equal to another level set.)
-%	\item can't have reports that are strict subsets and on a facet of the epigraph <-- less clear how this would follow in this section.
-% \end{itemize}
-% This begs the question: what is the utility of non-redundancy?  It feels like getting rid of redundant reports makes it easier to study the property, where they don't really hurt much when studying the loss.}
-
-
-\jessie{How do we want to think about finiteness here? Just assume it? }
-
-In \S~\ref{sec:poly-loss-embed}, we discuss some implications of a representative set being minimum; here, we further investigate the relationship between minimum representative sets, non-redundancy of losses, and introduce what it means for an embedding to be tight.
+The condition that a representative set be minimum implies that one has identified exactly the ``active'' reports of a loss, in some sense.
+We now relate this condition to another natural notion from the property elicitation literature, that of non-redundancy~\cite{frongillo2014general}\raft{TODO: see if there are other references we should include here.  Maybe Jessie you could search?}.
+Intuitively, a loss is non-redundant if no report is weakly dominated by another report.
 
 \begin{definition}[Non-redundancy]\label{def:nonredundant}
   A loss $L : \R \to \reals^\Y_+$ eliciting $\Gamma:\simplex \toto \R$ is \emph{redundant} if there are reports $r, r' \in \R$ such that $\Gamma_r \subseteq \Gamma_{r'}$, and \emph{non-redundant} otherwise.
 \end{definition}
 
-This motivates us to think about what it means to embed a non-redundant loss, and consider the implications this has for representative set.
-
-\begin{definition}[Tight embedding]\label{def:tight-embedding}
-  We say that a loss $L : \reals^d \to \reals_+^\Y$ \emph{tightly embeds} a discrete loss $\ell : \R \to \reals_+^\Y$ via the injection $\varphi :\R \to \reals^d$ if $L$ embeds $\ell$ and $\ell$ is non-redundant.
-\end{definition}
-
-% \begin{definition}[Non-redundancy]\label{def:nonredundant}
-%   A report $r \in \R$ is \emph{redundant} for the discrete loss $\ell : \R \to \reals_+^\Y$ if $r$ does not uniquely optimize $\inprod{p}{\ell(\cdot)}$ for any $p \in \simplex$.
-%   A set $\R$ is called \emph{non-redundant} if it contains no redundant reports.
-% \end{definition}
-
-
-% commented out 23 Apr 21
-% \begin{proposition}\label{prop:min-rep-implies-trim}
-%   Suppose $L$ elicits $\Gamma$.
-%   If the set $\R$ is a finite minimum representative set for $L$, then $\{\Gamma_r \mid r \in \R\} = \trim(\Gamma)$.
-% \end{proposition}
-% \begin{proof}
-%   We trivially have $\trim(\Gamma) \subseteq \{\Gamma_r \mid r \in \R\}$, so the other directino of inclusion is what's left to show.
-%   For $r \in \R$, we want to show $\Gamma_r \in \trim(\Gamma)$.
-%   
-%   \jessie{Implicit lemma about 3 ways to be redundant used here.}
-%   We proceed in three cases: if there is not an $r' \in \R$ such that $\Gamma_r \subseteq \Gamma_{r'}$, then $L$ is non-redundant.
-%   If there is an $r'$ such that $\Gamma_r = \Gamma_{r'}$, $\R$ being a minimum representative set implies $r = r'$.
-%   If there is an $r'$ such that $\Gamma_r \subsetneq \Gamma_{r'}$, then $\R \setminus \{r\}$ is also a representative set, so we contradict $\R$ being a minimum representative set.
-%   Therefore, $\Gamma_r \in \trim(\Gamma)$.
-% \end{proof}
-% 
-% \begin{proposition}
-%   Let $L : \R' \to \reals^\Y_+$ be a given loss function and $\R$ a \jessie{finite?} representative set for $L$.
-%   $L|_\R$ is non-redundant $\iff \R$ is a minimum representative set for $L$.
-% \end{proposition}
-% \begin{proof}
-%   $\implies$ If $L|_\R$ is non-redundant, then for any $r \in \R$, we want to show there exists a $p \in \simplex$ such that $\Gamma(p) \cap \R \setminus \{r\} = \emptyset$.
-%   By non-redundancy, we know there is no $r'$ such that $\Gamma_r \subseteq \Gamma_{r'}$.
-%   Therefore, if $r' \in \Gamma(p) \cap \R \setminus \{r\}$, we must still have some $p' \in \simplex$ so that $r' \not \in \Gamma(p')$.
-%   In particular, we claim that $\Gamma(p') \cap \R \setminus \{r\} = \emptyset$. \jessie{Prove this claim!}
-%   
-%   $\impliedby$
-%   We show the contrapositive: if $L|_\R$ is redundant, then $\R$ is not a minimum representative set for $L$.
-%   In particular, there is a pair, $r, r' \in \R$ such that $\Gamma_r \subseteq \Gamma_{r'}$, and we can thus verify $\Gamma(p) \cap \R \setminus \{r\}$ is also a representative set.
-%   Therefore, $\R$ is not a minimum representative set.
-% \end{proof}
-
+From the structural result of Lemma~\ref{lem:X}, we can see that in fact these two notions are equivalent when $L$ has a polyhedral Bayes risk.
 \begin{proposition}\label{prop:tfae-min-rep-nonredundant}
-  Let $\U$ be a finite representative set for $L$.
-  $\U$ is a minimum representative set for $L$ if and only if $L|_{\U}$ is non-redundant.
+  Let $L:\R\to\reals^\Y_+$ have a finite representative set $\R'$.
+  Then $\R'$ is a minimum representative set for $L$ if and only if $L|_{\R'}$ is non-redundant.
 \end{proposition}
 \begin{proof}
-  Let $L$ elicit $\Gamma$.
-  $\Rightarrow$  
-  We show the contrapositive: suppose $L|_{\U}$ is redundant.
-  Then there is a $r,r' \in \U$ such that $\Gamma_r \subseteq \Gamma_{r'}$.
-  Then for all $p \in \Gamma_r$, we have $\{r, r'\} \subseteq \Gamma(p)$.
-  Therefore, $\U \setminus \{r\}$ still a representative set, so $\U$ is not minimum.
-  
-  \btw{Commenting out other statements with FDLS- Jessie 1 June 21}
-%  $(b \implies c)$
-%  If $L|_\R$ is non-redundant, then for all $r \in \R$, there is no $r'$ so that $\Gamma_r \subseteq \Gamma_{r'}$.
-%  This means the multiset $\{\Gamma_r : r \in \R\}$ contains no duplicate elements, since it has duplicate elements if and only if $\Gamma_r = \Gamma_{r'}$.
-%  Moreover, each $\Gamma_r$ is full-dimensional, since if there was a $\Gamma_r$ that was lower dimensional, it would have to be a subset of another level set, which would contradict non-redundancy. \jessiet{Hand waving here}
-%  Finally, we have $\cup_{r \in \R} \Gamma_r = \simplex$ since $\R$ is representative.
-%  
-%  $(c \implies a)$
-%  As $\Gamma_r$ is full-dimensional and there are no $r, r' \in \R$ such that $\Gamma_r = \Gamma_{r'}$, for each $r \in \R$ there must be some distribution $p_r \in \simplex$ so that $\Gamma(p_r) = \{r\}$.
-%  Thus, $\R \setminus \{r\}$ not a representative set for all $r \in \R$.
-%  Therefore, $\R$ is minimum.
-  
-  $\Leftarrow$
-  \btw{Commented out version relying on hyperplanes without power diagrams; it was incorrect - Jessie 1 June 21}
-  Since $\U$ is a finite representative set, we know $L|_\U$ is embedded by $L$ in Proposition~\ref{prop:representative-embeds-restriction}.
-  Therefore, $\Gamma := \prop{L}$ embeds $\Gamma|_\U := \prop{L|_\U}$ (see Definition~\ref{def:prop-embed} in \S~\ref{app:embed-props}).
-  Since $\Gamma|_\U$ is non-redundant (Definition~\ref{def:nonredundant-prop}) by a corollary of the assumption, we can apply Proposition~\ref{prop:embed-trim}\jessiet{BTW: Forward ref}, $\U$ is a minimum representative set for $L$.
-%  Since $\R^*$ is finite, it suffices to show that for all $r \in \R^*$, there exists some $p_r \in \simplex$ such that $\{r\} = \Gamma(p_r)$.
-%  This implies the result, as removing $r$ from $\R^*$ would make $\Gamma(p_r) = \emptyset$, and therefore $\R^* \setminus \{r\}$ would not be representative.
-%  
-%  If there was an $r \in \R^*$ such that there was no such $p_r$, but $\Gamma_r \not \subseteq \Gamma_{r'}$ for any other $r' \in \R^*$, then we must have some $r', r''$ such that there exists a $p_{r'}^r$ and $p_{r''}^r$ such that $\{r,r'\} \subseteq \Gamma(p_{r'}^r)$ and $r'' \not \in p_{r'}^r$, and similarly, $\{r, r''\} \subseteq \Gamma(p_{r''}^r)$ and $r' \not \in \Gamma(p_{r''}^r)$.
-%  
-%  Observe that the hyperplane $H_L(p; u) := p \mapsto \inprod{p}{L(u)}$ supports $\risk{L}$ at $p$ if and only if $r \in \Gamma(p)$.
-%  By assumption, we have $H_L(p_{r'}^r; r)$ supporting $\risk{L}(p_{r'}^r)$ and $H_L(p_{r''}^r; r)$ supporting $\risk{L}(p_{r''}^r)$.
-%  As $H_L(\cdot;r)$ is linear in its first argument (this is true for any $r \in \R^*$), then $\risk{L}$ must be linear between $p_{r'}^r$ and $p_{r''}^r$.
-%  
-%  Now observe that 
-%  $r' \in \Gamma(p_{r'}^r) \iff H_L(p_{r'}^r; r')$ supports $\risk{L}(p_{r'}^r)$.
-%  Since $\risk{L}$ is linear between $p_{r'}^r$ and $p_{r''}^r$, \jessie{THIS IS INCORRECT} it therefore also supports $\risk{L}(p_{r''}^r) \iff r' \in \Gamma(p_{r''}^r)$, yielding a contradiction.
-%  
-%  Therefore, for all $r \in \R^*$, there must be some $p_r$ such that $\Gamma(p_r) = \{r\}$, and thus $\R^*$ is a minimum representative set.
-  
-  
+  Let $\Gamma = \prop{L}$.
+  Suppose first that $L|_{\R'}$ is redundant.
+  Then there exist $r,r' \in \R'$ such that $\Gamma_r \subseteq \Gamma_{r'}$.
+  Thus, for all $p \in \Gamma_r$, we have $\{r, r'\} \subseteq \Gamma(p)$.
+  Therefore $\R' \setminus \{r\}$ still a representative set, so $\R'$ is not minimum.
 
+  Now suppose $L|_{\R'}$ is non-redundant.
+  As $\R'$ is a representative set, Lemma~\ref{lem:X}(\ref{item:X-rep-contain-min}) gives some minimum representative set $\Sc \subseteq \R'$.
+  Suppose we had some $r \in \R' \setminus \Sc$.
+  Now Lemma~\ref{lem:X}(\ref{item:X-redundant}) gives some $s\in\Sc$ such that $\Gamma_r \subseteq \Gamma_s$, which contradicts $L|_{\R'}$ being non-redundant.
+  We conclude $\Sc=\R'$, meaning $\R'$ is a minimum representative set.
 \end{proof}
-
 
 \begin{corollary}\label{cor:tight-embed-min-rep}
-  If $\R$ is a finite minimum representative set for $L$, then $L$ tightly embeds $L|_\R$. \raf{Changing def tight embed though...}
+  Let loss $L:\R\to\reals^\Y_+$ and finite representative set $\Sc$ be given.
+  Then $L$ tightly embeds $L|_\Sc$ if and only if $L|_\Sc$ is non-redundant.
 \end{corollary}
-Tightly embedding the restricted loss seems to make embedding construction slightly easier.
-While $L|_\R$ is not always the target loss of interest, there should now be a \emph{bijection} from $\R$ to the target reports.
-While an embedding only has to be constructed once and is considered an offline computation, its construction might be made easier by a tight embedding.
 
-We now present a concept called the $\trim$ of a loss (see Definition~\ref{def:trim-prop-nonred} for an analogous definition for properties in \S~\ref{app:embed-props}) which lets us focus on a unique set of loss vectors (resp., property values) induced by any minimum representative set.
-
-\begin{proposition}\label{prop:trim-unique}
-  Suppose $\R$ and $\R'$ are finite minimum representative sets for the loss $L$.
-  Then $\{L(r) \mid r \in \R\} = \{L(r') \mid r' \in \R'\}$.
-\end{proposition}
-\begin{proof}
-  It suffices to show $\{L(r) \mid r \in \R\} \subseteq \{L(r') \mid r' \in \R'\}$, and equality will follow by symmetry.
-  Consider $r\in \R$, and we want to show $L(r) \in \{L(r') \mid r' \in \R'\}$.
-  Since $\R$ and $\R'$ are minimum representative sets, all the level sets must be full-dimensional, and therefore have well-defined interiors (Proposition~\ref{prop:tfae-min-rep-nonredundant}).
-  In particular, we must have $\Gamma_r = \Gamma_{r'}$ for some $r' \in \R'$.
-  If $L(r) \neq L(r')$, then there would be a distribution $p \in \inter{\Gamma_r}$ such that $\inprod{p}{L(r)} \neq \inprod{p}{L(r')}$. \jessiet{This needs more detail}
-  If $\inprod{p}{L(r)} > \inprod{p}{L(r')}$, then $r' \not \in \Gamma(p)$, and $\R'$ is therefore either not a representative set or not minimum.
-  Similarly, if the inequality were flipped, we would contradict either $\R$ being a representative set or minimum.
-  Therefore, we must have the losses equal, and $L(r) \in \{L(r') \mid r' \in \R'\}$.
-\end{proof}
-
-\begin{definition}[$\trimcover$]\label{def:trim-loss}
-  Given a loss $L:\R \to \reals_+^\Y$ with a finite representative set, we define $\trimcover(L) = \{L(r) \mid r \in \R'\}$ given any minimum representative set $\R'$ for $L$.
-\end{definition}
 
 \begin{corollary}\label{prop:trim-loss-condition}
-  Given an loss $L : \R \to \reals^\Y_+$ with finite minimum representative set $\R^*$, we have $\trimcover(L) = \{L(u) \mid u \in \R \textrm{ s.t. } \neg\exists u'\in\R,u'\neq u,\, \Gamma_u \subsetneq \Gamma_{u'}\}$. 
+  Let $L : \R \to \reals^\Y_+$ have a finite representative set.
+  Then $\trimcover(L) = \{L(u) \mid u \in \R \textrm{ s.t. } \neg\exists u'\in\R,u'\neq u,\, \Gamma_u \subsetneq \Gamma_{u'}\}$. 
 \end{corollary}
-\begin{proof}[Sketch]
+\begin{proof}
+  \raf{Didn't get to this proof}
+  
   Let $\U := \{u \in \R \textrm{ s.t. } \neg\exists u'\in\R,u'\neq u,\, \Gamma_u \subsetneq \Gamma_{u'}\}$.
   The only time $\U$ contains redundant elements is if there is $u,u' \in \U$ so that $\Gamma_u = \Gamma_{u'}$.  In such a case, removing duplicate elements of $\U$ to form $\U^*$ means $\{L(u) \mid u \in \U\} = \{L(u) \mid u \in \U^*\}$ and $L|_{U'}\}$ is nonredundant, and therefore $\U^*$ is a minimum representative set by Proposition~\ref{prop:tfae-min-rep-nonredundant}, and therefore equal to $\trimcover(L)$.
-
-  % commented out 06 May 21	
-  %	We have $\U$ representative since for any $r \in \R \setminus \U$, we must have $\Gamma_r \subsetneq \Gamma_{r'}$ for some other $r'$, and $r' \in \U$ by partial orderings of subsets, so $\Gamma(p) \cap \U$ is never empty.
-  %	
-  %	Take any $\U' \subseteq \U$ that is a minimum representative set by pruning redundant reports from $\U$ (unique up to a choice of which duplicate report you want to keep).
-  %	If $\{L(u) \mid u \in \U\} = \{L(u) \mid u \in \U'\}$, the result follows as a corollary of Proposition~\ref{prop:tfae-min-rep-nonredundant}.
-  %	
-  %	Clearly, $\{L(u) \mid u \in \U\} \supseteq \{L(u) \mid u \in \U'\}$, so we just need to show $\{L(u) \mid u \in \U\} \subseteq \{L(u) \mid u \in \U'\}$.
-  %	If for $u \in \U$, we want to show there is some $u' \in \U'$ such that $L(u) = L(u')$, and the result follows.
-  %	If $u \not \in \U'$, it must be because there is a $u' \in \U'$ such that $\Gamma_{u'} = \Gamma_u$. \jessie{Hand waving}
-  %	These level sets are full-dimensional by Proposiiton~\ref{prop:tfae-min-rep-nonredundant}, so we must have equality of losses since there is some $p \in \inter{\Gamma_u}$ of full support, so the losses must match as the supporting hyperplane of $\risk{L}$ at $p$ is unique.
-  %	% Since $\Gamma_u = \Gamma_{u'} \iff L(u) = L(u')$, the losses, and therefore the sets are equal.
-  
-  % commented out 03 May 21	
-  %	Suppose $L(u) \in \trim(L)$.
-  %	By Proposition~\ref{prop:tfae-min-rep-nonredundant}, we know $\Gamma_u$ is a full-dimensional level set, and there exists a $p_u$ such that $\{u\} = \Gamma(p_u)$.
-  %	Therefore, $\Gamma_u$ cannot be a subset of any other level set, so $L(u) \in \{L(u) \mid \neg \exists u' s.t. \, \Gamma_u \subsetneq \Gamma_{u'}\}$.
-  %	
-  %	Now, suppose $L(u) \in \{L(u) \mid \neg \exists u' s.t. \, \Gamma_u \subsetneq \Gamma_{u'}\}$.
-  %	If $L(u) \not \in \trim(L)$, then there is a $u'$ so that $L(u') \in \trim(L)$ and $\Gamma_u \subseteq \Gamma_{u'}$.
-  %	By the set construction, we must have $\Gamma_u = \Gamma_{u'}$, and since $\R$ is a minimum representative set, we know there is a $p_{u'}$ such that $\{u'\} = \Gamma(p_{u'})$.
-  %	Therefore, we must have $u=u'$, so $L(u') = L(u) \in \trim(L)$.
 \end{proof}
 
-It turns out that the $\trim$ of two losses being equal is equivalent to embedding, and additionally implies the existence of a tight embedding for a loss restricted to any minimum representative set.
-
-\begin{proposition}\label{prop:embed-iff-trims-equal}
-  Let the discrete loss $\ell$ be given.
-  $L$ embeds $\ell$ if and only if $\trimcover(L) = \trimcover(\ell)$.
-  Moreover, when $\trimcover(L) = \trimcover(\ell)$, given any finite minimum representative set $\R^*$ for $\ell$, we have $L$ tightly embeds $\ell|_{\R^*}$. \jessie{Wanted to add this in meeting 06 May 21, but statement is kinda ugly.}
-\end{proposition}
-Suppose $\gamma := \prop{\ell}$ and $\Gamma := \prop{L}$, and $\R$ a minimum representative set for $\ell$.
-\begin{proof}[Sketch]
-  $\implies$
-  The optimality condition of embedding means $\Gamma_{\varphi(r)} = \gamma_r$ for all $r \in \R$.
-  $\R$ a minimum representative set for $\ell$ then implies $\varphi(\R)$ is a minimum representative set for $L$.
-  By Proposition~\ref{prop:trim-unique}, we have
-  \begin{equation*}
-    \trimcover(L) = \trimcover(L|_{\varphi(\R)}) = \trimcover(\ell|_\R) = \trimcover(\ell)~.~
-  \end{equation*}
-  The outside equalities follow from the sets being minimum representative sets, and the middle one follows from the embedding definition since losses have to match at embedded points.
-  
-  $\impliedby$
-  First, take $\varphi: r \mapsto u$ if $\ell(r) = L(u)$.
-  As these losses match we trivially have the second embedding condition matching losses.
-  It just remains to show $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p)$.
-  \begin{align*}
-    r \in \argmin_u \inprod{p}{\ell(u)} &\iff \ell(r) = \min_{u \in \R} \inprod{p}{\ell(u)} \\
-                                        &\iff L(\varphi(r)) = \min_{u \in \varphi(\R)} \inprod{p}{L(u)} \\
-                                        &\iff L(\varphi(r)) = \min_u \inprod{p}{L(u)} \\
-                                        &\iff \varphi(r) \in \argmin_{u} \inprod{p}{L(u)}
-  \end{align*}
-  
-  Finally, consider that $\trimcover(L) = \trimcover(\ell)$ implies $L$ embeds $\ell$, and if $\R^*$ is a minimum representative set for $\ell$ then $\trimcover(L) = \trimcover(\ell) = \trimcover(\ell|_{\R^*})$ so $L$ tightly embeds $\ell|_{\R^*}$ by Corollary~\ref{cor:tight-embed-min-rep} and composing the embeddings.
-  % and $\ell|_{\R^*}$ is non-redundant by Proposition~\ref{prop:tfae-min-rep-nonredundant}.
-  Therefore, $L$ tightly embeds $\ell|_{\R^*}$.
-\end{proof}
 
 
 \subsection{A property elicitation perspective}
 
-As we define one loss embedding another, one can imagine an analogous definition where one property embeds another (Definition~\ref{def:prop-embed}), and we can define $\trimnonred(\Gamma)$ as the set of level sets generated by a minimum representative set (Definition~\ref{def:trim-prop}).
+As we define one loss embedding another, one can imagine an analogous definition where one property embeds another (Definition~\ref{def:prop-embed}), and we can define $\trimcover(\Gamma)$ as the set of level sets generated by a minimum representative set (Definition~\ref{def:trim-prop}).
 See \S~\ref{app:embed-props} for precise definitions and discussion.
 Even when using the language of properties, similar results to those above hold; for intuition, the level sets of a property correspond to the subgradients of the Bayes risk of the loss eliciting it.
-Since embedding also means matching Bayes risks, the matching of $\trimnonred$ follows since the subgradients also trivially match.
+Since embedding also means matching Bayes risks, the matching of $\trimred$ follows since the subgradients also trivially match.
 
 We now state a useful result for proving the existence of an embedding loss, which shows remarkable structure of embeddable properties, and the properties that embed them.
 First, we conclude that any embeddable property must be elicitable.
@@ -1442,258 +1286,31 @@ We also conclude that if $\Gamma$ embeds $\gamma$, the level sets of $\Gamma$ mu
 In other words, $\Gamma$ is exactly the property $\gamma$, just with other reports filling in the gaps between the embedded reports of $\gamma$.
 (When working with convex losses, these extra reports are typically the convex hull of the embedded reports.)
 In this sense, we can regard embedding as only a slight departure from direct elicitation: if a loss $L$ elicits $\Gamma$ which embeds $\gamma$, we can think of $L$ as essentially eliciting $\gamma$ itself.
-Finally, we have an important converse: if $\Gamma$ has finitely many full-dimensional level sets, or if $\trimnonred(\Gamma)$ is finite, then $\Gamma$ must embed some finite elicitable property with those same level sets.
+Finally, we have an important converse: if $\Gamma$ has finitely many full-dimensional level sets, or if $\trimred(\Gamma)$ is finite, then $\Gamma$ must embed some finite elicitable property with those same level sets.
 
-\raf{NOTES 6/4/2021}
+\raf{Moved}
 
-Let $\L = \{ L:\R\to\reals^\Y_+ \mid L$ has a finite representative set$\}$.
 
-Let $\mathcal{G} =$ set of all properties.
-% = \{ \Gamma:\simplex\toto\R \mid \Gamma$ has a finite representative set$\}$.
-
-Defining $\trimnonred(\Gamma)$... say $L$ elicits $\Gamma$
-\begin{itemize}
-\item Define $u \equiv u'$ if $\Gamma_u = \Gamma_{u'}$
-\item $\U_\equiv := \{[u] \mid u \in \R \textrm{ s.t. } \neg\exists u'\in\R,u'\neq u,\, \Gamma_u \subsetneq \Gamma_{u'}\}$.
-\item $\trimnonred$ for properties: exactly as before: $\trimnonred(\Gamma) = \{\Gamma_u \mid [u] \in \U_\equiv\}$. 
-  (old) $:\mathcal{G}\to\mathcal{G}$, $\trimnonred(\Gamma):\simplex \toto \U_\equiv$ where $\trimnonred(\Gamma)_{[u]} := \Gamma_u$, i.e., $\trimnonred(\Gamma)(p) = \{[u] \mid u \in \Gamma(p)\}$. 
-\item $\trimnonred:\L \to \L$ given by $\trimnonred(L):\U_\equiv\to\reals^\Y_+$ where $L([u]) = L(u)$.  \raf{Need to prove well-defined (but now it's true)}
-\end{itemize} 
-
-\jessie{taking a pass on writing this formally}
-\begin{definition}[$\U_\equiv, \trimnonred$]\label{def:trim-equiv}
-	Given a property $\Gamma : \simplex \toto \R$, we define the equivalence class of reports $u \equiv u'$ if and only if $\Gamma_u = \Gamma_{u'}$.
-	Define the set $\U_\equiv := \{[u] \mid u \in \R$ such that $\neg \exists u' \in \R$ s.t. $u' \neq u, \Gamma_u \subsetneq \Gamma_{u'}\}$.
-	We define $\trimnonred(\Gamma) = \{\Gamma_u \mid [u] \in \U_\equiv\}$.
-\end{definition}
-\raf{END NOTES}
-
-\begin{lemma}\label{lem:finite-minrep-weakly-dominate}
-  Let $\Gamma : \simplex \toto \R$ be an elicitable property with a finite representative set $\R'$.
-  There is a minimum representative set $\R^* \subseteq \R'$.
-  Additionally, for any $r \in \R \setminus \R^*$, there is a $r^* \in \R^*$ such that $\Gamma_r \subseteq \Gamma_{r^*}$.
-  Moreover, the level sets $\{\Gamma_{r^*} \mid r^* \in \R^*\}$ are the unique full-dimensional level sets of $\Gamma$.
-\end{lemma}
-\begin{proof}
-  Let $L$ elicit $\Gamma$.
-  By Proposition~\ref{prop:SL-minimum}, since $L$ has a finite representative set, $-\risk{L}$ is polyhedral, with epigraph $E_L$.
-  Observe that for any report $r \in \R$, the hyperplane $H^L_r : p \mapsto (p, -\inprod{p}{L(r)})$ supports $E_L$ exactly when $p\in\Gamma_r$.
-  Since $E_L$ is a convex polyhedron in $\reals^{n+1}$, we can take a linear projection of the faces of $E_L$ onto $\simplex \subset \reals^n$ to yield an affinely equivalent cell complex $C$ (Definition~\ref{def:cell-complex}), which is a power diagram by Theorem~\ref{thm:aurenhammer}.
-  Thus, every level set of $\Gamma$ is a cell in the induced power diagram.
-  
-  Consider any minimum representative set $\R^*$; we claim $\R^* \subseteq \R'$.
-  Since the level sets of $\Gamma$ are cells in an induced power diagram, the intersection of any two level sets have pairwise disjoint relative interiors (Def.~\ref{def:cell-complex}).
-  Therefore, any representative $\R^*$ with smaller cardinality than $\R'$ must be a subset of $\R'$ since no level set can span the relative interiors of any other level set.
-
-  By Proposition~\ref{prop:SL-minimum}, the level sets $\{\Gamma_{r^*} \mid r^*\in\R^*\}$ are exactly the projections of the facets of $E_L$, and thus exactly the full-dimensional cells of the induced power diagram.
-  % , since if it was a lower-dimensional, it would be a subset of some full-dimensional cell, and we would contradict that $\R^*$ is minimum.
-  % Moreover, if any $r \in \R \setminus \R^*$ is full-dimensional, $\Gamma_r$ is exactly equal to $\Gamma_{r^*}$ for some $r^* \in \R^*$ since $\R^*$ is representative.
-  For any $r\in\R$, the level set $\Gamma_r$ is a cell of the induced power diagram, and thus contained in some full-dimensional cell $\Gamma_{r^*}$.
-\end{proof}
-\begin{corollary}\label{cor:finite-minrep-trim}
-  Let $\Gamma : \simplex \toto \R$ be an elicitable property with a finite minimum representative set $\R^*$.
-  Then $\trimnonred(\Gamma) = \{\Gamma_r \mid r\in\R^*\}$.
-\end{corollary}
-\begin{proof}
-  Let $\Theta = \{\Gamma_r \mid r\in\R^*\}$.
-  Let $r\in\R$ be arbitrary.
-  From Lemma~\ref{lem:finite-minrep-weakly-dominate}, we have some $r^*\in\R^*$ such that either $\Gamma_r = \Gamma_{r^*}$ or $\Gamma_r \subsetneq \Gamma_{r^*}$.
-  In the first case, $\Gamma_r$ is an element of both $\trimnonred(\Gamma)$ and $\Theta$, and in the second, $\Gamma_r$ is an element of neither (by definition of $\trimnonred$ and minimum representative).
-  Since both $\trimnonred(\Gamma)$ and $\Theta$ are sets of level sets of $\Gamma$, we conclude $\trimnonred(\Gamma) = \Theta$.
-\end{proof}
-
-\jessiet{Combining commented corollary into Lemma~\ref{lem:finite-minrep-weakly-dominate} because we need $\R^*$ to be minimum for the later parts of the statement.}
-%\begin{corollary}\label{cor:finite-rep-contains-min}
-%  Let $\Gamma : \simplex \toto \R$ be an elicitable property with a finite representative set $\R'$.
-%  Then $\R'$ contains a minimum representative set.
-%  \raf{Let's state this in the main part for losses too}
-%\end{corollary}
-%\begin{proof}
-%  By assumption, 
-%  \begin{itemize}
-%  	\item $\{\Gamma_r \mid r \in \R'\}$ is a finitely generated set.
-%  \end{itemize}
-%  Therefore, $\R^* \subset \R'$ is minimum, meaning.  
-%\end{proof}
-
-\begin{corollary}\label{cor:finite-embed-min-rep}
-  Let elicitable $\Gamma : \simplex \toto \reals^d$ embed a finite elicitable property $\gamma:\simplex\toto\R$ via embedding $\varphi$.
-  Then $\Sc$ is a minimum representative set for $\gamma$ if and only if $\varphi(\Sc)$ is a minimum representative set for $\Gamma$
-\end{corollary}
-\begin{proof}
-  Suppose $\Gamma := \prop{L}$ and $\gamma := \prop{\ell}$.
-  Let $\Sc$ be a finite represntative set for $\gamma$.
-  By the embedding condition (ii.) we know that $\varphi(\Sc)$ is a finite representative set for $\Gamma$.
-  To observe that both are minimum if and only if the other is, since both have finite representative sets, both $E_L$ and $E_\ell$ are polyhedral.
-  \jessie{Part about bijection from facets of $E_L$ in Prop 1 removed. Any reason why?}
-  \raf{Have to argue $\U$ is a minimum representative set for $\Gamma$.}
-  \jessie{If $\U$ was not minimum, there would be some $u' = \varphi(s')$ such that $\Gamma(p) \cap \U \setminus \{u'\} \neq \emptyset$ for all $p \in \simplex$. This is true iff $\gamma(p) \cap \Sc \setminus \{s'\}$ is non-empty for all $p \in \simplex$, contradicting the assumption that $\Sc$ is minimum. }
-  \raf{Use Proposition~\ref{prop:SL-minimum}?}
-\end{proof}
+\raf{Would suggest $r$ not $u$ here.}
+Define $\trimred(\Gamma) = \{\Gamma_u \mid u \in \R \textrm{ s.t. } \neg\exists u'\in\R,u'\neq u,\, \Gamma_u \subsetneq \Gamma_{u'}\}$. 
 
 \begin{restatable}{proposition}{embedtrim}\label{prop:embed-trim}
   Let $\Gamma:\simplex\toto\reals^d$ be an elicitable property.
   The following are equivalent:
   \begin{enumerate}\setlength{\itemsep}{0pt}
   \item $\Gamma$ embeds a elicitable finite property $\gamma:\simplex \toto \R$.
-  \item $\trimnonred(\Gamma)$ is a finite set.%, and $\cup\,\trimnonred(\Gamma) = \simplex$.
-  % \\ $\hat\Gamma := \trimnonred(\Gamma)$ is a finite property, and $\cup\,\hat\Gamma) = \simplex$.
+  \item $\trimred(\Gamma)$ is a finite set.%, and $\cup\,\trimred(\Gamma) = \simplex$.
+  % \\ $\hat\Gamma := \trimred(\Gamma)$ is a finite property, and $\cup\,\hat\Gamma) = \simplex$.
   \item There is a finite minimum representative set $\U$ for $\Gamma$.
   \item There is a finite set of full-dimensional level sets $\Theta$ of $\Gamma$, and $\cup\,\Theta = \simplex$.
   \end{enumerate}
   % \raft{I see why you wanted this addition here, but (a) it's clear from the def of embedding, and (b) we don't have varphi defined.  So let's leave it out.}
-  Moreover, when any of the above hold, $\trimnonred(\gamma) = \trimnonred(\Gamma) = \{\Gamma_u \mid u\in\U\} = \Theta$.
+  Moreover, when any of the above hold, $\trimred(\gamma) = \trimred(\Gamma) = \{\Gamma_u \mid u\in\U\} = \Theta$.
 \end{restatable}
-\btw{Deleted old proof (too messy for me to track) 7 June 21 at 8:47 AM}
 \begin{proof}
-Let $L$ elicit $\Gamma$, and $\ell$ elicit $\gamma$ if given.
-
-$1 \Rightarrow 2$:
-Since $\gamma$ is a finite property, it has a finite minimum representative set $\Sc$.
-Let $\varphi$ be the embedding between $\gamma$ and $\Gamma$.
-From Corollary~\ref{cor:finite-embed-min-rep}, $\U := \varphi(\Sc)$ is a finite minimum representative set for $\Gamma$.
-By definition of embedding, $\{\gamma_s \mid s\in\Sc\} = \{\Gamma_u \mid u\in\U\}$.
-From Corollary~\ref{cor:finite-minrep-trim} on both $\gamma$ and $\Gamma$, we have $\trimnonred(\gamma) = \{\gamma_s \mid s\in\Sc\} = \{\Gamma_u \mid u\in\U\} = \trimnonred(\Gamma)$.
-
-
-$2 \Rightarrow 3$:
-\begin{itemize}
-\item Trim is finite $\implies$ reports giving you trim are rep $\U'$
-\item Exists min rep $\U \subseteq \U'$ from Corollary~\ref{cor:finite-rep-contains-min}
-\item Equality of set of level sets from Corollary~\ref{cor:finite-minrep-trim}
-\end{itemize}
-Since $\trimnonred(\Gamma) = \{\Gamma_u \mid [u] \in \U_\equiv \}$ is finite and covers the simplex, $\U_\equiv$ is a finite representative set for $L$.
-Consider any set $\U = \{u \mid [u] \in \U_\equiv\}$ to be a selection of elements of $\U_\equiv$ from each equivalence class.
-We claim $\trimnonred(\Gamma) = \{\Gamma_u \mid u \in \U_\equiv\} = \{\Gamma_u \mid u \in \U\}$, and the result follows immediately.
-%Since $\U$ is generated by selecting elements of $\U_\equiv$, we have $\{\Gamma_u \mid u \in \U_\equiv\} \supseteq \{\Gamma_u \mid u \in \U\}$ by construction.
-By construction of $\U$, we just need to show $\{\Gamma_u \mid u \in \U_\equiv\} \subseteq \{\Gamma_u \mid u \in \U\}$; consider any $u \in \U_\equiv$.
-%If $u \in \U$, the result follows immediately.
-If $u \in \U_\equiv \setminus \U$, then we know there is no report in $u' \in \U$ such that $\Gamma_{u} \subsetneq \Gamma_{u'}$, so we must have some $u' \in \U$ such that $u \equiv u'$.
-Therefore, $\Gamma_u = \Gamma_{u'} \in \{\Gamma_{u'} \mid u' \in \U\}$, yielding the result.
-Thus, there is a finite minimum representative set $\U$ such that $\trimnonred(\Gamma) = \{\Gamma_u \mid u \in \U\}$ covers the simplex.
-
-
-$3 \Rightarrow 1$:
-Consider the loss $\ell := L|_\U$.
-$\ell$ is a finite loss since $\U$ is finite, and by Proposition~\ref{prop:representative-embeds-restriction}, $L$ embeds $\ell$.
-As a corollary of the loss embedding condition, we have $\Gamma$ embeds $\gamma := \prop{\ell}$.
-
-$3 \Rightarrow 4$:
-By Lemma~\ref{lem:finite-minrep-weakly-dominate}, we have each level set in $\{\Gamma_u \mid u \in \U\}$ full-dimensional, and union to $\simplex$ by definition of representative.
-
-$4 \Rightarrow 3$:
-Since $\Theta$ is a finite set of full-dimensional level sets, and these level sets are affinely equivalent to the epigraph of negative risk $E_L$, it must follow that $-\risk L$ is polyhedral (convexity follows as a property of $-\risk L$). 
-By Proposition~\ref{prop:SL-minimum}, $L$ has polyhedral risk if and only if $L$ (and therefore $\Gamma$) has a finite minimum representative set $\U$.
-From Proposition~\ref{prop:SL-minimum}, we also know there is a bijection between the facets of $E_L$ (corresponding to the level sets $\theta \in \Theta$) and the level sets $\{\Gamma_u \mid u \in \U\}$, so the generated sets are equal.
-
-$4 \Rightarrow 1$: \jessie{Why not use this? Clears up 4 -> 3 and 3 -> 1 and still have all the equalities}
-Consider any set of reports $\U = \{u_1, \ldots, u_k\}$ such that $\Theta = \{\Gamma_{u_1}, \ldots, \Gamma_{u_k}\}$.
-Since $\cup \Theta = \simplex$, we have $\U$ a finite representative set for $L$, so $L$ elicits $L|_\U$ by Proposition~\ref{prop:representative-embeds-restriction}, and therefore $\Gamma$ embeds $\gamma := \prop{L|_\U}$. 
-\raf{Use Cor 4 + 6 again, maybe uniqueness of full-dim level sets from Lemma}
-
+  \raf{Now using Lemma~\ref{lem:X}}
 \end{proof}
 
-\jessie{Lemma X}
-\begin{lemma}
-  Let $f: \simplex \to \reals_+$ be a (concave) polyhedral function.
-  There exists a unique set of loss vectors $\V$ of minimum cardinality such that $f(p) = \min_{v \in \V} \inprod{v}{p}$ for all $p\in\simplex$.
-  Define $\theta(v) = \{p \in \simplex \mid \inprod{v}{p} = f(p)\}$, and $\Theta := \{\theta(v) \mid v \in \V\}$.
-  Furthermore, let $L: \R \to \reals^\Y_+$ be any loss with Bayes risk $\risk L=f$ and let $\Gamma := \prop{L}$.
-  Then $L$ has a finite minimum representative set, and for any minimum representative set $\R^* \subseteq \R$,
-  % Furthermore, for all losses $L: \R \to \reals^\Y_+$ with Bayes risk $\risk L : \reals^n_+ \to \reals_+$, letting $\Gamma := \prop{L}$, there exists an $\R^* \subseteq \R$ such that
-  \begin{enumerate}
-  \item $\{L(r^*) \mid r^* \in \R^*\} = \V$,
-  % \item $\R^*$ is a minimum representative set for $L$,
-  \item $\{\Gamma_r \mid r \in \R^*\} = \Theta$ is exactly the set of full-dimensional level sets of $\Gamma$\jessie{relative to $\reals^{n-1}$},
-  \item For any $r \in \R$, there exists $r^* \in \R^*$ such that $\Gamma_r \subseteq \Gamma_{r^*}$\jessie{power diagrams stuff}.
-  \end{enumerate}
-\end{lemma}
-
-
-
-\newcommand{\epi}{\mathrm{epi}}
-\begin{proof}
-  Since $\risk L$ is a concave polyhedral function, it is finitely generated by \citet[Corollary 19.1.2]{rockafellar1997convex}. %and therefore, the set of linear functions of minimum cardinality is well-defined and unique\jessiet{unique should be cite-able, but not sure where to find it.  My copy of Rockafellar is in COS right now.}.
-  By \citet[Theorem 19.1]{rockafellar1997convex}, we know that $E_L := \epi(\risk L)$ is closed and has finitely many faces.
-  \jessiet{Define convex function on positive orthant that is the negative one homogeneous version of negative risk. $G : \reals^\Y_+ \to \reals$ given by $G(v) = -\risk L(v/\|v\|_1)  \|v\|_1$ with $G(0) = 0$.  Talk about epigraph and subgraients of $G$.}
-  Form $\V$ by iterating over $E_L$'s finitely many faces as follows:
-  for each face $F$, we know there is a vector $v$ generating the face \jessiet{That is, $p \mapsto (p, \inprod{p}{v})$ supports $\risk L$ on [exactly] face $F$.}. 
-  If there is a point $p_v \in F$ such that $\risk L$ is differentiable at $p_v$,\jessiet{Is this the condition we want? Dancing around facets} add $v$ to $\V$.
-  
-  \jessiet{Differentiable implies subgradient is single-valued implies supporting hyperplane is unique, right?}
-  $\V$ is then unique since $\partial \risk L(p_v) = \{\partial \inprod{p_v}{v}\}$ \jessiet{is this right?} for each $p_v$, and therefore the hyperplane $p \mapsto (p, \inprod{p}{v})$ uniquely supports $\risk L$ at $p_v$.
-  Moreover, since $\V$ is finite and for each $v \in \V$ there is a $p_v$ such that $\partial \risk L(p_v)$ is single-valued, no $v$ can be removed from $\V$, so it has the smallest cardinality possible. \jessiet{Explicitly: using integer cardinality here.}
-
-  Now suppose there is a loss $L:\R \to \reals_+^\Y$ with Bayes risk $\risk L : p \mapsto \min_{r \in \R} \inprod{p}{L(r)}$.
-  Construct $\R^*$ by iterating over $\V$; for each $v \in \V$, there must be some $r^* \in \R$ such that $L(r^*) = v$ since $\V$ is unique.
-  (Therefore, there is some $p_v$ such that $p \mapsto (p, \inprod{p}{v})$ uniquely supports $\risk L$ at $p_v$, so we must have $L(r^*) = v$.)
-  
-  (1) and (2) follow immediately.
-  (3) and (4) follow since $\Gamma_r$ can be re-written as $\{p \in \reals_+^n$\jessiet{$\simplex?$}$ \mid \inprod{p}{L(r)} = \risk L(p)\}$.
-  
-  Since $E_L$ is a convex polyhedron in $\reals^{n+1}_+$\jessiet{nonnegative okay? looking at Aurenhammer's paper, I only see results on $\reals^n$.}, we can take a linear projection of the faces of $E_L$ onto $\reals^n_+$ \jessie{nonnegative?} to yield an affinely equivalent cell complex $C$ (Definition~\ref{def:cell-complex}), which is a power diagram by Theorem~\ref{thm:aurenhammer}.
-  Thus, every level set of $\Gamma$ is a cell in the induced power diagram.
-  Since, for each $r \in \R^*$, there is a $p_r$ such that $\Gamma(p_r) = \{r\}$\jessiet{need to justify (using fact about infections from subgradient to property values?)}, we must have $\Gamma_{r}$ not a subset of any other level set, and therefore must be full-dimensional relative to $\reals^{n}$.\jessiet{??}
-  Moreover, if there was a full-dimensional level set $\Gamma_{r'}$ such that $\Gamma_{r'} \not \in \Theta$, then \jessie{contradict representative}.
-  (4) follows since any cell of a power diagram is contained in some $n-1$-dimensional face $F$, and there must be some $r^* \in \R^*$ such that $\Gamma_{r^*} = F$.
-  
-\end{proof}
-
-
-
-\btw{Commenting out remark to be replaced by Prop~\ref{prop:embed-trim} - Jessie, 1 June 21}
-%\begin{remark}\label{remark:embed-trim}
-%  Let $\Gamma:\simplex\toto \R$ be an elicitable property.
-%  The following are equivalent:
-%  \begin{enumerate}\setlength{\itemsep}{0pt}
-%  \item $\Gamma$ embeds a finite property $\gamma:\simplex \toto \R'$.
-%  \item $\Gamma$ has a finite representative set $\U$.\jessie{, and therefore any minimum representative set for $\Gamma$ is also finite.}
-%  \item There is a finite multiset $\Theta$ full-dimensional level sets of $\Gamma$, and $\cup\, \Theta = \simplex$. 
-%  \end{enumerate}
-%  Moreover, when $\Gamma$ tightly embeds $\gamma$, $\U$ is a minimum representative set, and there is a $\Theta' \subseteq \Theta$ with no duplicate elements such that $\cup \Theta' = \simplex$.
-%\end{remark}
-%\begin{proof}[Sketch]
-%  $(a \implies b)$
-%  If $\Gamma$ embeds $\gamma$, then we can take the embedded target reports $\U := \varphi(\R')$ and show this is a finite representative set for $L$.
-%  We know it is finite as $\R'$ is finite, and consider that $\Gamma_{\varphi(r)} = \gamma_r$ for all $r \in \R'$, hence $\R \cap \gamma(p) \neq \emptyset \implies \varphi(\R) \cap \Gamma(p) \neq \emptyset$ for all $p \in \simplex$.	
-%  
-%  $(b \implies c)$
-%  Consider that if $\U$ is a finite representative set for $L$, then $L$ has a finite minimum representative set $\U' \subseteq \U$.
-%  We have $\Theta := \trim(\Gamma) = \{\Gamma_u \mid u \in \U'\}$.
-%  This is finite as $\U'$ is finite, and unions to the simplex by $\U'$ being representative.
-%  If there was a level set $\Gamma_u$ for some $u \in \varphi(\R')$ that was not full-dimensional, it would have to be a subset of some other level set $\Gamma_{u'}$, but this contradicts that $\U'$ is minimum. \jessie{Hand waving; make the argument you can't span relints of other level sets.}
-%  
-%  $(c \implies a)$ 
-%  For each $\theta \in \Theta$, there is some $u \in \R$ so that $\theta = \Gamma_u$; take $\U'$ to be the set of such $u$s.
-%  We can see $\R'$ is representative since $\cup_{u \in \R'} \Gamma_u = \cup \theta = \simplex$, and therefore we have the result by an analog of Proposition~\ref{prop:representative-embeds-restriction}.
-%  
-%  % tight version; commented out May 8, 2021
-%  % $(a \implies b)$
-%  % If $\Gamma$ tightly embeds $\gamma$, then we can take the embedded target reports $\U := \varphi(\R')$ and show this is a finite minimum representative set for $L$.
-%  % We know it is finite as $\R'$ is finite, and consider that $\Gamma_{\varphi(r)} = \gamma_r$ for all $r \in \R'$.
-%  % If $\U$ was not minimum, then there would be some $r \in \R'$ so that $\U \setminus \{\varphi(r)\}$ is still representative.
-%  % This is true if and only if $\R' \setminus \{r\}$ is still representative for $\ell$, which contradicts non-redundancy of $\ell$ by tight embedding (Prop~\ref{prop:tfae-min-rep-nonredundant}).
-%  % Therefore, $\U$ is a finite minimum representative set for $L$.
-%  % 
-%  % $(b \implies c)$
-%  % We have $\trim(\Gamma) = \{\Gamma_u \mid u \in \varphi(\R')\}$, and take $\Theta := \trim(\Gamma)$.
-%  % This is finite as $\varphi(\R')$ is finite, and unions to the simplex by $\varphi(\R')$ being representative.
-%  % If there was a level set $\Gamma_u$ for some $u \in \varphi(\R')$ that was not full-dimensional, it would have to be a subset of some other level set $\Gamma_{u'}$, but this contradicts that $\varphi(\R')$ is minimum. \jessie{Hand waving; make the argument you can't span relints of other level sets.}
-%  % 
-%  % 
-%  % $(c \implies a)$ \jessie{Not quite: we need the multiset to have no duplicate elements}
-%  %% If we show $ c \implies b$, we have $b \implies a$ as an version of Proposition~\ref{prop:representative-embeds-restriction}.
-%  % For each $\theta \in \Theta$, there is some $u \in \R$ so that $\theta = \Gamma_u$; take $\R'$ to be the set of such $u$s.
-%  % If $\R'$ is a minimum representative set, then we have the result by an analog of Proposition~\ref{prop:representative-embeds-restriction}.
-%  % 
-%  % We can see $\R'$ is representative since $\cup_{u \in \R'} \Gamma_u = \cup \theta = \simplex$, and it is minimum since the multiset of $\Theta$ has no duplicate elements.
-%  % As the level sets are full-dimensional, each level set $\Gamma_u$ has some $p_u$ such that $\Gamma(p_u) = \{u\}$, so removing any $u$ from $\R'$ would make $\R'$ not representative.	
-%\end{proof}
-
-%\bigskip
-%\hrulefill
-\btw{Moved a bunch of statements from here to the Appendix Jessie 1 June 21}
-%
 
 
 \section{Polyhedral losses: indirect elicitation implies consistency}
@@ -1997,7 +1614,7 @@ As results in property elicitation typically assume non-redundant properties (e.
 We capture this transformation as the trim operator presented below.
 
 \begin{definition}\label{def:trim-prop-nonred}
-  Given an elicitable property $\Gamma:\simplex \toto\R$, we define $\trimnonred(\Gamma) = \{\Gamma_u \mid \neg \exists u' \neq u$ s.t. $\Gamma_u \subsetneq \Gamma_{'u}\}$.
+  Given an elicitable property $\Gamma:\simplex \toto\R$, we define $\trimred(\Gamma) = \{\Gamma_u \mid \neg \exists u' \neq u$ s.t. $\Gamma_u \subsetneq \Gamma_{'u}\}$.
   %$\trimcover(\Gamma) = \{\Gamma_u : u \in \U \}$ as the set of maximal level sets of $\Gamma$ for any minimum representative set $\U \subseteq \R$.
 \end{definition}
 
@@ -2008,7 +1625,7 @@ We capture this transformation as the trim operator presented below.
 The following corollary follows from Corollary~\ref{cor:trim-loss-condition}.
 \begin{corollary}
 	Let $\Gamma$ be an elicitable property with a finite minimum representative set.
-	$\trimcover(\Gamma) = \trimnonred(\Gamma)$.
+	$\trimcover(\Gamma) = \trimred(\Gamma)$.
 \end{corollary}
 
 \btw{RF: Note for later: should be able to show that the union of trim is the simplex.\jessie{This is part of the proposition statement 2 now.}}
@@ -2632,7 +2249,7 @@ The second is closely related to the definition of the trim operator: it states 
 %  
 %  Second, $\Gamma_u = \Gamma_{\varphi(r)}$ for some $r \in \R$, then the level set is in both $\{\Gamma_{\varphi(r)} : r \in \R\}$ and $\trim(\Gamma)$.
 %
-%  \proposedadd{First, construct $\Sc := \Sc(L)$ as Definition~\ref{cons:rep-set}\jessiet{Argue there is a bijection from this set to any other minimum representative set}, which is a minimum representative set by Proposition~\ref{prop:SL-minimum}. 
+%  \proposedadd{First, construct $\Sc := \Sc(L)$ as Definition~\ref{cons:rep-set}\jessiet{Argue there is a bijection from this set to any other minimum representative set}, which is a minimum representative set by Corollary~\ref{cor:poly-risk-fin-rep}. 
 %    Moreover, we have $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p)$ by embedding, and therefore $\gamma_r = \Gamma_{\varphi(r)}$, yielding $\{\gamma_r \mid r \in \Sc\} = \{\Gamma_{\varphi(r)} \mid r \in \Sc\}$ as this is true for all $r \in \Sc$.}
 %
 %  \proposedadd{Now let $T := \{\gamma_r \mid r \in \Sc\} = \trim(\gamma)$. 
