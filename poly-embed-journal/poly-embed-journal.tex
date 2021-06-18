@@ -517,28 +517,29 @@ We first explore the connection between embeddings and polyhedral surrogates.
 In this section, we establish a tight relationship between the technique of embedding and the use of polyhedral (piecewise-linear convex) surrogate losses.
 We defer the question of when such surrogates are consistent to \S~\ref{sec:calibration}. 
 
-\raf{Do we want this anymore?  We violate it right off the bat with Lemma~\ref{lem:loss-restrict}...}
-Throughout this section, unless specified otherwise, we use $\ell:\R\to\reals^\Y$ for discrete target losses and $L:\reals^d\to\reals^\Y$ for surrogates.
+% \raf{Do we want this anymore?  We violate it right off the bat with Lemma~\ref{lem:loss-restrict}...}
+% Throughout this section, unless specified otherwise, we use $\ell:\R\to\reals^\Y$ for discrete target losses and $L:\reals^d\to\reals^\Y$ for surrogates.
 
-A first step is a simple lemma showing that restricting a loss to only those reports in some representative set preserves the Bayes risk.
-We will use this lemma throughout the paper.
+A first observation is that a loss restricted to some representative set $\Sc$ elicits the same property restricted to $\Sc$.
+As a consequence, restricting to representative sets preserves the Bayes risk.
+We will use these observations throughout.
 \begin{lemma}\label{lem:loss-restrict}
-  Let $L$ elicit $\Gamma:\simplex\toto\R_1$, and let $\R_2\subseteq\R_1$ be representative for $L$.
-  % such that $\Gamma(p) \cap \R_2 \neq \emptyset$ for all $p\in\simplex$.
-  Then $L|_{\R_2}$ elicits $\gamma:\simplex\toto\R_2$ defined by $\gamma(p) = \Gamma(p)\cap \R_2$.
-  Moreover, $\risk{L}=\risk{L|_{\R_2}}$.
+  Let $L:\R\to\reals^\Y_+$ elicit $\Gamma$, and let $\Sc\subseteq\R$ be representative for $L$.
+  % such that $\Gamma(p) \cap \Sc \neq \emptyset$ for all $p\in\simplex$.
+  Then $L|_\Sc$ elicits $\gamma:\simplex\toto\Sc$ defined by $\gamma(p) = \Gamma(p)\cap \Sc$.
+  Moreover, $\risk{L}=\risk{L|_\Sc}$.
 \end{lemma}
 \begin{proof}
-	Let $p\in\simplex$ be fixed throughout.
-	First let $r \in \gamma(p) = \Gamma(p) \cap \R_2$.
-	Then $r \in \Gamma(p) = \argmin_{u\in\R_1} \inprod{p}{L(u)}$, so as $r\in\R_2$ we have in particular $r \in \argmin_{u\in\R_2} \inprod{p}{L(u)}$.
-	For the other direction, suppose $r \in \argmin_{u\in\R_2} \inprod{p}{L(u)}$.
-	By our assumption, we must have some $r^* \in \Gamma(p) \cap \R_2$.
-	On the one hand, $r^*\in\Gamma(p) = \argmin_{u\in\R_1} \inprod{p}{L(u)}$.
-	On the other, as $r^* \in \R_2$, we certainly have $r^* \in \argmin_{u\in\R_2} \inprod{p}{L(u)}$.
-	But now we must have $\inprod{p}{L(r)} = \inprod{p}{L(r^*)}$, and thus $r \in \argmin_{u\in\R_1} \inprod{p}{L(u)} = \Gamma(p)$ as well.
-	We now see $r \in \Gamma(p) \cap \R_2$.
-	Finally, the equality of the Bayes risks $\min_{u\in\R_1} \inprod{p}{L(u)} = \min_{u\in\R_2} \inprod{p}{L(u)}$ follows immediately by the above, as $\emptyset \neq \Gamma(p)\cap\R_2 \subseteq \Gamma(p)$ for all $p\in\simplex$.
+  Let $p\in\simplex$ be fixed throughout.
+  First let $r \in \gamma(p) = \Gamma(p) \cap \Sc$.
+  Then $r \in \Gamma(p) = \argmin_{u\in\R} \inprod{p}{L(u)}$, so as $r\in\Sc$ we have in particular $r \in \argmin_{u\in\Sc} \inprod{p}{L(u)}$.
+  For the other direction, suppose $r \in \argmin_{u\in\Sc} \inprod{p}{L(u)}$.
+  As $\Sc$ is representative for $L$, we must have some $s \in \Gamma(p) \cap \Sc$.
+  On the one hand, $s\in\Gamma(p) = \argmin_{u\in\R} \inprod{p}{L(u)}$.
+  On the other, as $s \in \Sc$, we certainly have $s \in \argmin_{u\in\Sc} \inprod{p}{L(u)}$.
+  But now we must have $\inprod{p}{L(r)} = \inprod{p}{L(s)}$, and thus $r \in \argmin_{u\in\R} \inprod{p}{L(u)} = \Gamma(p)$ as well.
+  We now see $r \in \Gamma(p) \cap \Sc$.
+  Finally, the equality of the Bayes risks $\min_{u\in\R} \inprod{p}{L(u)} = \min_{u\in\Sc} \inprod{p}{L(u)}$ follows immediately by the above, as $\emptyset \neq \Gamma(p)\cap\Sc \subseteq \Gamma(p)$ for all $p\in\simplex$.
 \end{proof}
 
 
@@ -557,17 +558,15 @@ Lemma~\ref{lem:loss-restrict} leads to the following useful tool for finding emb
 \end{proof}
 
 
-
-
-Shifting our focus to \emph{polyhedral} (piecewise linear and convex) surrogates, we observe that these surrogates elicit finite properties, though they may have optimal sets that are infinite.
-This lets us apply results about finite representative sets to understand the structure of polyhedral surrogates and the losses they embed.
+We now shift our focus to \emph{polyhedral} (piecewise-linear and convex) surrogates.
+Our first observation is that while polyhedral surrogates cannot be finite properties, in the sense that they have infinitely many possible reports, they do elicit properties with a finite range, meaning a finite set of possible optimal sets.
+This observation lets us apply results about finite representative sets to understand the structure of polyhedral surrogates and the losses they embed.
 See \S~\ref{app:power-diagrams} for the full proof.
 
 \begin{restatable}{lemma}{polyhedralrangegamma}
 	\label{lem:polyhedral-range-gamma}
 	Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss, and let $\Gamma = \prop{L}$.
-	Then the range of $\Gamma$, $\U = \Gamma(\simplex) = \{\Gamma(p) \subseteq \reals^d : p\in\simplex\}$, is a finite set of closed polyhedra.
-        \raft{Leave this statement and add a proof sketch; move other dependencies to appendix \jessie{Done feel free to burn}}
+	Then the range of $\Gamma$, given by $\Gamma(\simplex) = \{\Gamma(p) \subseteq \reals^d : p\in\simplex\}$, is a finite set of closed polyhedra.
 \end{restatable}
 \begin{proof}[Sketch]
 	With $\Y$ finite, there are only finitely many supporting sets over $\simplex$.
@@ -581,26 +580,25 @@ See \S~\ref{app:power-diagrams} for the full proof.
   Every polyhedral loss $L$ embeds a discrete loss.
 \end{theorem}
 \begin{proof}
-  \raf{Update notation here; been using $\U$ for a set of reports everywhere else}
   Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss, and $\Gamma = \prop{L}$.
-  By Lemma~\ref{lem:polyhedral-range-gamma}, $\U = \Gamma(\simplex)$ is finite. 
-  For each $U\in \U$, select $u_U \in U$, and let $\Sc = \{u_U : U \in\U\}$.
-  Then $\Sc$ is representative for $L$.
-  Proposition~\ref{prop:representative-embeds-restriction} now states that $L$ embeds $L|_{\Sc}$.
+  By Lemma~\ref{lem:polyhedral-range-gamma}, $\Gamma(\simplex)$ is finite set. 
+  For each $U\in \Gamma(\simplex)$, select $u_U \in U$, and let $\Sc = \{u_U : U \in\Gamma(\simplex)\}$, which is again finite.
+  For any $p\in\simplex$ then, let $U = \Gamma(p)$.
+  We have $U \in \Gamma(\simplex)$ by definition, and thus some $u_U \in \Sc$; in particular, $u_U \in U = \Gamma(p)$.
+  We conclude that $\Sc$ is representative for $L$.
+  Proposition~\ref{prop:representative-embeds-restriction} now states that $L$ embeds $L|_\Sc$.
 \end{proof}
 
 We now turn to the reverse direction: which discrete losses are embedded by some polyhedral loss?
 Perhaps surprisingly, we show that \emph{every} discrete loss is embeddable,
 using a construction via convex conjugate duality which has appeared several times in the literature (e.g.\ \cite{duchi2018multiclass,abernethy2013efficient,frongillo2014general}).
-Note however that the number of dimensions $d$ required could be as large as $O(|\Y|)$, which is particularly undesirable in structured prediction and information retrieval problems with exponentially many outcomes.
-Recent work~\citep{ramaswamy2016convex,finocchiaro2020embedding,finocchiaro2021unifying} yield characterizations for bounding the prediction dimension $d$ for consistent convex surrogates and embeddings.
-%\raft{CITE: DKR, frongillo-kash (WINE 2014), probably one of Bob's papers?, others?}
+The proof relies on a result we will prove in \S~\ref{sec:min-rep-sets}: a minimizable surrogate embeds a discrete loss if and only if their Bayes risks match (Proposition~\ref{prop:embed-bayes-risks}).
+
 
 \begin{theorem}\label{thm:discrete-loss-poly-embeddable}
   Every discrete loss $\ell:\R \to \reals^\Y_+$ is embedded by a polyhedral loss.
 \end{theorem}
 \begin{proof}
-  \raf{We will apply Theorem (bayes-risk-matching), which we prove in \S~\ref{sec:min-rep-sets}}
   Let $n = |\Y|$, and let $C:\reals^n \to \reals$ be given by $(-\risk{\ell})^*$, the convex conjugate of $-\risk{\ell}$.
   From standard results in convex analysis, $C$ is polyhedral as $-\risk{\ell}$ is, and $C$ is finite on all of $\reals^\Y$ as the domain of $-\risk{\ell}$ is bounded~\cite[Corollary 13.3.1]{rockafellar1997convex}.
   Note that $-\risk{\ell}$ is a closed convex function, as the infimum of affine functions, and thus $(-\risk{\ell})^{**} = -\risk{\ell}$.
@@ -622,6 +620,12 @@ Recent work~\citep{ramaswamy2016convex,finocchiaro2020embedding,finocchiaro2021u
   Letting $\delta_y\in\simplex$ be the point distribution on outcome $y\in\Y$, we have for all $u\in\reals^n$, $L(u)_y \geq \inf_{u'\in\reals^n} L(u')_y = \risk{L}(\delta_y) = \risk{\ell}(\delta_y) \geq 0$, where the final inequality follows from the nonnegativity of $\ell$.
   \btw{FUTURE: to get $n-1$, just use the same trick as before and note that the Bayes risk doesn't change.  Should be a couple lines.}
 \end{proof}
+
+\raf{TODO: smooth over these paragraphs.  I think we should combine the first two and give only a 1-sentence description of how to achieve $|\Y|-1$ dimensions.}
+
+Note however that the number of dimensions $d$ required could be as large as $O(|\Y|)$, which is particularly undesirable in structured prediction and information retrieval problems with exponentially many outcomes.
+Recent work~\citep{ramaswamy2016convex,finocchiaro2020embedding,finocchiaro2021unifying} yield characterizations for bounding the prediction dimension $d$ for consistent convex surrogates and embeddings.
+%\raft{CITE: DKR, frongillo-kash (WINE 2014), probably one of Bob's papers?, others?}
 
 \proposedadd{Moreover, to construct an embedding of dimension $n-1$ instead of $n$ (see~\citet{finocchiaro2020embedding} for significance of dimension),  consider some invertible linear transformation $A : \reals^n \to \reals^{n-1}$ that maps to an affine subspace.
 Take $L' : \reals^{n-1} \to \reals^\Y$ as $x \mapsto L(A^{-1}(x))$ and $L$ defined as above, so that $\inprod{\ell(r)}{p} = \inprod{L(\varphi(r))}{p} = \inprod{L'(A^{-1}(\varphi(r)))}{p} $ for all $p \in \simplex$.
