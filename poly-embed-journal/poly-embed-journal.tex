@@ -392,8 +392,6 @@ While our notion of embedding is sufficient for calibration (and therefore consi
 For example, while logistic loss does not embed 0-1 loss, the surrogate and link for logistic loss are consistent with respect to 0-1 loss.
 
 \subsection{Embedding}
-\jessiet{Also, do we want to frame calibrated links as ``loose embeddings''? Lol}
-\raft{Ew}
 
 Several consistent convex surrogates in the literature can be thought of as \emph{embeddings} of the target loss $\ell$, wherein one maps the discrete reports of $\ell$ to a vector space, and finds a convex loss which agrees with the original loss.
 A key notion to define an embedding is that of a \emph{representative set}: a set of reports $\Sc$ such that, for all label distributions, at least one report $r\in\Sc$ minimizes expected loss.
@@ -2853,9 +2851,25 @@ Define the projection $\pi:\reals^\Y\times \reals \to \reals^\Y, (x,c) \mapsto x
 \end{claim}
 \begin{proof}
 We can write any face $F_v = H_v \cap G = \{x \in \reals_+^{d-1} \mid \inprod{x}{v} = g(x)\}$.
-If there was no $v \in \V^*$ such that $x \in F_v$, then $g(x) = \min_{H_v \in \H_\Y} \inprod{v}{x}$.
-As these halfspaces are vertical, we have $g(x) = -\infty$, which does not support $G$ at $(x, g(x))$ since $x \in \reals_+^\Y$, yielding a contradiction.
-\jessie{Don't like this. Slash not true.  There's something implicit about all the normals being in $\R^d_-$ and $x \in \reals^d_+$.  Haven't proven the first claim}
+Since $H_v^+$ must be a valid inequality to define a face, we know that $G \subseteq H_v^+$.
+If there was no $v \in \V^*$ such that $x \in F_v$, 
+Since $\H_\V = \H_\Y \cup \H_{\V^*}$, if there was no $v \in \V^*$ such that $x \in F_v$, it must be the case that $\min_{H_v \in \H_\Y} \inprod{v}{x} = \min_{y \in \Y} x_y = 0 = g(x)$, and we must have $x \not \in \reals_{++}^\Y$.
+
+\jessie{If $G$ is not locally constant}
+Since $g$ is continuous (as it is convex), and not constant \jessie{??}, there must be some $x' \in B(x,\epsilon) \cap \reals_+^\Y$ such that $g(x') > 0$ and therefore no $y \in \Y$ would define a face $F_{v^*}$ supporting $G$ at $x'$.
+That $v^*$ must then be in $\V^*$, and we claim $\inprod{v^*}{x} = 0$, which would imply $F_{v^*}$ also supports $G$ at $x$.
+If $\inprod{v^*}{x} > 0 = g(x)$ (recall $g$ nonnegative on $\reals_+^\Y$) then we contradict continuity of $g$ on $\reals_+^\Y$. \jessie{Not the level of rigor that we want.  Also using lots of polyhedral structure here.}
+%First, $\inprod{v^*}{x} \geq 0$ by definition of $g$ nonnegative on $\reals_+^\Y$, and $\leq 0$
+
+
+
+
+\jessie{Claim: $x$ must be on boundary of $\reals_+^\Y$ and therefore $g(x) = 0$, and we have a matchy matchy with a $v^* \in \V^*$.}
+
+\jessie{If $x \in \reals_{++}^\Y$, then}
+
+%As these halfspaces are vertical, we have $g(x) = -\infty$, which does not support $G$ at $(x, g(x))$ since $x \in \reals_+^\Y$, yielding a contradiction.
+%\jessie{Don't like this. Slash not true.  There's something implicit about all the normals being in $\R^d_-$ and $x \in \reals^d_+$.  Haven't proven the first claim}
 %We claim $\cup_{v \in \V}\pi(F_v) = \reals_+^\Y$.
 %If there was a $v \in \V$ such that $\pi(F_v) \not \subseteq \reals_+^\Y$, this would imply there is some $x \not \in \reals_+^\Y$ such that $\inprod{x}{v} = c < \infty = g(x)$, contradicting $F_v$ supporting $g$ at $x$.
 %Thus, $\cup_{v \in \V} \pi(F_v) \subseteq \reals_+^\Y$.
@@ -2927,6 +2941,7 @@ For all $v\in\reals^\Y_+$, if $H_v$ supports $G$,  $\dim(\pi(F_v)) = \dim(F_v)-1
 \end{claim}
 \begin{proof}
 	\jessie{TODO}
+	Facts we can potentially use:
 	$F_v = \H_v \cap G \neq \emptyset$ by assumption.
 	$\dim(F_v) = \dim(\affhull(F_v))$
 	$\dim(\pi(F_v)) = \dim(F_v) - 1$.
@@ -2937,17 +2952,37 @@ As $H_{v}^+ \in \H$, it supports $G$ or it is redundant in $\H$ (or both).
 
 \begin{claim}If a $H_v \in \H$ does support $G$, then $F_{v} = H_{v} \cap G$ is a face of $G$, and thus a subset of a facet.
 \end{claim}
+\begin{proof}
+	Since $H_v$ supports $G$, we know that $G \subseteq H_v^+$ (WLOG) and $F_v$ is not empty.
+	Since $H^+_v$ is valid, we have $F_v = F_{([v;-1],0)}$ is a face by definition.
+	
+	%subset of facet
+	Moreover, the faces of $G$ are all convex polyhedra.
+	Any face of $G$ is must then be a lower-dimensional face of a facet, and therefore a subset.
+\end{proof}
+
 \begin{claim}
 	For any $v \in \V$, the face $F_{v}$ must be a subset of one of the $\V^*$ facets $F_{v^*}$ (as opposed to the vertical ones)
+	\jessie{I don't think this is true as stated.  I think this is true for non-facets, but this implies that any $H_y \in \H_\Y$ doesn't support $G$}
 \end{claim}
-\begin{claim}
-	Thus, $\pi(F_{\hat v}) \subseteq \pi(F_v)$. \raf{This will show (3) once we translate back}
-\end{claim}
-\begin{claim}
-	$\R'$ is a rep set for $L$ if and only if $\V \subseteq L(\R')$.
-\end{claim}
+\begin{proof}
+%	Suppose $F_v \subseteq F_{v^*}$.
+%	If $v' \not \in \V^*$, then $v' = [e_y; 0]$ for some $y \in \Y$.
+%	By construction of $G$, the polyhedron shoots off to $-\infty$, so the only subfaces of $F_{v'}$ are also adjacent 
+%	\jessie{Very informal...} 
+\end{proof}
+
 \begin{corollary}
-	$\R^*$ is a min rep set for $L$ if and only if $\V^* = L(\R^*)$. \raf{(1)}
+	For $v,v^*$ such that $F_v \subseteq F_{v^*}$ and $v^*\in \V^*$, $\pi(F_{v}) \subseteq \pi(F_{v^*})$. \raf{This will show (3) once we translate back}
+\end{corollary}
+\begin{claim}
+	$\R'$ is a representative set for $L$ if and only if $\V \subseteq L(\R')$.
+	\jessie{Is this true?  You could have hinge with a really bad loss vector that is never uniquely optimal (ex: $u = 2$) and $(3,0) \in L(\R)$ but not in $L(\{-1,1\})$.}
+\end{claim}
+
+
+\begin{corollary}
+	$\R^*$ is a min rep set for $L$ if and only if $\V^* = L(\R^*)$. \raf{(2)}
 \end{corollary}
 
 
