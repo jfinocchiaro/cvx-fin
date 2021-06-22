@@ -88,6 +88,7 @@
 
 \newcommand{\risk}[1]{\underline{#1}}
 \newcommand{\inprod}[2]{\langle #1, #2 \rangle}%\mathrm{int}(#1)}
+\newcommand{\relint}{\mathrm{relint}}
 \newcommand{\inter}[1]{\mathring{#1}}%\mathrm{int}(#1)}
 %\newcommand{\expectedv}[3]{\overline{#1}(#2,#3)}
 \newcommand{\expectedv}[3]{\E_{Y\sim{#3}} {#1}(#2,Y)}
@@ -2788,6 +2789,20 @@ Suppose we have a finite set $\V \subset \reals_+^d$.
 	In turn, this statement holds if and only if $(x,c) \in H^+_v$ for all $v \in \V$ and in $H^+_y$ for all $y \in \Y$, so $(x,c) \in \cap \H$.
 \end{proof}
 
+\begin{claim}
+	$x \in \reals^d_+ \iff (x,c)\in \cap \H_\Y$ for all $c \in \reals$.
+\end{claim}
+\begin{proof}
+	$\implies$ 
+	Fix any $c \in \reals$.
+	$x \in \reals^d_+ \iff x_y \geq 0$ for all $y \in \Y$.
+	This means that for any $y \in \Y$, $(x,c) \in \{(x,c) \mid x_y \geq 0\} = H_y$.
+	As $y$ and $c$ were arbitrary, this shows the forward direction.
+	
+	$\impliedby$
+	$(x,c) \in \cap \H_\Y$ implies $x_y \geq 0$ for all $y \in \Y$, and therefore $x \in \reals^d_+$.	
+\end{proof}
+
 Some statements about facets and H-rep
  
 \begin{claim}
@@ -2815,7 +2830,7 @@ Some statements about facets and H-rep
 	$\H_\Y \subseteq \H^*$.
 \end{claim}
 \begin{proof}
-	We argue $\H_\Y \subseteq \H^*$; if there was a $y \in \Y$ such that $H_y = \{(x,c) \mid x_y \geq 0\}$ was not in $\H^*$, then we would either have some $c_1 > 0$ such that $\{(x,c) \mid x_y \geq c_1\} \in \H^*$, or we have a point $x$ such that $x_y < 0$ but $g(x) > -\infty$.
+	If there was a $y \in \Y$ such that $H_y = \{(x,c) \mid x_y \geq 0\}$ was not in $\H^*$, then we would either have some $c_1 > 0$ such that $\{(x,c) \mid x_y \geq c_1\} \in \H^*$, or we have a point $x$ such that $x_y < 0$ but $g(x) > -\infty$.
 	The first cannot happen as we take $g$ to be defined (and finite) on $x = e_y \in \reals^d_+$.
 	Moreover, the second cannot be true by construction of $g$ including the $0-\infty$ indicator on $\reals^d_+$.	
 \end{proof}
@@ -2827,7 +2842,7 @@ Some statements about facets and H-rep
 \begin{proof}
 \raf{Argue that all facets of $G$ are an $H_y \cap G$ or some $H_v \cap G$.  Thus, we can define $\V^*$ by $\H_\Y \cup \H_{\V^*} = \H^*$.  (I.e., $\H^* \setminus \H_\Y = \H_{\V^*}$ for some $\V^*$.)}
 
-Since $G$ is full-dimensional, all facets of $G$ are uniquely determined by some $H^+ \in \H^*$.
+Since $G$ is full-dimensional, all facets of $G$ are uniquely determined by the hyperplanes $H$ whose halfspaces $H^+$ compose $\H^*$.
 Any facet $F$ must then be some intersection of an $H_y \cap G$ or $H_v \cap G$.
 Take $\V^*$ to be the set of such $H_v$ hyperplanes.
 %Since $\H_\Y \subseteq \H^*$, we can consider $\H_{\V^*} := \H \setminus \H_{\Y}$, and $\V^*$ to be the set generating $\H_{\V^*}$.
@@ -2842,10 +2857,19 @@ The moreover follows immediately since $\H_{\V^*} \subseteq \H^*$ and every $H^+
 
 
 \begin{corollary}
-  Let $\V \subseteq \reals^\Y_+$ be a finite set such that $\H = \H_\Y \cup \H_\V$ satisfies $P = \cap \H$.  Then $\V^* \subseteq \V$.
+  Let $\V \subseteq \reals^\Y_+$ be a finite set such that $\H = \H_\Y \cup \H_\V$ satisfies $G = \cap \H$.  Then $\V^* \subseteq \V$.
 \end{corollary}
 \begin{proof}
   $\H_\Y \cup \H_{V^*} = \H^* \subseteq \H = \H_\Y \cup \H_{\V}$, ergo $\V^* \subseteq \V$.
+\end{proof}
+
+\begin{claim}
+	$g(x) = \min_{v \in \V^*}\inprod{v}{x} - \delta(x \mid \reals_+^d)$
+\end{claim}
+\begin{proof}
+	$G = \cap \H = \cap \H^* = \cap (\H_\Y \cup \H_{\V^*}) = \{(x,c) \in \reals_+^d \times \reals \mid \inprod{v^*}{x} \geq c$ for all $v^* \in \V^* \}$.
+	Since $G$ is the hypograph of $g$, this means $g$ can be written as 
+	$g(x) = \min_{v \in \V^*}\inprod{v}{x} - \delta(x \mid \reals^d_+)$. 
 \end{proof}
 
 \subsection{Projections to the positive orthant}
@@ -2875,7 +2899,13 @@ Define the projection $\pi:\reals^\Y\times \reals \to \reals^\Y, (x,c) \mapsto x
 Argue $G \subseteq H^+_{v^*}$ by definition.
 Argue support: $g(x) = \inprod{v^*}{x}$.  WTS $(x,g(x)) \in G$.  Already have $(x,g(x)) \in H_{v^*}$.}
 
-
+By Claim 7\jessie{make reference}, we know that $g(x) = \min_{v \in \V^*}\inprod{v}{x}$.
+In particular, consider $v^* \in \argmin_{v \in \V^*}\inprod{v}{x}$; we claim that $H_{v^*}$ supports $G$ at $(x,g(x))$.
+First, $G \subset H^+_{v^*}$ by definition of $G$ as the intersection of halfspaces.
+Thus, it us just left to show that $(x, \inprod{v^*}{x}) \in H_{v^*} \cap G$.
+$H_{v^*} = \{(x,c) \mid \inprod{v^*}{x} = c\}$.
+By definition of $g$, we have $(x,g(x)) = \inprod{v^*}{x}$, so $(x,g(x)) \in H_{v^*}$.
+Moreover, $(x,g(x)) \in G = \{(x,c) \mid g(x) \geq c\}$ trivially since $g(x) \geq g(x)$.
 
 %\jessie{Claim: $x$ must be on boundary of $\reals_+^\Y$ and therefore $g(x) = 0$, and we have a matchy matchy with a $v^* \in \V^*$.}
 
@@ -2897,27 +2927,42 @@ Argue support: $g(x) = \inprod{v^*}{x}$.  WTS $(x,g(x)) \in G$.  Already have $(
 
 \raf{From notes 6/21/2021 COMMENTED OUT}
 
-% . REP <=> V* subset L(R')
-% . REP <=> Theta subset {Gamma_r | r in R'}
-% . Theta == Full-dim
-% . Lev sets subset theta
+
+\begin{itemize}
+	\item REP $\iff$ $\V^* \subseteq L(R')$
+	\item REP $\iff \Theta \subseteq \{\Gamma_r | r \in \R'\}$.
+	\item $\Theta$ == Full-dim
+	\item Lev sets subset $\theta$
+\end{itemize}
+
 
 \begin{claim}[6/21/2021]
   For $\V' \subseteq \V$, we have
-  $\cup_{v\in\V'} \pi(F_v) = \reals^\Y_+ \iff \V^* \subseteq \V'$.
+  $\cup_{v\in\V'} \pi(F_v) = \reals^\Y_+ \iff \V^* \subseteq \V'$.\jessie{Will get us to REP $\iff$ $\V^* \subseteq L(R')$}
 \end{claim}
 \begin{proof}
   Would like to show
-  $\cup_{v\in\V'} \pi(F_v) = \reals^\Y_+ \iff \cap(\H_\Y \cup \H_{\V'}) = G$.
+  $\cup_{v\in\V'} \pi(F_v) = \reals^\Y_+ \iff \cap(\H_\Y \cup \H_{\V'}) = G$ then apply Corollary 7\jessie{make reference}.
 
   Suppose $\cup_{v\in\V'} \pi(F_v) = \reals^\Y_+$.
   Take any $x\in\reals^\Y_+$.
-  Then there exists $c \in \reals$ and $v\in\V$ such that $(x,c) \in F_v$.
-  So $c = \inprod{v}{x}$.
+  Then there exists $c \in \reals$ and $v\in\V'$ such that $(x,c) \in F_v$, and $c = \inprod{v}{x}$.
   \raf{Argue that we have $\cap(\H_\Y \cup \H_{\V'}) \subseteq G$}
 
 
-  \raf{Another approach: assume $v^* \in \V^* \setminus \V'$.  Take $z = (x,g(x)) \in \relint(F_{v^*})$.  Argue that $x \notin \cup_{v\in\V'} \pi(F_v)$.}
+  \raf{Another approach: assume $v^* \in \V^* \setminus \V'$.  Take $z = (x,g(x)) \in \relint(F_{v^*})$.  Argue that $x \not\in \cup_{v\in\V'} \pi(F_v)$.}
+  
+  $\implies$ 
+  Fix any $x \in \reals^\Y_+$.
+  $x \in \H_\Y$ by previous Claim \jessie{ref}, so we just need to show that $(x,c) \in \cap \H_{\V'} \implies (x,c) \in G$.
+  
+  We know there exists a $v' \in \V'$ and $c \in \reals$ such that $(x,c) \in F_{v'}$, and $c = \inprod{v'}{x} = g(x)$.
+  Therefore $\inprod{v'}{x} = c = g(x) \leq \inprod{v}{x}$ for all $v \in \V$, so $(x,c) \in \cap \H_\V \implies (x,c) \in G = \cap (\H_\Y \cup \H_\V)$.
+  
+  $\impliedby$
+  $G = \cap (\H_\Y \cup \H_{\V'})$ if and only if $G = \cap \H_{\V'}$ for all $x \in \reals_+^\Y$.
+  This implies that for all $x \in \reals_+^\Y$, there exists a $v' \in \V'$ such that $(x,g(x)) \in H_{v'} \cap G = F_{v'} \implies x \in \pi(F_{v'})$.
+  As this is true for all $x \in \reals_+^\Y$, we have $\cup_{v \in \V'} \pi(F_{v}) = \reals_+^\Y$.
 
 \end{proof}
 
@@ -2969,7 +3014,7 @@ Take $\V^*$ to be the unique finite set such that $\H^* = \H_\Y \cup \H_{\V^*}$,
 \end{claim}
 \begin{proof}
 	$\H_{\V^*} \subseteq \H^* \subseteq \H$.
-	The first subset inclusion follows by construction of $\H_{\V^*}$, and the second follows from \jessie{cite} as $\H^*$ is the unique minimum halfspace representation of $G$, and is finite.
+	The first subset inclusion follows by construction of $\H_{\V^*}$, and the second follows from Theorem~\ref{thm:polyhedron-uniquely-gen-facets} as $\H^*$ is the unique minimum halfspace representation of $G$, and is finite.
 	%%$G = \cap \H^*$ and $\H_{\V^*} \subseteq \H$.
 	%since $\H_\Y \cup \H_{\V^*}$ is the unique min H-rep of $G$. \raf{not sure how to do this, since $\H$ could be infinite}
 \end{proof}
@@ -2982,29 +3027,21 @@ Take $\V^*$ to be the unique finite set such that $\H^* = \H_\Y \cup \H_{\V^*}$,
 For all $v\in\reals^\Y_+$, if $H_v$ supports $G$, then $\dim(\pi(F_v)) = \dim(F_v)$.
 \end{claim}
 \begin{proof}
-	By assumption, $G$ is nowhere locally constant, meaning $([\vec 0; -1], b) \not \in \V^*$ for any $b \in \reals$.
-	Therefore, the dimension of $\pi(F_v) = \pi(H_v \cap G) = \pi(\{(x,c) \in G \mid \inprod{v}{x} = c, c = g(x) \}) = \{x \in \reals^d_+ \mid \inprod{v}{x} = c\}$.
-	Let $A := \{(x,c) \in G \mid \inprod{v}{x} = c, c = g(x) \}$
-	If $\dim(A) = k$, then there is a set of $k\leq d$ vectors $\{z_i\}_{i=1}^k$ forming a basis for $\affhull(A)$.
-	In particular, \jessie{....}
-	 
-	\jessie{TODO}
-	Facts we can potentially use:
-	$F_v = \H_v \cap G \neq \emptyset$ by assumption.
-	$\dim(F_v) = \dim(\affhull(F_v))$
-	$\dim(\pi(F_v)) = \dim(F_v) - 1$.
+
 	\jessie{Think of the projection as a linear map and affine hull as a subspace.   Pick any point in relint of the facet, at the linear span, ...}
 	\jessie{$\affhull(F_v) = H_v$, $\dim(\affhull(\pi(F_v))) = \dim(\pi(\affhull(F_v)))$.   Show that when you project $H_v$, it gives you $\reals^\Y$.}
 	
-	\jessie{Meeting notes:} just need to argue that you never needed $c$ (i.e., $c$ was always just $g(x)$).  Maybe: take an affine basis, project, and show it's an affine basis. Given $\Y+1$ affinely independent vectors $z_i$ in $F_v$, so we get $|\Y| = 1$ affinely independent vectors.  Claim: $\{\pi(z_i)\}$ are affinely independent.
-	Let $a_1, \ldots, a_{\Y+1}$ sum to $0$, such that $\sum_i a_i \pi(z_i) = 0$.
+	\jessie{Meeting notes: See \url{http://homepages.cae.wisc.edu/~linderot/classes/ie418/lecture11.pdf} for def of AI} just need to argue that you never needed $c$ (i.e., $c$ was always just $g(x)$).  Maybe: take an affine basis, project, and show it's an affine basis. 
+	Suppose we are given $|\Y|+1$ affinely independent vectors $z_i$ in $F_v$.  %, so we get $|\Y| + 1$ affinely independent vectors. 
+	We claim $\{\pi(z_i)\}$ are affinely independent.
+	Let $a_1 + \ldots + a_{\Y+1} = 0$, such that $\sum_i a_i \pi(z_i) = 0$.
 	Want to conclude $a_i = 0$ for all $i$.
 	
 	Observe $z_i = (x_i, \inprod{v}{x_i})$ for all $i$ since $z_i \in F_v$, and therefore in $H_v$.
-	So $0 = \sim_i a_i \pi(z_i) = \sum_i a_i x_i$.
+	So $0 = \sum_i a_i \pi(z_i) = \sum_i a_i x_i$.
 	
 	Moreover, the sum $\sum_i a_i z_i = \sum_i a_i (x_i, \inprod{v}{x_i}) = (\sum_i a_i x_i, \inprod{v}{\sum_i a_i x_i}) = (0,0) = \vec 0$.
-	Thus, since the set $\{z_i\}$ is affinely independent, we have $a_i = 0$ for all $i$.
+	Thus, since $a_i = 0$ for all $i$, the set $\{z_i\}$ is affinely independent and the dimensions of the affine hulls are therefore equal.
 
 \end{proof}
 
@@ -3020,38 +3057,44 @@ As $H_{v}^+ \in \H$, it supports $G$ or it is redundant in $\H$ (or both).
 	%subset of facet
 	Moreover, the faces of $G$ are all convex polyhedra.
 	Any face of $G$ is must then be a lower-dimensional face of a facet, and therefore a subset.
+	\jessie{Gr\"unbaum Page 35, Section 3.1 statement 7}
 \end{proof}
 
 \begin{claim}
 	For any $v \in \V$, the face $F_{v}$ must be a subset of one of the $\V^*$ facets $F_{v^*}$ (as opposed to the vertical ones)
-	\jessie{I don't think this is true as stated.  I think this is true for non-facets, but this implies that any $H_y \in \H_\Y$ doesn't support $G$}
 \end{claim}
 \begin{proof}
-Since every face of a convex polyhedron is a convex polytope, any $F_v$ is 
+$\{F_{v^*}\}_{v^* \in \V^*}$ is exactly the set of facets on $\reals_+^\Y$. \jessie{Cite}
+Any $k$-face is contained in a facet (claim above).
+Must therefore be one of these.
+
+If it as a subset of a vertical facet, we would have $F_v = H_v \cap G \subseteq H_y \cap G$ for some $y \in \Y$.
+Expanding, this is $\{(x,g(x)) \mid \inprod{v}{x} = g(x)\} \subseteq \{(x,g(x)) \mid x_y = 0 \}$.
+While this can happen, it must be on the boundary of $\reals_+^d$, and must be at the intersection of $H_y$ and some other $H_{v^*}$ for $v^* \in \V^*$. \jessie{Justify}
 \end{proof}
 
 \begin{corollary}
 	For $v,v^*$ such that $F_v \subseteq F_{v^*}$ and $v^*\in \V^*$, $\pi(F_{v}) \subseteq \pi(F_{v^*})$. \raf{This will show (3) once we translate back}
 \end{corollary}
 
-\begin{claim}
-	\jessie{This should probably move down to translating for properties since representative sets are at the core, about properties}
-	$\R'$ is a representative set for $L$ if and only if $\V^* \subseteq L(\R')$.
-\end{claim}
-\begin{proof}
-	Fix $v^* \in \V^*$.
-	If $\R'$ is representative, then for any $p \in \simplex$ such that , 
-	As $g$ is $1$-homogeneous and minimizable, for every $v^* \in \V^*$, there must be some $p \in \simplex$ such that $\inprod{v^*}{p} = \inf_v \inprod{v}{x}$.
-	Thus, it suffices to show subset inclusion for any $p \in \simplex$.
-	Moreover, since $\R'$ is representative, there is some $r' \in \R'$ such that $\inprod{L(r')}{p} = \inf_{v} \inprod{v}{x}$.
-	
-	For the reverse implication, $\V^*$ is representative (since $\cup_{v^* \in \V^*} F_{v^*} = \reals_+^\Y$ in Corollary 8\jessie{make reference}), so any set containing $\V^*$ is also representative.
-\end{proof}
+%\begin{claim}
+%	\jessie{This should probably move down to translating for properties since representative sets are at the core, about properties}
+%	$\R'$ is a representative set for $L$ if and only if $\V^* \subseteq L(\R')$.
+%\end{claim}
+%\begin{proof}
+%	Fix $v^* \in \V^*$.
+%	If $\R'$ is representative, then for any $p \in \simplex$ such that , 
+%	As $g$ is $1$-homogeneous and minimizable, for every $v^* \in \V^*$, there must be some $p \in \simplex$ such that $\inprod{v^*}{p} = \inf_v \inprod{v}{x}$.
+%	Thus, it suffices to show subset inclusion for any $p \in \simplex$.
+%	Moreover, since $\R'$ is representative, there is some $r' \in \R'$ such that $\inprod{L(r')}{p} = \inf_{v} \inprod{v}{x}$.
+%	
+%	For the reverse implication, $\V^*$ is representative (since $\cup_{v^* \in \V^*} F_{v^*} = \reals_+^\Y$ in Corollary 8\jessie{make reference}), so any set containing $\V^*$ is also representative.
+%\end{proof}
 
 
-\begin{corollary}
-	$\R^*$ is a min rep set for $L$ if and only if $\V^* = L(\R^*)$. \raf{(2)}
-\end{corollary}
+%\begin{corollary}
+%	$\R^*$ is a min rep set for $L$ if and only if $\V^* = L(\R^*)$. \raf{(2)}
+%\end{corollary}
 
 
 \subsection{Translating to properties}
@@ -3059,7 +3102,7 @@ Since every face of a convex polyhedron is a convex polytope, any $F_v$ is
 Let $f:\reals^\Y\to\reals_+\cup\{-\infty\}$ be a polyhedral concave function with $\dom(f) = \simplex$.
 \jessie{Want to construct so that it matches $g$}
 \begin{claim}
-	We may write $f(p) = \min_{v\in\V} \inprod{p}{v}$ for some finite set $\V \subseteq \reals^\Y_+$ \raf{show you can do this using the $h$ and $\delta$ representation from Rockafellar -- argue that because $p\in\simplex$ we can write $\inprod{p}{b_i}-\beta_i = \inprod{p}{b_i-\beta_i\ones}$.}
+	We may write $f(p) = \min_{v\in\V} \inprod{p}{v} + \delta(p \mid \simplex)$ for some finite set $\V \subset \reals^\Y_+$ \raf{show you can do this using the $h$ and $\delta$ representation from Rockafellar -- argue that because $p\in\simplex$ we can write $\inprod{p}{b_i}-\beta_i = \inprod{p}{b_i-\beta_i\ones}$.}
 \end{claim}
 \begin{proof}
   We will think of $f$ as defined $f:\reals^\Y\to\reals_+\cup\{-\infty\}$  with $\dom(f) = \simplex$.
@@ -3074,13 +3117,28 @@ Let $f:\reals^\Y\to\reals_+\cup\{-\infty\}$ be a polyhedral concave function wit
 	\end{align*}
 \end{proof}
 
+In particular, take $f$ to match $g$ on $\simplex$.
+
+Define the function $\theta(v) = \{p \in \simplex \mid \inprod{v}{p} = f(p)\}$, and the set $\Theta := \{\theta(v) \mid v \in \V^*\}$.
 
 \begin{claim}
   $\theta(v) = \pi(F_v) \cap \simplex$. \raf{But haven't def $\theta$ yet}
 \end{claim}
+\begin{proof}
+Argue $\theta(v)$ is full-dim in $\simplex$ if and only if $\pi(F_v)$ is $|\Y|$-dim, if and only if $F_v$ is a facet. (Claim 12\jessie{make ref}) \raf{(2)}
+\end{proof}
 
-Argue $\theta(v)$ is full-dim in $\simplex$ if and only if $\pi(F_v)$ is $|\Y|$-dim, if and only if $F_v$ is a facet. \raf{(2)}
+\begin{claim}
+	$\cup_{v \in \V'} \pi(F_v) = \reals_+^\Y \iff \Theta \subseteq \{\Gamma_r \mid r \in \R'\}$.
+\end{claim}
 
+\begin{claim}
+	$\Theta$ is exactly equal to $\{\Gamma_r \mid r \in \R^*\}$ \jessie{Not sure if this is it.}
+\end{claim}
+
+\begin{claim}
+	For any $r \in \R$ with $v = L(r)$, we have $\Gamma_r \subset \theta(v)$. \jessie{=?}
+\end{claim}
 
 \end{document}
 %%% Local Variables:
