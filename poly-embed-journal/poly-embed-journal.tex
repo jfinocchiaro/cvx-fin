@@ -1092,28 +1092,27 @@ More generally, $L^2$ cannot be consistent because the property it embeds does n
 
 \subsection{Structure of polyhedral Bayes risks}
 
-\raf{Theme: expanding our results from polyhedral losses to polyhedral Bayes risks. We can start by observing that the latter is a weaker condition.}
-
-\raf{Moved}
+While we have focused on polyhedral losses thus far, it turns out that many of our results about embeddings extend to losses with polyhedral Bayes risks.
 (We say a concave function is polyhedral if its negation is a polyhedral convex function.)
-Note that the Bayes risk, a function from distributions over $\Y$ to the reals, may be polyhedral even if the loss itself is not.
-For example, this can be seen by a loss that is polyhedral in the convex hull of $\varphi(\R)$, but smooth outside that region.
+To see that this is a weaker condition, recall that Theorem~\ref{thm:poly-embeds-discrete} constructs a finite representative set $\Sc$ for any polyhedral loss $L$, and thus $\risk{L} = \risk{L|_\Sc}$ by Lemma~\ref{lem:loss-restrict}, which is polyhedral.
+The condition is strictly weaker, in that the Bayes risk may be polyhedral even if the loss itself is not.
+For example, a modified hinge loss $L(r)_y = \max(r^2-1,1-ry)$, which matches hinge loss on the interval $[-1,1]$ but is smooth outside the interval $[-2,2]$, still embeds twice 0-1 loss.
 
+% \begin{lemma}
+% 	\label{lem:poly-loss-poly-risk}
+% 	If $L$ is polyhedral, $\risk{L}$ is polyhedral.
+% \end{lemma}
+% \begin{proof}
+% 	Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss, and $\Gamma = \prop{L}$.
+% 	By Lemma~\ref{lem:polyhedral-range-gamma}, $\U = \Gamma(\simplex)$ is finite. 
+% 	For each $U\in \U$, select $u_U \in U$, and let $\Sc = \{u_U : U \in\U\}$.
+% 	$\Sc$ is representative for $L$, so Lemma~\ref{lem:loss-restrict} gives us $\risk{L} = \risk{L|_{\Sc}}$, which is polyhedral as $\Sc$ is finite.
+% \end{proof}
 
-\begin{lemma}
-	\label{lem:poly-loss-poly-risk}
-	If $L$ is polyhedral, $\risk{L}$ is polyhedral.
-\end{lemma}
-\begin{proof}
-	Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss, and $\Gamma = \prop{L}$.
-	By Lemma~\ref{lem:polyhedral-range-gamma}, $\U = \Gamma(\simplex)$ is finite. 
-	For each $U\in \U$, select $u_U \in U$, and let $\Sc = \{u_U : U \in\U\}$.
-	$\Sc$ is representative for $L$, so Lemma~\ref{lem:loss-restrict} gives us $\risk{L} = \risk{L|_{\Sc}}$, which is polyhedral as $\Sc$ is finite.
-\end{proof}
+We now present our main structural result, which will lay the foundation for the rest of this section.
+\raf{TODO: Brief description of the result}
 
-
-\jessie{Lemma X}
-\begin{lemma}\label{lem:X}
+\begin{lemma}[\jessie{Lemma X}]\label{lem:X}
   Let $L: \R \to \reals^\Y_+$ be a minimizable loss with a polyhedral Bayes risk $\risk L$.
   Then $L$ has a finite minimum representative set.
   Furthermore, letting $\Gamma = \prop{L}$, there exist finite sets
@@ -1192,7 +1191,9 @@ Lemma~\ref{lem:X} leads to another appealing equivalent condition to our embeddi
 
 %\btw{RF: DKR (section 3.1) realized the importance of matching Bayes risks, but they could only give general results for strictly convex (concave I should say) risks, in part because they fixed the link function to be a generalization of $\sgn$.  In contrast, we focus exclusively on non-strictly-convex risks.}
 
-Previous work from~\citet[Proposition 4]{duchi2018multiclass} realized the significance of matching Bayes risks for calibration with respect to the 0-1 loss, but their result relies the Bayes risk of the surrogate being strictly concave.  As polyhedral functions are never strictly concave, Proposition~\ref{prop:embed-bayes-risk} extends their result to the embedding setting.
+Previous work from~\citet[Proposition 4]{duchi2018multiclass} realized the significance of matching Bayes risks for calibration with respect to the 0-1 loss.
+Proposition~\ref{prop:embed-bayes-risks} broadens this general insight to any discrete loss.
+Moreover, their result relies the Bayes risk of the surrogate being strictly concave, whereas polyhedral Bayes risks are never strictly concave.
 
 \subsection{Trimming a loss}
 
@@ -1202,13 +1203,13 @@ For example, consider hinge loss with a spurious extra dimension, i.e., $L:\real
 Here the minimum representative sets are $\{(-1,a),(1,b)\}$ for any $a,b\in\reals$.
 Lemma~\ref{lem:X}(\ref{item:X-min-V}) states that, while the minimum representative set is not unique, its loss vectors are.
 
-Motivated by this observation, let us define the ``trim'' of a loss to be this unique set of loss vectors induced by any minimum representative set.
-
+Motivated by this observation, let us define the ``trim'' of a loss to be this unique set of loss vectors induced by any minimum representative set, as guaranteed by Lemma~\ref{lem:X}(\ref{item:X-min-V}).
 \begin{definition}[Trim]\label{def:trim-loss}
   Given a loss $L:\R \to \reals_+^\Y$ with a finite representative set, we define $\trimcover(L) = \{L(r) \mid r \in \R'\}$ given any minimum representative set $\R'$ for $L$.
 \end{definition}
 
-Using this notion of trimming a loss, we can again recast our embedding condition: a loss embeds another if and only if they have the same $\trim$.
+
+Using this notion of trimming a loss, we can again recast our embedding condition: a loss embeds another if and only if they have the same $\trimcover$.
 
 \begin{proposition}\label{prop:embed-iff-trims-equal}
   Let $L:\reals^d\to\reals^\Y_+$ have a finite representative set, and let $\ell:\R\to\reals^\Y_+$ be a discrete loss.
@@ -1259,7 +1260,7 @@ From the structural result of Lemma~\ref{lem:X}, we can see that in fact these t
 \end{corollary}
 
 
-\begin{corollary}\label{prop:trim-loss-condition}
+\begin{corollary}\label{cor:trim-loss-red}
   Let $L : \R \to \reals^\Y_+$ have a finite representative set.
   Then $\trimcover(L) = \{L(u) \mid u \in \R \textrm{ s.t. } \neg\exists u'\in\R,u'\neq u,\, \Gamma_u \subsetneq \Gamma_{u'}\}$. 
 \end{corollary}
@@ -1274,24 +1275,18 @@ From the structural result of Lemma~\ref{lem:X}, we can see that in fact these t
 
 \subsection{A property elicitation perspective}
 
-As we define one loss embedding another, one can imagine an analogous definition where one property embeds another (Definition~\ref{def:prop-embed}), and we can define $\trimcover(\Gamma)$ as the set of level sets generated by a minimum representative set (Definition~\ref{def:trim-prop}).
-See \S~\ref{app:embed-props} for precise definitions and discussion.
-Even when using the language of properties, similar results to those above hold; for intuition, the level sets of a property correspond to the subgradients of the Bayes risk of the loss eliciting it.
-Since embedding also means matching Bayes risks, the matching of $\trimred$ follows since the subgradients also trivially match.
+We conclude this section with a similar structural result about the properties elicited or embedded by a surrogate.
+As we define embeddings from one loss to another, one can define embeddings from one property to another, where essentially condition (i) is relaxed; see \S~\ref{app:embed-props} for a precise definition.
+When working with properties, it is perhaps more natural to define ``trim'' to remove any level sets which are redundant in the sense of set inclusion, as in Corollary~\ref{cor:trim-loss-red}.
+Precisely, given a property $\Gamma:\simplex\toto\R$, define\raft{I think the ``$r'\neq r$'' is not needed, right?}
+\[ \trimred(\Gamma) := \{\Gamma_r \mid r \in \R \textrm{ s.t. } \neg\exists r'\in\R,r'\neq r,\, \Gamma_r \subsetneq \Gamma_{r'}\}~.\]
 
-We now state a useful result for proving the existence of an embedding loss, which shows remarkable structure of embeddable properties, and the properties that embed them.
-First, we conclude that any embeddable property must be elicitable.
-We also conclude that if $\Gamma$ embeds $\gamma$, the level sets of $\Gamma$ must all be redundant relative to $\gamma$.
+With these definitions, we now state a structural result for embeddable properties, and the properties that embed them.
+First, if $\Gamma$ embeds $\gamma$ and $\gamma$ is non-redundant, the level sets of $\Gamma$ must all be redundant relative to $\gamma$.
 In other words, $\Gamma$ is exactly the property $\gamma$, just with other reports filling in the gaps between the embedded reports of $\gamma$.
 (When working with convex losses, these extra reports are typically the convex hull of the embedded reports.)
 In this sense, we can regard embedding as only a slight departure from direct elicitation: if a loss $L$ elicits $\Gamma$ which embeds $\gamma$, we can think of $L$ as essentially eliciting $\gamma$ itself.
 Finally, we have an important converse: if $\Gamma$ has finitely many full-dimensional level sets, or if $\trimred(\Gamma)$ is finite, then $\Gamma$ must embed some finite elicitable property with those same level sets.
-
-\raf{Moved}
-
-
-\raf{Would suggest $r$ not $u$ here.}
-Define $\trimred(\Gamma) = \{\Gamma_u \mid u \in \R \textrm{ s.t. } \neg\exists u'\in\R,u'\neq u,\, \Gamma_u \subsetneq \Gamma_{u'}\}$. 
 
 \begin{restatable}{proposition}{embedtrim}\label{prop:embed-trim}
   Let $\Gamma:\simplex\toto\reals^d$ be an elicitable property.
@@ -1306,10 +1301,8 @@ Define $\trimred(\Gamma) = \{\Gamma_u \mid u \in \R \textrm{ s.t. } \neg\exists 
   % \raft{I see why you wanted this addition here, but (a) it's clear from the def of embedding, and (b) we don't have varphi defined.  So let's leave it out.}
   Moreover, when any of the above hold, $\trimred(\gamma) = \trimred(\Gamma) = \{\Gamma_u \mid u\in\U\} = \Theta$.
 \end{restatable}
-\begin{proof}
-  \raf{Now using Lemma~\ref{lem:X}}
-\end{proof}
 
+We defer the proof, and precise definitions, to \S~\ref{app:embed-props}.
 
 
 \section{Polyhedral losses: indirect elicitation implies consistency}
