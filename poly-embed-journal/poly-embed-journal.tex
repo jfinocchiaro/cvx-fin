@@ -2838,7 +2838,7 @@ Note that we can also take $\theta(v) = F_v \cap \simplex$.
 \raf{Let's use $\H^*$ for the minimum one, here and below; $\H$ for another one}
 \raf{Similarly $\V^*$ for the minimum one, below; $\V$ for another one}
 \begin{theorem}\label{thm:polyhedron-uniquely-gen-facets}
-  Given a $d$-dimensional polyhedron $P \subseteq \reals^d$, there is a unique finite set of closed halfspaces $\H^*$ such that $P = \cap \H^*$, and for all sets of closed halfspaces $\H$ such that $P = \cap \H$, we have $\H^* \subseteq \H$.
+  Given a $d$-dimensional polyhedron $P \subseteq \reals^d$, there is a unique finite set of closed halfspaces $\H^*$ such that $P = \cap \H^*$, and for all finite sets of closed halfspaces $\H$ such that $P = \cap \H$, we have $\H^* \subseteq \H$.
   Moreover, $\{H^+\cap P \mid H^+ \in \H^*\}$ is the set of facets of $P$.
   % Given a $d$-dimensional polyhedron $P \subseteq \reals^d$, there is a unique finite set of closed halfspaces $\H = \{H^+_{(w_1, b_1)}, \ldots, H^+_{(w_k, b_k)}\}$ such that $P = \cap \H$, and for all sets of closed halfspaces $\H'$ such that $P = \cap \H'$, we have $\H \subseteq \H'$.
   % Moreover, for each $i \in [k]$, letting $F_i := H_{(w_i, b_i)} \cap P$, the set of $\{F_1, \ldots, F_k\}$ is the set of facets of $P$.
@@ -2886,6 +2886,9 @@ Suppose we have a finite set $\V \subset \reals_+^\Y$.
 
 \begin{claim}\label{claim:x-nonneg-orthant-iff-intersection-HY}
   $x \in \reals^\Y_+ \iff (x,c)\in \cap \H_\Y$ for all $c \in \reals$.
+
+  or:
+  $\cap \H_\Y = \reals^\Y_+ \times \reals$.
 \end{claim}
 \begin{proof}
   $\implies$ 
@@ -3019,15 +3022,29 @@ Define the projection $\pi:\reals^\Y\times \reals \to \reals^\Y, (x,c) \mapsto x
 \end{itemize}
 
 \begin{lemma}\label{lem:projected-faces-iff-support-iff-argmin}
-  $x \in \pi(F_v) \iff (x,g(x)) \in F_v \iff v \in \argmin_{v' \in \V} \inprod{v'}{x}$
+  Let $x$, $v$.
+  
+  TFAE:
+
+  $x \in \pi(F_v)$
+
+  $(x,g(x)) \in F_v$
+
+  $\inprod{v}{x}= g(x)$
+
+  $v \in \argmin_{v' \in \V} \inprod{v'}{x}$
 \end{lemma}
 \begin{proof}
   \jessie{Don't like this in align environment}
   \begin{align*}
-    x \in \pi(F_v) &\iff (x,g(x)) \in \{(x',c') \mid \inprod{v}{x'} = g(x) \} \\
-                   &\iff (x,g(x)) \in F_v \\
-                   &\iff (x,g(x)) \in \{(x',c') \mid \inprod{v}{x'} = \min_{v' \in \V} \inprod{v'}{x'}\} \\
-                   &\iff v \in \argmin_{v' \in \V}\inprod{v'}{x}
+    x \in \pi(F_v)
+    &\iff \exists c \in \reals \text{ s.t. } (x,c) \in F_v\\
+    &\iff \exists c \in \reals \text{ s.t. } (x,c) \in H_v \cap G\\
+    & ...\\
+    &\iff (x,g(x)) \in \{(x',c') \mid \inprod{v}{x'} = g(x) \} \\
+    &\iff (x,g(x)) \in F_v \\
+    &\iff (x,g(x)) \in \{(x',c') \mid \inprod{v}{x'} = \min_{v' \in \V} \inprod{v'}{x'}\} \\
+    &\iff v \in \argmin_{v' \in \V}\inprod{v'}{x}
   \end{align*}
 \end{proof}
 
@@ -3044,7 +3061,6 @@ Define the projection $\pi:\reals^\Y\times \reals \to \reals^\Y, (x,c) \mapsto x
 
   Suppose $\cup_{v\in\V'} \pi(F_v) = \reals^\Y_+$.
   Take any $x\in\reals^\Y_+$.
-  By Lemma~\ref{lem:projected-faces-iff-support-iff-argmin}, we have $(x,g(x)) \in F_v$.
   Let $c := g(x)$.
   \raf{Argue that we have $\cap(\H_\Y \cup \H_{\V'}) \subseteq G$}
 
@@ -3052,9 +3068,13 @@ Define the projection $\pi:\reals^\Y\times \reals \to \reals^\Y, (x,c) \mapsto x
   
   $\implies$ 
   Fix any $x \in \reals^\Y_+$.
+  \raf{Need to add logic: know $G \subseteq \cap(\H_\Y \cup \cap \H_{\V'})$, so only need to show $\cap(\H_\Y \cup \cap \H_{\V'}) \subseteq G$}
   $(x,c) \in \cap \H_\Y$ for all $c \in \reals$ by Claim~\ref{claim:x-nonneg-orthant-iff-intersection-HY}, so we just need to show that $(x,c) \in \cap \H_{\V'} \implies (x,c) \in G$.
-  We know there exists a $v' \in \V'$ such that $(x,g(x)) \in F_{v'}$, and $\inprod{v'}{x} = g(x)$.
-  Therefore $\inprod{v'}{x} = g(x) \leq \inprod{v}{x}$ for all $v \in \V$, so $(x,g(x)) \in \cap \H_\V \implies (x,g(x)) \in G = \cap (\H_\Y \cup \H_\V)$.
+  By Lemma~\ref{lem:projected-faces-iff-support-iff-argmin}, there exists a $v' \in \V'$ such that $(x,g(x)) \in F_{v'}$, and $\inprod{v'}{x} = g(x)$.
+  \raf{Want to show $c \leq g(x)$, then done by def $G$}
+  \raf{Now $(x,c) \in \cap \H_{\V'} \implies (x,c) \in H^+_{v'} \implies c \leq \inprod{v'}{x} = g(x) \implies (x,c) \in G$}
+
+  % ...$\leq \inprod{v}{x}$ for all $v \in \V$, so $(x,g(x)) \in \cap \H_\V \implies (x,g(x)) \in G = \cap (\H_\Y \cup \H_\V)$.
   
   $\impliedby$
   $G = \cap (\H_\Y \cup \H_{\V'})$ if and only if $G = \cap \H_{\V'}$ for all $x \in \reals_+^\Y$.
@@ -3086,19 +3106,22 @@ $\risk{L}_+(x) := \inf_{r\in\R} \inprod{x}{L(r)}$
 \item Let $\H = \H_\Y \cup \H_{\V}$.
 \end{itemize}
 \begin{claim}
-  $G = \cap\H$ by definition of $\risk{L}_+$.
+  $G = \cap\H$.
 \end{claim}
 \begin{proof}
+  \raf{... by definition of $\risk{L}_+$.}
   
   Observe that $x \in \reals^\Y_+ \iff (x, c) \in \cap \H_\Y$.
-  Moreover,
+Let $x \in \reals^\Y_+$.
   \begin{align*}
-    (x,c) \in G &\iff g(x) \geq c \\
-                &\iff \inprod{v}{x} \geq c \,\, \forall v \in \V \\
-                &\iff (x,c) \in H^+_{v} \,\, \forall v \in L(\R) \\
-                &\iff \inprod{L(r)}{x} \geq c \,\, \forall r \in \R\\
-                &\iff (x,c) \in H^+_{L(r)} \,\, \forall r \in \R \\
-                &\iff (x,c) \in \cap \H_\V \\ 
+    (x,c) \in G
+    &\iff g(x) \geq c & \text{ explain stuff here}\\
+    &\iff \risk L_+(x) \geq c & \text{ as $g=\risk L_+$}\\
+    &\iff \inprod{v}{x} \geq c \,\, \forall v \in \V \\
+    &\iff (x,c) \in H^+_{v} \,\, \forall v \in L(\R) & \raf{let's stick with V here}\\
+    % &\iff \inprod{L(r)}{x} \geq c \,\, \forall r \in \R\\
+    % &\iff (x,c) \in H^+_{L(r)} \,\, \forall r \in \R \\
+    &\iff (x,c) \in \cap \H_\V \\ 
   \end{align*}
   Combining the two equalities (e.g., $\cap \H = (\cap \H_\Y) \cap (\cap \H_\V)$), we have $G = \cap \H$.
 
