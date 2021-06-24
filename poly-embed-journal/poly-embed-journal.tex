@@ -69,6 +69,7 @@
 \newcommand{\simplex}{\Delta_\Y}
 
 % alphabetical order, by convention
+\newcommand{\A}{\mathcal{A}}
 \newcommand{\C}{\mathcal{C}}
 \newcommand{\D}{\mathcal{D}}
 \newcommand{\E}{\mathbb{E}}
@@ -1114,7 +1115,7 @@ We now present our main structural result, which will lay the foundation for the
 
 \begin{lemma}[\jessie{Lemma X}]\label{lem:X}
   Let $L: \R \to \reals^\Y_+$ be a minimizable loss with a polyhedral Bayes risk $\risk L$.
-  Then $L$ has a finite minimum representative set.
+  Then $L$ has a finite representative set.
   Furthermore, letting $\Gamma = \prop{L}$, there exist finite sets
   $\V \subseteq \reals^\Y_+$ and
   $\Theta = \{\theta_v \subseteq \simplex \mid v\in\V\}$,
@@ -1129,7 +1130,7 @@ We now present our main structural result, which will lay the foundation for the
   \item Every representative set for $L$ contains a minimum representative set for $L$.\label{item:X-rep-contain-min}
   \item The set of full-dimensional level sets of $\Gamma$ is exactly $\Theta$.\label{item:X-full-dim}
   \item For any $r \in \R$, there exists $\theta \in \Theta$ such that $\Gamma_r \subseteq \theta$.\label{item:X-redundant}
-  \item $L$ tightly embeds $\ell:\R'\to\reals^\Y_+$ if and only if $\ell$ is injective and $\ell(\R') = \V$.
+  \item $L$ tightly embeds $\ell:\R'\to\reals^\Y_+$ if and only if $\ell$ is injective and $\ell(\R') = \V$.\label{item:X-tight-embed}
   \end{enumerate}
 \end{lemma}
 
@@ -1179,7 +1180,7 @@ Lemma~\ref{lem:X} leads to another appealing equivalent condition to our embeddi
   The map $\varphi :\R^* \to \reals^d$, given by $\varphi(r) = s \in \Sc$ where $\ell(r) = L(s)$, is therefore well-defined.
   Condition (i) of an embedding is immediate.
   From Proposition~\ref{prop:representative-embeds-restriction}, $\ell$ embeds $\ell|_{\R^*}$ and $L$ embeds $L|_\Sc$, both via the identity embedding.
-  Thus for all $p\in\simplex$ and $r\in\R^*$, we have
+  Using condition (ii) from both embeddings, for all $p\in\simplex$ and $r\in\R^*$, we have
   \begin{equation*}
     r \in \gamma(p) \iff r \in \prop{\ell|_{\R^*}}(p) \iff \varphi(r) \in \prop{L|_\Sc}(p)
     \iff \varphi(r) \in \prop{L}(p)~,
@@ -1203,7 +1204,7 @@ For example, consider hinge loss with a spurious extra dimension, i.e., $L:\real
 Here the minimum representative sets are $\{(-1,a),(1,b)\}$ for any $a,b\in\reals$.
 Lemma~\ref{lem:X}(\ref{item:X-min-V}) states that, while the minimum representative set is not unique, its loss vectors are.
 
-Motivated by this observation, let us define the ``trim'' of a loss to be this unique set of loss vectors induced by any minimum representative set, as guaranteed by Lemma~\ref{lem:X}(\ref{item:X-min-V}).
+Motivated by this observation, let us define the ``trim'' of a loss to be this unique set $\V$ of loss vectors induced by any minimum representative set, which again is well-defined by Lemma~\ref{lem:X}(\ref{item:X-min-V}).
 \begin{definition}[Trim]\label{def:trim-loss}
   Given a loss $L:\R \to \reals_+^\Y$ with a finite representative set, we define $\trimcover(L) = \{L(r) \mid r \in \R'\}$ given any minimum representative set $\R'$ for $L$.
 \end{definition}
@@ -1213,15 +1214,19 @@ Using this notion of trimming a loss, we can again recast our embedding conditio
 
 \begin{proposition}\label{prop:embed-iff-trims-equal}
   Let $L:\reals^d\to\reals^\Y_+$ have a finite representative set, and let $\ell:\R\to\reals^\Y_+$ be a discrete loss.
-  Then $L$ embeds a discrete loss $\ell$ if and only if $\trimcover(L) = \trimcover(\ell)$.
+  Then $L$ embeds $\ell$ if and only if $\trimcover(L) = \trimcover(\ell)$.
   Furthermore, $L$ tightly embeds $\ell$ if and only if $\ell$ is injective and $\trimcover(L) = \ell(\R)$.
 \end{proposition}
 \begin{proof}
-  As $L$ has a finite representative set, $\risk{L}$ is polyhedral, and Lemma~\ref{lem:X} applies; let $\V$ be the set of loss vectors uniquely determined by $\risk{L}$.
-  If $L$ embeds $\ell$, then we have $\risk{L} = \risk{\ell}$ from Proposition~\ref{prop:embed-bayes-risks}.
-  Thus, Lemma~\ref{lem:X}(\ref{item:X-min-V}) gives $\trim(L) = \trim(\ell)$.
-
-  \raf{Fill in the rest...}
+  \raft{This is sort of a ``clever'' proof, probably not in a good way.  Something that used Lemma X more directly would probably be better than using Bayes risk matching.  But if correct I think it's not bad.}
+  As $L$ has a finite representative set, it is minimizable.
+  Proposition~\ref{prop:embed-bayes-risks} gives $L$ embeds $\ell$ if and only if $\risk L = \risk \ell$.
+  If $\risk L = \risk \ell$, Lemma~\ref{lem:X}(\ref{item:X-min-V}) gives $\trim(L) = \trim(\ell)$.
+  For the converse, suppose $\trim(L) = \trim(\ell) =: \V$.
+  Define the discrete loss $\ell_\trim : \V \to \V, v\mapsto v$.
+  Then $\ell_\trim$ is injective and $\ell_\trim(\V) = \V$, so from Lemma~\ref{lem:X}(\ref{item:X-tight-embed}), both $L$ and $\ell$ tightly embed $\ell_\trim$.
+  We conclude $\risk L = \risk{\ell_\trim} = \risk \ell$ from Proposition~\ref{prop:embed-iff-trims-equal}.
+  The second statement also follows directly from Lemma~\ref{lem:X}(\ref{item:X-tight-embed}).
 \end{proof}
 
 
@@ -1262,13 +1267,32 @@ From the structural result of Lemma~\ref{lem:X}, we can see that in fact these t
 
 \begin{corollary}\label{cor:trim-loss-red}
   Let $L : \R \to \reals^\Y_+$ have a finite representative set.
-  Then $\trimcover(L) = \{L(u) \mid u \in \R \textrm{ s.t. } \neg\exists u'\in\R,u'\neq u,\, \Gamma_u \subsetneq \Gamma_{u'}\}$. 
+  Then $\trimcover(L) = \{L(r) \mid r \in \R,\; \forall r'\in\R,\; \Gamma_r = \Gamma_{r'} \textnormal{ or } \Gamma_r \not\subseteq \Gamma_{r'}\}$.
+  % $\mid u \in \R \textrm{ s.t. } \neg\exists u'\in\R,u'\neq u,\, \Gamma_u \subsetneq \Gamma_{u'}\}$
 \end{corollary}
 \begin{proof}
-  \raf{Didn't get to this proof}
-  
-  Let $\U := \{u \in \R \textrm{ s.t. } \neg\exists u'\in\R,u'\neq u,\, \Gamma_u \subsetneq \Gamma_{u'}\}$.
-  The only time $\U$ contains redundant elements is if there is $u,u' \in \U$ so that $\Gamma_u = \Gamma_{u'}$.  In such a case, removing duplicate elements of $\U$ to form $\U^*$ means $\{L(u) \mid u \in \U\} = \{L(u) \mid u \in \U^*\}$ and $L|_{U'}\}$ is nonredundant, and therefore $\U^*$ is a minimum representative set by Proposition~\ref{prop:tfae-min-rep-nonredundant}, and therefore equal to $\trimcover(L)$.
+  \raft{I was a bit surprised how involved this proof ended up being.  Quite possibly there is a faster way, though at the same time, I do like how the proof shows something stronger.  Old version is in before-reorg-sec-3.tex.}
+  Let $\A := \{r \in \R \mid \forall r'\in\R,\; \Gamma_r = \Gamma_{r'} \textnormal{ or } \Gamma_r \not\subseteq \Gamma_{r'}\}$.
+  We will show the stronger statement, $\A = \bigcup\{\Sc\subseteq\R \mid \Sc \textnormal{ is minimum representative for } L\}$.
+  The result will then follow from the definition of trim.
+
+  Let $\Sc$ be a minimum representative set for $L$.
+  Observe that $\Gamma_s \not\subseteq \Gamma_{s'}$ for all $s,s'\in\Sc$, $s\neq s'$, as otherwise $\Sc$ would not be minimum representative.
+  Furthermore, as $\risk L$ is polyhedral (Corollary~\ref{cor:poly-risk-fin-rep}), Lemma~\ref{lem:X}(\ref{item:X-min-Theta},\ref{item:X-redundant}) together state that for all $r\in\R$, we have some $s\in\Sc$ such that $\Gamma_r \subseteq \Gamma_s$.
+  Let $s\in\Sc$.
+  Suppose for a contradiction that $\Gamma_s \subsetneq \Gamma_r$ for some $r\in\R$.
+  From the above we have some $s'\in\Sc$ with $\Gamma_r \subseteq \Gamma_{s'}$.
+  But now $\Gamma_s \subsetneq \Gamma_r \subseteq \Gamma_{s'}$, contradicting $\Sc$ being minimum representative.
+  We conclude that, for all $r\in\R$, either $\Gamma_s = \Gamma_r$ or $\Gamma_s \not\subseteq \Gamma_r$.
+  Thus $s\in\A$.
+
+  For the reverse inclusion, let $r\in\A$.
+  Let $\Sc$ again be a minimum representative set for $L$.
+  From Lemma~\ref{lem:X}(\ref{item:X-min-Theta},\ref{item:X-redundant}), we have some $s\in\Sc$ such that $\Gamma_r \subseteq \Gamma_s$.
+  By definition of $\A$, we conclude $\Gamma_r = \Gamma_s$.
+  Now take $\Sc' = (\Sc \setminus \{s\}) \cup \{r\}$, that is, the same set of reports with $r$ replacing $s$.
+  We have $\{\Gamma_s \mid s\in\Sc\} = \{\Gamma_{s'} \mid s'\in\Sc'\}$, and thus $\Sc'$ is minimum representative for $L$ by Lemma~\ref{lem:X}(\ref{item:X-min-Theta}).
+  As $r\in\Sc'$ we are done.
 \end{proof}
 
 
@@ -1278,7 +1302,7 @@ From the structural result of Lemma~\ref{lem:X}, we can see that in fact these t
 We conclude this section with a similar structural result about the properties elicited or embedded by a surrogate.
 As we define embeddings from one loss to another, one can define embeddings from one property to another, where essentially condition (i) is relaxed; see \S~\ref{app:embed-props} for a precise definition.
 When working with properties, it is perhaps more natural to define ``trim'' to remove any level sets which are redundant in the sense of set inclusion, as in Corollary~\ref{cor:trim-loss-red}.
-Precisely, given a property $\Gamma:\simplex\toto\R$, define\raft{I think the ``$r'\neq r$'' is not needed, right?}
+Precisely, given a property $\Gamma:\simplex\toto\R$, define
 \[ \trimred(\Gamma) := \{\Gamma_r \mid r \in \R \textrm{ s.t. } \neg\exists r'\in\R,r'\neq r,\, \Gamma_r \subsetneq \Gamma_{r'}\}~.\]
 
 With these definitions, we now state a structural result for embeddable properties, and the properties that embed them.
@@ -1301,6 +1325,14 @@ Finally, we have an important converse: if $\Gamma$ has finitely many full-dimen
   % \raft{I see why you wanted this addition here, but (a) it's clear from the def of embedding, and (b) we don't have varphi defined.  So let's leave it out.}
   Moreover, when any of the above hold, $\trimred(\gamma) = \trimred(\Gamma) = \{\Gamma_u \mid u\in\U\} = \Theta$.
 \end{restatable}
+
+\begin{proof}
+  Let $L$ elicit $\Gamma$.
+  Observe $L$ is minimizable by definition of elicits.
+  In each case, we will show that $\risk L$ is polyhedral, and thus Lemma~\ref{lem:X} will give us uniquely determined sets $\V$ and $\Theta$.
+
+  In case 1, in particular $\Gamma$ has a finite representative set $\Sc$, and $\varphi(\Sc)$ is representative for $\gamma$.........
+\end{proof}
 
 We defer the proof, and precise definitions, to \S~\ref{app:embed-props}.
 
