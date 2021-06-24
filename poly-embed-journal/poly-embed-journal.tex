@@ -708,8 +708,6 @@ A key step in the following definition will be to narrow down a ``link envelope'
   If $\Psi(u)$ became empty, then leave $\psi(u)$ undefined.
 \end{definition}
 
-\btw{JOURNAL: cool to point out that when $L$ is polyhedral, $\prop{L}$ has a finite range (this result) and so does its (multivalued map) inverse (trim result)!}
-
 % \begin{proposition}
 %   If $\psi$ is a separated link between losses $L$ and $\ell$, then $L$ and $\psi$ are consistent with respect to $\ell$. \jessie{Rephrase?}
 % \end{proposition}
@@ -803,7 +801,8 @@ Given a tree $H = ([n], E,W)$ over finite class labels, they consider the discre
 \begin{equation}\label{eq:tree-loss-discrete}
 	\ell^H(r,y) = \text{shortest path length in $H$ between $r$ and $y$}
 \end{equation}
-They generalize the BEP embedding to this problem and show their extension is consistent with respect to eq.~\eqref{eq:tree-loss-discrete}; we can also verify this is an embedding and subsume their result through Theorem~\ref{thm:poly-ie-implies-consistent}.
+They generalize the BEP embedding to this problem and show their extension is consistent with respect to eq.~\eqref{eq:tree-loss-discrete}.
+We can also verify that their surrogate is an embedding and recover their result through Theorem~\ref{thm:poly-ie-implies-consistent}.
 
 
 \begin{figure}
@@ -825,6 +824,8 @@ They generalize the BEP embedding to this problem and show their extension is co
 
 \subsection{Inconsistency of Lov\'asz hinge}
 \label{sec:lovasz-hinge}
+
+\raf{TODO: update section with formal theorem statements and new result about tight embedding}
 
 Many structured prediction settings can be thought of as making multiple predictions at once, with a loss function that jointly measures error based on the relationship between these predictions~\cite{hazan2010direct, gao2011consistency, osokin2017structured}.
 In the case of $k$ binary predictions, these settings are typically formalized by taking the predictions and outcomes to be $\pm 1$ vectors, so $\R=\Y=\{-1,1\}^k$.
@@ -1095,6 +1096,9 @@ More generally, $L^2$ cannot be consistent because the property it embeds does n
 \section{Additional Structure of Embeddings}
 \label{sec:min-rep-sets}
 
+\raf{Brief overview here}
+
+
 \subsection{Structure of polyhedral Bayes risks}
 
 While we have focused on polyhedral losses thus far, it turns out that many of our results about embeddings extend to losses with polyhedral Bayes risks.
@@ -1344,7 +1348,7 @@ We will make use of another corollary of Proposition~\ref{prop:embed-iff-trims-e
   As $\Gamma$ has at least on minimum representative set, we conclude $\trimred(\Gamma) = \{\Gamma_r \mid r\in \R\setminus\red(\Gamma)\} = \Theta$.  
 \end{proof}
 
-\begin{restatable}{proposition}{embedtrim}\label{prop:embed-trim}
+\begin{proposition}\label{prop:embed-trim}
   Let $\Gamma:\simplex\toto\reals^d$ be an elicitable property.
   The following are equivalent:
   \begin{enumerate}\setlength{\itemsep}{0pt}
@@ -1356,9 +1360,7 @@ We will make use of another corollary of Proposition~\ref{prop:embed-iff-trims-e
   \end{enumerate}
   % \raft{I see why you wanted this addition here, but (a) it's clear from the def of embedding, and (b) we don't have varphi defined.  So let's leave it out.}
   Moreover, when any of the above hold, $\trimred(\gamma) = \trimred(\Gamma) = \{\Gamma_u \mid u\in\U\} = \hat\Theta$.
-\end{restatable}
-
-
+\end{proposition}
 
 \begin{proof}
   Let $L$ be a fixed loss eliciting $\Gamma$, so that in particular $\risk L$ is fixed.
@@ -1403,8 +1405,10 @@ We will make use of another corollary of Proposition~\ref{prop:embed-iff-trims-e
   % Finally, Lemma~\ref{lem:X}(\ref{item:X-redundant}) gives $\trimred(\gamma) = \Theta$.
 \end{proof}
 
+\btw{JOURNAL: cool to point out that when $L$ is polyhedral, $\prop{L}$ has a finite range (this result) and so does its (multivalued map) inverse (trim result)!}
 
-\section{Polyhedral losses: indirect elicitation implies consistency}
+
+\section{Polyhedral Indirect Elicitation Implies Consistency}
 \label{sec:poly-ie-consistency}
 
 Our last result concerns indirect elicitation as a necessary condition for consistency.
@@ -1451,76 +1455,65 @@ This result holds more generally whenever $L$ has a finite representative set, a
   For any loss $\ell$ eliciting $\gamma$, there exists a link $\psi$ such that $(L, \psi)$ is calibrated (and consistent) with respect to $\ell$.
 \end{theorem}
 \begin{proof}
+  \raft{Jessie: well done with this proof!  There were a bunch of type check problems where you got the links confused but the overall thread was there.}
 	Let $L:\reals^d \to \reals^\Y_+$ be a polyhedral loss indirectly eliciting $\gamma: \simplex \toto \R$, and let $\ell$ be a discrete loss eliciting $\gamma$.
   By Lemma~\ref{lem:ie-iff-embeds-refinement}, $L$ tightly embeds a discrete loss $\ell^\emb:\R^\emb\to\reals^\Y_+$ such that $\gamma^\emb := \prop{\ell^\emb}$ refines $\gamma$.
-  From refinement, we can define a function $\psi^\R: \R^\emb \to \R$, where such that $\gamma^\emb_r \subseteq \gamma_{\psi^\R(r)}$ for all $r\in\R^\emb$. 
+  From refinement, we can define a function $\psi^\R: \R^\emb \to \R$ such that for all $r\in\R^\emb$ and $p\in\simplex$ we have $r\in\gamma^\emb(p) \implies \psi^\R(r) \in \gamma(p)$. 
   Finally, Theorem~\ref{thm:eps-thick-calibrated} gives a link function $\psi^\emb : \reals^d \to \R^\emb$ such that $(L,\psi^\emb)$ is calibrated with respect to $\ell^\emb$.
-	Consider $\psi := \psi^\R \circ \psi^\emb$.
-	
-  As $(L,\psi^\emb)$ is calibrated with respect to $\ell^\emb$, we have
-	\begin{align*}
-	\inf_{u\in\reals^d : \psi^\emb(u) \not \in \gamma^\emb(p)} \inprod{p}{L(u)} > \inf_{u\in\reals^d}\inprod{p}{L(u)}
-	\end{align*}
-  We next show $\{u\in\reals^d \mid \psi'(u) \not \in \gamma(p) \} \subseteq \{u\in\reals^d \mid \psi^\emb(u) \not \in \gamma^\emb(p) \}$; we show the contrapositive, e.g., $\psi^\emb(u) \in \gamma^\emb(p) \implies \psi'(u) \in \gamma(p)$.
-	Take $u \in \reals^d$ so that $\psi^\emb(u) \in \gamma^\emb(p)$.
-	
-	\begin{align*}
-	\psi^\emb(u) \in \gamma^\emb(p) &\iff \psi' \circ \psi^\emb(u) \in \psi' \circ \gamma^\emb(p)\\
-	&\implies \psi(u) \in \gamma(p)~,~
-	\end{align*}
-	where the last equality follows by construction of $\psi$ and refinement.
 
-  
-	\begin{align*}
-	\inf_{u\in\reals^d}\inprod{p}{L(u)} &< \inf_{u\in\reals^d : \psi^\emb(u) \not \in \gamma^\emb(p)} \inprod{p}{L(u)}\\
-	&\leq \inf_{u\in\reals^d : \psi'(u) \not \in \gamma(p)} \inprod{p}{L(u)}~.~
-	\end{align*}
-	Consistency now follows as calibration and consistency are equivalent in this setting~\citep{bartlett2006convexity}.
-
-  \hrule
-  
-  By Lemma~\ref{lem:ie-iff-embeds-refinement}, $\Gamma := \prop{L}$ embeds a finite elicitable property $\gamma^\emb:\simplex \toto \R'$ which refines $\gamma$.
-	Therefore, these exists a calibrated link $\psi^\emb : \reals^d \to \R'$ from $\Gamma$ to $\gamma^\emb$ by Theorem~\ref{thm:eps-thick-calibrated}. Moreover, as $\gamma^\emb$ refines $\gamma$, take any link $\psi': r \mapsto r'$, where $\gamma_r \subseteq \gamma'_{r'}$. 
-	(We know such a link exists by refinement.)
-	Consider $\psi := \psi^\emb \circ \psi'$.
 	
-	Now, we show that $(L, \psi)$ is calibrated with respect to $\ell$.
-	Consider that since $\Gamma$ embeds $\gamma^\emb$, we have a link $\psi^\emb$ such that $(L,\psi^\emb)$ is calibrated with respect to $\ell^\emb$ eliciting $\gamma^\emb$ (Theorem~\ref{thm:eps-thick-calibrated}).
-	We have
+  Consider $\psi := \psi^\R \circ \psi^\emb$ and fix $p\in\simplex$.
+	For any $u\in\reals^d$, if $\psi^\emb(u) \in \gamma^\emb(p)$, then $\psi(u) = \psi^\R(\psi^\emb(u)) \in \gamma(p)$ by definition of $\psi$ and $\psi^\R$.
+  Contrapositively\raft{You heard me},
+  $\psi(u) \notin \gamma(p) \implies \psi^\emb(u) \notin \gamma^\emb(p)$.
+  Thus, we have
+  \begin{equation}
+    \label{eq:link-set-inclusion}
+    \{u\in\reals^d \mid \psi(u) \not \in \gamma(p) \} \subseteq \{u\in\reals^d \mid \psi^\emb(u) \not \in \gamma^\emb(p) \}~.
+  \end{equation}
+  Combining eq.~\eqref{eq:link-set-inclusion} with the fact that $(L,\psi^\emb)$ is calibrated with respect to $\ell^\emb$, we have
 	\begin{align*}
-	\inf_{u}\inprod{p}{L(u)} &< \inf_{u : \psi^\emb(u) \not \in \gamma^\emb(p)} \inprod{p}{L(u)}\\
-	&\leq \inf_{u : \psi'(u) \not \in \gamma(p)} \inprod{p}{L(u)}~.~
+\inf_{u\in\reals^d : \psi(u) \not \in \gamma(p)} \inprod{p}{L(u)} \geq	\inf_{u\in\reals^d : \psi^\emb(u) \not \in \gamma^\emb(p)} \inprod{p}{L(u)} > \inf_{u\in\reals^d}\inprod{p}{L(u)}~,
 	\end{align*}
-	The second statement is true if $\{u : \psi'(u) \not \in \gamma(p) \} \subseteq \{u : \psi^\emb(u) \not \in \gamma^\emb(p) \}$; we show the contrapositive, e.g., $\psi^\emb(u) \in \gamma^\emb(p) \implies \psi'(u) \in \gamma(p)$.
-	Take $u \in \reals^d$ so that $\psi^\emb(u) \in \gamma^\emb(p)$.
-	
-	\begin{align*}
-	\psi^\emb(u) \in \gamma^\emb(p) &\iff \psi' \circ \psi^\emb(u) \in \psi' \circ \gamma^\emb(p)\\
-	&\implies \psi(u) \in \gamma(p)~,~
-	\end{align*}
-	where the last equality follows by construction of $\psi$ and refinement.
-	Consistency now follows as calibration and consistency are equivalent in this setting~\citep{bartlett2006convexity}.
-
+  showing calibration of $\psi$.
+	Consistency follows as calibration and consistency are equivalent in this setting~\citep{bartlett2006convexity}\raft{I think we need a better reference, since I believe that's only for binary classification...}.
 \end{proof}
 
-The above Theorem statement gives us a somewhat surprising result: when restricting to polyhedral losses (and discrete prediction problems), indirect elicitation implies consistency.
-\citet{finocchiaro2021unifying} gives the reverse direction, which allows us to conclude that indirect elicitation and consistency are equivalent when restricting to polyhedral losses.
+Theorem~\ref{thm:poly-ie-implies-consistent} gives a somewhat surprising result: despite the fact that indirect elicitation appears to be a somewhat weak necessary condition for consistency in general, the two conditions are equivalent for polyhedral surrogates.
 
 
 
 
 \section{Conclusions} \label{sec:conclusion}
-% \paragraph{Summary.}
-\jessiet{18 Mar 21: Probably want to revisit before submitting, once re-org has settled}
+
+\raf{Old recap; perhaps cut}
 This paper formalizes an intuitive way to design convex surrogate losses for classification-like problems---by embedding the reports into $\reals^d$.
 We establish a close relationship between embeddings and polyhedral surrogates, showing both that every polyhedral loss embeds a discrete loss (Theorem~\ref{thm:poly-embeds-discrete}) and that every discrete loss is embedded by some polyhedral loss (Theorem~\ref{thm:discrete-loss-poly-embeddable}).
 We then construct a calibrated link function from any polyhedral loss to the discrete loss it embeds, giving consistency for all such losses (Theorem~\ref{thm:eps-thick-calibrated}).
-In fact, we conjecture that \emph{any} loss embedding a discrete $\ell$ must be polyhedral on the convex hull of the embedded reports. 
+
+
+\raf{Future work and conjectures}
+\begin{itemize}
+\item \raf{This is false I believe, from BEP surrogate $n=4$ and large (small?) $\alpha$ -- you can add a little curvature between the spokes and it still embeds.  Maybe we can rephrase / reformulate.}
+  In fact, we conjecture that \emph{any} loss embedding a discrete $\ell$ must be polyhedral on the convex hull of the embedded reports. 
 (The convex hull of the embedded reports follows since any point not in the convex hull will never minimize the expected loss.)
-Since discrete losses have a finite set of reports, and in turn, minimizers, any surrogate embedding the discrete loss must also have a finite set of unique minimizers.
-This is in turn related to another conjecture about the ``convex envelope'' of embeddings: if $L$ embeds $\ell$ by the embedding $\varphi$, the (polyhedral) surrogate $L'$ such that $L'_y$ is the convex envelope of $\{(\varphi(r),L(r)_y)\}_{r\in\R}$ also embeds $\ell$.
-We conclude with examples of how the embedding framework presented can be applied to understand existing surrogates in the literature, including those for the abstain loss, top-$k$ loss, and Lov\'asz hinge.
-In particular, our link construction recovers the link function proposed by~\citet{ramaswamy2018consistent} for abstain loss, as well as another simpler link based on the $L_1$ norm.
+
+\item 
+  Since discrete losses have a finite set of reports, and in turn, minimizers, any surrogate embedding the discrete loss must also have a finite set of unique minimizers.
+  This is in turn related to another conjecture about the ``convex envelope'' of embeddings: if $L$ embeds $\ell$ by the embedding $\varphi$, the (polyhedral) surrogate $L'$ such that $L'_y$ is the convex envelope of $\{(\varphi(r),L(r)_y)\}_{r\in\R}$ also embeds $\ell$.
+
+\item
+  Relation to geometry of losses / superprediction sets?  Say something about trim being finite...
+  
+\item
+  For which other classes of surrogates / settings is indirect elicitation equivalent to consistency?
+
+\item
+  Characterizing embedding dimension \cite{finocchiaro2020embedding}; does poly dim == embedding dim?  ccdim == embedding dim?
+
+\item
+  ...
+\end{itemize}
 
 %%%% Pre-neurips
 %This work is part of a broader research program to understand convex surrogates through the lens of property elicitation.  % the relationship between finite losses and convex surrogates, the link functions connecting them, and the properties they elicit.
@@ -1807,35 +1800,6 @@ Finally, we have an important converse: if $\Gamma$ has finitely many full-dimen
 
 
 
-\embedtrim*
-\begin{proof}
-  Let $L$ elicit $\Gamma$.
-
-  1 $\Rightarrow$ 2:
-  By the embedding condition, taking $\R_1 = \reals^d$ and $\R_2 = \varphi(\R)$ satisfies the conditions of Lemma~\ref{lem:loss-restrict}: for all $p\in\simplex$, as $\gamma(p) \neq \emptyset$ by definition, we have some $r\in\gamma(p)$ and thus some $\varphi(r) \in \Gamma(p)$.
-  Let $G(p) := -\min_{u\in\reals^d} \inprod{p}{L(u)}$ be the negative Bayes risk of $L$, which is convex, and $G_{\R}$ that of $L|_{\varphi(\R)}$.
-  By the Lemma, we also have $G = G_\R$.
-  As $\gamma$ is finite, $G$ is polyhedral.
-  Moreover, the projection of the epigraph of $G$ onto $\simplex$ forms a power diagram, with the facets projecting onto the level sets of $\gamma$, the cells of the power diagram.
-  (See Theorem~\ref{thm:aurenhammer}.)
-  As $L$ elicits $\Gamma$, for all $u\in\reals^d$, the hyperplane $p\mapsto \inprod{p}{L(u)}$ is a supporting hyperplane of the epigraph of $G$ at $(p,G(p))$ if and only if $u\in\Gamma(p)$.
-  This supporting hyperplane exposes some face $F$ of the epigraph of $G$, which must be contained in some facet $F'$.
-  Thus, the projection of $F$, which is $\Gamma_u$, must be contained in the projection of $F'$, which is a level set of $\gamma$.
-  We conclude that $\Gamma_u \subseteq \gamma_r$ for some $r\in\R$.
-  Hence, $\trim(\Gamma) = \{\gamma_r : r\in\R\}$, which is finite, and unions to $\simplex$.
-
-  2 $\Rightarrow$ 3: let $\R = \{u_1,\ldots,u_k\} \subseteq\reals^d$ be a set of distinct reports such that $\trim(\Gamma) = \{\Gamma_{u_1},\ldots,\Gamma_{u_k}\}$.
-  Now as $\cup\,\trim(\Gamma) = \simplex$, for any $p\in\simplex$, we have $p\in\Gamma_{u_i}$ for some $u_i\in\R$, and thus $\Gamma(p) \cap \R \neq \emptyset$.
-  We now satisfy the conditions of Lemma~\ref{lem:loss-restrict} with $\R_1 = \reals^d$ and $\R_2 = \R$.
-  The property $\gamma:p\mapsto\Gamma(p)\cap\R$ is non-redundant by the definition of $\trim$, finite, and elicitable.
-  Now from Lemma~\ref{lem:finite-full-dim}, the level sets $\Theta = \{\gamma_r:r\in\R\}$ are full-dimensional, and union to $\simplex$.
-  Statement 3 then follows from the fact that $\gamma_r = \Gamma_r$ for all $r\in\R$.
-
-  3 $\Rightarrow$ 1: let $\Theta = \{\theta_1,\ldots,\theta_k\}$.
-  For all $i\in\{1,\ldots,k\}$ let $u_i\in\reals^d$ such that $\Gamma_{u_i} = \theta_i$.
-  Now define $\gamma:\simplex\toto\{1,\ldots,k\}$ by $\gamma(p) = \{i : p\in\theta_i\}$, which is non-degenerate as $\cup\,\Theta = \simplex$.
-  By construction, we have $\gamma_i = \theta_i = \Gamma_{u_i}$ for all $i$, so letting $\varphi(i) = u_i$ we satisfy the definition of embedding, namely statement 1.
-\end{proof}
 
 \jessie{Added from COLT-19 but not discussed in COLT-20}
 
