@@ -112,7 +112,7 @@
 \newcommand{\ellabs}[1]{\ell_{#1}}
 \newcommand{\elltopk}{\ell^{\text{top-$k$}}}
 \newcommand{\elltop}[1]{\ell^{\text{top-$#1$}}}
-\newcommand{\emb}{{\tt emb}}
+\newcommand{\emb}{{\tt e}}
 
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
@@ -176,7 +176,7 @@ We also show \raf{Newer stuff}
 %		\item \sout{Reorg sections: \S 3 (Embeddings, matching risks, etc.), \S 5 (Calibrated link), Examples, \S 4 (Polyhedral losses: I.E. implies consistency) OR Main results (w/o proof), Examples, \S 3, \S 5, \S 4}
 %		\item \sout{Flesh out and expand on Ordered Partition Example}
 %		\item add paragraph of discussion on the requirements of polyhedral losses
-%		\item Check proof and statement of Theorem~\ref{thm:poly-ie-implies-consistent} - Jessie, 17 Mar 21: took a look to brush up; Theorem~\ref{thm:ie-iff-embeds-refinement} can use a look too.
+%		\item Check proof and statement of Theorem~\ref{thm:poly-ie-implies-consistent} - Jessie, 17 Mar 21: took a look to brush up; Theorem~\ref{lem:ie-iff-embeds-refinement} can use a look too.
 %		\item Try to make section~\ref{sec:poly-loss-embed} self-contained, moving up results from appendix 
 %		\begin{itemize}
 %		\item \sout{for now, move everything up except PDs}
@@ -1407,68 +1407,79 @@ We will make use of another corollary of Proposition~\ref{prop:embed-iff-trims-e
 \section{Polyhedral losses: indirect elicitation implies consistency}
 \label{sec:poly-ie-consistency}
 
-\begin{definition}
+Our last result concerns indirect elicitation as a necessary condition for consistency.
+Intuitively, a loss $L$ indirectly elicits a property $\gamma$ if we can compute $\gamma$ from $\prop L$.
+To formalize the condition, we use the notion of a property refining another from~\citet{frongillo2014general} \raf{also (and maybe only) Biometrika paper with Ian}.
+
+\begin{definition}[Refines]
 	Let $\Gamma:\simplex \toto \R$ and $\Gamma':\simplex\toto \R'$.
-	Then $\Gamma'$ \emph{refines} $\Gamma$ if for all $r' \in \R'$, we have $\Gamma'_{r'} \subseteq \Gamma_r$ for some $r \in \R$.
-	That is, the cells of $\Gamma'$ are all contained in the cells of $\Gamma$.
+	Then $\Gamma$ \emph{refines} $\Gamma'$ if for all $r \in \R$, there exists $r' \in \R'$ such that $\Gamma_{r} \subseteq \Gamma'_{r'}$.
+\end{definition}
+Equivalently, $\Gamma$ refines $\Gamma'$ if there is some ``link'' function $\psi:\R\to\R'$ such that $r\in\Gamma(p) \implies f(r) \in \Gamma'(p)$ for all $p\in\simplex$.
+We will use the fact that refinement is transitive: if $\Gamma_1$ refines $\Gamma_2$ and $\Gamma_2$ refines $\Gamma_3$, then $\Gamma_1$ refines $\Gamma_3$.
+
+\begin{definition}[Indirectly elicits]
+  A loss $L$ \emph{indirectly elicits} a property $\gamma$ if $\prop L$ refines $\gamma$.
 \end{definition}
 
-\begin{theorem}\label{thm:ie-iff-embeds-refinement}
+It is straightforward to verify that consistency, and therefore calibration, implies indirect elicitation\raft{Add cites}.
+Indirect elicitation may appear much weaker than calibration, since in particular it does not depend on the loss except through the property it elicits.
+Surprisingly, for polyhedral surrogates, we show the converse: indirect elicitation implies calibration, and therefore consistency.
+
+A useful lemma is that for polyhedral losses, indirect elicitation must always pass through an embedding.
+This result holds more generally whenever $L$ has a finite representative set, as in \S~\ref{sec:min-rep-sets}.
+\begin{lemma}\label{lem:ie-iff-embeds-refinement}
   Let $L$ be a polyhedral loss.
-  Then $L$ indirectly elicits a finite elicitable property $\gamma$ if and only if $L$ embeds a discrete loss $\ell$ and $\prop \ell$ refines $\gamma$.
-\end{theorem}
-
-
-\begin{theorem}\label{thm:ie-iff-embeds-refinement}
-	Every polyhedral loss embeds a finite elicitable property.
-	Moreover, a polyhedral loss $L$ indirectly elicits a finite elicitable property $\gamma$ if and only if $\gamma$ is finite and $L$ embeds a property which refines $\gamma$.
-\end{theorem}
+  Then $L$ indirectly elicits a property $\gamma$ if and only if $L$ tightly embeds a discrete loss $\ell$ such that $\prop \ell$ refines $\gamma$.
+\end{lemma}
 \begin{proof}
-	\jessie{Intuition: There are only a finite set of possible vertices of the loss, and claim that for each $p \in \simplex$, one of these vertices is a minimizer of $\inprod{p}{L(\cdot)}$.  Rinse and repeat for vertices of the expected loss on all possible (finite) supports.  As there is a some vertex in the property value for every $p \in \simplex$, we have $\trim(\Gamma)$ finite, which yields the results via Prop 3 somehow?  Unclear on that gap.}
-	\jessie{Cut everything but last paragraph}
-	The first statement is a trivial corollary of Theorem~\ref{thm:poly-embeds-discrete}.
-	%	Let $L:\reals^d\to\reals^\Y_+$ be a polyhedral loss.
-	%	For all $p$, let $P(p)$ be the epigraph of the convex function $u\mapsto \inprod{p}{L(u)}$.
-	%	From Lemma~\ref{lem:polyhedral-pd-same}, we have that the power diagram induced by the projection of $P(p)$ onto $\reals^d$ is constant whenever $p\in\inter\simplex$.
-	%	Let $q\in\inter\simplex$ be the uniform distribution on $\Y$, and $V_\Y$ be the set of vertices of $P(q)$ projected onto $\reals^d$.
-	%	By the above, this set is the same had we replaced $q$ by any $p\in\inter\simplex$.
-	%	
-	%	Now let $\Gamma := \Gamma[L]$.
-	%	We claim for all $p\in\inter\simplex$, that $\Gamma(p) \cap V_\Y \neq \emptyset$.
-	%	To see this, let $u \in \Gamma(p)$, and $u' = (u,\inprod{p}{L(u)}) \in P(p)$.
-	%	The optimality of $u$ is equivalent to $u$ being contained in the face exposed by the normal $(0,\ldots,0,-1)\in\reals^{d+1}$, which is a face of $P(p)$.
-	%	Let $v'\in\reals^{d+1}$ be a vertex on such a face, and $v\in V_\Y$ its projection onto $\reals^d$.
-	%	Then $v$ is also optimal, and therefore $v\in\Gamma(p)$.
-	%	
-	%	Now consider $\Y'\subset \Y$.
-	%	Applying the above argument on distributions $p$ with support exactly $\Y'$, we have a similar guarantee: a finite set $V_{\Y'}$ such that $\Gamma(p) \cap V_{\Y'} \neq \emptyset$ for all $p$ with support exactly $\Y'$.
-	%	(When $\Y' = \{y\}$ is a singleton, we simply take the projected vertices of $L(\cdot)_y$.)
-	%	
-	%	Thus, taking $V = \bigcup_{\Y'\subseteq\Y} V_{\Y'}$, we have for all $p\in\simplex$ that $\Gamma(p) \cap V \neq \emptyset$.
-	%	This implies that $\trim(\Gamma) \subseteq \{\Gamma_v : v\in V\}$, which is finite, so Proposition~\ref{prop:embed-trim} \jessie{also Prop 3} now gives the conclusion.
-	%	\jessiet{Do we need to show the preimage of $\Gamma$ is $V$?}
-	
-	
-	%\raft{I might be delusional, but this second part ended up being much slicker than I'd thought, by essentially chaining definitions and maps.  Please check!}
-	For the second part, let $\gamma':\simplex\toto\R'$ be the finite elicitable property embedded by $L$, with embedding $\varphi:\R'\to\reals^d$, and let $\psi:\reals^d \to \R$ be a link to a non-redundant elicitable property $\gamma:\simplex\toto\R$.
-	Then letting $\psi' = (\psi \circ \varphi):\R'\to\R$, we see that $\psi'$ is a link from $\gamma'$ to $\gamma$:
-	for all $r'\in\R'$, we have $\gamma'_{r'} = \prop{L}_{\varphi(r')} \subseteq \gamma_{\psi(\varphi(r'))} = \gamma_{\psi'(r')}$.
-	In particular, $\gamma'$ refines $\gamma$, and as $\gamma'$ is finite, $\gamma$ must be finite.
-	
-	\jessie{Added 18 Mar 21}
-	This suffices to prove both directions of the equality since there is a subtle use of the statement ``$\gamma'_{r'} = \prop{L}_{\varphi(r')}$'' following as a corollary of Proposition~\ref{prop:embed-trim}, and each direction of the statement follows from a subset inclusion of one of these two level sets. 
-	%\jessie{added 17 Mar 21}
-	%	The ``only if'' direction follows from an implication of refinement, as $L$ embedding $\gamma'$ refining $\gamma \implies L$ indirectly elicits $\gamma$
-	%	Take embedding $\varphi$ and calibrated link\jessiet{Implicit forward ref to Theorem~\ref{thm:eps-thick-calibrated}} $\psi':\reals^d \to \R'$, and consider that $\prop{L}_u = \gamma'_{\psi'(u)} \subseteq \gamma_{\psi(u)}$, where $\psi$ is inherent in the definition of refinement.
-	
+  Let $L:\reals^d\to\reals^\Y_+$ be polyhedral, and $\Gamma = \prop L$.
+  Then $L$ tightly embeds a discrete loss from Lemma~\ref{lem:X}(\ref{item:X-tight-embed}).
+  Furthermore, Lemma~\ref{lem:X}(\ref{item:X-min-Theta},\ref{item:X-redundant},\ref{item:X-tight-embed}) implies that $\prop L$ refines $\prop \ell$ for any discrete loss $\ell$ that $L$ tightly embeds.
+
+  We claim that, for any property $\gamma$, and any loss $\ell$ that $L$ tightly embeds, $\prop L$ refines $\gamma$ if and only if $\prop \ell$ refines $\gamma$.
+  If $\prop \ell$ refines $\gamma$, then $\prop L$ refines $\gamma$ by transitivity.
+  For the other direction, Lemma~\ref{lem:X}(\ref{item:X-min-Theta},\ref{item:X-tight-embed}) shows that the level sets of $\prop \ell$ are contained in the set $\{\Gamma_u \mid u\in\reals^d\}$.
+  Thus, if $\prop L$ refines $\gamma$, then in particular $\prop \ell$ refines $\gamma$.
+  The result now follows immediately from the claim.
 \end{proof}
 
 
+
 \begin{theorem}\label{thm:poly-ie-implies-consistent}
-	If a polyhedral loss $L:\reals^d \to \reals^\Y$ indirectly elicits a property $\gamma: \simplex \toto \R$, then for any loss $\ell$ eliciting $\gamma$, there exists a link $\psi$ such that $(L, \psi)$ is calibrated, and therefore consistent, with respect to $\ell$.
+	Let $L$ be a polyhedral loss which indirectly elicits a finite property $\gamma$.
+  For any loss $\ell$ eliciting $\gamma$, there exists a link $\psi$ such that $(L, \psi)$ is calibrated (and consistent) with respect to $\ell$.
 \end{theorem}
 \begin{proof}
-	By Theorem~\ref{thm:ie-iff-embeds-refinement}, we know that $\Gamma := \prop{L}$ embeds a finite elicitable property $\gamma^\emb:\simplex \toto \R'$ which refines $\gamma$.
+	Let $L:\reals^d \to \reals^\Y_+$ be a polyhedral loss indirectly eliciting $\gamma: \simplex \toto \R$, and let $\ell$ be a discrete loss eliciting $\gamma$.
+  By Lemma~\ref{lem:ie-iff-embeds-refinement}, $L$ tightly embeds a discrete loss $\ell^\emb:\R^\emb\to\reals^\Y_+$ such that $\gamma^\emb := \prop{\ell^\emb}$ refines $\gamma$.
+  From refinement, we can define a function $\psi^\R: \R^\emb \to \R$, where such that $\gamma^\emb_r \subseteq \gamma_{\psi^\R(r)}$ for all $r\in\R^\emb$. 
+  Finally, Theorem~\ref{thm:eps-thick-calibrated} gives a link function $\psi^\emb : \reals^d \to \R^\emb$ such that $(L,\psi^\emb)$ is calibrated with respect to $\ell^\emb$.
+	Consider $\psi := \psi^\R \circ \psi^\emb$.
+	
+  As $(L,\psi^\emb)$ is calibrated with respect to $\ell^\emb$, we have
+	\begin{align*}
+	\inf_{u\in\reals^d : \psi^\emb(u) \not \in \gamma^\emb(p)} \inprod{p}{L(u)} > \inf_{u\in\reals^d}\inprod{p}{L(u)}
+	\end{align*}
+  We next show $\{u\in\reals^d \mid \psi'(u) \not \in \gamma(p) \} \subseteq \{u\in\reals^d \mid \psi^\emb(u) \not \in \gamma^\emb(p) \}$; we show the contrapositive, e.g., $\psi^\emb(u) \in \gamma^\emb(p) \implies \psi'(u) \in \gamma(p)$.
+	Take $u \in \reals^d$ so that $\psi^\emb(u) \in \gamma^\emb(p)$.
+	
+	\begin{align*}
+	\psi^\emb(u) \in \gamma^\emb(p) &\iff \psi' \circ \psi^\emb(u) \in \psi' \circ \gamma^\emb(p)\\
+	&\implies \psi(u) \in \gamma(p)~,~
+	\end{align*}
+	where the last equality follows by construction of $\psi$ and refinement.
+
+  
+	\begin{align*}
+	\inf_{u\in\reals^d}\inprod{p}{L(u)} &< \inf_{u\in\reals^d : \psi^\emb(u) \not \in \gamma^\emb(p)} \inprod{p}{L(u)}\\
+	&\leq \inf_{u\in\reals^d : \psi'(u) \not \in \gamma(p)} \inprod{p}{L(u)}~.~
+	\end{align*}
+	Consistency now follows as calibration and consistency are equivalent in this setting~\citep{bartlett2006convexity}.
+
+  \hrule
+  
+  By Lemma~\ref{lem:ie-iff-embeds-refinement}, $\Gamma := \prop{L}$ embeds a finite elicitable property $\gamma^\emb:\simplex \toto \R'$ which refines $\gamma$.
 	Therefore, these exists a calibrated link $\psi^\emb : \reals^d \to \R'$ from $\Gamma$ to $\gamma^\emb$ by Theorem~\ref{thm:eps-thick-calibrated}. Moreover, as $\gamma^\emb$ refines $\gamma$, take any link $\psi': r \mapsto r'$, where $\gamma_r \subseteq \gamma'_{r'}$. 
 	(We know such a link exists by refinement.)
 	Consider $\psi := \psi^\emb \circ \psi'$.
@@ -1489,45 +1500,12 @@ We will make use of another corollary of Proposition~\ref{prop:embed-iff-trims-e
 	\end{align*}
 	where the last equality follows by construction of $\psi$ and refinement.
 	Consistency now follows as calibration and consistency are equivalent in this setting~\citep{bartlett2006convexity}.
+
 \end{proof}
 
 The above Theorem statement gives us a somewhat surprising result: when restricting to polyhedral losses (and discrete prediction problems), indirect elicitation implies consistency.
 \citet{finocchiaro2021unifying} gives the reverse direction, which allows us to conclude that indirect elicitation and consistency are equivalent when restricting to polyhedral losses.
 
-\iffalse
-\jessie{Other results on refined properties? Assuming we don't want the embedding dimension conjecture brought up on 02.03.2020 in here.}
-\jessie{This is new from the NeurIPS submission.}
-\begin{proposition}\label{prop:calibrated-link-refinement}
-	Take $\prop{\ell} =: \gamma : \simplex \toto \R$ and $\prop{\ell'} =:\gamma' : \simplex \toto \R'$.
-	If $\gamma'$ refines $\gamma$ and $L'$ is calibrated with respect to  the discrete loss $\ell'$, then there exists a link $\psi$ so that $(L', \psi)$ is calibrated with respect to $\ell$.
-	\proposedadd{$(L, \psi)$ calibrated w.r.t. $\ell \implies L $ indirectly elicits $\prop{\ell}$.}
-\end{proposition}
-\begin{proof}
-	Let us construct the link $\psi$ such that, for all $r' \in \R'$ consider $r \in \R$ so that $\gamma'_{r'} \subseteq \gamma_r$.
-	Define $\psi$ so that $\psi'(u) = r' \implies \psi(u) = r$.
-	
-	To see this link and surrogate are calibrated with respect to $\ell$, consider that for any fixed $p \in \simplex$, $\{u \in \reals^d : \psi(u) \not \in \gamma(p)\} \subseteq \{u \in \reals^d : \psi'(u) \not \in \gamma'(p)\}$, which in turn implies that the infimum over the first term of the expected loss is at least the infimum over the second term, which is strictly greater than the Bayes Risk of $L'$ at $p$ by calibration of $(L', \psi')$.
-	
-	\jessiet{Probably need to be more thorough on the subset argument.}
-	That is, 
-	\begin{align*}
-	\{u \in \reals^d : \psi(u) \not \in \gamma(p)\} &\subseteq \{u \in \reals^d : \psi'(u) \not \in \gamma'(p)\}\\
-	\implies
-	\inf_{u \in \reals^d : \psi(u) \not \in \gamma(p)} \inprod{p}{L'(u)} &\geq \inf_{u \in \reals^d : \psi'(u) \not \in \gamma'(p)} \inprod{p}{L'(u)} > \inf_u \inprod{p}{L'(u)}\\
-	\implies 		\inf_{u \in \reals^d : \psi(u) \not \in \gamma(p)} \inprod{p}{L'(u)} &> \inf_u \inprod{p}{L'(u)}~.~
-	\end{align*}
-	Thus, as $p$ is arbitrary, we observe $(L', \psi)$ is calibrated with respect to $\ell$.
-\end{proof}
-\fi
-
-\iffalse
-\begin{conjecture}
-	Let $\gamma'$ refine $\gamma = \prop{\ell}$ and $L'$ embeds $\gamma'$ by the injection $\varphi'$.
-	Define $\phi : \R \to \R'$ such that $\phi(r) = r' \implies \gamma'_{r'} \subseteq \gamma_r$.
-	Let $\varphi:\R \to \reals^d = \phi \circ \varphi'$
-	Then $(-\risk{L'|_{\varphi(R)}})^*$ embeds $\ell$.
-\end{conjecture}
-\fi
 
 
 
