@@ -1106,7 +1106,7 @@ While we have focused on polyhedral losses thus far, it turns out that many of o
 (We say a concave function is polyhedral if its negation is a polyhedral convex function.)
 To see that this is a weaker condition, recall that Theorem~\ref{thm:poly-embeds-discrete} constructs a finite representative set $\Sc$ for any polyhedral loss $L$, and thus $\risk{L} = \risk{L|_\Sc}$ by Lemma~\ref{lem:loss-restrict}, which is polyhedral.
 The condition is strictly weaker, in that the Bayes risk may be polyhedral even if the loss itself is not.
-For example, a modified hinge loss $L(r)_y = \max(r^2-1,1-ry)$, which matches hinge loss on the interval $[-1,1]$ but is smooth outside the interval $[-2,2]$, still embeds twice 0-1 loss.
+For example, a modified hinge loss $L(r)_y = \max(r^2-1,1-ry)$, \jessie{Would a figure be helpful?} which matches hinge loss on the interval $[-1,1]$ but is smooth outside the interval $[-2,2]$, still embeds twice 0-1 loss.
 
 % \begin{lemma}
 % 	\label{lem:poly-loss-poly-risk}
@@ -1185,7 +1185,7 @@ Lemma~\ref{lem:X} leads to another appealing equivalent condition to our embeddi
   \end{equation*}
   
 	For the reverse implication, assume $\risk{L} = \risk{\ell}$, which are polyhedral functions as $\ell$ is discrete.
-  From Lemma~\ref{lem:X}(\ref{item:X-min-V}), we have some set $\V\subseteq\reals^\Y_+$ and minimum representative sets $\R^* \subseteq \R$ and $\Sc \subseteq \U$, for $\ell$ and $L$ respectively, such that $\ell(\R^*) = \V = L(\Sc)$.
+  From Lemma~\ref{lem:X}(\ref{item:X-min-V}), we have some set $\V\subseteq\reals^\Y_+$ and minimum representative sets $\R^* \subseteq \R$ and $\Sc \subseteq \U$, for $\ell$ and $L$ respectively, such that $\ell(\R^*) = \V = L(\Sc)$.\jessie{This is a different $\Sc$ than the first paragraph, right? The first $\Sc$ is representative for $\ell$.}
   As $\R^*$ and $\Sc$ are miniumum, they cannot repeat loss vectors, and thus $|\R^*|=|\ell(\R^*)|$ and $|L(\Sc)|=\Sc$.
   We conclude that $\R^*$ and $\Sc$ are both in bijection with $\V$.
   The map $\varphi :\R^* \to \reals^d$, given by $\varphi(r) = s \in \Sc$ where $\ell(r) = L(s)$, is therefore well-defined.
@@ -1212,12 +1212,12 @@ Moreover, their result relies the Bayes risk of the surrogate being strictly con
 Central to the structural results in Lemma~\ref{lem:X} is the existence of a canonical set of loss vectors $\V$ which match the loss vectors of any minimum representative set.
 This fact may seem surprising when one considers that losses may have many mimimum representative sets.
 For example, consider hinge loss with a spurious extra dimension, i.e., $L:\reals^2\to\reals^\Y$, $L(r)_y = \max(0,1-r_1y)$ for $\Y = \{-1,+1\}$.
-Here the minimum representative sets are $\{(-1,a),(1,b)\}$ for any $a,b\in\reals$.
+Here the minimum representative sets are $\{(-1,a),(1,b)\}$ for any $a,b\in\reals$. \jessie{Do we want this as an example or is it too contrived? I don't have a better one though.  We could also point out that lots of surrogates have an extra dimension in practice (e.g., people use $n$ dimensions instead of $n-1$ for multiclass classification.)}
 Lemma~\ref{lem:X}(\ref{item:X-min-V}) states that, while the minimum representative set is not unique, its loss vectors are.
 
 Motivated by this observation, let us define the ``trim'' of a loss to be this unique set $\V$ of loss vectors induced by any minimum representative set, which again is well-defined by Lemma~\ref{lem:X}(\ref{item:X-min-V}).
 \begin{definition}[Trim]\label{def:trim-loss}
-  Given a loss $L:\R \to \reals_+^\Y$ with a finite representative set, we define $\trimcover(L) = \{L(r) \mid r \in \R'\}$ given any minimum representative set $\R'$ for $L$.
+  Given a loss $L:\R \to \reals_+^\Y$ with a finite representative set, we define $\trimcover(L) = \{L(r) \mid r \in \R^*\}$ given any minimum representative set $\R^*$ for $L$.
 \end{definition}
 
 
@@ -1229,7 +1229,7 @@ Using this notion of trimming a loss, we can again recast our embedding conditio
   Furthermore, $L$ tightly embeds $\ell$ if and only if $\ell$ is injective and $\trimcover(L) = \ell(\R)$.
 \end{proposition}
 \begin{proof}
-  \raft{This is sort of a ``clever'' proof, probably not in a good way.  Something that used Lemma X more directly would probably be better than using Bayes risk matching.  But if correct I think it's not bad.}
+  \raft{This is sort of a ``clever'' proof, probably not in a good way.  Something that used Lemma X more directly would probably be better than using Bayes risk matching.  But if correct I think it's not bad. \jessie{It's a little subtle in parts, but checks out to me.}}
   As $L$ has a finite representative set, it is minimizable.
   Proposition~\ref{prop:embed-bayes-risks} gives $L$ embeds $\ell$ if and only if $\risk L = \risk \ell$.
   If $\risk L = \risk \ell$, Lemma~\ref{lem:X}(\ref{item:X-min-V}) gives $\trim(L) = \trim(\ell)$.
@@ -1271,8 +1271,8 @@ From the structural result of Lemma~\ref{lem:X}, we can see that in fact these t
 \end{proof}
 
 \begin{corollary}\label{cor:tight-embed-min-rep}
-  Let loss $L:\R\to\reals^\Y_+$ and finite representative set $\Sc$ be given.
-  Then $L$ tightly embeds $L|_\Sc$ if and only if $L|_\Sc$ is non-redundant.
+  Let loss $L:\R\to\reals^\Y_+$ with finite representative set $\R'$ be given.
+  Then $L$ tightly embeds $L|_{\R'}$ if and only if $L|_{\R'}$ is non-redundant.
 \end{corollary}
 
 In fact, we can show something stronger: the reports in minimum representative sets are precisely those which are not strictly redundant.
@@ -1283,7 +1283,7 @@ Similarly, for minimizable $L$, let $\red(L) := \red(\prop L)$.
   Let $L : \R \to \reals^\Y_+$ have a finite representative set.
   Let $\R'$ be the union of all minimum representative sets for $L$.
   Then $\R' = \R \setminus \red(L)$.
-  \raft{I was a bit surprised how involved this proof ended up being.  Quite possibly there is a faster way, though at the same time, I do like how the proof shows something stronger.  Old version is in before-reorg-sec-3.tex.}
+  \raft{I was a bit surprised how involved this proof ended up being.  Quite possibly there is a faster way, though at the same time, I do like how the proof shows something stronger.  Old version is in before-reorg-sec-3.tex.\jessie{It doesn't feel that involved as a reader, though maybe I'm not clear what you mean by ``involved''}}
 \end{proposition}
 
 \begin{proof}
@@ -1301,7 +1301,7 @@ Similarly, for minimizable $L$, let $\red(L) := \red(\prop L)$.
   By definition of $\red(L)$, we conclude $\Gamma_r = \Gamma_s$.
   Now take $\Sc' = (\Sc \setminus \{s\}) \cup \{r\}$, that is, the same set of reports with $r$ replacing $s$.
   We have $\{\Gamma_s \mid s\in\Sc\} = \{\Gamma_{s'} \mid s'\in\Sc'\}$, and thus $\Sc'$ is minimum representative for $L$ by Lemma~\ref{lem:X}(\ref{item:X-min-Theta}).
-  As $r\in\Sc'$ we are done.
+  As $r\in\Sc'$, we have $r \in \R'$ and we are done.
 \end{proof}
 
 
@@ -1332,7 +1332,7 @@ Precisely, we define $\trimred(\Gamma) := \{\Gamma_r \mid r \in \R\setminus\red(
 
 With these definitions, we now state a structural result for embeddable properties, and the properties that embed them.
 First, if $\Gamma$ embeds $\gamma$ and $\gamma$ is non-redundant, the level sets of $\Gamma$ must all be redundant relative to $\gamma$.
-In other words, $\Gamma$ is exactly the property $\gamma$, just with other reports filling in the gaps between the embedded reports of $\gamma$.
+In other words, $\Gamma$ is exactly the property $\gamma$ \jessie{up to relabelling reports}, just with other reports filling in the gaps between the embedded reports of $\gamma$.
 When working with convex losses, these extra reports often arise as the convex hull of the embedded reports.
 In this sense, we can regard embedding as only a slight departure from direct elicitation: if a loss $L$ elicits $\Gamma$ which embeds $\gamma$, we can think of $L$ as essentially eliciting $\gamma$ itself.
 Finally, we have an important converse: if $\Gamma$ has finitely many full-dimensional level sets, or if $\trimred(\Gamma)$ is finite, then $\Gamma$ must embed some finite elicitable property with those same level sets.
@@ -1346,11 +1346,14 @@ We will make use of another corollary of Proposition~\ref{prop:embed-iff-trims-e
   Let $L$ elicit $\Gamma$.
   From Lemma~\ref{lem:X}(\ref{item:X-min-Theta},\ref{item:X-full-dim}), for any finite minumum representative set $\Sc\subseteq\R$, the set $\{\Gamma_s\mid s\in\Sc\}$ is exactly the set of full-dimensional level sets $\Theta$ of $\Gamma$.
   From Proposition~\ref{prop:tfae-min-rep-nonredundant}, we have $r \in \R\setminus \red(\Gamma)$ if and only if $r$ is an element of some minimum representative set.
-  As $\Gamma$ has at least on minimum representative set, we conclude $\trimred(\Gamma) = \{\Gamma_r \mid r\in \R\setminus\red(\Gamma)\} = \Theta$.  
+  As $\Gamma$ has at least one minimum representative set, we conclude $\trimred(\Gamma) = \{\Gamma_r \mid r\in \R\setminus\red(\Gamma)\} = \Theta$.  
 \end{proof}
 
+\jessie{Adding in small motivation of Prop 6}
+This allows us to think about the structure of properties elicited by losses with finite representative sets in the following equivalent ways through $\trimred(\Gamma)$.
+
 \begin{proposition}\label{prop:embed-trim}
-  Let $\Gamma:\simplex\toto\reals^d$ be an elicitable property.
+  Let $\Gamma:\simplex\toto\reals^d$ be an elicitable property.\jessie{$\reals^d$ vs $\R$?}
   The following are equivalent:
   \begin{enumerate}\setlength{\itemsep}{0pt}
   \item $\Gamma$ embeds a elicitable finite property $\gamma:\simplex \toto \R$.
@@ -1375,11 +1378,12 @@ We will make use of another corollary of Proposition~\ref{prop:embed-iff-trims-e
   Corollary~\ref{cor:trim-prop-red} now gives $\trimred(\Gamma) = \Theta$, which is finite, showing Case 2.
 
   Case 2:
-  If $\trimred(\Gamma)$ is finite, then in particular we have a finite set of reports $\Sc \subseteq \R\setminus\red(\Gamma)$ such that $\trimred(\Gamma) = \{\Gamma_s \mid s\in\Sc\}$.
+  If $\trimred(\Gamma)$ is finite, then in particular we have a finite set of reports $\Sc \subseteq \R\setminus\red(\Gamma)$ such that $\trimred(\Gamma) = \{\Gamma_s \mid s\in\Sc\}$. \jessie{Technically, $\R$ not defined?}
   As $\Gamma$ is elicitable, $\R$ is representative for $\Gamma$.
-  By definition of $\trimred$, we have $\simplex = \cup_{r\in\R} \Gamma_r \subseteq \cup \trimred(\Gamma) = \cup_{s\in\Sc} \Gamma_s$, and therefore $\Sc$ is representative for $\Gamma$ and for $L$.
-  From Lemma~\ref{lem:X}(\ref{item:X-rep-contain-min}), we have some minimum representative set $\U\subseteq\U'$ for $L$ and $\Gamma$, showing Case 3.
+  By definition of $\trimred$, we have $\simplex = \cup_{r\in\R} \Gamma_r \subseteq \cup \trimred(\Gamma) = \cup_{s\in\Sc} \Gamma_s$, and therefore $\Sc$ is representative for $\Gamma$ and for $L$. \jessie{I'm a bit confused by this- how do we get $\cup_{\R}\Gamma_r \subseteq \cup \trimred(\Gamma)$?}
+  From Lemma~\ref{lem:X}(\ref{item:X-rep-contain-min}), we have some minimum representative set $\U\subseteq\U'$ \jessie{$\R$?} for $L$ and $\Gamma$, showing Case 3.
   Moreover, Lemma~\ref{lem:X}(\ref{item:X-min-Theta},\ref{item:X-full-dim}) gives $\{\Gamma_u \mid u\in\U\} = \Theta$.
+  \jessie{My understanding: we have a representative set $\R$, but don't know if it's finite.  However, we have $\Sc$ that [nonredundantly] generates trim, which is finite by assumption, and need to show that's representative.  Once we have $\Sc$ a finite representative set, we can apply Lemma X to say it also contains a finite \emph{minimum} rep set.}
 
   Case 3:
   Let $\U$ be a finite minimum representative set.
@@ -1390,7 +1394,7 @@ We will make use of another corollary of Proposition~\ref{prop:embed-iff-trims-e
   Let $\Sc\subseteq\R$ such that $\{\Gamma_s \mid s\in\Sc\} = \hat \Theta$.
   Then $\Sc$ is representative for $\Gamma$ and $L$, as $\cup\hat\Theta = \simplex$.
   Lemma~\ref{lem:loss-restrict} now states that $L$ embeds $L|_\Sc$, so $\Gamma$ embeds $\gamma := \Gamma|_\Sc$, giving Case 1.
-  Finally, Corollary~\ref{cor:trim-prop-red} gives $\trimred(\gamma) = \Theta$.
+  Finally, Corollary~\ref{cor:trim-prop-red} gives $\trimred(\gamma) = \Theta$. \jessie{$\Gamma$?}
   %
   % Letting $\Theta_\ell$ be the full-dimensional level sets of $\gamma$, Corollary~\ref{cor:trim-prop-red} also gives $\trimred(\gamma) = \Theta'$.
   % From Lemma~\ref{lem:X}(\ref{item:X-rep-contain-min}), we have some minimum representative set $\U\subseteq\U'$ for $L$ and $\Gamma$.
@@ -3199,10 +3203,11 @@ Given the function $f$, we consider $g$ to be such its extension and $L$ such th
 Define the function $\theta(v) = \{p \in \simplex \mid \inprod{v}{p} = f(p)\}$ as the level sets of the loss vector $v \in \V$, and the set $\Theta := \{\theta(v) \mid v \in \V^*\}$ to be the set of (minimal) level sets uniquely defined by the loss vectors.
 
 \begin{claim}
-  \raf{Add quantifiers!} $\theta(v) = \pi(F_v) \cap \simplex$.
+  For all $v \in \V$, $\theta(v) = \pi(F_v) \cap \simplex$.
 \end{claim}
 \begin{proof}
-  Argue $\theta(v)$ is full-dim in $\simplex$ if and only if $\pi(F_v)$ is $|\Y|$-dim, if and only if $F_v$ is a facet. \raf{(2)}
+  % Argue $\theta(v)$ is full-dim in $\simplex$ if and only if $\pi(F_v)$ is $|\Y|$-dim, if and only if $F_v$ is a facet. \raf{(2)}
+  \jessiet{Moved previous proof outline to comment}
 
   Fix $p \in \simplex$.
   \begin{align*}
@@ -3212,14 +3217,11 @@ Define the function $\theta(v) = \{p \in \simplex \mid \inprod{v}{p} = f(p)\}$ a
     &\iff v \in \argmin_{v' \in \V}\inprod{v'}{p} & \text{Def of argmin}\\
     &\iff p \in \pi(F_v) & \text{Lemma~\ref{lem:projected-faces-iff-support-iff-argmin}}
   \end{align*}
-
-  \jessie{Revisit; feels like it's missing something.}
 \end{proof}
 
 
 \begin{claim}\label{claim:level-set-is-projected-face}
-  For all $r \in \R$, take $v \in \V$ so that $v = L(r)$.
-  $\Gamma_r = \theta(v) = \pi(F_{v}) \cap \simplex$.
+  For all $r \in \R$ with $v = L(r)$, $\Gamma_r = \theta(v) = \pi(F_{v}) \cap \simplex$.
 \end{claim}
 \begin{proof}
   % Follows immediately from Lemma~\ref{lem:projected-faces-iff-support-iff-argmin}.
@@ -3266,21 +3268,69 @@ Define the function $\theta(v) = \{p \in \simplex \mid \inprod{v}{p} = f(p)\}$ a
   % We must then have $\pi(F_v) \cap \simplex = \Gamma_r \subseteq \pi(F_{v^*}) \cap \simplex = \theta(v^*)$.
 \end{proof}
 
-\raf{From notes 6/21/2021}
-\begin{itemize}
-\item REP $\iff$ $\V^* \subseteq \V' := L(\R')$\jessie{Claim~\ref{claim:Vprime-projected-faces-cover-iff-Vstar-subset-Vprime}}
-\item REP $\iff \jessie{\Lambda := \{\pi(F_v) \mid v \in \V^*\}; \Lambda \subseteq \{ \pi(F_{v}) \mid v \in L(\R')\}}$.
-  \jessie{Claim~\ref{claim:Vprime-projected-faces-cover-iffprojected-faces-subsets}}
-\item $\Lambda$ == Full-dim \jessie{Claim~\ref{claim:projected-Vstar-faces-full-dim}.}
-\item Lev sets subset $\theta$ \jessie{Just work with $\pi(F_{v})$ where $v \in L(\R)$}\jessie{Claim~\ref{claim:any-levelset-contained-in-minlevelset}}
-\end{itemize}
+\begin{lemma}\label{lem:g-1-homog}
+  For the finite set $\V^* \subseteq \reals^\Y_+$, the function defined by $g(x) = \min_{v \in \V^*}\inprod{v}{x}$ is $1$-homogeneous.
+\end{lemma}
+\begin{proof}
+  If $x \not \in \reals^\Y_+$, then $c g(x) = -\infty = g(cx)$ for any $c > 0$.
+  If $x \in \reals^\Y_+$, then we have $g(cx) = \min_{v \in \V^*}\inprod{v}{cx} = c \min_{v \in \V^*}\inprod{v}{x} = c g(x)$ for any $c > 0$ by linearity of the inner product.
+\end{proof}
+
+Define the \emph{extended level set} $\bar \Gamma_r := \{x \in \reals^\Y_+ \mid \inprod{L(r)}{x} = \risk L_+(x)\}$.
+
+\begin{lemma}\label{lem:levelset-to-extended-levelset}
+  For any $r \in \R$ and $c > 0$, if $p \in \Gamma_r$, then $cp \in \bar \Gamma_r$. 
+\end{lemma}
+\begin{proof}
+  Fix $r \in \R$ and $c > 0$.
+  We have
+  \begin{align*}
+    p \in \Gamma_r
+    &= \{p' \in \simplex \mid r \in \argmin_{r' \in \R} \inprod{L(r')}{p'} \} & \text {Def of level set} \\
+    &= \{p' \in \simplex \mid v \in \argmin_{v' \in \V} \inprod{v'}{p'} \} & \text {$\V = L(\R)$} \\
+    &= \{p' \in \simplex \mid \inprod{v}{p'} = \min_{v' \in \V} \inprod{v'}{p'} \} & \text {$L$ minnable} \\
+    &= \{p' \in \simplex \mid \inprod{v}{p'} = g(p') \} & \text {Definition of $g$} \\
+    &= \{p' \in \simplex \mid c \inprod{v}{p'} = g(p') \} & \text {Multiplying both sides by $c$} \\
+    &= \{p' \in \simplex \mid  \inprod{v}{cp'} = g(cp') \} & \text {Linearity of inner product and Lemma~\ref{lem:g-1-homog}} \\
+    \implies cp
+    &\in \{x \in \reals^\Y_+ \mid \inprod{v}{x} = g(x)\}\\
+    &= \bar \Gamma_r
+  \end{align*}
+\end{proof}
+
+\begin{lemma}\label{lem:extended-levelset-equals-projected-face}
+  For any $r\in \R$ with $v = L(r)$, $\bar \Gamma_r = \pi(F_v)$.  
+\end{lemma}
+\begin{proof}
+  \begin{align*}
+    \bar \Gamma_r
+    &= \{x \in \reals^\Y_+ \mid \inprod{L(r)}{x} = \risk L_+(x)\} & \text{Definition of $\bar \Gamma_r$}\\
+    &= \{x \in \reals^\Y_+ \mid \inprod{L(r)}{x} = g(x)\} & \text{Assumption that $\risk L_+(x) = g(x)$}\\
+    &= \{x \in \reals^\Y_+ \mid \inprod{v}{x} = g(x)\} & \text{$v = L(r)$}\\
+    &= \pi(F_v) & \text{Since $F_v = \{(x,c) \mid \inprod{v}{x} = c = g(x)\}$\jessie{Help on this justification?} }\\
+  \end{align*}
+\end{proof}
 
 \begin{claim}\label{claim:projected-faces-cover-RY-iff-representative}
   A set $\R' \subseteq \R$ with $\V' := L(\R')$ is representative for $L$ if and only if $\cup_{v \in \V'} \pi(F_v) = \reals^\Y_+$.  
 \end{claim}
 \begin{proof}
-  \jessie{TODO}
-  \raf{Need 1-homog here -- suggest separating out statement like cone(simplex cap pi(Fv)) = pi(Fv)}
+raf{Need 1-homog here -- suggest separating out statement like cone(simplex cap pi(Fv)) = pi(Fv)}
+
+  $\implies$
+  This proof follows from three lemmas: first, we observe that $g$ is $1$-homogeneous (Lemma~\ref{lem:g-1-homog}).
+  Then we extend the notion of a level set $\Gamma_r$ to the nonnegative orthant $\bar \Gamma_r$, and show that any scalar transformation of a distribution in the level set is contained in the same (extended) level set via Lemma~\ref{lem:levelset-to-extended-levelset}).
+  Finally, we show the extended level set is exactly the projection $\pi(F_v)$ (Lemma~\ref{lem:extended-levelset-equals-projected-face}).
+  As a corollary, we chain the results to observe $\cup_{r \in \R'} \Gamma_r = \simplex \implies \cup_{r \in \R'} \bar \Gamma_r = \reals_+^\Y = \cup_{v \in L(\R')}\pi(F_v) = \reals^\Y_+$, yielding the forward implication.
+
+
+  $\impliedby$
+  Fix $p \in \simplex \subseteq \reals^\Y_+$.
+  By the assumption, there is a $v \in \V'$ such that $p \in \pi(F_v)$.
+  By Claim~\ref{claim:level-set-is-projected-face}, we have $p \in \pi(F_v) \cap \simplex = \Gamma_r$ for the $r \in \R'$ such that $v = L(r)$.
+  As this is true for all $p \in \simplex$, we have $\R'$ representative.
+  
+  
 \end{proof}
 
 \begin{claim}
