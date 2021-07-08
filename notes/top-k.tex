@@ -101,6 +101,7 @@
 \newtheorem{definition}{Definition}
 \newtheorem{corollary}{Corollary}
 \newtheorem{conjecture}{Conjecture}
+\newtheorem{claim}{Claim}
 \newtheorem{assumption}{Assumption}
 
 
@@ -668,6 +669,113 @@ and take the function
 
 \begin{corollary}
 	$\phi(\simplex)$ is a finite representative set.
+\end{corollary}
+
+\jessie{Adding 8 July 2021}
+Fix the distribution $p \in \simplex$.
+Denote the sets:
+\begin{align*}
+H_p &= \{i \in \Y \mid p_i > \frac 1 k\}\\
+M_p &= \{i \in \Y \mid p_i \in \left( \frac 1 {k+1}, \frac 1 k\right]\}\\
+B_p &= \{i \in \Y \mid p_i \leq \frac 1 {k+1} \wedge p_i \frac{k(1-p_H)}{(k+1)(k-H)}\}\\
+L_p &= \{i \in \Y \mid p_i \leq \frac {1}{k+1}\} \setminus B_p
+\end{align*}
+where $H := |H_p|$ and $p_H := \sum_{y \in H_p} p_y$.
+
+We will construct the report $\hat \Gamma(p) := \frac{M + B + k - 1}{k-H}\ones_{H_p} + \ones_{M_p} + \ones_{B_p}$.
+
+\begin{claim}
+	For any $p \in \simplex$, we have $\|\hat \Gamma(p)\|_0 \leq k$.
+\end{claim}	
+
+\begin{claim}
+	$\E_p L(\hat \Gamma(p), Y) = (1-p_H)(\bar u - \frac 1 k) + p_L)$. 
+\end{claim}
+
+We denote $L^* := \E_p L(\hat \Gamma(p), Y)$.
+
+\begin{lemma}
+	For small enough $\varepsilon$ and any $\hat y \in \Y$, consider $\varepsilon_{\hat y} := \varepsilon e_{\hat y}$.
+	The loss $\E_p L(\hat\Gamma(p), Y) \leq \E_p L(\hat \Gamma(p) + \varepsilon_{\hat y}, Y)$.
+\end{lemma}
+\begin{proof}
+	We proceed in 6 cases:
+	
+	Case 1: $\hat y \in H_p, \varepsilon_{\hat y} > 0$.
+	\begin{align*}
+	\E_p L(\hat \Gamma(p) + \varepsilon_{\hat y}, Y) &= {\color{blue}\sum_{y \in H_p} p_y (\frac {\varepsilon_{\hat y}}{k})} {\color{teal} - p_{\hat y} \frac{\varepsilon_{\hat y}}{k}} + {\color{blue} \sum_{y \in M_p, B_p} p_y(\frac{\varepsilon_{\hat y}}{k})} + {\color{olive}\sum_{y \in M_p, B_p} p_y(\bar u - \frac 1 k)} + {\color{blue}\sum_{y \in L_p} p_y (\frac{\varepsilon_{\hat y}}{k})}+ {\color{olive}\sum_{y \in L_p}p_y(1+ \bar u - \frac 1 k)}\\
+	&= {\color{blue}\frac{\varepsilon_{\hat y}}{k}} - {\color{teal}p_{\hat y}\frac{\varepsilon_{\hat y}}{k}} + {\color{olive}L^*}
+	\end{align*}
+	This is greater than or equal to $L^*$ if and only if $\frac{\varepsilon_{\hat y}}{k} \geq p_{\hat y}\frac{\varepsilon_{\hat y}}{k}$.
+	This is always true as $p \in \simplex$, so $p_{\hat y} \leq 1$.
+	
+	Case 2: $\hat y \in M_p, B_p, L_p, \varepsilon_{\hat y} > 0$.
+	\begin{align*}
+	\E_p L(\hat \Gamma(p) + \varepsilon_{\hat y}, Y) &= {\color{blue}\sum_{y \in H_p} p_y (\frac {\varepsilon_{\hat y}}{k}) + \sum_{y \in M_p, B_p} p_y(\frac{\varepsilon_{\hat y}}{k})} + {\color{olive}\sum_{y \in M_p, B_p} p_y(\bar u - \frac 1 k)} - {\color{teal}p_{\hat y} \varepsilon_{\hat y}} + {\color{blue}\sum_{y \in L_p} p_y (\frac{\varepsilon_{\hat y}}{k})}+ {\color{olive}\sum_{y \in L_p}p_y(1+ \bar u - \frac 1 k)}\\
+	&= {\color{blue}\frac{\varepsilon_{\hat y}}{k}} - {\color{teal}p_{\hat y}\frac{\varepsilon_{\hat y}}{k}} + {\color{olive}L^*}
+	\end{align*}
+	This is greater than or equal to $L^*$ if and only if $\frac{\varepsilon_{\hat y}}{k} \geq p_{\hat y} \varepsilon_{\hat y}$, which is true by the case that $p_{\hat y} \leq \frac 1 k$ since $\hat y \not \in H_p$.
+	
+	Case 3: $\hat y \in H_p, \varepsilon_{\hat y} < 0$.
+	For clarity, we assume $\varepsilon_{\hat y} > 0$, and we consider $\hat \Gamma(p) - \varepsilon_{\hat y}$.
+	
+	\begin{align*}
+	\E_p L(\hat \Gamma(p) - \varepsilon_{\hat y}, Y) &= {\color{teal} p_{\hat y}\varepsilon_{\hat y}} + \sum_{y \in M_p, B_p}({\color{olive}\bar u - \frac 1 k} -{\color{blue} \frac{\varepsilon_{\hat y}}{k}}) + \sum_{y \in L_p}({\color{olive}1 + \bar u - \frac 1 k} -{\color{blue} \frac{\varepsilon_{\hat y}}{k}})\\
+	&= {\color{olive}L^*} + {\color{teal} p_{\hat y}\varepsilon_{\hat y}} - {\color{blue} (1-p_H) \frac{\varepsilon_{\hat y}}{k}}
+	\end{align*}
+	This is greater than or equal to $L^*$ if and only if 
+	\begin{align*}
+	p_{\hat y} &\geq \frac{(1 - p_H)}{k}\\
+	\iff k p_{\hat y} &\geq (1 - p_H) ~,~
+	\end{align*}
+	which is true as $p_{\hat y} \geq \frac 1 k$, so the product is at least $1$ and $p_H$ is nonnegative.
+	
+	Case 4: $\hat y \in \in M_p, B_p, \varepsilon_{\hat y} < 0$.
+	Again, we repeat the notation as above.
+	\begin{align*}
+	\E_p L(\hat \Gamma(p) - \varepsilon_{\hat y}, Y) &= \sum_{y \in M_p, B_p}({\color{olive}\bar u - \frac 1 k} -{\color{blue} \frac{\varepsilon_{\hat y}}{k}}) + {\color{teal} p_{\hat y}\varepsilon_{\hat y}} + \sum_{y \in L_p}({\color{olive}1 + \bar u - \frac 1 k} -{\color{blue} \frac{\varepsilon_{\hat y}}{k}})\\
+	&= {\color{olive}L^*} + {\color{teal} p_{\hat y}\varepsilon_{\hat y}} - {\color{blue} (1-p_H) \frac{\varepsilon_{\hat y}}{k}}
+	\end{align*}
+	
+	Case 4a: $\hat y \in M_p$
+	It remains to show that $p_{\hat y} \varepsilon_{\hat y} \geq (1 - p_H)\frac{\varepsilon_{\hat y}}{k}$.
+
+	Observe that we require $H_p \neq \emptyset$; otherwise we would say $i \in H_p$ instead of $M_p$. \jessie{Check this claim!}
+	Therefore, $p_H \geq \frac 1 k$, so $1 - p_H \leq \frac{k-1}{k}$.
+	
+	\begin{align*}
+	p_{\hat y} \varepsilon_{\hat y} &\geq (1 - p_H)\frac{\varepsilon_{\hat y}}{k} &\\
+	\iff p_{\hat y} &\geq \frac{(1-p_H)}{k} & \text{Since $\varepsilon_{\hat y} > 0$} \\
+	\iff p_{\hat y} &\geq \frac{(k-1)/k}{k} \geq \frac{1-p_H}{k} & \text{Since $H \geq 1$}\\
+	p_{\hat y} &\geq \frac 1 {k+1} \geq \frac{k-1}{k^2} \geq \frac{(1-p_H)}{k} & \text{Since $\hat y \in M_p$} \\ 
+	\end{align*}
+	Thus, we conclude $\E_p L(\hat\Gamma(p) - \varepsilon_{\hat y}, Y) \geq L^*$ for $\hat y \in M_p$.
+	
+	Case 4b: $\hat y \in B_p$.
+	First, observe that $H_p = \emptyset \implies B_p = \emptyset$, since we have $i \in B_p \iff p_i \leq \frac{1}{k+1}$ and $p_i > \frac{k(1-p_H)}{(k+1)(k-H)} = \frac 1 {k+1}$, yielding a contradiction.
+	\begin{align*}
+	p_{\hat y} \varepsilon_{\hat y} \geq \frac{k(1-p_H)}{(k+1)(k-H)} &\geq \frac{1-p_H}{k} &\text{By assumption}\\
+	\iff \frac{k}{(k+1)(k-H)} &\geq \frac{1}{k} & \text{Dividing both sides by $(1-p_H)$} \\
+	\iff k^2 &\geq (k+1)(k-H) = k^2 - (H-1) k -1 & \text{Manipulating fractions}
+	\end{align*}
+	The last statement is true since $H \geq 1$, so the result holds.
+	
+	Case 4: $\hat y \in L_p, \varepsilon_{\hat y} < 0$.
+
+	\begin{align*}
+	\E_p L(\hat \Gamma(p) - \varepsilon_{\hat y}, Y) &= \sum_{y \in M_p, B_p}({\color{olive}\bar u - \frac 1 k}) + {\color{teal} p_{\hat y}\varepsilon_{\hat y}} + \sum_{y \in L_p}({\color{olive}1 + \bar u - \frac 1 k} )\\
+	&= {\color{olive}L^*} + {\color{teal} p_{\hat y}\varepsilon_{\hat y}} 
+	\end{align*}
+	This is greater than or equal to $L^*$ since $\varepsilon_{\hat y} > 0$ (recall instead of adding a negative number, we subtracted a positive one).
+\end{proof}
+
+
+\jessie{Not sure if this is correct/makes sense}
+Since $L^{top-k}$ is polyhedral, $\inprod{L^{top-k}(\hat\Gamma(p))}{p}$ is linear in any direction $\epsilon v$ for small enough $v$, and therefore, we have $\E_p L(\hat \Gamma(p) + \sum_i \lambda_{i} \varepsilon_{i}, Y) = \sum_i \lambda_i \E_p L(\hat \Gamma(p) + \varepsilon_{i}, Y) \geq \sum_i \lambda_i L^* = L^*$ for any $\{\lambda_1, \ldots, \lambda_n\} \in \simplex$ (i.e., convex combination of the $\varepsilon_{i}$s).  
+Since $\{\varepsilon_{\hat y}\}_{\hat y \in \Y}$ forms a basis for $\reals^n$, we have the following corollary.
+
+\begin{corollary}
+	For any $p \in \simplex, \hat \Gamma(p) \in \argmin_u \inprod{L^{top-k}(u)}{p}$
 \end{corollary}
 
 \end{document}
