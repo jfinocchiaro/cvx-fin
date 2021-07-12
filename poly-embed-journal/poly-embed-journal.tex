@@ -158,7 +158,7 @@ We formalize and study the natural approach of designing convex surrogate loss f
 In this approach, one embeds each of the finitely many predictions (e.g. classes) as a point in $\reals^d$, assigns the original loss values to these points, and ``convexifies'' the loss in some way to obtain a surrogate.
 We prove that this approach is equivalent, in a strong sense, to working with polyhedral (piecewise-linear convex) losses.
 Moreover, given any polyhedral loss $L$, we give a construction of a link function through which $L$ is a consistent surrogate for the loss it embeds.
-Our framework yields succinct proofs of consistency or inconsistency of various polyhedral surrogates in the literature, and for further reveals the target problems that inconsistent surrogates are consistent for.
+Our framework yields succinct proofs of consistency or inconsistency of various polyhedral surrogates in the literature, and for further reveals the discrete problems that inconsistent surrogates are consistent for.
 We also show \raf{Newer stuff}
 \end{abstract}
 
@@ -215,9 +215,9 @@ Common examples of this general construction include hinge loss as a surrogate f
 
 
 We prove that such an embedding scheme is intimitely related to the class of polyhedral (piecewise-linear and convex) loss functions.
-In particular, every discrete target loss is embedded by a polyhedral surrogate.
+In particular, every discrete loss is embedded by a polyhedral surrogate.
 Moreover, such an embedding gives rise to calibrated link function.
-Our proofs give explicit constructions for the surrogate (\S~\ref{sec:poly-loss-embed}) and link (\S~\ref{sec:calibration}) given a discrete target loss.
+Our proofs give explicit constructions for the surrogate (\S~\ref{sec:poly-loss-embed}) and link (\S~\ref{sec:calibration}) given a discrete loss.
 
 \jessiet{Want these as restatables so the numbering is consistent?}
 \raft{I think good as-is, since in both cases these follow from more specific results}
@@ -226,7 +226,7 @@ Our proofs give explicit constructions for the surrogate (\S~\ref{sec:poly-loss-
 \end{theorem}
 
 \begin{theorem}\label{thm:link-informal}
-  Given any polyhedral loss $L$, let $\ell$ be the discrete target loss it embeds. There exists a link function $\psi$ such that $(L,\psi)$ is calibrated with respect to $\ell$.
+  Given any polyhedral loss $L$, let $\ell$ be the discrete loss it embeds. There exists a link function $\psi$ such that $(L,\psi)$ is calibrated with respect to $\ell$.
 \end{theorem}
 
 To better understand existing polyhedral surrogates, we provide tools to find the discrete losses they embed (Proposition~\ref{prop:representative-embeds-restriction}).
@@ -234,7 +234,7 @@ In short, if one can identify a finite \emph{representative set} $\Sc$ of report
 We apply these tools to several polyhedral surrogates which have been proposed recently (\S~\ref{sec:applications}), showing in some cases that they are inconsistent for the desired target, but are consistent for a different target: the discrete loss they embed.
 
 Underpinning our results are several observations which formalize the idea that polyhedral losses ``behave like'' discrete losses.
-For example, discrete losses have polyhedral Bayes risks (as the minimum of finitely many linear functions), and so do polyhedral losses (Lemma~\ref{lem:poly-loss-poly-risk}).
+For example, discrete losses have polyhedral Bayes risks (as the minimum of finitely many linear functions), and so do polyhedral losses (Lemma~\ref{lem:poly-loss-poly-risk})\jessiet{Flag: unresolved ref}.
 As a consequence, polyhedral losses always have finite representative sets, and restricting the loss to any such set is an embedding.
 
 We also provide several observations beyond what is needed to prove our main results, which we view as conceptual contributions (\S~\ref{sec:min-rep-sets},~\ref{sec:poly-ie-consistency}).
@@ -243,7 +243,7 @@ We further show that, while the minimum representative set is not always unique,
 Finally, using our main results, we show the following result: when restricting to the class of polyhedral surrogates, indirect elicitation is both necessary and sufficient for consistency (Theorem~\ref{thm:poly-ie-implies-consistent}).
 
 Taken together, we view our contribution as both conceptual and practical.
-We uncover the remarkable structure of polyhedral surrogates, deepening our understanding of the relationship between surrogate and target losses.
+We uncover the remarkable structure of polyhedral surrogates, deepening our understanding of the relationship between surrogate and discrete target losses.
 This structure leads to a powerful new framework to design and analyze surrogate losses, which we apply to several examples.
 We hope our framework will inspire new research, and we conclude with several exciting directions for future work.
 
@@ -280,6 +280,7 @@ For discrete prediction problems like classification, due to hardness of directl
 Of course, to show that this surrogate loss successfully addresses the original problem, one needs to establish consistency, which depends crucially on the choice of link function that maps surrogate reports (predictions) to original reports.
 After introducing notation, and terminology from property elicitation, we study \emph{calibration} (Definition~\ref{def:calibrated}), which is equivalent to consistency in finite outcome settings~\citep{bartlett2006convexity,tewari2007consistency,ramaswamy2016convex} and depends solely on the conditional distribution over $\Y$.
 Consistency is a prerequisite to obtain empirical risk minimization bounds, motivating our firm requirement of constructing consistent surrogates.
+\jessiet{Should this last sentence move up a bit?}
 
 \subsection{Notation and Losses}
 \label{sec:notation-losses}
@@ -287,10 +288,11 @@ Consistency is a prerequisite to obtain empirical risk minimization bounds, moti
 Let $\Y$ be a finite label space, and throughout let $n=|\Y|$.
 The set of probability distributions on $\Y$ is denoted $\simplex\subseteq\reals^{\Y}_+$, represented as vectors of probabilities (requiring $\|p\|_1 = 1$).
 We write $p_y$ for the probability of outcome $y \in \Y$ drawn from $p \in \simplex$.
-We first discuss the conditional setting, with just labels $\Y$ and no features $\X$, and show in \S~\ref{sec:calibration} how these notions relate to the usual $\X\times\Y$ setting considering features.
+We first discuss the conditional setting, with just labels $\Y$ and no features $\X$, and show in \S~\ref{subsec:calibration-links} how these notions relate to the usual $\X\times\Y$ setting considering features.
 
-We assume that a given discrete prediction problem, such as classification, is given in the form of a \emph{discrete loss}\jessiet{discrete vs target?} $\ell:\R\to\reals^\Y_+$, which maps a report (prediction) $r$ from a finite set $\R$ to the vector of loss values $\ell(r) = (\ell(r)_y)_{y\in\Y}$ for each possible outcome $y\in\Y$.
-We will assume throughout that the given discrete loss is \emph{non-redundant}, meaning every report is uniquely optimal (minimizes expected loss) for some distribution $p\in\simplex$.
+We assume that a given discrete prediction problem, such as classification, is given in the form of a discrete \emph{target loss} $\ell:\R\to\reals^\Y_+$, which maps a report (prediction) $r$ from a finite set $\R$ to the vector of loss values $\ell(r) = (\ell(r)_y)_{y\in\Y}$ for each possible outcome $y\in\Y$.
+\jessiet{Removed sentence saying we assume non-redundancy}
+%We will assume throughout that the given discrete loss is \emph{non-redundant}, meaning every report is uniquely optimal (minimizes expected loss) for some distribution $p\in\simplex$.
 Similarly, surrogate losses will be written $L:\reals^d\to\reals^\Y_+$, typically with reports written $u\in\reals^d$.
 \btw{Cut generic loss}%(A generic loss will be written $L:\R\to\reals^\Y$.)
 We write the corresponding expected loss when $Y \sim p$ as $\inprod{p}{\ell(r)}$ and $\inprod{p}{L(u)}$.
@@ -312,7 +314,7 @@ A convex function $f:\reals^d\to\reals$ is \emph{polyhedral} if its epigraph is 
 \end{definition}
 %
 For example, hinge loss is polyhedral, whereas logistic loss is not.
-To motivate our focus on polyhedral losses, we echo~\citet[Section~1.2]{ramaswamy2018consistent}, who note that smooth surrogates often encode much more information than necessary, and in these cases non-smooth surrogates are the best candidates to achieve a low input dimension $d$.
+To motivate our focus on polyhedral losses, we echo~\citet[Section~1.2]{ramaswamy2018consistent}, who note that smooth surrogates often encode much more information than necessary, and in these cases non-smooth surrogates are the best candidates to achieve a low prediction dimension $d$.
 
 \subsection{Property Elicitation}
 \label{sec:property-elicitation}
@@ -329,8 +331,8 @@ To this end, we will use double arrow notation to mean a mapping to all nonempty
 \end{definition}
 
 Intuitively, $\Gamma(p)$ is the set of reports which should be optimal for a given distribution $p$, and $\Gamma_r$ is the set of distributions for which the report $r$ should be optimal.
-In general, by optimal, we mean minimizing an associated loss function in expectation over $p$, which we formalize shortly.
-Note that our definitions align such that discrete losses elicit finite properties; both are non-redundant in the correct senses.
+By optimal, we mean minimizing an associated loss function in expectation over $p$, which we formalize shortly.
+Note that our definitions align such that discrete losses elicit finite properties (those with finite range). %; both are non-redundant in the correct senses.
 For example, the \emph{mode} is the %finite
 property $\mode(p) = \argmax_{y\in\Y} p_y$, and captures the set of optimal reports for 0-1 loss: for each distribution over the labels, one should report the most likely label.
 In this case we say 0-1 loss \emph{elicits} the mode, as we formalize below.
@@ -353,7 +355,7 @@ For general properties and losses, we will also use $\Gamma$ and $L$, as above.
 % In this case, we write the embedded reports as $u\in\reals^d$, reserving $r\in\R$ for the finite property.
 
 \subsection{Calibration and Links}
-\label{sec:calibration}
+\label{subsec:calibration-links}
 
 
 To assess whether a surrogate and link function align with the original loss, we turn to the common condition of \emph{calibration}.
@@ -384,16 +386,13 @@ for all $p \in \simplex$,
   \end{equation}
   If $(L, \psi)$ is calibrated with respect to $\ell$, we call $\psi$ a \emph{calibrated link.}
 \end{definition}
-It is well-known in finite-outcome settings that calibration is equivalent to \emph{consistency}, in the following sense (cf.~\citep{agarwal2015consistent}).
+It is well-known in finite-outcome settings that calibration is equivalent to \emph{consistency}, in the following sense (cf.~\citep{bartlett2006convexity,zhang2004statistical,agarwal2015consistent}).
 Given feature space $\X$, fix a distribution $D \in \Delta(\X\times\Y)$.
 Let $L^*$ be the best possible expected $L$-loss achieved by any hypothesis $H:\X\to\reals^d$, and $\ell^*$ the best expected $\ell$-loss for any hypothesis $h:\X\to\R$, respectively.
 Then $(L,\psi)$ is consistent if a sequence of surrogate hypotheses $H_1,H_2,\ldots$ whose $L$-loss limits to $L^*$, then the $\ell$-loss of $\psi\circ H_1,\psi \circ H_2, \ldots$ limits to $\ell^*$.
 As Definition~\ref{def:calibrated} does not involve the feature space $\X$, we will drop it for the remainder of the paper.
 Note that in the finite-outcome setting, calibration is necessary and sufficient for consistency from a generalization of~\citet{tewari2007consistency} given by~\citet{ramaswamy2016convex}.  
 
-\raf{Suggest moving / incorporating below}
-While our notion of embedding is sufficient for calibration (and therefore consistency), it is worth noting that it is not \emph{necessary} for these conditions.  
-For example, while logistic loss does not embed 0-1 loss, the surrogate and link for logistic loss are consistent with respect to 0-1 loss.
 
 \subsection{Embedding}
 
@@ -480,7 +479,7 @@ With both conditions of Definition~\ref{def:loss-embed} satisfied, we conclude t
 %	\caption{Bayes risk of the logistic loss.}
 %	\label{fig:logistic-br}
 \end{minipage}
-\caption{Bayes risks of 0-1, hinge, and logistic losses, respectively, in binary classification setting.}
+\caption{Bayes risks of 0-1, hinge, and logistic losses, respectively, in binary classification setting. \jessie{Move this down to when we actually discuss risks matching?}}
 \label{fig:bayes-risks-01}
 \end{figure}
 
@@ -489,6 +488,10 @@ More generally, however, it is not clear whether an arbitrary embedding yields a
 Indeed, apart from mapping the embedded points back to their original reports via $\psi(\varphi(r)) = r$, how to map the remaining values is far from obvious.
 When the surrogate is polyhedral, we give a construction to map the remaining values in \S~\ref{sec:calibration}, showing that embeddings always yield calibration.
 We first explore the connection between embeddings and polyhedral surrogates.
+
+\raf{Suggest moving / incorporating below} \jessie{Moved, though I think think should be merged with above paragraph now}
+While our notion of embedding is sufficient for calibration (and therefore consistency), it is worth noting that it is not \emph{necessary} for these conditions.  
+For example, while logistic loss does not embed 0-1 loss, the surrogate and link for logistic loss are consistent with respect to 0-1 loss.
 
 
 % Taking $\R = \{-1,1\}$ and the above embedding, we can write the expected loss over each report
@@ -576,8 +579,9 @@ See \S~\ref{app:power-diagrams} for the full proof.
 \begin{proof}[Sketch]
 	With $\Y$ finite, there are only finitely many supporting sets over $\simplex$.
 	For $p \in \simplex$, the power diagram induced by projecting the epigraph of expected loss onto $\reals^d$ is the same for any $p$ of the same support (Lemma~\ref{lem:polyhedral-pd-same}).
-	Moreover, we have $\Gamma(p)$ being exactly one of the faces of the projected epigraph since the hyperplane $u \mapsto (u, \inprod{p}{L(u)})$ supports the epigraph of the expected loss at exactly the property value.
-	Since this epigraph has finitely many faces, the range of $\Gamma$ is then (a subset) of elements of a finitely generated (finite supports) set of finite elements (finite faces).
+	Moreover, we have $\Gamma(p)$ being exactly one of the faces of the projected epigraph since the hyperplane $u \mapsto (u, \inprod{p}{L(u)})$ supports the epigraph of the expected loss at exactly the property value; moreover, since the loss is polyhedral the supporting hyperplane must support on a face of the epigraph.
+	Since this epigraph has finitely many faces (as it is polyhedral), the range of $\Gamma$ is then (a subset) of elements of a finitely generated (finite supports) set of finite elements (finite faces).
+	Moreover, each element of $\Gamma(\simplex)$ is a closed polyhedron since it corresponds exactly to a closed face of a polyhedral set.
 \end{proof}
 
 
@@ -749,7 +753,7 @@ Our results give a framework to construct consistent surrogates and link functio
 Below, we illustrate the power of this framework with specific examples from the literature, as well as new examples.
 In some cases we simplify existing proofs, while in others we give new results, such as a new calibrated link for abstain loss, and the inconsistency of the recently proposed Lov\'asz hinge.
 \btw{RF: The top-k and hypercube/set examples (except abstain) have the link built in, e.g.\ as the sign function), and they just work around it.  Our results may suggest that it's worth thinking ``outside the box'' (HAH, genious...) and looking for embeddings which are not the hypercube. \jessie{Added a bit discussing this, starting at ``the examples in ...''.}}
-The examples in \S~\ref{sec:applications}, with the exception of the abstain surrogate given by~\citet{ramaswamy2018consistent}, all present a surrogate that use the link $\psi: u \mapsto \sgn(u)$.
+The examples below, with the exception of the abstain surrogate given by~\citet{ramaswamy2018consistent}, all present a surrogate that use the link $\psi: u \mapsto \sgn(u)$.
 While this may sometimes yield a calibrated link, this is not always the case.
 In fact, we will see that most of these examples do not yield calibrated surrogates, although proving that there is \emph{no} calibrated link for a given surrogate is quite difficult.
 Our results suggest that it is possible that some of the given surrogates are calibrated, but perhaps one must use a nontraditional link in order to calibrate the loss, such as the thickening construction given here.
@@ -1481,7 +1485,7 @@ This result holds more generally whenever $L$ has a finite representative set, a
 \inf_{u\in\reals^d : \psi(u) \not \in \gamma(p)} \inprod{p}{L(u)} \geq	\inf_{u\in\reals^d : \psi^\emb(u) \not \in \gamma^\emb(p)} \inprod{p}{L(u)} > \inf_{u\in\reals^d}\inprod{p}{L(u)}~,
 	\end{align*}
   showing calibration of $\psi$.
-	Consistency follows as calibration and consistency are equivalent in this setting~\citep{bartlett2006convexity}\raft{I think we need a better reference, since I believe that's only for binary classification...}.
+	Consistency follows as calibration and consistency are equivalent in this setting~\citep{ramaswamy2016convex}\raft{I think we need a better reference, since I believe that's only for binary classification...}\jessiet{Changed to Hari's proof (which tbh, isn't much of a proof but rather a claim IIRC)}.
 \end{proof}
 
 Theorem~\ref{thm:poly-ie-implies-consistent} gives a somewhat surprising result: despite the fact that indirect elicitation appears to be a somewhat weak necessary condition for consistency in general, the two conditions are equivalent for polyhedral surrogates.
@@ -1652,6 +1656,7 @@ We now include the full proof of Lemma~\ref{lem:polyhedral-range-gamma}.
 
 
 \section{Embedding properties}\label{app:embed-props}
+\jessie{Do we use this anymore?}
 
 While Definition~\ref{def:loss-embed} gives the notion of one \emph{loss} embedding another, we now define the notion of one \emph{property} embedding another.
 \begin{definition}\label{def:prop-embed}
