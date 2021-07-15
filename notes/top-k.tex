@@ -135,28 +135,22 @@ Then, using this form of the expected loss, we are able to find a finite set of 
 \subsection{Notation and Assumptions}
 \subsubsection{Notation}
 We say $u_{[i]}$ is the $i^{th}$ largest element of the $u$ vector.
-Let $\bar{u} = \frac 1 k \sum_{i = 1}^k u_{[i]}$ and similarly, $\bar{u}_{-i} = \frac{1}{k-1} (k \bar u - u_{[i]})$ be the averages of the first $k$ sorted elements of $u$ and the average of the first $k-1$ sorted elements of $u$ besides the $i^{th}$ element, respectively.
-$u[y]$ refers to the order of the $y^{th}$ component of $u$.
-For example, if $u = (1,2,0)$, then $u[2] = 1$. 
+Let $\bar{u} = \frac 1 k \sum_{i = 1}^k u_{[i]}$.
+Similarly, let $\bar{u}_{-i} = \frac{1}{k-1} (k \bar u - u_{[i]})$ be the averages of the first $k$ sorted elements of $u$ and the average of the first $k-1$ sorted elements of $u$ besides the $i^{th}$ element, respectively.
+$u[y]$ refers to the relative order of the $y^{th}$ component of $u$.
+For example, if $u = (1,2,4)$, then $u[3] = 1$. 
 If $u$ is understood from context, we abuse notation to omit the $u$ and write $u[y] = [y]$.
 
 Let $\min(\vec w, \vec v) \in \reals^d$ denote the element-wise minimum of vectors $\vec w, \vec v \in \reals^d$.
 
-\subsubsection{Assumptions}\label{sec:assumptions}
-Throughout, we make two assumptions about our report set. 
-For all $p \in \simplex$, we show there is a minimizer of $\inprod{p}{L^{top-k}(\cdot)}$ satisfying these two assumptions.
-
-%\begin{assumption}\label{assum:ordered-u}
-%First, assume that $u$ is ordered, where $u_1 \geq u_2 \geq \ldots \geq u_n$.
-%\end{assumption}
-%This is without loss of generality, as we can reorder $p$ so that each $p_i$ corresponds to the ordered $u_i$ that it originally corresponded to.
-%This is simply for ease of exposition, as it allows us to write $u_i$ instead of $u_{[i]}$ in many situations. 
+\subsubsection{Closing the search space for a representative set}\label{sec:assumptions}
+Throughout, we make two assumptions about our report set, and show the set of reports satisfying both assumptions is representative. 
 
 For our first assumption, we first observe that $L^{top-k}$ is invariant in the $\ones$ direction.
-\begin{lemma}
+\begin{lemma}\label{lem:invar-ones}
 	For all $\alpha \in \reals$ and $y\in\Y$, we have $L^{top-k}(u)_y = L^{top-k}(u + \alpha \ones)_y$.
 \end{lemma}
-\begin{proof}\label{lem:invar-ones}
+\begin{proof}
 	\begin{align*}
 	L^{top-k}(u + \alpha \ones)_y &= \left(1 - (u_y + \alpha) + \frac{1}{k} \sum_{i=1}^k ((u + \alpha \ones  - e_y)_{[i]} \right)_+\\
 	&= \left(1 - (u_y + \alpha) +\frac{1}{k} \alpha k + \frac{1}{k} \sum_{i=1}^k ((u - e_y)_{[i]} \right)_+\\
@@ -166,21 +160,15 @@ For our first assumption, we first observe that $L^{top-k}$ is invariant in the 
 	\end{align*}
 \end{proof}
 
-\begin{assumption}\label{assum:nonneg}
-	We will say $u_{[k+1]} = \ldots = u_{[n-1]} = u_{[n]} = 0$.
-\end{assumption}
-This partially follows from the invariance of $L^{top-k}$ in the $\ones$ direction shown in Lemma~\ref{lem:invar-ones}.
-We set $u_{[k+1]} = 0$, and then show weak dominance of the nonnegative $u'$ over any $u$ that contains negative components as in Lemma~\ref{lem:extra-elts-zero}.
-
 \begin{lemma}\label{lem:extra-elts-zero}
-	For all $u \in \reals^d$, there is a $u'$ satisfying Assumption~\ref{assum:nonneg} so that $L^{top-k}(u)_y \geq L^{top-k}(u')_y$ for all $y \in \Y$.
-	\jessie{Claim: $R := \{u \in \reals^n_+ \mid \|u\|_0 \leq k\}$ is a representative set for $L^{top-k}$.}
+	$R^{\tt low} := \{u \in \reals^n_+ \mid \|u\|_0 \leq k\}$ is a representative set for $L^{top-k}$.
 \end{lemma}
 \begin{proof}
 	By Lemma~\ref{lem:invar-ones}, we can fix $u_{[k+1]} = 0$.
 	We then have $u_{[i]} \leq 0$ for all $i \geq k+1$.
 	Consider $u'$ such that $u'_{[i]} = u_{[i]}$ for all $i$ so that $u_{[i]} \geq 0$, and $u'_{[i]} = 0$ otherwise.
-	Observe that $u$ and $u'$ have the same ordering on their elements.
+	Observe that $u$ and $u'$ have the same ordering on their elements and $u' \in R^{\tt low}$.
+	We want to show that $L^{top-k}(u)_y \geq L^{top-k}(u')_y$, and representativeness of $R^{\tt low}$ follows.
 	
 	If $[y] \geq k+1$, then 
 	\begin{align*}
@@ -191,7 +179,7 @@ We set $u_{[k+1]} = 0$, and then show weak dominance of the nonnegative $u'$ ove
 	\end{align*}
 	The inequality comes from the equality of the first $k+1$ sorted elements of $u$ and $u'$, combined with setting $u_{[y]} \leq u'_{[y]} = 0$ in this case.
 	
-	Now, if $[y] < k+1$ and $u_y \geq 1$, then 
+	Now, if $[y] < k+1$ and $u_y \geq 1$, observing that $\bar u = \bar u'$, we then have 
 	\begin{align*}
 	L^{top-k}(u)_y &= \left(1 - u_y + \frac 1 k \sum_{i=1}^k (u - e_y)_{[i]}\right)_+ \\
 	&= \left(1 - u_y + \bar u - \frac 1 k\right)_+\\
@@ -199,7 +187,7 @@ We set $u_{[k+1]} = 0$, and then show weak dominance of the nonnegative $u'$ ove
 	&= L^{top-k}(u')_y~.~
 	\end{align*}
 	
-	Now suppose that $[y] < k+1$ and $u_y \in [0,1)$; we now observe $(u - e_y)_{[k]} = u_{[k+1]} = 0$. 
+	Now suppose that $[y] < k+1$ and $u_y \in [0,1)$; we now observe $(u - e_y)_{[k]} = u_{[k+1]} = 0 = (u' - e_y)_{[k]}$. 
 	\begin{align*}
 	L^{top-k}(u)_y &= \left(1 - u_y + \frac 1 k \sum_{i=1}^{k-1} u_{[i]} + 0 \right)_+\\
 	&= \left(1 - u'_y + \frac 1 k \sum_{i=1}^{k-1} u'_{[i]}\right)_+\\
@@ -207,25 +195,31 @@ We set $u_{[k+1]} = 0$, and then show weak dominance of the nonnegative $u'$ ove
 	&= L^{top-k}(u')_y~.~
 	\end{align*}
 
-	As an aside, since $L^{top-k}(u)_y \geq L^{top-k}(u')_y$ for all $y \in \Y$, this also holds for the expected loss for all $p \in \simplex$.
+	Since $L^{top-k}(u)_y \geq L^{top-k}(u')_y$ for all $y \in \Y$, this also holds for the expected loss for all $p \in \simplex$.
+	Thus, $R$ is representative.
 \end{proof}
 
+\begin{assumption}\label{assum:nonneg}
+	We will say $u_{[k+1]} = \ldots = u_{[n-1]} = u_{[n]} = 0$.
+\end{assumption}
+It follows from Lemma~\ref{lem:extra-elts-zero} that $R^{\tt low}$ is representative, and every $u$ satisfying Assumption~\ref{assum:nonneg} is in $R^{\tt low}$ by construction.
 
 
-%For $i > k+1$, observe that $u_i$ can never affect the $\bar{u}$ term that is added, and can only be subtracted in the case that $i = y$. 
-%Therefore, we minimize expected loss by pulling $u_{k+2},\ldots, u_n$ up to $u_{k+1}$, making it as ``tight'' as possible.
-%This leads to our assumption, which we can make since we are primarily interested in finding \emph{a} minimizer of $L^{top-k}$, rather than \emph{all} minimizers.
-%\jessie{Formalize justification}
-
-The following Lemma leads to our final assumption, which provides an upper bound on the report values we consider.
+We now state our final assumption, and show that the set of reports satisfying the two assumptions is representative.
+\begin{assumption}\label{assum:top-threshold}
+	$u \in R^{\tt high} := \{u \in \reals^n \mid u_i \leq \bar u_{-i} +1 \, \forall i \in [n]\}$.
+\end{assumption}
 
 \begin{lemma}\label{lem:top-threshold}
-	For all $y \in \Y$, there is a minimizer $u$ of $L^{top-k}(\cdot)_y$ satisfying Assumption~\ref{assum:nonneg} so that for all $i$, we have $u_i \leq \bar u_{-i} +1$. 
+The set $R^{\tt low} \cap R^{\tt high}$ is representative.
+%	For all $y \in \Y$, there is a minimizer $u$ of $L^{top-k}(\cdot)_y$ satisfying Assumption~\ref{assum:nonneg} so that for all $i$, we have $u_i \leq \bar u_{-i} +1$. 
 \end{lemma}
 \begin{proof}
-	If $u_{[i]} > \bar u_{-i} + 1$, reassigning such a $u'_{[i]} := \bar u_{-i} +1$ results in $L^{top-k}(u')_i = L^{top-k}(u)_i = 0$, but we observe $L^{top-k}(u')_j \leq L^{top-k}(u)_j$ for all $j \neq i$ by decreasing $\ubar$, since $u_i \geq 0$.
+  Since we have already proven $R^{\tt low}$ is representative, suppose $u \in R^{\tt low}$.
+  For all $i \in [n]$ such that $u_{[i]} > \bar u_{-i} + 1$, reassigning such a $u'_{[i]} := \bar u_{-i} +1$ results in $L^{top-k}(u')_i = L^{top-k}(u)_i = 0$, but we observe $L^{top-k}(u')_j \leq L^{top-k}(u)_j$ for all $j \neq i$ by decreasing $\ubar$, since $u_i \geq 0$.
+  Moreover, $u' in R^{\tt high}$ by construction.
 
-To see this, consider $u_y = \bar u_{-y} + 1 + \epsilon$ and $u'_y = \bar u_{-y} + 1$, with $u_i = u'_i$ for all $i \neq y$. 
+Now, we write $u_y = \bar u_{-y} + 1 + \epsilon$ for some $\epsilon > 0$ and $u'_y = \bar u_{-y} + 1$, with $u_i = u'_i$ for all $i \neq y$. 
 \begin{align*}
 L^{top-k}(u)_y &= \left(1 - (\bar u_{-y} + \epsilon + 1) + \frac 1 k \left(\sum_{i=1, i \neq y}^k u_i + \bar u_{-y} + \epsilon\right) \right)_+\\ 
 &= \left(1 - (\bar u_{-y} + \epsilon + 1) + \frac 1 k \left((k-1) \bar u_{-y} + \bar u_{-y} + \epsilon\right) \right)_+\\
@@ -242,30 +236,327 @@ L^{top-k}(u')_y &= \left(1 - (\bar u_{-y} + 1) + \frac 1 k \left(\sum_{i=1, i \n
 \end{align*}
 Thus, the losses are equal on the outcome $y$.
 
-Now let us consider outcome $j \neq y$.
-By Assumption~\ref{assum:nonneg}, if $u_y > \bar u_{-y} + 1$, then we have $[y] < k+1$ as $u_y > 0$.
-Moreover, $u_y \geq 1$ in this case.
-Now, for outcome $j \neq y$, we have 
+Now let us consider outcome $y\neq i$.
+Since $u$ satisfies Assumption~\ref{assum:nonneg}, we have $\bar u \geq 0$ and $\bar u_{-i} \geq 0$ for any $i$.
+Therefore, if $u_y > \bar u_{-y} + 1$, then we have $[y] < k+1$ as $u_y + 1 \geq 1 > 0$.
+Now, for outcome $y \neq i$, we have 
 \begin{align*}
-L^{top-k}(u)_j &= \left( 1 - u_j + \frac 1 k \sum_{i=1}^k (u-e_j)_{[i]} \right)_+\\
-	&= \left( 1 - u'_j + \frac 1 k \sum_{i=1}^k (u'-e_j)_{[i]} + \frac {\epsilon}{k}\right)_+\\
-	&> \left( 1 - u'_j + \frac 1 k \sum_{i=1}^k (u'-e_j)_{[i]}\right)_+\\
-	&= L^{top-k}(u')_j
+L^{top-k}(u)_y &= \left( 1 - u_y + \frac 1 k \sum_{j=1}^k (u-e_y)_{[j]} \right)_+ &\text{Plugging in $u$}\\
+	&= \left( 1 - u'_y + \frac 1 k \sum_{j=1}^k (u'-e_y)_{[j]} + \frac {\epsilon}{k}\right)_+ & \text{$u'_y$ is in the top $k$ elements of $(u' - e_y)$}\\
+	&\geq \left( 1 - u'_y + \frac 1 k \sum_{j=1}^k (u'-e_y)_{[j]}\right)_+ & \text{Since $\epsilon > 0$}\\
+	&= L^{top-k}(u')_y
 \end{align*}
 Therefore, if $u$ minimizes $L^{top-k}(\cdot)_y$, then so does $u'$ for each $y \in \Y$, so we can say the same of the expected loss $\inprod{p}{L^{top-k}(\cdot)}$ for all $p \in \simplex$.
+Thus, there is some $u' \in R^{\tt low} \cap R^{\tt high}$ so that $u' \in \argmin_u \inprod{p}{L^{top-k}(u)}$.
 \end{proof}
 
-This leads to our final assumption.
-\begin{assumption}\label{assum:top-threshold}
-	We restrict to $u$ such that for all $i$, we have $u_i \leq \bar u_{-i} +1$.
-\end{assumption}
+
+
+Consider the set $\U := R^{\tt low} \cap R^{\tt high}$.
+
+\bigskip
+\hrule
+\bigskip
+
+%Consider the following finite set.
+%\begin{align*}
+%\R := \left\{ \frac{|M| + k -1}{k - |H|} \mathbf{1}_H + \mathbf{1}_M : H, M \subset [n], H\cap M = \emptyset, |H| + |M| \leq k \right\}
+%\end{align*}
+%\jessie{Ultimately, WTS $\R$ is representative for $L^{top-k}$.}
+%Throughout, we consider $c(u) := \frac{|M(u)| + k -1}{k - |H(u)|}$, where $M(u) = \{i \in [n] : u_i \in [0,1] \}$ and $H(u) = \{i \in [n] : u_i > 1\}$. 
+%\jessie{This has changed so $H$ and $M$ are functions of $p \in \simplex$.
+
+%\begin{lemma}\label{lem:linear-pieces}
+%	For each element $u_i$ of $u \in \U$, the expected loss $\inprod{p}{L^{top-k}(u)}$ is linear on $[0,1]$ and $[1, \bar u_{-i} + 1]$ for all $p \in \simplex$.
+%	\jessie{Not sure if this is the right statement.}
+%    \raf{Not sure either.  One thing to be careful about: you either have to make sure that the intervals in question yield points in the set $\U$, or refer to the original form of the loss.  Because the form of the loss you are using only is shown to hold when $u\in\U$.  Hopefully that made sense.}
+%    \raf{One thing that would help: let's visualize $\U$ for some value of $k,n$ to get some intuition for what this set is.  Maybe $k=2$ and $n=3$, but only plot the first 2 coordinates?}
+%\end{lemma}
+%\begin{proof}
+%	For all $p \in \simplex$ and $u \in \U^\circ$, we know that 
+%	\begin{equation}
+%	\inprod{p}{L^{top-k}(u)} = 1 + \bar u - \inprod{p}{u + \frac 1 k \min{u,\ones}}~.~
+%	\end{equation}
+%	For any $p$, if $u_i \in [0,1]$, we then have 
+%	\begin{align*}
+%	\inprod{p}{L^{top-k}(u)} &= 1 + \bar u - \inprod{p}{u + \frac 1 k \min(u,\ones)}\\
+%	 &= 1 + \bar u - \sum_{y \neq i}p_y (u_y + \frac 1 k \min(u_y, 1)) - p_i \frac {k+1} k u_i~,~
+%	\end{align*}
+%	which is linear on $u_i$.
+%	
+%	Similarly, for $u_i \in [1, \bar u_{-i} + 1]$, we can write $\inprod{p}{L^{top-k}(u)} = 1 + \bar u - \sum_{y \neq i}p_y (u_y + \frac 1 k \min(u_y, 1)) - p_i u_i - p_i/k$, which is linear in $u_i$.
+%\end{proof}
+
+%\begin{theorem}\label{thm:finite-set}
+%	Consider the loss $L^{top-k} : \reals^n \times \Y \to \reals_+$ given in Equation~\ref{eq:top-k-surrogate}.  
+%	The finite set
+%	\begin{align*}
+%	\R := \left\{ \frac{|M| + k -1}{k - |H|} \mathbf{1}_H + \mathbf{1}_M : H, M \subset [n], H\cap M = \emptyset, |H| + |M| \leq k \right\}
+%	\end{align*}
+%	is representative for $L^{top-k}$.
+%\end{theorem}
+%\begin{proof}[Sketch]
+%%	The above work tells us that when $p_y > \frac 1 {k+1}$, it is optimal to set $u_y > 0$, and otherwise, it is optimal to set $u_y = 0$.
+%	Since $L^{top-k}$ is linear in $i$ on $[0,1]$ and $[1, c]$ for some $c \geq 1$ and all dimensions $i \in [n]$, we know that the optimum is on the boundary of such reports, so when we bump $u_y$ up to some number greater than $0$, it should either be one $1$ or $c$ to be an optimal report.
+%	$H$ represents the elements of the report that are bumped up to $c$, and $M$ represents the elements of the report that are bumped up to $1$.
+%	We know that the size of $H \cup M$ must be less than or equal to $k$ by Assumption~\ref{assum:nonneg}, and $H \cap M$ is empty by each element of $u$ being real-valued, so for $c > 1$, $u_i$ cannot simultaneously be equal to $c$ and $1$, hence the restrictions on $\R$.
+%	Note that if $c = 1$, then we can say $H = \emptyset$.
+%	
+%	To see the reason for $c := \frac{|M| + k -1}{k - |H|}$, consider that, given the loss $L^{top-k}$, when we want to ``crank $u_i$'' above $1$, we want to do so as much as possible, until hitting the threshold discussed in Assumption~\ref{assum:top-threshold}.
+%	Exceeding the threshold on $u_i > c$ then can only increase expected loss, as shown in Lemma~\ref{lem:top-threshold}.
+%	
+%	Then, for $i \in H$, ``cranking'' $u_i$ as high as possible, we want to have $c = u_i = \bar u _{-i} + 1$.
+%	However, each $i \in H$ should get ``cranked up'' to the same value of $\bar u_{-i} + 1$ by linearity.
+%	We can see that 
+%	\begin{align*}
+%	c &= \bar u_{-i} + 1 \\
+%	c &= \frac{(c (|H|-1)) + |M|}{k-1} + 1\\
+%	ck-c &= c|H| - c + |M| + k - 1\\
+%	ck - c|H| &= |M| + k - 1\\
+%	c &= \frac{|M|+k-1}{k-|H|}~.~
+%	\end{align*}
+%\end{proof}
 
 
 
-\section{Re-writing the loss}
-The following Lemma allows us to consider the loss without the $(\cdot)_+$ operator.
-Before we do so, consider the set $\U$ to be all $u \in \reals^n$ satisfying Assumptions~\ref{assum:nonneg} and ~\ref{assum:top-threshold}.
-\jessie{Can we claim $\U$ is a representative set for $L^{top-k}$?  Would take some more work.}
+\section{Cutting down on search space}
+Consider the loss $L^{top-k} : \reals^n \times \Y \to \reals_+$ given in equation~\eqref{eq:top-k-surrogate}.
+Since the loss is polyhedral, we know it has a finite set of minimizers.
+If we can find a finite representative set, we can easily embed these reports via the identity and more easily study the property elicited by this surrogate, and how it compares to the top-$k$ property originally in mind when the surrogate was designed.
+
+We will start with $\U$ as we show it is representative in Lemma~\ref{lem:top-threshold}, and narrow down to a finite representative set for $L^{top-k}$.
+
+\begin{proposition}
+	$\R := \left\{ \frac{|M| + k -1}{k - |H|} \mathbf{1}_H + \mathbf{1}_M : H, M \subset [n], H\cap M = \emptyset, |H| + |M| \leq k \right\}$ is representative for $L^{top-k}$.
+\end{proposition}
+
+
+\section{Property elicited by $L^{top-k}$}
+There is sometimes a benefit in expected loss for this surrogate by artificially bumping up from the ``low'' to ``middle'' bin when possible because doing so cranks up the constant on the ``high'' reports, yielding better expected loss.
+
+Note that ``bumping down'' does not happen because of how the original bins are set, but we can ''bump up'' from low to medium or medium to high.
+
+Fix $p \in \simplex$.
+We construct the bins
+\begin{align*}
+H_p &:= \left\{i \mid p_i > \frac 1 k\right\}\\
+M_p &:= \left\{i \mid p_i \in \left(\frac 1 {k+1}, \frac 1 k\right]\right\} \\
+B_p &:= \left\{i \mid p_i \in \left(\frac {k(1-p_H)}{(k+1)(k-H)}, \frac 1 {k+1} \right]\right\}\\
+L_p &:= \left\{i \mid p_i \leq \frac {k(1-p_H)}{(k+1)(k-H)} \right\}~,~
+\end{align*}
+where $p_H := \sum_{i \in \bar H} p_i$.
+Sometimes we drop $p$ from the notation where it can be understood from context.
+
+
+The bin $B_p$ allows us to ``bump'' reports up to a higher bin if beneficial, as bumping a report up allows for each element of $H_p$ to be set at a higher constant.
+One can verify that it is never beneficial to bump from middle to high, so we need only concern ourselves with bumping from $L_p$ to $M_p$.
+
+To understand when to bump $j$ from $L_p$ to $B_p$, taking $u \to u'$, we can ask when we have
+\begin{align*}
+\inprod{p}{L(u)} &\geq \inprod{p}{L(u')}\\
+\sum_{i \in H} \frac{|M| + k -1}{k-|H|} - p_i \left(\frac{k(|M| + k -1)+ 1}{k(k- |H|)}\right) + \sum_{i \in M} \left(\frac 1 k - p_i \left( \frac {k+1}{k}\right)\right) &\geq \sum_{i \in H} \frac{|M| + k }{k-|H|} - p_i \left(\frac{k(|M| + k)+ 1}{k(k- |H|)}\right) + \sum_{i \in M'} \left(\frac 1 k - p_i \left( \frac {k+1}{k}\right)\right)\\
+\frac{|H|(|M| + k - 1)}{k(k- |H|)} + p_H \frac{-k(|M| + k - 1) - 1}{k(k - |H|)} &\geq \frac{|H|(|M| + k)}{k(k - |H)} + p_H \left(\frac{-k(|M| + k)-1}{k (k - |H|)}\right) + \left(\frac 1 k - p_j \left(\frac {k+1}{k}\right)\right) \\
+\frac{-|H|}{k (k - |H|)} + \frac{p_H}{k - |H|} &\geq \frac 1 k - p_j \left(\frac{k+1}{k}\right)~.~
+\end{align*}
+
+Thus, we can take the set 
+\begin{align*}
+B_p &:= \left\{i : p_i \leq \frac{1}{k+1} \wedge \frac{p_H k- |\bar H|}{k(k- |\bar H|)} \geq \frac 1 k - p_i\left(\frac{k+1}{k}\right) \right\}\\
+&=\left\{i \mid p_i \in \left(\frac {k(1-p_H)}{(k+1)(k-H)}, \frac 1 {k+1} \right]\right\}
+\end{align*}
+
+
+We will construct the report $\hat \Gamma(p) := \frac{M + B + k - 1}{k-H}\ones_{H_p} + \ones_{M_p} + \ones_{B_p}$.
+
+
+\jessie{Adding 8 July 2021}
+%Fix the distribution $p \in \simplex$.
+%Denote the sets:
+%\begin{align*}
+%H_p &= \left\{i \in \Y \mid p_i > \frac 1 k\right\}\\
+%M_p &= \left\{i \in \Y \mid p_i \in \left( \frac 1 {k+1}, \frac 1 k\right]\right\}\\
+%B_p &= \left\{i \in \Y \mid p_i \leq \frac 1 {k+1} \wedge p_i \frac{k(1-p_H)}{(k+1)(k-H)}\right\}\\
+%L_p &= \left\{i \in \Y \mid p_i \leq \frac {1}{k+1}\right\} \setminus B_p
+%\end{align*}
+%where $H := |H_p|$ and $p_H := \sum_{y \in H_p} p_y$.
+
+
+\begin{claim}
+	Fix $p \in \simplex$.
+	$\hat \Gamma(p) \in \U$.
+\end{claim}	
+\begin{proof}
+	Fix $p \in \simplex$, and take $H := |H_p|, M:= |M_p|$, and $B := |B_p|$.
+	It suffices to show $H + M + B \leq k$ to show $\hat \Gamma (p) \in \R^{\tt low}$.
+	
+	\jessie{TODO}
+	Observe that $p_H > \frac H k$, and therefore, $H < k$.
+	Moreover, $M \leq k$, and if $M = k$, then $(1 - p_M) = p_H + p_B + p_L \leq \frac 1 {k+1}$.
+	Additionally, we have $p_M > \frac {M}{k+1}$
+	
+	Now we have $p_B > \frac{Bk(1-p_H)}{(k+1)(k-H)}$.
+	
+	Since $p_H + p_M + p_B \leq 1$, I am hoping we get to a contradiction.
+	
+	\begin{align*}
+	p_H + p_M + p_B &> 
+	\frac{H}{k} + \frac M {k+1} + \frac{Bk(1-p_H)}{(k+1)(k-H)} \\
+	&= \frac{H(k+1)(k-H)}{k(k+1)(k-H)} + \frac{Mk(k-H)}{k(k+1)(k-H)} + \frac{Bk^2(1-p_H)}{k(k+1)(k-H)}\\
+	\end{align*}
+	
+	
+	
+	\jessie{...}
+	
+	
+	Moreover, $\hat \Gamma(p) \in R^{\tt high}$ by construction.
+	Thus, $\hat \Gamma(p) \in \U$.
+\end{proof}
+
+\begin{claim}
+	$\inprod{L(\hat \Gamma(p))}{p} = (1-p_H)(\bar u - \frac 1 k) + p_L)$. 
+\end{claim}
+\begin{proof}
+	\begin{align*}
+	\inprod{L(\hat \Gamma(p))}{p} &=
+	\sum_{y \in H_p} L(\hat \Gamma(p))_y + \sum_{y \in M_p, B_p} L(\hat \Gamma(p))_y + \sum_{y \in L_p}L(\hat \Gamma(p))_y \\
+	&= \sum_{y \in H_p} 0 + \sum_{y \in M_p, B_p} p_y(\bar u - \frac{1}{k}) + \sum_{y \in L_p} p_y(1 + \bar u - \frac 1 k) \\
+	&= \sum_{y \in M_p, B_p, L_p} p_y (\bar u - \frac{1}{k}) + \sum_{y \in L_p} p_y \\
+	&= (1-p_H) (\bar u - \frac{1}{k}) + p_L
+	\end{align*}
+\end{proof}
+
+
+
+\begin{lemma}
+	Fix $p \in \simplex$.
+	For small enough $\varepsilon$ and any $\hat y \in \Y$, consider $\varepsilon_{\hat y} := \varepsilon e_{\hat y}$.
+	For any (small enough) $\varepsilon_{\hat y}$, the loss $\inprod{L(\hat \Gamma(p))}{p} \leq \inprod{L(\hat \Gamma(p) + \varepsilon_{\hat y})}{p}$.
+\end{lemma}
+\begin{proof}
+	We denote $L^* := \inprod{L(\hat \Gamma(p))}{p}$.
+	We proceed in cases:
+	
+	Case 1: $\hat y \in H_p, \varepsilon_{\hat y} > 0$.
+	\begin{align*}
+	\E_p L(\hat \Gamma(p) + \varepsilon_{\hat y}, Y) &= {\color{blue}\sum_{y \in H_p} p_y (\frac {\varepsilon_{\hat y}}{k})} {\color{teal} - p_{\hat y} \frac{\varepsilon_{\hat y}}{k}} + {\color{blue} \sum_{y \in M_p, B_p} p_y(\frac{\varepsilon_{\hat y}}{k})} + {\color{olive}\sum_{y \in M_p, B_p} p_y(\bar u - \frac 1 k)} + {\color{blue}\sum_{y \in L_p} p_y (\frac{\varepsilon_{\hat y}}{k})}+ {\color{olive}\sum_{y \in L_p}p_y(1+ \bar u - \frac 1 k)}\\
+	&= {\color{blue}\frac{\varepsilon_{\hat y}}{k}} - {\color{teal}p_{\hat y}\frac{\varepsilon_{\hat y}}{k}} + {\color{olive}L^*}
+	\end{align*}
+	This is greater than or equal to $L^*$ if and only if $\frac{\varepsilon_{\hat y}}{k} \geq p_{\hat y}\frac{\varepsilon_{\hat y}}{k}$.
+	This is always true as $p \in \simplex$, so $p_{\hat y} \leq 1$.
+	
+	Case 2: $\hat y \in M_p \cup  B_p \cup L_p$, and $\varepsilon_{\hat y} > 0$.
+	\begin{align*}
+	\E_p L(\hat \Gamma(p) + \varepsilon_{\hat y}, Y) &= {\color{blue}\sum_{y \in H_p} p_y (\frac {\varepsilon_{\hat y}}{k}) + \sum_{y \in M_p, B_p} p_y(\frac{\varepsilon_{\hat y}}{k})} + {\color{olive}\sum_{y \in M_p, B_p} p_y(\bar u - \frac 1 k)} - {\color{teal}p_{\hat y} \varepsilon_{\hat y}} + {\color{blue}\sum_{y \in L_p} p_y (\frac{\varepsilon_{\hat y}}{k})}+ {\color{olive}\sum_{y \in L_p}p_y(1+ \bar u - \frac 1 k)}\\
+	&= {\color{blue}\frac{\varepsilon_{\hat y}}{k}} - {\color{teal}p_{\hat y}\frac{\varepsilon_{\hat y}}{k}} + {\color{olive}L^*}
+	\end{align*}
+	This is greater than or equal to $L^*$ if and only if $\frac{\varepsilon_{\hat y}}{k} \geq p_{\hat y} \varepsilon_{\hat y}$, which is true by the case that $p_{\hat y} \leq \frac 1 k$ since $\hat y \not \in H_p$.
+	
+	Case 3: $\hat y \in H_p, \varepsilon_{\hat y} < 0$.
+	For clarity, we assume $\varepsilon_{\hat y} > 0$, and we consider $\hat \Gamma(p) - \varepsilon_{\hat y}$.
+	
+	\begin{align*}
+	\E_p L(\hat \Gamma(p) - \varepsilon_{\hat y}, Y) &= {\color{teal} p_{\hat y}\varepsilon_{\hat y}} + \sum_{y \in M_p, B_p}({\color{olive}\bar u - \frac 1 k} -{\color{blue} \frac{\varepsilon_{\hat y}}{k}}) + \sum_{y \in L_p}({\color{olive}1 + \bar u - \frac 1 k} -{\color{blue} \frac{\varepsilon_{\hat y}}{k}})\\
+	&= {\color{olive}L^*} + {\color{teal} p_{\hat y}\varepsilon_{\hat y}} - {\color{blue} (1-p_H) \frac{\varepsilon_{\hat y}}{k}}
+	\end{align*}
+	This is greater than or equal to $L^*$ if and only if 
+	\begin{align*}
+	p_{\hat y} &\geq \frac{(1 - p_H)}{k}\\
+	\iff k p_{\hat y} &\geq (1 - p_H) ~,~
+	\end{align*}
+	which is true as $p_{\hat y} \geq \frac 1 k$, so the product is at least $1$ and $p_H$ is nonnegative.
+	
+	Case 4: $\hat y \in M_p \cup B_p, \varepsilon_{\hat y} < 0$.
+	Again, we repeat the notation as above.
+	\begin{align*}
+	\E_p L(\hat \Gamma(p) - \varepsilon_{\hat y}, Y) &= \sum_{y \in M_p, B_p}({\color{olive}\bar u - \frac 1 k} -{\color{blue} \frac{\varepsilon_{\hat y}}{k}}) + {\color{teal} p_{\hat y}\varepsilon_{\hat y}} + \sum_{y \in L_p}({\color{olive}1 + \bar u - \frac 1 k} -{\color{blue} \frac{\varepsilon_{\hat y}}{k}})\\
+	&= {\color{olive}L^*} + {\color{teal} p_{\hat y}\varepsilon_{\hat y}} - {\color{blue} (1-p_H) \frac{\varepsilon_{\hat y}}{k}}
+	\end{align*}
+	
+	Case 4a: $\hat y \in M_p$
+	
+	It remains to show that $p_{\hat y} \varepsilon_{\hat y} \geq (1 - p_H)\frac{\varepsilon_{\hat y}}{k}$.
+
+	First, suppose $H_p \neq \emptyset$.
+	Therefore, $p_H \geq \frac 1 k$, so $1 - p_H \leq \frac{k-1}{k}$.
+	
+	\begin{align*}
+	p_{\hat y} \varepsilon_{\hat y} &\geq (1 - p_H)\frac{\varepsilon_{\hat y}}{k} &\\
+	\iff p_{\hat y} &\geq \frac{(1-p_H)}{k} & \text{Since $\varepsilon_{\hat y} > 0$} \\
+	\iff p_{\hat y} &\geq \frac{(k-1)/k}{k} \geq \frac{1-p_H}{k} & \text{Since $H \geq 1$}\\
+	p_{\hat y} &\geq \frac 1 {k+1} \geq \frac{k-1}{k^2} \geq \frac{(1-p_H)}{k} & \text{Since $\hat y \in M_p$} \\ 
+	\end{align*}
+	Thus, we conclude $\inprod{L(\hat\Gamma(p) - \varepsilon_{\hat y})}{p} \geq L^*$ for $\hat y \in M_p$.
+	
+	Now, if $H_p = \emptyset$
+	\jessie{???}
+	
+	Case 4b: $\hat y \in B_p$.
+	First, observe that $H_p = \emptyset \implies B_p = \emptyset$, since we have $i \in B_p \iff p_i \leq \frac{1}{k+1}$ and $p_i > \frac{k(1-p_H)}{(k+1)(k-H)} = \frac 1 {k+1}$, yielding a contradiction.
+	\begin{align*}
+	p_{\hat y} \varepsilon_{\hat y} \geq \frac{k(1-p_H)}{(k+1)(k-H)} &\geq \frac{1-p_H}{k} &\text{By assumption}\\
+	\iff \frac{k}{(k+1)(k-H)} &\geq \frac{1}{k} & \text{Dividing both sides by $(1-p_H)$} \\
+	\iff k^2 &\geq (k+1)(k-H) = k^2 - (H-1) k -1 & \text{Manipulating fractions}
+	\end{align*}
+	The last statement is true since $H \geq 1$, so the result holds.
+	
+	Case 4: $\hat y \in L_p, \varepsilon_{\hat y} < 0$.
+
+	\begin{align*}
+	\E_p L(\hat \Gamma(p) - \varepsilon_{\hat y}, Y) &= \sum_{y \in M_p, B_p}({\color{olive}\bar u - \frac 1 k}) + {\color{teal} p_{\hat y}\varepsilon_{\hat y}} + \sum_{y \in L_p}({\color{olive}1 + \bar u - \frac 1 k} )\\
+	&= {\color{olive}L^*} + {\color{teal} p_{\hat y}\varepsilon_{\hat y}} 
+	\end{align*}
+	This is greater than or equal to $L^*$ since $\varepsilon_{\hat y} > 0$ (recall instead of adding a negative number, we subtracted a positive one).
+\end{proof}
+
+
+\jessie{Not sure if this is correct/makes sense}
+Since $L^{top-k}$ is polyhedral, $\inprod{L^{top-k}(\hat\Gamma(p))}{p}$ is linear in any direction $\epsilon v$ for small enough $\varepsilon$, and therefore, we have 
+\begin{align*}
+\inprod{L(\hat \Gamma(p) + \sum_i \lambda_{i} \varepsilon_{i})}{p} &= 
+\sum_i \lambda_i \inprod{L(\hat \Gamma(p) + \varepsilon_{i})}{p}\\
+&\geq \sum_i \lambda_i L^* \\
+&= L^*
+\end{align*}
+for any $\lambda = \{\lambda_i\} \in \simplex$.
+Since $\{\varepsilon_{\hat y}\}_{\hat y \in \Y}$ forms a basis for $\reals^n$, we have the following corollaries.
+
+\begin{proposition}
+	For all $p \in \simplex$, $\hat \Gamma(p) \in \Gamma(p) \cap \U$.
+\end{proposition}
+
+\begin{corollary}
+	$\hat \Gamma(\simplex)$ is a finite representative set.
+\end{corollary}
+
+
+This yields the finite loss $L|_{\hat \Gamma(\simplex)}$ embedded by $L^{top-k}$ by
+\begin{align}
+L|_{\R}(r,y) &= \begin{cases}
+0 & r_y = \bar r_{-y} + 1\\
+\bar r - \frac 1 k & r_y = 1\\
+1 + \bar r & r_y = 0
+\end{cases}~.~
+\end{align}
+
+
+\section{Example: $k=2$ and $n=3$}
+First, we have $\risk{\ell}(p) = 1 - \min_y p_y$, and so $-\risk{\ell}(p) = \min_y p_y - 1$.
+Taking the conjugate $(-\ell^*)(q) = \sup_{p \in \simplex} \{\inprod p q + 1 - \min_y p_y\}$, we see this is maximized by putting weight $1$ on $\argmax_y q_y$ and weight $0$ on every other element for $q \in \simplex$.
+Since $n \neq 1$, we then have $\min_y p_y = 0$, so the conjugate of the negative risk reduces to $C(u) = 1 + \max_y u_y$.
+
+Then, plugging this into our given loss yields $L(u)_y = 1 + u_{[1]} - u_y$.
+
+
+\end{document}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
+
+\jessie{Removed from the document July 14, 2021}
+% to be all $u \in \reals^n$ satisfying Assumptions~\ref{assum:nonneg} and ~\ref{assum:top-threshold}.
+%\jessie{Can we claim $\U$ is a representative set for $L^{top-k}$?  Would take some more work.}
 
 One can observe that $\U$ is not convex.
 However, we can consider permutations $\pi$ of the elements of $\U$ so that $\pi(u)$ is the permutation of $\{1,2,\ldots, n\}$ so that $u$ is ordered in decreasing order according to this permutation.
@@ -319,22 +610,22 @@ With Assumptions~\ref{assum:nonneg} and \ref{assum:top-threshold} and Lemma~\ref
 \raf{Note: some inconsistency in the way you use this $\min$ operator and denote $\ones$; see below too}\jessie{$\min$ is element-wise, but in this next instance, is just on scalars.}
 \begin{lemma}\label{lem:new-form-surrogate}
 	For $u \in \U \cap \U_{\pi(u)}$, the top-$k$ surrogate can be written:
-\begin{align*} 
-L^{top-k}(u)_y  &= 1 - u_y + \bar u - \frac{1}{k}(\min(u_y, 1)) = \begin{cases}
-1 - u_y + \bar u - \frac{u_y}{k} & u_y \leq 1\\
-1 - u_y + \bar u - \frac{1}{k} & u_y > 1
-\end{cases}
-~.~
-\end{align*}
+	\begin{align*} 
+	L^{top-k}(u)_y  &= 1 - u_y + \bar u - \frac{1}{k}(\min(u_y, 1)) = \begin{cases}
+	1 - u_y + \bar u - \frac{u_y}{k} & u_y \leq 1\\
+	1 - u_y + \bar u - \frac{1}{k} & u_y > 1
+	\end{cases}
+	~.~
+	\end{align*}
 \end{lemma}
 \begin{proof}
 	First, consider
-\begin{align*}
+	\begin{align*}
 	L^{top-k}(u)_y &= \left(1 -u_y + \frac{1}{k} \sum_{i=1}^k ((u - e_y)_{[i]} \right)_+\\
 	&= 1 -u_y + \frac{1}{k} \sum_{i=1}^k ((u - e_y)_{[i]}~,
 	\end{align*}
 	by Lemma~\ref{lem:get-rid-max-op}.
-
+	
 	
 	If $u_y \in [0,1]$, then $(u-e_y)_{[k]} = u_{k+1} = 0$ by Assumption~\ref{assum:nonneg}.
 	This yields
@@ -342,7 +633,7 @@ L^{top-k}(u)_y  &= 1 - u_y + \bar u - \frac{1}{k}(\min(u_y, 1)) = \begin{cases}
 	L^{top-k}(u)_y &= 1 - u_y + \bar u - \frac{u_y}{k}~.~
 	\end{align*}
 	In this case, $u_y = \min(u_y, 1)$, and $\frac {u_y}{k}$ is subtracted from $1 - u_y + \bar u$.
-
+	
 	If $u_y > 1$, then $(u-e_y)_{[k]} \geq 0$, and $(u_y - 1)$ is part of the summation.
 	This yields
 	\begin{align*}
@@ -396,16 +687,6 @@ Lemma~\ref{lem:new-form-surrogate} allows us to then write the expected loss as 
 Because the upper bound on $u_y$ in Assumption~\ref{assum:top-threshold} depends on $\ubar$, we cannot determine $u$ iteratively.
 However, we can show that for each element $y$ of $u$, $L^{top-k}$ is linear on $[0,1]$ and $[1, \bar u_{-y} + 1]$, and therefore an optimal report must be one of these three values for each $u_i$.
 
-\bigskip
-\hrule
-\bigskip
-
-Consider the following finite set.
-\begin{align*}
-\R := \left\{ \frac{|M| + k -1}{k - |H|} \mathbf{1}_H + \mathbf{1}_M : H, M \subset [n], H\cap M = \emptyset, |H| + |M| \leq k \right\}
-\end{align*}
-\jessie{Ultimately, WTS $\R$ is representative for $L^{top-k}$.}
-Throughout, we consider $c(u) := \frac{|M(u)| + k -1}{k - |H(u)|}$, where $M(u) = \{i \in [n] : u_i \in [0,1] \}$ and $H(u) = \{i \in [n] : u_i > 1\}$.
 
 We claim that there are a finite number of polytopes $P^{a} \subseteq \U$ so that (i.) $\cup_{a \in \I} P^{a} = \U$, (ii.) each $P^{a}$ is the convex hull of points in $\R$, and (iii.) $L^{top-k}(\cdot)_y$ is linear on each $P^{a}$ for each $y \in \Y$.
 If these three statements are true, then $L^{top-k}|_\R$ is embedded by $L^{top-k}$.
@@ -457,142 +738,6 @@ Consider that on the polytope $P^\pi_a$, we fix $u_y \in [0,1]$ or $u_y >1$ for 
 %	
 %}
 
-\bigskip
-\hrule
-\bigskip
-
-\begin{lemma}\label{lem:linear-pieces}
-	For each element $u_i$ of $u \in \U$, the expected loss $\inprod{p}{L^{top-k}(u)}$ is linear on $[0,1]$ and $[1, \bar u_{-i} + 1]$ for all $p \in \simplex$.
-	\jessie{Not sure if this is the right statement.}
-    \raf{Not sure either.  One thing to be careful about: you either have to make sure that the intervals in question yield points in the set $\U$, or refer to the original form of the loss.  Because the form of the loss you are using only is shown to hold when $u\in\U$.  Hopefully that made sense.}
-    \raf{One thing that would help: let's visualize $\U$ for some value of $k,n$ to get some intuition for what this set is.  Maybe $k=2$ and $n=3$, but only plot the first 2 coordinates?}
-\end{lemma}
-\begin{proof}
-	For all $p \in \simplex$ and $u \in \U^\circ$, we know that 
-	\begin{equation}
-	\inprod{p}{L^{top-k}(u)} = 1 + \bar u - \inprod{p}{u + \frac 1 k \min{u,\ones}}~.~
-	\end{equation}
-	For any $p$, if $u_i \in [0,1]$, we then have 
-	\begin{align*}
-	\inprod{p}{L^{top-k}(u)} &= 1 + \bar u - \inprod{p}{u + \frac 1 k \min(u,\ones)}\\
-	 &= 1 + \bar u - \sum_{y \neq i}p_y (u_y + \frac 1 k \min(u_y, 1)) - p_i \frac {k+1} k u_i~,~
-	\end{align*}
-	which is linear on $u_i$.
-	
-	Similarly, for $u_i \in [1, \bar u_{-i} + 1]$, we can write $\inprod{p}{L^{top-k}(u)} = 1 + \bar u - \sum_{y \neq i}p_y (u_y + \frac 1 k \min(u_y, 1)) - p_i u_i - p_i/k$, which is linear in $u_i$.
-\end{proof}
-
-\begin{theorem}\label{thm:finite-set}
-	Consider the loss $L^{top-k} : \reals^n \times \Y \to \reals_+$ given in Equation~\ref{eq:top-k-surrogate}.  
-	The finite set
-	\begin{align*}
-	\R := \left\{ \frac{|M| + k -1}{k - |H|} \mathbf{1}_H + \mathbf{1}_M : H, M \subset [n], H\cap M = \emptyset, |H| + |M| \leq k \right\}
-	\end{align*}
-	is representative for $L^{top-k}$.
-\end{theorem}
-\begin{proof}[Proof Sketch.]
-%	The above work tells us that when $p_y > \frac 1 {k+1}$, it is optimal to set $u_y > 0$, and otherwise, it is optimal to set $u_y = 0$.
-	Since $L^{top-k}$ is linear in $i$ on $[0,1]$ and $[1, c]$ for some $c \geq 1$ and all dimensions $i \in [n]$, we know that the optimum is on the boundary of such reports, so when we bump $u_y$ up to some number greater than $0$, it should either be one $1$ or $c$ to be an optimal report.
-	$H$ represents the elements of the report that are bumped up to $c$, and $M$ represents the elements of the report that are bumped up to $1$.
-	We know that the size of $H \cup M$ must be less than or equal to $k$ by Assumption~\ref{assum:nonneg}, and $H \cap M$ is empty by each element of $u$ being real-valued, so for $c > 1$, $u_i$ cannot simultaneously be equal to $c$ and $1$, hence the restrictions on $\R$.
-	Note that if $c = 1$, then we can say $H = \emptyset$.
-	
-	To see the reason for $c := \frac{|M| + k -1}{k - |H|}$, consider that, given the loss $L^{top-k}$, when we want to ``crank $u_i$'' above $1$, we want to do so as much as possible, until hitting the threshold discussed in Assumption~\ref{assum:top-threshold}.
-	Exceeding the threshold on $u_i > c$ then can only increase expected loss, as shown in Lemma~\ref{lem:top-threshold}.
-	
-	Then, for $i \in H$, ``cranking'' $u_i$ as high as possible, we want to have $c = u_i = \bar u _{-i} + 1$.
-	However, each $i \in H$ should get ``cranked up'' to the same value of $\bar u_{-i} + 1$ by linearity.
-	We can see that 
-	\begin{align*}
-	c &= \bar u_{-i} + 1 \\
-	c &= \frac{(c (|H|-1)) + |M|}{k-1} + 1\\
-	ck-c &= c|H| - c + |M| + k - 1\\
-	ck - c|H| &= |M| + k - 1\\
-	c &= \frac{|M|+k-1}{k-|H|}~.~
-	\end{align*}
-\end{proof}
-
-
-By Theorem~\ref{thm:finite-set}, we now have a finite set of optimal reports for $L^{top-k}$.
-This yields the finite loss $L|_\R$ embedded by $L^{top-k}$.
-This gives the discrete loss $\ell^{top-k} : \R \times\Y \to \reals_+$ by
-\begin{align}
-\ell^{top-k}(r,y) &= \begin{cases}
-0 & r_y = \bar r_{-y} + 1\\
-\bar r - \frac 1 k & r_y = 1\\
-1 + \bar r & r_y = 0
-\end{cases}~.~
-\end{align}
-
-\bigskip
-\hrule
-\bigskip
-
-Story: Here is a region $\U$ containing optimal reports.
-Clearly, if $\U \subseteq \U^\circ$, then optimal reports are also in $\U^\circ$.
-Look at this convex region.
-Since $L^{top-k}$ is polyhedral, we know that one of its minimizers must be on a vertex.
-We want to claim that all vertices are in $\hat\U$, which is a finite set of our own construction.
-Since all vertices are in $\hat\U$, and all minimizers must be vertices (if not, there is also a vertex that is a minimizer), we then have that $\argmin_u \inprod{p}{L^{top-k}(u)} \cap \hat\U \neq \emptyset$.
-
-
-\section{Constructing a calibrated surrogate}
-Here, we use the surrogate constructed in Proposition 2 of the paper to construct a calibrated surrogate for top $k$.
-\subsection{$k=2$ and $n=3$}
-First, we have $\risk{\ell}(p) = 1 - \min_y p_y$, and so $-\risk{\ell}(p) = \min_y p_y - 1$.
-Taking the conjugate $(-\ell^*)(q) = \sup_{p \in \simplex} \{\inprod p q + 1 - \min_y p_y\}$, we see this is maximized by putting weight $1$ on $\argmax_y q_y$ and weight $0$ on every other element for $q \in \simplex$.
-Since $n \neq 1$, we then have $\min_y p_y = 0$, so the conjugate of the negative risk reduces to $C(u) = 1 + \max_y u_y$.
-
-Then, plugging this into our given loss yields $L(u)_y = 1 + u_{[1]} - u_y$.
-
-\subsection{Generalizing $k$ and $n$}
-Generalizing the above calibrated surrogate, we observe that $\risk(\ell) = 1 - \sum_{i=k+1}^n p_{[i]}$, and so $(-\risk{\ell})^*(q) = \sup_{p \in \simplex} \{\inprod p q + 1 - \sum_{i=k+1}^n p_{[i]}\}$.
-This is maximized in the same way as above, and so we reduce this to $(-\risk{\ell})^*(q) = 1 - q_{[1]}$.
-
-Again, we yield $L(u)_y = 1 + u_{[1]} - u_y$.
-
-\section{Cutting down on search space}
-Consider the loss $L^{top-k} : \U \times \Y \to \reals_+$ given in equation~\eqref{eq:top-k-surrogate}.
-This surrogate is defined originally on $\U = \reals^n$, but since the loss is polyhedral, we know it has a finite set of minimizers.
-If we can find a finite representative set, we can easily embed these reports via the identity and more easily study the property elicited by this surrogate, and how it compares to the top-$k$ property it was originally designed for.
-
-We will start with $\U = \reals^n$, and slowly narrow down to a finite representative set for $L^{top-k}$.
-
-\begin{proposition}
-	$\U' := \{u \in \reals^n_+ \mid \|u\|_0 \leq k\}$ is representative for $L^{top-k}$.
-\end{proposition}
-\begin{proof}
-	This is Lemma~\ref{lem:extra-elts-zero}.
-\end{proof}
-
-\begin{proposition}
-	The set $\U'' := \U' \cap [0,k]^n$ is representative for $L^{top-k}$.
-\end{proposition}
-\begin{proof}
-	Corollary of Lemma~\ref{lem:top-threshold}, as any of the $k$ largest elements cannot be more than $1$ greater than its preceding element.
-\end{proof}
-
-\begin{proposition}
-	\jessie{Incorporate no more than 1 higher than mean}
-\end{proposition}
-
-Now we move from an infinite to finite set via the function $\phi$
-\begin{align*}
-\phi(u)_i &= 
-\begin{cases}
-0 & u_i < 1\\
-1 & \\
-c(u) & \\
-\end{cases}~,~
-\end{align*}
-where $c(u) = \frac{|M(u)| + k - 1}{k - |H(u)|}$ with $M(u)$ is the number of elements $i$ of $u_i$ so that $\phi(u)_i = 1$, and $H(u)$ is the number of elements of $u_i$ so that $\phi(u)_i > 1$.
-
-\begin{proposition}
-	$\R = \phi(\U'')$ and is a finite representative set for $L^{top-k}$.
-\end{proposition}
-\begin{proof}
-	
-\end{proof}
 
 \begin{proposition}
 	$\R := \left\{ \frac{|M| + k -1}{k - |H|} \mathbf{1}_H + \mathbf{1}_M : H, M \subset [n], H\cap M = \emptyset, |H| + |M| \leq k \right\}$ is representative for $L^{top-k}$.
@@ -615,171 +760,3 @@ where $c(u) = \frac{|M(u)| + k - 1}{k - |H(u)|}$ with $M(u)$ is the number of el
 	$\min(u, \ones) = \min(\phi(u), \ones)$
 	If $u$ minimizes $L(u;p)$, then $\inprod{p}{u} \geq \inprod{p}{\phi(u)}$.
 \end{proof}
-
-
-\section{Property elicited by $L^{top-k}$}
-Consider that we have $\R$ as above, but we are not sure when to ``bump'' reports up or down from one group to another.
-There is sometimes a benefit in expected loss to artificially bumping up from the ``low'' to ``middle'' bin when possible because doing so cranks up the constant on the ``high'' reports, yielding better expected loss.
-
-Note that ``bumping down'' does not happen because of how the original bins are set, but we can ''bump up'' from low to medium or medium to high.
-
-Given $p \in \simplex$, we have the original bins
-\begin{align*}
-\bar H(p) &:= \{i \mid p_i \geq \frac 1 k\}\\
-\bar M(p) &:= \{i \mid p_i \in [\frac 1 {k+1}, \frac 1 k]\} \\
-\bar L(p) &:= \{i \mid p_i \leq \frac 1 {k+1}\}~,~
-\end{align*}
-dropping $p$ from the notation where it can be understood from context.
-
-Now we want to modify this bins so that we can ``bump'' reports up to a higher bin if beneficial.
-One can verify that it is never beneficial to bump from middle to high, so we need only concern ourselves with bumping from $L$ to $M$.
-To understand when to bump $j$ from lower to middle, taking $u \to u'$, we can ask when we have
-\begin{align*}
-\inprod{p}{L(u)} &\geq \inprod{p}{L(u')}\\
-\sum_{i \in \bar H} \frac{|\bar M| + k -1}{k-|\bar H|} - p_i \left(\frac{k(|\bar M| + k -1)+ 1}{k(k- |\bar H|)}\right) + \sum_{i \in \bar M} \left(\frac 1 k - p_i \left( \frac {k+1}{k}\right)\right) &\geq \sum_{i \in \bar H} \frac{|\bar M| + k }{k-|\bar H|} - p_i \left(\frac{k(|\bar M| + k)+ 1}{k(k- |\bar H|)}\right) + \sum_{i \in \bar M'} \left(\frac 1 k - p_i \left( \frac {k+1}{k}\right)\right)\\
-\frac{|\bar H|(|\bar M| + k - 1)}{k(k- |\bar H|)} + p_H \frac{-k(|\bar M| + k - 1) - 1}{k(k - |\bar H|)} &\geq \frac{|\bar H|(|\bar M| + k)}{k(k - |\bar H)} + p_H \left(\frac{-k(|\bar M| + k)-1}{k (k - |\bar H|)}\right) + \left(\frac 1 k - p_j \left(\frac {k+1}{k}\right)\right) \\
-\frac{-|\bar H|}{k (k - |\bar H|)} + \frac{p_H}{k - |\bar H|} &\geq \frac 1 k - p_j \left(\frac{k+1}{k}\right)~,~
-\end{align*}
-where $p_H := \sum_{i \in \bar H} p_i$.
-Thus, we can take the set 
-\begin{align}
-B(p) &:= \left\{i : p_i \leq \frac{1}{k+1} \wedge \frac{p_H k- |\bar H|}{k(k- |\bar H|)} \geq \frac 1 k - p_i\left(\frac{k+1}{k}\right) \right\}
-\end{align}
-
-Now take the sets
-\begin{align*}
-H(p) &:= \bar H(p) \\
-M(p) &:= \bar H(p) \cup B(p) \\
-L(p) &:= \bar L(p) \setminus B(p)\\
-\end{align*}
-and take the function 
-\begin{align}
-\phi(p) := \frac{|M(p)| + k - 1}{k-|H(p)|} \ones_{H(p)} + \ones_{M(p)}~.~
-\end{align}
-\jessie{Fix with algorithm}
-
-
-\begin{proposition}
-	For all $p \in \simplex$, we have $\phi(p) \in \Gamma(p) \cap \R$.
-\end{proposition}
-\begin{proof}
-	To see $\phi(p) \in \R$ by construction. 
-\end{proof}
-
-
-\begin{corollary}
-	$\phi(\simplex)$ is a finite representative set.
-\end{corollary}
-
-\jessie{Adding 8 July 2021}
-Fix the distribution $p \in \simplex$.
-Denote the sets:
-\begin{align*}
-H_p &= \{i \in \Y \mid p_i > \frac 1 k\}\\
-M_p &= \{i \in \Y \mid p_i \in \left( \frac 1 {k+1}, \frac 1 k\right]\}\\
-B_p &= \{i \in \Y \mid p_i \leq \frac 1 {k+1} \wedge p_i \frac{k(1-p_H)}{(k+1)(k-H)}\}\\
-L_p &= \{i \in \Y \mid p_i \leq \frac {1}{k+1}\} \setminus B_p
-\end{align*}
-where $H := |H_p|$ and $p_H := \sum_{y \in H_p} p_y$.
-
-We will construct the report $\hat \Gamma(p) := \frac{M + B + k - 1}{k-H}\ones_{H_p} + \ones_{M_p} + \ones_{B_p}$.
-
-\begin{claim}
-	For any $p \in \simplex$, we have $\|\hat \Gamma(p)\|_0 \leq k$.
-\end{claim}	
-
-\begin{claim}
-	$\E_p L(\hat \Gamma(p), Y) = (1-p_H)(\bar u - \frac 1 k) + p_L)$. 
-\end{claim}
-
-We denote $L^* := \E_p L(\hat \Gamma(p), Y)$.
-
-\begin{lemma}
-	For small enough $\varepsilon$ and any $\hat y \in \Y$, consider $\varepsilon_{\hat y} := \varepsilon e_{\hat y}$.
-	The loss $\E_p L(\hat\Gamma(p), Y) \leq \E_p L(\hat \Gamma(p) + \varepsilon_{\hat y}, Y)$.
-\end{lemma}
-\begin{proof}
-	We proceed in 6 cases:
-	
-	Case 1: $\hat y \in H_p, \varepsilon_{\hat y} > 0$.
-	\begin{align*}
-	\E_p L(\hat \Gamma(p) + \varepsilon_{\hat y}, Y) &= {\color{blue}\sum_{y \in H_p} p_y (\frac {\varepsilon_{\hat y}}{k})} {\color{teal} - p_{\hat y} \frac{\varepsilon_{\hat y}}{k}} + {\color{blue} \sum_{y \in M_p, B_p} p_y(\frac{\varepsilon_{\hat y}}{k})} + {\color{olive}\sum_{y \in M_p, B_p} p_y(\bar u - \frac 1 k)} + {\color{blue}\sum_{y \in L_p} p_y (\frac{\varepsilon_{\hat y}}{k})}+ {\color{olive}\sum_{y \in L_p}p_y(1+ \bar u - \frac 1 k)}\\
-	&= {\color{blue}\frac{\varepsilon_{\hat y}}{k}} - {\color{teal}p_{\hat y}\frac{\varepsilon_{\hat y}}{k}} + {\color{olive}L^*}
-	\end{align*}
-	This is greater than or equal to $L^*$ if and only if $\frac{\varepsilon_{\hat y}}{k} \geq p_{\hat y}\frac{\varepsilon_{\hat y}}{k}$.
-	This is always true as $p \in \simplex$, so $p_{\hat y} \leq 1$.
-	
-	Case 2: $\hat y \in M_p, B_p, L_p, \varepsilon_{\hat y} > 0$.
-	\begin{align*}
-	\E_p L(\hat \Gamma(p) + \varepsilon_{\hat y}, Y) &= {\color{blue}\sum_{y \in H_p} p_y (\frac {\varepsilon_{\hat y}}{k}) + \sum_{y \in M_p, B_p} p_y(\frac{\varepsilon_{\hat y}}{k})} + {\color{olive}\sum_{y \in M_p, B_p} p_y(\bar u - \frac 1 k)} - {\color{teal}p_{\hat y} \varepsilon_{\hat y}} + {\color{blue}\sum_{y \in L_p} p_y (\frac{\varepsilon_{\hat y}}{k})}+ {\color{olive}\sum_{y \in L_p}p_y(1+ \bar u - \frac 1 k)}\\
-	&= {\color{blue}\frac{\varepsilon_{\hat y}}{k}} - {\color{teal}p_{\hat y}\frac{\varepsilon_{\hat y}}{k}} + {\color{olive}L^*}
-	\end{align*}
-	This is greater than or equal to $L^*$ if and only if $\frac{\varepsilon_{\hat y}}{k} \geq p_{\hat y} \varepsilon_{\hat y}$, which is true by the case that $p_{\hat y} \leq \frac 1 k$ since $\hat y \not \in H_p$.
-	
-	Case 3: $\hat y \in H_p, \varepsilon_{\hat y} < 0$.
-	For clarity, we assume $\varepsilon_{\hat y} > 0$, and we consider $\hat \Gamma(p) - \varepsilon_{\hat y}$.
-	
-	\begin{align*}
-	\E_p L(\hat \Gamma(p) - \varepsilon_{\hat y}, Y) &= {\color{teal} p_{\hat y}\varepsilon_{\hat y}} + \sum_{y \in M_p, B_p}({\color{olive}\bar u - \frac 1 k} -{\color{blue} \frac{\varepsilon_{\hat y}}{k}}) + \sum_{y \in L_p}({\color{olive}1 + \bar u - \frac 1 k} -{\color{blue} \frac{\varepsilon_{\hat y}}{k}})\\
-	&= {\color{olive}L^*} + {\color{teal} p_{\hat y}\varepsilon_{\hat y}} - {\color{blue} (1-p_H) \frac{\varepsilon_{\hat y}}{k}}
-	\end{align*}
-	This is greater than or equal to $L^*$ if and only if 
-	\begin{align*}
-	p_{\hat y} &\geq \frac{(1 - p_H)}{k}\\
-	\iff k p_{\hat y} &\geq (1 - p_H) ~,~
-	\end{align*}
-	which is true as $p_{\hat y} \geq \frac 1 k$, so the product is at least $1$ and $p_H$ is nonnegative.
-	
-	Case 4: $\hat y \in \in M_p, B_p, \varepsilon_{\hat y} < 0$.
-	Again, we repeat the notation as above.
-	\begin{align*}
-	\E_p L(\hat \Gamma(p) - \varepsilon_{\hat y}, Y) &= \sum_{y \in M_p, B_p}({\color{olive}\bar u - \frac 1 k} -{\color{blue} \frac{\varepsilon_{\hat y}}{k}}) + {\color{teal} p_{\hat y}\varepsilon_{\hat y}} + \sum_{y \in L_p}({\color{olive}1 + \bar u - \frac 1 k} -{\color{blue} \frac{\varepsilon_{\hat y}}{k}})\\
-	&= {\color{olive}L^*} + {\color{teal} p_{\hat y}\varepsilon_{\hat y}} - {\color{blue} (1-p_H) \frac{\varepsilon_{\hat y}}{k}}
-	\end{align*}
-	
-	Case 4a: $\hat y \in M_p$
-	It remains to show that $p_{\hat y} \varepsilon_{\hat y} \geq (1 - p_H)\frac{\varepsilon_{\hat y}}{k}$.
-
-	Observe that we require $H_p \neq \emptyset$; otherwise we would say $i \in H_p$ instead of $M_p$. \jessie{Check this claim!}
-	Therefore, $p_H \geq \frac 1 k$, so $1 - p_H \leq \frac{k-1}{k}$.
-	
-	\begin{align*}
-	p_{\hat y} \varepsilon_{\hat y} &\geq (1 - p_H)\frac{\varepsilon_{\hat y}}{k} &\\
-	\iff p_{\hat y} &\geq \frac{(1-p_H)}{k} & \text{Since $\varepsilon_{\hat y} > 0$} \\
-	\iff p_{\hat y} &\geq \frac{(k-1)/k}{k} \geq \frac{1-p_H}{k} & \text{Since $H \geq 1$}\\
-	p_{\hat y} &\geq \frac 1 {k+1} \geq \frac{k-1}{k^2} \geq \frac{(1-p_H)}{k} & \text{Since $\hat y \in M_p$} \\ 
-	\end{align*}
-	Thus, we conclude $\E_p L(\hat\Gamma(p) - \varepsilon_{\hat y}, Y) \geq L^*$ for $\hat y \in M_p$.
-	
-	Case 4b: $\hat y \in B_p$.
-	First, observe that $H_p = \emptyset \implies B_p = \emptyset$, since we have $i \in B_p \iff p_i \leq \frac{1}{k+1}$ and $p_i > \frac{k(1-p_H)}{(k+1)(k-H)} = \frac 1 {k+1}$, yielding a contradiction.
-	\begin{align*}
-	p_{\hat y} \varepsilon_{\hat y} \geq \frac{k(1-p_H)}{(k+1)(k-H)} &\geq \frac{1-p_H}{k} &\text{By assumption}\\
-	\iff \frac{k}{(k+1)(k-H)} &\geq \frac{1}{k} & \text{Dividing both sides by $(1-p_H)$} \\
-	\iff k^2 &\geq (k+1)(k-H) = k^2 - (H-1) k -1 & \text{Manipulating fractions}
-	\end{align*}
-	The last statement is true since $H \geq 1$, so the result holds.
-	
-	Case 4: $\hat y \in L_p, \varepsilon_{\hat y} < 0$.
-
-	\begin{align*}
-	\E_p L(\hat \Gamma(p) - \varepsilon_{\hat y}, Y) &= \sum_{y \in M_p, B_p}({\color{olive}\bar u - \frac 1 k}) + {\color{teal} p_{\hat y}\varepsilon_{\hat y}} + \sum_{y \in L_p}({\color{olive}1 + \bar u - \frac 1 k} )\\
-	&= {\color{olive}L^*} + {\color{teal} p_{\hat y}\varepsilon_{\hat y}} 
-	\end{align*}
-	This is greater than or equal to $L^*$ since $\varepsilon_{\hat y} > 0$ (recall instead of adding a negative number, we subtracted a positive one).
-\end{proof}
-
-
-\jessie{Not sure if this is correct/makes sense}
-Since $L^{top-k}$ is polyhedral, $\inprod{L^{top-k}(\hat\Gamma(p))}{p}$ is linear in any direction $\epsilon v$ for small enough $v$, and therefore, we have $\E_p L(\hat \Gamma(p) + \sum_i \lambda_{i} \varepsilon_{i}, Y) = \sum_i \lambda_i \E_p L(\hat \Gamma(p) + \varepsilon_{i}, Y) \geq \sum_i \lambda_i L^* = L^*$ for any $\{\lambda_1, \ldots, \lambda_n\} \in \simplex$ (i.e., convex combination of the $\varepsilon_{i}$s).  
-Since $\{\varepsilon_{\hat y}\}_{\hat y \in \Y}$ forms a basis for $\reals^n$, we have the following corollary.
-
-\begin{corollary}
-	For any $p \in \simplex, \hat \Gamma(p) \in \argmin_u \inprod{L^{top-k}(u)}{p}$
-\end{corollary}
-
-\end{document}
-%%% Local Variables:
-%%% mode: latex
-%%% TeX-master: t
-%%% End:
