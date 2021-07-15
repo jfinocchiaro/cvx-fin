@@ -344,7 +344,7 @@ M_p &:= \left\{i \mid p_i \in \left(\frac 1 {k+1}, \frac 1 k\right]\right\} \\
 B_p &:= \left\{i \mid p_i \in \left(\frac {k(1-p_H)}{(k+1)(k-H)}, \frac 1 {k+1} \right]\right\}\\
 L_p &:= \left\{i \mid p_i \leq \frac {k(1-p_H)}{(k+1)(k-H)} \right\}~,~
 \end{align*}
-where $p_H := \sum_{i \in \bar H} p_i$.
+where $p_H := \sum_{i \in H_p} p_i$.
 Sometimes we drop $p$ from the notation where it can be understood from context.
 
 
@@ -361,7 +361,7 @@ To understand when to bump $j$ from $L_p$ to $B_p$, taking $u \to u'$, we can as
 
 Thus, we can take the set 
 \begin{align*}
-B_p &:= \left\{i : p_i \leq \frac{1}{k+1} \wedge \frac{p_H k- |\bar H|}{k(k- |\bar H|)} \geq \frac 1 k - p_i\left(\frac{k+1}{k}\right) \right\}\\
+B_p &:= \left\{i : p_i \leq \frac{1}{k+1} \wedge \frac{p_H k- H}{k(k- H)} > \frac 1 k - p_i\left(\frac{k+1}{k}\right) \right\}\\
 &=\left\{i \mid p_i \in \left(\frac {k(1-p_H)}{(k+1)(k-H)}, \frac 1 {k+1} \right]\right\}
 \end{align*}
 
@@ -390,23 +390,9 @@ We will construct the report $\hat \Gamma(p) := \frac{M + B + k - 1}{k-H}\ones_{
 	It suffices to show $H + M + B \leq k$ to show $\hat \Gamma (p) \in \R^{\tt low}$.
 	
 	\jessie{TODO}
-	Observe that $p_H > \frac H k$, and therefore, $H < k$.
-	Moreover, $M \leq k$, and if $M = k$, then $(1 - p_M) = p_H + p_B + p_L \leq \frac 1 {k+1}$.
-	Additionally, we have $p_M > \frac {M}{k+1}$
-	
-	Now we have $p_B > \frac{Bk(1-p_H)}{(k+1)(k-H)}$.
-	
-	Since $p_H + p_M + p_B \leq 1$, I am hoping we get to a contradiction.
-	
-	\begin{align*}
-	p_H + p_M + p_B &> 
-	\frac{H}{k} + \frac M {k+1} + \frac{Bk(1-p_H)}{(k+1)(k-H)} \\
-	&= \frac{H(k+1)(k-H)}{k(k+1)(k-H)} + \frac{Mk(k-H)}{k(k+1)(k-H)} + \frac{Bk^2(1-p_H)}{k(k+1)(k-H)}\\
-	\end{align*}
 	
 	
-	
-	\jessie{...}
+	\jessie{Thought: Break into cases: the nonzero elements in (a) H (b) M (c) B (d) H,M (e) H,B (f) B,M (g) H,M,B.  Turns out that a,b are pretty trivial, c and f can never happen.  H,M has an untyped proof in my notes, but e and g have yet to be shown.  There's a tension between modifying the sets so this proof is more immediate and the result being true.  I think we can determine the sets algorithmically so this proof is more immediate, but showing it is a correct property value might be harder.}
 	
 	
 	Moreover, $\hat \Gamma(p) \in R^{\tt high}$ by construction.
@@ -414,15 +400,16 @@ We will construct the report $\hat \Gamma(p) := \frac{M + B + k - 1}{k-H}\ones_{
 \end{proof}
 
 \begin{claim}
-	$\inprod{L(\hat \Gamma(p))}{p} = (1-p_H)(\bar u - \frac 1 k) + p_L)$. 
+	$\inprod{L(\hat \Gamma(p))}{p} = (1-p_H) \bar u + p_L - \frac{p_M + p_B}{k}$. 
 \end{claim}
 \begin{proof}
 	\begin{align*}
 	\inprod{L(\hat \Gamma(p))}{p} &=
 	\sum_{y \in H_p} L(\hat \Gamma(p))_y + \sum_{y \in M_p, B_p} L(\hat \Gamma(p))_y + \sum_{y \in L_p}L(\hat \Gamma(p))_y \\
-	&= \sum_{y \in H_p} 0 + \sum_{y \in M_p, B_p} p_y(\bar u - \frac{1}{k}) + \sum_{y \in L_p} p_y(1 + \bar u - \frac 1 k) \\
-	&= \sum_{y \in M_p, B_p, L_p} p_y (\bar u - \frac{1}{k}) + \sum_{y \in L_p} p_y \\
-	&= (1-p_H) (\bar u - \frac{1}{k}) + p_L
+	&= \sum_{y \in H_p} 0 + \sum_{y \in M_p, B_p} p_y(\bar u - \frac{1}{k}) + \sum_{y \in L_p} p_y(1 + \bar u) \\
+	&= (1-p_H) \bar u + p_L - \frac{p_M + p_B}{k}
+%	&= \sum_{y \in M_p, B_p, L_p} p_y (\bar u - \frac{1}{k}) + \sum_{y \in L_p} p_y \\
+%	&= (1-p_H) (\bar u - \frac{1}{k}) + p_L
 	\end{align*}
 \end{proof}
 
@@ -439,7 +426,7 @@ We will construct the report $\hat \Gamma(p) := \frac{M + B + k - 1}{k-H}\ones_{
 	
 	Case 1: $\hat y \in H_p, \varepsilon_{\hat y} > 0$.
 	\begin{align*}
-	\E_p L(\hat \Gamma(p) + \varepsilon_{\hat y}, Y) &= {\color{blue}\sum_{y \in H_p} p_y (\frac {\varepsilon_{\hat y}}{k})} {\color{teal} - p_{\hat y} \frac{\varepsilon_{\hat y}}{k}} + {\color{blue} \sum_{y \in M_p, B_p} p_y(\frac{\varepsilon_{\hat y}}{k})} + {\color{olive}\sum_{y \in M_p, B_p} p_y(\bar u - \frac 1 k)} + {\color{blue}\sum_{y \in L_p} p_y (\frac{\varepsilon_{\hat y}}{k})}+ {\color{olive}\sum_{y \in L_p}p_y(1+ \bar u - \frac 1 k)}\\
+	\E_p L(\hat \Gamma(p) + \varepsilon_{\hat y}, Y) &= {\color{blue}\sum_{y \in H_p} p_y (\frac {\varepsilon_{\hat y}}{k})} {\color{teal} - p_{\hat y} \frac{\varepsilon_{\hat y}}{k}} + {\color{blue} \sum_{y \in M_p, B_p} p_y(\frac{\varepsilon_{\hat y}}{k})} + {\color{olive}\sum_{y \in M_p, B_p} p_y(\bar u - \frac 1 k)} + {\color{blue}\sum_{y \in L_p} p_y (\frac{\varepsilon_{\hat y}}{k})}+ {\color{olive}\sum_{y \in L_p}p_y(1+ \bar u)}\\
 	&= {\color{blue}\frac{\varepsilon_{\hat y}}{k}} - {\color{teal}p_{\hat y}\frac{\varepsilon_{\hat y}}{k}} + {\color{olive}L^*}
 	\end{align*}
 	This is greater than or equal to $L^*$ if and only if $\frac{\varepsilon_{\hat y}}{k} \geq p_{\hat y}\frac{\varepsilon_{\hat y}}{k}$.
@@ -447,7 +434,7 @@ We will construct the report $\hat \Gamma(p) := \frac{M + B + k - 1}{k-H}\ones_{
 	
 	Case 2: $\hat y \in M_p \cup  B_p \cup L_p$, and $\varepsilon_{\hat y} > 0$.
 	\begin{align*}
-	\E_p L(\hat \Gamma(p) + \varepsilon_{\hat y}, Y) &= {\color{blue}\sum_{y \in H_p} p_y (\frac {\varepsilon_{\hat y}}{k}) + \sum_{y \in M_p, B_p} p_y(\frac{\varepsilon_{\hat y}}{k})} + {\color{olive}\sum_{y \in M_p, B_p} p_y(\bar u - \frac 1 k)} - {\color{teal}p_{\hat y} \varepsilon_{\hat y}} + {\color{blue}\sum_{y \in L_p} p_y (\frac{\varepsilon_{\hat y}}{k})}+ {\color{olive}\sum_{y \in L_p}p_y(1+ \bar u - \frac 1 k)}\\
+	\E_p L(\hat \Gamma(p) + \varepsilon_{\hat y}, Y) &= {\color{blue}\sum_{y \in H_p} p_y (\frac {\varepsilon_{\hat y}}{k}) + \sum_{y \in M_p, B_p} p_y(\frac{\varepsilon_{\hat y}}{k})} + {\color{olive}\sum_{y \in M_p, B_p} p_y(\bar u - \frac 1 k)} - {\color{teal}p_{\hat y} \varepsilon_{\hat y}} + {\color{blue}\sum_{y \in L_p} p_y (\frac{\varepsilon_{\hat y}}{k})}+ {\color{olive}\sum_{y \in L_p}p_y(1+ \bar u)}\\
 	&= {\color{blue}\frac{\varepsilon_{\hat y}}{k}} - {\color{teal}p_{\hat y}\frac{\varepsilon_{\hat y}}{k}} + {\color{olive}L^*}
 	\end{align*}
 	This is greater than or equal to $L^*$ if and only if $\frac{\varepsilon_{\hat y}}{k} \geq p_{\hat y} \varepsilon_{\hat y}$, which is true by the case that $p_{\hat y} \leq \frac 1 k$ since $\hat y \not \in H_p$.
@@ -456,7 +443,7 @@ We will construct the report $\hat \Gamma(p) := \frac{M + B + k - 1}{k-H}\ones_{
 	For clarity, we assume $\varepsilon_{\hat y} > 0$, and we consider $\hat \Gamma(p) - \varepsilon_{\hat y}$.
 	
 	\begin{align*}
-	\E_p L(\hat \Gamma(p) - \varepsilon_{\hat y}, Y) &= {\color{teal} p_{\hat y}\varepsilon_{\hat y}} + \sum_{y \in M_p, B_p}({\color{olive}\bar u - \frac 1 k} -{\color{blue} \frac{\varepsilon_{\hat y}}{k}}) + \sum_{y \in L_p}({\color{olive}1 + \bar u - \frac 1 k} -{\color{blue} \frac{\varepsilon_{\hat y}}{k}})\\
+	\E_p L(\hat \Gamma(p) - \varepsilon_{\hat y}, Y) &= {\color{teal} p_{\hat y}\varepsilon_{\hat y}} + \sum_{y \in M_p, B_p}p_y({\color{olive}\bar u - \frac 1 k} -{\color{blue} \frac{\varepsilon_{\hat y}}{k}}) + \sum_{y \in L_p} p_y({\color{olive}1 + \bar u} -{\color{blue} \frac{\varepsilon_{\hat y}}{k}})\\
 	&= {\color{olive}L^*} + {\color{teal} p_{\hat y}\varepsilon_{\hat y}} - {\color{blue} (1-p_H) \frac{\varepsilon_{\hat y}}{k}}
 	\end{align*}
 	This is greater than or equal to $L^*$ if and only if 
@@ -469,7 +456,7 @@ We will construct the report $\hat \Gamma(p) := \frac{M + B + k - 1}{k-H}\ones_{
 	Case 4: $\hat y \in M_p \cup B_p, \varepsilon_{\hat y} < 0$.
 	Again, we repeat the notation as above.
 	\begin{align*}
-	\E_p L(\hat \Gamma(p) - \varepsilon_{\hat y}, Y) &= \sum_{y \in M_p, B_p}({\color{olive}\bar u - \frac 1 k} -{\color{blue} \frac{\varepsilon_{\hat y}}{k}}) + {\color{teal} p_{\hat y}\varepsilon_{\hat y}} + \sum_{y \in L_p}({\color{olive}1 + \bar u - \frac 1 k} -{\color{blue} \frac{\varepsilon_{\hat y}}{k}})\\
+	\E_p L(\hat \Gamma(p) - \varepsilon_{\hat y}, Y) &= \sum_{y \in M_p, B_p}({\color{olive}\bar u - \frac 1 k} -{\color{blue} \frac{\varepsilon_{\hat y}}{k}}) + {\color{teal} p_{\hat y}\varepsilon_{\hat y}} + \sum_{y \in L_p}({\color{olive}1 + \bar u} -{\color{blue} \frac{\varepsilon_{\hat y}}{k}})\\
 	&= {\color{olive}L^*} + {\color{teal} p_{\hat y}\varepsilon_{\hat y}} - {\color{blue} (1-p_H) \frac{\varepsilon_{\hat y}}{k}}
 	\end{align*}
 	
@@ -488,10 +475,13 @@ We will construct the report $\hat \Gamma(p) := \frac{M + B + k - 1}{k-H}\ones_{
 	\end{align*}
 	Thus, we conclude $\inprod{L(\hat\Gamma(p) - \varepsilon_{\hat y})}{p} \geq L^*$ for $\hat y \in M_p$.
 	
-	Now, if $H_p = \emptyset$
-	\jessie{???}
+	Now, if $H_p = \emptyset$ then we can write the expected loss
+	\begin{align*}
+	\E_p L(\hat \Gamma(p) - \varepsilon_{\hat y}, Y) &= \sum_{y \in \Y}({\color{olive}\bar u - \frac 1 k} -{\color{blue} \frac{\varepsilon_{\hat y}}{k}}) + {\color{teal} p_{\hat y}\varepsilon_{\hat y}} + \sum_{y \in L_p}({\color{olive}p_y + \bar u - \frac 1 k} -{\color{blue} \frac{\varepsilon_{\hat y}}{k}})\\
+	\end{align*}
 	
 	Case 4b: $\hat y \in B_p$.
+	
 	First, observe that $H_p = \emptyset \implies B_p = \emptyset$, since we have $i \in B_p \iff p_i \leq \frac{1}{k+1}$ and $p_i > \frac{k(1-p_H)}{(k+1)(k-H)} = \frac 1 {k+1}$, yielding a contradiction.
 	\begin{align*}
 	p_{\hat y} \varepsilon_{\hat y} \geq \frac{k(1-p_H)}{(k+1)(k-H)} &\geq \frac{1-p_H}{k} &\text{By assumption}\\
@@ -500,37 +490,32 @@ We will construct the report $\hat \Gamma(p) := \frac{M + B + k - 1}{k-H}\ones_{
 	\end{align*}
 	The last statement is true since $H \geq 1$, so the result holds.
 	
-	Case 4: $\hat y \in L_p, \varepsilon_{\hat y} < 0$.
+	Case 5: $\hat y \in L_p, \varepsilon_{\hat y} < 0$.
 
 	\begin{align*}
-	\E_p L(\hat \Gamma(p) - \varepsilon_{\hat y}, Y) &= \sum_{y \in M_p, B_p}({\color{olive}\bar u - \frac 1 k}) + {\color{teal} p_{\hat y}\varepsilon_{\hat y}} + \sum_{y \in L_p}({\color{olive}1 + \bar u - \frac 1 k} )\\
+	\E_p L(\hat \Gamma(p) - \varepsilon_{\hat y}, Y) &= \sum_{y \in M_p, B_p}p_y({\color{olive}\bar u - \frac 1 k}) + \sum_{y \in L_p}p_y({\color{olive}1 + \bar u - \frac 1 k}) + {\color{teal} p_{\hat y}\varepsilon_{\hat y}} \\
 	&= {\color{olive}L^*} + {\color{teal} p_{\hat y}\varepsilon_{\hat y}} 
 	\end{align*}
 	This is greater than or equal to $L^*$ since $\varepsilon_{\hat y} > 0$ (recall instead of adding a negative number, we subtracted a positive one).
 \end{proof}
 
-
-\jessie{Not sure if this is correct/makes sense}
-Since $L^{top-k}$ is polyhedral, $\inprod{L^{top-k}(\hat\Gamma(p))}{p}$ is linear in any direction $\epsilon v$ for small enough $\varepsilon$, and therefore, we have 
+\jessie{I think this is clear, but I'm biased as the writer}
+Since $L^{top-k}$ is polyhedral, $\inprod{L^{top-k}(\hat\Gamma(p))}{p}$ is linear in any direction $\varepsilon v$ for small enough $\varepsilon$.
+Moreover, $\{\varepsilon_{\hat y}\}_{\hat y \in \Y}$ forms a basis for $\reals^n$, so for all $v \in \reals^n$, there is a unique $\lambda = \{\lambda_i\} \in \reals^n$ such that $v = \lambda_i e_i$.
+Therefore, we have 
 \begin{align*}
 \inprod{L(\hat \Gamma(p) + \sum_i \lambda_{i} \varepsilon_{i})}{p} &= 
 \sum_i \lambda_i \inprod{L(\hat \Gamma(p) + \varepsilon_{i})}{p}\\
 &\geq \sum_i \lambda_i L^* \\
 &= L^*
 \end{align*}
-for any $\lambda = \{\lambda_i\} \in \simplex$.
-Since $\{\varepsilon_{\hat y}\}_{\hat y \in \Y}$ forms a basis for $\reals^n$, we have the following corollaries.
-
-\begin{proposition}
-	For all $p \in \simplex$, $\hat \Gamma(p) \in \Gamma(p) \cap \U$.
-\end{proposition}
+This yields the following corollary.
 
 \begin{corollary}
-	$\hat \Gamma(\simplex)$ is a finite representative set.
+	$\R := \hat \Gamma(\simplex)$ is a finite representative set.
 \end{corollary}
 
-
-This yields the finite loss $L|_{\hat \Gamma(\simplex)}$ embedded by $L^{top-k}$ by
+The finite loss $L|_{\R}$ embedded by $L^{top-k}$ by
 \begin{align}
 L|_{\R}(r,y) &= \begin{cases}
 0 & r_y = \bar r_{-y} + 1\\
