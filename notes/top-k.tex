@@ -152,10 +152,10 @@ For our first assumption, we first observe that $L^{top-k}$ is invariant in the 
 \end{lemma}
 \begin{proof}
 	\begin{align*}
-	L^{top-k}(u + \alpha \ones)_y &= \left(1 - (u_y + \alpha) + \frac{1}{k} \sum_{i=1}^k ((u + \alpha \ones  - e_y)_{[i]} \right)_+\\
-	&= \left(1 - (u_y + \alpha) +\frac{1}{k} \alpha k + \frac{1}{k} \sum_{i=1}^k ((u - e_y)_{[i]} \right)_+\\
-	&= \left(1 -u_y - \alpha + \alpha + \frac{1}{k} \sum_{i=1}^k ((u - e_y)_{[i]} \right)_+\\
-	&= \left(1 -u_y + \frac{1}{k} \sum_{i=1}^k ((u - e_y)_{[i]} \right)_+\\
+	L^{top-k}(u + \alpha \ones)_y &= \left(1 - (u_y + \alpha) + \frac{1}{k} \sum_{i=1}^k (u + \alpha \ones  - e_y)_{[i]} \right)_+\\
+	&= \left(1 - (u_y + \alpha) +\frac{1}{k} \alpha k + \frac{1}{k} \sum_{i=1}^k (u - e_y)_{[i]} \right)_+\\
+	&= \left(1 -u_y - \alpha + \alpha + \frac{1}{k} \sum_{i=1}^k (u - e_y)_{[i]} \right)_+\\
+	&= \left(1 -u_y + \frac{1}{k} \sum_{i=1}^k (u - e_y)_{[i]} \right)_+\\
 	&= L^{top-k}(u)_y
 	\end{align*}
 \end{proof}
@@ -199,10 +199,7 @@ For our first assumption, we first observe that $L^{top-k}$ is invariant in the 
 	Thus, $R$ is representative.
 \end{proof}
 
-\begin{assumption}\label{assum:nonneg}
-	We will say $u_{[k+1]} = \ldots = u_{[n-1]} = u_{[n]} = 0$.
-\end{assumption}
-It follows from Lemma~\ref{lem:extra-elts-zero} that $R^{\tt low}$ is representative, and every $u$ satisfying Assumption~\ref{assum:nonneg} is in $R^{\tt low}$ by construction.
+It follows from construction of $R^{\tt low}$ that we can take $u_{k+1} = \ldots, = u_{[n]} = 0$.
 
 
 We now state our final assumption, and show that the set of reports satisfying the two assumptions is representative.
@@ -254,9 +251,11 @@ Thus, there is some $u' \in R^{\tt low} \cap R^{\tt high}$ so that $u' \in \argm
 
 Consider the set $\U := R^{\tt low} \cap R^{\tt high}$.
 
-\bigskip
-\hrule
-\bigskip
+For $u \in \U$, we can write $\inprod{L^{top-k}(u)}{p}$ as follows:
+\begin{align*}
+L^{top-k}(u)_y &= 1 + \bar u - u_y - \frac 1 k \min(u_y, 1)\\
+\inprod{L^{top-k}(u)}{p} &= 1 + \bar u - \inprod{p}{u} - \frac 1 k \inprod{p}{\min(u, \ones)}
+\end{align*}
 
 %Consider the following finite set.
 %\begin{align*}
@@ -326,9 +325,25 @@ If we can find a finite representative set, we can easily embed these reports vi
 
 We will start with $\U$ as we show it is representative in Lemma~\ref{lem:top-threshold}, and narrow down to a finite representative set for $L^{top-k}$.
 
+\begin{claim}
+	For each $p \in \mathrm{relint}\simplex$, the expected loss $\inprod{p}{L^{top-k}(u)}$ is affine on the set $\{u \in \U \mid $ the top-$k$ elements of $(u - e_y)$ are the same for all $ y \in \Y\}$.
+\end{claim}
+\begin{proof}
+	For $u \in \U$, the loss for any outcome is given by $L^{top-k}(u)_y = \left(1 - u_y + \frac 1 k \sum_{i = 1}^k(u - e_y)_{[i]}\right)$.
+	Since this is affine in the first two terms, it is thus affine on any set for which the last sum is composed of the same elements, which is precisely given by the set above.
+\end{proof}
+
+\jessie{This is not precise...}
 \begin{proposition}
-	$\R := \left\{ \frac{|M| + k -1}{k - |H|} \mathbf{1}_H + \mathbf{1}_M : H, M \subset [n], H\cap M = \emptyset, |H| + |M| \leq k \right\}$ is representative for $L^{top-k}$.
+	$\R := \left\{ \frac{|M| + k -1}{k - |H|} \mathbf{1}_H + \mathbf{1}_M : H, M \subset [n], H\cap M = \emptyset, |H| + |M| \leq k \right\}$ is the set of vertices of $L^{top-k}$.
 \end{proposition}
+\begin{proof}
+	Any vertex of the loss surface in $\reals^n \cap \U$ is given by the intersection of (at least) $n-1$ affine halfspaces.
+	The set of affine halfspaces composing $L^{top-k}$ is precisely those where the top-$k$ elements of $(u - e_y)$ are the same for all $y \in \Y$.
+	These sets shift when either (a) one of the $k$ nonzero elements shifts below $1$ or (b) we hit the boundary of $\U$.
+	For (a), this is the intersection of the $n$ hyperplanes where \jessie{...}
+	When we hit the boundary of $\U$, the vertices are \jessie{...}
+\end{proof}
 
 
 \section{Property elicited by $L^{top-k}$}
@@ -405,7 +420,7 @@ We will construct the report $\hat \Gamma(p) := \frac{M + B + k - 1}{k-H}\ones_{
 \begin{proof}
 	\begin{align*}
 	\inprod{L(\hat \Gamma(p))}{p} &=
-	\sum_{y \in H_p} L(\hat \Gamma(p))_y + \sum_{y \in M_p, B_p} L(\hat \Gamma(p))_y + \sum_{y \in L_p}L(\hat \Gamma(p))_y \\
+	\sum_{y \in H_p} p_y L(\hat \Gamma(p))_y + \sum_{y \in M_p, B_p} L(\hat \Gamma(p))_y + \sum_{y \in L_p}L(\hat \Gamma(p))_y \\
 	&= \sum_{y \in H_p} 0 + \sum_{y \in M_p, B_p} p_y(\bar u - \frac{1}{k}) + \sum_{y \in L_p} p_y(1 + \bar u) \\
 	&= (1-p_H) \bar u + p_L - \frac{p_M + p_B}{k}
 %	&= \sum_{y \in M_p, B_p, L_p} p_y (\bar u - \frac{1}{k}) + \sum_{y \in L_p} p_y \\
