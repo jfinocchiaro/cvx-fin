@@ -323,7 +323,7 @@ Consider the loss $L^{top-k} : \reals^n \times \Y \to \reals_+$ given in equatio
 Since the loss is polyhedral, we know it has a finite set of minimizers.
 If we can find a finite representative set, we can easily embed these reports via the identity and more easily study the property elicited by this surrogate, and how it compares to the top-$k$ property originally in mind when the surrogate was designed.
 
-We will start with $\U$ as we show it is representative in Lemma~\ref{lem:top-threshold}, and narrow down to a finite representative set $\R$ for $L^{top-k}$.
+We will start with $\U$ as we show it is representative in Lemma~\ref{lem:top-threshold}, and the set of vertices $\R$ for $L^{top-k}$.
 Consider $\R := \left\{ \frac{|M| + k -1}{k - |H|} \mathbf{1}_H + \mathbf{1}_M : H, M \subset [n], H\cap M = \emptyset, |H| + |M| \leq k \right\}$.
 
 \begin{claim}
@@ -331,44 +331,54 @@ Consider $\R := \left\{ \frac{|M| + k -1}{k - |H|} \mathbf{1}_H + \mathbf{1}_M :
 \end{claim}
 \begin{proof}
 	First, observe the loss is affine in the first two terms for all $u \in \U$, and non-linearity is only introduced in the last two terms.
-	Without loss of generality, we will fix a partition $\pi$ of the elements of $u$, and let $T_k(u)$ be the top $k$ elements of $u$ according to the partition $\pi$.
-	Since $u \in \U \supseteq R^{\tt low}$, we have $u_{\pi_{k+1}} = \ldots = u_{\pi_n} = 0$, and take $k$ constraints constructing $R^{\tt low}$ given by $0 \leq u_{\pi_i}$ for $i \in [k]$.
-	Call $T$ the top $k$ elements of the partition $\pi$.
-	
-	
-	Moreover, there are $k$ constraints constructing $R^{\tt high}$, given by $	\forall i \in T_k(u), \,\,
+	Fixing a set $T$ of size $k$, and for any $u \in \U$, we will call $T_k(u)$ the top $k$ elements of $u$.
+	Moreover, denote by $A^T = \{u \in \U \mid T_k(u) = T\}$ as the set of $u$ whose top $k$ elements are exactly the elements of $T$.
+	By construction, we now have $\bar u$ is affine in $A^T$ for each $T$.
+	 
+	Since $u \in \U \supseteq R^{\tt low}$, we have $u_{[k+1]} = \ldots = u_{[n]} = 0$, and we also have $k$ constraints constructing $R^{\tt low}$ given by $0 \leq u_{i}$ for $i \in T$.	
+	Moreover, there are $k$ constraints constructing $R^{\tt high}$, given by $\forall i \in T, \,\,
 	u_{i} \leq 1 + \frac{1}{k-1}\sum_{j \in T_k(u) \setminus \{i\}} u_j$.
 
 
-	%need to introduce the segments where L is affine.
-	Within each permutation $\pi$, we know that the third term is affine on each set $\{u \in \U \mid $ the top $k$ elements of $u$ are equal to $T\}$.
-	
 	Finally, we can consider affineness in the last term, where there is a ``switch'' at $u_y = 1$ for each $y$.
-	There are $2^k$ choices of sets $V \in \{A,B\}^k$, $u \in V$ if and only if, for all $y \in \Y$, $V_y = A$ means $u_y \leq 1$ and $V_y = B$ otherwise. 
-	We have $L$ affine on the region $\{u \in \U \mid u \in V\}$ for each choice of $V \in \{A,B\}^k$.
-	We will generate such sets using $T$ and $S$, the latter of which is introduced below.
+	For a fixed set $T$ and $u \in A^T$, consider any $S \subseteq T$.
+	We can now construct the region $A^{T,S} = \{u \in A^T \mid u_y \in [0,1] \forall y \in S \wedge u_y \in [1,1 + \frac 1 {k-1} \sum_{j \in T_k(u) \setminus \{i\}} u_j] \forall y \in T \setminus S \}$.
+	%  where for any $y \in S$, we have $u_y \in [0,1]$, and for $y \in T \setminus S$, we have $u_y \in [1,1 + \frac 1 {k-1} \sum_{j \in T_k(u) \setminus \{i\}} u_j]$.
+	%There are $2^k$ choices of sets $V \in \{A,B\}^k$, $u \in V$ if and only if, for all $y \in \Y$, $V_y = A$ means $u_y \leq 1$ and $V_y = B$ otherwise. 
+	As $A^{T,S}$ is a subset of $A^T$, we know the third term is affine on $A^{T,S}$, and construct $A^{T,S}$ so that it is affine on the fourth term: therefore, $L$ is affine on $A^{T,S}$ for all $T$ and $S \subseteq T$. 
+	We now proceed to enumerate the vertices of $L$ by finding $k$ equalities imposed on $A^{T,S}$.
+	(Note that technically we need $n$ hyperplanes to intersect to form a vertex, but with $T$ fixed, the other $n-k$ come from the requirement $u_i = 0 \forall i \in [n] \setminus T$.)
 	
 	%Now, since each of these inequalities generates a halfspace in $\reals^k$, and a vertex in $\reals^k$ is the intersection of $k$ such halfspaces, we observe that there are $2^k$ possible vertices (though some of these are redundant).
-	
-	For a fixed $T$ (the top $k$ elements of $\pi$), iterate over every $S \subseteq T$.
-	Suppose $S$ is the set of elements of $u$ such that $0 \leq u_y \leq 1$ for all $y \in S$, and additionally have the constraints $1 \leq u_y \leq 1 + \frac 1 {k-1} \sum_{j \in T_k(u) \setminus \{i\}} u_j$.
-	For each $T,S$ combination, we then have vertices at each of these $2^k$ possible equalities.
+	For each $T,S$ combination, we then have vertices at each of these $2^k$ possible equalities, given by the following constraints.
 	\begin{align*}
 	\forall i \in S, \,\, 0 &\leq u_i \leq 1 \\
 	\forall i \in T \setminus S, \,\, 1 &\leq u_i \leq 1 + \frac 1 {k-1} \sum_{j \in T_k(u) \setminus \{i\}} u_j 
 	\end{align*}
-	Iterating over each of these $2^k$ inequalities, we see that vertices are generated at points $0,1$ or some constant $c_{TS}$ for each choice of inequalities for $T$ and $S$.
+	Iterating over each of these $2^k$ inequalities, we see that vertices are generated at points $0,1$ or some constant $c_{T,S}$ for each choice of inequalities for $T$ and $S$.
 
-	Now, for each $T$ and $S$ and choice of equalities in each, let $M = \{y \mid u_y = 1\}$, and $H = \{y \in \Y \mid u_y = 1 + \sum_{j \in T_k(u) \setminus \{i\}} u_j\}$.
+	Now, for fixed $T$, $S$, and choice of equalities in each, let $M = \{y \mid u_y = 1\}$, and $H = \{y \in \Y \mid u_y = 1 + \sum_{j \in T_k(u) \setminus \{i\}} u_j\}$.
 	(Note that $y \in H \implies u_y > 1$ unless $M$ is empty \jessie{and $H = \{y\}$?}, in which case, we will say $y \in M$ and $H = \emptyset$.) 
 	\jessie{Be careful about if $c_{MH} = 1$}
 	By construction of $T$ and $S$, we satisfy the set requirements of $\R$, and observe that for all $y \in H$, we have $u_y = 1 + \frac 1 {k-1}\sum_{j \in T_k(u) \setminus \{y\} u_j} = \frac{|M| + k -1}{k - |H|}$.
 	
-	
 	As there are only finitely many choices of $T$ and $S$, a finite number of vertices generated by each of those choices, and they generate the sets generating $\R$.
 	Moreover, for each $H,M$ generating an element of $R$, there is a $T,S$ generating the element of $\R$.
 	Thus, we conclude $\R$ is the finite set of vertices of $\inprod{p}{L(\cdot)}$ for distributions $p \in \mathrm{relint}(\simplex)$.
+	%(If $p \not \in \mathrm{relint}(\simplex)$, then some points in $\R$ may not be vertices since any $T$ containing $y$ outside the support of $p$ will not be it dude )
 \end{proof}
+
+\begin{corollary}
+	$L^{top-k}$ embeds $L^{top-k}|_\R$.
+\end{corollary}
+
+\begin{align}
+L|_{\R}(r,y) &= \begin{cases}
+0 & r_y = \bar r_{-y} + 1\\
+\bar r - \frac 1 k & r_y = 1\\
+1 + \bar r & r_y = 0
+\end{cases}~.~
+\end{align}
 
 %\jessie{This is not precise...}
 %\begin{proposition}
@@ -435,11 +445,11 @@ We will construct the report $\hat \Gamma(p) := \frac{M + B + k - 1}{k-H}\ones_{
 
 \begin{claim}
 	Fix $p \in \simplex$.
-	$\hat \Gamma(p) \in \U$.
+	$\hat \Gamma(p) \in \R$.
 \end{claim}	
 \begin{proof}
 	Fix $p \in \simplex$, and take $H := |H_p|, M:= |M_p|$, and $B := |B_p|$.
-	It suffices to show $H + M + B \leq k$ to show $\hat \Gamma (p) \in \R^{\tt low}$.
+	By construction, we just need to show that $H + M + B \leq k$ and we are done.
 	
 	\jessie{TODO}
 	
@@ -567,14 +577,6 @@ This yields the following corollary.
 	$\R := \hat \Gamma(\simplex)$ is a finite representative set.
 \end{corollary}
 
-The finite loss $L|_{\R}$ embedded by $L^{top-k}$ by
-\begin{align}
-L|_{\R}(r,y) &= \begin{cases}
-0 & r_y = \bar r_{-y} + 1\\
-\bar r - \frac 1 k & r_y = 1\\
-1 + \bar r & r_y = 0
-\end{cases}~.~
-\end{align}
 
 
 \section{Example: $k=2$ and $n=3$}
@@ -584,6 +586,36 @@ Since $n \neq 1$, we then have $\min_y p_y = 0$, so the conjugate of the negativ
 
 Then, plugging this into our given loss yields $L(u)_y = 1 + u_{[1]} - u_y$.
 
+
+\section{One-pager}
+Top-$k$ prediction is often used for image classification where labels may be ambiguous.
+This generalization of 0-1 loss allows the algorithm to guess $k$ labels, and deeming a prediction ``correct'' if the true, assigned label is in the $k$-element set of predicted labels.
+The top-$k$ discrete loss with predictions $r \in \R := \{R \subseteq \Y \mid |R| \leq k\}$ can be defined as follows:
+\begin{align*}
+\ell^k(r)_y &=
+\begin{cases}
+0 & y \in r \\
+1 & \text{otherwise}
+\end{cases}
+\end{align*}
+
+Like 0-1 loss, $\ell^k$ is $NP$-hard to optimize in most cases, and we want a convex surrogate for $\ell^k$ that is calibrated.
+\citet{lapin2015top, lapin2015loss} propose a few natural convex surrogates for $\ell^k$, leaving calibration as an open question.
+\citet{yang2020consistency} later show that their convex surrogates are not calibrated with respect to $\ell^k$ (summary of results in Table 1, functions $\psi_2, \psi_3$).
+This begs the question: what are these surrogates calibrated with respect to?
+We focus on one of the surrogates of \citet{lapin2015top,lapin2015loss}, denoted $L^{top-k}$ here, and find a finite representative set for it, giving a loss that $L^{top-k}$ embeds.
+Note that for any $u \in \reals^n$, we denote $u_{[i]}$ to be the $i^{th}$ largest element of $u$.
+\begin{align*}
+L^{top-k}(u)_y &= \left(1 - u_y + \sum_{i=1}^k(u-e_y)_{[i]}\right)_+
+\end{align*}
+
+We enumerate the vertices of $L^{top-k}$ by first reducing to an infinite representative set $\U$ which allows us to simplify the form of $L^{top-k}$, then define the regions for which $\inprod{p}{L(\cdot)}$ is affine (for any $p$) so that we may enumerate the vertices of $L^{top-k}$.
+These vertices have each coordinate ``low'' (e.g., $u_i = 0$), ``medium'' ($u_i = 1$), or ``high'' ($u_i$ is as high as possible while still being in $\U$).
+Details are deferred to Appendix~\ref{app:top-k}.
+
+\jessie{Bonus content: if $\hat \Gamma(p)$ pans out, then we have the non-redundancy result} 
+
+\jessie{Maybe: for intuition, keep example with $k = 2$ and $n = 3$?}
 
 \end{document}
 %%% Local Variables:
