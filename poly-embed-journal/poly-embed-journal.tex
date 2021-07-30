@@ -200,6 +200,7 @@ For example, recent work has developed tools to bound the prediction dimension o
 Yet in some cases these bounds are far from tight, such as for \emph{abstain loss} (classification with an abstain option)~\citep{bartlett2008classification,yuan2010classification,ramaswamy2016convex,ramaswamy2018consistent,zhang2018reject}.
 Furthermore, the kinds of strategies available for constructing surrogates, and their relative power, are not well understood.
 
+\bo{This is pretty inaccessible to nonexperts. I think we should consider a rewrite that expands this intro and makes it much more accessible. For example what is a surrogate? It would help many readers a lot to spell things out more.}
 We augment this literature by studying a particularly natural approach for finding convex surrogates, wherein one ``embeds'' a discrete loss.
 Specifically, we say a convex surrogate $L$ embeds a discrete loss $\ell$ if there is an injective embedding from the discrete reports (predictions) to a vector space such that (i) the original loss values are recovered, and (ii) a report is $\ell$-optimal if and only if the embedded report is $L$-optimal.
 If this embedding can be extended to a calibrated link function, which roughly maps approximately $L$-optimal reports to $\ell$-optimal reports, then consistency follows~\citep{agarwal2015consistent}.
@@ -213,7 +214,7 @@ Common examples of this general construction include hinge loss as a surrogate f
 % thus giving a very general framework to construct consistent convex surrogates for arbitrary losses.
 
 
-We prove that such an embedding scheme is intimitely related to the class of polyhedral (piecewise-linear and convex) loss functions.
+We prove that such an embedding scheme is intimately related to the class of polyhedral (piecewise-linear and convex) loss functions.
 In particular, every discrete loss is embedded by a polyhedral surrogate.
 Moreover, such an embedding gives rise to calibrated link function.
 Our proofs give explicit constructions for the surrogate (\S~\ref{sec:poly-loss-embed}) and link (\S~\ref{sec:calibration}) given a discrete loss.
@@ -288,6 +289,7 @@ Let $\Y$ be a finite label space, and throughout let $n=|\Y|$.
 The set of probability distributions on $\Y$ is denoted $\simplex\subseteq\reals^{\Y}_+$, represented as vectors of probabilities (requiring $\|p\|_1 = 1$).
 We write $p_y$ for the probability of outcome $y \in \Y$ drawn from $p \in \simplex$.
 We first discuss the conditional setting, with just labels $\Y$ and no features $\X$, and show in \S~\ref{subsec:calibration-links} how these notions relate to the usual $\X\times\Y$ setting considering features.
+\bo{I don't expect the previous sentence to make sense to most readers. Suggest we add some explanation or detail -- or defer this comment to a bit later.}
 
 We assume that a given discrete prediction problem, such as classification, is given in the form of a discrete \emph{target loss} $\ell:\R\to\reals^\Y_+$, which maps a report (prediction) $r$ from a finite set $\R$ to the vector of loss values $\ell(r) = (\ell(r)_y)_{y\in\Y}$ for each possible outcome $y\in\Y$.
 \jessiet{Removed sentence saying we assume non-redundancy}
@@ -309,7 +311,7 @@ A \emph{polytope} is a bounded polyhedral set.
 A convex function $f:\reals^d\to\reals$ is \emph{polyhedral} if its epigraph is polyhedral, or equivalently, if it can be written as a pointwise maximum of a finite set of affine functions~\citep{rockafellar1997convex}.
 %
 \begin{definition}[Polyhedral loss]
-  A loss $L: \reals^d \to \reals^{\Y}_+$ is \emph{polyhedral} if $L(u)_y$ is a polyhedral (convex) function of $u$ for each $y\in\Y$.
+  A loss $L: \reals^d \to \reals^{\Y}_+$ is \emph{polyhedral} if $L(u)_y$ is a polyhedral convex\bo{removed parentheses which might be confusing} function of $u$ for each $y\in\Y$.
 \end{definition}
 %
 For example, hinge loss is polyhedral, whereas logistic loss is not.
@@ -349,6 +351,7 @@ In this case we say 0-1 loss \emph{elicits} the mode, as we formalize below.
 For finite properties (those with $|\R|<\infty$) and discrete losses, we will use lowercase notation $\gamma$ and $\ell$, respectively, with reports $r\in\R$; for surrogate properties and losses we use $\Gamma$ and $L$, with reports $u\in\reals^d$.
 % For finite properties (those with $|\R|<\infty$) and discrete losses, we will use lowercase notation $\gamma:\simplex\toto\R$ and $\ell:\R\toto\reals^\Y_+$, respectively, with reports $r\in\R$; for surrogate properties and losses we use $\Gamma:\simplex\toto\reals^d$ and $L:\reals^d\toto\reals^\Y_+$, with reports $u\in\reals^d$.
 For general properties and losses, we will also use $\Gamma$ and $L$, as above.
+\bo{This slightly clashes with statement above in 2.1 that $L$ means a surrogate loss.}
 
 % Often we will work with two properties simultaneously, a finite property $\gamma:\simplex\toto\R$, and its embedded version $\Gamma:\simplex\toto\reals^d$.
 % In this case, we write the embedded reports as $u\in\reals^d$, reserving $r\in\R$ for the finite property.
@@ -388,15 +391,24 @@ for all $p \in \simplex$,
 It is well-known in finite-outcome settings that calibration is equivalent to \emph{consistency}, in the following sense (cf.~\citep{bartlett2006convexity,zhang2004statistical,agarwal2015consistent}).
 Given feature space $\X$, fix a distribution $D \in \Delta(\X\times\Y)$.
 Let $L^*$ be the best possible expected $L$-loss achieved by any hypothesis $H:\X\to\reals^d$, and $\ell^*$ the best expected $\ell$-loss for any hypothesis $h:\X\to\R$, respectively.
-Then $(L,\psi)$ is consistent if a sequence of surrogate hypotheses $H_1,H_2,\ldots$ whose $L$-loss limits to $L^*$, then the $\ell$-loss of $\psi\circ H_1,\psi \circ H_2, \ldots$ limits to $\ell^*$.
+If $(L,\psi)$ is consistent, then for any sequence of surrogate hypotheses $H_1,H_2,\ldots$ whose $L$-loss limits to $L^*$, the $\ell$-loss of $\psi\circ H_1,\psi \circ H_2, \ldots$ limits to $\ell^*$.
+\bo{edited above slightly. I believe a technical definition of consistency would have a ``for all $\D$'', but we can probably skip that.}
 As Definition~\ref{def:calibrated} does not involve the feature space $\X$, we will drop it for the remainder of the paper.
 Note that in the finite-outcome setting, calibration is necessary and sufficient for consistency from a generalization of~\citet{tewari2007consistency} given by~\citet{ramaswamy2016convex}.  
 
 
 \subsection{Embedding}
 
-Several consistent convex surrogates in the literature can be thought of as \emph{embeddings} of the target loss $\ell$, wherein one maps the discrete reports of $\ell$ to a vector space, and finds a convex loss which agrees with the original loss.
-A key notion to define an embedding is that of a \emph{representative set}: a set of reports $\Sc$ such that, for all label distributions, at least one report $r\in\Sc$ minimizes expected loss.
+\bo{rewritten slightly}
+%Several consistent convex surrogates in the literature can be thought of as \emph{embeddings} of the target loss $\ell$, wherein one maps the discrete reports of $\ell$ to a vector space, and finds a convex loss which agrees with the original loss.
+%A key notion to define an embedding is that of a \emph{representative set}: a set of reports $\Sc$ such that, for all label distributions, at least one report $r\in\Sc$ minimizes expected loss.
+We now formalize the sense in which a convex surrogate can be an \emph{embedding} of a target loss $\ell$.
+In these cases, which capture several consistent surrogates in the literature\bo{cites/examples?}, one maps each report (prediction) of $\ell$ to a point in $\reals^d$, then constructs a convex loss on $\reals^d$ that agrees with $\ell$ at these points.
+
+In fact, it is not always necessary to map \emph{all} reports to such points.
+It turns out to often be convenient to allow $\ell$ to have reports that are ``redundant'' in some sense (explored in \S~\ref{sec:min-rep-sets}).
+\bo{perhaps mention and cite \citet{wang2020weston}}
+Because of this, a key notion to define an embedding is that of a \emph{representative set}: a set of reports $\Sc$ such that, for all label distributions, at least one report $r\in\Sc$ minimizes expected loss.
 \begin{definition}[Representative set]
   Let $\Gamma:\simplex\toto\R$.
   We say $\Sc \subseteq \R$ is \emph{representative for $\Gamma$} if we have $\Gamma(p) \cap \Sc \neq \emptyset$ for all $p\in \simplex$.
@@ -405,13 +417,14 @@ A key notion to define an embedding is that of a \emph{representative set}: a se
   % We say $\Sc \subseteq \R$ is \emph{representative for $L$} if we have $\prop{L}(p) \cap \Sc \neq \emptyset$ for all $p\in \simplex$.
   % We further say $\Sc$ is a \emph{minimum representative set} if it has the smallest cardinality among all representative sets.
 \end{definition}
-It turns out that it will be convenient, especially in applications, to allow the target $\ell:\R\to\reals^\Y_+$ to have reports which are ``redundant'' in some sense.
-One natural sense is that $\ell$ has a representative set that is a strict subset of $\R$, i.e., $\R$ is not a minimum representative set.
-\raft{Some discussion here about minimum representative sets and \emph{maximally informative sets} from~\citet{wang2020weston} here, though maybe best to leave it until later.  BTW, I think their latest version might use different terminology.}
-Another is that some reports $r$ are ``dominated'', meaning $r$ is never optimal or there is another report $r'$ which is always optimal when $r$ is optimal.
-A priori these alternate definitions may not seem closely related.
-In fact, we show in \S~\ref{sec:min-rep-sets} that they are equivalent in our setting.
+\bo{Removed a paragraph here and folded it into the above. It's good to explain why we need representative sets -- i.e. the first sentence was great. But I don't think we should go into any details of various ways in which reports can be redundant. It doesn't matter, we can forward ref. Instead though, I think we should give some intuition for why it will be convenient.}
 
+%It turns out that it will be convenient, especially in applications, to allow the target $\ell:\R\to\reals^\Y_+$ to have reports which are ``redundant'' in some sense.
+%One natural sense is that $\ell$ has a representative set that is a strict subset of $\R$, i.e., $\R$ is not a minimum representative set.
+%\raft{Some discussion here about minimum representative sets and \emph{maximally informative sets} from~\citet{wang2020weston} here, though maybe best to leave it until later.  BTW, I think their latest version might use different terminology.}
+%Another is that some reports $r$ are ``dominated'', meaning $r$ is never optimal or there is another report $r'$ which is always optimal when $r$ is optimal.
+%A priori these alternate definitions may not seem closely related.
+%In fact, we show in \S~\ref{sec:min-rep-sets} that they are equivalent in our setting.
 
 We now formally introduce the concept of an embedding.
 In addition to matching loss values, a key condition for consistency is that the original reports should be optimal exactly when the corresponding embedded points are optimal.
@@ -536,6 +549,8 @@ We will use these observations throughout.
   Then $L|_\Sc$ elicits $\gamma:\simplex\toto\Sc$ defined by $\gamma(p) = \Gamma(p)\cap \Sc$.
   Moreover, $\risk{L}=\risk{L|_\Sc}$.
 \end{lemma}
+\bo{I didn't see us define $L|_\Sc$ anywhere yet! Although it's briefly mentioned in the intro.}
+\bo{Notation in the lemma is confusing because $L$ is supposed to be a surrogate with report space $\reals^d$ and $\R$ is supposed to be the report space for $\ell$.}
 \begin{proof}
   Let $p\in\simplex$ be fixed throughout.
   First let $r \in \gamma(p) = \Gamma(p) \cap \Sc$.
@@ -631,7 +646,7 @@ The proof relies on a result we will prove in \S~\ref{sec:min-rep-sets}: a minim
 
 \raf{TODO: smooth over these paragraphs.  I think we should combine the first two and give only a 1-sentence description of how to achieve $|\Y|-1$ dimensions.}
 
-Note however that the number of dimensions $d$ required could be as large as $O(|\Y|)$, which is particularly undesirable in structured prediction and information retrieval problems with exponentially many outcomes.
+Note however that the number of dimensions $d$ required could be as large as $n = |\Y|$, which is particularly undesirable in structured prediction and information retrieval problems where the number of outcomes is exponential.
 Recent work~\citep{ramaswamy2016convex,finocchiaro2020embedding,finocchiaro2021unifying} yield characterizations for bounding the prediction dimension $d$ for consistent convex surrogates and embeddings.
 %\raft{CITE: DKR, frongillo-kash (WINE 2014), probably one of Bob's papers?, others?}
 
@@ -667,71 +682,49 @@ What's more is that there is a polyhedral \emph{embedding} that is calibrated fo
 \label{sec:calibration}
 
 We have now seen the tight relationship between polyhedral losses and embeddings; in particular, every polyhedral loss embeds some discrete loss.
-The embedding itself tells us how to link the embedded points back to the discrete reports (map $\varphi(r)$ to $r$), but it is not clear when this link can be extended to the remaining reports, and whether such a link can lead to consistency.
+The embedding itself tells us how to link the embedded points back to the discrete reports (map $\varphi(r)$ to $r$).
+But it is not clear how to extend this to yield a full link function $\psi: \reals^d \to \R$, and whether such a $\psi$ can lead to consistency.
 In this section, we give a construction to generate calibrated links for \emph{any} polyhedral loss.
+\S~\ref{app:calibration} contains the full proof; this section provides a sketch of the main construction and result.
 
-\S~\ref{app:calibration} contains the full proof; this section provides a sketch along with the main construction and result.
-The first step is to give a link $\psi$ such that exactly minimizing expected surrogate loss $L$, followed by applying $\psi$, always exactly minimizes expected original loss $\ell$.
-The existence of such a link is somewhat subtle, because in general some point $u$ that is far from any embedding point can minimize expected loss for two very different distributions $p,p'$, making it unclear whether there exists a choice $\psi(u)\in\R$ that is $\ell$-optimal for both distributions.
-We show that as we vary $p$ over $\simplex$, there are only finitely many sets of the form $U = \argmin_{u \in \reals^d} \inprod{p}{L(u)}$ (Lemma~\ref{lem:polyhedral-range-gamma}).
-Associating each $U$ with $R_U \subseteq \R$, the set of reports whose embedding points are in $U$, we enforce that all points in $U$ link to some report in $R_U$.
-(As a special case, embedding points must link to their corresponding reports.)
-Proving that these choices are well-defined uses a chain of arguments involving the Bayes risk, ultimately showing that if $u$ lies in multiple such sets $U$, the corresponding report sets $R_U$ all intersect at some $r =: \psi(u)$.
+\begin{theorem}\label{thm:eps-thick-calibrated}
+  Let $L$ be polyhedral and $\ell$ the discrete loss it embeds from Theorem~\ref{thm:poly-embeds-discrete}.
+  Then there exists a calibrated link function $\psi$ from $L$ to $\ell$.
+%Then for small enough $\epsilon > 0$, the $\epsilon$-thickened link $\psi$ is well-defined and, furthermore, is a calibrated link from $L$ to $\ell$.
+\end{theorem}
 
-%
-%\begin{proposition}\label{prop:embed-link}
-%  Let $L$ elicit $\Gamma:\simplex\toto\reals^d$ which embeds a finite property $\gamma$.
-%  Then there exists a link function $\psi: \reals^d \to \R$ that is \emph{valid} in the sense that, for any $p$, if $u$ minimizes expected $L$-loss (i.e. $u \in \Gamma(p)$, then $\psi(u)$ minimizes expected $\ell$-loss (i.e. $\psi(u) \in \gamma(p)$).
-%\end{proposition}
-%\begin{proof}
-%  Let $\gamma:\simplex\toto\R$.
-%  Proposition~\ref{prop:embed-trim} gives us that $\trim(\Gamma) = \{\gamma_r : r\in\R\}$.
-%  \bo{Have we defined trim already? Or is this proof going to the appendix?}
-%  Then for any $u\in\reals^d$, there is some $r\in\R$ such that $\Gamma_u \subseteq \gamma_r$.
-%  The link $\psi : \reals^d \to \R$ which encodes these choices is valid.
-%\end{proof}
+The first step is to show indirect elicitation: we give a link $\psi: \reals^d \to \R$ such that exactly minimizing expected surrogate loss $L$, followed by applying $\psi$, always exactly minimizes expected original loss $\ell$.
+%Symbolically, if $u^* \in \argmin_u \inprod{p}{L(u)} = \Gamma(p)$, then $\psi(u^*) \in \argmin_r \inprod{p}{\ell(r)} = \gamma(p)$.
+For this step, the challenge is that for a generic $u \in \reals^d$, not an embedding point, we may have $u \in \Gamma(p) \cap \Gamma(p')$.
+Because $u$ minimizes expected loss for both $p$ and $p'$, this imposes the requirement on the link that $\psi(u) \in \gamma(p) \cap \gamma(p')$.
+It is not \emph{a priori} clear that these sets even have a nonempty intersection.
+We use elicitation results, discussed in \S~\ref{sec:min-rep-sets}, to show that for each $u \in \reals^d$ there exists $r \in \R$ such that $\Gamma_u \subseteq \gamma_r$, i.e. if $p$ satisfies $u \in \Gamma(p)$ then it satisfies $r \in \gamma(p)$.
+This implies that if $u \in \Gamma(p) \cap \Gamma(p')$, then $r \in \gamma(p) \cap \gamma(p')$, so we may safely choose $\psi(u) = r$.
 
-Intuitively, to ensure calibration, we just need to ``thicken'' this construction, by mapping all approximately-optimal points $u$ to optimal reports $r$.
-Let $\U$ contain all optimal report sets $U$ of the form above.
-A key step in the following definition will be to narrow down a ``link envelope'' $\Psi$ where $\Psi(u)$ denotes the legal or valid choices for $\psi(u)$.
+%Associating each $U$ with $R_U \subseteq \R$, the set of reports whose embedding points are in $U$, we enforce that all points in $U$ link to some report in $R_U$.
+%(As a special case, embedding points must link to their corresponding reports.)
+%Proving that these choices are well-defined uses a chain of arguments involving the Bayes risk, ultimately showing that if $u$ lies in multiple such sets $U$, the corresponding report sets $R_U$ all intersect at some $r =: \psi(u)$.
 
-%\begin{lemma}
-%  \label{lem:polyhedral-range-gamma}
-%  Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss, and let $\Gamma = \prop{L}$.
-%  Then the range of $\Gamma$, $\U = \Gamma(\simplex) = \{\Gamma(p) \subseteq \reals^d | p\in\simplex\}$, is a finite set of closed polyhedra.
-%\end{lemma}
-%For each of these finitely many $U \in \U$, we let $R_U$ be the set of reports whose embedding points lie in $U$.
-%The idea will be to map points in $U$, as well as points nearby, to something in $R_U$
-%We show in the full version \bo{okay wording?} that for any $p$, if $U = \Gamma(p)$, then $R_U = \gamma(p)$.
+The second step is to ensure calibration: we should modify this link so that even approximately-optimal points $u$ link to optimal reports $r$.
+We do so by ``thickening'' the link by $\epsilon$ as described next.
+Informally, we take each optimal report set, i.e. some $U = \Gamma(p) = \argmin_u \inprod{p}{L(u)}$, and thicken it by adding all points within distance $\epsilon$.
+Then, we impose a requirement that all points in this thickened set are linked to some element of $\gamma(p) = \argmin_r \inprod{p}{\ell(r)}$.
+We use $\Psi(u)$ to denote the remaining legal choices for $\psi(u)$.
+After repeating for each optimal report set, we will claim that there exists a small enough $\epsilon > 0$ so that the construction is successful, i.e. $\Psi(u)$ is nonempty.
+%A key step in the following definition will be to narrow down a ``link envelope'' $\Psi$ where $\Psi(u)$ denotes the legal or valid choices for $\psi(u)$.
 
-\begin{definition} \label{def:eps-thick-link}
+\begin{definition}[$\epsilon$-thickened link] \label{def:eps-thick-link}
+  First, define $\U = \{\Gamma(p) : p \in \simplex\}$ and, for each $U \in \U$, let $R_U = \{r \in \R : \phi(r) \in U\}$, the reports whose embedding points are in $U$.
   Given a polyhedral $L$ that embeds some $\ell$, an $\epsilon > 0$, and a norm $\|\cdot\|$, the \emph{$\epsilon$-thickened link} $\psi$ is constructed as follows.
   First, initialize $\Psi: \reals^d \toto \R$ by setting $\Psi(u) = \R$ for all $u$.
   Then for each $U \in \U$, for all points $u$ such that $\inf_{u^* \in U} \|u^*-u\| < \epsilon$, update $\Psi(u) = \Psi(u) \cap R_U$.
   Finally, define $\psi(u) \in \Psi(u)$, breaking ties arbitrarily.
   If $\Psi(u)$ became empty, then leave $\psi(u)$ undefined.
 \end{definition}
-
-% \begin{proposition}
-%   If $\psi$ is a separated link between losses $L$ and $\ell$, then $L$ and $\psi$ are consistent with respect to $\ell$. \jessie{Rephrase?}
-% \end{proposition}
-% \begin{proof}
-%   \raf{Use Hari's theorems from their section 8.}
-% \end{proof}
-
-\begin{theorem}\label{thm:eps-thick-calibrated}
-  Let $L$ be polyhedral, and $\ell$ the discrete loss it embeds from Theorem~\ref{thm:poly-embeds-discrete}.
-  Then for small enough $\epsilon > 0$, the $\epsilon$-thickened link $\psi$ is well-defined and, furthermore, is a calibrated link from $L$ to $\ell$.
-\end{theorem}
-
-\begin{proof}[Sketch]
-  \emph{Well-defined:}
-  For the initial construction above, we argued that if some collection such as $U,U',U''$ overlap at a $u$, then their report sets $R_U, R_{U'}, R_{U''}$ also overlap, so there is a valid choice $r = \psi(u)$.
-  Now, we thicken all sets $U \in \U$ by a small enough $\epsilon$; it can be shown that if the \emph{thickened} sets overlap at $u$, then $U,U',U''$ themselves overlap, so again $R_U, R_{U'}, R_{U''}$ overlap and there is a valid chioce $r = \psi(u)$.
-
-  \emph{Calibrated:} By construction of the thickened link, if $u$ maps to an incorrect report, i.e.\ $\psi(u) \not\in \gamma(p)$, then $u$ must have at least distance $\epsilon$ to the optimal set $U$.
+A key point is that, by Lemma~\ref{lem:polyhedral-range-gamma}, there are only finitely many sets of the form $U = \Gamma(p)$.
+We then show, along the lines discussed above, that for a small enough choice of $\epsilon > 0$, if the thickenings of $U$ and $U'$ overlap at some $u$, then the corresponding report sets $R_U, R_{U'}$ also overlap; this implies $\Psi(u)$ is nonempty.
+Given a well-defined thickened link $\psi$, calibration is almost immediate because, given $p$, any report $u$ linking to a suboptimal $r = \psi(u)$ satisfies $\inf_{u^* \in \Gamma(p} \|u^* - u\| \geq \epsilon$.
   We then show that the minimal gradient of the expected loss along any direction away from $U$ is lower-bounded, giving a constant excess expected loss at $u$.
-\end{proof}
 
 \btw{FUTURE: we should comment in the discussion section that we probably can show that *any* loss embedding $\ell$ must be polyhedral-ish, meaning polyhedral except for stuff that is never optimal.  This theorem would then not need the ``polyhedral'' part. This is related to the ``convex envelope conjucture'', that if $L$ embeds $\ell$ via $\varphi$, you can just take the loss $L'$ such that $L_y$ is the convex envelope of points $\{(\varphi(r),L(r)_y)\}_{r\in\R}$.}
 \btw{FUTURE: This prop and theorem give an excellent reason to focus on embeddings, since other techniques do not necessarily give you separated links for free.  Since we know we get them for free, we can just focus on the property, and study elicitation complexity; we know if we have a link at all it can be taken to be separated.  [[Is this true?]]}
