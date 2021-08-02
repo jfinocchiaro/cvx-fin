@@ -324,9 +324,9 @@ Since the loss is polyhedral, we know it has a finite set of minimizers.
 If we can find a finite representative set, we can easily embed these reports via the identity and more easily study the property elicited by this surrogate, and how it compares to the top-$k$ property originally in mind when the surrogate was designed.
 
 We will start with $\U$ as we show it is representative in Lemma~\ref{lem:top-threshold}, and the set of vertices $\R$ for $L^{top-k}$.
-Consider $\R := \left\{ \frac{|M| + k -1}{k - |H|} \mathbf{1}_H + \mathbf{1}_M : H, M \subset [n], H\cap M = \emptyset, |H| + |M| \leq k \right\}$.
+Consider $\R := \left\{ \frac{|M| + k -1}{k - |H|} \mathbf{1}_H + \mathbf{1}_M : H, M \subset [n], H\cap M = \emptyset, |H| + |M| \leq k, |H| < k \right\}$.
 
-\begin{claim}
+\begin{claim}\label{claim:R-vertices}
 	For each $p \in \mathrm{relint}\simplex$, the vertices of the expected loss $\inprod{p}{L^{top-k}(u)} = 1 - \inprod{p}{u} + \sum_{i=1}^k u_{[i]} - \inprod{p}{\min(u,\ones)}$ are denoted by $\R$.
 \end{claim}
 \begin{proof}
@@ -443,7 +443,7 @@ We will construct the report $\hat \Gamma(p) := \frac{M + B + k - 1}{k-H}\ones_{
 %where $H := |H_p|$ and $p_H := \sum_{y \in H_p} p_y$.
 
 
-\begin{claim}
+\begin{claim}\label{claim:hat-Gamma-subset-R}
 	Fix $p \in \simplex$.
 	$\hat \Gamma(p) \in \R$.
 \end{claim}	
@@ -452,6 +452,34 @@ We will construct the report $\hat \Gamma(p) := \frac{M + B + k - 1}{k-H}\ones_{
 	By construction, we just need to show that $H + M + B \leq k$ and we are done.
 	
 	\jessie{TODO}
+	We can consider $8$ cases: each corresponding to when (a) H (b) M (c) B (d) H,M (e) H,B (f) B,M (g) H,M,B are nonzero.
+	
+	(a) We immediately have at most $k-1$ outcomes $y \in \Y$ with weight strictly grater than $\frac 1 k$ since distributions with $k$ elements having weight exactly $\frac 1 k$ will not be in $H_p$, and in this case, the weight of all other elements is $0$.
+	
+	(b) Similarly, we immediately have at most $k$ elements with weight strictly greater than $\frac 1 {k+1}$.
+	
+	(c) Cannot happen, since $H_p = \emptyset \implies B_p = \{i \mid p_i \in \left(\frac{1}{k+1}, \frac{1}{k+1}\right]\} = \emptyset$.
+	
+	(d) Since $p_H > \frac H k$, we have $p_M < 1 - H_k$.
+	\jessie{TODO}
+	
+	
+	(e) Suppose $p_H = 1 - \epsilon$.
+	For all $b \in B_p$, we then have $p_b > \frac{k \epsilon}{(k+1)(k-H)}$.
+	By simplex constraints, we then have 
+	\begin{align*}
+	1 - \epsilon + \frac{Bk\epsilon}{(k+1)(k-H)}&\leq 1 \\
+	\iff \frac{Bk}{(k+1)(k-H)}&\leq 1 \\
+	Bk &\leq (k+1)(k-H)\\
+	B &\leq \frac{k^2 + k - H - Hk}{k}\\
+	B &\leq k+1-H - \frac H k
+	&< k+1 - H
+	\end{align*}
+	Thus, $B+H < k+1$.
+	
+	(f) Again, see (c) as to why this cannot happen, since $H = 0 \implies B = 0$..
+	
+	(g)
 	
 	
 	\jessie{Thought: Break into cases: the nonzero elements in (a) H (b) M (c) B (d) H,M (e) H,B (f) B,M (g) H,M,B.  Turns out that a,b are pretty trivial, c and f can never happen.  H,M has an untyped proof in my notes, but e and g have yet to be shown.  There's a tension between modifying the sets so this proof is more immediate and the result being true.  I think we can determine the sets algorithmically so this proof is more immediate, but showing it is a correct property value might be harder.}
@@ -459,6 +487,16 @@ We will construct the report $\hat \Gamma(p) := \frac{M + B + k - 1}{k-H}\ones_{
 	
 	Moreover, $\hat \Gamma(p) \in R^{\tt high}$ by construction.
 	Thus, $\hat \Gamma(p) \in \U$.
+\end{proof}
+
+\begin{claim}
+	With $k < n$, we have $\hat \Gamma(\simplex) = \R$.
+	\jessie{Need to move below proof of correctness}
+\end{claim}
+\begin{proof}
+	By Claim~\ref{claim:hat-Gamma-subset-R}, we immediately have $\hat \Gamma(\simplex) \subseteq \R$.
+	
+	Now for any sets $H,M$ such that $H, M \subseteq [n]$, $H \cap M = \emptyset$, $|H| + |M| \leq k$, and $|H| < k$ with $k <n$, consider the distribution $p_{HM} = (\frac{1}{k} + \varepsilon)\ones_{H} + (\frac{1}{k+1} + \varepsilon)\ones_M + (1 - ((\frac{|H|}{k} + |H| \varepsilon) + (\frac{|M|}{k+1} + |M| \varepsilon))) \ones_{[n] \setminus H\cup M} $.
 \end{proof}
 
 \begin{claim}
@@ -477,7 +515,7 @@ We will construct the report $\hat \Gamma(p) := \frac{M + B + k - 1}{k-H}\ones_{
 
 
 
-\begin{lemma}
+\begin{lemma}\label{lem:hat-gamma-opt-one-dir}
 	Fix $p \in \simplex$.
 	For small enough $\varepsilon$ and any $\hat y \in \Y$, consider $\varepsilon_{\hat y} := \varepsilon e_{\hat y}$.
 	For any (small enough) $\varepsilon_{\hat y}$, the loss $\inprod{L(\hat \Gamma(p))}{p} \leq \inprod{L(\hat \Gamma(p) + \varepsilon_{\hat y})}{p}$.
@@ -571,11 +609,37 @@ Therefore, we have
 &\geq \sum_i \lambda_i L^* \\
 &= L^*
 \end{align*}
+
+By Claim~\ref{claim:R-vertices}, we know exactly the regions on which $L^{top-k}$ is affine.
+Since L is polyhedral and we have the regions where it is affine, in order to understand if $\hat \Gamma(\simplex)$ is representative for $L^{top-k}$, we just need to check how the loss at $\hat \Gamma(p)$ compares to the loss at vertices of these affine regions for all $p \in \simplex$.  
+
+However, since $L^{top-k}$ is convex, we actually only need to check vertices of the affine regions on which $u := \hat \Gamma(p)$ sits.  
+Moreover, since $L$ is affine on each of those (convex) regions defined by some $T,S$ pair, we actually only need to check the vertices adjacent to $u$.
+To justify this, consider that, for a convex region $A^{T,S}$ on which $L^{top-k}$ is affine, let $\hat \Gamma(p)$ have adjacent vertices $a_i$.
+For any other vertex $v$ of $A^{T,S}$, there is a point $v_\lambda = \lambda v + (1-\lambda) \hat \Gamma(p)$ for $\lambda \in [0,1]$ such that $v_\lambda = \sum_i \lambda'_i a_i$.\jessie{Right?}
+
+Since $L^{top-k}$ is affine on $A^{T,S}$ and $|haat \Gamma(p)$ attains better loss than its adjacent vertices, we then have 
+\begin{align*}
+\inprod{p}{L(\hat \Gamma(p))} &\leq \inprod{p}{L(a_i)} \,\, \forall i & \text{by Claim} \\
+\implies \inprod{p}{L(\hat \Gamma(p))} &\leq \sum_i \lambda'_i \inprod{p}{L(a_i)} & \text{since $L$ affine} \\
+&= \inprod{p}{\sum_i L(\lambda'_i a_i)} & \text{linearity of inner product}\\
+&= \inprod{p}{L(\sum_i \lambda'_i a_i)} & \text{affineness}\\
+&= \inprod{p}{L(v_\lambda)} & \text{construction of $v_\lambda$}\\
+&\leq \inprod{p}{L(v)} & \text{$L$ affine and $v_\lambda$ a convex combo of $v$ and $\hat \Gamma(p)$}\\
+\end{align*}
+
+Now, we can ask what are the vertices adjacent to $u$?  They are precisely the elements of $\R$ if you moved one element of $u$ to the "next bin" (e.g., low to medium, medium to high, medium to low, high to medium).  
+This is the same as considering the other equality for each $i \in S$ ($0 \leq u_i \leq 1$) or $i \in T \setminus S$ ($1 \leq u_i \leq 1 + \bar u_{-i}$.) 
+
+Since $L^{top-k}$ is affine on each of the regions $A^{T,S}$,  and in particular, between vertices, we only need to move a little in the direction of the other vertex and show an increase in loss. 
+The proof of Lemma~\ref{lem:hat-gamma-opt-one-dir} enumerates all the cases we need.
 This yields the following corollary.
 
 \begin{corollary}
-	$\R := \hat \Gamma(\simplex)$ is a finite representative set.
+	$\R := \hat \Gamma(\simplex)$ is a (minimum?) finite representative set.
 \end{corollary}
+
+
 
 
 
