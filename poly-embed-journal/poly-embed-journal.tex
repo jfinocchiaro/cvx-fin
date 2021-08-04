@@ -193,21 +193,27 @@ We also show \raf{Newer stuff}
 %		\item Theorem~\ref{thm:discrete-loss-poly-embeddable}: move from n-dimensional construction to n-1 dimensional construction (or add n-1 dim construction in appendix if it gets too hairy?)
 %	\end{itemize}}
 
+In supervised learning, one tries to learn a hypothesis which fits some labeled data, as judged by a target loss function.
+Unfortunately, minimizing the target loss directly is typically computationally intractable, especially for discrete prediction tasks like classification, ranking, and structured prediction.
+Instead, one typically minimizes a surrogate loss which is convex and therefore efficiently minimized.
+Given a surrogate hypothesis, a link function then translates back to the target problem.
+This general approach, called surrogate risk minimization, is ubiquitous in supervised machine learning algorithms.
+\botodo{This is pretty inaccessible to nonexperts. I think we should consider a rewrite that expands this intro and makes it much more accessible. For example what is a surrogate? It would help many readers a lot to spell things out more.}
+\raft{I added this paragraph (based on our rates paper) and then transitioned into the next}
 
-Convex surrogate losses are a central building block in machine learning for finite prediction problems such as classification and structured prediction tasks.
-A growing body of work seeks to design and analyze convex surrogates for given loss functions, and more broadly, understand the best empirical risk minimization bounds that can found for a surrogate, for which consistency is a necessary condition.
-For example, recent work has developed tools to bound the prediction dimension of the surrogate, meaning the dimension of the range of the surrogate hypothesis~\cite{frongillo2015elicitation,  ramaswamy2016convex}\jessiet{I took dimension of the hypothesis space to be, e.g., the degree of the polynomial $k$ for $\H = \{h : |\X| \times k \to \reals\}$.  Not sure if we should change to surrogates prediction/report space?}\raft{Excellent point.  Changed to prediction dimension, with a bit of explanation.}
+% Convex surrogate losses are a central building block in machine learning for finite prediction problems such as classification and structured prediction tasks.
+A growing body of work seeks to design and analyze convex surrogates for particular target loss functions, and more broadly, understand the best empirical risk minimization bounds that can found for a surrogate, for which consistency is a necessary condition.
+For example, recent work has developed tools to bound the prediction dimension of the surrogate, meaning the dimension of the range of the surrogate hypothesis~\cite{frongillo2015elicitation,  ramaswamy2016convex}.
 Yet in some cases these bounds are far from tight, such as for \emph{abstain loss} (classification with an abstain option)~\citep{bartlett2008classification,yuan2010classification,ramaswamy2016convex,ramaswamy2018consistent,zhang2018reject}.
 Furthermore, the kinds of strategies available for constructing surrogates, and their relative power, are not well understood.
 
-\bo{This is pretty inaccessible to nonexperts. I think we should consider a rewrite that expands this intro and makes it much more accessible. For example what is a surrogate? It would help many readers a lot to spell things out more.}
 We augment this literature by studying a particularly natural approach for finding convex surrogates, wherein one ``embeds'' a discrete loss.
 Specifically, we say a convex surrogate $L$ embeds a discrete loss $\ell$ if there is an injective embedding from the discrete reports (predictions) to a vector space such that (i) the original loss values are recovered, and (ii) a report is $\ell$-optimal if and only if the embedded report is $L$-optimal.
 If this embedding can be extended to a calibrated link function, which roughly maps approximately $L$-optimal reports to $\ell$-optimal reports, then consistency follows~\citep{agarwal2015consistent}.
 Common examples of this general construction include hinge loss as a surrogate for 0-1 loss and the abstain surrogate mentioned above~\citep{ramaswamy2018consistent}.
 
 
-\raf{The old intro had just one more paragraph here, now commented out}
+% OLD INTRO PARAGRAPH:
 % Using tools from property elicitation, we show a tight relationship between such embeddings and the class of polyhedral (piecewise-linear convex) loss functions.
 % In particular, by focusing on Bayes risks, we show that every discrete loss is embedded by some polyhedral loss, and every polyhedral loss function embeds some discrete loss.
 % Moreover, we show that any polyhedral loss gives rise to a calibrated link function to the loss it embeds,
@@ -549,8 +555,8 @@ We will use these observations throughout.
   Then $L|_\Sc$ elicits $\gamma:\simplex\toto\Sc$ defined by $\gamma(p) = \Gamma(p)\cap \Sc$.
   Moreover, $\risk{L}=\risk{L|_\Sc}$.
 \end{lemma}
-\bo{I didn't see us define $L|_\Sc$ anywhere yet! Although it's briefly mentioned in the intro.}
-\bo{Notation in the lemma is confusing because $L$ is supposed to be a surrogate with report space $\reals^d$ and $\R$ is supposed to be the report space for $\ell$.}
+\botodo{I didn't see us define $L|_\Sc$ anywhere yet! Although it's briefly mentioned in the intro.}\raft{Yeah, maybe recall the def here?}
+\botodo{Notation in the lemma is confusing because $L$ is supposed to be a surrogate with report space $\reals^d$ and $\R$ is supposed to be the report space for $\ell$.}\raft{We should discuss this point}
 \begin{proof}
   Let $p\in\simplex$ be fixed throughout.
   First let $r \in \gamma(p) = \Gamma(p) \cap \Sc$.
@@ -684,7 +690,7 @@ What's more is that there is a polyhedral \emph{embedding} that is calibrated fo
 We have now seen the tight relationship between polyhedral losses and embeddings; in particular, every polyhedral loss embeds some discrete loss.
 The embedding itself tells us how to link the embedded points back to the discrete reports (map $\varphi(r)$ to $r$).
 But it is not clear how to extend this to yield a full link function $\psi: \reals^d \to \R$, and whether such a $\psi$ can lead to consistency.
-In this section, we give a construction to generate calibrated links for \emph{any} polyhedral loss.
+In this section, we give a construction to generate calibrated links for \emph{any} polyhedral loss, which we summarize in the following theorem.
 \S~\ref{app:calibration} contains the full proof; this section provides a sketch of the main construction and result.
 
 \begin{theorem}\label{thm:eps-thick-calibrated}
@@ -693,10 +699,12 @@ In this section, we give a construction to generate calibrated links for \emph{a
 %Then for small enough $\epsilon > 0$, the $\epsilon$-thickened link $\psi$ is well-defined and, furthermore, is a calibrated link from $L$ to $\ell$.
 \end{theorem}
 
+\raf{I liked the new version in general.  The only thing I was suggest is that for a journal version we could add a bit more detail right here, in the proof sketch.  For example, maybe a high-level overview right at this spot would help, since when you launch into step 1, it's not clear how many steps will follow.  And after step 2, there is a definition, and more discussion after.  All the pieces are great; maybe just a splash of overview and organization can help the reader orient as they go through it.}
+
 The first step is to show indirect elicitation: we give a link $\psi: \reals^d \to \R$ such that exactly minimizing expected surrogate loss $L$, followed by applying $\psi$, always exactly minimizes expected original loss $\ell$.
 %Symbolically, if $u^* \in \argmin_u \inprod{p}{L(u)} = \Gamma(p)$, then $\psi(u^*) \in \argmin_r \inprod{p}{\ell(r)} = \gamma(p)$.
 For this step, the challenge is that for a generic $u \in \reals^d$, not an embedding point, we may have $u \in \Gamma(p) \cap \Gamma(p')$.
-Because $u$ minimizes expected loss for both $p$ and $p'$, this imposes the requirement on the link that $\psi(u) \in \gamma(p) \cap \gamma(p')$.
+Because $u$ minimizes expected loss for both $p$ and $p'$, this \raf{suggest adding a noun here} imposes the requirement on the link that $\psi(u) \in \gamma(p) \cap \gamma(p')$.
 It is not \emph{a priori} clear that these sets even have a nonempty intersection.
 We use elicitation results, discussed in \S~\ref{sec:min-rep-sets}, to show that for each $u \in \reals^d$ there exists $r \in \R$ such that $\Gamma_u \subseteq \gamma_r$, i.e. if $p$ satisfies $u \in \Gamma(p)$ then it satisfies $r \in \gamma(p)$.
 This implies that if $u \in \Gamma(p) \cap \Gamma(p')$, then $r \in \gamma(p) \cap \gamma(p')$, so we may safely choose $\psi(u) = r$.
@@ -710,7 +718,7 @@ We do so by ``thickening'' the link by $\epsilon$ as described next.
 Informally, we take each optimal report set, i.e. some $U = \Gamma(p) = \argmin_u \inprod{p}{L(u)}$, and thicken it by adding all points within distance $\epsilon$.
 Then, we impose a requirement that all points in this thickened set are linked to some element of $\gamma(p) = \argmin_r \inprod{p}{\ell(r)}$.
 We use $\Psi(u)$ to denote the remaining legal choices for $\psi(u)$.
-After repeating for each optimal report set, we will claim that there exists a small enough $\epsilon > 0$ so that the construction is successful, i.e. $\Psi(u)$ is nonempty.
+After repeating for each optimal report set, we will claim that there exists a small enough $\epsilon > 0$ so that the construction is successful, i.e. $\Psi(u)$ is nonempty for all $u$.
 %A key step in the following definition will be to narrow down a ``link envelope'' $\Psi$ where $\Psi(u)$ denotes the legal or valid choices for $\psi(u)$.
 
 \begin{definition}[$\epsilon$-thickened link] \label{def:eps-thick-link}
@@ -822,43 +830,60 @@ We can also verify that their surrogate is an embedding and recover their result
 \subsection{Inconsistency of Lov\'asz hinge}
 \label{sec:lovasz-hinge}
 
-\raf{TODO: update section with formal theorem statements and new result about tight embedding}
-
 Many structured prediction settings can be thought of as making multiple predictions at once, with a loss function that jointly measures error based on the relationship between these predictions~\cite{hazan2010direct, gao2011consistency, osokin2017structured}.
 In the case of $k$ binary predictions, these settings are typically formalized by taking the predictions and outcomes to be $\pm 1$ vectors, so $\R=\Y=\{-1,1\}^k$.
-One then defines a joint loss function, which is often merely a function of the set of mispredictions, meaning we may write $\ell^g(r)_y = g(\{i \in [k] : r_i \neq y_i\})$ for some set function $g:2^{[k]}\to\reals$.
-For example, Hamming loss is given by $g(S) = |S|$.
-In an effort to provide a general convex surrogate for these settings when $g$ is a submodular function, Yu and Blaschko~\cite{yu2018lovasz} introduce the \emph{Lov\'asz hinge}, which leverages the well-known convex Lov\'asz extension of submodular functions.
+One then defines a joint loss function, which is often merely a function of the set of mispredictions, meaning we may write $\ell^f(r)_y = f(\{i \in [k] : r_i \neq y_i\})$ for some set function $f:2^{[k]}\to\reals$.
+For example, Hamming loss is given by $f(S) = |S|$.
+In an effort to provide a general convex surrogate for these settings when $f$ is a submodular function, Yu and Blaschko~\cite{yu2018lovasz} introduce a surrogate $L^f$ which they dub the \emph{Lov\'asz hinge}, as it leverages the well-known convex Lov\'asz extension of submodular functions.
 While the authors provide theoretical justification and experiments, consistency of the Lov\'asz hinge is left open, which we resolve.
+As even the formal definition of the Lov\'asz hinge is quite involved, we defer the complete analysis to \S~\ref{app:lovasz} and here state the main results.
 
-Rather than formally define the Lov\'asz hinge, we defer the complete analysis to the full version of the paper~\cite{finocchiaro2019embedding}, and focus here on the $k=2$ case.
-For brevity, we write $g_\emptyset := g(\emptyset)$, $g_{1,2} := g(\{1,2\})$, etc.
+As a warm-up, let us introduce the form of the Lov\'asz hinge $L^f$ for the case $k=2$, as one can build intuition from this case.
+For brevity, we write $f_\emptyset := f(\emptyset)$, $f_{1,2} := f(\{1,2\})$, etc.
 %\raft{Jessie: I meant \emph{our} paper :-].  Leaving this here:\cite{yu2015lovaszarxiv}}
-Assuming $g$ is normalized and increasing (meaning $g_{1,2} \geq \{g_1,g_2\} \geq g_\emptyset = 0$), the Lov\'asz hinge $L:\reals^k\to\reals^\Y_+$ is given by
+Assuming $f$ is normalized and increasing (meaning $f_{1,2} \geq \{f_1,f_2\} \geq f_\emptyset = 0$), the Lov\'asz hinge $L:\reals^k\to\reals^\Y_+$ is given by
 \begin{multline}
   \label{eq:lovasz-hinge}
-  L^g(u)_y = \max\Bigl\{(1-u_1y_1)_+ g_1 + (1-u_2y_2)_+ (g_{1,2}-g_1),\\[-4pt] (1-u_2y_2)_+ g_2 + (1-u_1y_1)_+ (g_{1,2}-g_2)\Bigr\}~,
+  L^f(u)_y = \max\Bigl\{(1-u_1y_1)_+ f_1 + (1-u_2y_2)_+ (f_{1,2}-f_1),\\[-4pt] (1-u_2y_2)_+ f_2 + (1-u_1y_1)_+ (f_{1,2}-f_2)\Bigr\}~,
 \end{multline}
 where $(x)_+ = \max\{x,0\}$.
-We will explore the range of values of $g$ for which $L^g$ is consistent, where the link function $\psi:\reals^2\to\{-1,1\}^2$ is fixed as $\psi(u)_i = \sgn(u_i)$, with ties broken arbitrarily.
+The link function $\psi:\reals^2\to\{-1,1\}^2$ is fixed as $\psi(u)_i = \sgn(u_i)$, with ties broken arbitrarily.
 
-Let us consider the coefficients $g_\emptyset = 0$, $g_1 = g_2 = g_{1,2} = 1$, for which $\ell^g$ is merely 0-1 loss on $\Y$.
-For consistency, for any distribution $p\in\simplex$, we must have that whenever $u \in \argmin_{u'\in\reals^2} \inprod{p}{L^g(u')}$, the outcome $\psi(u)$ must be the most likely, i.e., in $\argmax_{y\in\Y} p(y)$.
+We are interested in characterizing the functions $f$ for which $L^f$ is consistent.
+As an example, consider the coefficients $f_\emptyset = 0$, $f_1 = f_2 = f_{1,2} = 1$, for which $\ell^f$ is merely 0-1 loss on $\Y$.
+For consistency, for any distribution $p\in\simplex$, we must have that whenever $u \in \argmin_{u'\in\reals^2} \inprod{p}{L^f(u')}$, the outcome $\psi(u)$ must be the most likely, i.e., in $\argmax_{y\in\Y} p(y)$.
 Simplifying eq.~\eqref{eq:lovasz-hinge}, however, we have
 \begin{equation}
   \label{eq:lovasz-hinge-abstain}
-  L^g(u)_y = \max\bigl\{(1-u_1y_1)_+,(1-u_2y_2)_+\bigr\} = \max\bigl\{1-u_1y_1,1-u_2y_2,0\bigr\}~,
+  L^f(u)_y = \max\bigl\{(1-u_1y_1)_+,(1-u_2y_2)_+\bigr\} = \max\bigl\{1-u_1y_1,1-u_2y_2,0\bigr\}~,
 \end{equation}
 which is exactly the abstain surrogate~\eqref{eq:abstain-surrogate} for $d=2$.
-We immediately conclude that $L^g$ cannot be consistent with $\ell^g$, as the origin will be the unique optimal report for $L^g$ under distributions with $p_y < 0.5$ for all $y$, and one can simply take a distribution which disagrees with the way ties are broken in $\psi$.
-For example, if we take $\sgn(0) = 1$, then under $p((1,1)) = p((1,-1)) = p((-1,1)) = 0.2$ and $p((-1,-1)) = 0.4$, we have $\{0\} = \argmin_{u\in\reals^2} \inprod{p}{L^g(u)}$, yet we also have $\psi(0) = (1,1) \notin \{(-1,-1)\} = \argmin_{r\in\R} \inprod{p}{\ell^g(r)}$.
+We immediately conclude that $L^f$ cannot be consistent with $\ell^f$, as the origin will be the unique optimal report for $L^f$ under distributions with $p_y < 0.5$ for all $y$, and one can simply take a distribution which disagrees with the way ties are broken in $\psi$.
+For example, if we take $\sgn(0) = 1$, then under $p((1,1)) = p((1,-1)) = p((-1,1)) = 0.2$ and $p((-1,-1)) = 0.4$, we have $\{0\} = \argmin_{u\in\reals^2} \inprod{p}{L^f(u)}$, yet we also have $\psi(0) = (1,1) \notin \{(-1,-1)\} = \argmin_{r\in\R} \inprod{p}{\ell^f(r)}$.
 
-In fact, this example is typical: using our embedding framework, and characterizing when $0\in\reals^2$ is an embedded point, one can show that $L^g$ is consistent if and only if $g_{1,2} = g_1 + g_2$.
-Moreover, in this linear case, which corresponds to $g$ being \emph{modular}, the Lov\'asz hinge reduces to weighted Hamming loss, which is trivially consistent from the consistency of hinge loss for 0-1 loss.
-In the full version of the paper~\cite{finocchiaro2019embedding}, we generalize this observation for all $k$: $L^g$ is consistent if and only if $g$ is modular.
+In fact, this example is typical: % using our embedding framework, and characterizing when $0\in\reals^2$ is an embedded point,
+one can show that $L^f$ is consistent if and only if $f_{1,2} = f_1 + f_2$.
+Moreover, in this linear case, which corresponds to $f$ being \emph{modular}, the Lov\'asz hinge reduces to weighted Hamming loss, which is trivially consistent from the consistency of hinge loss for 0-1 loss.
+In \S~\ref{app:lovasz}, we generalize this observation for all $k$.
+\begin{theorem}
+	Let $f$ be submodular, normalized, and increasing.
+	Then $(L^f,\psi)$ is consistent if and only if $f$ is modular.
+\end{theorem}
 In other words, even for $k>2$, the only consistent Lov\'asz hinge is weighted Hamming loss.
-These results cast doubt on the effectiveness of the Lov\'asz hinge in practice.
+This result casts doubt on the practical effectiveness of the Lov\'asz hinge as a surrogate for $\ell^f$.
 
+In light of this negative result, together with the fact that every polyhedral surrogate embeds some target loss (Theorem~\ref{thm:poly-embeds-discrete}), we now turn to the question: what target problem, then, \emph{is} the Lov\'asz hinge consistent for?
+We show in \S~\ref{app:lovasz} that the answer is a variant of abstain loss where one can abstain on a set of labels $B\subseteq[k]$.
+Recall that the symmetric difference is defined by $S\triangle T = (S\setminus T) \cup (T\setminus S)$.
+\begin{theorem}
+	Let $\hat\ell^f:\hat\R\times\Y\to\reals_+$, where $\hat\R = \{(A,B) \in 2^{[k]} \times 2^{[k]}: A\cap B=\emptyset\}$, be given by
+	\begin{equation}
+	\hat\ell^f((A,B),S) = f(A\triangle S\setminus B) + f(A\triangle S\cup B)~.
+	\end{equation}
+	Then the Lov\'asz hinge $L^f$ embeds $\hat\ell^f$.
+  Moreover, the embedding is tight whenever $f$ is strictly submodular.
+\end{theorem}
+\raf{Something about how this could actually be a useful target and surrogate, provided you actually link from the surrogate to the target and not ignore $B$.}
 
 % \subsection{New surrogates for cost-sensitive classification}
 
@@ -1102,7 +1127,7 @@ While we have focused on polyhedral losses thus far, it turns out that many of o
 (We say a concave function is polyhedral if its negation is a polyhedral convex function.)
 To see that this is a weaker condition, recall that Theorem~\ref{thm:poly-embeds-discrete} constructs a finite representative set $\Sc$ for any polyhedral loss $L$, and thus $\risk{L} = \risk{L|_\Sc}$ by Lemma~\ref{lem:loss-restrict}, which is polyhedral.
 The condition is strictly weaker, in that the Bayes risk may be polyhedral even if the loss itself is not.
-For example, a modified hinge loss $L(r)_y = \max(r^2-1,1-ry)$, \jessie{Would a figure be helpful?} which matches hinge loss on the interval $[-1,1]$ but is smooth outside the interval $[-2,2]$, still embeds twice 0-1 loss.
+For example, a modified hinge loss $L(r)_y = \max(r^2-1,1-ry)$, \jessiet{Would a figure be helpful?}\raft{Yeah!} which matches hinge loss on the interval $[-1,1]$ but is smooth outside the interval $[-2,2]$, still embeds twice 0-1 loss.
 
 % \begin{lemma}
 % 	\label{lem:poly-loss-poly-risk}
@@ -1181,7 +1206,7 @@ Lemma~\ref{lem:X} leads to another appealing equivalent condition to our embeddi
   \end{equation*}
   
 	For the reverse implication, assume $\risk{L} = \risk{\ell}$, which are polyhedral functions as $\ell$ is discrete.
-  From Lemma~\ref{lem:X}(\ref{item:X-min-V}), we have some set $\V\subseteq\reals^\Y_+$ and minimum representative sets $\R^* \subseteq \R$ and $\Sc \subseteq \U$, for $\ell$ and $L$ respectively, such that $\ell(\R^*) = \V = L(\Sc)$.\jessie{This is a different $\Sc$ than the first paragraph, right? The first $\Sc$ is representative for $\ell$.}
+  From Lemma~\ref{lem:X}(\ref{item:X-min-V}), we have some set $\V\subseteq\reals^\Y_+$ and minimum representative sets $\R^* \subseteq \R$ and $\Sc \subseteq \U$, for $\ell$ and $L$ respectively, such that $\ell(\R^*) = \V = L(\Sc)$.\jessiet{This is a different $\Sc$ than the first paragraph, right? The first $\Sc$ is representative for $\ell$.}\raft{They are both quantified separately, so not linked; are you saying it's confusing to use $\Sc$ here though because its role is slightly different?}
   As $\R^*$ and $\Sc$ are miniumum, they cannot repeat loss vectors, and thus $|\R^*|=|\ell(\R^*)|$ and $|L(\Sc)|=\Sc$.
   We conclude that $\R^*$ and $\Sc$ are both in bijection with $\V$.
   The map $\varphi :\R^* \to \reals^d$, given by $\varphi(r) = s \in \Sc$ where $\ell(r) = L(s)$, is therefore well-defined.
@@ -1208,7 +1233,7 @@ Moreover, their result relies the Bayes risk of the surrogate being strictly con
 Central to the structural results in Lemma~\ref{lem:X} is the existence of a canonical set of loss vectors $\V$ which match the loss vectors of any minimum representative set.
 This fact may seem surprising when one considers that losses may have many mimimum representative sets.
 For example, consider hinge loss with a spurious extra dimension, i.e., $L:\reals^2\to\reals^\Y$, $L(r)_y = \max(0,1-r_1y)$ for $\Y = \{-1,+1\}$.
-Here the minimum representative sets are $\{(-1,a),(1,b)\}$ for any $a,b\in\reals$. \jessie{Do we want this as an example or is it too contrived? I don't have a better one though.  We could also point out that lots of surrogates have an extra dimension in practice (e.g., people use $n$ dimensions instead of $n-1$ for multiclass classification.)}
+Here the minimum representative sets are $\{(-1,a),(1,b)\}$ for any $a,b\in\reals$. \jessiet{Do we want this as an example or is it too contrived? I don't have a better one though.  We could also point out that lots of surrogates have an extra dimension in practice (e.g., people use $n$ dimensions instead of $n-1$ for multiclass classification.)}\raft{I like the example for its simplicity.  We could add a footnote about this coming up in practice, but since it's not a major point I'd lean leaving it as-is. If you agree feel free to burn.}
 Lemma~\ref{lem:X}(\ref{item:X-min-V}) states that, while the minimum representative set is not unique, its loss vectors are.
 
 Motivated by this observation, let us define the ``trim'' of a loss to be this unique set $\V$ of loss vectors induced by any minimum representative set, which again is well-defined by Lemma~\ref{lem:X}(\ref{item:X-min-V}).
@@ -1240,7 +1265,7 @@ Using this notion of trimming a loss, we can again recast our embedding conditio
 \subsection{Minimum representative sets and non-redundancy}
 
 The condition that a representative set be minimum implies that one has identified exactly the ``active'' reports of a loss, in some sense.
-We now relate this condition to another natural notion from the property elicitation literature, that of non-redundancy~\cite{frongillo2014general,lambert2018elicitation}\raft{TODO: see if there are other references we should include here.  Maybe Jessie you could search? \jessie{Quick search leads me to a couple of your papers and Nico's, but not much else.}}.
+We now relate this condition to another natural notion from the property elicitation literature, that of non-redundancy~\cite{frongillo2014general,lambert2018elicitation}.
 Intuitively, a loss is non-redundant if no report is weakly dominated by another report.
 
 \begin{definition}[Non-redundancy]\label{def:nonredundant}
@@ -1349,7 +1374,7 @@ We will make use of another corollary of Proposition~\ref{prop:embed-iff-trims-e
 This allows us to think about the structure of properties elicited by losses with finite representative sets in the following equivalent ways through $\trimred(\Gamma)$.
 
 \begin{proposition}\label{prop:embed-trim}
-  Let $\Gamma:\simplex\toto\reals^d$ be an elicitable property.\jessie{$\reals^d$ vs $\R$?}
+  Let $\Gamma:\simplex\toto\reals^d$ be an elicitable property.\jessiet{$\reals^d$ vs $\R$?}\raft{Can't recall why we needed $\reals^d$.  Probably don't... in any case, can't use $\R$ since that clashes with $\gamma$.}
   The following are equivalent:
   \begin{enumerate}\setlength{\itemsep}{0pt}
   \item $\Gamma$ embeds a elicitable finite property $\gamma:\simplex \toto \R$.
@@ -1374,10 +1399,11 @@ This allows us to think about the structure of properties elicited by losses wit
   Corollary~\ref{cor:trim-prop-red} now gives $\trimred(\Gamma) = \Theta$, which is finite, showing Case 2.
 
   Case 2:
-  If $\trimred(\Gamma)$ is finite, then in particular we have a finite set of reports $\Sc \subseteq \R\setminus\red(\Gamma)$ such that $\trimred(\Gamma) = \{\Gamma_s \mid s\in\Sc\}$. \jessie{Technically, $\R$ not defined?}
-  As $\Gamma$ is elicitable, $\R$ is representative for $\Gamma$.
-  By definition of $\trimred$, we have $\simplex = \cup_{r\in\R} \Gamma_r \subseteq \cup \trimred(\Gamma) = \cup_{s\in\Sc} \Gamma_s$, and therefore $\Sc$ is representative for $\Gamma$ and for $L$. \jessie{I'm a bit confused by this- how do we get $\cup_{\R}\Gamma_r \subseteq \cup \trimred(\Gamma)$?}
-  From Lemma~\ref{lem:X}(\ref{item:X-rep-contain-min}), we have some minimum representative set $\U\subseteq\U'$ \jessie{$\R$?} for $L$ and $\Gamma$, showing Case 3.
+  \raf{Somehow I had like 5 typos in here which made it impossible to follow.  Hopefully better now!}
+  If $\trimred(\Gamma)$ is finite, then in particular we have a finite set of reports $\Sc \subseteq \reals^d\setminus\red(\Gamma)$ such that $\trimred(\Gamma) = \{\Gamma_s \mid s\in\Sc\}$.
+  As $\Gamma$ is elicitable, $\reals^d$ is representative for $\Gamma$.
+  By definition of $\trimred$, we have $\simplex = \cup_{r\in\reals^d} \Gamma_r = \cup \trimred(\Gamma) = \cup_{s\in\Sc} \Gamma_s$, and therefore $\Sc$ is representative for $\Gamma$ and for $L$.\jessiet{I'm a bit confused by this- how do we get $\cup_{\reals^d}\Gamma_r \subseteq \cup \trimred(\Gamma)$?}\raft{Each level set on the left is contained in one on the right}
+  From Lemma~\ref{lem:X}(\ref{item:X-rep-contain-min}), we have some minimum representative set $\U\subseteq\Sc$ for $L$ and $\Gamma$, showing Case 3.
   Moreover, Lemma~\ref{lem:X}(\ref{item:X-min-Theta},\ref{item:X-full-dim}) gives $\{\Gamma_u \mid u\in\U\} = \Theta$.
   \jessie{My understanding: we have a representative set $\R$, but don't know if it's finite.  However, we have $\Sc$ that [nonredundantly] generates trim, which is finite by assumption, and need to show that's representative.  Once we have $\Sc$ a finite representative set, we can apply Lemma X to say it also contains a finite \emph{minimum} rep set.}
 
@@ -1390,7 +1416,7 @@ This allows us to think about the structure of properties elicited by losses wit
   Let $\Sc\subseteq\R$ such that $\{\Gamma_s \mid s\in\Sc\} = \hat \Theta$.
   Then $\Sc$ is representative for $\Gamma$ and $L$, as $\cup\hat\Theta = \simplex$.
   Lemma~\ref{lem:loss-restrict} now states that $L$ embeds $L|_\Sc$, so $\Gamma$ embeds $\gamma := \Gamma|_\Sc$, giving Case 1.
-  Finally, Corollary~\ref{cor:trim-prop-red} gives $\trimred(\gamma) = \Theta$. \jessie{$\Gamma$?}
+  Finally, Corollary~\ref{cor:trim-prop-red} gives $\trimred(\gamma) = \Theta$.
   %
   % Letting $\Theta_\ell$ be the full-dimensional level sets of $\gamma$, Corollary~\ref{cor:trim-prop-red} also gives $\trimred(\gamma) = \Theta'$.
   % From Lemma~\ref{lem:X}(\ref{item:X-rep-contain-min}), we have some minimum representative set $\U\subseteq\U'$ for $L$ and $\Gamma$.
@@ -3157,9 +3183,9 @@ Define the function $\theta(v) = \{p \in \simplex \mid \inprod{v}{p} = f(p)\}$ a
   Fix $p \in \simplex$.
   \begin{align*}
     p \in \theta(v)
-    &\iff \inprod{v}{p} = f(p) & \text{Def of $\theta$}\\
-    &\iff \inprod{v}{p} = \min_{v' \in \V}\inprod{v'}{p} & \text{$f$ matches $g$ on $\simplex$ (Cor.~\ref{cor:f-matches-g-on-simplex}.)}\\
-    &\iff v \in \argmin_{v' \in \V}\inprod{v'}{p} & \text{Def of argmin}\\
+    &\iff \inprod{v}{p} = f(p) & \text{Definition of $\theta$}\\
+    &\iff \inprod{v}{p} = \min_{v' \in \V}\inprod{v'}{p} & \text{$f=g$ on $\simplex$ (Cor.~\ref{cor:f-matches-g-on-simplex})}\\
+    &\iff v \in \argmin_{v' \in \V}\inprod{v'}{p} &\\
     &\iff p \in \pi(F_v) & \text{Lemma~\ref{lem:projected-faces-iff-support-iff-argmin}}
   \end{align*}
 \end{proof}
@@ -3179,13 +3205,14 @@ Define the function $\theta(v) = \{p \in \simplex \mid \inprod{v}{p} = f(p)\}$ a
     &= \{p \in \simplex \mid \inprod{v}{p} = f(p) \}\\
     &= \theta(v)
   \end{align*}
+  \raf{Wait, isn't this just Claim 19 again?}
   Now, we have $p \in \theta(v)$ if and only if,
   \begin{align*}
     p \in \theta(v)
     &\iff p \in \{p' \in \simplex \mid \inprod{v}{p'} = f(p')\} & \text{Definition of $\theta$}\\
-    &\iff p \in \{p' \in \simplex \mid \inprod{v}{p'} = g(p')\} &\text {Since $f = g$ on simplex} \\
-    &\iff p \in \{p' \in \reals_+^\Y \mid \inprod{v}{p'} = g(p')\} \cap \simplex &\text {Since $g$ defined over $\reals^\Y_+$} \\
-    &\iff p \in \pi(F_v) \cap \simplex & \text{Following from definition of $F_v$}
+    &\iff p \in \{p' \in \simplex \mid \inprod{v}{p'} = g(p')\} &\text {$f = g$ on $\simplex$ (Cor.~\ref{cor:f-matches-g-on-simplex})} \\
+    &\iff p \in \{p' \in \reals_+^\Y \mid \inprod{v}{p'} = g(p')\} \cap \simplex & \\
+    &\iff p \in \pi(F_v) \cap \simplex & \text{Definition of $\pi$, $F_v$}
   \end{align*}
   The result follows.
    
@@ -3230,12 +3257,12 @@ Define the \emph{extended level set} $\bar \Gamma_r := \{x \in \reals^\Y_+ \mid 
   We have
   \begin{align*}
     p \in \Gamma_r
-    &= \{p' \in \simplex \mid r \in \argmin_{r' \in \R} \inprod{L(r')}{p'} \} & \text {Def of level set} \\
+    &= \{p' \in \simplex \mid r \in \argmin_{r' \in \R} \inprod{L(r')}{p'} \} & \text {Definition of level set} \\
     &= \{p' \in \simplex \mid v \in \argmin_{v' \in \V} \inprod{v'}{p'} \} & \text {$\V = L(\R)$} \\
     &= \{p' \in \simplex \mid \inprod{v}{p'} = \min_{v' \in \V} \inprod{v'}{p'} \} & \text {$L$ minnable} \\
     &= \{p' \in \simplex \mid \inprod{v}{p'} = g(p') \} & \text {Definition of $g$} \\
-    &= \{p' \in \simplex \mid c \inprod{v}{p'} = g(p') \} & \text {Multiplying both sides by $c$} \\
-    &= \{p' \in \simplex \mid  \inprod{v}{cp'} = g(cp') \} & \text {Linearity of inner product and Lemma~\ref{lem:g-1-homog}} \\
+    &= \{p' \in \simplex \mid c \inprod{v}{p'} = c g(p') \} &  \\
+    &= \{p' \in \simplex \mid  \inprod{v}{cp'} = g(cp') \} & \text {Lemma~\ref{lem:g-1-homog}} \\
     \implies cp
     &\in \{x \in \reals^\Y_+ \mid \inprod{v}{x} = g(x)\}\\
     &= \bar \Gamma_r
