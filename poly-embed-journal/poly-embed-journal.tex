@@ -225,8 +225,6 @@ In particular, every discrete loss is embedded by a polyhedral surrogate.
 Moreover, such an embedding gives rise to calibrated link function.
 Our proofs give explicit constructions for the surrogate (\S~\ref{sec:poly-loss-embed}) and link (\S~\ref{sec:calibration}) given a discrete loss.
 
-\jessiet{Want these as restatables so the numbering is consistent?}
-\raft{I think good as-is, since in both cases these follow from more specific results}
 \begin{theorem}\label{thm:embed-poly-informal}
   Every discrete loss $\ell$ is embedded by some polyhedral loss $L$, and every polyhedral loss $L$ embeds some discrete loss $\ell$.
 \end{theorem}
@@ -240,7 +238,7 @@ In short, if one can identify a finite \emph{representative set} $\Sc$ of report
 We apply these tools to several polyhedral surrogates which have been proposed recently (\S~\ref{sec:applications}), showing in some cases that they are inconsistent for the desired target, but are consistent for a different target: the discrete loss they embed.
 
 Underpinning our results are several observations which formalize the idea that polyhedral losses ``behave like'' discrete losses.
-For example, discrete losses have polyhedral Bayes risks (as the minimum of finitely many linear functions), and so do polyhedral losses (Lemma~\ref{lem:poly-loss-poly-risk})\jessiet{Flag: unresolved ref}.
+For example, discrete losses have polyhedral Bayes risks (as the minimum of finitely many linear functions), as do polyhedral losses (Lemma~\ref{lem:polyhedral-range-gamma}).
 As a consequence, polyhedral losses always have finite representative sets, and restricting the loss to any such set is an embedding.
 
 We also provide several observations beyond what is needed to prove our main results, which we view as conceptual contributions (\S~\ref{sec:min-rep-sets},~\ref{sec:poly-ie-consistency}).
@@ -294,16 +292,18 @@ Consistency is a prerequisite to obtain empirical risk minimization bounds, moti
 Let $\Y$ be a finite label space, and throughout let $n=|\Y|$.
 The set of probability distributions on $\Y$ is denoted $\simplex\subseteq\reals^{\Y}_+$, represented as vectors of probabilities (requiring $\|p\|_1 = 1$).
 We write $p_y$ for the probability of outcome $y \in \Y$ drawn from $p \in \simplex$.
-We first discuss the conditional setting, with just labels $\Y$ and no features $\X$, and show in \S~\ref{subsec:calibration-links} how these notions relate to the usual $\X\times\Y$ setting considering features.
-\bo{I don't expect the previous sentence to make sense to most readers. Suggest we add some explanation or detail -- or defer this comment to a bit later.}
+While supervised algorithms learn hypothesis functions $h:\X \to \R$ that minimize expected loss over data representations and labels, one can abstract away the hypothesis function for simplicity and reason about generic reports.
+We first discuss this conditional setting, with just labels $\Y$ and no features $\X$, and show in \S~\ref{subsec:calibration-links} how these notions relate to the usual $\X\times\Y$ setting considering features.
+\botodo{I don't expect the previous sentence to make sense to most readers. Suggest we add some explanation or detail -- or defer this comment to a bit later.}
+\jessiet{Better?}
 
 We assume that a given discrete prediction problem, such as classification, is given in the form of a discrete \emph{target loss} $\ell:\R\to\reals^\Y_+$, which maps a report (prediction) $r$ from a finite set $\R$ to the vector of loss values $\ell(r) = (\ell(r)_y)_{y\in\Y}$ for each possible outcome $y\in\Y$.
-\jessiet{Removed sentence saying we assume non-redundancy}
 %We will assume throughout that the given discrete loss is \emph{non-redundant}, meaning every report is uniquely optimal (minimizes expected loss) for some distribution $p\in\simplex$.
 Similarly, surrogate losses will be written $L:\reals^d\to\reals^\Y_+$, typically with reports written $u\in\reals^d$.
-\btw{Cut generic loss}%(A generic loss will be written $L:\R\to\reals^\Y$.)
+%\btw{Cut generic loss -- from neurips 2019 lol}%(A generic loss will be written $L:\R\to\reals^\Y$.)
 We write the corresponding expected loss when $Y \sim p$ as $\inprod{p}{\ell(r)}$ and $\inprod{p}{L(u)}$.
 The \emph{Bayes risk} of a loss $L:\reals^d\to\reals^\Y_+$ is the function $\risk{L}:\simplex\to\reals_+$ given by $\risk{L}(p) := \inf_{u\in\reals^d} \inprod{p}{L(u)}$; naturally for discrete losses we write $\risk{\ell}$ with the infimum over $\R$.
+When restricting the domain of a loss $L$ from $\R$ to $\R'$, we write $L|_{\R'}$.
 
 %\jessie{In general, we shall denote discrete reports by $r \in \R$, and real-valued reports by $u \in \U$.}
 For example, 0-1 loss is a discrete loss with $\R = \Y = \{-1,1\}$
@@ -317,7 +317,7 @@ A \emph{polytope} is a bounded polyhedral set.
 A convex function $f:\reals^d\to\reals$ is \emph{polyhedral} if its epigraph is polyhedral, or equivalently, if it can be written as a pointwise maximum of a finite set of affine functions~\citep{rockafellar1997convex}.
 %
 \begin{definition}[Polyhedral loss]
-  A loss $L: \reals^d \to \reals^{\Y}_+$ is \emph{polyhedral} if $L(u)_y$ is a polyhedral convex\bo{removed parentheses which might be confusing} function of $u$ for each $y\in\Y$.
+  A loss $L: \reals^d \to \reals^{\Y}_+$ is \emph{polyhedral} if $L(u)_y$ is a polyhedral convex function of $u$ for each $y\in\Y$.
 \end{definition}
 %
 For example, hinge loss is polyhedral, whereas logistic loss is not.
@@ -395,7 +395,7 @@ for all $p \in \simplex$,
   If $(L, \psi)$ is calibrated with respect to $\ell$, we call $\psi$ a \emph{calibrated link.}
 \end{definition}
 It is well-known in finite-outcome settings that calibration is equivalent to \emph{consistency}, in the following sense (cf.~\citep{bartlett2006convexity,zhang2004statistical,agarwal2015consistent}).
-Given feature space $\X$, fix a distribution $D \in \Delta(\X\times\Y)$.
+Given feature space $\X$, \jessie{and any?}fix a distribution $D \in \Delta(\X\times\Y)$.
 Let $L^*$ be the best possible expected $L$-loss achieved by any hypothesis $H:\X\to\reals^d$, and $\ell^*$ the best expected $\ell$-loss for any hypothesis $h:\X\to\R$, respectively.
 If $(L,\psi)$ is consistent, then for any sequence of surrogate hypotheses $H_1,H_2,\ldots$ whose $L$-loss limits to $L^*$, the $\ell$-loss of $\psi\circ H_1,\psi \circ H_2, \ldots$ limits to $\ell^*$.
 \bo{edited above slightly. I believe a technical definition of consistency would have a ``for all $\D$'', but we can probably skip that.}
@@ -405,15 +405,14 @@ Note that in the finite-outcome setting, calibration is necessary and sufficient
 
 \subsection{Embedding}
 
-\bo{rewritten slightly}
 %Several consistent convex surrogates in the literature can be thought of as \emph{embeddings} of the target loss $\ell$, wherein one maps the discrete reports of $\ell$ to a vector space, and finds a convex loss which agrees with the original loss.
 %A key notion to define an embedding is that of a \emph{representative set}: a set of reports $\Sc$ such that, for all label distributions, at least one report $r\in\Sc$ minimizes expected loss.
 We now formalize the sense in which a convex surrogate can be an \emph{embedding} of a target loss $\ell$.
-In these cases, which capture several consistent surrogates in the literature\bo{cites/examples?}, one maps each report (prediction) of $\ell$ to a point in $\reals^d$, then constructs a convex loss on $\reals^d$ that agrees with $\ell$ at these points.
+In these cases, which capture several consistent surrogates in the literature (e.g.,~\citep{ramaswamy2015hierarchical,ramaswamy2016convex,lapin2015top,wang2020weston}; see \S~\ref{sec:applications}), one maps each report (prediction) of $\ell$ to a point in $\reals^d$, then constructs a convex loss on $\reals^d$ that agrees with $\ell$ at these points.
 
 In fact, it is not always necessary to map \emph{all} reports to such points.
-It turns out to often be convenient to allow $\ell$ to have reports that are ``redundant'' in some sense (explored in \S~\ref{sec:min-rep-sets}).
-\bo{perhaps mention and cite \citet{wang2020weston}}
+It turns out to often be convenient to allow $\ell$ to have reports that are ``redundant'' in some sense (explored in \S~\ref{sec:min-rep-sets}), initially explored by~\citet{wang2020weston} under the name \emph{embedding cardinality}.
+%\bo{perhaps mention and cite \citet{wang2020weston}}
 Because of this, a key notion to define an embedding is that of a \emph{representative set}: a set of reports $\Sc$ such that, for all label distributions, at least one report $r\in\Sc$ minimizes expected loss.
 \begin{definition}[Representative set]
   Let $\Gamma:\simplex\toto\R$.
@@ -507,7 +506,7 @@ Indeed, apart from mapping the embedded points back to their original reports vi
 When the surrogate is polyhedral, we give a construction to map the remaining values in \S~\ref{sec:calibration}, showing that embeddings always yield calibration.
 We first explore the connection between embeddings and polyhedral surrogates.
 
-\raf{Suggest moving / incorporating below} \jessie{Moved, though I think think should be merged with above paragraph now}
+%\raf{Suggest moving / incorporating below} \jessie{Moved, though I think think should be merged with above paragraph now}
 While our notion of embedding is sufficient for calibration (and therefore consistency), it is worth noting that it is not \emph{necessary} for these conditions.  
 For example, while logistic loss does not embed 0-1 loss, the surrogate and link for logistic loss are consistent with respect to 0-1 loss.
 
