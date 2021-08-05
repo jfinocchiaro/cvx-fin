@@ -202,7 +202,7 @@ This general approach, called surrogate risk minimization, is ubiquitous in supe
 \raft{I added this paragraph (based on our rates paper) and then transitioned into the next}
 
 % Convex surrogate losses are a central building block in machine learning for finite prediction problems such as classification and structured prediction tasks.
-A growing body of work seeks to design and analyze convex surrogates for particular target loss functions, and more broadly, understand the best empirical risk minimization bounds that can found for a surrogate, for which consistency is a necessary condition.
+A growing body of work seeks to design and analyze convex surrogates for particular target loss functions, and more broadly, understand the best empirical risk minimization bounds that can be found for a surrogate, for which consistency is a necessary condition.
 For example, recent work has developed tools to bound the prediction dimension of the surrogate, meaning the dimension of the range of the surrogate hypothesis~\cite{frongillo2015elicitation,  ramaswamy2016convex}.
 Yet in some cases these bounds are far from tight, such as for \emph{abstain loss} (classification with an abstain option)~\citep{bartlett2008classification,yuan2010classification,ramaswamy2016convex,ramaswamy2018consistent,zhang2018reject}.
 Furthermore, the kinds of strategies available for constructing surrogates, and their relative power, are not well understood.
@@ -297,13 +297,17 @@ We first discuss this conditional setting, with just labels $\Y$ and no features
 \botodo{I don't expect the previous sentence to make sense to most readers. Suggest we add some explanation or detail -- or defer this comment to a bit later.}
 \jessiet{Better?}
 
-We assume that a given discrete prediction problem, such as classification, is given in the form of a discrete \emph{target loss} $\ell:\R\to\reals^\Y_+$, which maps a report (prediction) $r$ from a finite set $\R$ to the vector of loss values $\ell(r) = (\ell(r)_y)_{y\in\Y}$ for each possible outcome $y\in\Y$.
-%We will assume throughout that the given discrete loss is \emph{non-redundant}, meaning every report is uniquely optimal (minimizes expected loss) for some distribution $p\in\simplex$.
-Similarly, surrogate losses will be written $L:\reals^d\to\reals^\Y_+$, typically with reports written $u\in\reals^d$.
-%\btw{Cut generic loss -- from neurips 2019 lol}%(A generic loss will be written $L:\R\to\reals^\Y$.)
+
+\bo{Suggest: ``...loss function $L:\R\to\reals^\Y_+$...'' then transition to target and surrogate}
+\raf{Moved: `` which maps a report (prediction) $r$ from a finite set $\R$ to the vector of loss values $L(r) = (L(r)_y)_{y\in\Y}$ for each possible outcome $y\in\Y$''}
 We write the corresponding expected loss when $Y \sim p$ as $\inprod{p}{\ell(r)}$ and $\inprod{p}{L(u)}$.
 The \emph{Bayes risk} of a loss $L:\reals^d\to\reals^\Y_+$ is the function $\risk{L}:\simplex\to\reals_+$ given by $\risk{L}(p) := \inf_{u\in\reals^d} \inprod{p}{L(u)}$; naturally for discrete losses we write $\risk{\ell}$ with the infimum over $\R$.
 When restricting the domain of a loss $L$ from $\R$ to $\R'$, we write $L|_{\R'}$.
+
+We assume that a given discrete prediction problem, such as classification, is given in the form of a discrete \emph{target loss}, which we denote $\ell:\R\to\reals^\Y_+$, where we assume $\R$ is a finite set.
+%We will assume throughout that the given discrete loss is \emph{non-redundant}, meaning every report is uniquely optimal (minimizes expected loss) for some distribution $p\in\simplex$.
+Similarly, surrogate losses will be written $L:\reals^d\to\reals^\Y_+$, typically with reports written $u\in\reals^d$.
+%\btw{Cut generic loss -- from neurips 2019 lol}%(A generic loss will be written $L:\R\to\reals^\Y$.)
 
 %\jessie{In general, we shall denote discrete reports by $r \in \R$, and real-valued reports by $u \in \U$.}
 For example, 0-1 loss is a discrete loss with $\R = \Y = \{-1,1\}$
@@ -357,7 +361,6 @@ In this case we say 0-1 loss \emph{elicits} the mode, as we formalize below.
 For finite properties (those with $|\R|<\infty$) and discrete losses, we will use lowercase notation $\gamma$ and $\ell$, respectively, with reports $r\in\R$; for surrogate properties and losses we use $\Gamma$ and $L$, with reports $u\in\reals^d$.
 % For finite properties (those with $|\R|<\infty$) and discrete losses, we will use lowercase notation $\gamma:\simplex\toto\R$ and $\ell:\R\toto\reals^\Y_+$, respectively, with reports $r\in\R$; for surrogate properties and losses we use $\Gamma:\simplex\toto\reals^d$ and $L:\reals^d\toto\reals^\Y_+$, with reports $u\in\reals^d$.
 For general properties and losses, we will also use $\Gamma$ and $L$, as above.
-\bo{This slightly clashes with statement above in 2.1 that $L$ means a surrogate loss.}
 
 % Often we will work with two properties simultaneously, a finite property $\gamma:\simplex\toto\R$, and its embedded version $\Gamma:\simplex\toto\reals^d$.
 % In this case, we write the embedded reports as $u\in\reals^d$, reserving $r\in\R$ for the finite property.
@@ -413,7 +416,7 @@ In these cases, which capture several consistent surrogates in the literature (e
 In fact, it is not always necessary to map \emph{all} reports to such points.
 It turns out to often be convenient to allow $\ell$ to have reports that are ``redundant'' in some sense (explored in \S~\ref{sec:min-rep-sets}), initially explored by~\citet{wang2020weston} under the name \emph{embedding cardinality}.
 %\bo{perhaps mention and cite \citet{wang2020weston}}
-Because of this, a key notion to define an embedding is that of a \emph{representative set}: a set of reports $\Sc$ such that, for all label distributions, at least one report $r\in\Sc$ minimizes expected loss.
+Because of this redundancy, we will only require an embedding map to be defined on a \emph{representative set}: a set of reports $\Sc$ such that, for all label distributions, at least one report $r\in\Sc$ minimizes expected loss.
 \begin{definition}[Representative set]
   Let $\Gamma:\simplex\toto\R$.
   We say $\Sc \subseteq \R$ is \emph{representative for $\Gamma$} if we have $\Gamma(p) \cap \Sc \neq \emptyset$ for all $p\in \simplex$.
@@ -422,7 +425,6 @@ Because of this, a key notion to define an embedding is that of a \emph{represen
   % We say $\Sc \subseteq \R$ is \emph{representative for $L$} if we have $\prop{L}(p) \cap \Sc \neq \emptyset$ for all $p\in \simplex$.
   % We further say $\Sc$ is a \emph{minimum representative set} if it has the smallest cardinality among all representative sets.
 \end{definition}
-\bo{Removed a paragraph here and folded it into the above. It's good to explain why we need representative sets -- i.e. the first sentence was great. But I don't think we should go into any details of various ways in which reports can be redundant. It doesn't matter, we can forward ref. Instead though, I think we should give some intuition for why it will be convenient.}
 
 %It turns out that it will be convenient, especially in applications, to allow the target $\ell:\R\to\reals^\Y_+$ to have reports which are ``redundant'' in some sense.
 %One natural sense is that $\ell$ has a representative set that is a strict subset of $\R$, i.e., $\R$ is not a minimum representative set.
@@ -475,6 +477,7 @@ For condition (ii), let us compute the property each loss elicits, i.e., the set
 % Now, take the embedding $\varphi$ to be the identity.  % := r$ if $r \in [-1,1]$, and $\sgn(r)$ otherwise.
 In particular, we see that $-1 \in \prop{\ellzo}(p) \iff p_1 \in [0, 1/2] \iff -1 \in \prop{\hinge}(p)$, and $1 \in \prop{\ellzo}(p) \iff p_1 \in [1/2,1] \iff 1 \in \prop{\hinge}(p)$.
 With both conditions of Definition~\ref{def:loss-embed} satisfied, we conclude that $\hinge$ embeds $2\ellzo$.
+\raf{Forward ref \S~\ref{sec:min-rep-sets} <-- add ref to 6.2}
 
 \begin{figure}
 	\begin{minipage}{0.3\linewidth}
@@ -496,7 +499,7 @@ With both conditions of Definition~\ref{def:loss-embed} satisfied, we conclude t
 %	\caption{Bayes risk of the logistic loss.}
 %	\label{fig:logistic-br}
 \end{minipage}
-\caption{Bayes risks of 0-1, hinge, and logistic losses, respectively, in binary classification setting. \jessie{Move this down to when we actually discuss risks matching?}}
+\caption{Bayes risks of 0-1, hinge, and logistic losses, respectively, in binary classification setting. \jessie{Move this down to when we actually discuss risks matching?}\raf{Let's keep but add detail / increase font size}}
 \label{fig:bayes-risks-01}
 \end{figure}
 
@@ -541,11 +544,12 @@ For example, while logistic loss does not embed 0-1 loss, the surrogate and link
 
 In this section, we establish a tight relationship between the technique of embedding and the use of polyhedral (piecewise-linear convex) surrogate losses.
 We defer the question of when such surrogates are consistent to \S~\ref{sec:calibration}. 
+\raf{Reference Theorem~\ref{thm:embed-poly-informal}}
 
 % \raf{Do we want this anymore?  We violate it right off the bat with Lemma~\ref{lem:loss-restrict}...}
 % Throughout this section, unless specified otherwise, we use $\ell:\R\to\reals^\Y$ for discrete target losses and $L:\reals^d\to\reals^\Y$ for surrogates.
 
-A first observation is that a loss restricted to some representative set $\Sc$ elicits the same property restricted to $\Sc$.
+A first observation is that a loss $L$ restricted to some representative set $\Sc$, denoted $L|_\Sc$, elicits the same property restricted to $\Sc$.
 As a consequence, restricting to representative sets preserves the Bayes risk.
 We will use these observations throughout.
 \begin{lemma}\label{lem:loss-restrict}
@@ -554,8 +558,6 @@ We will use these observations throughout.
   Then $L|_\Sc$ elicits $\gamma:\simplex\toto\Sc$ defined by $\gamma(p) = \Gamma(p)\cap \Sc$.
   Moreover, $\risk{L}=\risk{L|_\Sc}$.
 \end{lemma}
-\botodo{I didn't see us define $L|_\Sc$ anywhere yet! Although it's briefly mentioned in the intro.}\raft{Yeah, maybe recall the def here?}
-\botodo{Notation in the lemma is confusing because $L$ is supposed to be a surrogate with report space $\reals^d$ and $\R$ is supposed to be the report space for $\ell$.}\raft{We should discuss this point}
 \begin{proof}
   Let $p\in\simplex$ be fixed throughout.
   First let $r \in \gamma(p) = \Gamma(p) \cap \Sc$.
@@ -686,6 +688,8 @@ What's more is that there is a polyhedral \emph{embedding} that is calibrated fo
 \section{Consistency via Calibrated Links}
 \label{sec:calibration}
 
+\raf{Reference Theorem~\ref{thm:link-informal}}
+
 We have now seen the tight relationship between polyhedral losses and embeddings; in particular, every polyhedral loss embeds some discrete loss.
 The embedding itself tells us how to link the embedded points back to the discrete reports (map $\varphi(r)$ to $r$).
 But it is not clear how to extend this to yield a full link function $\psi: \reals^d \to \R$, and whether such a $\psi$ can lead to consistency.
@@ -761,6 +765,8 @@ Our results suggest that it is possible that some of the given surrogates are ca
 
 \subsection{Consistency of abstain surrogate and link construction}
 \label{sec:abstain}
+
+\raf{TODO: talk about generic approach: restrict to affine regions, take vertices}
 
 In classification settings with a large number of labels, several authors consider a variant of classification, with the addition of a ``reject'' or \emph{abstain} option.
 For example, \citet{ramaswamy2018consistent} study the loss $\ellabs{\alpha} : [n] \cup \{\bot\} \to \reals^\Y_+$ defined by $\ellabs{\alpha}(r)_y = 0$ if $r=y$, $\alpha$ if $r = \bot$, and 1 otherwise.
@@ -877,7 +883,7 @@ Recall that the symmetric difference is defined by $S\triangle T = (S\setminus T
 \begin{theorem}\label{thm:lovasz-embed-main}
 	Let $\hat\ell^f:\hat\R\times\Y\to\reals_+$, where $\hat\R = \{(A,B) \in 2^{[k]} \times 2^{[k]}: A\cap B=\emptyset\}$, be given by
 	\begin{equation}
-	\hat\ell^f((A,B),S) = f(A\triangle S\setminus B) + f(A\triangle S\cup B)~.
+	\hat\ell^f((A,B))_S = f(A\triangle S\setminus B) + f(A\triangle S\cup B)~.
 	\end{equation}
 	Then the Lov\'asz hinge $L^f$ embeds $\hat\ell^f$.
   Moreover, the embedding is tight whenever $f$ is strictly submodular.
