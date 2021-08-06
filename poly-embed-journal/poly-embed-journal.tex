@@ -879,7 +879,7 @@ In \S~\ref{app:lovasz}, we generalize this observation for all $k$.
 In other words, even for $k>2$, the only consistent Lov\'asz hinge is weighted Hamming loss.
 This result casts doubt on the practical effectiveness of the Lov\'asz hinge as a surrogate for $\ell^f$.
 
-In light of this negative result, together with the fact that every polyhedral surrogate embeds some target loss (Theorem~\ref{thm:poly-embeds-discrete}), we now turn to the question: what target problem, then, \emph{is} the Lov\'asz hinge consistent for?
+In light of this negative result, together with the fact that every polyhedral surrogate embeds some target loss (Theorem~\ref{thm:poly-embeds-discrete}), we now turn to the question: for what target problem \emph{is} the Lov\'asz hinge consistent?
 We show in \S~\ref{app:lovasz} that the answer is a variant of abstain loss where one can abstain on a set of labels $B\subseteq[k]$.
 Recall that the symmetric difference is defined by $S\triangle T = (S\setminus T) \cup (T\setminus S)$.
 \begin{theorem}\label{thm:lovasz-embed-main}
@@ -888,9 +888,12 @@ Recall that the symmetric difference is defined by $S\triangle T = (S\setminus T
 	\hat\ell^f((A,B))_S = f(A\triangle S\setminus B) + f(A\triangle S\cup B)~.
 	\end{equation}
 	Then the Lov\'asz hinge $L^f$ embeds $\hat\ell^f$.
-  Moreover, the embedding is tight whenever $f$ is strictly submodular.
+  Moreover, if $f$ is strictly submodular and strictly increasing, the embedding is tight.
 \end{theorem}
-\raf{Something about how this could actually be a useful target and surrogate, provided you actually link from the surrogate to the target and not ignore $B$.}
+
+While Theorem~\ref{thm:lovasz-consistent-main} shows that the Lov\'asz hinge is inconsistent, Theorem~\ref{thm:lovasz-embed-main} illuminates why: when there is sufficient uncertainty around some subset of labels, the loss encourages the learning algorithm to ``hedge'' and set prediction coordinates for that set equal to 0.
+This observation reveals a potential peril of using the Lov\'asz hinge in noisy label settings.
+On the other hand, of course, this revelation suggests a positive result as well: under an appropriate link from our construction in Theorem~\ref{thm:eps-thick-calibrated}\raft{Which theorem number to ref?}, the Lov\'asz hinge could be fruitfully applied to set-valued prediction problems when one allows the learning algorithm to abstain on a subset of labels.
 
 % \subsection{New surrogates for cost-sensitive classification}
 
@@ -2399,16 +2402,18 @@ For clarity of exposition, we will depart from our usual notation for loss funct
 The link will be the sign function $\psi = \sgn$, with ties broken arbitrarily.
 
 A set function $f:2^N\to\reals$ is \emph{submodular} if for all $S,T\subseteq N$ we have $f(S) + f(T) \geq f(S\cup T) + f(S\cap T)$.
-A function is \emph{supermodular} if the inequality is reversed, and \emph{modular} if it holds with equality, for all $S,T\subseteq N$.
-The function $f$ is \emph{increasing} if we have $f(S\cup T) \geq f(S)$, again for all $S,T\subseteq N$.
+If this inequality is strict whenever $S$ and $T$ are incomparable, meaning $S\not\subseteq T$ and $T\not\subseteq S$, then we say $f$ is \emph{strictly submodular}.
+A function is \emph{modular} if the submodular inequality holds with equality for all $S,T\subseteq N$.
+The function $f$ is \emph{increasing} if we have $f(S\cup T) \geq f(S)$ for all disjoint $S,T\subseteq N$, and \emph{strictly increasing} if the inequality is always tight.
 
-We are interested in convex surrogates for the following discrete loss $\ell:\R\times\Y\to\reals$, where $\R=\Y=2^N$,
+Let $\triangle$ be the symmetric difference operator, defined by $S\triangle T = (S\setminus T) \cup (T\setminus S)$.
+To avoid additional parentheses, throughout we assume $\triangle$ has operator precedence over $\setminus$, $\cap$, and $\cup$.
+
+We are interested in convex surrogates for the following discrete loss $\ell^f:\R\times\Y\to\reals$, with $\R=\Y=2^N$,
 \begin{equation}
 \label{eq:discrete-set-loss}
-\ell^f(A,S) = f(A\triangle S)~,
+\ell^f(A,S) = f(A\triangle S)~.
 \end{equation}
-where $\triangle$ is the symmetric difference operator, defined by $S\triangle T = (S\setminus T) \cup (T\setminus S)$.
-Note: throughout we assume $\triangle$ has operator precedence over $\setminus$, $\cap$, and $\cup$.
 In words, $\ell^f$ measures the joint error of our $k$ predictions by computing the set of mispredictions (elements in $A$ but not $S$ and vice versa) and calling the set function $f$.
 
 A natural approach to deriving convex surrogates in the case of submodular functions $f$ is the Lov\'asz extension, which is known to be convex when $f$ if (and only if) submodular. %\jessiet{Doesn't make grammatical sense to me.}
@@ -2651,10 +2656,109 @@ We can now restate and prove Theorem~\ref{thm:lovasz-consistent-main}.
 \subsection{Tightness of the embedding}
 \label{app:lovasz-tight}
 
-We have seen that the Lov\'asz hinge is consistent if and only if it is modular, as otherwise some report $(A,B)$ with $B\neq\emptyset$ is non-redundant.
-\raft{Maybe we could do it this way to be more direct!}
+Finally, we show a sufficient condition for when the embedding is tight.
+It appears from the proof that both assumptions on $f$ are required, though we leave open whether that is indeed the case.
+
+\begin{lemma}
+  Let $X,Y,Z\subseteq N$ such that $Y\cap Z = \emptyset$.
+  Then $X\triangle (Y\cup Z) = X\triangle Y \triangle Z$.
+\end{lemma}
+\begin{proof}
+  $X\triangle (Y\cup Z) = X\cup (Y\cup Z) \setminus (X \cap (Y\cup Z))$
 
 
+  $X\triangle (Y\cup Z) = (X \setminus (Y\cup Z)) \cup ((Y\cup Z) \setminus X)$
+\end{proof}
+
+\begin{theorem}\label{thm:lovasz-embed-tight}
+  Let $f$ be strictly submodular and strictly increasing.
+  Then $L^f$ tightly embeds $\hat\ell^f$.
+\end{theorem}
+\begin{proof}
+  Let $A,B\subseteq N$ be disjoint.
+  We will show that $(A,B)$ is the unique $\hat\ell^f$-optimal report for the distribution $p$ given by
+  \begin{equation}
+    \label{eq:1}
+    p(S) =
+    \begin{cases}
+      2^{-|B|} & S\setminus A \subseteq B \\
+      0 & \text{otherwise}
+    \end{cases}~.
+  \end{equation}
+  The condition $S\setminus A \subseteq B$ is equivalent to the existence of some $T\subseteq B$ such that $S = A \cup T$, and this $T$ must be disjoint from $A$ as $B$ is.
+  The expected loss for $(A,B)$ under $p$ is therefore
+  \begin{align*}
+    \hat\ell^f((A,B);p)
+    &= \sum_{T\subseteq B} 2^{-|B|} f(A\triangle (A\cup T)\setminus B) + f(A\triangle (A\cup T)\cup B)
+    \\
+    &= 2^{-|B|} \sum_{T\subseteq B} f(T\setminus B) + f(T\cup B)
+    \\
+    &= f(\emptyset) + f(B)~.
+  \end{align*}
+
+  Now suppose $A',B'\subseteq N$ are disjoint, with $(A',B') \neq (A,B)$.
+  Once again we write the expected loss under $p$.
+  We will use the observation that, as $A$ and $T$ are disjoint, $A\cup T = A\triangle T$.
+  Defining $\hat A = A' \triangle A$, and using the associativity of $\triangle$, we then have $A' \triangle (A\cup T) = \hat A \triangle T$.
+  \begin{align*}
+    \hat\ell^f((A',B');p)
+    &= 2^{-|B|} \sum_{T\subseteq B} f(A'\triangle (A\cup T)\setminus B') + f(A'\triangle (A\cup T)\cup B')
+    \\
+    &= 2^{-|B|} \sum_{T\subseteq B} f(\hat A\triangle T\setminus B') + f(\hat A\triangle T\cup B')
+    \\
+    &= \frac 1 2 \; 2^{-|B|} \sum_{T\subseteq B} \biggl( f(\hat A\triangle T\setminus B') + f(\hat A\triangle T\cup B')
+    \\[-8pt]
+    & \hspace*{85pt} + f(\hat A\triangle (B\setminus T)\setminus B') + f(\hat A\triangle (B\setminus T)\cup B') \biggr)~.
+  \end{align*}
+  
+  We first suppose $B \subseteq B'$.
+  Then $\hat A\triangle T\setminus B' = \hat A \setminus B'$ and $\hat A\triangle T\cup B' = \hat A\cup B'$ for any $T \subseteq B$.
+  We conclude
+  \begin{align*}
+    \hat\ell^f((A',B');p)
+    &= \frac 1 2 \; 2^{-|B|} \sum_{T\subseteq B} \biggl( f(\hat A\setminus B') + f(\hat A\cup B') + f(\hat A\setminus B') + f(\hat A\cup B') \biggr)
+    \\
+    &= f(\hat A\setminus B') + f(\hat A\cup B')~.
+  \end{align*}
+  We will show either (i) $\hat A\setminus B' \neq \emptyset$ or (ii) $\hat A\cup B' \supsetneq B$ hold, and then apply the fact that $f$ is strictly increasing.
+  If (ii) fails, since $B \subseteq B'$, we must have $B = B'$.
+  Then $B = B'$ is disjoint from both $A$ and $A'$, and therefore from $\hat A = A'\triangle A$.
+  We therefore have $\hat A\setminus B' \neq \emptyset \iff \hat A \neq \emptyset \iff A \neq A'$, which must hold as $B = B'$ yet $(A,B) \neq (A',B')$ by assumption.
+  Thus, at least (i) or (ii) hold.
+  As $f$ is strictly increasing, we conclude $\hat\ell^f((A',B');p) > f(\emptyset) + f(B) = \hat\ell^f((A,B);p)$.
+
+  Now suppose $B \not\subseteq B'$.
+  We claim that there exists $T\subseteq B$ such that one of the following two cases hold:
+  \begin{enumerate}
+  \item[(i)]
+    $\hat A\triangle T\setminus B'$ and 
+    $\hat A\triangle (B\setminus T)\cup B'$
+    are incomparable;
+  \item[(ii)]
+    $\hat A\triangle T\cup B'$
+    and
+    $\hat A\triangle (B\setminus T)\setminus B'$
+    are incomparable. 
+  \end{enumerate}
+  We will then apply strict submodularity to conclude.
+
+  \bigskip
+  Take $T = B\setminus B'$.
+
+  If $B' = \emptyset$
+
+\raf{It seems we need to handle the case where $B\setminus B'$ is a singleton, since then we run into the same problem as when we used only $\emptyset$ and $B$.  If larger, we can take $T$ to fragment $B\setminus B'$ and I think we're good...}
+
+  Let $i\in B\setminus B'$.
+  If $i\in A'$, then $i\in\hat A$ (as $i\notin A$).
+
+  
+  \bigskip
+  For case (i), 
+
+  
+
+\end{proof}
 
 \section{Top-$k$ surrogate} 
 \jessie{Remove this section?}
