@@ -123,7 +123,7 @@
 
 \begin{document}
 
-\section{Top-$k$ surrogate}
+\section{Top-$k$ surrogate intro}
 
 Throughout this section, consider the surrogate loss \begin{equation}\label{eq:top-k-surrogate}
 L^{top-k}(u)_y~=~\left(1 - u_y + \frac{1}{k} \sum_{i=1}^k (u - e_y)_{[i]} \right)_+~.~
@@ -132,8 +132,7 @@ L^{top-k}(u)_y~=~\left(1 - u_y + \frac{1}{k} \sum_{i=1}^k (u - e_y)_{[i]} \right
 We write the expected loss $L^{top-k}(u)$ without the $(\cdot)_+$ operator by restricting $u$.
 Then, using this form of the expected loss, we are able to find a finite set of optimal reports over all $p \in \simplex$.
 
-\subsection{Notation and Assumptions}
-\subsubsection{Notation}
+\subsection{Notation}
 We say $u_{[i]}$ is the $i^{th}$ largest element of the $u$ vector.
 Let $\bar{u} = \frac 1 k \sum_{i = 1}^k u_{[i]}$.
 Similarly, let $\bar{u}_{-i} = \frac{1}{k-1} (k \bar u - u_{[i]})$ be the averages of the first $k$ sorted elements of $u$ and the average of the first $k-1$ sorted elements of $u$ besides the $i^{th}$ element, respectively.
@@ -143,10 +142,13 @@ If $u$ is understood from context, we abuse notation to omit the $u$ and write $
 
 Let $\min(\vec w, \vec v) \in \reals^d$ denote the element-wise minimum of vectors $\vec w, \vec v \in \reals^d$.
 
-\subsubsection{Closing the search space for a representative set}\label{sec:assumptions}
-Throughout, we make two assumptions about our report set, and show the set of reports satisfying both assumptions is representative. 
 
-For our first assumption, we first observe that $L^{top-k}$ is invariant in the $\ones$ direction.
+
+\section{Restricting the search space}
+\subsection{Closing the search space for a representative set}\label{sec:assumptions}
+We initially bound our report set with upper and lower bounds, and show the restricted set is representative. 
+
+For our first restriction to be representative, we first observe that $L^{top-k}$ is invariant in the $\ones$ direction.
 \begin{lemma}\label{lem:invar-ones}
 	For all $\alpha \in \reals$ and $y\in\Y$, we have $L^{top-k}(u)_y = L^{top-k}(u + \alpha \ones)_y$.
 \end{lemma}
@@ -160,6 +162,7 @@ For our first assumption, we first observe that $L^{top-k}$ is invariant in the 
 	\end{align*}
 \end{proof}
 
+We now introduce our first restriction on reports and show it is representative.
 \begin{lemma}\label{lem:extra-elts-zero}
 	$R^{\tt low} := \{u \in \reals^n_+ \mid \|u\|_0 \leq k\}$ is a representative set for $L^{top-k}$.
 \end{lemma}
@@ -168,7 +171,7 @@ For our first assumption, we first observe that $L^{top-k}$ is invariant in the 
 	We then have $u_{[i]} \leq 0$ for all $i \geq k+1$.
 	Consider $u'$ such that $u'_{[i]} = u_{[i]}$ for all $i$ so that $u_{[i]} \geq 0$, and $u'_{[i]} = 0$ otherwise.
 	Observe that $u$ and $u'$ have the same ordering on their elements and $u' \in R^{\tt low}$.
-	We want to show that $L^{top-k}(u)_y \geq L^{top-k}(u')_y$, and representativeness of $R^{\tt low}$ follows.
+	We want to show that $L^{top-k}(u)_y \geq L^{top-k}(u')_y$ for all $y \in \Y$, and representativeness of $R^{\tt low}$ follows.
 	
 	If $[y] \geq k+1$, then 
 	\begin{align*}
@@ -179,7 +182,8 @@ For our first assumption, we first observe that $L^{top-k}$ is invariant in the 
 	\end{align*}
 	The inequality comes from the equality of the first $k+1$ sorted elements of $u$ and $u'$, combined with setting $u_{[y]} \leq u'_{[y]} = 0$ in this case.
 	
-	Now, if $[y] < k+1$ and $u_y \geq 1$, observing that $\bar u = \bar u'$, we then have 
+	Now, if $[y] < k+1$ and $u_y \geq 1$, observe that $\bar u = \bar u'$.
+	We then have 
 	\begin{align*}
 	L^{top-k}(u)_y &= \left(1 - u_y + \frac 1 k \sum_{i=1}^k (u - e_y)_{[i]}\right)_+ \\
 	&= \left(1 - u_y + \bar u - \frac 1 k\right)_+\\
@@ -196,7 +200,7 @@ For our first assumption, we first observe that $L^{top-k}$ is invariant in the 
 	\end{align*}
 
 	Since $L^{top-k}(u)_y \geq L^{top-k}(u')_y$ for all $y \in \Y$, this also holds for the expected loss for all $p \in \simplex$.
-	Thus, $R$ is representative.
+	Thus, $R^{\tt low}$ is representative.
 \end{proof}
 
 It follows from construction of $R^{\tt low}$ that we can take $u_{k+1} = \ldots, = u_{[n]} = 0$.
@@ -208,14 +212,15 @@ We now state our final assumption, and show that the set of reports satisfying t
 \end{assumption}
 
 \begin{lemma}\label{lem:top-threshold}
-The set $R^{\tt low} \cap R^{\tt high}$ is representative.
+The set $\U := R^{\tt low} \cap R^{\tt high}$ is representative.
 %	For all $y \in \Y$, there is a minimizer $u$ of $L^{top-k}(\cdot)_y$ satisfying Assumption~\ref{assum:nonneg} so that for all $i$, we have $u_i \leq \bar u_{-i} +1$. 
 \end{lemma}
 \begin{proof}
   Since we have already proven $R^{\tt low}$ is representative, suppose $u \in R^{\tt low}$.
-  For all $i \in [n]$ such that $u_{[i]} > \bar u_{-i} + 1$, reassigning such a $u'_{[i]} := \bar u_{-i} +1$ results in $L^{top-k}(u')_i = L^{top-k}(u)_i = 0$, but we observe $L^{top-k}(u')_j \leq L^{top-k}(u)_j$ for all $j \neq i$ by decreasing $\ubar$, since $u_i \geq 0$.
-  Moreover, $u' in R^{\tt high}$ by construction.
+  If $u \not \in R^{\tt high}$, consider $u'$ as follows: for all $i \in [n]$ such that $u_{[i]} > \bar u_{-i} + 1$, reassigning such a $u'_{[i]} := \bar u_{-i} +1$ results in $L^{top-k}(u')_i = L^{top-k}(u)_i = 0$, but we claim $L^{top-k}(u')_j \leq L^{top-k}(u)_j$ for all $j \neq i$ by decreasing $\ubar$, since $u_i \geq 0$.
+  Moreover, $u' \in R^{\tt high}$ by construction.
 
+First, we consider when the outcome $y = i$ equals the modified element of $u$.
 Now, we write $u_y = \bar u_{-y} + 1 + \epsilon$ for some $\epsilon > 0$ and $u'_y = \bar u_{-y} + 1$, with $u_i = u'_i$ for all $i \neq y$. 
 \begin{align*}
 L^{top-k}(u)_y &= \left(1 - (\bar u_{-y} + \epsilon + 1) + \frac 1 k \left(\sum_{i=1, i \neq y}^k u_i + \bar u_{-y} + \epsilon\right) \right)_+\\ 
@@ -234,122 +239,68 @@ L^{top-k}(u')_y &= \left(1 - (\bar u_{-y} + 1) + \frac 1 k \left(\sum_{i=1, i \n
 Thus, the losses are equal on the outcome $y$.
 
 Now let us consider outcome $y\neq i$.
-Since $u$ satisfies Assumption~\ref{assum:nonneg}, we have $\bar u \geq 0$ and $\bar u_{-i} \geq 0$ for any $i$.
+Since $u \in R^{\tt low}$, we have $\bar u \geq 0$ and $\bar u_{-i} \geq 0$ for any $i$.
 Therefore, if $u_y > \bar u_{-y} + 1$, then we have $[y] < k+1$ as $u_y + 1 \geq 1 > 0$.
 Now, for outcome $y \neq i$, we have 
 \begin{align*}
 L^{top-k}(u)_y &= \left( 1 - u_y + \frac 1 k \sum_{j=1}^k (u-e_y)_{[j]} \right)_+ &\text{Plugging in $u$}\\
-	&= \left( 1 - u'_y + \frac 1 k \sum_{j=1}^k (u'-e_y)_{[j]} + \frac {\epsilon}{k}\right)_+ & \text{$u'_y$ is in the top $k$ elements of $(u' - e_y)$}\\
+	&= \left( 1 - u'_y + \frac 1 k \sum_{j=1}^k (u'-e_y)_{[j]} + \frac {\epsilon}{k}\right)_+ & \text{$u'_y$ is in the top $k$ elements of $(u' - e_y)$ and $u_y = u'_y$}\\
 	&\geq \left( 1 - u'_y + \frac 1 k \sum_{j=1}^k (u'-e_y)_{[j]}\right)_+ & \text{Since $\epsilon > 0$}\\
 	&= L^{top-k}(u')_y
 \end{align*}
 Therefore, if $u$ minimizes $L^{top-k}(\cdot)_y$, then so does $u'$ for each $y \in \Y$, so we can say the same of the expected loss $\inprod{p}{L^{top-k}(\cdot)}$ for all $p \in \simplex$.
-Thus, there is some $u' \in R^{\tt low} \cap R^{\tt high}$ so that $u' \in \argmin_u \inprod{p}{L^{top-k}(u)}$.
+Thus, there is some $u' \in R^{\tt low} \cap R^{\tt high}$ so that $u' \in \argmin_u \inprod{p}{L^{top-k}(u)}$ and $\U$ is representative.
 \end{proof}
 
 
-
-Consider the set $\U := R^{\tt low} \cap R^{\tt high}$.
-
-For $u \in \U$, we can write $\inprod{L^{top-k}(u)}{p}$ as follows:
+\subsection{Re-writing the surrogate}
+For any $u \in \U$, we have $L^{top-k}(u) =  1 - u_y + \frac 1 k \sum_{j = 1}^k(u - e_y)_{[j]}$, removing the floor function with $0$.
+This enables us to re-write the loss as follows:
 \begin{align*}
 L^{top-k}(u)_y &= 1 + \bar u - u_y - \frac 1 k \min(u_y, 1)\\
 \inprod{L^{top-k}(u)}{p} &= 1 + \bar u - \inprod{p}{u} - \frac 1 k \inprod{p}{\min(u, \ones)}
 \end{align*}
 
-%Consider the following finite set.
-%\begin{align*}
-%\R := \left\{ \frac{|M| + k -1}{k - |H|} \mathbf{1}_H + \mathbf{1}_M : H, M \subset [n], H\cap M = \emptyset, |H| + |M| \leq k \right\}
-%\end{align*}
-%\jessie{Ultimately, WTS $\R$ is representative for $L^{top-k}$.}
-%Throughout, we consider $c(u) := \frac{|M(u)| + k -1}{k - |H(u)|}$, where $M(u) = \{i \in [n] : u_i \in [0,1] \}$ and $H(u) = \{i \in [n] : u_i > 1\}$. 
-%\jessie{This has changed so $H$ and $M$ are functions of $p \in \simplex$.
-
-%\begin{lemma}\label{lem:linear-pieces}
-%	For each element $u_i$ of $u \in \U$, the expected loss $\inprod{p}{L^{top-k}(u)}$ is linear on $[0,1]$ and $[1, \bar u_{-i} + 1]$ for all $p \in \simplex$.
-%	\jessie{Not sure if this is the right statement.}
-%    \raf{Not sure either.  One thing to be careful about: you either have to make sure that the intervals in question yield points in the set $\U$, or refer to the original form of the loss.  Because the form of the loss you are using only is shown to hold when $u\in\U$.  Hopefully that made sense.}
-%    \raf{One thing that would help: let's visualize $\U$ for some value of $k,n$ to get some intuition for what this set is.  Maybe $k=2$ and $n=3$, but only plot the first 2 coordinates?}
-%\end{lemma}
-%\begin{proof}
-%	For all $p \in \simplex$ and $u \in \U^\circ$, we know that 
-%	\begin{equation}
-%	\inprod{p}{L^{top-k}(u)} = 1 + \bar u - \inprod{p}{u + \frac 1 k \min{u,\ones}}~.~
-%	\end{equation}
-%	For any $p$, if $u_i \in [0,1]$, we then have 
-%	\begin{align*}
-%	\inprod{p}{L^{top-k}(u)} &= 1 + \bar u - \inprod{p}{u + \frac 1 k \min(u,\ones)}\\
-%	 &= 1 + \bar u - \sum_{y \neq i}p_y (u_y + \frac 1 k \min(u_y, 1)) - p_i \frac {k+1} k u_i~,~
-%	\end{align*}
-%	which is linear on $u_i$.
-%	
-%	Similarly, for $u_i \in [1, \bar u_{-i} + 1]$, we can write $\inprod{p}{L^{top-k}(u)} = 1 + \bar u - \sum_{y \neq i}p_y (u_y + \frac 1 k \min(u_y, 1)) - p_i u_i - p_i/k$, which is linear in $u_i$.
-%\end{proof}
-
-%\begin{theorem}\label{thm:finite-set}
-%	Consider the loss $L^{top-k} : \reals^n \times \Y \to \reals_+$ given in Equation~\ref{eq:top-k-surrogate}.  
-%	The finite set
-%	\begin{align*}
-%	\R := \left\{ \frac{|M| + k -1}{k - |H|} \mathbf{1}_H + \mathbf{1}_M : H, M \subset [n], H\cap M = \emptyset, |H| + |M| \leq k \right\}
-%	\end{align*}
-%	is representative for $L^{top-k}$.
-%\end{theorem}
-%\begin{proof}[Sketch]
-%%	The above work tells us that when $p_y > \frac 1 {k+1}$, it is optimal to set $u_y > 0$, and otherwise, it is optimal to set $u_y = 0$.
-%	Since $L^{top-k}$ is linear in $i$ on $[0,1]$ and $[1, c]$ for some $c \geq 1$ and all dimensions $i \in [n]$, we know that the optimum is on the boundary of such reports, so when we bump $u_y$ up to some number greater than $0$, it should either be one $1$ or $c$ to be an optimal report.
-%	$H$ represents the elements of the report that are bumped up to $c$, and $M$ represents the elements of the report that are bumped up to $1$.
-%	We know that the size of $H \cup M$ must be less than or equal to $k$ by Assumption~\ref{assum:nonneg}, and $H \cap M$ is empty by each element of $u$ being real-valued, so for $c > 1$, $u_i$ cannot simultaneously be equal to $c$ and $1$, hence the restrictions on $\R$.
-%	Note that if $c = 1$, then we can say $H = \emptyset$.
-%	
-%	To see the reason for $c := \frac{|M| + k -1}{k - |H|}$, consider that, given the loss $L^{top-k}$, when we want to ``crank $u_i$'' above $1$, we want to do so as much as possible, until hitting the threshold discussed in Assumption~\ref{assum:top-threshold}.
-%	Exceeding the threshold on $u_i > c$ then can only increase expected loss, as shown in Lemma~\ref{lem:top-threshold}.
-%	
-%	Then, for $i \in H$, ``cranking'' $u_i$ as high as possible, we want to have $c = u_i = \bar u _{-i} + 1$.
-%	However, each $i \in H$ should get ``cranked up'' to the same value of $\bar u_{-i} + 1$ by linearity.
-%	We can see that 
-%	\begin{align*}
-%	c &= \bar u_{-i} + 1 \\
-%	c &= \frac{(c (|H|-1)) + |M|}{k-1} + 1\\
-%	ck-c &= c|H| - c + |M| + k - 1\\
-%	ck - c|H| &= |M| + k - 1\\
-%	c &= \frac{|M|+k-1}{k-|H|}~.~
-%	\end{align*}
-%\end{proof}
 
 
 
-\section{Cutting down on search space}
-Consider the loss $L^{top-k} : \reals^n \times \Y \to \reals_+$ given in equation~\eqref{eq:top-k-surrogate}.
-Since the loss is polyhedral, we know it has a finite set of minimizers.
-If we can find a finite representative set, we can easily embed these reports via the identity and more easily study the property elicited by this surrogate, and how it compares to the top-$k$ property originally in mind when the surrogate was designed.
+\section{A finite representative set}
+Since the loss $L^{top-k}$ is polyhedral, we know it has a finite set of minimizers.
+If we can find a finite representative set from $\U$, we can easily embed these reports via the identity and more easily study the property elicited by this surrogate, and how it compares to the top-$k$ property originally in mind when the surrogate was designed.
 
-We will start with $\U$ as we show it is representative in Lemma~\ref{lem:top-threshold}, and the set of vertices $\R$ for $L^{top-k}$.
-Consider $\R := \left\{ \frac{|M| + k -1}{k - |H|} \mathbf{1}_H + \mathbf{1}_M : H, M \subset [n], H\cap M = \emptyset, |H| + |M| \leq k, |H| < k \right\}$.
+We will start with $\U$ as we show it is representative in Lemma~\ref{lem:top-threshold}, and consider  the following set $\R := \left\{ \frac{|M| + k -1}{k - |H|} \mathbf{1}_H + \mathbf{1}_M : H, M \subset [n], H\cap M = \emptyset, |H| + |M| \leq k, |H| < k \right\}$.
 
-\begin{claim}\label{claim:R-vertices}
-	For each $p \in \mathrm{relint}\simplex$, the vertices of the expected loss $\inprod{p}{L^{top-k}(u)} = 1 - \inprod{p}{u} + \sum_{i=1}^k u_{[i]} - \inprod{p}{\min(u,\ones)}$ are denoted by $\R$.
-\end{claim}
+\begin{lemma}\label{lem:topk-affine-regions}
+	Fix a set $T \subseteq [n]$ and any $S \subseteq T$.
+	Then $L^{top-k}$ is affine on the set $A^{T,S} := \{u \in A^T \mid u_y \in [0,1] \forall y \in S \wedge u_y \in [1,1 + \frac 1 {k-1} \sum_{j \in T_k(u) \setminus \{i\}} u_j] \forall y \in T \setminus S \}$.
+\end{lemma}
 \begin{proof}
 	First, observe the loss is affine in the first two terms for all $u \in \U$, and non-linearity is only introduced in the last two terms.
-	Fixing a set $T$ of size $k$, and for any $u \in \U$, we will call $T_k(u)$ the top $k$ elements of $u$.
-	Moreover, denote by $A^T = \{u \in \U \mid T_k(u) = T\}$ as the set of $u$ whose top $k$ elements are exactly the elements of $T$.
-	By construction, we now have $\bar u$ is affine in $A^T$ for each $T$.
-	 
-	Since $u \in \U \supseteq R^{\tt low}$, we have $u_{[k+1]} = \ldots = u_{[n]} = 0$, and we also have $k$ constraints constructing $R^{\tt low}$ given by $0 \leq u_{i}$ for $i \in T$.	
-	Moreover, there are $k$ constraints constructing $R^{\tt high}$, given by $\forall i \in T, \,\,
-	u_{i} \leq 1 + \frac{1}{k-1}\sum_{j \in T_k(u) \setminus \{i\}} u_j$.
-
-
-	Finally, we can consider affineness in the last term, where there is a ``switch'' at $u_y = 1$ for each $y$.
+	For brevity, we denote $T_k(u)$ the top $k$ elements of $u$ for any $u$.
+	Fix any set $T \subseteq [n]$ of size $k$.
+	We denote by $A^T := \{u \in \U \mid T_k(u) = T\}$ as the set of $u$ whose top $k$ elements are exactly the elements of $T$.
+	We now have $\bar u$ is affine in $A^T$ for each $T$ since $\bar u$ is the sum of the top $k$ elements of $u$, regardless of their relative order.
+	
+	Recall that since $u \in \U \supseteq R^{\tt low}$, we have $u_{[k+1]} = \ldots = u_{[n]} = 0$, and we additionally impose $k$ constraints constructing $R^{\tt low}$ given by $0 \leq u_{i}$ for $i \in T$.	
+	Moreover, there are $k$ constraints constructing $R^{\tt high}$: given by $u_{i} \leq 1 + \frac{1}{k-1}\sum_{j \in T_k(u) \setminus \{i\}} u_j$ for all $i \in T$.
+	
+	This sets us up to consider affineness in the last term, where there is a ``switch'' at $u_y = 1$ for each $y$.
 	For a fixed set $T$ and $u \in A^T$, consider any $S \subseteq T$.
 	We can now construct the region $A^{T,S} = \{u \in A^T \mid u_y \in [0,1] \forall y \in S \wedge u_y \in [1,1 + \frac 1 {k-1} \sum_{j \in T_k(u) \setminus \{i\}} u_j] \forall y \in T \setminus S \}$.
-	%  where for any $y \in S$, we have $u_y \in [0,1]$, and for $y \in T \setminus S$, we have $u_y \in [1,1 + \frac 1 {k-1} \sum_{j \in T_k(u) \setminus \{i\}} u_j]$.
-	%There are $2^k$ choices of sets $V \in \{A,B\}^k$, $u \in V$ if and only if, for all $y \in \Y$, $V_y = A$ means $u_y \leq 1$ and $V_y = B$ otherwise. 
-	As $A^{T,S}$ is a subset of $A^T$, we know the third term is affine on $A^{T,S}$, and construct $A^{T,S}$ so that it is affine on the fourth term: therefore, $L$ is affine on $A^{T,S}$ for all $T$ and $S \subseteq T$. 
-	We now proceed to enumerate the vertices of $L$ by finding $k$ equalities imposed on $A^{T,S}$.
-	(Note that technically we need $n$ hyperplanes to intersect to form a vertex, but with $T$ fixed, the other $n-k$ come from the requirement $u_i = 0 \forall i \in [n] \setminus T$.)
+	Note that $A^{T,S} \subseteq A^T$.
 	
-	%Now, since each of these inequalities generates a halfspace in $\reals^k$, and a vertex in $\reals^k$ is the intersection of $k$ such halfspaces, we observe that there are $2^k$ possible vertices (though some of these are redundant).
+	Since $A^{T,S}$ is a subset of $A^T$, we know the third term is affine on $A^{T,S}$, and construct $A^{T,S}$ so that it is affine on the fourth term: therefore, $L$ is affine on $A^{T,S}$ for all $T$ and $S \subseteq T$. 
+\end{proof}
+
+\begin{claim}\label{claim:R-vertices}
+	For each $p \in \mathrm{relint}\simplex$, the vertices of the expected loss $\inprod{p}{L^{top-k}(u)} = 1 - \inprod{p}{u} + \sum_{i=1}^k u_{[i]} - \inprod{p}{\min(u,\ones)}$ is exactly $\R$.
+\end{claim}
+\begin{proof}
+	By Lemma~\ref{lem:topk-affine-regions}, we know that $L^{top-k}$ is affine on $A^{T,S}$ for any $T \subseteq [n]$ of size $k$ and $S \subseteq T$. 
+
+	We now proceed to enumerate the vertices of $L$ by finding $k$ equalities imposed on $A^{T,S}$. \jessie{Grunbaum for the fact that it needs to be $k$}
+	\footnote{Technically we need $n$ hyperplanes to intersect to form a vertex, but with $T$ fixed, the other $n-k$ come from the requirement $u_i = 0 \forall i \in [n] \setminus T$.}
+	
 	For each $T,S$ combination, we then have vertices at each of these $2^k$ possible equalities, given by the following constraints.
 	\begin{align*}
 	\forall i \in S, \,\, 0 &\leq u_i \leq 1 \\
@@ -360,18 +311,23 @@ Consider $\R := \left\{ \frac{|M| + k -1}{k - |H|} \mathbf{1}_H + \mathbf{1}_M :
 	Now, for fixed $T$, $S$, and choice of equalities in each, let $M = \{y \mid u_y = 1\}$, and $H = \{y \in \Y \mid u_y = 1 + \sum_{j \in T_k(u) \setminus \{i\}} u_j\}$.
 	(Note that $y \in H \implies u_y > 1$ unless $M$ is empty \jessie{and $H = \{y\}$?}, in which case, we will say $y \in M$ and $H = \emptyset$.) 
 	\jessie{Be careful about if $c_{MH} = 1$}
-	By construction of $T$ and $S$, we satisfy the set requirements of $\R$, and observe that for all $y \in H$, we have $u_y = 1 + \frac 1 {k-1}\sum_{j \in T_k(u) \setminus \{y\} u_j} = \frac{|M| + k -1}{k - |H|}$.
+	By construction of $T$ and $S$, we satisfy the set requirements of $\R$, and observe that for all $y \in H$, we have $u_y = 1 + \frac 1 {k-1}\sum_{j \in T_k(u) \setminus \{y\} u_j} = \frac{|M| + k -1}{k - |H|}$.\footnote{This last equality comes from setting $u_i = \bar u_{-i} +1 = \frac{|M| + (|H|-1)u_i}{k-1} + 1 = \frac{|M| + k - 1}{k - |H|}$ for all $i \in H$.}
 	
 	As there are only finitely many choices of $T$ and $S$, a finite number of vertices generated by each of those choices, and they generate the sets generating $\R$.
-	Moreover, for each $H,M$ generating an element of $R$, there is a $T,S$ generating the element of $\R$.
+	Moreover, for each $H,M$ generating an element of $\R$, there is a $T,S$ generating the element of $\R$: consider $T = H$ and $S = M$, with $u_i = 1$ for all $i \in S$ ad $u_i = \bar u_{-i} + 1$ for all $i \in T$.
 	Thus, we conclude $\R$ is the finite set of vertices of $\inprod{p}{L(\cdot)}$ for distributions $p \in \mathrm{relint}(\simplex)$.
 	%(If $p \not \in \mathrm{relint}(\simplex)$, then some points in $\R$ may not be vertices since any $T$ containing $y$ outside the support of $p$ will not be it dude )
 \end{proof}
 
 \begin{corollary}
+	$\R$ is a finite representative set for $L^{top-k}$.
+\end{corollary}
+
+\begin{corollary}
 	$L^{top-k}$ embeds $L^{top-k}|_\R$.
 \end{corollary}
 
+We can now evaluate the restricted function and obtain it in the form of a loss matrix.
 \begin{align}
 L|_{\R}(r,y) &= \begin{cases}
 0 & r_y = \bar r_{-y} + 1\\
@@ -380,22 +336,15 @@ L|_{\R}(r,y) &= \begin{cases}
 \end{cases}~.~
 \end{align}
 
-%\jessie{This is not precise...}
-%\begin{proposition}
-%	is the set of vertices of $L^{top-k}$.
-%\end{proposition}
-%\begin{proof}
-%	Any vertex of the loss surface in $\reals^n \cap \U$ is given by the intersection of (at least) $n-1$ affine halfspaces.
-%	The set of affine halfspaces composing $L^{top-k}$ is precisely those where the top-$k$ elements of $(u - e_y)$ are the same for all $y \in \Y$.
-%	These sets shift when either (a) one of the $k$ nonzero elements shifts below $1$ or (b) we hit the boundary of $\U$.
-%	For (a), this is the intersection of the $n$ hyperplanes where \jessie{...}
-%	When we hit the boundary of $\U$, the vertices are \jessie{...}
-%\end{proof}
-
 
 \section{Property elicited by $L^{top-k}$}
-There is sometimes a benefit in expected loss for this surrogate by artificially bumping up from the ``low'' to ``middle'' bin when possible because doing so cranks up the constant on the ``high'' reports, yielding better expected loss.
+The next natural question is to think about if $\R$ is non-redundant.
+In order to answer this, we necessarily need to understand $\Gamma := \prop{L^{top-k}}$.
 
+In the previous section, we saw the construction of ``high'' ($H$), ``meduim'' ($M$), and ``low`` ($L := [n] \setminus (H \cup M)$) bins for the vertices of $\R$.
+However, because of the nature of $\U$, there is a dependence of multiple coordinates for an optimal report of $L^{top-k}$.
+That is, for a fixed probability distribution $p \in \simplex$, there may be coordinates with ``enough'' weight to be in $H$ or $M$.
+However, there is sometimes a benefit in expected loss for this surrogate by artificially bumping up from the ``low'' to ``middle'' bin when possible because doing so cranks up the constant on the ``high'' reports, yielding better expected loss.
 Note that ``bumping down'' does not happen because of how the original bins are set, but we can ''bump up'' from low to medium or medium to high.
 
 Fix $p \in \simplex$.
@@ -407,13 +356,11 @@ B_p &:= \left\{i \mid p_i \in \left(\frac {k(1-p_H)}{(k+1)(k-H)}, \frac 1 {k+1} 
 L_p &:= \left\{i \mid p_i \leq \frac {k(1-p_H)}{(k+1)(k-H)} \right\}~,~
 \end{align*}
 where $p_H := \sum_{i \in H_p} p_i$.
-Sometimes we drop $p$ from the notation where it can be understood from context.
 
-
-The bin $B_p$ allows us to ``bump'' reports up to a higher bin if beneficial, as bumping a report up allows for each element of $H_p$ to be set at a higher constant.
+The bin $B_p$ allows us to ``bump'' reports up to a the middle bin if beneficial (it is never beneficial to bump to a the highest bin), as bumping a report up allows for each element of $H_p$ to be set at a higher constant.
 One can verify that it is never beneficial to bump from middle to high, so we need only concern ourselves with bumping from $L_p$ to $M_p$.
 
-To understand when to bump $j$ from $L_p$ to $B_p$, taking $u \to u'$, we can ask when we have
+To understand when to bump $j$ from $L_p$ to $B_p$, taking $u \to u'$ (that is, $u_j = 0$, $u'_j = 1$, and $u_l = u'_l$ for all $l \neq j$), we can ask when we have \jessie{Revisit}
 \begin{align*}
 \inprod{p}{L(u)} &\geq \inprod{p}{L(u')}\\
 \sum_{i \in H} \frac{|M| + k -1}{k-|H|} - p_i \left(\frac{k(|M| + k -1)+ 1}{k(k- |H|)}\right) + \sum_{i \in M} \left(\frac 1 k - p_i \left( \frac {k+1}{k}\right)\right) &\geq \sum_{i \in H} \frac{|M| + k }{k-|H|} - p_i \left(\frac{k(|M| + k)+ 1}{k(k- |H|)}\right) + \sum_{i \in M'} \left(\frac 1 k - p_i \left( \frac {k+1}{k}\right)\right)\\
@@ -428,10 +375,12 @@ B_p &:= \left\{i : p_i \leq \frac{1}{k+1} \wedge \frac{p_H k- H}{k(k- H)} > \fra
 \end{align*}
 
 
-We will construct the report $\hat \Gamma(p) := \frac{M + B + k - 1}{k-H}\ones_{H_p} + \ones_{M_p} + \ones_{B_p}$.
+We will propose the report 
+\begin{equation}\label{eq:hat-gamma}
+\hat \Gamma(p) := \frac{M + B + k - 1}{k-H}\ones_{H_p} + \ones_{M_p} + \ones_{B_p}
+\end{equation}.
 
 
-\jessie{Adding 8 July 2021}
 %Fix the distribution $p \in \simplex$.
 %Denote the sets:
 %\begin{align*}
@@ -451,7 +400,6 @@ We will construct the report $\hat \Gamma(p) := \frac{M + B + k - 1}{k-H}\ones_{
 	Fix $p \in \simplex$, and take $H := |H_p|, M:= |M_p|$, and $B := |B_p|$.
 	By construction, we just need to show that $H + M + B \leq k$ and we are done.
 	
-	\jessie{TODO}
 	We can consider $8$ cases: each corresponding to when (a) H (b) M (c) B (d) H,M (e) H,B (f) B,M (g) H,M,B are nonzero.
 	
 	(a) We immediately have at most $k-1$ outcomes $y \in \Y$ with weight strictly grater than $\frac 1 k$ since distributions with $k$ elements having weight exactly $\frac 1 k$ will not be in $H_p$, and in this case, the weight of all other elements is $0$.
@@ -498,26 +446,16 @@ We will construct the report $\hat \Gamma(p) := \frac{M + B + k - 1}{k-H}\ones_{
 	\implies B &< \frac{1- \frac H k - \frac M {k+1} (k-H)}{1- \frac H k - \frac M {k+1}+ \frac M {k+1}}\\
 	\iff B &< \frac{(k- H - \frac {kM}{k+1} (k-H))}{k-H}\\
 	\iff B &< k- H - \frac {kM}{k+1}\\
-	\implies B &\leq k- H - M\\
-	%\implies B&< \frac{\epsilon (k-H)}{\epsilon + \frac M {k+1}}\\
-	%\implies B&< \frac{(1 - \frac {H}{k} - \frac{M}{k+1}) (k-H)}{1 - \frac H k}\\
-	%\iff B&< \frac{ (k - H - (k+1)M)(k-H)}{k-H}\\
-	%\iff B&< k - H - M - kM \\
-	%% &< \frac{(k+1)(k-H)}{k}
-	%% &< \frac{k^2 + k - Hk - H}{k}\\
-	%% &= k + 1 - H - \frac H k
+	\implies B &\leq k- H - M
 	\end{align*}
-	\jessie{TODO}
-		
 	
-	Moreover, $\hat \Gamma(p) \in R^{\tt high}$ by construction.
-	Thus, $\hat \Gamma(p) \in \U$.
+	As all 8 cases are covered, we have $\hat \Gamma(p) \in R^{\tt low}$, and since $\hat \Gamma(p) \in R^{\tt high}$ by construction, we have $\hat \Gamma(p) \in \U$.
+	Moreover, $\hat \Gamma(p) \in \R$ by construction, since we can construct the sets $H', M'$ satisfying the requirements of $\R$ with $H' := H_p$ and $M' := M_p \cup B_p$. 
 \end{proof}
 
-
-
+In what follows, we use this alternate, equivalent form of $L^{top-k}(\hat \Gamma(p))$ for any $p \in \simplex$.
 \begin{claim}
-	$\inprod{L(\hat \Gamma(p))}{p} = (1-p_H) \bar u + p_L - \frac{p_M + p_B}{k}$. 
+	For all $p \in \simplex$ and $\hat \Gamma(p)$ constructed as in Equation~\eqref{eq:hat-gamma}, we have $\inprod{L(\hat \Gamma(p))}{p} = (1-p_H) \bar u + p_L - \frac{p_M + p_B}{k}$. 
 \end{claim}
 \begin{proof}
 	\begin{align*}
@@ -525,20 +463,18 @@ We will construct the report $\hat \Gamma(p) := \frac{M + B + k - 1}{k-H}\ones_{
 	\sum_{y \in H_p} p_y L(\hat \Gamma(p))_y + \sum_{y \in M_p, B_p} L(\hat \Gamma(p))_y + \sum_{y \in L_p}L(\hat \Gamma(p))_y \\
 	&= \sum_{y \in H_p} 0 + \sum_{y \in M_p, B_p} p_y(\bar u - \frac{1}{k}) + \sum_{y \in L_p} p_y(1 + \bar u) \\
 	&= (1-p_H) \bar u + p_L - \frac{p_M + p_B}{k}
-%	&= \sum_{y \in M_p, B_p, L_p} p_y (\bar u - \frac{1}{k}) + \sum_{y \in L_p} p_y \\
-%	&= (1-p_H) (\bar u - \frac{1}{k}) + p_L
 	\end{align*}
 \end{proof}
 
 
-
+We now fix our prediction $\hat \Gamma(p)$ for any $p \in \simplex$, and show that if we change any element of $u$, the expected loss increases.
 \begin{lemma}\label{lem:hat-gamma-opt-one-dir}
 	Fix $p \in \simplex$.
 	For small enough $\varepsilon$ and any $\hat y \in \Y$, consider $\varepsilon_{\hat y} := \varepsilon e_{\hat y}$.
 	For any (small enough) $\varepsilon_{\hat y}$, the loss $\inprod{L(\hat \Gamma(p))}{p} \leq \inprod{L(\hat \Gamma(p) + \varepsilon_{\hat y})}{p}$.
 \end{lemma}
 \begin{proof}
-	We denote $L^* := \inprod{L(\hat \Gamma(p))}{p}$ and $\bar u := \bar \sum_{i \in T_k(\hat\Gamma(p))} u_i$.
+	We denote $L^* := \inprod{L(\hat \Gamma(p))}{p}$ and $\bar u := \sum_{i \in T_k(\hat\Gamma(p))} u_i$.
 	We proceed in cases:
 	
 	Case 1: $\hat y \in H_p, \varepsilon_{\hat y} > 0$.
@@ -555,7 +491,7 @@ We will construct the report $\hat \Gamma(p) := \frac{M + B + k - 1}{k-H}\ones_{
 	\E_p L(\hat \Gamma(p) + \varepsilon_{\hat y}, Y) &= {\color{blue}\sum_{y \in H_p} p_y (\frac {\varepsilon_{\hat y}}{k}) + \sum_{y \in M_p, B_p} p_y(\frac{\varepsilon_{\hat y}}{k})} + {\color{olive}\sum_{y \in M_p, B_p} p_y(\bar u - \frac 1 k)} - {\color{teal}p_{\hat y} \varepsilon_{\hat y}} + {\color{blue}\sum_{y \in L_p} p_y (\frac{\varepsilon_{\hat y}}{k})}+ {\color{olive}\sum_{y \in L_p}p_y(1+ \bar u)}\\
 	&= {\color{blue}\frac{\varepsilon_{\hat y}}{k}} - {\color{teal}p_{\hat y}\frac{\varepsilon_{\hat y}}{k}} + {\color{olive}L^*}
 	\end{align*}
-	This is greater than or equal to $L^*$ if and only if $\frac{\varepsilon_{\hat y}}{k} \geq p_{\hat y} \varepsilon_{\hat y}$, which is true by the case that $p_{\hat y} \leq \frac 1 k$ since $\hat y \not \in H_p$.
+	This is greater than or equal to $L^*$ if and only if $\frac{\varepsilon_{\hat y}}{k} \geq p_{\hat y} \varepsilon_{\hat y}$, which is true since $\hat y \not \in H_p \implies p_{\hat y} \leq \frac 1 k$.
 	
 	Case 3: $\hat y \in H_p, \varepsilon_{\hat y} < 0$.
 	For clarity, we assume $\varepsilon_{\hat y} > 0$, and we consider $\hat \Gamma(p) - \varepsilon_{\hat y}$.
@@ -621,11 +557,11 @@ We will construct the report $\hat \Gamma(p) := \frac{M + B + k - 1}{k-H}\ones_{
 \end{proof}
 
 
-By Claim~\ref{claim:R-vertices}, we know exactly the regions on which $L^{top-k}$ is affine.
-Since L is polyhedral and we have the regions where it is affine, in order to understand if $\hat \Gamma(\simplex)$ is representative for $L^{top-k}$, we just need to check how the loss at $\hat \Gamma(p)$ compares to the loss at vertices of these affine regions for all $p \in \simplex$.  
+By Lemma~\ref{lem:topk-affine-regions}, we know exactly the regions on which $L^{top-k}$ is affine.
+Since $L^{top-k}$ is polyhedral and we have the regions where it is affine, in order to understand if $\hat \Gamma(\simplex)$ is representative for $L^{top-k}$, we just need to check how the loss at $\hat \Gamma(p)$ compares to the loss at vertices of these affine regions for all $p \in \simplex$.  
 
-However, since $L^{top-k}$ is convex, we actually only need to check vertices of the affine regions on which $u := \hat \Gamma(p)$ sits.  
-Moreover, since $L$ is affine on each of those (convex) regions defined by some $T,S$ pair, we actually only need to check the vertices adjacent to $u$.
+Moreover, since $L^{top-k}$ is convex, we actually only need to check vertices of the affine regions on which $u := \hat \Gamma(p)$ sits, as $u$ being a local minimum implies it is a global minimum for a convex function.  
+Additionally, since $L$ is affine on each of those (convex) regions defined by some $T,S$ pair, we actually only need to check the vertices adjacent to $u$.
 To justify this, consider that, for a convex region $A^{T,S}$ on which $L^{top-k}$ is affine, let $\hat \Gamma(p)$ have adjacent vertices $a_i$.
 For any other vertex $v$ of $A^{T,S}$, there is a point $v_\lambda = \lambda v + (1-\lambda) \hat \Gamma(p)$ for $\lambda \in [0,1]$ such that $v_\lambda = \sum_i \lambda'_i a_i$ (convex combination).\jessie{Right?}
 
@@ -634,69 +570,66 @@ For any other vertex $v$ of $A^{T,S}$, there is a point $v_\lambda = \lambda v +
 Since $L^{top-k}$ is affine on $A^{T,S}$ and $\hat \Gamma(p)$ attains better loss than its adjacent vertices, we then have 
 \begin{align*}
 \inprod{p}{L(\hat \Gamma(p))} &\leq \inprod{p}{L(a_i)} \,\, \forall i & \text{by Lemma~\ref{lem:hat-gamma-opt-one-dir}} \\
-\implies \inprod{p}{L(\hat \Gamma(p))} &\leq \sum_i \lambda'_i \inprod{p}{L(a_i)} & \text{since $L$ convex} \\
+\implies \inprod{p}{L(\hat \Gamma(p))} &\leq \sum_i \lambda'_i \inprod{p}{L(a_i)} & \text{since $L$ convex; Jensen's inequality \jessie{right?}} \\
 &= \inprod{p}{\sum_i \lambda'_i L(a_i)} & \text{linearity of inner product}\\
 &= \inprod{p}{L(\sum_i \lambda'_i a_i)} & \text{affineness}\\
 &= \inprod{p}{L(v_\lambda)} & \text{construction of $v_\lambda$}\\
 &\leq \inprod{p}{L(v)} & \text{$L$ affine and $v_\lambda$ a convex combo of $v$ and $\hat \Gamma(p)$}\\
 \end{align*}
 
-Now, we can ask what are the vertices adjacent to $u$?  They are precisely the elements of $\R$ if you moved one element of $u$ to the "next bin" (e.g., low to medium, medium to high, medium to low, high to medium).  
+Now, we can ask what are the vertices adjacent to $u$?  They are precisely the elements of $\R$ if you moved one element of $u$ to the ``next bin'' (e.g., low to medium, medium to high, medium to low, high to medium).  
 This is the same as considering the other equality for each $i \in S$ ($0 \leq u_i \leq 1$) or $i \in T \setminus S$ ($1 \leq u_i \leq 1 + \bar u_{-i}$.) 
 
 Since $L^{top-k}$ is affine on each of the regions $A^{T,S}$,  and in particular, between vertices, we only need to move a little in the direction of the other vertex and show an increase in loss. 
 The proof of Lemma~\ref{lem:hat-gamma-opt-one-dir} enumerates all the cases we need.
 This yields the following corollary.
 
-\begin{claim}
+\begin{claim}\label{claim:range-hat-gamma-equals-R}
 	With $k < n$, we have $\hat \Gamma(\simplex) = \R$.
-	\jessie{Need to move below proof of correctness}
 \end{claim}
 \begin{proof}
 	By Claim~\ref{claim:hat-Gamma-subset-R}, we immediately have $\hat \Gamma(\simplex) \subseteq \R$.
 	
-	Now for $r \in \R$ generated by the sets $H,M$ such that $H, M \subseteq [n]$, $H \cap M = \emptyset$, $|H| + |M| \leq k$, and $|H| < k$ with $k <n$, consider the distribution 
+	Now for $r \in \R$ generated by the sets $H,M$ such that $H, M \subseteq [n]$, $H \cap M = \emptyset$, $|H| + |M| \leq k$, and $|H| < k$ with $k <n$, consider the following distribution.
 	Fix a small $\varepsilon_M > 0$ and consider $\varepsilon_H = 1 - \frac H k - \frac M {k+1} - M \varepsilon_M$.
-	Now consider the distribution p such that, for all $y \in H$, we have $p_y = \frac 1 k + \varepsilon_H$, and similarly, for all $y \in M$, we have $p_y = \frac 1 {k+1} + \varepsilon_M$, and $p_y  = 0 \forall y \in [n] \setminus (H \cup M)$.
-	For any $H,M$ combination, we have the generated $p \in \simplex$ \jessie{flesh out that claim}, and therefore $r \in \hat \Gamma(p)$. 
+	Now consider the distribution $p$ such that, for all $y \in H$, we have $p_y = \frac 1 k + \varepsilon_H$, and similarly, for all $y \in M$, we have $p_y = \frac 1 {k+1} + \varepsilon_M$, and $p_y  = 0 \,\, \forall y \in [n] \setminus (H \cup M)$.
+	For any $H,M$ combination, we have the generated a $p \in \simplex$ such that $r = \hat \Gamma(p)$. 
 	Thus, $\R \subseteq \hat \Gamma(\simplex)$.
-	
-	%$p_{HM} = (\frac{1}{k} + \varepsilon)\ones_{H} + (\frac{1}{k+1} + \varepsilon)\ones_M + (1 - ((\frac{|H|}{k} + |H| \varepsilon) + (\frac{|M|}{k+1} + |M| \varepsilon))) \ones_{[n] \setminus H\cup M} $.
 \end{proof}
 
-\begin{corollary}
-	$\R$ is a finite representative set.
-\end{corollary}
+This leads us to ask about non-redundancy of $\hat \Gamma$, or equivalently, if $\R$ is a minimum representative set.
 
 \section{Minimum-ness}
 \begin{claim}
-	For all $r \in \R$, there is a $p \in \simplex$ such that $\hat \Gamma(p)$ uniquely minimizes $L^{top-k}$.
+	For all $r \in \R$, there is a $p \in \simplex$ such that $r$ uniquely minimizes $\inprod{p}{L^{top-k}(\cdot)}$.
 \end{claim}
 \begin{proof}[Sketch]
 	Fix $r \in \R$, and consider $H,M$ so that $r$ is generated by $H$ and $M$.
 	
-	Since $L^{top-k}$ is affine on the regions $A^{T,S}$ for each $T,S$ affiliated with $H$ and $M$, we just need to show strict inequality in each of the cases of Lemma~\ref{lem:hat-gamma-opt-one-dir}.
+	Construct $p$ as in the proof of Claim~\ref{claim:range-hat-gamma-equals-R}, and take $u := \hat \Gamma(p)$.
+	Since $L^{top-k}$ is affine on the regions $A^{T,S}$ for each $T,S$ affiliated with $H$ and $M$, we just need to show strict inequality changing one coordinate $\hat y$ as in each of the cases of Lemma~\ref{lem:hat-gamma-opt-one-dir}.
+	
 	
 	
 	\jessie{Want to formalize, but here's the idea.}
-	In Case 1, we would leave $\U$, so no ned to worry.
-	In Case 2, we construct $p$ so that $p_{y} < \frac 1 k$, and thus the inequality is strict.
-	In Case 3, since $y \in H_p$, we additionally have $p_y > \frac 1 k$.
-	In Case 4a, we have $p_y < \frac 1 k$, and case 4b does not happen by construction.
+	In Case 1, we would leave $\U$, so no need to worry.
+	In Case 2, we construct $p$ so that $p_{\hat y} < \frac 1 k$, and thus the inequality is strict.
+	In Case 3, since $\hat y \in H_p$, we additionally have $p_{\hat y} > \frac 1 k$.
+	In Case 4a, we have $p_{\hat y} < \frac 1 k$, and case 4b does not happen by construction.
 	Case 5 devolves to leaving $\U$, and again the inequality is strict. 
 \end{proof}
 
 
 
-\section{Example: $k=2$ and $n=3$}
-First, we have $\risk{\ell}(p) = 1 - \min_y p_y$, and so $-\risk{\ell}(p) = \min_y p_y - 1$.
-Taking the conjugate $(-\ell^*)(q) = \sup_{p \in \simplex} \{\inprod p q + 1 - \min_y p_y\}$, we see this is maximized by putting weight $1$ on $\argmax_y q_y$ and weight $0$ on every other element for $q \in \simplex$.
-Since $n \neq 1$, we then have $\min_y p_y = 0$, so the conjugate of the negative risk reduces to $C(u) = 1 + \max_y u_y$.
+%\section{Example: $k=2$ and $n=3$}
+%First, we have $\risk{\ell}(p) = 1 - \min_y p_y$, and so $-\risk{\ell}(p) = \min_y p_y - 1$.
+%Taking the conjugate $(-\ell^*)(q) = \sup_{p \in \simplex} \{\inprod p q + 1 - \min_y p_y\}$, we see this is maximized by putting weight $1$ on $\argmax_y q_y$ and weight $0$ on every other element for $q \in \simplex$.
+%Since $n \neq 1$, we then have $\min_y p_y = 0$, so the conjugate of the negative risk reduces to $C(u) = 1 + \max_y u_y$.
+%
+%Then, plugging this into our given loss yields $L(u)_y = 1 + u_{[1]} - u_y$.
 
-Then, plugging this into our given loss yields $L(u)_y = 1 + u_{[1]} - u_y$.
 
-
-\section{One-pager}
+\section{One-pager; combine with what's currently there}
 Top-$k$ prediction is often used for image classification where labels may be ambiguous.
 This generalization of 0-1 loss allows the algorithm to guess $k$ labels, and deeming a prediction ``correct'' if the true, assigned label is in the $k$-element set of predicted labels.
 The top-$k$ discrete loss with predictions $r \in \R := \{R \subseteq \Y \mid |R| \leq k\}$ can be defined as follows:
