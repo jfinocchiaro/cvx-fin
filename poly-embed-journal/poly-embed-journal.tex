@@ -14,6 +14,10 @@
 \usepackage{microtype}      % microtypography
 \usepackage[normalem]{ulem}
 \usepackage{thm-restate}
+\usepackage{array}
+\newcolumntype{R}{>{$}r<{$}} % math-mode version of "l" column type
+\newcolumntype{C}{>{$}c<{$}} % math-mode version of "c" column type
+\newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
 
 \usepackage{mathtools, amsmath, amssymb, graphicx, verbatim, amsthm}
 %\usepackage[thmmarks, thref, amsthm]{ntheorem}
@@ -2536,9 +2540,11 @@ We can now see that $L^f$ embeds the loss given by $L^f$ restricted to $\U$, as 
 In fact, we can write this loss entirely in terms of $f$ itself.
 This statement proves the first part of Theorem~\ref{thm:lovasz-embed-main}; see \S~\ref{app:lovasz-tight} for when this embedding is tight.
 
+\raf{Add: explanation for why $B$ cannot be a singleton if we want a tight embedding... or maybe prove this first and then prove the stronger one --- downside with that is needing to define yet another discrete loss.}
+
 \begin{lemma}
 	\label{lem:lovasz-u}
-	Let $\hat\ell^f:\hat\R\times\Y\to\reals_+$, where $\hat\R = \{(A,B) \in 2^N \times 2^N: A\cap B=\emptyset\}$, be given by
+	Let $\hat\ell^f:\hat\R\times\Y\to\reals_+$, where $\hat\R = \{(A,B) \in 2^N \times 2^N: A\cap B=\emptyset, |B|\neq 1\}$, be given by
 	\begin{equation}
 	\label{eq:lovasz-embeds}
 	\hat\ell^f((A,B),S) = L^f(\chi_A + \ones_B,S) = f(A\triangle S\setminus B) + f(A\triangle S\cup B)~.
@@ -2659,20 +2665,11 @@ We can now restate and prove Theorem~\ref{thm:lovasz-consistent-main}.
 Finally, we show a sufficient condition for when the embedding is tight.
 It appears from the proof that both assumptions on $f$ are required, though we leave open whether that is indeed the case.
 
-\begin{lemma}
-  Let $X,Y,Z\subseteq N$ such that $Y\cap Z = \emptyset$.
-  Then $X\triangle (Y\cup Z) = X\triangle Y \triangle Z$.
-\end{lemma}
-\begin{proof}
-  $X\triangle (Y\cup Z) = X\cup (Y\cup Z) \setminus (X \cap (Y\cup Z))$
-
-
-  $X\triangle (Y\cup Z) = (X \setminus (Y\cup Z)) \cup ((Y\cup Z) \setminus X)$
-\end{proof}
 
 \begin{theorem}\label{thm:lovasz-embed-tight}
   Let $f$ be strictly submodular and strictly increasing.
   Then $L^f$ tightly embeds $\hat\ell^f$.
+  \raf{Assuming here $|B|\neq 1$}
 \end{theorem}
 \begin{proof}
   Let $A,B\subseteq N$ be disjoint.
@@ -2705,22 +2702,13 @@ It appears from the proof that both assumptions on $f$ are required, though we l
     &= 2^{-|B|} \sum_{T\subseteq B} f(A'\triangle (A\cup T)\setminus B') + f(A'\triangle (A\cup T)\cup B')
     \\
     &= 2^{-|B|} \sum_{T\subseteq B} f(\hat A\triangle T\setminus B') + f(\hat A\triangle T\cup B')
-    \\
-    &= \frac 1 2 \; 2^{-|B|} \sum_{T\subseteq B} \biggl( f(\hat A\triangle T\setminus B') + f(\hat A\triangle T\cup B')
-    \\[-8pt]
-    & \hspace*{85pt} + f(\hat A\triangle (B\setminus T)\setminus B') + f(\hat A\triangle (B\setminus T)\cup B') \biggr)~.
+      \numberthis\label{eq:tightness-loss-rewrite}
   \end{align*}
   
   We first suppose $B \subseteq B'$.
-  Then $\hat A\triangle T\setminus B' = \hat A \setminus B'$ and $\hat A\triangle T\cup B' = \hat A\cup B'$ for any $T \subseteq B$.
-  We conclude
-  \begin{align*}
-    \hat\ell^f((A',B');p)
-    &= \frac 1 2 \; 2^{-|B|} \sum_{T\subseteq B} \biggl( f(\hat A\setminus B') + f(\hat A\cup B') + f(\hat A\setminus B') + f(\hat A\cup B') \biggr)
-    \\
-    &= f(\hat A\setminus B') + f(\hat A\cup B')~.
-  \end{align*}
-  We will show either (i) $\hat A\setminus B' \neq \emptyset$ or (ii) $\hat A\cup B' \supsetneq B$ hold, and then apply the fact that $f$ is strictly increasing.
+  Then $\hat A\triangle T\setminus B' = \hat A \setminus B'$ and $\hat A\triangle T\cup B' = \hat A\cup B'$ for any $T \subseteq B$, giving the simpler form $\hat\ell^f((A',B');p) = f(\hat A\setminus B') + f(\hat A\cup B')$.
+  Consider two cases (i) $\hat A\setminus B' \neq \emptyset$, and (ii) $\hat A\cup B' \supsetneq B$.
+  We will show either (i) or (ii) hold, and then apply the fact that $f$ is strictly increasing.
   If (ii) fails, since $B \subseteq B'$, we must have $B = B'$.
   Then $B = B'$ is disjoint from both $A$ and $A'$, and therefore from $\hat A = A'\triangle A$.
   We therefore have $\hat A\setminus B' \neq \emptyset \iff \hat A \neq \emptyset \iff A \neq A'$, which must hold as $B = B'$ yet $(A,B) \neq (A',B')$ by assumption.
@@ -2728,37 +2716,88 @@ It appears from the proof that both assumptions on $f$ are required, though we l
   As $f$ is strictly increasing, we conclude $\hat\ell^f((A',B');p) > f(\emptyset) + f(B) = \hat\ell^f((A,B);p)$.
 
   Now suppose $B \not\subseteq B'$.
-  We claim that there exists $T\subseteq B$ such that one of the following two cases hold:
-  \begin{enumerate}
-  \item[(i)]
-    $\hat A\triangle T\setminus B'$ and 
-    $\hat A\triangle (B\setminus T)\cup B'$
-    are incomparable;
-  \item[(ii)]
-    $\hat A\triangle T\cup B'$
-    and
-    $\hat A\triangle (B\setminus T)\setminus B'$
-    are incomparable. 
-  \end{enumerate}
-  We will then apply strict submodularity to conclude.
-
-  \bigskip
-  Take $T = B\setminus B'$.
-
-  If $B' = \emptyset$
-
-\raf{It seems we need to handle the case where $B\setminus B'$ is a singleton, since then we run into the same problem as when we used only $\emptyset$ and $B$.  If larger, we can take $T$ to fragment $B\setminus B'$ and I think we're good...}
-
-  Let $i\in B\setminus B'$.
-  If $i\in A'$, then $i\in\hat A$ (as $i\notin A$).
-
+  In this case, we will apply strict submodularity.
+  Let us rewrite the expected loss,
+  \begin{align*}
+    \hat\ell^f((A',B');p)
+    &= 2^{-|B|} \sum_{T\subseteq B} f(\hat A\triangle T\setminus B') + f(\hat A\triangle T\cup B')
+    \\
+    &= \frac 1 2 \; 2^{-|B|} \sum_{T\subseteq B} \biggl( f(\hat A\triangle T\setminus B') + f(\hat A\triangle T\cup B')
+    \\[-12pt]
+    & \hspace*{85pt}
+      + f(\hat A\triangle (B\setminus T)\setminus B') + f(\hat A\triangle (B\setminus T)\cup B') \biggr)
+      \numberthis\label{eq:tightness-double-counting}
+    \\
+    &\geq \frac 1 2 \; 2^{-|B|} \sum_{T\subseteq B} \biggl(
+      f\Bigl((\hat A\triangle T\setminus B') \cup (\hat A\triangle (B\setminus T)\cup B')\Bigr)
+    \\[-10pt]
+    & \hspace*{85pt}
+      + f\Bigl((\hat A\triangle T\setminus B') \cap (\hat A\triangle (B\setminus T)\cup B')\Bigr)
+    \\[2pt]
+    & \hspace*{85pt}
+      + f\Bigl((\hat A\triangle (B\setminus T)\setminus B') \cup (\hat A\triangle T\cup B')\Bigr)
+    \\[-2pt]
+    & \hspace*{85pt}
+      + f\Bigl((\hat A\triangle (B\setminus T)\setminus B') \cap (\hat A\triangle T\cup B')\Bigr)
+      \biggr)
+      \numberthis\label{eq:tightness-apply-submodularity}
+    \\
+    &= \frac 1 2 \; 2^{-|B|} \sum_{T\subseteq B} \biggl(
+      f\bigl(\hat A\cup B\cup B'\bigr) + f\bigl(\hat A \setminus (B\cup B')\bigr)
+    \\[-10pt]
+    & \hspace*{85pt}
+      f\bigl(\hat A\cup B\cup B'\bigr) + f\bigl(\hat A \setminus (B\cup B')\bigr)
+      \biggr)      ~,
+      \numberthis\label{eq:tightness-simplify}
+    \\
+    &= f\bigl(\hat A\cup B\cup B'\bigr) + f\bigl(\hat A \setminus (B\cup B')\bigr)
+    \\
+    &\geq f(B) + f(\emptyset)
+      ~,
+      \numberthis\label{eq:tightness-weak-increasing}
+  \end{align*}
+  where in eq.~\eqref{eq:tightness-apply-submodularity} we applied submodularity twice, to the first and fourth terms and to the second and third terms, and in eq.~\eqref{eq:tightness-weak-increasing} we used the fact that $f$ is increasing.
+  We will show that for at least one $T\subseteq B$, the first and fourth terms in eq.~\eqref{eq:tightness-apply-submodularity} correspond to incomparable sets, meaning the inequality is actually tight.
   
-  \bigskip
-  For case (i), 
-
-  
-
+  As $|B|\neq 1$, we must have $|B|\geq 2$.
+  Let $i,j\in B$ be distinct elements such that $i\notin B'$.
+  We therefore have two cases for $i$, and three for $j$, and for each we claim there exists $T\subseteq B$ such that $\hat A\triangle T\setminus B'$ and $\hat A\triangle (B\setminus T)\cup B'$ are incomparable:
+  \begin{center}
+    \begin{tabular}{R|CC}
+      & i\in A' & i\notin A'
+      \\
+      \hline
+      j\in A' & T=\{j\} & T=\{i,j\}
+      \\
+      j\in B' & T=B\setminus\{i\} & T=\{i\}
+      \\
+      j\notin A'\cup B' & T=\emptyset & T=\{i\}
+    \end{tabular}
+  \end{center}
+  In particular, these choices give $i\in\hat A\triangle T$ and $i\notin\hat A\triangle (B\setminus T)$:
+  in the first column, $i\in A'\setminus A \implies i\in \hat A$, so we ensure $i\notin T$, whereas we ensure $i\in T$ in the second column.
+  Similarly, these choices give $j\notin\hat A\triangle T\setminus B'$ and $j\in\hat A\triangle (B\setminus T)\cup B'$:
+  in the first row, $j\in \hat A$, so we ensure $j\in T$;
+  in the second row, $j\in B'$, so we automatically have the condition;
+  in the third row, $j\notin \hat A$, so we ensure $j\notin T$.
 \end{proof}
+
+
+\raf{Show also that $A,\{i\}$ is always weakly dominated by $A\cup\{i\},\emptyset$ or $A,\emptyset$.}
+
+
+\raf{Other thoughts if we split this off into its own paper:}
+
+\begin{enumerate}
+\item 
+  If modular on a sub lattice, what does that mean about abstentions wrt that sub lattice?  Maybe it’s not so bad to characterize the redundant reports as a function of f...
+\item
+  Related: what are examples of f functions in the wild?  Are they strict?
+\item
+  The link.  Would be super interesting to understand how to link properly when some reports are redundant.  Already not totally obvious for strictly modular and k=3... visualize!
+\item
+  Data set where Lh performs poorly wrt original target?
+\end{enumerate}
 
 \section{Top-$k$ surrogate} 
 \jessie{Remove this section?}
