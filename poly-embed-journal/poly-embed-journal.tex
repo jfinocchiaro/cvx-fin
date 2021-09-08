@@ -910,52 +910,59 @@ On the other hand, of course, this revelation suggests a positive result as well
 % For example, if $v_1,\ldots,v_n \in \reals^k$ are on the unit sphere and $C_{ij} = \inprod{v_i}{v_j}$, we can simply take $L_j(u) = $\raf{aaaand Noah woke up}\raf{Just realized that this loss matrix has rank $k$ and thus is covered by AA15: just elicit the linear property $\E v_Y \in \reals^k$.}
 
 \subsection{Inconsistency of top-$k$ losses}
-% 7.14.19- proposed version for arXiv
-%\jessiet{The story we discussed: YK show $L'$ is inconsistent.  Our framework lets us ask: with what discrete loss \emph{is} $L'$ consistent?  (It also assures us that $L'$ is consistent for something...) Oh look, $L'$ embeds something which is $\elltopk$ plus some other term, so (a) we can see very clearly what $L'$ ``is doing'', and (b) we can see where to look for distributions yielding inconsistency, namely ones for which we actually prefer to report a set with $|r|<k$.}
+In settings of search results and object recognition, one might plausibly be interested in top-$k$ classification: a generalization of $0-1$ loss where one can predict a set $S$ of size $k$, receiving loss $0$ if the true label $y \in S$, and $1$ otherwise.
+While this problem is well-studied, \citep{lapin2015top, lapin2016loss, lapin2018analysis,yang2018consistency}\jessie{Add more} a class of surrogates for top-$k$, most of which are not convex and consistent.
+The only convex surrogate in the literature that is consistent is the softmax surrogate of~\citet{lapin2016loss} which essentially learns the entire distribution.
+However, this seems to encapsulate more information than necessary and therefore presumably requires more data to learn the Bayes optimal hypothesis.
+\jessie{Add more here}
 
-% As one instance, the top-$k$ classification problem is to predict the set of $k$ most likely labels; formally, we have $\R := \{r \subseteq [n] : |r| = k\}$, $\Y = [n]$, 
-% $1<k<n$, and discrete loss $\elltopk : r \mapsto \Ind{y \not\in r}$.
-In certain classification problems when ground truth may be ambiguous, such as object identification, it is common to predict a set of possible labels.
-As one instance, the top-$k$ classification problem is to predict the set of $k$ most likely labels; formally, we have $\R := \{r \in \{0,1\}^n : \|r\|_0 = k\}$, $1<k<n$, $\Y = [n]$, and discrete loss $\elltopk(r)_y = 1-r_y$.
-Surrogates for this problem commonly take reports $u\in\reals^n$, with the link $\psi(u) = \{u_{[1]},\ldots,u_{[k]}\}$, where $u_{[i]}$ is the $i^{th}$ largest entry of $u$.
-% , with ties broken arbitrarily.
-
-\citet{lapin2015top, lapin2016loss, lapin2018analysis} provide the following convex surrogate loss for this problem, which \citet{yang2018consistency} show to be inconsistent:%
-\footnote{\citet{yang2018consistency} also introduce a consistent surrogate, but it is non-convex.}
-\begin{align}\label{eq:L-2-surrogate}
-L^k(u)_y := \left( 1-u_y + \tfrac{1}{k} \textstyle\sum_{i=1}^k (u - e_y)_{[i]} \right)_+~,
+\begin{align}\label{eq:topk-embedding}
+L(u,y) &= \max \left(u_{[1]}, \max_{m \in k+1, \ldots, m} 1 - \frac k m + \frac 1 m \sum_{i=1}^m u_{[i]} - \right)- u_y
 \end{align}
-where $e_y$ is $1$ in component $y$ and 0 elsewhere.
-With our framework, we can say more.
-Specifically, while $(L^k,\psi)$ is not consistent for $\elltopk$, since $L^k$ is polyhedral (Lemma~\ref{lem:top-k-polyhedral}), we know from Theorem~\ref{thm:poly-embeds-discrete} that it embeds \emph{some} discrete loss $\ell^k$, and from Theorem~\ref{thm:eps-thick-calibrated} there is a link $\psi'$ such that $(L^k,\psi')$ is calibrated (and consistent) for $\ell^k$.
-We therefore turn to deriving this discrete loss $\ell^k$.
 
-For concreteness, consider the case with $k = 2$ over $n=3$ outcomes.
-We can re-write $L^2(u)_y = \left(1 - u_y + \tfrac 1 2 (u_{[1]}+ u_{[2]} - \min(1,u_y))\right)_+$.
-By inspection, we can derive the properties elicited by $\elltop{2}$ and $L^2$, respectively, which reveals that the set $\R'$ consisting of all permutations of $(1,0,0)$, $(1,1,0)$, and $(2,1,0)$, are always represented among the minimizers of $L^2$.
-Thus, $L^2$ embeds the loss $\ell^2(r)_y = 0$ if $r_y = 2$ or $\ell^2(r)_y = 1 - r_y + \tfrac 1 2 \inprod{r}{\ones-e_y}$ otherwise.
-Observe that $\ell^2$ is just $\elltop{2}$ with an extra term punishing weight on elements other than $y$, and a reward for a weight of 2 on $y$.
+\citet{TOPKPAPER} presents an embedding (Eq.~\eqref{eq:topk-embedding}) for top-$k$ loss that looks unlike the 
+Moreover, the most common link $\psi^{\tt argmax}(u) := \argmax_{S \subseteq \Y : |S| = k} \sum_{i \in S} u_i$ is an $\epsilon$-thickening of the embedding with $\epsilon = $ and the norm $\|\cdot\|_x$.\jessie{TODO... if this is true.}
 
-Moreover, we can visually inspect the corresponding properties (Fig.~\ref{fig:top-k-simplices}) to immediately see why $L^2$ is inconsistent: for distributions where the two least likely labels are roughly equally (un)likely, the minimizer will put all weight on the most likely label, and thus fail to distinguish the other two.
-More generally, $L^2$ cannot be consistent because the property it embeds does not ``refine'' (subdivide) the top-$k$ property, so not just $\psi$, but \emph{no} link function, could make $L^2$ consistent.
+%Commented out 07 Sept 21
+%In certain classification problems when ground truth may be ambiguous, such as object identification, it is common to predict a set of possible labels.
+%As one instance, the top-$k$ classification problem is to predict the set of $k$ most likely labels; formally, we have $\R := \{r \in \{0,1\}^n : \|r\|_0 = k\}$, $1<k<n$, $\Y = [n]$, and discrete loss $\elltopk(r)_y = 1-r_y$.
+%Surrogates for this problem commonly take reports $u\in\reals^n$, with the link $\psi(u) = \{u_{[1]},\ldots,u_{[k]}\}$, where $u_{[i]}$ is the $i^{th}$ largest entry of $u$.
+%
+%\citet{lapin2015top, lapin2016loss, lapin2018analysis} provide the following convex surrogate loss for this problem, which \citet{yang2018consistency} show to be inconsistent:%
+%\footnote{\citet{yang2018consistency} also introduce a consistent surrogate, but it is non-convex.}
+%\begin{align}\label{eq:L-2-surrogate}
+%L^k(u)_y := \left( 1-u_y + \tfrac{1}{k} \textstyle\sum_{i=1}^k (u - e_y)_{[i]} \right)_+~,
+%\end{align}
+%where $e_y$ is $1$ in component $y$ and 0 elsewhere.
+%With our framework, we can say more.
+%Specifically, while $(L^k,\psi)$ is not consistent for $\elltopk$, since $L^k$ is polyhedral (Lemma~\ref{lem:top-k-polyhedral}), we know from Theorem~\ref{thm:poly-embeds-discrete} that it embeds \emph{some} discrete loss $\ell^k$, and from Theorem~\ref{thm:eps-thick-calibrated} there is a link $\psi'$ such that $(L^k,\psi')$ is calibrated (and consistent) for $\ell^k$.
+%We therefore turn to deriving this discrete loss $\ell^k$.
+%
+%For concreteness, consider the case with $k = 2$ over $n=3$ outcomes.
+%We can re-write $L^2(u)_y = \left(1 - u_y + \tfrac 1 2 (u_{[1]}+ u_{[2]} - \min(1,u_y))\right)_+$.
+%By inspection, we can derive the properties elicited by $\elltop{2}$ and $L^2$, respectively, which reveals that the set $\R'$ consisting of all permutations of $(1,0,0)$, $(1,1,0)$, and $(2,1,0)$, are always represented among the minimizers of $L^2$.
+%Thus, $L^2$ embeds the loss $\ell^2(r)_y = 0$ if $r_y = 2$ or $\ell^2(r)_y = 1 - r_y + \tfrac 1 2 \inprod{r}{\ones-e_y}$ otherwise.
+%Observe that $\ell^2$ is just $\elltop{2}$ with an extra term punishing weight on elements other than $y$, and a reward for a weight of 2 on $y$.
+%
+%Moreover, we can visually inspect the corresponding properties (Fig.~\ref{fig:top-k-simplices}) to immediately see why $L^2$ is inconsistent: for distributions where the two least likely labels are roughly equally (un)likely, the minimizer will put all weight on the most likely label, and thus fail to distinguish the other two.
+%More generally, $L^2$ cannot be consistent because the property it embeds does not ``refine'' (subdivide) the top-$k$ property, so not just $\psi$, but \emph{no} link function, could make $L^2$ consistent.
+%
+%\begin{figure}[H]
+%	\begin{minipage}{0.45\linewidth}
+%		\centering
+%		\includegraphics[width=\linewidth]{tikz/original-top-k}
+%		\label{fig:original-top-k}
+%	\end{minipage}
+%	\hfill
+%	\begin{minipage}{0.45\linewidth}
+%		\centering
+%		\includegraphics[width=\linewidth]{tikz/finite-surrogate-top-k}
+%		\label{fig:finite-surrogate-top-k}
+%	\end{minipage}
+%	\caption{Minimizers of $\inprod{p}{\elltop{2}}$ and $\inprod{p}{\ell^2}$, respectively, varying $p$ over $\Delta_3$.}
+%	\label{fig:top-k-simplices}
+%\end{figure}
 
-\begin{figure}[H]
-	\begin{minipage}{0.45\linewidth}
-		\centering
-		\includegraphics[width=\linewidth]{tikz/original-top-k}
-		\label{fig:original-top-k}
-	\end{minipage}
-	\hfill
-	\begin{minipage}{0.45\linewidth}
-		\centering
-		\includegraphics[width=\linewidth]{tikz/finite-surrogate-top-k}
-		\label{fig:finite-surrogate-top-k}
-	\end{minipage}
-	\caption{Minimizers of $\inprod{p}{\elltop{2}}$ and $\inprod{p}{\ell^2}$, respectively, varying $p$ over $\Delta_3$.}
-	\label{fig:top-k-simplices}
-\end{figure}
-
-%\btw{Yutong's paper commented out here; mentioned at beginning of section- June 1 21}
 \subsection{Embedding Ordered Partitions}
 \citet*{wang2020weston} use embeddings to construct and prove the calibration of the Weston-Watkins surrogate for the \emph{Ordered Partition} loss.
 
