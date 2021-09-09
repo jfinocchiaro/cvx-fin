@@ -106,6 +106,7 @@
 \newcommand{\trimcover}{\mathrm{trim}}
 \newcommand{\fplc}{finite-piecewise-linear and convex\xspace} %xspace for use in text
 \newcommand{\conv}{\mathrm{conv}}
+\newcommand{\epi}{\mathrm{epi}}
 \newcommand{\indopp}{\bar{\mathbbm{1}}}
 \newcommand{\ones}{\mathbbm{1}}
 \DeclarePairedDelimiter\ceil{\lceil}{\rceil}
@@ -229,13 +230,13 @@ In particular, every discrete loss is embedded by a polyhedral surrogate.
 Moreover, such an embedding gives rise to calibrated link function.
 Our proofs give explicit constructions for the surrogate (\S~\ref{sec:poly-loss-embed}) and link (\S~\ref{sec:calibration}) given a discrete loss.
 
-\begin{theorem}\label{thm:embed-poly-informal}
+\begin{restatable}{theorem}{embedpolyinformal}\label{thm:embed-poly-informal}
   Every discrete loss $\ell$ is embedded by some polyhedral loss $L$, and every polyhedral loss $L$ embeds some discrete loss $\ell$.
-\end{theorem}
+\end{restatable}
 
-\begin{theorem}\label{thm:link-informal}
+\begin{restatable}{theorem}{linkinformal}\label{thm:link-informal}
   Given any polyhedral loss $L$, let $\ell$ be the discrete loss it embeds. There exists a link function $\psi$ such that $(L,\psi)$ is calibrated with respect to $\ell$.
-\end{theorem}
+\end{restatable}
 
 To better understand existing polyhedral surrogates, we provide tools to find the discrete losses they embed (Proposition~\ref{prop:representative-embeds-restriction}).
 In short, if one can identify a finite \emph{representative set} $\Sc$ of reports for a surrogate $L$, meaning $\Sc$ always contains an $L$-optimal report for any label distribution, then $L$ embeds $L|_\Sc$, the loss given by $L$ restricting to $\Sc$.
@@ -402,10 +403,10 @@ for all $p \in \simplex$,
   If $(L, \psi)$ is calibrated with respect to $\ell$, we call $\psi$ a \emph{calibrated link.}
 \end{definition}
 It is well-known in finite-outcome settings that calibration is equivalent to \emph{consistency}, in the following sense (cf.~\citep{bartlett2006convexity,zhang2004statistical,agarwal2015consistent}).
-Given feature space $\X$, \jessie{and any?}fix a distribution $D \in \Delta(\X\times\Y)$.
+Suppose we have the feature space $\X$ and label space $\Y$.
 Let $L^*$ be the best possible expected $L$-loss achieved by any hypothesis $H:\X\to\reals^d$, and $\ell^*$ the best expected $\ell$-loss for any hypothesis $h:\X\to\R$, respectively.
-If $(L,\psi)$ is consistent, then for any sequence of surrogate hypotheses $H_1,H_2,\ldots$ whose $L$-loss limits to $L^*$, the $\ell$-loss of $\psi\circ H_1,\psi \circ H_2, \ldots$ limits to $\ell^*$.
-\bo{edited above slightly. I believe a technical definition of consistency would have a ``for all $\D$'', but we can probably skip that.}
+If $(L,\psi)$ is consistent, then for any sequence of surrogate hypotheses $H_1,H_2,\ldots$ whose $L$-loss limits to $L^*$, the $\ell$-loss of $\psi\circ H_1,\psi \circ H_2, \ldots$ limits to $\ell^*$ for all data distributions $D \in \Delta(\X \times \Y)$.
+\bo{edited above slightly. I believe a technical definition of consistency would have a ``for all $\D$'', but we can probably skip that.}\jessie{Tried to make sure it had this technical correctness.}
 As Definition~\ref{def:calibrated} does not involve the feature space $\X$, we will drop it for the remainder of the paper.
 Note that in the finite-outcome setting, calibration is necessary and sufficient for consistency from a generalization of~\citet{tewari2007consistency} given by~\citet{ramaswamy2016convex}.  
 
@@ -480,7 +481,7 @@ For condition (ii), let us compute the property each loss elicits, i.e., the set
 \]
 % Now, take the embedding $\varphi$ to be the identity.  % := r$ if $r \in [-1,1]$, and $\sgn(r)$ otherwise.
 In particular, we see that $-1 \in \prop{\ellzo}(p) \iff p_1 \in [0, 1/2] \iff -1 \in \prop{\hinge}(p)$, and $1 \in \prop{\ellzo}(p) \iff p_1 \in [1/2,1] \iff 1 \in \prop{\hinge}(p)$.
-With both conditions of Definition~\ref{def:loss-embed} satisfied, we conclude that $\hinge$ embeds $2\ellzo$.
+With both conditions of Definition~\ref{def:loss-embed} satisfied, we can conclude that $\hinge$ embeds $2\ellzo$ by results in \S~\ref{subsec:match-BR}.
 \raf{Forward ref \S~\ref{sec:min-rep-sets} <-- add ref to 6.2}
 
 \begin{figure}
@@ -546,7 +547,7 @@ For example, while logistic loss does not embed 0-1 loss, the surrogate and link
 \section{Embeddings and Polyhedral Losses}
 \label{sec:poly-loss-embed}
 
-In this section, we establish a tight relationship between the technique of embedding and the use of polyhedral (piecewise-linear convex) surrogate losses.
+In this section, we establish a tight relationship between the technique of embedding and the use of polyhedral (piecewise-linear convex) surrogate losses, showing Theorem~\ref{thm:embed-poly-informal}.
 We defer the question of when such surrogates are consistent to \S~\ref{sec:calibration}. 
 \raf{Reference Theorem~\ref{thm:embed-poly-informal}}
 
@@ -656,10 +657,11 @@ The proof relies on a result we will prove in \S~\ref{sec:min-rep-sets}: a minim
 \end{proof}
 
 \raf{TODO: smooth over these paragraphs.  I think we should combine the first two and give only a 1-sentence description of how to achieve $|\Y|-1$ dimensions.}
+\jessie{Took a pass 09 Sept 21}
 
 Note however that the number of dimensions $d$ required could be as large as $n = |\Y|$, which is particularly undesirable in structured prediction and information retrieval problems where the number of outcomes is exponential.
 Recent work~\citep{ramaswamy2016convex,finocchiaro2020embedding,finocchiaro2021unifying} yield characterizations for bounding the prediction dimension $d$ for consistent convex surrogates and embeddings.
-Moreover, to construct an embedding of dimension $n-1$ instead of $n$, consider an invertible linear transformation from $\reals^n \to \reals^{n-1}$ and re-define the loss appropriately so Bayes Risks match.
+Moreover, to construct an embedding of dimension $n-1$ instead of $n$, consider an invertible linear transformation from $\reals^n \to \reals^{n-1}$ and re-define the loss appropriately so Bayes risks match.
 %\raft{CITE: DKR, frongillo-kash (WINE 2014), probably one of Bob's papers?, others?}
 
 %Moreover, to construct an embedding of dimension $n-1$ instead of $n$ (see~\citet{finocchiaro2020embedding} for significance of dimension),  consider some invertible linear transformation $A : \reals^n \to \reals^{n-1}$ that maps to an affine subspace.
@@ -669,9 +671,14 @@ Moreover, to construct an embedding of dimension $n-1$ instead of $n$, consider 
 
 %\btw{Cut summary for now (Why is this cool?)}
 %\jessiet{Jessie: added a bit to say why this is cool.}
+\jessiet{Is this following paragraph necessary here?  It's more of an intro for \S~\ref{sec:calibration}.}
 We will see that embedding implies the existence of a consistent surrogate and link, so this result tells us that, for discrete losses, the embedding framework is sufficient to understand the existence of consistent surrogates for the given loss.
 Even if there is a smooth surrogate for a given discrete loss, there is also a polyhedral loss that is calibrated for the given loss.
 What's more is that there is a polyhedral \emph{embedding} that is calibrated for the discrete loss.
+
+Recall from the introduction Theorem~\ref{thm:embed-poly-informal}.
+\embedpolyinformal*
+This result is exactly the chaining of theorems \ref{thm:poly-embeds-discrete} and \ref{thm:discrete-loss-poly-embeddable}, thus we have shown the result.
 
 
 %\begin{corollary}\label{cor:finite-elicit-embed}
@@ -696,11 +703,15 @@ What's more is that there is a polyhedral \emph{embedding} that is calibrated fo
 
 \raf{Reference Theorem~\ref{thm:link-informal}}
 
+
+
 We have now seen the tight relationship between polyhedral losses and embeddings; in particular, every polyhedral loss embeds some discrete loss.
 The embedding itself tells us how to link the embedded points back to the discrete reports (map $\varphi(r)$ to $r$).
 But it is not clear how to extend this to yield a full link function $\psi: \reals^d \to \R$, and whether such a $\psi$ can lead to consistency.
 In this section, we give a construction to generate calibrated links for \emph{any} polyhedral loss, which we summarize in the following theorem.
 \S~\ref{app:calibration} contains the full proof; this section provides a sketch of the main construction and result.
+
+\linkinformal* \jessie{vs...}
 
 \begin{theorem}\label{thm:eps-thick-calibrated}
   Let $L$ be polyhedral and $\ell$ the discrete loss it embeds from Theorem~\ref{thm:poly-embeds-discrete}.
@@ -710,6 +721,7 @@ In this section, we give a construction to generate calibrated links for \emph{a
 
 \raf{I liked the new version in general.  The only thing I was suggest is that for a journal version we could add a bit more detail right here, in the proof sketch.  For example, maybe a high-level overview right at this spot would help, since when you launch into step 1, it's not clear how many steps will follow.  And after step 2, there is a definition, and more discussion after.  All the pieces are great; maybe just a splash of overview and organization can help the reader orient as they go through it.}
 
+At a high level, the proof has three main steps.
 The first step is to show indirect elicitation: we give a link $\psi: \reals^d \to \R$ such that exactly minimizing expected surrogate loss $L$, followed by applying $\psi$, always exactly minimizes expected original loss $\ell$.
 %Symbolically, if $u^* \in \argmin_u \inprod{p}{L(u)} = \Gamma(p)$, then $\psi(u^*) \in \argmin_r \inprod{p}{\ell(r)} = \gamma(p)$.
 For this step, the challenge is that for a generic $u \in \reals^d$, not an embedding point, we may have $u \in \Gamma(p) \cap \Gamma(p')$.
@@ -725,7 +737,8 @@ This implies that if $u \in \Gamma(p) \cap \Gamma(p')$, then $r \in \gamma(p) \c
 The second step is to ensure calibration: we should modify this link so that even approximately-optimal points $u$ link to optimal reports $r$.
 We do so by ``thickening'' the link by $\epsilon$ as described next.
 Informally, we take each optimal report set, i.e. some $U = \Gamma(p) = \argmin_u \inprod{p}{L(u)}$, and thicken it by adding all points within distance $\epsilon$.
-Then, we impose a requirement that all points in this thickened set are linked to some element of $\gamma(p) = \argmin_r \inprod{p}{\ell(r)}$.
+
+Finally, we impose a requirement that all points in this thickened set are linked to some element of $\gamma(p) = \argmin_r \inprod{p}{\ell(r)}$.
 We use $\Psi(u)$ to denote the remaining legal choices for $\psi(u)$.
 After repeating for each optimal report set, we will claim that there exists a small enough $\epsilon > 0$ so that the construction is successful, i.e. $\Psi(u)$ is nonempty for all $u$.
 %A key step in the following definition will be to narrow down a ``link envelope'' $\Psi$ where $\Psi(u)$ denotes the legal or valid choices for $\psi(u)$.
@@ -740,7 +753,7 @@ After repeating for each optimal report set, we will claim that there exists a s
 \end{definition}
 A key point is that, by Lemma~\ref{lem:polyhedral-range-gamma}, there are only finitely many sets of the form $U = \Gamma(p)$.
 We then show, along the lines discussed above, that for a small enough choice of $\epsilon > 0$, if the thickenings of $U$ and $U'$ overlap at some $u$, then the corresponding report sets $R_U, R_{U'}$ also overlap; this implies $\Psi(u)$ is nonempty.
-Given a well-defined thickened link $\psi$, calibration is almost immediate because, given $p$, any report $u$ linking to a suboptimal $r = \psi(u)$ satisfies $\inf_{u^* \in \Gamma(p} \|u^* - u\| \geq \epsilon$.
+Given a well-defined thickened link $\psi$, calibration is almost immediate because, given $p$, any report $u$ linking to a suboptimal $r = \psi(u)$ satisfies $\inf_{u^* \in \Gamma(p)} \|u^* - u\| \geq \epsilon$.
   We then show that the minimal gradient of the expected loss along any direction away from $U$ is lower-bounded, giving a constant excess expected loss at $u$.
 
 \btw{FUTURE: we should comment in the discussion section that we probably can show that *any* loss embedding $\ell$ must be polyhedral-ish, meaning polyhedral except for stuff that is never optimal.  This theorem would then not need the ``polyhedral'' part. This is related to the ``convex envelope conjucture'', that if $L$ embeds $\ell$ via $\varphi$, you can just take the loss $L'$ such that $L_y$ is the convex envelope of points $\{(\varphi(r),L(r)_y)\}_{r\in\R}$.}
@@ -762,17 +775,25 @@ Our results give a framework to construct consistent surrogates and link functio
 Below, we illustrate the power of this framework with specific examples from the literature, as well as new examples.
 In some cases we simplify existing proofs, while in others we give new results, such as a new calibrated link for abstain loss, and the inconsistency of the recently proposed Lov\'asz hinge.
 \btw{RF: The top-k and hypercube/set examples (except abstain) have the link built in, e.g.\ as the sign function), and they just work around it.  Our results may suggest that it's worth thinking ``outside the box'' (HAH, genious...) and looking for embeddings which are not the hypercube. \jessie{Added a bit discussing this, starting at ``the examples in ...''.}}
-The examples below, with the exception of the abstain surrogate given by~\citet{ramaswamy2018consistent}, all present a surrogate that use the link $\psi: u \mapsto \sgn(u)$.
+The examples below, with the exception of the abstain surrogate given by~\citet{ramaswamy2018consistent}, all present a surrogate that use the link $\psi: u \mapsto \sgn(u)$. \jessie{Is this true?  Not for top-$k$, unless I'm misreading}
 While this may sometimes yield a calibrated link, this is not always the case.
 In fact, we will see that most of these examples do not yield calibrated surrogates, although proving that there is \emph{no} calibrated link for a given surrogate is quite difficult.
 Our results suggest that it is possible that some of the given surrogates are calibrated, but perhaps one must use a nontraditional link in order to calibrate the loss, such as the thickening construction given here.
-\citet{wang2020weston} apply the embedding framework to show that the Weston-Watkins hinge loss embeds a discrete loss for ordered partitions.
+%\citet{wang2020weston} apply the embedding framework to show that the Weston-Watkins hinge loss embeds a discrete loss for ordered partitions.
+
+In general the approach to apply embeddings is as follows: given a surrogate $L:\reals^d \to \reals^\Y_+$, find the regions for which $L$ is affine.
+Vertices of $L$ are formed by the intersection of $d$ facets of $\epi(L)$, or equivalently affine regions of $L$~\citep[Statement 3.1.7]{grunbaum2013convex}.
+The enumeration of these vertices yields a finite representative set, and we can reason about embedding these vertices.
+
+Applying the $\epsilon$-thickened link construction additionally enables one to verify the consistency of a proposed link and embedding.
+For a given $\epsilon$ and norm $\|\cdot\|$, suppose one follows the routine of Definition~\ref{def:eps-thick-link} until the last step in which values for the link are selected.
+Once possible choices for this $\epsilon$-thickened set-valued function are available, we can see if the proposed link aligns with these possible choices: if so, then the proposed link is calibrated.
 
 
 \subsection{Consistency of abstain surrogate and link construction}
 \label{sec:abstain}
 
-\raf{TODO: talk about generic approach: restrict to affine regions, take vertices}
+%\raf{TODO: talk about generic approach: restrict to affine regions, take vertices} \jessie{Attempted above}
 
 In classification settings with a large number of labels, several authors consider a variant of classification, with the addition of a ``reject'' or \emph{abstain} option.
 For example, \citet{ramaswamy2018consistent} study the loss $\ellabs{\alpha} : [n] \cup \{\bot\} \to \reals^\Y_+$ defined by $\ellabs{\alpha}(r)_y = 0$ if $r=y$, $\alpha$ if $r = \bot$, and 1 otherwise.
@@ -847,7 +868,7 @@ One then defines a joint loss function, which is often merely a function of the 
 For example, Hamming loss is given by $f(S) = |S|$.
 In an effort to provide a general convex surrogate for these settings when $f$ is a submodular function, Yu and Blaschko~\cite{yu2018lovasz} introduce a surrogate $L^f$ which they dub the \emph{Lov\'asz hinge}, as it leverages the well-known convex Lov\'asz extension of submodular functions.
 While the authors provide theoretical justification and experiments, consistency of the Lov\'asz hinge is left open, which we resolve.
-As even the formal definition of the Lov\'asz hinge is quite involved, we defer the complete analysis to \S~\ref{app:lovasz} and here state the main results.
+As even the formal definition of the Lov\'asz hinge is quite involved, we defer the complete analysis to \S~\ref{app:lovasz} \jessie{REF} and here state the main results.
 
 As a warm-up, let us introduce the form of the Lov\'asz hinge $L^f$ for the case $k=2$, as one can build intuition from this case.
 For brevity, we write $f_\emptyset := f(\emptyset)$, $f_{1,2} := f(\{1,2\})$, etc.
@@ -909,6 +930,33 @@ On the other hand, of course, this revelation suggests a positive result as well
 % one advantage of our embedding framework is the ability to construct lower-dimensional surrogates when costs have certain geometric interpretations.
 % For example, if $v_1,\ldots,v_n \in \reals^k$ are on the unit sphere and $C_{ij} = \inprod{v_i}{v_j}$, we can simply take $L_j(u) = $\raf{aaaand Noah woke up}\raf{Just realized that this loss matrix has rank $k$ and thus is covered by AA15: just elicit the linear property $\E v_Y \in \reals^k$.}
 
+\subsection{Embedding Ordered Partitions}
+\citet*{wang2020weston} use embeddings to construct and prove the calibration of the Weston-Watkins surrogate for the \emph{Ordered Partition} loss.
+
+An ordered partition on $[n] := \{1, \ldots, n\}$ is an ordered list $S = (S_1, \ldots, S_l)$ of nonempty, pairwise disjoint sets such that $\cup_i S_i = [n]$, and assume $l \geq 2$.
+The ordered partition target loss $\ell^{\OP}$ is defined, for $i \in [n]$ and $S = (S_1, \ldots, S_l) \in \OP_n$ by
+\begin{align*}
+\ell^\OP(S,y) &= |S_1| - 1 + \sum_{i=1}^{l-1} |S_1 \cup \ldots \cup S_{i+1}| \cdot \Ind{y \not \in S_1 \cup \ldots \cup S_i}~.~
+\end{align*}
+The summation in this ordered partition loss can be interpreted as a variation of 0-1 loss where one can report sets of sets, and increases the punishment for the outcome $y$ not being in the earlier sets in the ordering; outside the summation is a punishment for having a large prediction set on the first $S_1$.
+This work presents an embedding for $\ell^\OP$ and uses this fact to show that the Weston-Watkins hinge loss~\citep{weston1999support} is in fact calibrated (and hence consistent, since the two are equivalent in Quadrant 1) with respect to $\ell^\OP$.
+
+The Weston-Watkins hinge loss takes predictions $u \in \reals^n$ and assigns loss
+\begin{equation}\label{eq:ww-hinge}
+L(u,y) = \sum_{i \in \Y : i \neq y} (1 - (u_y - u_i))_+~.~
+\end{equation}
+
+\citet[Definition 2.3]{wang2020weston} takes the embedding $\varphi : \OP_n \to \reals^n$ entrywise so that for all $j \in S_i$, we have $\varphi(S)_j = -(i-1)$.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.5\linewidth]{tikz/ordered-partition}
+	\caption{Level sets of $\psi \circ \prop{WW}$, the property elicited by Weston Watkins hinge with embedding given by~\citet[Definition 2.3]{wang2020weston}.  
+		$\prop{WW}$ is shown with faint dotted lines.}
+	\label{fig:ordered-partition}
+\end{figure}
+
+
 \subsection{Inconsistency of top-$k$ losses}
 In settings of search results and object recognition, one might plausibly be interested in top-$k$ classification: a generalization of $0-1$ loss where one can predict a set $S$ of size $k$, receiving loss $0$ if the true label $y \in S$, and $1$ otherwise.
 While this problem is well-studied, \citep{lapin2015top, lapin2016loss, lapin2018analysis,yang2018consistency}\jessie{Add more} a class of surrogates for top-$k$, most of which are not convex and consistent.
@@ -917,7 +965,7 @@ However, this seems to encapsulate more information than necessary and therefore
 \jessie{Add more here}
 
 \begin{align}\label{eq:topk-embedding}
-L(u,y) &= \max \left(u_{[1]}, \max_{m \in k+1, \ldots, m} 1 - \frac k m + \frac 1 m \sum_{i=1}^m u_{[i]} - \right)- u_y
+L(u,y) &= \max \left(u_{[1]}, \max_{m \in k+1, \ldots, m} 1 - \frac k m + \frac 1 m \sum_{i=1}^m u_{[i]} \right)- u_y
 \end{align}
 
 \citet{TOPKPAPER} presents an embedding (Eq.~\eqref{eq:topk-embedding}) for top-$k$ loss that looks unlike the 
@@ -963,30 +1011,6 @@ Moreover, the most common link $\psi^{\tt argmax}(u) := \argmax_{S \subseteq \Y 
 %	\label{fig:top-k-simplices}
 %\end{figure}
 
-\subsection{Embedding Ordered Partitions}
-\citet*{wang2020weston} use embeddings to construct and prove the calibration of the Weston-Watkins surrogate for the \emph{Ordered Partition} loss.
-
-An ordered partition on $[n] := \{1, \ldots, n\}$ is an ordered list $S = (S_1, \ldots, S_l)$ of nonempty, pairwise disjoint sets such that $\cup_i S_i = [n]$, and assume $l \geq 2$.
-The ordered partition target loss $\ell^{\OP}$ is defined, for $i \in [n]$ and $S = (S_1, \ldots, S_l) \in \OP_n$ by
-\begin{align*}
-\ell^\OP(S,y) &= |S_1| - 1 + \sum_{i=1}^{l-1} |S_1 \cup \ldots \cup S_{i+1}| \cdot \Ind{y \not \in S_1 \cup \ldots \cup S_i}~.~
-\end{align*}
-The summation in this ordered partition loss can be interpreted as a variation of 0-1 loss where one can report sets of sets, and increases the punishment for the outcome $y$ not being in the earlier sets in the ordering; outside the summation is a punishment for having a large prediction set on the first $S_1$.
-This work presents an embedding for $\ell^\OP$ and uses this fact to show that the Weston-Watkins hinge loss~\citep{weston1999support} is in fact calibrated (and hence consistent, since the two are equivalent in Quadrant 1) with respect to $\ell^\OP$.
-
-The Weston-Watkins hinge loss takes predictions $u \in \reals^n$ and assigns loss
-\begin{equation}\label{eq:ww-hinge}
-L(u,y) = \sum_{i \in \Y : i \neq y} (1 - (u_y - u_i))_+~.~
-\end{equation}
-
-\citet[Definition 2.3]{wang2020weston} takes the embedding $\varphi : \OP_n \to \reals^n$ entrywise so that for all $j \in S_i$, we have $\varphi(S)_j = -(i-1)$.
-
-\begin{figure}[H]
-		\centering
-		\includegraphics[width=0.5\linewidth]{tikz/ordered-partition}
-	\caption{Level sets of the Weston Watkins hinge with embedding given by~\citet[Definition 2.3]{wang2020weston}.}
-	\label{fig:ordered-partition}
-\end{figure}
 
 
 \btw{Hierarchical surrogate commented out; just mention in 7.1 since it builds off of that example.}
@@ -1201,7 +1225,7 @@ As it is also a more succinct condition, we will use the former in the sequel.
 In particular, the implications of Lemma~\ref{lem:X} follow whenever $L$ has a finite representative set.
 
 
-\subsection{Equivalent condition: matching Bayes risks}
+\subsection{Equivalent condition: matching Bayes risks}\label{subsec:match-BR}
 
 
 Lemma~\ref{lem:X} leads to another appealing equivalent condition to our embedding condition in Definition~\ref{def:loss-embed}: a surrogate embeds a discrete loss if and only if their Bayes risks match.
