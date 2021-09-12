@@ -504,7 +504,7 @@ With both conditions of Definition~\ref{def:loss-embed} satisfied, we can conclu
 %	\caption{Bayes risk of the logistic loss.}
 %	\label{fig:logistic-br}
 \end{minipage}
-\caption{Bayes risks of 0-1, hinge, and logistic losses, respectively, in binary classification setting. \jessie{Move this down to when we actually discuss risks matching?}\raf{Let's keep but add detail / increase font size}}
+\caption{Bayes risks of 0-1, hinge, and logistic losses, respectively, in binary classification setting. \raf{Add detail}}
 \label{fig:bayes-risks-01}
 \end{figure}
 
@@ -959,16 +959,18 @@ L(u,y) = \sum_{i \in \Y : i \neq y} (1 - (u_y - u_i))_+~.~
 
 \subsection{Inconsistency of top-$k$ losses}
 In settings of search results and object recognition, one might plausibly be interested in top-$k$ classification: a generalization of $0-1$ loss where one can predict a set $S$ of size $k$, receiving loss $0$ if the true label $y \in S$, and $1$ otherwise.
-While this problem is well-studied, \citep{lapin2015top, lapin2016loss, lapin2018analysis,yang2018consistency}\jessie{Add more} a class of surrogates for top-$k$, most of which are not convex and consistent.
+While this problem is well-studied, \citep{lapin2015top, lapin2016loss, lapin2018analysis,yang2018consistency,berrada2018smooth,rastegari2011scalable} a class of surrogates for top-$k$, most of which are not simultaneously convex and consistent.
 The only convex surrogate in the literature that is consistent is the softmax surrogate of~\citet{lapin2016loss} which essentially learns the entire distribution.
 However, this seems to encapsulate more information than necessary and therefore presumably requires more data to learn the Bayes optimal hypothesis.
 \jessie{Add more here}
+
+Other hinge-like surrogates are shown to be non-consistent by~\citet{lapin2016loss} and~\citet{yang2018consistency}, including $\psi_2$ from~\citet[Table 1]{yang2018consistency}, which elicits essentially the same property $\prop{WW}$ shown in Figure~\ref{fig:ordered-partition} before the link is applied for certain values of $n$ and $k$.
 
 \begin{align}\label{eq:topk-embedding}
 L(u,y) &= \max \left(u_{[1]}, \max_{m \in k+1, \ldots, m} 1 - \frac k m + \frac 1 m \sum_{i=1}^m u_{[i]} \right)- u_y
 \end{align}
 
-\citet{TOPKPAPER} presents an embedding (Eq.~\eqref{eq:topk-embedding}) for top-$k$ loss that looks unlike the 
+\citet{TOPKPAPER} presents an embedding (Eq.~\eqref{eq:topk-embedding}) for top-$k$ loss that looks unlike the commonly studied surrogates in the literature.
 Moreover, the most common link $\psi^{\tt argmax}(u) := \argmax_{S \subseteq \Y : |S| = k} \sum_{i \in S} u_i$ is an $\epsilon$-thickening of the embedding with $\epsilon = $ and the norm $\|\cdot\|_x$.\jessie{TODO... if this is true.}
 
 %Commented out 07 Sept 21
@@ -1174,6 +1176,25 @@ To see that this is a weaker condition, recall that Theorem~\ref{thm:poly-embeds
 The condition is strictly weaker, in that the Bayes risk may be polyhedral even if the loss itself is not.
 For example, a modified hinge loss $L(r)_y = \max(r^2-1,1-ry)$, \jessiet{Would a figure be helpful?}\raft{Yeah!} which matches hinge loss on the interval $[-1,1]$ but is smooth outside the interval $[-2,2]$, still embeds twice 0-1 loss.
 
+\begin{figure}
+	\begin{minipage}{0.47\linewidth}
+		\centering
+		\includegraphics[width=0.95\linewidth]{figs/modhinge.pdf}
+		%		\caption{Bayes risk of the 0-1 loss.}
+		%		\label{fig:0-1-br}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.47\linewidth}
+		\centering		\includegraphics[width=0.95\linewidth]{figs/modhinge-br.pdf}
+		%		\caption{Bayes risk of hinge loss.}
+		%		\label{fig:hinge-br}
+	\end{minipage}
+	\caption{(L) Modified (expected) hinge loss for fixed distribution, and (R) Bayes risk of modified hinge still matches the Bayes risk of hinge}
+	\label{fig:bayes-risks-01}
+\end{figure}
+
+
+
 % \begin{lemma}
 % 	\label{lem:poly-loss-poly-risk}
 % 	If $L$ is polyhedral, $\risk{L}$ is polyhedral.
@@ -1185,8 +1206,9 @@ For example, a modified hinge loss $L(r)_y = \max(r^2-1,1-ry)$, \jessiet{Would a
 % 	$\Sc$ is representative for $L$, so Lemma~\ref{lem:loss-restrict} gives us $\risk{L} = \risk{L|_{\Sc}}$, which is polyhedral as $\Sc$ is finite.
 % \end{proof}
 
-We now present our main structural result, which will lay the foundation for the rest of this section.
-\raf{TODO: Brief description of the result}
+We now present our main structural result in Lemma~\ref{lem:X}, which will lay the foundation for the rest of this section.
+Lemma~\ref{lem:X} observes that a (minimizable) loss $L$ with polyhedral Bayes risk have finite representative sets, and derives equivalent conditions on the level sets of the property elicited by $L$ and tight embeddings.
+\raf{TODO: Brief description of the result}\jessie{Attempted}
 
 \begin{lemma}[\jessie{Lemma X}]\label{lem:X}
   Let $L: \R \to \reals^\Y_+$ be a minimizable loss with a polyhedral Bayes risk $\risk L$.
@@ -1251,15 +1273,15 @@ Lemma~\ref{lem:X} leads to another appealing equivalent condition to our embeddi
   \end{equation*}
   
 	For the reverse implication, assume $\risk{L} = \risk{\ell}$, which are polyhedral functions as $\ell$ is discrete.
-  From Lemma~\ref{lem:X}(\ref{item:X-min-V}), we have some set $\V\subseteq\reals^\Y_+$ and minimum representative sets $\R^* \subseteq \R$ and $\Sc \subseteq \U$, for $\ell$ and $L$ respectively, such that $\ell(\R^*) = \V = L(\Sc)$.\jessiet{This is a different $\Sc$ than the first paragraph, right? The first $\Sc$ is representative for $\ell$.}\raft{They are both quantified separately, so not linked; are you saying it's confusing to use $\Sc$ here though because its role is slightly different?}
-  As $\R^*$ and $\Sc$ are miniumum, they cannot repeat loss vectors, and thus $|\R^*|=|\ell(\R^*)|$ and $|L(\Sc)|=\Sc$.
-  We conclude that $\R^*$ and $\Sc$ are both in bijection with $\V$.
-  The map $\varphi :\R^* \to \reals^d$, given by $\varphi(r) = s \in \Sc$ where $\ell(r) = L(s)$, is therefore well-defined.
+  From Lemma~\ref{lem:X}(\ref{item:X-min-V}), we have some set $\V\subseteq\reals^\Y_+$ and minimum representative sets $\R^* \subseteq \R$ and $\U^* \subseteq \U$, for $\ell$ and $L$ respectively, such that $\ell(\R^*) = \V = L(\U^*)$.\jessiet{This is a different $\Sc$ than the first paragraph, right? The first $\Sc$ is representative for $\ell$.}\raft{They are both quantified separately, so not linked; are you saying it's confusing to use $\Sc$ here though because its role is slightly different?}\jessiet{Yes... attempting to clarify.}
+  As $\R^*$ and $\U^*$ are miniumum, they cannot repeat loss vectors, and thus $|\R^*|=|\ell(\R^*)|$ and $|L(\U^*)|=|\U^*|$.
+  We conclude that $\R^*$ and $\U^*$ are both in bijection with $\V$.
+  The map $\varphi :\R^* \to \reals^d$, given by $\varphi(r) = u \in \U^*$ where $\ell(r) = L(u)$, is therefore well-defined.
   Condition (i) of an embedding is immediate.
-  From Proposition~\ref{prop:representative-embeds-restriction}, $\ell$ embeds $\ell|_{\R^*}$ and $L$ embeds $L|_\Sc$, both via the identity embedding.
+  From Proposition~\ref{prop:representative-embeds-restriction}, $\ell$ embeds $\ell|_{\R^*}$ and $L$ embeds $L|_{\U^*}$, both via the identity embedding.
   Using condition (ii) from both embeddings, for all $p\in\simplex$ and $r\in\R^*$, we have
   \begin{equation*}
-    r \in \gamma(p) \iff r \in \prop{\ell|_{\R^*}}(p) \iff \varphi(r) \in \prop{L|_\Sc}(p)
+    r \in \gamma(p) \iff r \in \prop{\ell|_{\R^*}}(p) \iff \varphi(r) \in \prop{L|_{\U^*}}(p)
     \iff \varphi(r) \in \prop{L}(p)~,
   \end{equation*}
   giving condition (ii).
@@ -1278,7 +1300,7 @@ Moreover, their result relies the Bayes risk of the surrogate being strictly con
 Central to the structural results in Lemma~\ref{lem:X} is the existence of a canonical set of loss vectors $\V$ which match the loss vectors of any minimum representative set.
 This fact may seem surprising when one considers that losses may have many mimimum representative sets.
 For example, consider hinge loss with a spurious extra dimension, i.e., $L:\reals^2\to\reals^\Y$, $L(r)_y = \max(0,1-r_1y)$ for $\Y = \{-1,+1\}$.
-Here the minimum representative sets are $\{(-1,a),(1,b)\}$ for any $a,b\in\reals$. \jessiet{Do we want this as an example or is it too contrived? I don't have a better one though.  We could also point out that lots of surrogates have an extra dimension in practice (e.g., people use $n$ dimensions instead of $n-1$ for multiclass classification.)}\raft{I like the example for its simplicity.  We could add a footnote about this coming up in practice, but since it's not a major point I'd lean leaving it as-is. If you agree feel free to burn.}
+Here the minimum representative sets are $\{(-1,a),(1,b)\}$ for any $a,b\in\reals$. 
 Lemma~\ref{lem:X}(\ref{item:X-min-V}) states that, while the minimum representative set is not unique, its loss vectors are.
 
 Motivated by this observation, let us define the ``trim'' of a loss to be this unique set $\V$ of loss vectors induced by any minimum representative set, which again is well-defined by Lemma~\ref{lem:X}(\ref{item:X-min-V}).
@@ -1559,7 +1581,7 @@ Theorem~\ref{thm:poly-ie-implies-consistent} gives a somewhat surprising result:
 \section{Conclusions} \label{sec:conclusion}
 
 \raf{Old recap; perhaps cut}
-This paper formalizes an intuitive way to design convex surrogate losses for classification-like problems---by embedding the reports into $\reals^d$.
+This paper formalizes an intuitive way to design convex surrogate losses for finite prediction problems---by embedding the reports into $\reals^d$.
 We establish a close relationship between embeddings and polyhedral surrogates, showing both that every polyhedral loss embeds a discrete loss (Theorem~\ref{thm:poly-embeds-discrete}) and that every discrete loss is embedded by some polyhedral loss (Theorem~\ref{thm:discrete-loss-poly-embeddable}).
 We then construct a calibrated link function from any polyhedral loss to the discrete loss it embeds, giving consistency for all such losses (Theorem~\ref{thm:eps-thick-calibrated}).
 
