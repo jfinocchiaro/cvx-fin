@@ -164,7 +164,9 @@ We establish a strong connection between this approach and polyhedral (piecewise
 Given any polyhedral loss $L$, we give a construction of a link function through which $L$ is a consistent surrogate for the loss it embeds.
 Conversely, we show how to construct a consistent polyhedral surrogate for any given discrete loss.
 Our framework yields succinct proofs of consistency or inconsistency of various polyhedral surrogates in the literature, and for inconsistent surrogates, it further reveals the discrete losses for which these surrogates are consistent.
-\raf{Jessie: take a crack at filling in the rest with our newer results}
+We show some additional structure of embeddings, such as a reducing embedding to matching Bayes risks.
+Finally, we show that when restricting to polyhedral surrogates, indirect property elicitation is equivalent to consistent.
+%The framework can generally be applied to finite prediction tasks, and is demonstrated on examples including high-confidence classification, structured prediction, ordered partitions, and top-$k$ prediction.
 \end{abstract}
 
 %\begin{keywords}%
@@ -227,8 +229,8 @@ Common examples of this general construction include hinge loss as a surrogate f
 
 We prove that such an embedding scheme is intimately related to the class of polyhedral (piecewise-linear and convex) loss functions.
 In particular, every discrete loss is embedded by a polyhedral surrogate.
-Moreover, such an embedding gives rise to calibrated link function.
-Our proofs give explicit constructions for the surrogate (\S~\ref{sec:poly-loss-embed}) and link (\S~\ref{sec:calibration}) given a discrete loss.
+Moreover, such an embedding gives rise to calibrated link function, and is therefore consistent with respect to the target loss.
+Our proofs give explicit constructions for the surrogate (\S~\ref{sec:poly-loss-embed}) and link (\S~\ref{sec:calibration}) embedding a given discrete loss.
 
 \begin{restatable}{theorem}{embedpolyinformal}\label{thm:embed-poly-informal}
   Every discrete loss $\ell$ is embedded by some polyhedral loss $L$, and every polyhedral loss $L$ embeds some discrete loss $\ell$.
@@ -244,7 +246,7 @@ We apply these tools to several polyhedral surrogates which have been proposed r
 
 Underpinning our results are several observations which formalize the idea that polyhedral losses ``behave like'' discrete losses.
 For example, discrete losses have polyhedral Bayes risks (as the minimum of finitely many linear functions), as do polyhedral losses (Lemma~\ref{lem:polyhedral-range-gamma}).
-As a consequence, polyhedral losses always have finite representative sets, and restricting the loss to any such set is an embedding.
+As a consequence, polyhedral losses always have finite representative sets, and restricting the loss to any such set is an embedding.\btw{Subtle distinction b/w polyhedral losses and losses with polyhedral Bayes risk.  I don't think we want that level of detail in the intro, and since we have an entire section on polyhedral embeddings, I think it's fine -J, 16 Sep 21}
 
 We also provide several observations beyond what is needed to prove our main results, which we view as conceptual contributions (\S~\ref{sec:min-rep-sets},~\ref{sec:poly-ie-consistency}).
 Using tools from property elicitation, we show an equivalence between minumum reprosentative sets and ``non-redundancy'', wherein no report is dominated by another.
@@ -268,14 +270,14 @@ The literature on convex surrogates focuses mainly on smooth surrogate losses~\c
 Nevertheless, nonsmooth losses, such as the polyhedral losses we consider, have been proposed and studied for a variety of classification-like problems~\citep{yang2018consistency,yu2018lovasz,lapin2015top}.
 Moreover,~\citet{zhang2020bayes} describe the impact of the hypothesis class has on consistency, and when consistency relative to the hypothesis class differs from Bayes consistency; the latter is what we describe in this paper when we say ``consistency.''
 
-A notable addition to this literature is~\citet{ramaswamy2018consistent}, who argue that nonsmooth losses may enable dimension reduction of the prediction space (range of the surrogate hypothesis) relative to smooth losses, illustrating this conjecture with a surrogate for \emph{abstain loss} needing only $\log(n)$ dimensions for $n$ labels, whereas the best known smooth loss needs $n-1$ dimensions.
+A notable addition to this literature is~\citet{ramaswamy2018consistent}, who argue that nonsmooth losses may enable dimension reduction of the prediction space (range of the surrogate hypothesis) relative to smooth losses (cf.~\citep[Section 1.2]{ramaswamy2018consistent}), illustrating this conjecture with a surrogate for \emph{abstain loss} needing only $\log(n)$ dimensions for $n$ labels, whereas the best known smooth loss needs $n-1$ dimensions.
 Their surrogate is a natural example of an embedding (cf.~\S~\ref{sec:abstain}), and serves as inspiration for our work.
 
 
 While property elicitation has by now an extensive literature~\citep{savage1971elicitation,osband1985information-eliciting,lambert2008eliciting,gneiting2011making,steinwart2014elicitation,frongillo2015vector-valued,fissler2016higher,lambert2018elicitation}, these works are mostly concerned with point estimation problems.
 Literature directly connecting property elicitation to consistency is sparse.
 However,~\citet{agarwal2015consistent} consider single-valued properties in finite outcome settings, whereas finite properties elicited by general convex losses are necessarily set-valued.
-\citet{finocchiaro2021unifying} additionally relates indirect property elicitation to consistency when one is given either a target loss or property in both discrete and continuous prediction settings, assuming surrogates attain their infimum in expectation over all distributions over the outcomes.
+\citet{finocchiaro2021unifying} additionally relates indirect property elicitation to consistency when one is given either a target loss or property in both discrete and continuous prediction settings, assuming surrogates are minimizable, or attain their infimum in expectation over all distributions over the outcomes.
 
 % \citet{agarwal2015consistent} and~\citet{ramaswamy2016convex} study the existence of convex surrogates; the latter proves lower bounds on dimensionality of hypothesis spaces for e.g.~0-1 loss via their notion of feasible subspace dimension.
 %   These works are generally not directly comparable to our results, as they do not consider the embedding method.
@@ -306,7 +308,7 @@ We will primarily focus on conditional distributions $p\in\simplex$ over labels,
 \raft{Tried to condense; old version commented out.}
 
 A generic loss function, denoted $L:\R\to\reals^\Y_+$, maps a report (prediction) $r$ from a set $\R$ to the vector of loss values $L(r) = (L(r)_y)_{y\in\Y}$ for each possible outcome $y\in\Y$.
-\raft{We got some feedback from Anish and others that the way we write generic losses was confusing.  I tried to rewrite to emphasize that we use $L$ for generic losses, including surrogates, and $\ell$ for discrete losses, where we assume $\R$ is a finite set.  That way the idea that $\R$ is always finite is perhaps dispelled.}
+\raft{We got some feedback from Anish and others that the way we write generic losses was confusing.  I tried to rewrite to emphasize that we use $L$ for generic losses, including surrogates, and $\ell$ for discrete losses, where we assume $\R$ is a finite set.  That way the idea that $\R$ is always finite is perhaps dispelled.\jessie{I like this re-write}}
 We write the corresponding expected loss when $Y \sim p$ as $\inprod{p}{L(r)}$.
 The \emph{Bayes risk} of a loss $L:\R\to\reals^\Y_+$ is the function $\risk{L}:\simplex\to\reals_+$ given by $\risk{L}(p) := \inf_{r\in\R} \inprod{p}{L(r)}$.
 When restricting the domain of a loss $L$ from $\R$ to $\R'$, we write $L|_{\R'}$.
@@ -331,9 +333,9 @@ A convex function $f:\reals^d\to\reals$ is \emph{polyhedral} if its epigraph is 
   A loss $L: \reals^d \to \reals^{\Y}_+$ is \emph{polyhedral} if $L(u)_y$ is a polyhedral convex function of $u$ for each $y\in\Y$.
 \end{definition}
 %
-For example, hinge loss is polyhedral, whereas logistic loss is not.
-To motivate our focus on polyhedral losses, we echo~\citet[Section~1.2]{ramaswamy2018consistent}, who note that smooth surrogates often encode much more information than necessary, and in these cases non-smooth surrogates are the best candidates to achieve a low prediction dimension $d$.
-\raft{This sentence seems odd here, but it's a nice reference; is there a better place?}
+%For example, hinge loss is polyhedral, whereas logistic loss is not.
+%To motivate our focus on polyhedral losses, we echo~\citet[Section~1.2]{ramaswamy2018consistent}, who note that smooth surrogates often encode much more information than necessary, and in these cases non-smooth surrogates are the best candidates to achieve a low prediction dimension $d$.
+\raft{This sentence seems odd here, but it's a nice reference; is there a better place? \jessie{Commenting out and consolidating-- We have a similar few sentences in the 2nd paragraph of related work}}
 
 \subsection{Property Elicitation}
 \label{sec:property-elicitation}
@@ -368,11 +370,11 @@ In this case we say 0-1 loss \emph{elicits} the mode, as we formalize below.
 \end{definition}
 
 
+We will typically denote general properties and losses with $\Gamma$ and $L$, respectively.
 For surrogate losses $L$ and properties $\Gamma$, we will typically take $\R = \reals^d$.
-For target losses and properties, we will take $\R$ to be any finite set, and use lowercase notation $\ell$ and $\gamma$, respectively.
+For discrete target losses and properties, we will take $\R$ to be any finite set, and use lowercase notation $\ell$ and $\gamma$, respectively.
 Any property $\gamma:\simplex\toto\R$ for a finite set $\R$ is called a \emph{finite property}.
-For general properties and losses, we will also use $\Gamma$ and $L$, as above.
-\raft{Rewrote to (hopefully) make our notational conventions clearer}
+\raft{Rewrote to (hopefully) make our notational conventions clearer \jessie{Re-arranged slightly to match the re-write of loss notation, but feel free to undo if more confusing. - 16 Sept 21}}
 
 % Often we will work with two properties simultaneously, a finite property $\gamma:\simplex\toto\R$, and its embedded version $\Gamma:\simplex\toto\reals^d$.
 % In this case, we write the embedded reports as $u\in\reals^d$, reserving $r\in\R$ for the finite property.
@@ -382,7 +384,7 @@ For general properties and losses, we will also use $\Gamma$ and $L$, as above.
 
 
 To assess whether a surrogate and link function align with the original loss, we turn to the common condition of \emph{calibration}.
-Roughly, a surrogate and link are calibrated if the best possible expected loss achieved by linking to an incorrect report is strictly suboptimal, which require that the excess loss of some report is bounded by (a constant times) the excess loss of the linked report.
+Roughly, a surrogate and link are calibrated if the best possible expected loss achieved by linking to an incorrect report is strictly suboptimal, which requires that the excess loss of some report is bounded by (a constant times) the excess loss of the linked report.
 
 % \begin{definition}[Consistency]\label{def:consistency}
 %   A surrogate $L:\reals^d\to\reals^\Y_+$ and link $\psi:\reals^d\to\R$ is \emph{consistent} with a discrete loss $\ell:\R\to\reals^\Y_+$ if \raf{statement about distributions on $\X\times\Y$, limits of hypotheses, and Bayes opt hypotheses}
@@ -602,7 +604,7 @@ Lemma~\ref{lem:loss-restrict} leads to the following useful tool for finding emb
 
 
 We now shift our focus to \emph{polyhedral} (piecewise-linear and convex) surrogates.
-Our first observation is that while polyhedral surrogates cannot be finite properties, in the sense that they have infinitely many possible reports, they do elicit properties with a finite range, meaning a finite set of possible optimal sets.
+Our first observation is that while polyhedral surrogates cannot elicit finite properties, in the sense that they have infinitely many possible reports, they do elicit properties with a finite range, meaning a finite set of possible optimal sets.
 This observation lets us apply results about finite representative sets to understand the structure of polyhedral surrogates and the losses they embed.
 See \S~\ref{app:power-diagrams} for the full proof.
 
@@ -669,7 +671,7 @@ We then apply a result we will prove in \S~\ref{sec:min-rep-sets}: a minimizable
 While Theorem~\ref{thm:discrete-loss-poly-embeddable} constructs a consistent surrogate for any discrete loss, in some settings, such as structured prediction and information retrieval, the prediction dimension $d = n := |\Y|$ can be prohibitively large.%
 \footnote{One can always reduce to $d=n-1$ in Theorem~\ref{thm:discrete-loss-poly-embeddable} via a linear transformation from $\reals^n$ to $\reals^{n-1}$ which is injective on $\simplex$; redefining the surrogate appropriately, the Bayes risks will still match.}
 Recent work~\citep{ramaswamy2016convex,finocchiaro2020embedding,finocchiaro2021unifying} yield characterizations for bounding the prediction dimension $d$ for consistent convex surrogates and embeddings.
-\raft{I trimmed this discussion and footnoted the $n-1$ construction, and then folded the last paragraph above the theorem}
+%\raft{I trimmed this discussion and footnoted the $n-1$ construction, and then folded the last paragraph above the theorem \jessie{I like this much better}}
 
 
 
