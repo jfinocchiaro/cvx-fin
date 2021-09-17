@@ -446,6 +446,8 @@ Because of this redundancy, we will only require an embedding map to be defined 
   % We further say $\Sc$ is a \emph{minimum representative set} if it has the smallest cardinality among all representative sets.
 \end{definition}
 
+\citet{wang2020weston} first studies the notion of minimum representative sets under the name \emph{embedding cardinality}.
+
 %It turns out that it will be convenient, especially in applications, to allow the target $\ell:\R\to\reals^\Y_+$ to have reports which are ``redundant'' in some sense.
 %One natural sense is that $\ell$ has a representative set that is a strict subset of $\R$, i.e., $\R$ is not a minimum representative set.
 %\raft{Some discussion here about minimum representative sets and \emph{maximally informative sets} from~\citet{wang2020weston} here, though maybe best to leave it until later.  BTW, I think their latest version might use different terminology.}
@@ -902,48 +904,59 @@ On the other hand, of course, this revelation suggests a positive result as well
 % one advantage of our embedding framework is the ability to construct lower-dimensional surrogates when costs have certain geometric interpretations.
 % For example, if $v_1,\ldots,v_n \in \reals^k$ are on the unit sphere and $C_{ij} = \inprod{v_i}{v_j}$, we can simply take $L_j(u) = $\raf{aaaand Noah woke up}\raf{Just realized that this loss matrix has rank $k$ and thus is covered by AA15: just elicit the linear property $\E v_Y \in \reals^k$.}
 
-\subsection{Embedding Ordered Partitions}
-\citet*{wang2020weston} use embeddings to construct and prove the calibration of the Weston-Watkins surrogate for the \emph{Ordered Partition} loss.
-
-An ordered partition on $[n] := \{1, \ldots, n\}$ is an ordered list $S = (S_1, \ldots, S_l)$ of nonempty, pairwise disjoint sets such that $\cup_i S_i = [n]$, and assume $l \geq 2$.
-The ordered partition target loss $\ell^{\OP}$ is defined, for $i \in [n]$ and $S = (S_1, \ldots, S_l) \in \OP_n$ by
-\begin{align*}
-\ell^\OP(S,y) &= |S_1| - 1 + \sum_{i=1}^{l-1} |S_1 \cup \ldots \cup S_{i+1}| \cdot \Ind{y \not \in S_1 \cup \ldots \cup S_i}~.~
-\end{align*}
-The summation in this ordered partition loss can be interpreted as a variation of 0-1 loss where one can report sets of sets, and increases the punishment for the outcome $y$ not being in the earlier sets in the ordering; outside the summation is a punishment for having a large prediction set on the first $S_1$.
-This work presents an embedding for $\ell^\OP$ and uses this fact to show that the Weston-Watkins hinge loss~\citep{weston1999support} is in fact calibrated (and hence consistent, since the two are equivalent in Quadrant 1) with respect to $\ell^\OP$.
-
+\subsection{Embedding Ordered Partitions via Weston-Watkins Hinge}
+While the hinge loss is the most common surrogate for binary support vector machines (SVMs), original extensions to $n$-class prediction involved a one-vs-all reduction to the binary problem and generating ${n \choose 2}$ hyperplanes via hinge loss.
+Proposing a more efficient solution,~\citet*{weston1999support} give an alternate surrogate for multiclass SVM prediction, though originally its consistency with respect to 0-1 loss remained open.
+Regardless,~\citet{dogan2016unified} advocate for the Weston-Watkins SVM to be the default for multiclass prediction problems.
 The Weston-Watkins hinge loss takes predictions $u \in \reals^n$ and assigns loss
 \begin{equation}\label{eq:ww-hinge}
 L(u,y) = \sum_{i \in \Y : i \neq y} (1 - (u_y - u_i))_+~.~
 \end{equation}
 
-\citet[Definition 2.3]{wang2020weston} takes the embedding $\varphi : \OP_n \to \reals^n$ entrywise so that for all $j \in S_i$, we have $\varphi(S)_j = -(i-1)$.
+\citet*{wang2020weston} use embeddings to construct and prove the calibration of the Weston-Watkins surrogate for the \emph{Ordered Partition} loss, and in turn, show inconsistency with respect to 0-1 loss.
+An ordered partition on $[n] := \{1, \ldots, n\}$ can be defined by a nested sequence of tuples $T = \{T_1, \ldots, T_l\}$ with $\emptyset \subsetneq T_1 \subsetneq \ldots \subsetneq T_l = [n]$ for some $l \geq 2$.
+The ordered partition target loss $\ell^{\OP}$ is defined by
+%An ordered partition on $[n] := \{1, \ldots, n\}$ is an ordered list $S = (S_1, \ldots, S_l)$ of nonempty, pairwise disjoint sets such that $\cup_i S_i = [n]$, and assume $l \geq 2$.
+%The ordered partition target loss $\ell^{\OP}$ is defined, for $i \in [n]$ and $S = (S_1, \ldots, S_l) \in \OP_n$ by
+\begin{align*}
+\ell^\OP(T,y) &= |T_1| - 1 + \sum_{i=1}^{l-1} |T_{i+1}| \cdot \Ind{y \not \in T_i}~.~
+\end{align*}
+The summation in this ordered partition loss can be interpreted as a variation of 0-1 loss where one can report sets of sets, and increases the punishment for the outcome $y$ not being in the earlier sets in the ordering; outside the summation is a punishment for having a large prediction set on the first $S_1$.
+This work presents an embedding for $\ell^\OP$ and uses this fact to show that the Weston-Watkins hinge loss~\citep{weston1999support} is in fact calibrated (and hence consistent, since the two are equivalent in Quadrant 1) with respect to $\ell^\OP$.
+\citet[Definition 2.3]{wang2020weston} takes the embedding $\varphi : \OP_n \to \reals^n$ entrywise so that for all $j \in T_i \setminus T_{i-1}$, we have $\varphi(T)_j = -(i-1)$.
 
 \begin{figure}[H]
+	\begin{minipage}{0.5\linewidth}
 	\centering
-	\includegraphics[width=0.5\linewidth]{tikz/ordered-partition}
+	\includegraphics[width=0.9\linewidth]{tikz/ordered-partition}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.45\linewidth}
 	\caption{Level sets of $\psi \circ \prop{WW}$, the property elicited by Weston Watkins hinge with embedding given by~\citet[Definition 2.3]{wang2020weston}.  
 		$\prop{WW}$ is shown with faint dotted lines.}
 	\label{fig:ordered-partition}
+	\end{minipage}
 \end{figure}
 
 
 \subsection{Inconsistency of top-$k$ losses}
-In settings of search results and object recognition, one might plausibly be interested in top-$k$ classification: a generalization of $0-1$ loss where one can predict a set $S$ of size $k$, receiving loss $0$ if the true label $y \in S$, and $1$ otherwise.
-While this problem is well-studied, \citep{lapin2015top, lapin2016loss, lapin2018analysis,yang2018consistency,berrada2018smooth,rastegari2011scalable} a class of surrogates for top-$k$, most of which are not simultaneously convex and consistent.
-The only convex surrogate in the literature that is consistent is the softmax surrogate of~\citet{lapin2016loss} which essentially learns the entire distribution.
-However, this seems to encapsulate more information than necessary and therefore presumably requires more data to learn the Bayes optimal hypothesis.
-\jessie{Add more here}
+In settings of search results and object recognition, one might plausibly be interested in top-$k$ classification: a generalization of 0-1 loss where one can predict a set $S$ of size $k$, receiving loss $0$ if the true label $y \in S$, and $1$ otherwise.
+While this problem is well-studied, \citep{lapin2015top, lapin2016loss, lapin2018analysis,yang2018consistency,berrada2018smooth,rastegari2011scalable} most surrogates for top-$k$ are not simultaneously convex and consistent.
+Those that are essentially elicit the distribution $p \in \simplex$, and take the link to be the top $k$ elements of $p$~\citep{lapin2016loss}.
+%The only convex surrogate in the literature that is consistent is the softmax surrogate of~\citet{lapin2016loss} which essentially learns the entire distribution.
+However, this seems to encapsulate more information than necessary and therefore presumably requires more data to learn the Bayes optimal hypothesis than learning the less granular top-$k$ property.
 
-Other hinge-like surrogates are shown to be non-consistent by~\citet{lapin2016loss} and~\citet{yang2018consistency}, including $\psi_2$ from~\citet[Table 1]{yang2018consistency}, which elicits essentially the same property $\prop{WW}$ shown in Figure~\ref{fig:ordered-partition} before the link is applied for certain values of $n$ and $k$.
+Other hinge-like surrogates are shown to be non-consistent by~\citet{lapin2016loss} and~\citet{yang2018consistency}.
+For example, $\psi_2$ from~\citet[Table 1]{yang2018consistency} elicits essentially the same property $\prop{WW}$ shown in Figure~\ref{fig:ordered-partition} before the link is applied for certain values of $n$ and $k$.
+\citet{TOPKPAPER} applies the embedding framework to these surrogates to understand the target problems for which they are consistent.
 
 \begin{align}\label{eq:topk-embedding}
 L(u,y) &= \max \left(u_{[1]}, \max_{m \in k+1, \ldots, m} 1 - \frac k m + \frac 1 m \sum_{i=1}^m u_{[i]} \right)- u_y
 \end{align}
 
-\citet{TOPKPAPER} presents an embedding (Eq.~\eqref{eq:topk-embedding}) for top-$k$ loss that looks unlike the commonly studied surrogates in the literature.
-Moreover, the most common link $\psi^{\tt argmax}(u) := \argmax_{S \subseteq \Y : |S| = k} \sum_{i \in S} u_i$ is an $\epsilon$-thickening of the embedding with $\epsilon = $ and the norm $\|\cdot\|_x$.\jessie{TODO... if this is true.}
+Moreover, \citet{TOPKPAPER} presents an embedding (Eq.~\eqref{eq:topk-embedding}) for top-$k$ loss that looks unlike the commonly studied surrogates in the literature.
+Moreover, the most common link $\psi^{\tt argmax}(u) := \argmax_{S \subseteq \Y : |S| = k} \sum_{i \in S} u_i$ is calibrated for the surrogate in Equation~\eqref{eq:topk-embedding}.\jessie{TODO... confirm this is true.}
+Their proof uses the $\epsilon$-thickened link construction from \S~\ref{sec:calibration} to understand which choices of linked values are feasible and align these choices with the argmax link.
 
 %Commented out 07 Sept 21
 %In certain classification problems when ground truth may be ambiguous, such as object identification, it is common to predict a set of possible labels.
@@ -1137,8 +1150,15 @@ Moreover, the most common link $\psi^{\tt argmax}(u) := \argmax_{S \subseteq \Y 
 \section{Additional Structure of Embeddings}
 \label{sec:min-rep-sets}
 
-\raf{Brief overview here}
-\raf{Add somewhere: initially explored by~\citet{wang2020weston} under the name \emph{embedding cardinality}}
+\jessie{Attempted brief overview}
+In \S~\ref{sec:poly-loss-embed}, we discussed the connection between embeddings and polyhedral losses, and a natural next question is to understand if polyhedral losses are necessary to embed a discrete loss --- the answer is negative.
+Here, we further study the structure of embeddings, showing instead that discrete losses must be embedded by a function with polyhedral Bayes risk, which have finite minimum representative sets.
+For intuition, we show in \S~\ref{subsec:match-BR} that the embedding condition simplifies to matching Bayes risks (Proposition~\ref{prop:embed-bayes-risks}).
+Since surrogates with polyhedral Bayes risk have finite minimum representative sets, we introduce and study the notion of a trimmed loss, and connect this to tight embeddings and non-redundancy from property elicitation.
+ 
+
+\raf{Add somewhere: initially explored by~\citet{wang2020weston} under the name \emph{embedding cardinality} }
+\jessie{Feels like we should mention that earlier, when minimum representative set is introduced? -- mentioned it right under the definition of representative set}
 
 \subsection{Structure of polyhedral Bayes risks}
 
@@ -1689,7 +1709,7 @@ We extend Theorem~\ref{thm:aurenhammer} to a weighted sum of convex functions, s
 	The power diagram induced by $\sum_{i=1}^m p_i f_i$ is the same for all $p \in \inter(\simplex)$.
 \end{lemma}
 \begin{proof}
-	For any convex function $g$ with epigraph $P$, the proof of~\citet[Theorem 4]{aurenhammer1987power} shows that the power diagram induced by $g$ is determined by the facets of $P$.
+	For any polyhedral convex function $g$ with epigraph $P$, the proof of~\citet[Theorem 4]{aurenhammer1987power} shows that the power diagram induced by $g$ is determined by the facets of $P$.
 	Let $F$ be a facet of $P$, and $F'$ its projection down to $\reals^d$.
 	It follows that $g|_{F'}$ is affine, and thus $g$ is differentiable on $\inter(F')$ with constant derivative $d\in\reals^d$.
 	Conversely, for any subgradient $d'$ of $g$, the set of points $\{x\in\reals^d : d'\in\partial g(x)\}$ is the projection of a face of $P$; we conclude that $F = \{(x,g(x))\in\reals^{d+1} : d\in\partial g(x)\}$ and $F' = \{x\in\reals^d : d\in\partial g(x)\}$.
