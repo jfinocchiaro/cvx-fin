@@ -686,7 +686,7 @@ But it is not clear how to extend this to yield a full link function $\psi: \rea
 In this section, we prove Theorem~\ref{thm:link-main}, restated below, which gives a construction to generate calibrated links for \emph{any} polyhedral loss.
 \S~\ref{app:calibration} contains the full proof; this section provides a sketch of the main construction and result.
 
-\linkinformal
+\linkinformal*
 % \begin{theorem}\label{thm:eps-thick-calibrated}
 %   Let $L$ be polyhedral and $\ell$ the discrete loss it embeds from Theorem~\ref{thm:poly-embeds-discrete}.
 %   Then there exists a calibrated link function $\psi$ from $L$ to $\ell$.
@@ -773,7 +773,7 @@ More generally, however, our results suggest that researchers could explore surr
 In particular, one can instead search for surrogates that embed the correct discrete loss, and use Theorem~\ref{thm:link-main} to construct the link.
 
 
-\raft{FYI Jessie, this statement is not quite true: ``In fact, we will see that most of these examples do not yield calibrated surrogates, although proving that there is \emph{no} calibrated link for a given surrogate is quite difficult.'' The reason is we usually can show it using property elicitation alone, i.e., a cell of the simplex that spans (the relints of) two cells of the target property.}
+%\raft{FYI Jessie, this statement is not quite true: ``In fact, we will see that most of these examples do not yield calibrated surrogates, although proving that there is \emph{no} calibrated link for a given surrogate is quite difficult.'' The reason is we usually can show it using property elicitation alone, i.e., a cell of the simplex that spans (the relints of) two cells of the target property. \jessie{Good catch.  Thanks for that!}}
 
 
 
@@ -795,38 +795,43 @@ The report $\bot$ corresponds to ``abstaining'' if no label is sufficiently like
 \citeauthor{ramaswamy2018consistent} provide a polyhedral surrogate for $\ellabs{\alpha}$, which we present here for $\alpha=1/2$.
 Letting $d = \ceil{\log_2(n)}$, their surrogate is $L_{1/2} : \reals^d \to \reals^\Y_+$ given by
 \begin{equation}\label{eq:abstain-surrogate}
-L_{1/2}(u)_y = \left(\max\nolimits_{j \in [d]}B(y)_j u_j + 1\right)_+~,
+L_{1/2}(u)_y = \left(\max\nolimits_{j \in [d]}\varphi(y)_j u_j + 1\right)_+~,
 \end{equation}
-where $B:[n]\to\{-1,1\}^d$ is a arbitrary injection; let us assume $n = 2^d$ so that we have a bijection\raft{Do we actually need the bijection?  Might be simpler to leave this statement out otherwise}.
+where embeds outcomes to corners of the $\pm 1$ hypercube, and the abstain report to the origin. %; let us assume $n = 2^d$ so that we have a bijection
+\raft{Do we actually need the bijection?  Might be simpler to leave this statement out otherwise}.
 Consistency is proven for the following link function,
 \begin{equation}\label{eq:abstain-link}
   \psi(u) = \begin{cases}
 	\bot & \min_{i \in [d]} |u_i| \leq 1/2\\
-	B^{-1}(\sgn(-u)) &\text{otherwise}
+	\varphi^{-1}(\sgn(-u)) &\text{otherwise}
   \end{cases}~.
 \end{equation}
 
-In light of our framework, we can see that $L_{1/2}$ is an excellent example of an embedding, where $\varphi(y) = B(y)$ and $\varphi(\bot) = 0 \in \reals^d$.
-Moreover, as we illustrate in Figure~\ref{fig:abstain-links}(L), the link function $\psi$ proposed by \citeauthor{ramaswamy2018consistent} can be recovered from Theorem~\ref{thm:link-main} by choosing the norm $\|\cdot\|_\infty$ and setting $\epsilon=1/2$\raft{Double-check theorem ref; was eps-thick-calibrated.  Also below.}.
+%In light of our framework, we can see that $L_{1/2}$ is an excellent example of an embedding, where $\varphi(y) = B(y)$ and $\varphi(\bot) = 0 \in \reals^d$.
+As we illustrate in Figure~\ref{fig:abstain-links}(L), the link function $\psi$ proposed by \citeauthor{ramaswamy2018consistent} can be recovered from Theorem~\ref{thm:link-main} by choosing the norm $\|\cdot\|_\infty$ and setting $\epsilon=1/2$. %\raft{Double-check theorem ref; was eps-thick-calibrated.  Also below.}.
 Hence, our framework would have simplified the process of finding such a link, and the corresponding proof of consistency.
 To illustrate this point further, we give an alternate link $\psi_1$ corresponding to $\|\cdot\|_1$ and $\epsilon=1$, shown in Figure~\ref{fig:abstain-links}(R):
 \begin{equation}\label{eq:abstain-link-1}
   \psi_1(u) = \begin{cases}
 	\bot & \|u\|_1 \leq 1\\
-	B^{-1}(\sgn(-u)) &\text{otherwise}
+	\varphi^{-1}(\sgn(-u)) &\text{otherwise}
   \end{cases}~.
 \end{equation}
 Theorem~\ref{thm:link-main} immediately gives calibration of $(L_{1/2},\psi_1)$ with respect to $\ellabs{1/2}$.
 Aside from its simplicity, one possible advantage of $\psi_1$ is that it appears to yield the same constant in generalization bounds as $\psi$, yet assigns $\bot$ to much less of the surrogate space $\reals^d$\raft{Let's check this statement with Bo; I thought when we actually worked it out that the bound seemed to be worse.  In that case, we could simply say ``Aside from its simplicity, one possible advantage of $\psi_1$ is that it assigns $\bot$ to much less of the surrogate space $\reals^d$.''}.
 It would be interesting to compare the two links in practice.
 
+\raft{Let's clear up what we mean by the elements of this tuple, or cut it entirely.  What is $W$?}
+\jessiet{Clarified, but also think it's fine to remove the paragraph}
 The embedding framework also sheds light on a variant of the BEP surrogate given by~\citet{ramaswamy2015hierarchical} for a hierarchical classification problem.
-Given a tree $H = ([n], E,W)$ over finite class labels\raft{Let's clear up what we mean by the elements of this tuple, or cut it entirely.  What is $W$?}, they consider the discrete loss 
+Given a tree $H = ([n], E,W)$ defined by a finite class of labels $[n]$, edges $E$, and weights $W$, they consider the discrete loss 
 \begin{equation}\label{eq:tree-loss-discrete}
 	\ell^H(r,y) = \text{shortest path length in $H$ between $r$ and $y$}~.
 \end{equation}
 The authors introduce a polyhedral surrogate based on the BEP surrogate, and show it is consistent with respect to $\ell^H$.
-We can also verify that their surrogate is an embedding and recover their result through Theorem~\ref{thm:poly-ie-implies-consistent}\raft{Can we say more explicitly, as we did for BEP, how exactly our framework could have helped, and/or sheds light on it now?}.
+We can also verify that their surrogate is an embedding and recover their result through Theorem~\ref{thm:poly-ie-implies-consistent}. 
+\raft{Can we say more explicitly, as we did for BEP, how exactly our framework could have helped, and/or sheds light on it now?}
+\jessiet{They sequentially apply the BEP surrogate on each level of the tree (start at the root; if you predict on a child, move to that child.  If you abstain, stay at the current node), It would be a mess to apply and probably to describe, which moves me in even stronger favor of deleting this paragraph.}
 
 
 \begin{figure}
@@ -854,8 +859,8 @@ In the case of $k$ binary predictions, these settings are typically formalized b
 One then defines a joint loss function, which is often merely a function of the set of mispredictions, meaning we may write $\ell^f(r)_y = f(\{i \in [k] : r_i \neq y_i\})$ for some set function $f:2^{[k]}\to\reals$.
 For example, Hamming loss is given by $f(S) = |S|$.
 In an effort to provide a general convex surrogate for these settings when $f$ is a submodular function, Yu and Blaschko~\cite{yu2018lovasz} introduce a surrogate $L^f$ which they dub the \emph{Lov\'asz hinge}, as it leverages the well-known convex Lov\'asz extension of submodular functions.
-While the authors provide theoretical justification and experiments, consistency of the Lov\'asz hinge is left open, which we resolve.
-As even the formal definition of the Lov\'asz hinge is quite involved, we defer the complete analysis to \S~\ref{app:lovasz} \jessie{REF} and here state the main results.
+While the authors provide theoretical justification and experiments, consistency of the Lov\'asz hinge is left open, which we resolve. \jessiet{Want to cite the preprint instead of saying we resolve this?}
+%As even the formal definition of the Lov\'asz hinge is quite involved, we defer the complete analysis to \S~\ref{app:lovasz} \jessie{REF} and here state the main results.
 
 As a warm-up, let us introduce the form of the Lov\'asz hinge $L^f$ for the case $k=2$, as one can build intuition from this case.
 For brevity, we write $f_\emptyset := f(\emptyset)$, $f_{1,2} := f(\{1,2\})$, etc.
@@ -883,16 +888,16 @@ For example, if we take $\sgn(0) = 1$, then under $p((1,1)) = p((1,-1)) = p((-1,
 In fact, this example is typical: % using our embedding framework, and characterizing when $0\in\reals^2$ is an embedded point,
 one can show that $L^f$ is consistent if and only if $f_{1,2} = f_1 + f_2$.
 Moreover, in this linear case, which corresponds to $f$ being \emph{modular}, the Lov\'asz hinge reduces to weighted Hamming loss, which is trivially consistent from the consistency of hinge loss for 0-1 loss.
-In \S~\ref{app:lovasz}, we generalize this observation for all $k$.
+In \S~\ref{app:lovasz} \jessiet{Change to citation?}, we generalize this observation for all $k$.
 \begin{theorem}\label{thm:lovasz-consistent-main}
 	Let $f$ be submodular, normalized, and increasing.
 	Then $(L^f,\psi)$ is consistent if and only if $f$ is modular.
 \end{theorem}
 In other words, even for $k>2$, the only consistent Lov\'asz hinge is weighted Hamming loss.
-This result casts doubt on the practical effectiveness of the Lov\'asz hinge as a surrogate for $\ell^f$.
+This result casts doubt on the practical effectiveness of the Lov\'asz hinge as a surrogate for $\ell^f$.\jessie{We might have a reviewer fight us on that unless we add something about ``without low-noise assumptions''}
 
 In light of this negative result, together with the fact that every polyhedral surrogate embeds some target loss (Theorem~\ref{thm:poly-embeds-discrete}), we now turn to the question: for what target problem \emph{is} the Lov\'asz hinge consistent?
-We show in \S~\ref{app:lovasz} that the answer is a variant of abstain loss where one can abstain on a set of labels $B\subseteq[k]$.
+We show in \S~\ref{app:lovasz}\jessie{CITE} that the answer is a variant of abstain loss where one can abstain on a set of labels $B\subseteq[k]$.
 Recall that the symmetric difference is defined by $S\triangle T = (S\setminus T) \cup (T\setminus S)$.
 \begin{theorem}\label{thm:lovasz-embed-main}
 	Let $\hat\ell^f:\hat\R\times\Y\to\reals_+$, where $\hat\R = \{(A,B) \in 2^{[k]} \times 2^{[k]}: A\cap B=\emptyset\}$, be given by
@@ -905,7 +910,7 @@ Recall that the symmetric difference is defined by $S\triangle T = (S\setminus T
 
 While Theorem~\ref{thm:lovasz-consistent-main} shows that the Lov\'asz hinge is inconsistent, Theorem~\ref{thm:lovasz-embed-main} illuminates why: when there is sufficient uncertainty around some subset of labels, the loss encourages the learning algorithm to ``hedge'' and set prediction coordinates for that set equal to 0.
 This observation reveals a potential peril of using the Lov\'asz hinge in noisy label settings.
-On the other hand, of course, this revelation suggests a positive result as well: under an appropriate link from our construction in Theorem~\ref{thm:eps-thick-calibrated}\raft{Which theorem number to ref?}, the Lov\'asz hinge could be fruitfully applied to set-valued prediction problems when one allows the learning algorithm to abstain on a subset of labels.
+On the other hand, of course, this revelation suggests a positive result as well: under an appropriate link from our construction in Theorem~\ref{thm:link-main}, the Lov\'asz hinge could be fruitfully applied to set-valued prediction problems when one allows the learning algorithm to abstain on a subset of labels.
 
 % \subsection{New surrogates for cost-sensitive classification}
 
@@ -920,11 +925,11 @@ On the other hand, of course, this revelation suggests a positive result as well
 \subsection{Embedding Ordered Partitions via Weston-Watkins Hinge}
 \label{sec:winge}
 As hinge loss is one of the most common surrogates for binary support vector machines (SVMs), original extensions to the multiclass setting involved a one-vs-all reduction to the binary problem via hinge loss, thus generating ${n \choose 2}$ hyperplanes for $n$ labels.
-Proposing a more efficient solution,~\citet*{weston1999support} give an alternate surrogate for multiclass SVM prediction, defined as follows for predictions $u \in \reals^n$,
+Proposing a more efficient solution,~\citet{weston1999support} give an alternate surrogate for multiclass SVM prediction, defined as follows for predictions $u \in \reals^n$,
 \begin{equation}\label{eq:ww-hinge}
 L(u,y) = \sum_{i \in \Y : i \neq y} (1 - (u_y - u_i))_+~.~
 \end{equation}
-While it was later shown to be inconsistent\raf{Jessie: add cite?}, \citet{dogan2016unified} nonetheless advocate for the Weston-Watkins SVM to be the default for multiclass prediction problems.
+While it was later shown to be inconsistent~\citep{tewari2007consistency,liu2007fisher}, \citet{dogan2016unified} nonetheless advocate for the Weston-Watkins SVM to be the default for multiclass prediction problems.
 
 \citet*{wang2020weston} use embeddings to construct and prove the calibration of the Weston-Watkins surrogate for the \emph{Ordered Partition} loss, and in turn, show inconsistency with respect to 0-1 loss.
 An ordered partition on $[n] := \{1, \ldots, n\}$ can be defined by a nested sequence of tuples $T = \{T_1, \ldots, T_l\}$ with $\emptyset \subsetneq T_1 \subsetneq \ldots \subsetneq T_l = [n]$ for some $l \geq 2$.
@@ -934,8 +939,8 @@ The ordered partition target loss $\ell^{\OP}$ is defined by
 \begin{align*}
 \ell^\OP(T,y) &= |T_1| - 1 + \sum_{i=1}^{l-1} |T_{i+1}| \cdot \Ind{y \not \in T_i}~.~
 \end{align*}
-The summation in this ordered partition loss can be interpreted as a variation of 0-1 loss where one can report sets of sets, and increases the punishment for the outcome $y$ not being in the earlier sets in the ordering; outside the summation is a punishment for having a large prediction set on the first $S_1$.
-This work presents an embedding for $\ell^\OP$ and uses this fact to show that the Weston-Watkins hinge loss~\citep{weston1999support} is in fact calibrated (and hence consistent, since the two are equivalent in Quadrant 1) with respect to $\ell^\OP$.
+The summation in this ordered partition loss can be interpreted as a variation of 0-1 loss where one can report sets of sets, and increases the punishment for the outcome $y$ not being in the earlier sets in the ordering; outside the summation is a punishment for having a large prediction set on the first $T_1$.
+This work presents an embedding for $\ell^\OP$ and uses this fact to show that the Weston-Watkins hinge loss~\citep{weston1999support} is in fact calibrated (and hence consistent) with respect to $\ell^\OP$.
 \citet[Definition 2.3]{wang2020weston} takes the embedding $\varphi : \OP_n \to \reals^n$ entrywise so that for all $j \in T_i \setminus T_{i-1}$, we have $\varphi(T)_j = -(i-1)$.
 
 \begin{figure}[H]
@@ -945,8 +950,7 @@ This work presents an embedding for $\ell^\OP$ and uses this fact to show that t
 	\end{minipage}
 	\hfill
 	\begin{minipage}{0.45\linewidth}
-	\caption{Level sets of $\psi \circ \prop{WW}$, the property elicited by Weston Watkins hinge with embedding given by~\citet[Definition 2.3]{wang2020weston}.  
-		$\prop{WW}$ is shown with faint dotted lines.}
+	\caption{Level sets of $\psi \circ \prop{WW}$, the property elicited by Weston-Watkins hinge with embedding given by~\citet[Definition 2.3]{wang2020weston}.  $\prop{WW}$ is shown with dotted lines.}
 	\label{fig:ordered-partition}
 	\end{minipage}
 \end{figure}
@@ -1765,59 +1769,60 @@ We now include the full proof of Lemma~\ref{lem:polyhedral-range-gamma}.
 \end{proof}
 
 
-\section{Embedding properties}\label{app:embed-props}
-\jessie{Do we use this anymore?}
-
-While Definition~\ref{def:loss-embed} gives the notion of one \emph{loss} embedding another, we now define the notion of one \emph{property} embedding another.
-\begin{definition}\label{def:prop-embed}
-	A property $\Gamma : \simplex \toto \reals^d$ embeds a property $\gamma:\simplex \toto \R$ if there exists some injective embedding $\varphi:\R \to \reals^d$ such that for all $p \in \simplex$ and $r \in \R$, we have $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p)$.
-\end{definition}
-
-By condition (ii.) of Definition~\ref{def:loss-embed}, we then have $L$ embedding $\ell$ implies $\prop{L}$ embeds $\prop{\ell}$.
-
-This also prompts us to think about redundancy in properties.
-\begin{definition}[Non-redundant property]\label{def:nonredundant-prop}
-	A property $\Gamma:\simplex \toto \R$ is \emph{redundant} if there are reports $r, r' \in \R$ such that $\Gamma_r \subseteq \Gamma_{r'}$, and \emph{non-redundant} otherwise.
-\end{definition}
-
-
-%It is often convenient to work directly with properties and set aside the losses which elicit them.
-%To this end, we say a property to embeds another if eq.~\eqref{eq:embed-loss} holds.
-%We begin with the notion of redundancy.
-%\begin{definition}[Finite property, non-redundant]
-%  A property $\gamma:\simplex\toto\R$ is \emph{redundant} if for some $r,r'\in\R$ with $r \neq r'$, we have $\gamma_r \subseteq \gamma_{r'}$, and \emph{non-redundant} otherwise.
-%  $\gamma$ is \emph{finite} if it is non-redundant and $\R$ is a finite set.
+%\section{Embedding properties}\label{app:embed-props}
+%\jessie{Do we use this anymore?}
+%
+%While Definition~\ref{def:loss-embed} gives the notion of one \emph{loss} embedding another, we now define the notion of one \emph{property} embedding another.
+%\begin{definition}\label{def:prop-embed}
+%	A property $\Gamma : \simplex \toto \reals^d$ embeds a property $\gamma:\simplex \toto \R$ if there exists some injective embedding $\varphi:\R \to \reals^d$ such that for all $p \in \simplex$ and $r \in \R$, we have $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p)$.
 %\end{definition}
-
-%With the terminology of properties in hand, we can restate our definition of embedding.
-%First, we formalize the notion of embedding properties.
-%\begin{definition}
-%  A property $\Gamma : \simplex \toto \reals^d$ \emph{embeds} a property $\gamma : \simplex \toto \R$ if there exists some injective embdedding $\varphi:\R\to\reals^d$ such that for all $p\in\simplex,r\in\R$ we have $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p)$.
-%  Similarly, we say a loss $L:\reals^d\to\reals^\Y$ embeds $\gamma$ if $\prop{L}$ embeds $\gamma$.
+%
+%By condition (ii.) of Definition~\ref{def:loss-embed}, we then have $L$ embedding $\ell$ implies $\prop{L}$ embeds $\prop{\ell}$.
+%
+%This also prompts us to think about redundancy in properties.
+%\begin{definition}[Non-redundant property]\label{def:nonredundant-prop}
+%	A property $\Gamma:\simplex \toto \R$ is \emph{redundant} if there are reports $r, r' \in \R$ such that $\Gamma_r \subseteq \Gamma_{r'}$, and \emph{non-redundant} otherwise.
 %\end{definition}
-%We can now see that a surrogate $L:\reals^d\to\reals^\Y$ embeds $\ell:\R\to\reals^\Y$ if and only if $\prop{L}$ embeds $\prop{\ell}$ via $\varphi$ and for all $r\in\R$ we have $L(\varphi(r)) = \ell(r)$.
+%
+%
+%%It is often convenient to work directly with properties and set aside the losses which elicit them.
+%%To this end, we say a property to embeds another if eq.~\eqref{eq:embed-loss} holds.
+%%We begin with the notion of redundancy.
+%%\begin{definition}[Finite property, non-redundant]
+%%  A property $\gamma:\simplex\toto\R$ is \emph{redundant} if for some $r,r'\in\R$ with $r \neq r'$, we have $\gamma_r \subseteq \gamma_{r'}$, and \emph{non-redundant} otherwise.
+%%  $\gamma$ is \emph{finite} if it is non-redundant and $\R$ is a finite set.
+%%\end{definition}
+%
+%%With the terminology of properties in hand, we can restate our definition of embedding.
+%%First, we formalize the notion of embedding properties.
+%%\begin{definition}
+%%  A property $\Gamma : \simplex \toto \reals^d$ \emph{embeds} a property $\gamma : \simplex \toto \R$ if there exists some injective embdedding $\varphi:\R\to\reals^d$ such that for all $p\in\simplex,r\in\R$ we have $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p)$.
+%%  Similarly, we say a loss $L:\reals^d\to\reals^\Y$ embeds $\gamma$ if $\prop{L}$ embeds $\gamma$.
+%%\end{definition}
+%%We can now see that a surrogate $L:\reals^d\to\reals^\Y$ embeds $\ell:\R\to\reals^\Y$ if and only if $\prop{L}$ embeds $\prop{\ell}$ via $\varphi$ and for all $r\in\R$ we have $L(\varphi(r)) = \ell(r)$.
+%
+%When working with convex losses which are not strictly convex, one quickly encounters redundant properties: if $\inprod{p}{L(\cdot)}$ is minimized by a point where $p\cdot L$ is flat, then there will be an uncountable set of reports which also minimize the loss.
+%As results in property elicitation typically assume non-redundant properties (e.g.~\cite{frongillo2014general,frongillo2015elicitation}), it is useful to consider a transformation which removes redundant level sets.
+%We capture this transformation as the trim operator presented below.
+%
+%\begin{definition}\label{def:trim-prop-nonred}
+%  Given an elicitable property $\Gamma:\simplex \toto\R$, we define $\trimred(\Gamma) = \{\Gamma_u \mid \neg \exists u' \neq u$ s.t. $\Gamma_u \subsetneq \Gamma_{'u}\}$.
+%  %$\trimcover(\Gamma) = \{\Gamma_u : u \in \U \}$ as the set of maximal level sets of $\Gamma$ for any minimum representative set $\U \subseteq \R$.
+%\end{definition}
+%
+%\begin{definition}\label{def:trim-prop-cover}
+%	Given an elicitable property $\Gamma:\simplex \toto\R$, we define $\trimcover(\Gamma) = \{\Gamma_u : u \in \U \}$ as the set of maximal level sets of $\Gamma$ for any minimum representative set $\U \subseteq \R$.
+%\end{definition}
+%
+%The following corollary follows from Corollary~\ref{cor:trim-loss-condition}.
+%\begin{corollary}
+%	Let $\Gamma$ be an elicitable property with a finite minimum representative set.
+%	$\trimcover(\Gamma) = \trimred(\Gamma)$.
+%\end{corollary}
+%
+%\btw{RF: Note for later: should be able to show that the union of trim is the simplex.\jessie{This is part of the proposition statement 2 now.}}
+%Take note that the unlabeled property $\trim(\Gamma)$ is non-redundant, meaning that for any $\theta \in \trim(\Gamma)$, there is no level set $\theta' \in \trim(\Gamma)$ such that $\theta \subset \theta'$.
 
-When working with convex losses which are not strictly convex, one quickly encounters redundant properties: if $\inprod{p}{L(\cdot)}$ is minimized by a point where $p\cdot L$ is flat, then there will be an uncountable set of reports which also minimize the loss.
-As results in property elicitation typically assume non-redundant properties (e.g.~\cite{frongillo2014general,frongillo2015elicitation}), it is useful to consider a transformation which removes redundant level sets.
-We capture this transformation as the trim operator presented below.
-
-\begin{definition}\label{def:trim-prop-nonred}
-  Given an elicitable property $\Gamma:\simplex \toto\R$, we define $\trimred(\Gamma) = \{\Gamma_u \mid \neg \exists u' \neq u$ s.t. $\Gamma_u \subsetneq \Gamma_{'u}\}$.
-  %$\trimcover(\Gamma) = \{\Gamma_u : u \in \U \}$ as the set of maximal level sets of $\Gamma$ for any minimum representative set $\U \subseteq \R$.
-\end{definition}
-
-\begin{definition}\label{def:trim-prop-cover}
-	Given an elicitable property $\Gamma:\simplex \toto\R$, we define $\trimcover(\Gamma) = \{\Gamma_u : u \in \U \}$ as the set of maximal level sets of $\Gamma$ for any minimum representative set $\U \subseteq \R$.
-\end{definition}
-
-The following corollary follows from Corollary~\ref{cor:trim-loss-condition}.
-\begin{corollary}
-	Let $\Gamma$ be an elicitable property with a finite minimum representative set.
-	$\trimcover(\Gamma) = \trimred(\Gamma)$.
-\end{corollary}
-
-\btw{RF: Note for later: should be able to show that the union of trim is the simplex.\jessie{This is part of the proposition statement 2 now.}}
-Take note that the unlabeled property $\trim(\Gamma)$ is non-redundant, meaning that for any $\theta \in \trim(\Gamma)$, there is no level set $\theta' \in \trim(\Gamma)$ such that $\theta \subset \theta'$.
 
 \iffalse
 \hrule
