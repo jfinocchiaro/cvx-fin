@@ -85,6 +85,7 @@
 \newcommand{\OP}{\mathcal{OP}}
 \newcommand{\R}{\mathcal{R}}
 \newcommand{\Sc}{\mathcal{S}}
+\newcommand{\T}{\mathcal{T}}
 \newcommand{\U}{\mathcal{U}}
 \newcommand{\V}{\mathcal{V}}
 \newcommand{\X}{\mathcal{X}}
@@ -927,21 +928,30 @@ On the other hand, of course, this revelation suggests a positive result as well
 As hinge loss is one of the most common surrogates for binary support vector machines (SVMs), original extensions to the multiclass setting involved a one-vs-all reduction to the binary problem via hinge loss, thus generating ${n \choose 2}$ hyperplanes for $n$ labels.
 Proposing a more efficient solution,~\citet{weston1999support} give an alternate surrogate for multiclass SVM prediction, defined as follows for predictions $u \in \reals^n$,
 \begin{equation}\label{eq:ww-hinge}
-L(u,y) = \sum_{i \in \Y : i \neq y} (1 - (u_y - u_i))_+~.~
+L_{WW}(u,y) = \sum_{i \in \Y : i \neq y} (1 - (u_y - u_i))_+~.~
 \end{equation}
 While it was later shown to be inconsistent~\citep{tewari2007consistency,liu2007fisher}, \citet{dogan2016unified} nonetheless advocate for the Weston-Watkins SVM to be the default for multiclass prediction problems.
 
-\citet*{wang2020weston} use embeddings to construct and prove the calibration of the Weston-Watkins surrogate for the \emph{Ordered Partition} loss, and in turn, show inconsistency with respect to 0-1 loss.
-An ordered partition on $[n] := \{1, \ldots, n\}$ can be defined by a nested sequence of tuples $T = \{T_1, \ldots, T_l\}$ with $\emptyset \subsetneq T_1 \subsetneq \ldots \subsetneq T_l = [n]$ for some $l \geq 2$.
-The ordered partition target loss $\ell^{\OP}$ is defined by
-%An ordered partition on $[n] := \{1, \ldots, n\}$ is an ordered list $S = (S_1, \ldots, S_l)$ of nonempty, pairwise disjoint sets such that $\cup_i S_i = [n]$, and assume $l \geq 2$.
-%The ordered partition target loss $\ell^{\OP}$ is defined, for $i \in [n]$ and $S = (S_1, \ldots, S_l) \in \OP_n$ by
+\citet*{wang2020weston} use our embedding framework to construct and prove the calibration of the Weston-Watkins surrogate for the \emph{ordered partition} loss, and in turn, show inconsistency with respect to 0-1 loss\raft{But it was already known, right?  If so, it's good to use phrases like ``recover the result that''}.
+%An ordered partition on $[n] := \{1, \ldots, n\}$ can be defined by a nested sequence of tuples
+%Let $T = \{T_1, \ldots, T_k\}$
+The report space for this discrete loss can be defined in terms of nested subsets of $[n] := \{1, \ldots, n\}$, as follows.%
+\footnote{To recover the partition of~\citet{wang2020weston}, one can define $S_i = T_i \setminus T_{i-1}$.}
 \begin{align*}
-\ell^\OP(T,y) &= |T_1| - 1 + \sum_{i=1}^{l-1} |T_{i+1}| \cdot \Ind{y \not \in T_i}~.~
+\T = \{ (T_0,\ldots,T_k) \mid k \geq 2, \emptyset = T_0 \subsetneq T_1 \subsetneq \ldots \subsetneq T_k = [n]\}~.
 \end{align*}
-The summation in this ordered partition loss can be interpreted as a variation of 0-1 loss where one can report sets of sets, and increases the punishment for the outcome $y$ not being in the earlier sets in the ordering; outside the summation is a punishment for having a large prediction set on the first $T_1$.
-This work presents an embedding for $\ell^\OP$ and uses this fact to show that the Weston-Watkins hinge loss~\citep{weston1999support} is in fact calibrated (and hence consistent) with respect to $\ell^\OP$.
-\citet[Definition 2.3]{wang2020weston} takes the embedding $\varphi : \OP_n \to \reals^n$ entrywise so that for all $j \in T_i \setminus T_{i-1}$, we have $\varphi(T)_j = -(i-1)$.
+The ordered partition target loss $\ell^{\OP} : \T \to \reals^\Y_+$ is then defined by
+\begin{align*}
+\ell^\OP(T,y) &= \sum_{i=1}^{k} |T_{i}| \cdot \Ind{y \not \in T_{i-1}}-1~.~
+\end{align*}
+\raf{Jessie, could you check that the newer form is correct?  I messed with a couple things, and decided not to clutter the tex with the old stuff -- maybe check the diff if it would help, or go straight to the original version.}
+
+This loss can be interpreted as a variation of 0-1 loss where one reports a nested sequence of sets, and the punishment for the outcome $y$ is the cardinality of the first set containing $y$, plus the cardinality of all smaller sets.
+\citet{wang2020weston} use our framework to show that $L_{WW}$ embeds $\ell^\OP$, and thus is calibrated with respect to it\raft{Do they construct a link, or start with the existing one?  If the latter, I'm curious how they show consistency; using our framework, as we now describe in 4, or something else?}.
+Specifically, they use the embedding
+% \citet[Definition 2.3]{wang2020weston}
+$\varphi : \T \to \reals^n$ given by $\varphi(T)_j = -(i-1)$ for all $j \in T_i \setminus T_{i-1}$.
+\raf{Here would be a good place to define the link $\psi$, even if informally.}
 
 \begin{figure}[H]
 	\begin{minipage}{0.5\linewidth}
@@ -950,7 +960,7 @@ This work presents an embedding for $\ell^\OP$ and uses this fact to show that t
 	\end{minipage}
 	\hfill
 	\begin{minipage}{0.45\linewidth}
-	\caption{Level sets of $\psi \circ \prop{WW}$, the property elicited by Weston-Watkins hinge with embedding given by~\citet[Definition 2.3]{wang2020weston}.  $\prop{WW}$ is shown with dotted lines.}
+	\caption{Level sets of $\psi \circ \prop{L_{WW}}$, the property elicited by Weston-Watkins hinge with embedding given by~\citet[Definition 2.3]{wang2020weston}.  $\prop{L_{WW}}$ is shown with dotted lines.}
 	\label{fig:ordered-partition}
 	\end{minipage}
 \end{figure}
@@ -964,15 +974,16 @@ Those that are essentially elicit the distribution $p \in \simplex$, and take th
 %The only convex surrogate in the literature that is consistent is the softmax surrogate of~\citet{lapin2016loss} which essentially learns the entire distribution.
 However, this seems to encapsulate more information than necessary and therefore presumably requires more data to learn the Bayes optimal hypothesis than learning the less granular top-$k$ property.
 
+\raf{Take one more pass?  Define the brackets notation.  Feel free to guess at what our results are going to be, and then add margin comments that we should revisit.}
 Other hinge-like surrogates are shown to be non-consistent by~\citet{lapin2016loss} and~\citet{yang2018consistency}.
 For example, $\psi_2$ from~\citet[Table 1]{yang2018consistency} elicits essentially the same property $\prop{WW}$ shown in Figure~\ref{fig:ordered-partition} before the link is applied for certain values of $n$ and $k$.
-\citet{TOPKPAPER} applies the embedding framework to these surrogates to understand the target problems for which they are consistent.
+\citet{ourtopkpaper} applies the embedding framework to these surrogates to understand the target problems for which they are consistent.
 
 \begin{align}\label{eq:topk-embedding}
 L(u,y) &= \max \left(u_{[1]}, \max_{m \in k+1, \ldots, m} 1 - \frac k m + \frac 1 m \sum_{i=1}^m u_{[i]} \right)- u_y
 \end{align}
 
-Moreover, \citet{TOPKPAPER} presents an embedding (Eq.~\eqref{eq:topk-embedding}) for top-$k$ loss that looks unlike the commonly studied surrogates in the literature.
+Moreover, \citet{ourtopkpaper} presents an embedding (Eq.~\eqref{eq:topk-embedding}) for top-$k$ loss that looks unlike the commonly studied surrogates in the literature.
 Moreover, the most common link $\psi^{\tt argmax}(u) := \argmax_{S \subseteq \Y : |S| = k} \sum_{i \in S} u_i$ is calibrated for the surrogate in Equation~\eqref{eq:topk-embedding}.\jessie{TODO... confirm this is true.}
 Their proof uses the $\epsilon$-thickened link construction from \S~\ref{sec:calibration} to understand which choices of linked values are feasible and align these choices with the argmax link.
 
