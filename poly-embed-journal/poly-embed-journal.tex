@@ -783,7 +783,7 @@ In particular, one can instead search for surrogates that embed the correct disc
 
 %\raf{TODO: talk about generic approach: restrict to affine regions, take vertices} \jessie{Attempted above}
 
-Several authors consider a variant of classification, with the addition of a ``reject'' or \emph{abstain} option\raft{Let's dump a few citations here, starting with Bartlett~\cite{bartlett2008classification}}.
+Several authors consider a variant of classification, with the addition of a ``reject'' or \emph{abstain} option~\citep{bartlett2008classification,ramaswamy2018consistent,madras2018predict,elyaniv2010foundations,cortes2016learning}.
 In particular, \citet{ramaswamy2018consistent} study the loss $\ellabs{\alpha} : [n] \cup \{\bot\} \to \reals^\Y_+$ defined by $\ellabs{\alpha}(r)_y = 0$ if $r=y$, $\alpha$ if $r = \bot$, and 1 otherwise.
 %\begin{align}\label{eq:abstain-discrete}
 %$\ellabs{\alpha}(r)_y = \begin{cases}
@@ -799,7 +799,7 @@ Letting $d = \ceil{\log_2(n)}$, their surrogate is $L_{1/2} : \reals^d \to \real
 L_{1/2}(u)_y = \left(\max\nolimits_{j \in [d]}\varphi(y)_j u_j + 1\right)_+~,
 \end{equation}
 where embeds outcomes to corners of the $\pm 1$ hypercube, and the abstain report to the origin. %; let us assume $n = 2^d$ so that we have a bijection
-\raft{Do we actually need the bijection?  Might be simpler to leave this statement out otherwise}.
+%\raft{Do we actually need the bijection?  Might be simpler to leave this statement out otherwise}.
 Consistency is proven for the following link function,
 \begin{equation}\label{eq:abstain-link}
   \psi(u) = \begin{cases}
@@ -930,9 +930,9 @@ Proposing a more efficient solution,~\citet{weston1999support} give an alternate
 \begin{equation}\label{eq:ww-hinge}
 L_{WW}(u,y) = \sum_{i \in \Y : i \neq y} (1 - (u_y - u_i))_+~.~
 \end{equation}
-While it was later shown to be inconsistent~\citep{tewari2007consistency,liu2007fisher}, \citet{dogan2016unified} nonetheless advocate for the Weston-Watkins SVM to be the default for multiclass prediction problems.
+While it was later shown to be inconsistent with respect to 0-1 loss~\citep{tewari2007consistency,liu2007fisher}, \citet{dogan2016unified} nonetheless advocate for the Weston-Watkins SVM to be the default for multiclass prediction problems.
 
-\citet*{wang2020weston} use our embedding framework to construct and prove the calibration of the Weston-Watkins surrogate for the \emph{ordered partition} loss, and in turn, show inconsistency with respect to 0-1 loss\raft{But it was already known, right?  If so, it's good to use phrases like ``recover the result that''}.
+\citet*{wang2020weston} use the embedding framework to construct and prove the calibration of the Weston-Watkins surrogate for the \emph{ordered partition} loss, and in turn, recover the result of inconsistency with respect to 0-1 loss.
 %An ordered partition on $[n] := \{1, \ldots, n\}$ can be defined by a nested sequence of tuples
 %Let $T = \{T_1, \ldots, T_k\}$
 The report space for this discrete loss can be defined in terms of nested subsets of $[n] := \{1, \ldots, n\}$, as follows.%
@@ -942,16 +942,16 @@ The report space for this discrete loss can be defined in terms of nested subset
 \end{align*}
 The ordered partition target loss $\ell^{\OP} : \T \to \reals^\Y_+$ is then defined by
 \begin{align*}
-\ell^\OP(T,y) &= \sum_{i=1}^{k} |T_{i}| \cdot \Ind{y \not \in T_{i-1}}-1~.~
+\ell^\OP(T,y) &= \sum_{i=1}^{k} \left(|T_{i}| \cdot \Ind{y \not \in T_{i-1}} \right) -1~.~
 \end{align*}
-\raf{Jessie, could you check that the newer form is correct?  I messed with a couple things, and decided not to clutter the tex with the old stuff -- maybe check the diff if it would help, or go straight to the original version.}
+%\raf{Jessie, could you check that the newer form is correct?  I messed with a couple things, and decided not to clutter the tex with the old stuff -- maybe check the diff if it would help, or go straight to the original version.}\jessie{Confirmed}
 
-This loss can be interpreted as a variation of 0-1 loss where one reports a nested sequence of sets, and the punishment for the outcome $y$ is the cardinality of the first set containing $y$, plus the cardinality of all smaller sets.
-\citet{wang2020weston} use our framework to show that $L_{WW}$ embeds $\ell^\OP$, and thus is calibrated with respect to it\raft{Do they construct a link, or start with the existing one?  If the latter, I'm curious how they show consistency; using our framework, as we now describe in 4, or something else?}.
+The ordered partition loss can be interpreted as a variation of 0-1 loss where one reports a nested sequence of sets, and the punishment for the outcome $y$ is the cardinality of the first set containing $y$, plus the cardinality of all earlier sets.
+\citet{wang2020weston} show that $L_{WW}$ embeds $\ell^\OP$, and conclude that $L_{WW}$ is calibrated with respect to $\ell^\OP$\raft{Do they construct a link, or start with the existing one?  If the latter, I'm curious how they show consistency; using our framework, as we now describe in 4, or something else?}\jessiet{They just show embedding and don't provide a link, citing our construction and leaving it to existence}.
 Specifically, they use the embedding
 % \citet[Definition 2.3]{wang2020weston}
 $\varphi : \T \to \reals^n$ given by $\varphi(T)_j = -(i-1)$ for all $j \in T_i \setminus T_{i-1}$.
-\raf{Here would be a good place to define the link $\psi$, even if informally.}
+\raf{Here would be a good place to define the link $\psi$, even if informally.}\jessie{They don't define $\psi$- they just take its existence for granted as a corollary of showing embedding.}
 
 \begin{figure}[H]
 	\begin{minipage}{0.5\linewidth}
@@ -978,14 +978,23 @@ However, this seems to encapsulate more information than necessary and therefore
 Other hinge-like surrogates are shown to be non-consistent by~\citet{lapin2016loss} and~\citet{yang2018consistency}.
 For example, $\psi_2$ from~\citet[Table 1]{yang2018consistency} elicits essentially the same property $\prop{WW}$ shown in Figure~\ref{fig:ordered-partition} before the link is applied for certain values of $n$ and $k$.
 \citet{ourtopkpaper} applies the embedding framework to these surrogates to understand the target problems for which they are consistent.
+Moreover, \citeauthor{ourtopkpaper} presents the embedding in Eq.~\eqref{eq:topk-embedding} for top-$k$ loss that looks unlike the commonly studied surrogates in the literature.
+In Equation~\eqref{eq:topk-embedding}, $u_{[i]}$ denotes the $i^{th}$ largest element of $u \in \reals^n$.
 
 \begin{align}\label{eq:topk-embedding}
-L(u,y) &= \max \left(u_{[1]}, \max_{m \in k+1, \ldots, m} 1 - \frac k m + \frac 1 m \sum_{i=1}^m u_{[i]} \right)- u_y
+L(u,y) &= \max \left(u_{[1]}, \max_{m \in \{k+1, \ldots, m\}} \left[ 1 - \frac k m + \frac 1 m \sum_{i=1}^m u_{[i]}\right] \right)- u_y
 \end{align}
 
-Moreover, \citet{ourtopkpaper} presents an embedding (Eq.~\eqref{eq:topk-embedding}) for top-$k$ loss that looks unlike the commonly studied surrogates in the literature.
-Moreover, the most common link $\psi^{\tt argmax}(u) := \argmax_{S \subseteq \Y : |S| = k} \sum_{i \in S} u_i$ is calibrated for the surrogate in Equation~\eqref{eq:topk-embedding}.\jessie{TODO... confirm this is true.}
-Their proof uses the $\epsilon$-thickened link construction from \S~\ref{sec:calibration} to understand which choices of linked values are feasible and align these choices with the argmax link.
+Perhaps the most natural link function for a proposed top-$k$ surrogate is the argmax link 
+$\psi^{\tt argmax}(u) := \argmax_{S \subseteq \Y : |S| = k} \sum_{i \in S} u_i$ linking to the $k$ highest elements of $u$.
+While the embeddings framework guarantees the existence of a calibrated link, we cannot immediately conclude the pair $(L, \psi^{\tt argmax})$ is calibrated with respect to the top-$k$ loss.
+\citeauthor{ourtopkpaper} use the $\epsilon$-thickening link construction as a tool to verify this natural conjecture in the following way:
+in constructing an $\epsilon$-thickened link as in \S~\ref{sec:calibration}, the function $\Psi(u)$ yields a set of possible link choices for each $u \in \reals^d$.
+Verifying the calibration of a proposed link is accomplished by testing $\psi^{\tt argmax}(u) \in \Psi(u)$ for all $u \in \reals^d$. \btw{COME BACK AND CHECK}
+
+\btw{This entire paragraph is conjecture}
+\citeauthor{ourtopkpaper} additionally compare empirical convergence results and error rates of optimizing $L$ and the surrogates of \citet{yang2018consistency,lapin2016loss}.
+In low-noise settings, such as cleaned datasets, performance is about equal across surrogates, but in synthetic settings where the distribution of data is approximately uniform, $L$ outperforms inconsistent surrogates, and converges faster than very smooth, highly granular surrogates.
 
 %Commented out 07 Sept 21
 %In certain classification problems when ground truth may be ambiguous, such as object identification, it is common to predict a set of possible labels.
