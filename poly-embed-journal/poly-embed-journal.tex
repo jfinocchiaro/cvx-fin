@@ -856,63 +856,27 @@ We can also verify that their surrogate is an embedding and recover their result
 \subsection{Inconsistency of Lov\'asz hinge}
 \label{sec:lovasz-hinge}
 
+\newcommand{\dis}{\mathrm{dis}}
+\newcommand{\abs}{\mathrm{abs}}
+
 Many structured prediction settings can be thought of as making multiple predictions at once, with a loss function that jointly measures error based on the relationship between these predictions~\cite{hazan2010direct, gao2011consistency, osokin2017structured}.
 In the case of $k$ binary predictions, these settings are typically formalized by taking the predictions and outcomes to be $\pm 1$ vectors, so $\R=\Y=\{-1,1\}^k$.
-One then defines a joint loss function, which is often merely a function of the set of mispredictions, meaning we may write $\ell^f(r)_y = f(\{i \in [k] : r_i \neq y_i\})$ for some set function $f:2^{[k]}\to\reals$.
+One then defines a joint loss function in terms of the misprediction or disagreement set $\dis(r,y) = \{i \in [k] \mid r_i \neq y_i\}$, meaning we may write $\ell^f(r)_y = f(\dis(r,y))$ for some set function $f:2^{[k]}\to\reals$.
 For example, Hamming loss is given by $f(S) = |S|$.
-In an effort to provide a general convex surrogate for these settings when $f$ is a submodular function, Yu and Blaschko~\cite{yu2018lovasz} introduce a surrogate $L^f$ which they dub the \emph{Lov\'asz hinge}, as it leverages the well-known convex Lov\'asz extension of submodular functions.
-While the authors provide theoretical justification and experiments, consistency of the Lov\'asz hinge is left open, which we resolve. \jessiet{Want to cite the preprint instead of saying we resolve this?}
-%As even the formal definition of the Lov\'asz hinge is quite involved, we defer the complete analysis to \S~\ref{app:lovasz} \jessie{REF} and here state the main results.
+In an effort to provide a general convex surrogate for these settings when $f$ is a submodular function, Yu and Blaschko~\cite{yu2018lovasz} introduce a surrogate $L^f:\reals^k\to\reals^\Y_+$ which they dub the \emph{Lov\'asz hinge}, as it leverages the well-known convex Lov\'asz extension of submodular functions.
+While the authors provide theoretical justification and experiments, consistency of the Lov\'asz hinge is left open.
 
-As a warm-up, let us introduce the form of the Lov\'asz hinge $L^f$ for the case $k=2$, as one can build intuition from this case.
-For brevity, we write $f_\emptyset := f(\emptyset)$, $f_{1,2} := f(\{1,2\})$, etc.
-%\raft{Jessie: I meant \emph{our} paper :-].  Leaving this here:\cite{yu2015lovaszarxiv}}
-Assuming $f$ is normalized and increasing (meaning $f_{1,2} \geq \{f_1,f_2\} \geq f_\emptyset = 0$), the Lov\'asz hinge $L:\reals^k\to\reals^\Y_+$ is given by
-\begin{multline}
-  \label{eq:lovasz-hinge}
-  L^f(u)_y = \max\Bigl\{(1-u_1y_1)_+ f_1 + (1-u_2y_2)_+ (f_{1,2}-f_1),\\[-4pt] (1-u_2y_2)_+ f_2 + (1-u_1y_1)_+ (f_{1,2}-f_2)\Bigr\}~,
-\end{multline}
-where $(x)_+ = \max\{x,0\}$.
-The link function $\psi:\reals^2\to\{-1,1\}^2$ is fixed as $\psi(u)_i = \sgn(u_i)$, with ties broken arbitrarily.
-
-We are interested in characterizing the functions $f$ for which $L^f$ is consistent.
-As an example, consider the coefficients $f_\emptyset = 0$, $f_1 = f_2 = f_{1,2} = 1$, for which $\ell^f$ is merely 0-1 loss on $\Y$.
-For consistency, for any distribution $p\in\simplex$, we must have that whenever $u \in \argmin_{u'\in\reals^2} \inprod{p}{L^f(u')}$, the outcome $\psi(u)$ must be the most likely, i.e., in $\argmax_{y\in\Y} p(y)$.
-Simplifying eq.~\eqref{eq:lovasz-hinge}, however, we have
+\citet{ourlovaszpaper}\raft{authors TBD...} use our embedding framework to resolve the consistency of $L^f$, showing that it is inconsistent outside of the trivial case where $f$ is modular and $L^f$ reduces to weighted Hamming loss.
+Moreover, they show what $L^f$ embeds: a variant $\hat \ell^f$ of $\ell^f$ where one is allowed to abstain on a set of indices $S \subseteq [k]$.
+To derive $\hat \ell^f$, they show that the set $\hat \R = \{-1,0,1\}^k$ is representative for $L^f$, and use our Proposition~\ref{prop:representative-embeds-restriction} to show that $L^f$ embeds $\hat \ell^f := L^f|_{\hat \R}$.
+Letting $\abs(\hat r) = \{i\in[k] \mid \hat r_i = 0\}$ denote the ``abstain'' set, we may write $\hat \ell^f : \hat R \to \reals^\Y_+$ as
 \begin{equation}
-  \label{eq:lovasz-hinge-abstain}
-  L^f(u)_y = \max\bigl\{(1-u_1y_1)_+,(1-u_2y_2)_+\bigr\} = \max\bigl\{1-u_1y_1,1-u_2y_2,0\bigr\}~,
+	\hat\ell^f(\hat r)_y = f(\dis(\hat r,y) \setminus \abs(\hat r)) + f(\dis(\hat r,y))~.
 \end{equation}
-which is exactly the abstain surrogate~\eqref{eq:abstain-surrogate} for $d=2$.
-We immediately conclude that $L^f$ cannot be consistent with $\ell^f$, as the origin will be the unique optimal report for $L^f$ under distributions with $p_y < 0.5$ for all $y$, and one can simply take a distribution which disagrees with the way ties are broken in $\psi$.
-For example, if we take $\sgn(0) = 1$, then under $p((1,1)) = p((1,-1)) = p((-1,1)) = 0.2$ and $p((-1,-1)) = 0.4$, we have $\{0\} = \argmin_{u\in\reals^2} \inprod{p}{L^f(u)}$, yet we also have $\psi(0) = (1,1) \notin \{(-1,-1)\} = \argmin_{r\in\R} \inprod{p}{\ell^f(r)}$.
+(Observe that $\abs(\hat r,y) \subseteq \dis(\hat r,y)$, since $y\in\{-1,1\}^k$.)
+They go on to show that the embedding is tight, for $f$ strictly submodular and strictly monotone, if one first disallows $\hat r$ with $|\abs(\hat r)| = 1$.
+Thus, interestingly, the Lov\'asz hinge solves a variant of this structured problem where one is optionally allowed to abstain on at least two labels.
 
-In fact, this example is typical: % using our embedding framework, and characterizing when $0\in\reals^2$ is an embedded point,
-one can show that $L^f$ is consistent if and only if $f_{1,2} = f_1 + f_2$.
-Moreover, in this linear case, which corresponds to $f$ being \emph{modular}, the Lov\'asz hinge reduces to weighted Hamming loss, which is trivially consistent from the consistency of hinge loss for 0-1 loss.
-In \S~\ref{app:lovasz} \jessiet{Change to citation?}, we generalize this observation for all $k$.
-\begin{theorem}\label{thm:lovasz-consistent-main}
-	Let $f$ be submodular, normalized, and increasing.
-	Then $(L^f,\psi)$ is consistent if and only if $f$ is modular.
-\end{theorem}
-In other words, even for $k>2$, the only consistent Lov\'asz hinge is weighted Hamming loss.
-This result casts doubt on the practical effectiveness of the Lov\'asz hinge as a surrogate for $\ell^f$.\jessie{We might have a reviewer fight us on that unless we add something about ``without low-noise assumptions''}
-
-In light of this negative result, together with the fact that every polyhedral surrogate embeds some target loss (Theorem~\ref{thm:poly-embeds-discrete}), we now turn to the question: for what target problem \emph{is} the Lov\'asz hinge consistent?
-We show in \S~\ref{app:lovasz}\jessie{CITE} that the answer is a variant of abstain loss where one can abstain on a set of labels $B\subseteq[k]$.
-Recall that the symmetric difference is defined by $S\triangle T = (S\setminus T) \cup (T\setminus S)$.
-\begin{theorem}\label{thm:lovasz-embed-main}
-	Let $\hat\ell^f:\hat\R\times\Y\to\reals_+$, where $\hat\R = \{(A,B) \in 2^{[k]} \times 2^{[k]}: A\cap B=\emptyset\}$, be given by
-	\begin{equation}
-	\hat\ell^f((A,B))_S = f(A\triangle S\setminus B) + f(A\triangle S\cup B)~.
-	\end{equation}
-	Then the Lov\'asz hinge $L^f$ embeds $\hat\ell^f$.
-  Moreover, if $f$ is strictly submodular and strictly increasing, the embedding is tight.
-\end{theorem}
-
-While Theorem~\ref{thm:lovasz-consistent-main} shows that the Lov\'asz hinge is inconsistent, Theorem~\ref{thm:lovasz-embed-main} illuminates why: when there is sufficient uncertainty around some subset of labels, the loss encourages the learning algorithm to ``hedge'' and set prediction coordinates for that set equal to 0.
-This observation reveals a potential peril of using the Lov\'asz hinge in noisy label settings.
-On the other hand, of course, this revelation suggests a positive result as well: under an appropriate link from our construction in Theorem~\ref{thm:link-main}, the Lov\'asz hinge could be fruitfully applied to set-valued prediction problems when one allows the learning algorithm to abstain on a subset of labels.
 
 % \subsection{New surrogates for cost-sensitive classification}
 
