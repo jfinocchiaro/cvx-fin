@@ -14,6 +14,7 @@
 \usepackage{microtype}      % microtypography
 \usepackage[normalem]{ulem}
 \usepackage{thm-restate}
+\newcommand{\restatehack}[1]{}   % for auc-tex; don't ask
 \usepackage{array}
 \newcolumntype{R}{>{$}r<{$}} % math-mode version of "l" column type
 \newcolumntype{C}{>{$}c<{$}} % math-mode version of "c" column type
@@ -234,6 +235,13 @@ We prove that such an embedding scheme is intimately related to the class of pol
 In particular, every discrete loss is embedded by a polyhedral surrogate.
 Moreover, such an embedding gives rise to calibrated link function, and is therefore consistent with respect to the target loss.
 Our proofs give explicit constructions for the surrogate (\S~\ref{sec:poly-loss-embed}) and link (\S~\ref{sec:calibration}) embedding a given discrete loss.
+
+
+\restatehack{
+  \begin{theorem}
+    \label{thm:embed-poly-main}
+    \label{thm:link-main}
+  \end{theorem}}
 
 \begin{restatable}{theorem}{embedpolyinformal}\label{thm:embed-poly-main}
   Every discrete loss $\ell$ is embedded by some polyhedral loss $L$, and every polyhedral loss $L$ embeds some discrete loss $\ell$.
@@ -760,8 +768,8 @@ Below, we illustrate the power of this framework with specific examples from the
 To warm up, we study the abstain surrogate given by~\citet{ramaswamy2018consistent}, and show how to rederive their link function using Theorem~\ref{thm:link-main}.
 We then give three examples of subsequent works that use our framework to study existing surrogates, and derive new ones using Theorem~\ref{thm:discrete-loss-poly-embeddable}.
 
-Studying existing surrogates using our framework generally proceeds as follows.
-Let a surrogate $L:\reals^d \to \reals^\Y_+$ be given.
+When using our framework to study an existing surrogate $L:\reals^d \to \reals^\Y_+$, often the first step is determining the loss it embeds.
+To this end, we suggest the following general approach.
 First, for each $y\in\Y$, divide $\reals^d$ into a finite number of polyhedral regions on which $L(\cdot)_y$ is an affine function.
 Often these regions are straightforward to identify based on the form of $L$.
 Letting $\Sc\subset\reals^d$ be the union of vertices of these polyhedral regions, conclude that $\Sc$ is a finite representative set for $L$~\citep[Statement 3.1.7]{grunbaum2013convex}.
@@ -784,7 +792,7 @@ In particular, one can instead search for surrogates that embed the correct disc
 
 %\raf{TODO: talk about generic approach: restrict to affine regions, take vertices} \jessie{Attempted above}
 
-Several authors consider a variant of classification, with the addition of a ``reject'' or \emph{abstain} option~\citep{bartlett2008classification,ramaswamy2018consistent,madras2018predict,elyaniv2010foundations,cortes2016learning}.
+Several authors consider a variant of classification, with the addition of a reject or \emph{abstain} option~\citep{bartlett2008classification,ramaswamy2018consistent,madras2018predict,elyaniv2010foundations,cortes2016learning}.
 In particular, \citet{ramaswamy2018consistent} study the loss $\ellabs{\alpha} : [n] \cup \{\bot\} \to \reals^\Y_+$ defined by $\ellabs{\alpha}(r)_y = 0$ if $r=y$, $\alpha$ if $r = \bot$, and 1 otherwise.
 %\begin{align}\label{eq:abstain-discrete}
 %$\ellabs{\alpha}(r)_y = \begin{cases}
@@ -794,13 +802,12 @@ In particular, \citet{ramaswamy2018consistent} study the loss $\ellabs{\alpha} :
 %\end{cases}~.$
 %\end{align}
 The report $\bot$ corresponds to ``abstaining'' if no label is sufficiently likely, specifically, if no $y\in\Y$ has $p_y \geq 1-\alpha$.
-\citeauthor{ramaswamy2018consistent} provide a polyhedral surrogate for $\ellabs{\alpha}$, which we present here for $\alpha=1/2$.
+\citeauthor{ramaswamy2018consistent} provide a polyhedral surrogate $L_\alpha$ for $\ellabs{\alpha}$, which we present here for $\alpha=1/2$.
 Letting $d = \ceil{\log_2(n)}$, their surrogate is $L_{1/2} : \reals^d \to \reals^\Y_+$ given by
 \begin{equation}\label{eq:abstain-surrogate}
 L_{1/2}(u)_y = \left(\max\nolimits_{j \in [d]}\varphi(y)_j u_j + 1\right)_+~,
 \end{equation}
-where embeds outcomes to corners of the $\pm 1$ hypercube, and the abstain report to the origin. %; let us assume $n = 2^d$ so that we have a bijection
-%\raft{Do we actually need the bijection?  Might be simpler to leave this statement out otherwise}.
+where $\varphi$ embeds outcomes to corners of the $\pm 1$ hypercube, and the abstain report $\bot$ to the origin.
 Consistency is proven for the following link function,
 \begin{equation}\label{eq:abstain-link}
   \psi(u) = \begin{cases}
@@ -820,20 +827,20 @@ To illustrate this point further, we give an alternate link $\psi_1$ correspondi
   \end{cases}~.
 \end{equation}
 Theorem~\ref{thm:link-main} immediately gives calibration of $(L_{1/2},\psi_1)$ with respect to $\ellabs{1/2}$.
-Aside from its simplicity, one possible advantage of $\psi_1$ is that it appears to yield the same constant in generalization bounds as $\psi$, yet assigns $\bot$ to much less of the surrogate space $\reals^d$\raft{Let's check this statement with Bo; I thought when we actually worked it out that the bound seemed to be worse.  In that case, we could simply say ``Aside from its simplicity, one possible advantage of $\psi_1$ is that it assigns $\bot$ to much less of the surrogate space $\reals^d$.''}.
+Aside from its simplicity, one possible advantage of $\psi_1$ is that it assigns $\bot$ to much less of the surrogate space $\reals^d$\raft{Bo, we used to say ``it appears to yield the same constant in generalization bounds as $\psi$''but I think our paper implies that the bound is worse, right?}.
 It would be interesting to compare the two links in practice.
 
-\raft{Let's clear up what we mean by the elements of this tuple, or cut it entirely.  What is $W$?}
-\jessiet{Clarified, but also think it's fine to remove the paragraph}
-The embedding framework also sheds light on a variant of the BEP surrogate given by~\citet{ramaswamy2015hierarchical} for a hierarchical classification problem.
-Given a tree $H = ([n], E,W)$ defined by a finite class of labels $[n]$, edges $E$, and weights $W$, they consider the discrete loss 
-\begin{equation}\label{eq:tree-loss-discrete}
-	\ell^H(r,y) = \text{shortest path length in $H$ between $r$ and $y$}~.
-\end{equation}
-The authors introduce a polyhedral surrogate based on the BEP surrogate, and show it is consistent with respect to $\ell^H$.
-We can also verify that their surrogate is an embedding and recover their result through Theorem~\ref{thm:poly-ie-implies-consistent}. 
-\raft{Can we say more explicitly, as we did for BEP, how exactly our framework could have helped, and/or sheds light on it now?}
-\jessiet{They sequentially apply the BEP surrogate on each level of the tree (start at the root; if you predict on a child, move to that child.  If you abstain, stay at the current node), It would be a mess to apply and probably to describe, which moves me in even stronger favor of deleting this paragraph.}
+% \jessiet{Clarified, but also think it's fine to remove the paragraph}
+\raft{Commented out hierarchical paragraph for now :-)}
+% The embedding framework also sheds light on a variant of the BEP surrogate given by~\citet{ramaswamy2015hierarchical} for a hierarchical classification problem.
+% Given a tree $H = ([n], E,W)$ defined by a finite class of labels $[n]$, edges $E$, and weights $W$, they consider the discrete loss 
+% \begin{equation}\label{eq:tree-loss-discrete}
+% 	\ell^H(r,y) = \text{shortest path length in $H$ between $r$ and $y$}~.
+% \end{equation}
+% The authors introduce a polyhedral surrogate based on the BEP surrogate, and show it is consistent with respect to $\ell^H$.
+% We can also verify that their surrogate is an embedding and recover their result through Theorem~\ref{thm:poly-ie-implies-consistent}. 
+% \raft{Can we say more explicitly, as we did for BEP, how exactly our framework could have helped, and/or sheds light on it now?}
+% \jessiet{They sequentially apply the BEP surrogate on each level of the tree (start at the root; if you predict on a child, move to that child.  If you abstain, stay at the current node), It would be a mess to apply and probably to describe, which moves me in even stronger favor of deleting this paragraph.}
 
 
 \begin{figure}
@@ -912,11 +919,11 @@ The ordered partition target loss $\ell^{\OP} : \T \to \reals^\Y_+$ is then defi
 %\raf{Jessie, could you check that the newer form is correct?  I messed with a couple things, and decided not to clutter the tex with the old stuff -- maybe check the diff if it would help, or go straight to the original version.}\jessie{Confirmed}
 
 The ordered partition loss can be interpreted as a variation of 0-1 loss where one reports a nested sequence of sets, and the punishment for the outcome $y$ is the cardinality of the first set containing $y$, plus the cardinality of all earlier sets.
-\citet{wang2020weston} show that $L_{WW}$ embeds $\ell^\OP$, and conclude that $L_{WW}$ is calibrated with respect to $\ell^\OP$\raft{Do they construct a link, or start with the existing one?  If the latter, I'm curious how they show consistency; using our framework, as we now describe in 4, or something else?}\jessiet{They just show embedding and don't provide a link, citing our construction and leaving it to existence}.
-Specifically, they use the embedding
-% \citet[Definition 2.3]{wang2020weston}
+\citet{wang2020weston} show that $L_{WW}$ embeds $\ell^\OP$, with the embedding
 $\varphi : \T \to \reals^n$ given by $\varphi(T)_j = -(i-1)$ for all $j \in T_i \setminus T_{i-1}$.
-\raf{Here would be a good place to define the link $\psi$, even if informally.}\jessie{They don't define $\psi$- they just take its existence for granted as a corollary of showing embedding.}
+They then apply Theorem~\ref{thm:link-main} to conclude that there exists a link function $\psi$ such that $(L_{WW},\psi)$ is calibrated with respect to $\ell^\OP$.
+\raf{Jessie, could you add something here about the figure and dotted lines, which show conditions under which WW is consistent for 0-1?}
+
 
 \begin{figure}[H]
 	\begin{minipage}{0.5\linewidth}
@@ -933,33 +940,31 @@ $\varphi : \T \to \reals^n$ given by $\varphi(T)_j = -(i-1)$ for all $j \in T_i 
 
 \subsection{Inconsistency of top-$k$ losses}
 \label{sec:top-k}
-In settings of search results and object recognition, one might plausibly be interested in top-$k$ classification: a generalization of 0-1 loss where one can predict a set $S$ of size $k$, receiving loss $0$ if the true label $y \in S$, and $1$ otherwise.
-While this problem is well-studied, \citep{lapin2015top, lapin2016loss, lapin2018analysis,yang2018consistency,berrada2018smooth,rastegari2011scalable} most surrogates for top-$k$ are not simultaneously convex and consistent.
+In settings like object recognition and information retrieval, the problem of top-$k$ classification arises: one predicts a set $S$ of size $k$, and if the true outcome is $y$, receives loss $\elltopk(S)_y = \ones\{y\notin S\}$.
+While this problem is well-studied \citep{lapin2015top, lapin2016loss, lapin2018analysis,yang2018consistency,berrada2018smooth,rastegari2011scalable}, most surrogates for top-$k$ are not simultaneously convex and consistent.
 Those that are essentially elicit the distribution $p \in \simplex$, and take the link to be the top $k$ elements of $p$~\citep{lapin2016loss}.
 %The only convex surrogate in the literature that is consistent is the softmax surrogate of~\citet{lapin2016loss} which essentially learns the entire distribution.
-However, this seems to encapsulate more information than necessary and therefore presumably requires more data to learn the Bayes optimal hypothesis than learning the less granular top-$k$ property.
+This full-distribution approach seems to encapsulate more information than necessary, therefore raising the question of whether a more direct surrogate can be found for the top-$k$ property.
+While polyhedral surrogates are a promising angle for such a surrogate, \citet{lapin2016loss} and~\citet{yang2018consistency} show that most of the proposed polyhedral surrogates for top-$k$ classification are inconsistent.
 
-\raf{Take one more pass?  Define the brackets notation.  Feel free to guess at what our results are going to be, and then add margin comments that we should revisit.}
-Other hinge-like surrogates are shown to be non-consistent by~\citet{lapin2016loss} and~\citet{yang2018consistency}.
-For example, $\psi_2$ from~\citet[Table 1]{yang2018consistency} elicits essentially the same property $\prop{WW}$ shown in Figure~\ref{fig:ordered-partition} before the link is applied for certain values of $n$ and $k$.
 \citet{ourtopkpaper} applies the embedding framework to these surrogates to understand the target problems for which they are consistent.
-Moreover, \citeauthor{ourtopkpaper} presents the embedding in Eq.~\eqref{eq:topk-embedding} for top-$k$ loss that looks unlike the commonly studied surrogates in the literature.
-In Equation~\eqref{eq:topk-embedding}, $u_{[i]}$ denotes the $i^{th}$ largest element of $u \in \reals^n$.
-
+For example, $\psi_2$ from~\citet[Table 1]{yang2018consistency} elicits essentially the same property\raft{should we say ``a similar property''? I thought they weren't the same, right?} $\prop{WW}$ shown in Figure~\ref{fig:ordered-partition} before the link is applied for certain values of $n$ and $k$.
+Moreover, \citeauthor{ourtopkpaper} uses Theorem~\ref{thm:discrete-loss-poly-embeddable} to derive the first calibrated polyhedral surrogate for $\elltopk$, given in eq.~\eqref{eq:topk-embedding}.
+Here $u_{[i]}$ denotes the $i^{th}$ largest element of $u \in \reals^n$.
 \begin{align}\label{eq:topk-embedding}
-L(u,y) &= \max \left(u_{[1]}, \max_{m \in \{k+1, \ldots, m\}} \left[ 1 - \frac k m + \frac 1 m \sum_{i=1}^m u_{[i]}\right] \right)- u_y
+L(u)_y &= \max \left(u_{[1]}, \max_{m \in \{k+1, \ldots, m\}} \left[ 1 - \frac k m + \frac 1 m \sum_{i=1}^m u_{[i]}\right] \right)- u_y~.
 \end{align}
+While Theorem~\ref{thm:link-main} guarantees the existence of a link function from $L$ to $\elltopk$, we ideally would like to use the typical link function 
+$\psi(u)$ which returns the $k$ largest elements of $u$ (breaking ties arbitrarily).
+\citeauthor{ourtopkpaper} confirm that indeed $(L,\psi)$ is calibrated with respect to $\elltopk$ for this link $\psi$, by showing that $\psi$ can arise from Theorem~\ref{thm:link-main} for sufficiently small $\epsilon$.
+% construction as a tool to verify this natural conjecture in the following way:
+% in constructing an $\epsilon$-thickened link as in \S~\ref{sec:calibration}, the function $\Psi(u)$ yields a set of possible link choices for each $u \in \reals^d$.
+% Verifying the calibration of a proposed link is accomplished by testing $\psi^{\tt argmax}(u) \in \Psi(u)$ for all $u \in \reals^d$. \btw{COME BACK AND CHECK}
 
-Perhaps the most natural link function for a proposed top-$k$ surrogate is the argmax link 
-$\psi^{\tt argmax}(u) := \argmax_{S \subseteq \Y : |S| = k} \sum_{i \in S} u_i$ linking to the $k$ highest elements of $u$.
-While the embeddings framework guarantees the existence of a calibrated link, we cannot immediately conclude the pair $(L, \psi^{\tt argmax})$ is calibrated with respect to the top-$k$ loss.
-\citeauthor{ourtopkpaper} use the $\epsilon$-thickening link construction as a tool to verify this natural conjecture in the following way:
-in constructing an $\epsilon$-thickened link as in \S~\ref{sec:calibration}, the function $\Psi(u)$ yields a set of possible link choices for each $u \in \reals^d$.
-Verifying the calibration of a proposed link is accomplished by testing $\psi^{\tt argmax}(u) \in \Psi(u)$ for all $u \in \reals^d$. \btw{COME BACK AND CHECK}
-
-\btw{This entire paragraph is conjecture}
-\citeauthor{ourtopkpaper} additionally compare empirical convergence results and error rates of optimizing $L$ and the surrogates of \citet{yang2018consistency,lapin2016loss}.
-In low-noise settings, such as cleaned datasets, performance is about equal across surrogates, but in synthetic settings where the distribution of data is approximately uniform, $L$ outperforms inconsistent surrogates, and converges faster than very smooth, highly granular surrogates.
+\btw{Commented out paragraph on experiments, since not the focus of the journal paper anyway}
+% \btw{This entire paragraph is conjecture}
+% \citeauthor{ourtopkpaper} additionally compare empirical convergence results and error rates of optimizing $L$ and the surrogates of \citet{yang2018consistency,lapin2016loss}.
+% In low-noise settings, such as cleaned datasets, performance is about equal across surrogates, but in synthetic settings where the distribution of data is approximately uniform, $L$ outperforms inconsistent surrogates, and converges faster than very smooth, highly granular surrogates.
 
 %Commented out 07 Sept 21
 %In certain classification problems when ground truth may be ambiguous, such as object identification, it is common to predict a set of possible labels.
@@ -1518,7 +1523,7 @@ We will use the fact that refinement is transitive: if $\Gamma_1$ refines $\Gamm
   A loss $L$ \emph{indirectly elicits} a property $\gamma$ if $\prop L$ refines $\gamma$.
 \end{definition}
 
-It is straightforward to verify that consistency, and therefore calibration, implies indirect elicitation~\citep{finocchiaro2021unifying,gyorfi2002distribution,fan1998efficient}\raft{Add cites \jessie{Any more?}}.
+It is straightforward to verify that consistency, and therefore calibration, implies indirect elicitation~\citep{finocchiaro2021unifying,agarwal2015consistent,steinwart2008support}.
 Indirect elicitation may appear much weaker than calibration, since in particular it does not depend on the loss except through the property it elicits.
 Surprisingly, for polyhedral surrogates, we show the converse: indirect elicitation implies calibration, and therefore consistency.
 
@@ -1568,7 +1573,7 @@ This result holds more generally whenever $L$ has a finite representative set, a
 \inf_{u\in\reals^d : \psi(u) \not \in \gamma(p)} \inprod{p}{L(u)} \geq	\inf_{u\in\reals^d : \psi^\emb(u) \not \in \gamma^\emb(p)} \inprod{p}{L(u)} > \inf_{u\in\reals^d}\inprod{p}{L(u)}~,
 	\end{align*}
   showing calibration of $\psi$.
-	Consistency follows as calibration and consistency are equivalent in this setting~\citep{ramaswamy2016convex}\raft{I think we need a better reference, since I believe that's only for binary classification...}\jessiet{Changed to Hari's proof (which tbh, isn't much of a proof but rather a claim IIRC)}.
+	Consistency follows as calibration and consistency are equivalent in this setting~\citep{ramaswamy2016convex}.
 \end{proof}
 
 Theorem~\ref{thm:poly-ie-implies-consistent} gives a somewhat surprising result: despite the fact that indirect elicitation appears to be a somewhat weak necessary condition for consistency in general, the two conditions are equivalent for polyhedral surrogates.
@@ -1578,22 +1583,31 @@ Theorem~\ref{thm:poly-ie-implies-consistent} gives a somewhat surprising result:
 
 \section{Conclusions} \label{sec:conclusion}
 
-\raf{Old recap; perhaps cut}
-This paper formalizes an intuitive way to design convex surrogate losses for finite prediction problems---by embedding the reports into $\reals^d$.
-We establish a close relationship between embeddings and polyhedral surrogates, showing both that every polyhedral loss embeds a discrete loss (Theorem~\ref{thm:poly-embeds-discrete}) and that every discrete loss is embedded by some polyhedral loss (Theorem~\ref{thm:discrete-loss-poly-embeddable}).
-We then construct a calibrated link function from any polyhedral loss to the discrete loss it embeds, giving consistency for all such losses (Theorem~\ref{thm:eps-thick-calibrated}).
+\raft{Didn't love the way any of the recaps sounded, and I also remember that some journals forbid recaps anyway, so commented out for now.  Instead I left a probably-too-terse recap, which we could expand slightly.}
+% This paper formalizes an intuitive way to design convex surrogate losses for finite prediction problems, by embedding the reports into $\reals^d$.
+% We establish a close relationship between such embeddings and polyhedral surrogates (Theorem~\ref{thm:embed-poly-main}), showing both that every polyhedral loss embeds a discrete loss and that every discrete loss is embedded by some polyhedral loss.
+% We then construct a calibrated link function from any polyhedral loss to the discrete loss it embeds, giving consistency for all such losses (Theorem~\ref{thm:link-main}).
+% As we detail in Section~\ref{sec:applications}
 
-\jessie{New version...?}
-In this paper, we introduce the embeddings tool for studying finite prediction problems, and connect this tool to the design of piecewise-linear and convex (polyhedral) surrogates (Theorem~\ref{thm:embed-poly-main}), and show that embeddings by polyhedral surrgates are consistent with respect to the given target problem (Theorem~\ref{thm:link-main}).
-We additionally show that embedding discrete prediction tasks is tightly connected to surrogates with polyhedral Bayes risks (Corollary~\ref{cor:poly-risk-fin-rep}).
-In \S~\ref{sec:applications}, this tool is applied to a variety of examples, including high-confidence classification, stuctured prediction, ordered partitions, and top-$k$ prediction.
-Finally, when restricting to polyhedral surrogate losses, we use embeddings to show that indirect property elicitation is equivalent to consistency in \S~\ref{sec:poly-ie-consistency}.
 
-Some open questions remain: 
+% \jessie{New version...?}
+% In this paper, we introduce the embeddings tool for studying finite prediction problems, and connect this tool to the design of piecewise-linear and convex (polyhedral) surrogates (Theorem~\ref{thm:embed-poly-main}), and show that embeddings by polyhedral surrgates are consistent with respect to the given target problem (Theorem~\ref{thm:link-main}).
+% We additionally show that embedding discrete prediction tasks is tightly connected to surrogates with polyhedral Bayes risks (Corollary~\ref{cor:poly-risk-fin-rep}).
+% In \S~\ref{sec:applications}, this tool is applied to a variety of examples, including high-confidence classification, stuctured prediction, ordered partitions, and top-$k$ prediction.
+% Finally, when restricting to polyhedral surrogate losses, we use embeddings to show that indirect property elicitation is equivalent to consistency in \S~\ref{sec:poly-ie-consistency}.
 
-\jessie{I don't think we want all of these... I feel like it sends a signal about the work being incomplete.  Also, I think we should take out of bullet format}
-\raf{Future work and conjectures}
-\begin{itemize}
+We have established a tight connection between polyhedral losses and embeddings.
+As detailed in \S~\ref{sec:applications}, this connection sheds light on the design and analysis of polyhedral surrogates throughout the machine learning literature.
+
+Several directions for future work remain.
+% it is not clear whether one can further restrict embeddings to surrogates given by the convex envelope of embedded points.
+We show in Theorem~\ref{thm:poly-ie-implies-consistent} that indirect elicitation is equivalent to consistency when restricting to the class of polyhedral surrogates; we would like to identify other classes of surrogates for which this equivalence holds.
+It would also be interesting to explore embeddings through the lens of superprediction sets~\citep{williamson2014geometry}.
+Finally, it is important for applications to understand the minimum prediction dimension $d$ of a consistent convex surrogate $L:\reals^d\to \reals^\Y_+$ for a given target problem, also called its elicitation complexity.
+One approach to this question is to first understand the minimum $d$ for which an embedding $L$ exists, a study initiated by \citet{finocchiaro2020embedding}, and then relate this dimension to polyhedral, or general convex, elicitation complexity.
+
+\raf{Notes on future work and conjectures}
+\begin{itemize}\small
 \setlength \itemsep{0.1em}
 \item %\raf{This is false I believe, from BEP surrogate $n=4$ and large (small?) $\alpha$ -- you can add a little curvature between the spokes and it still embeds.  Maybe we can rephrase / reformulate.}
 %  In fact, we conjecture that \emph{any} loss embedding a discrete $\ell$ must be polyhedral on the convex hull of the embedded reports. 
