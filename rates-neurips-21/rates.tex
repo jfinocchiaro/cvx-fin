@@ -40,7 +40,7 @@
 \theoremstyle{definition}\newtheorem{definition}{Definition}
 \theoremstyle{definition}\newtheorem{assumption}{Assumption}
 
-\newcommand{\Comments}{0}
+\newcommand{\Comments}{1}
 \newcommand{\mynote}[2]{\ifnum\Comments=1\textcolor{#1}{#2}\fi}
 \newcommand{\mytodo}[2]{\ifnum\Comments=1%
   \todo[linecolor=#1!80!black,backgroundcolor=#1,bordercolor=#1!80!black]{#2}\fi}
@@ -449,6 +449,7 @@ By combining this fact with Lemma \ref{lemma:refines}, we obtain that target reg
 We now arrive at the key property of polyhedral losses.
 It requires that $L$ be \emph{minimizable:} for all $p \in \simplex$, there exists some optimal prediction $u$, i.e. where $\inprod{p}{L(u)} = \inf_{u' \in \reals^d} \inprod{p}{L(u')}$.
 Note that if $(L,\psi)$ indirectly elicits $\ell$ for some $\psi$ and $\ell$ then $L$ is minimizable.
+\raf{Wait, I think minimizability comes for free, since we assume $L(\cdot)_y \geq 0$ for all $y$.}
 \begin{lemma} \label{lemma:polyhedral-finite}
   If $L: \reals^d \to \reals_+^{\Y}$ is polyhedral and minimizable, then $\Gamma = \prop{L}$ has a finite set of level sets that union to $\simplex$. Also, these level sets are polytopes.
 \end{lemma}
@@ -492,7 +493,7 @@ The following result is our main lower bound.
 \end{theorem}
 The key idea of the proof is to fix a boundary report $u_0$ and consider a sequence of distributions $p_{\lambda} \to p_0$ as $\lambda \to 0$.
 Target regret $R_{\ell}(\psi(u_0),p_{\lambda})$ shrinks linearly in $\lambda$, but surrogate regret $R_L(u_0,p_{\lambda})$ shrinks quadratically.
-This holds roughly because expected surrogate loss is strongly convex in some neighborhood of $u_0$ and is strongly smooth elsewhere.\footnote{We note that a tempting approach instead is to fix a distribution $p_0$ and consider a sequence of predictions. But, we know from Lemma \ref{lemma:fixed-p} that this will fail: for any consistent surrogate and any fixed $p_0$, there is a linear regret transfer if we restrict to $p_0$.}
+This holds roughly because expected surrogate loss is strongly convex in some neighborhood of $u_0$ and is strongly smooth elsewhere.\footnote{A tempting alternative is to fix a distribution $p_0$ and consider a sequence of predictions. We know from Lemma \ref{lemma:fixed-p} that this approach will fail, however: for any consistent surrogate and any fixed $p_0$, there is a linear regret transfer if we restrict to $p_0$.}
 
 We observe that Assumption \ref{assumption:lower} captures a wide range of surrogate losses beyond those that are strongly convex and strongly smooth.
 For example, exponential loss is not strongly convex, but does satisfy Assumption \ref{assumption:lower}. \bo{more to say?}
@@ -522,6 +523,7 @@ In Appendix \ref{app:constant}, we use Hoffman constants to obtain the following
 \begin{lemma} \label{lemma:hoffman-polyhedral}
   Let $L: \reals^d \to \reals_+^{\Y}$ be a polyhedral loss with $\Gamma = \prop{L}$.
   Then for any fixed $p$, there exists some smallest constant $H_{L,p} \geq 0$ such that $d_{\infty}(u,\Gamma(p)) \leq H_{L,p} R_L(u,p)$ for all $u \in \reals^d$.
+  \raft{Seems important: don't we actually have $H_{L,p}>0$?}
 \end{lemma}
 
 To foreshadow the usefulness of $H_{L,p}$, recall the proof strategy of the upper bound: use Lemma \ref{lemma:fixed-p} to obtain a constant $\alpha_p$ for each $p$; then carefully choose a finite set of $p$'s and take the maximum constant.
@@ -607,7 +609,7 @@ The rate at which $L$ grows is at least $H_{L,p}$, so the surrogate loss at $u$ 
 The ratio of regrets is therefore bounded by $\frac{H_{L,p} C_{\ell}}{\epsilon_{\psi}}$.
 
 The tightest possible bound, on the other hand, is $\alpha^* = \sup_{u: \psi(u) \not\in \gamma(p)} \frac{R_{\ell}(\psi(u),p)}{R_L(u,p)}$.
-This can be smaller if the values of numerator and denominator are correlated across $u$.
+This bound can be smaller if the values of numerator and denominator are correlated across $u$.
 For example, $u$ may only be $\epsilon_{\psi}$-close to the optimal set when it links to reports $\psi(u)$ with lower target regret; or $L$ may have a smaller slope in the direction where the link's separation is larger than $\epsilon$.
 
 To illustrate with a concrete example, consider the \emph{binary encoded predictions (BEP) surrogate} of \cite{ramaswamy2018consistent} for the abstain target loss, $\ell(r,y) = \frac{1}{2}$ if $r = \bot$, otherwise $\ell(r,y) = \ones[r \neq y]$.
@@ -626,7 +628,7 @@ A similar but slightly more involved calculation can be carried out for the othe
 \paragraph{Different norms.}
 This paper uses $L_{\infty}$ norm for the minimum-slope $H_L$ and the $\epsilon$-separated link.
 One reason is that it is easiest to prove the former by reduction to existence of Hoffman constants; another reason is compatibility of both with the abstain loss example above.
-However, all definitions hold for other $L_p$ norms and so does the main upper bound, as existence of an $H_L$ and $\epsilon_{\psi}$ in $L_{\infty}$ imply existence of constants in $L_p$ for $p \geq 1$.
+However, all definitions hold for other norms and so does the main upper bound, as existence of an $H_L$ and $\epsilon_{\psi}$ in $L_{\infty}$ imply existence of constants for other norms.
 The optimal constant may change if the distance measure changes.
 
 
