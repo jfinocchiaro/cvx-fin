@@ -1,7 +1,7 @@
 \documentclass{article} % Anonymized submission
 % \renewcommand{\includegraphics}[1][1]{}
 
-\usepackage[nonatbib]{neurips_2021}
+\usepackage[nonatbib,final]{neurips_2021}
 
 % The following packages will be automatically loaded:
 % amsmath, amssymb, natbib, graphicx, url, algorithm2e
@@ -26,7 +26,9 @@
 \hypersetup{colorlinks,breaklinks,
 	linkcolor=darkblue,urlcolor=darkblue,
 	anchorcolor=darkblue,citecolor=darkblue}
-\definecolor{myblue}{rgb}{0,0.3,0.8} \definecolor{myorange}{rgb}{0.9,0.5,0}
+\definecolor{myblue}{rgb}{0,0.3,0.8} 
+\definecolor{mygreen}{rgb}{0,0.8,0.2}
+\definecolor{myorange}{rgb}{0.9,0.5,0}
 \usepackage{wrapfig}
 \usepackage[small]{caption}
 \usepackage[colorinlistoftodos,textsize=tiny]{todonotes} % need xargs for below
@@ -165,10 +167,10 @@
 \title{Unifying Lower Bounds on Prediction Dimension of Consistent Convex Surrogates}
 
 \author{%
-	Jessie Finocchiaro\thanks{Use footnote for providing further information
-		about author (webpage, alternative address)---\emph{not} for acknowledging
-		funding agencies.} \\
-	Department of Computer Science\\
+	Jessie Finocchiaro\\%\thanks{Use footnote for providing further information
+		%about author (webpage, alternative address)---\emph{not} for acknowledging
+	%	funding agencies.} \\
+	%Department of Computer Science\\
 	CU Boulder\\
 	\texttt{jefi8453@colorado.edu} \\
 	% examples of more authors
@@ -268,7 +270,17 @@ In the context of these quadrants, Figure~\ref{fig:results-flow} gives a roadmap
 %\bo{Citation help appreciated!} \jessie{\cite{fisher1922mathematical,zhang2004statistical,bartlett2006convexity,tewari2007consistency,steinwart2007compare,ramaswamy2016convex} -- these are the ones I know of that discuss consistency in slightly various forms.  I believe the definition we run with is most similar to \cite{ramaswamy2016convex}.}
 %\jessiet{Make this subsection more concise?}
 We focus on surrogate losses $L: \reals^d \times \Y \to \reals$ that are consistent, roughly meaning that minimizing $L$-loss corresponds to solving the target problem of interest.
-When given a \emph{target loss} $\ell$, we roughly define $L$ to be consistent if minimizing $L$, and applying a link function, minimizes $\ell$ (Def.~\ref{def:consistent-ell}, \S~\ref{sec:consis-implies-indir})~\citep{zhang2004statistical,bartlett2006convexity,tewari2007consistency,steinwart2007compare,ramaswamy2016convex}.
+When given a \emph{target loss} $\ell$, we roughly define $L$ to be consistent if minimizing $L$, and applying a link function, minimizes $\ell$ (Def.~\ref{def:consistent-ell-informal} informally; Def.~\ref{def:consistent-ell}, \S~\ref{sec:consis-implies-indir} formally)~\citep{zhang2004statistical,bartlett2006convexity,tewari2007consistency,steinwart2007compare,ramaswamy2016convex}.
+
+
+\begin{definition}[Consistent: loss, informal]\label{def:consistent-ell-informal}
+	A loss $L \in \L$ and link $(L,\psi)$ are \emph{consistent} with respect to a target loss $\ell$ if, for all distributions $D$ over $\X \times \Y$ and all sequences of measurable hypothesis functions $\{f_m : \X \to \R\}$,
+	\begin{align*}
+	\E_D L(f_m(X), Y) \to \inf_f \E_D L(f(X), Y) &\implies \E_D \ell((\psi \circ f_m)(X), Y) \to \inf_f \E_D \ell((\psi \circ f)(X), Y)~.~
+	\end{align*}
+\end{definition}
+
+
 When given instead a target statistic such as the conditional quantile or variance, we introduce a notion of consistency in line with classical statistics (Def.~\ref{def:consistent-prop}, \S~\ref{sec:consis-implies-indir}) \citep{gyorfi2006distribution, fan1998efficient,ruppert1997local}.
 Here we define $L$ to be consistent if minimizing $L$ and applying a link function yields estimates converging to the correct statistic value.
 %\jessiet{Do we still want this following paragraph?}
@@ -304,7 +316,7 @@ The key observation which underpins our approach is that consistency for target 
     % \tikzset{edge/.style = {->}}; %,> = triangle 45}}
     \tikzstyle{every node}=[font=\small];
 
-    \path[fill=blue, fill opacity = 0.1] (0,-3) -- (0,3) -- (15.8,3) -- (15.8,-3) -- cycle;
+    \path[fill=mygreen, fill opacity = 0.1] (0,-3) -- (0,3) -- (15.8,3) -- (15.8,-3) -- cycle;
     \draw[dashed, opacity = 0.3] (0,-3) -- (0,-0.1);
     \draw[dashed, opacity = 0.3] (0,3) -- (0,0.6);
     \node[draw=none] at (3,2.5) {{\large$\Lcvx$}};
@@ -345,7 +357,7 @@ See \S~\ref{subsec:complexity} for a review of previous work pertaining to notio
 As definitions of consistency are difficult to apply directly, the literature often focuses on a weaker condition called \emph{calibration}, which only applies when given a target loss, e.g. Quadrants 1 and 3. 
 Particularly, several authors~\citep{zhang2004statistical, lin2004note,bartlett2006convexity,tewari2007consistency,ramaswamy2016convex} show the equivalence of consistency and calibration in Quadrant 1.
 %, where one is given a target statistic \raf{loss?} and discrete prediction set
-We discuss the additional relationship of elicitation and calibration in \S~\ref{app:calibration}, and derive Theorem~\ref{thm:consistent-implies-indir-elic} via calibration.
+We discuss the additional relationship of elicitation and calibration in \S~\ref{app:calibration}, and derive Proposition~\ref{thm:consistent-implies-indir-elic} via calibration.
 
 %\begin{figure}
 %	\begin{minipage}{0.25\linewidth}
@@ -377,14 +389,14 @@ Here $\X$ is the \emph{feature space}, $\Y$ the \emph{label space}, and $\R$ the
 %The task is to produce a hypothesis $f: \X \to \R$, for some \emph{prediction space} $\R$, which may be different from $\Y$.
 For example, in ranking problems, $\R$ may be all $|\Y|!$ permutations over the $|\Y|$ labels forming $\Y$.
 We focus on surrogate losses, target problems, and their relationships to conditional distributions $p := \D_x = \Pr[Y|X=x]$ over $\Y$ given some $x \in X$.
-We can often abstract away $x$, working directly with a set of (conditional) distributions over outcomes $\P \subseteq \simplex$.
+We can often abstract away $x$, working directly with a set of (conditional) distributions over outcomes $\P \subseteq \simplex$, where $\simplex := \{p \in \reals^{|\Y|}_+ \mid \|p\|= 1\}$ is the probability simplex over labels.
 We then write e.g.\ $\E_p \ell(r,Y)$ to mean the expected loss of prediction $r \in \R$ when $Y\sim p$.
 
 If given, we use $\ell: \R \times \Y \to \reals$ to denote a \emph{target loss}, with predictions $r\in\R$.
 %where the goal is minimize expected loss, $\E ~ \ell(f(X),Y)$ for pairs $X,Y$ drawn from some distribution.
 Similarly, $L: \reals^d \times \Y \to \reals$ will typically denote a \emph{surrogate} loss, with surrogate predictions $u \in \reals^d$.
 In this case, $d$ is the prediction dimension of $d$.
-We write $\L_d $ for the set of $\mathcal{B}(\reals^d) \otimes \Y$-measurable and lower semi-continuous surrogates $L : \reals^d \times\Y \to \reals$ such that $\E_{Y \sim p} L(u,Y) < \infty$ for all $u \in \reals^d, p \in \P$, that are minimizable in that $\argmin_{u} \exploss{L}{u}{p}$ is nonempty for all $p\in\P$.
+We write $\L_d $ for the set of (Borel) $\mathcal{B}(\reals^d) \otimes \Y$-measurable and lower semi-continuous surrogates $L : \reals^d \times\Y \to \reals$ such that $\E_{Y \sim p} L(u,Y) < \infty$ for all $u \in \reals^d, p \in \P$, that are minimizable in that $\argmin_{u} \exploss{L}{u}{p}$ is nonempty for all $p\in\P$.
 (See \S~\ref{app:minnable-assumption} for a discussion of this assumption.)
 Moreover, $\Lcvx_d \subseteq \L_d$ is the set of convex (in $\reals^d$ for every $y \in \Y$) losses in $\L_d$.
 \btw{Sufficient condition for $\A$-normal convex integrand: $L$ is lower semi-continuous and $\mathcal{B}(\A) \otimes \Y$-measurable; $\E_p L(u,Y)$ finite for all $u, p$, there exists a $u_0$ for each $p$ so that $\E_p L(u_0, Y)$ is finite and continuous for Rockefellar's corollary, though it's stricter than Ioffe and Tokhimorov IIRC}
@@ -611,15 +623,15 @@ Corollary~\ref{cor:Pcodim-flat-elic-relint-prop} gives $\conscvx(\gamma) = 2$.
 	\centering
 	\begin{tikzpicture}[yscale=0.6]
 \tikzstyle{vertex} = [draw, minimum width=4em, inner sep=2pt, fill = white];
-\tikzstyle{vertexblue} = [draw, minimum width=4em, inner sep=2pt, fill = blue, fill opacity = 0.2, text=black, text opacity = 1.];
+\tikzstyle{vertexgrn} = [draw, minimum width=4em, inner sep=2pt, fill = green, fill opacity = 0.2, text=black, text opacity = 1.];
 \tikzstyle{every node}=[font=\small];
 
 % vertices
 \node[vertex] (speech) at  (0,2) {Speech};
-\node[vertexblue] (active) at  (-2,1) {Active};
+\node[vertexgrn] (active) at  (-2,1) {Active};
 \node[vertex] (nonactive) at  (2,1) {Non-active};
-\node[vertexblue] (median) at  (1,0) {Median};
-\node[vertexblue] (passive) at  (3,0) {Passive};
+\node[vertexgrn] (median) at  (1,0) {Median};
+\node[vertexgrn] (passive) at  (3,0) {Passive};
 
 %edges
 \draw[thick] (speech) --(active);
@@ -686,12 +698,12 @@ While perhaps intuitively obvious, even this simple result is novel.
       
       \begin{scope}
 	\clip (h) -- (m) -- (l) -- (h);
-	\draw[myblue] (1/2,1/2,0) -- (1/2, 0, 1/2);
-	\draw[myblue] (0,1/2,1/2) -- (1/2, 0, 1/2);
-	\draw[myblue] (0,1/2,1/2) -- (1/2,1/2, 0);
+	\draw[mygreen] (1/2,1/2,0) -- (1/2, 0, 1/2);
+	\draw[mygreen] (0,1/2,1/2) -- (1/2, 0, 1/2);
+	\draw[mygreen] (0,1/2,1/2) -- (1/2,1/2, 0);
 	\coordinate (point) at (0.3,0.4, 0.3);
-	\draw[orange, dashed,shorten >= -3cm, shorten <=-3cm] (1/4,3/4,0) -- (point);
-	\draw[orange, dashed,shorten >= -3cm, shorten <=-3cm] (0.7,0,0.3) -- (point);
+	\draw[myblue, dashed,shorten >= -3cm, shorten <=-3cm] (1/4,3/4,0) -- (point);
+	\draw[myblue, dashed,shorten >= -3cm, shorten <=-3cm] (0.7,0,0.3) -- (point);
 	\node at (point) {$\bullet$};
 	% \draw[orange, very thick] (0.7,0.3,0) -- (0.7,0.3,2);
       \end{scope}
@@ -720,12 +732,12 @@ While perhaps intuitively obvious, even this simple result is novel.
 	
 	\begin{scope}
           \clip (h) -- (m) -- (l) -- (h);
-          \draw[myblue,thick] (1/2,0,1/2) -- (0,1/2, 1/2);
+          \draw[mygreen,thick] (1/2,0,1/2) -- (0,1/2, 1/2);
           \def\e{1/16};
-          \draw[myblue,thick] (1/4,1/4,1/2) -- (1/2, 1/2, 0);
+          \draw[mygreen,thick] (1/4,1/4,1/2) -- (1/2, 1/2, 0);
           \coordinate (point) at (0.3,0.4, 0.3);
-          \draw[orange, dashed,shorten >= -3cm, shorten <=-3cm] (0.4, 0.6, 0.) -- (point);
-          \draw[orange, dashed,shorten >= -3cm, shorten <=-3cm] (0,0.4,0.6) -- (point);
+          \draw[myblue, dashed,shorten >= -3cm, shorten <=-3cm] (0.4, 0.6, 0.) -- (point);
+          \draw[myblue, dashed,shorten >= -3cm, shorten <=-3cm] (0,0.4,0.6) -- (point);
           \node at (point) {$\bullet$};
           % \draw[orange, very thick] (0.3,0.7,0) -- (0.3,0.7,2);
           % \draw[orange, very thick] (0.7,0.3,0) -- (0.7,0.3,2);
@@ -762,10 +774,10 @@ While perhaps intuitively obvious, even this simple result is novel.
           \pgfmathsetmacro\aa{\c}
           \coordinate (A) at ($(\aa,1-\aa,0)$);
           \coordinate (B) at ($(\aa,1-\aa,2)$);
-          \draw[myblue,thin] (A) -- (B);
+          \draw[mygreen,thin] (A) -- (B);
         }
-        \draw[myblue] (0.45,0.55,0) -- (0.45,.55,2);
-        \draw[myorange, very thick,dashed] (0.45,0.55,0) -- (0.45,.55,2);
+        \draw[mygreen] (0.45,0.55,0) -- (0.45,.55,2);
+        \draw[myblue, very thick,dashed] (0.45,0.55,0) -- (0.45,.55,2);
         % \draw[orange, very thick] (0.7,0.3,0) -- (0.7,0.3,2);
       \end{scope}
       \node (point) at (0.3,0.4,0.3) {$\bullet$};
@@ -800,8 +812,8 @@ While perhaps intuitively obvious, even this simple result is novel.
             \coordinate (A) at ($(\aa,1-\aa,0)$);
             \coordinate (B) at ($(1-\aa,\aa,0)$);
             \coordinate (C) at ($(\bb,\bb,1-2*\bb)$);
-            \draw[myblue,thin] (C) parabola (A);
-            \draw[myblue,thin] (C) parabola (B);
+            \draw[mygreen,thin] (C) parabola (A);
+            \draw[mygreen,thin] (C) parabola (B);
           }
           \def\c{0.69}
           \pgfmathsetmacro\aa{0.5*(sqrt(1-\c)+1)}
@@ -813,9 +825,9 @@ While perhaps intuitively obvious, even this simple result is novel.
           \coordinate (Cright) at ($(\bb,\bb + 2,1-2*\bb)$);
           %\coordinate (centerdot) at (0.21,0.445, 0.345);
 		  \coordinate (centerdot) at (0.3,.4,.3);
-          \draw[myblue, very thick] (C) parabola (A);
-          \draw[myblue, very thick] (C) parabola (B);
-          \draw[orange, dashed,shorten >= -3cm, shorten <=-3cm] (1/10,9/10,0) -- (centerdot);
+          \draw[mygreen, very thick] (C) parabola (A);
+          \draw[mygreen, very thick] (C) parabola (B);
+          \draw[myblue, dashed,shorten >= -3cm, shorten <=-3cm] (1/10,9/10,0) -- (centerdot);
           \node at (centerdot) {$\bullet$};
         \end{scope}
         \def\c{0.69}
