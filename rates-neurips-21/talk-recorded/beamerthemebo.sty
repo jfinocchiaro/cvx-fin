@@ -1,0 +1,183 @@
+% based somewhat on beamerthemeraf (Raf Frongillo)
+
+\mode<presentation>
+
+\newif\ifbeamer@secheader
+\beamer@secheaderfalse
+
+\DeclareOptionBeamer{secheader}{\beamer@secheadertrue}
+\ProcessOptionsBeamer
+
+% rectangles!
+\useinnertheme{rectangles}
+\setbeamertemplate{navigation symbols}{}
+
+% Theme dark or light
+\newif\ifdarktheme
+%\darkthemetrue
+\darkthemefalse
+
+
+% color definitions
+\definecolor{darkblue}{RGB}{0,0,200}
+\definecolor{darkred}{RGB}{200,0,0}
+\definecolor{darkgreen}{RGB}{0,200,0}
+\definecolor{myorange}{RGB}{255,135,15}
+\definecolor{lightblue}{RGB}{80,180,255}
+\definecolor{myyellow}{RGB}{250,230,0}
+
+
+% choose the colors of everything
+\ifdarktheme
+  \colorlet{canvasbg}{black}
+  \colorlet{canvasfg}{white}
+  \colorlet{myblockbg}{darkblue}
+  \colorlet{myblockfg}{white}
+  \colorlet{myemcolor}{myyellow}  % emphasis
+  \colorlet{myblueemcolor}{lightblue}  % blue emphasis
+\else
+  \colorlet{canvasbg}{white}
+  \colorlet{canvasfg}{black}
+  \colorlet{myblockbg}{myorange}
+  \colorlet{myblockfg}{black}
+%  \colorlet{myemcolor}{purple}  % emphasis
+  \colorlet{myemcolor}{myblockbg!85!canvasfg}  % emphasis
+  \colorlet{myblueemcolor}{darkblue}  % blue emphasis
+\fi
+
+
+% set the talk title color
+\setbeamercolor{title}{fg=myblockfg}
+
+% set colors for specific elements
+\setbeamercolor{background canvas}{fg=canvasfg,bg=canvasbg}
+\setbeamercolor{structure}{fg=myblockfg,bg=myblockbg}
+\setbeamercolor{block title}{parent=structure}
+\setbeamercolor{block body}{bg=structure.bg!35!canvasbg,fg=canvasfg}
+
+
+% otherwise throws an error !?
+\colorlet{block body.bg}{white}
+
+
+% \setbeamercolor{block}{fg=offwhite}
+% \setbeamercolor{block title}{fg=offwhite}
+% \setbeamercolor{block item}{fg=offwhite}
+\setbeamercolor{itemize item}{fg=myblockbg}%{fg=myblueemcolor!80!canvasbg} % itemize bullet color
+\setbeamercolor{itemize subitem}{fg=myblockbg}%{fg=myblueemcolor!80!canvasbg}
+\setbeamercolor{item projected}{bg=myblockbg,fg=myblockfg}%{bg=myblueemcolor!80!canvasbg,fg=myblockfg} % enumerate bullet colors
+
+\setbeamertemplate{enumerate item}{%
+  \usebeamercolor[bg]{item projected}%
+  \raisebox{1.5pt}{\colorbox{bg}{\color{fg}\footnotesize\insertenumlabel}}%
+}
+\setbeamertemplate{itemize item}{%
+  \usebeamercolor[bg]{item projected}%
+  \raisebox{4pt}{\scalebox{0.8}{\colorbox{bg}{}}}%
+}
+
+\setbeamercolor{normal text}{fg=canvasfg}
+\setbeamercolor{alerted text}{fg=myblueemcolor}
+
+% sizes
+\setbeamersize{text margin left=1em,text margin right=1em}
+%\setbeamersize{frametitle=\huge}
+
+% fonts
+\setbeamerfont{structure}{series=\bfseries} 
+\setbeamerfont{item projected}{size=\large,series=\bfseries}
+\setbeamerfont{title}{size=\huge,series=\bfseries}
+\setbeamerfont{subtitle}{size=\large,=\bfseries}
+
+
+
+\mode<all>
+
+
+% "hints" (light text)
+\newcommand{\hintcol}[1]{{\color{normal text.fg!50!block body.bg}#1}}
+\newcommand{\hint}[1]{\hintcol{\small \text{\em #1}}}
+\newcommand{\hintt}[1]{\\\quad\hint{#1}}
+\newcommand{\hintright}[1]{\hfill\hint{#1}}
+
+
+% emphasis
+\newcommand{\myem}[1]{\textbf{\color{myemcolor}#1}}
+\newcommand{\myblueem}[1]{\textbf{\color{myblueemcolor}#1}}
+\newcommand{\redem}[1]{\textbf{\color{red}#1}}
+\newcommand{\blueem}[1]{\textbf{\color{darkblue}#1}}
+\newcommand{\red}[1]{\color{red}#1}
+\newcommand{\blue}[1]{\color{darkblue}#1}
+
+
+
+% Authors in tabular format
+% Usage: \author[Short Author List]{Author 1 & Affiliation 1 \and Author 2 & Affiliation 2 \and etc}
+% Example: \author[Raf and Bo]{Raf Frongillo & CU \and Bo Waggoner & UPenn}
+\makeatletter
+\long\def\beamer@author[#1]#2{
+  \def\and{\tabularnewline}
+  \def\insertauthor{\def\inst{\beamer@insttitle}\def\and{\tabularnewline}
+  \begin{tabular}{ll}#2\end{tabular}}
+  \def\beamer@shortauthor{#1}
+}
+\makeatother
+
+%\setbeamerfont{frametitle}{size=\small}
+\setbeamerfont{author}{size=\small}
+\setbeamerfont{date}{size=\small}
+
+\defbeamertemplate*{title page}{bo}[1][]
+{
+  \vbox{}
+  \vfill
+  \begingroup
+    \begin{beamercolorbox}[sep=8pt,center,#1]{title}
+      \usebeamerfont{title}\inserttitle\par%
+      \ifx\insertsubtitle\@empty%
+      \else%
+        \vskip0.25em%
+        {\usebeamerfont{subtitle}\usebeamercolor[fg]{subtitle}\insertsubtitle\par}%
+      \fi%
+    \end{beamercolorbox}%
+    \vskip0.2em\par
+    {\centering\usebeamercolor[fg]{titlegraphic}\inserttitlegraphic\par}
+    \begin{columns}[T]
+    \column{0.4\linewidth}
+      \begin{beamercolorbox}[sep=8pt,left,#1]{author}
+        \usebeamerfont{author}
+        \insertauthor
+      \end{beamercolorbox}
+      %\begin{beamercolorbox}[sep=8pt,center,#1]{institute}
+      %  \usebeamerfont{institute}\insertinstitute
+      %\end{beamercolorbox}
+    \column{0.6\linewidth}
+      \begin{beamercolorbox}[sep=8pt,right,#1]{date}
+        \usebeamerfont{date}
+        \vspace{-0.05em}
+
+        \insertdate
+      \end{beamercolorbox}
+    \end{columns}
+  \endgroup
+  \vskip0.1em
+  \vfill
+}
+
+\setbeamertemplate{title page}[bo]
+
+%\let\oldtitlepage\titlepage
+%\renewcommand{\titlepage}{%
+%  \oldtitlepage
+%  % Need to put a phantom block somewhere to initialize colors
+%  % (not sure why; it crashes otherwise) but off the page
+%  \vspace{300pt}
+%  \begin{block}
+%    % leave this newline; crashes otherwise
+%
+%  \end{block}
+%  \vspace{-300pt}%
+%}
+%
+
+
