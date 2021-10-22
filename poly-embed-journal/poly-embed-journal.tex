@@ -1210,18 +1210,18 @@ $\psi(u)$ which returns the $k$ largest elements of $u$ (breaking ties arbitrari
 \label{sec:min-rep-sets}
 
 \jessie{Attempted brief overview}
-In \S~\ref{sec:poly-loss-embed}, we discussed the connection between embeddings and polyhedral losses; a natural next question is to understand if polyhedral losses are necessary to embed a discrete loss --- the answer is negative.
-Here, we further study the structure of embeddings, showing instead that discrete losses must be embedded by a function with polyhedral Bayes risk, which have finite minimum representative sets.
+In \S~\ref{sec:poly-loss-embed}, we discussed the connection between embeddings and polyhedral losses; a natural next question is to understand if polyhedral losses are necessary to embed a discrete loss --- the answer is negative, as we show with a counterexample in Figure~\ref{fig:modified-hinge}.
+Here, we further study the structure of embeddings, showing instead a more general necessary condition for embedding: discrete losses must be embedded by a function with polyhedral Bayes risk, which have finite minimum representative sets (Lemma~\ref{lem:X}).
 For intuition, we show in \S~\ref{subsec:match-BR} that the embedding condition simplifies to matching Bayes risks (Proposition~\ref{prop:embed-bayes-risks}).
-Since surrogates with polyhedral Bayes risk have finite minimum representative sets (Lemma~\ref{lem:X}), we introduce and study the notion of a trimmed loss studying loss values at minimum representative sets, and connect this to both tight embeddings and non-redundancy from property elicitation.
+Since surrogates with polyhedral Bayes risk have finite minimum representative sets, we introduce and study the notion of a trimmed loss studying loss values at minimum representative sets (Definition~\ref{def:trim-loss}), and connect this to both tight embeddings and non-redundancy from property elicitation (Proposition~\ref{prop:embed-iff-trims-equal}).
  
 
-\raf{Add somewhere: initially explored by~\citet{wang2020weston} under the name \emph{embedding cardinality} }
-\jessie{mentioned it right under the definition of representative set way earlier}
+%\raf{Add somewhere: initially explored by~\citet{wang2020weston} under the name \emph{embedding cardinality} }
+%\jessie{mentioned it right under the definition of representative set way earlier}
 
 \subsection{Structure of polyhedral Bayes risks}
 
-While we have focused on polyhedral losses thus far, it turns out that many of our results about embeddings extend to losses with polyhedral Bayes risks.
+While we have focused on polyhedral losses thus far, many of our results about embeddings extend to losses with polyhedral Bayes risks.
 (We say a concave function is polyhedral if its negation is a polyhedral convex function.)
 To see that this is a weaker condition, recall that Theorem~\ref{thm:poly-embeds-discrete} constructs a finite representative set $\Sc$ for any polyhedral loss $L$, and thus $\risk{L} = \risk{L|_\Sc}$ by Lemma~\ref{lem:loss-restrict}, which is polyhedral.
 The condition of polyhedral Bayes risk is strictly weaker than polyhedral surrogates, in that the Bayes risk may be polyhedral even if the loss itself is not.
@@ -1384,7 +1384,7 @@ Using this notion of trimming a loss, we can again recast our embedding conditio
 \subsection{Minimum representative sets and non-redundancy}
 
 The condition that a representative set be minimum implies that one has identified exactly the ``active'' reports of a loss, in some sense.
-We now relate this condition to another natural notion from the property elicitation literature, that of non-redundancy~\cite{frongillo2014general,lambert2018elicitation}.
+We now relate this condition to another natural notion from the property elicitation literature: non-redundancy~\cite{frongillo2014general,lambert2018elicitation}.
 Intuitively, a loss is non-redundant if no report is weakly dominated by another report.
 
 \begin{definition}[Non-redundancy]\label{def:nonredundant}
@@ -1458,8 +1458,7 @@ The result follows immediately from the definition of $\trim$.
 
 
 
-\subsection{A property elicitation perspective on trimmed losses}
-\jessie{Should this be a subsubsection?}
+\subsubsection{A property elicitation perspective on trimmed losses}
 
 We conclude this section with a similar structural result about the properties embedded by another property.
 We say a property $\Gamma:\simplex\toto\reals^d$ embeds a finite property $\gamma:\simplex\toto\R$ if condition (ii) of Definition~\ref{def:loss-embed} holds.
@@ -1469,14 +1468,15 @@ In other words, $\Gamma$ embeds $\gamma$ if we have some representative set $\Sc
 % As we define embeddings from one loss to another, one can define embeddings from one property to another, where essentially condition (i) is relaxed; see \S~\ref{app:embed-props} for a precise definition.
 Furthermore, when working with properties, it is more natural to define ``trim'' to remove any level sets which are strictly redundant.
 Precisely, we define $\trimred(\Gamma) := \{\Gamma_r \mid r \in \R\setminus\red(\Gamma)\}$.
+\jessie{We're using $\trimred$ for properties and $\trim$ for losses... do we want to consolidate notation or keep it separate?}
 %\R \textrm{ s.t. } \neg\exists r'\in\R,r'\neq r,\, \Gamma_r \subsetneq \Gamma_{r'}\}~.\]
 
 With these definitions, we now state a structural result for embeddable properties, and the properties that embed them.
 First, if $\Gamma$ embeds $\gamma$ and $\gamma$ is non-redundant, the level sets of $\Gamma$ must all be redundant relative to $\gamma$.
 In other words, $\Gamma$ is exactly the property $\gamma$ up to relabelling reports, just with other reports filling in the gaps between the embedded reports of $\gamma$.
 When working with convex losses, these extra reports often arise in the convex hull of the embedded reports.
-In this sense, we can regard embedding as only a slight departure from direct elicitation: if a loss $L$ elicits $\Gamma$ which embeds $\gamma$, we can almost think of $L$ as essentially eliciting $\gamma$ itself.
-Finally, we have an important converse: if $\Gamma$ has finitely many full-dimensional level sets, or if $\trimred(\Gamma)$ is finite, then $\Gamma$ must embed some finite elicitable property with those same level sets.
+In this sense, we can regard embedding as only a slight departure from direct elicitation: if a loss $L$ elicits $\Gamma$ which embeds $\gamma$, we can almost think of $L$ as eliciting $\gamma$ itself.
+Finally, we have an important converse: if $\Gamma$ has finitely many full-dimensional level sets, or equivalently, if $\trimred(\Gamma)$ is finite, then $\Gamma$ must embed some finite elicitable property with those same level sets.
 
 We will make use of another corollary of Proposition~\ref{prop:embed-iff-trims-equal}, stated for properties.
 \begin{corollary}\label{cor:trim-prop-red}
@@ -1559,23 +1559,23 @@ This allows us to think about the structure of properties elicited by losses wit
 \section{Polyhedral Indirect Elicitation Implies Consistency}
 \label{sec:poly-ie-consistency}
 
-Our last result concerns indirect elicitation as a necessary condition for consistency.
+Our last result concerns indirect elicitation as a necessary condition for consistency when restricting to polyhedral losses.
 Intuitively, a loss $L$ indirectly elicits a property $\gamma$ if we can compute $\gamma$ from $\prop L$.
-To formalize the condition, we use the notion of a property refining another from~\citet{frongillo2014general} \raf{also (and maybe only) Biometrika paper with Ian}.
+To formalize the condition, we use the notion of a property refining another from~\citep{frongillo2014general}.
 
 \begin{definition}[Refines]
 	Let $\Gamma:\simplex \toto \R$ and $\Gamma':\simplex\toto \R'$.
 	Then $\Gamma$ \emph{refines} $\Gamma'$ if for all $r \in \R$, there exists $r' \in \R'$ such that $\Gamma_{r} \subseteq \Gamma'_{r'}$.
 \end{definition}
 Equivalently, $\Gamma$ refines $\Gamma'$ if there is some ``link'' function $\psi:\R\to\R'$ such that $r\in\Gamma(p) \implies \psi(r) \in \Gamma'(p)$ for all $p\in\simplex$.
-We will use the fact that refinement is transitive: if $\Gamma_1$ refines $\Gamma_2$ and $\Gamma_2$ refines $\Gamma_3$, then $\Gamma_1$ refines $\Gamma_3$.
+We will use the fact that refinement is transitive: if $\Gamma$ refines $\Gamma'$ and $\Gamma'$ refines $\Gamma''$, then $\Gamma$ refines $\Gamma''$.
 
 \begin{definition}[Indirectly elicits]
   A loss $L$ \emph{indirectly elicits} a property $\gamma$ if $\prop L$ refines $\gamma$.
 \end{definition}
 
 It is straightforward to verify that consistency, and therefore calibration, implies indirect elicitation~\citep{finocchiaro2021unifying,agarwal2015consistent,steinwart2008support}.
-Indirect elicitation may appear much weaker than calibration, since in particular it does not depend on the loss except through the property it elicits.
+Indirect elicitation may appear much weaker than calibration, since in particular it does not depend on the loss except through the property it elicits, and thus only depends on the exact minimizers of the loss.
 Surprisingly, for polyhedral surrogates, we show the converse: indirect elicitation implies calibration, and therefore consistency.
 
 A useful lemma is that for polyhedral losses, indirect elicitation must always pass through an embedding.
