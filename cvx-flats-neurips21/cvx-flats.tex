@@ -257,7 +257,7 @@ Our framework rests on \emph{property elicitation}, a weaker and simpler conditi
 
 \paragraph{The ``four quadrants'' of problem types.}
 Above, we discuss a significant divergence in previous frameworks: constructing a surrogate given a \emph{target loss} versus a \emph{target statistic}.
-In addition to the two possible targets, we may have one of two domains: a \emph{discrete} (i.e.\ finite) target prediction space, like a classification problem, or a \emph{continuous} one, like a regression or estimation problem.
+In addition to the two possible targets, we may have one of two domains: a \emph{discrete} (i.e.\ finite) target prediction space, like a classification problem, or a \emph{continuous} one, like a regression or point estimation problem.
 We informally refer to the four resulting cases---target loss vs.\ target statistic, and discrete vs.\ continuous predictions---as the ``four quadrants'' of supervised learning problems, shown in Table~\ref{tab:quadrants}.
 % For further examples, see Appendix~\ref{app:omitted-examples}.
 In the context of these quadrants, Figure~\ref{fig:results-flow} gives a roadmap of our main results.
@@ -335,7 +335,8 @@ Here we define $L$ to be consistent if minimizing $L$ and applying a link functi
 %\jessiet{Do we still want this following paragraph?}
 %\raft{Good question.  I edited a bit, but still up for discussion.}
 %A priori, it is not clear that compatible definitions of consistency could be given for both target statistics and target losses.
-The key observation which underpins our approach is that consistency for target losses is a special case of consistency for target statistics (\S~\ref{sec:consis-implies-indir}).
+The key observation which underpins our approach is that consistency for target losses is a special case of consistency for target statistics (Lemma~\ref{lem:consistent-loss-implies-prop}). 
+%(\S~\ref{sec:consis-implies-indir}).
 Therefore, property elicitation---which studies the exact minimizers of loss functions---allows us to give general lower bounds on prediction dimension of any convex surrogates corresponding to a target task; these bounds apply across all four quadrants.
 See \S~\ref{subsec:complexity} for other prior work on notions of prediction dimension. 
 
@@ -350,12 +351,12 @@ We discuss the additional relationship of elicitation and calibration in \S~\ref
 
 \section{Setting}\label{sec:related-work}
 
-In supervised learning, data is drawn from a distribution $\D$ over the space $\X \times \Y$ and the goal is to produce a hypothesis $f: \X \to \R$.
+In supervised learning, data is drawn from a distribution $D$ over the space $\X \times \Y$ and the goal is to produce a hypothesis $f: \X \to \R$.
 Here $\X$ is the \emph{feature space}, $\Y$ the \emph{label space}, and $\R$ the \emph{report} or \emph{prediction space}, possibly different from $\Y$.
 %consider supervised learning problems in the space $\X \times \Y$, for some \emph{feature space} $\X$ and a \emph{label space} $\Y$, with data drawn from a distribution $D$ over $\X \times \Y$.
 %The task is to produce a hypothesis $f: \X \to \R$, for some \emph{prediction space} $\R$, which may be different from $\Y$.
 For example, in ranking problems, $\R$ may be all $|\Y|!$ permutations over the $|\Y|$ labels forming $\Y$.
-We focus on surrogate losses, target problems, and their relationships to conditional distributions $p := \D_x = \Pr[Y|X=x]$ over $\Y$ given some $x \in X$.
+We focus on surrogate losses, target problems, and their relationships to conditional distributions $p := D_x = \Pr[Y|X=x]$ over $\Y$ given some $x \in X$.
 We can often abstract away $x$, working directly with a set of (conditional) distributions over outcomes $\P \subseteq \simplex$, where $\simplex := \{p \in \reals^{|\Y|}_+ \mid \|p\|= 1\}$ is the probability simplex over labels.
 We then write e.g.\ $\E_p \ell(r,Y)$ to mean the expected loss of prediction $r \in \R$ when $Y\sim p$.
 
@@ -437,7 +438,19 @@ Consistency with respect to a property follows similarly, but instead of converg
 	\end{equation}
 \end{definition}
 
-\raf{Lemma~\ref{lem:consistent-loss-implies-prop} goes here}
+
+We can now state Lemma~\ref{lem:consistent-loss-implies-prop}, with proof deferred to \S~\ref{sec:consis-implies-indir}.
+
+\begin{restatable}{lemma}{consistentlossimpliesprop}\label{lem:consistent-loss-implies-prop}
+	Let a convex $\P \subseteq \simplex$ be given.
+	Given a surrogate loss $L \in \L$, link $\psi$, and target loss $\ell$, set
+	$\mu(r,p) := \E_p \ell(r,Y) - \min_{r'}\E_p \ell(r',Y)$.
+	Then there is a $\D$ such that
+	$(L, \psi)$ is $\D$-consistent with respect to $\ell$ if and only if $(L,\psi)$ is $(\propdis, \D)$-consistent with respect to $\gamma := \prop{\ell}$. 
+%	\btw{Note: don't actually need $\gamma$ nonempty here.}
+\end{restatable}
+\jessiet{Note: this is the formal version- do we want an informal version here instead, or to just leave the details in here?}
+
 
 As observed in the literature, e.g.~\citep{steinwart2008support,agarwal2015consistent},
 both notions of consistency imply in particular that the link function must map exactly optimal surrogate reports to exactly optimal target reports.
@@ -1014,7 +1027,7 @@ In light of our $d$-flats framework, the result is nearly immediate, as the proo
   Letting $F = \zeros{V(r,\cdot)}$, we therefore have an arbitrary $k$-flat containing $p$.
   The proof then proceeds to construct some $p'\in F$ with $\mode(p') \neq u$.
   Corollary~\ref{cor:Pcodim-flat-elic-relint-prop} now gives $\conscvx(\mode) \geq \eliccvx(\mode) \geq k+1$.
-  \btw{NOTE: the set $\P$ is not convex.  Take two univariance Gaussians centered at 0 and 1: they are each in $\P$ but their mixture is not.}
+  \btw{NOTE: the set $\P$ is not convex.  Take two univariance Gaussians centered at 0 and 1: they are each in $\P$ but their mixture is not. \jessie{Should we be concerned about this}}
   As $k$ was arbitrary, the result follows.
 \end{proof}
 
@@ -1065,7 +1078,8 @@ More broadly, we would like to characterize $\conscvx$ and $\eliccvx$ and develo
 
 \begin{ack}
   We thank Adam Bloniarz and Nishant Mehta for several key suggestions and insights.
-  This material is based upon work supported by the National Science Foundation under Grant Nos.\ IIS-2045347 and 2040434. \jessie{confirm GRFP number}\raf{I think it's usually stated differently for GRFPs, since it's not really a grant application, right?}
+  This material is based upon work supported by the National Science Foundation under Grant No.\ IIS-2045347. 
+  Additionally, this material is based upon work supported by the National Science Foundation Graduate Research Fellowship under Grant No. 2040434. \jessie{confirm GRFP number}
 \end{ack}
 
 
@@ -1140,21 +1154,13 @@ As the main focus of this paper is lower bounds on the prediction dimension, i.e
 
 Given a target loss $\ell$, we can define a statistic $\gamma$, the property it elicits.
 Intuitively, consistency of a surrogate $L$ with respect to $\ell$ and $\gamma$ are equivalent, i.e. in both cases estimates should converge to values that minimize $\ell$-loss.
-We formalize this by letting $\propdis$ be the $\ell$-regret, yielding Lemma~\ref{lem:consistent-loss-implies-prop}.
+We formalize this by letting $\propdis$ be the $\ell$-regret, $R_\ell := \E_p \ell(r,Y) - \min_{r'}\E_p \ell(r',Y)$, yielding Lemma~\ref{lem:consistent-loss-implies-prop}.
 %If $\gamma$ is a property elicited by a target loss $\ell$, then taking $\propdis$ to be the $\ell$-regret makes the two definitions are equivalent, as stated in Lemma~\ref{lem:consistent-loss-implies-prop}, proven in Appendix~\ref{app:misc-omitted-proofs}.% for the appropriate choice of $\propdis$.
 
 \raf{Important: I think we need to move this lemma up to \S~\ref{sec:informal-consis-implies-indir}.  Probably using this exact same statement.  Related: do we define $R_\ell$ anywhere?  Not in this section, unless I missed it...}
-\begin{restatable}{lemma}{consistentlossimpliesprop}\label{lem:consistent-loss-implies-prop}
-	Let a convex $\P \subseteq \simplex$ be given.
-	%\jessiet{Defer to appendix?  Thoughts?}\raft{Let's keep it but move the proof.}
-	Given a surrogate loss $L \in \L$, link $\psi$, and target loss $\ell$, set
-	% Take $\propdis: \R \times \simplex \to \reals_+$ with 
-	$\mu(r,p) := R_\ell(r,p)$.
-	Then there is a $\D$ such that
-	$(L, \psi)$ is $\D$-consistent with respect to $\ell$ if and only if $(L,\psi)$ is $(\propdis, \D)$-consistent with respect to $\gamma := \prop{\ell}$. 
-	\btw{Note: don't actually need $\gamma$ nonempty here.}
-\end{restatable}
+\jessie{Good catch; I think we removed it from COLT to NeurIPS or vice versa}
 
+\consistentlossimpliesprop*
 \begin{proof}
 	First, observe that $\propdis(r,p) = 0 \iff \exploss{\ell}{r}{p} = \inf_{r' \in \R} \exploss{\ell}{r'}{p} \iff r \in \gamma(p)$.
 	Now suppose $(L, \psi)$ are consistent with respect to $\ell$, and take any sequence $\{f_m\}$ of measurable hypotheses.
