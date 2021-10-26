@@ -212,7 +212,7 @@ The convex consistency dimension of a supervised learning task is the lowest pre
 A loss function is called a \emph{surrogate} when it is used to solve a related, but not identical, ``target'' problem of interest.
 Selecting a hypothesis by minimizing surrogate risk is one of the most widespread techniques in supervised machine learning.
 %There are two main reasons why a surrogate loss is necessary: (I) the target loss does not satisfy some desiderata, such as convexity, or (II) the goal is to estimate some target statistic and there is no target loss, as in many continuous estimation problems.
-There are two main reasons why a surrogate loss is necessary: (I) the target problem is to minimize a loss, the \emph{target loss}, that does not satisfy some desiderata such as convexity; or (II) the target problem is to estimate some \emph{target statistic} and some associated surrogate loss is required to do so, as in many continuous estimation problems.
+There are two main reasons why a surrogate loss is necessary: (I) the target problem is to minimize a loss, the \emph{target loss}, that does not satisfy some desiderata such as continuity or convexity; or (II) the target problem is to estimate some \emph{target statistic} and some associated surrogate loss is required to do so, as in many continuous estimation problems.
 %(1) often occurs in discrete settings such as classification, while (2) is commone in continuous prediction problems when one seeks to estimate a target conditional statistic.%\raft{I felt we needed a sentence like this to justify \emph{why} we need a surrogate. And given that we need it, we can't really avoid hinting at the quadrants...}
 In both settings, a key criteria for choosing a surrogate loss is \emph{consistency}, a precursor to excess risk bounds and convergence rates.
 Roughly speaking, consistency means that minimizing surrogate risk corresponds to solving the target problem of interest, i.e. in (I) the target risk is also minimized, or in (II) the continuous prediction approaches the true conditional statistic.
@@ -223,8 +223,7 @@ This state of affairs is especially dire when one seeks low \emph{prediction dim
 For example, in multiclass classification with $n$ labels, the prediction domain might be $\reals^n$.
 In many type (I) settings, such as structured prediction and extreme classification, the prediction dimension of any convex and consistent surrogate often becomes intractably large, forcing one to sacrifice consistency for computational efficiency.
 To understand whether this sacrifice is necessary, recent work developed tools like the feasible subspace dimension to lower bound the prediction dimension of any consistent convex surrogate~\citep{ramaswamy2016convex}.
-Challenges of type (II) include estimating risk measures such as conditional value at risk (CVaR), with applications in financial regulation, robust engineering design, and algorithmic fairness.
-\raft{Add cites after submission; they are in \S~\ref{sec:risk-measures}.}
+Challenges of type (II) include estimating risk measures such as conditional value at risk (CVaR), with applications in financial regulation, robust engineering design, and algorithmic fairness~\cite{acerbi2014back-testing,fissler2016expected,rockafellar2010buffered,williamson2019fairness}.
 Risk measures are not elicitable, meaning they cannot be specified via a target loss, and thus we seek a surrogate loss of low (or at least finite) prediction dimension.
 Recent work~\citep{fissler2016higher,frongillo2015elicitation,frongillo2020elicitation} gives prediction dimension bounds for some of these risk measures, but without the requirement that the surrogate be convex; bounds for convex surrogates are left as a major open question.
 
@@ -267,16 +266,13 @@ In the context of these quadrants, Figure~\ref{fig:results-flow} gives a roadmap
 %\bo{Citation help appreciated!} \jessie{\cite{fisher1922mathematical,zhang2004statistical,bartlett2006convexity,tewari2007consistency,steinwart2007compare,ramaswamy2016convex} -- these are the ones I know of that discuss consistency in slightly various forms.  I believe the definition we run with is most similar to \cite{ramaswamy2016convex}.}
 %\jessiet{Make this subsection more concise?}
 We focus on surrogate losses $L: \reals^d \times \Y \to \reals$ that are consistent, roughly meaning that minimizing $L$-loss corresponds to solving the target problem of interest.
-When given a \emph{target loss} $\ell$, we roughly define $L$ to be consistent if minimizing $L$, and applying a link function, minimizes $\ell$ (Def.~\ref{def:consistent-ell-informal} informally; Def.~\ref{def:consistent-ell}, \S~\ref{sec:consis-implies-indir} formally)~\citep{zhang2004statistical,bartlett2006convexity,tewari2007consistency,steinwart2007compare,ramaswamy2016convex}.
+We give informal definitions of consistency in \S~\ref{sec:informal-consis-implies-indir}, with formal definitions in \S~\ref{sec:consis-implies-indir}.
+%Def.~\ref{def:consistent-ell-informal} informally; Def.~\ref{def:consistent-ell} formally
+%,bartlett2006convexity
+% (Def.~\ref{def:consistent-prop-informal} informally; Def.~\ref{def:consistent-prop}, \S~\ref{sec:consis-implies-indir} formally)
 
-
-
-When given instead a target statistic such as the conditional quantile or variance, we introduce a notion of consistency in line with classical statistics (Def.~\ref{def:consistent-prop-informal} informally; Def.~\ref{def:consistent-prop}, \S~\ref{sec:consis-implies-indir} formally) \citep{gyorfi2006distribution, fan1998efficient,ruppert1997local}.
-Here we define $L$ to be consistent if minimizing $L$ and applying a link function yields predictions converging to the correct statistic value.
-%\jessiet{Do we still want this following paragraph?}
-%\raft{Good question.  I edited a bit, but still up for discussion.}
-%A priori, it is not clear that compatible definitions of consistency could be given for both target statistics and target losses.
-The key observation which underpins our approach is that consistency for target losses is a special case of consistency for target statistics (\S~\ref{sec:consis-implies-indir}).
+When given a \emph{target loss} $\ell$, we roughly define $L$ to be consistent if minimizing $L$, and applying a link function, minimizes $\ell$~\citep{zhang2004statistical,tewari2007consistency,steinwart2007compare,ramaswamy2016convex}.
+When given instead a target statistic such as the conditional quantile or variance,\!%terrible spacing hack
 \begin{table}[h!]
   \vspace*{10pt}
   \begin{center}
@@ -334,8 +330,14 @@ The key observation which underpins our approach is that consistency for target 
 \caption{Flow and implications of our results. Compared to calibration, we suggest indirect elicitation as a simpler but almost-as-powerful necessary condition for consistency. In particular, we obtain a testable condition (Theorem~\ref{thm:convex-flats-inf-dim}), based on $d$-flats, for the existence of a $d$-dimensional consistent convex surrogate. This condition recovers and strengthens existing calibration-based results for Q1, while simultaneously applying to other quadrants. We illustrate the breadth and power of $d$-flats by resolving two open questions for Q3 and Q4 in \S~\ref{sec:contin-consis}.}
 \label{fig:results-flow}
 \end{figure}
+we introduce a notion of consistency in line with classical statistics \citep{gyorfi2006distribution, fan1998efficient,ruppert1997local}.
+Here we define $L$ to be consistent if minimizing $L$ and applying a link function yields predictions converging to the correct statistic value.
+%\jessiet{Do we still want this following paragraph?}
+%\raft{Good question.  I edited a bit, but still up for discussion.}
+%A priori, it is not clear that compatible definitions of consistency could be given for both target statistics and target losses.
+The key observation which underpins our approach is that consistency for target losses is a special case of consistency for target statistics (\S~\ref{sec:consis-implies-indir}).
 Therefore, property elicitation---which studies the exact minimizers of loss functions---allows us to give general lower bounds on prediction dimension of any convex surrogates corresponding to a target task; these bounds apply across all four quadrants.
-See \S~\ref{subsec:complexity} for a review of previous work pertaining to notions of prediction dimension. 
+See \S~\ref{subsec:complexity} for other prior work on notions of prediction dimension. 
 
 
 
@@ -408,14 +410,14 @@ Typically, we denote the target property by $\gamma$, and the surrogate by $\Gam
 
 
 \subsection{Consistency and indirect elicitation}
+\label{sec:informal-consis-implies-indir}
 
-\raft{Consistency implies elicitation, so this sentence seems logically incoherent (you can't have the former without the latter.  Recommend reading through this subsection again with fresh eyes.}
-\jessiet{I was trying to build off of: we just talked about elicitation, but who gives a shit about it, since consistency is what we need. Definitely see how it could be confusing to read though.}
-%Consistency, not necessarily property elicitation, is a prerequisite for deriving error bounds for a loss.
-While property elicitation studies the exact minimizers of a loss, it is not yet clear when and how this can act as a proxy for consistency --- the true condition required for deriving excess risk bounds.
-Here, we define consistency here with respect to either a target loss or a property, and show their equivalence in Lemma~\ref{lem:consistent-loss-implies-prop} (\S~\ref{sec:consis-implies-indir}) in our setting.
-In a loose sense, this allows us to ``translate'' the study of consistency for problems in Quadrant 1 to Quadrant 2, and from Quadrant 3 to Quadrant 4.
-
+\raft{Your edit was much better for that narrative -- I think this narrative might flow better though.}
+As discussed above, notions of consistency have appeared in the literature with respect to target losses, and to target statistics / properties.
+We give informal definitions of both notions here, with formal versions deferred to \S~\ref{sec:consis-implies-indir}.
+Lemma~\ref{lem:consistent-loss-implies-prop} shows that, in fact, one can capture consistency with respect to a target loss as a special case of consistency with respect to a target property.
+This observation allows us to translate consistency from Quadrant 1 to Quadrant 2, and from Quadrant 3 to Quadrant 4;
+in particular, it will allow us to prove bounds for all four quadrants simultaneously.
 
 \begin{definition}[Consistent: loss (informal)]\label{def:consistent-ell-informal}
 	A loss $L \in \L$ and link $(L,\psi)$ are \emph{consistent} with respect to a target loss $\ell$ if, for all distributions $D$ over $\X \times \Y$ and all sequences of measurable hypothesis functions $\{f_m : \X \to \R\}$,
@@ -435,23 +437,27 @@ Consistency with respect to a property follows similarly, but instead of converg
 	\end{equation}
 \end{definition}
 
+\raf{Lemma~\ref{lem:consistent-loss-implies-prop} goes here}
 
-The concept of the link $\psi$ in consistency allows us to think about the application of such a link directly to a property, which gives rise to the notion of \emph{indirect} elicitation.
-In Proposition~\ref{prop:consistent-implies-indir-elic}, we connect consistency and elicitation by this observation: if a surrogate is consistent with respect to a property (or loss eliciting that property), then that surrogate and link \emph{indirectly} elicit a that property.
-For single-valued properties, this definition reduces to the natural requirement $\gamma = \psi \circ \Gamma$.
+As observed in the literature, e.g.~\citep{steinwart2008support,agarwal2015consistent},
+both notions of consistency imply in particular that the link function must map exactly optimal surrogate reports to exactly optimal target reports.
+In property elicitation, this condition is known as \emph{indirect elicitation}: for single-valued properties, $\Gamma$ and $\psi$ indirectly elicit $\gamma$ if $\gamma = \psi \circ \Gamma$.
+The definition below covers the general set-valued case as well.
+%Informally, consistency means that a hypothesis sequence converging to the optimal surrogate loss, in expectation over the data distribution $\D \sim \X \times \Y$, links to a sequence converging to the optimal target loss or conditional statistical value.
+%See \S~\ref{sec:consis-implies-indir} for definitions and the proof.
+
 \begin{definition}[Indirect Elicitation]\label{def:indirectly-elicits}
 	A surrogate loss and link $(L, \psi)$ \emph{indirectly elicit} a property $\gamma:\P \toto \R$ if $L$ elicits a property $\Gamma: \P \toto \reals^d$ such that for all $u \in \reals^d$, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$.
 	We say $L$ \emph{indirectly elicits} $\gamma$ if such a link $\psi$ exists.
   \btw{interesting discussion of set-valued properties commented out; revive later!}
 \end{definition}
-
-As observed implicitly and explicitly in the literature, e.g.~\citep{steinwart2008support,agarwal2015consistent}, the following proposition states that consistency implies indirect elicitation.
-%Informally, consistency means that a hypothesis sequence converging to the optimal surrogate loss, in expectation over the data distribution $\D \sim \X \times \Y$, links to a sequence converging to the optimal target loss or conditional statistical value.
-%See \S~\ref{sec:consis-implies-indir} for definitions and the proof.
-
 \begin{restatable}{proposition}{consistencyimpliesindirelic}\label{prop:consistent-implies-indir-elic}
 	For a surrogate $L \in \L$, if the pair $(L, \psi)$ is consistent with respect to a property $\gamma: \P \toto \R$ or a loss $\ell$ eliciting $\gamma$, then $(L, \psi)$ indirectly elicits $\gamma$.
 \end{restatable}
+In other words, indirect elicitation is a necessary condition for consistency.
+In light of Lemma~\ref{lem:consistent-loss-implies-prop}, we can use this fact to build prediction dimension lower bounds across all four quadrants.
+
+
 
 % While there are several possible set-valued extensions, Definition~\ref{def:indirectly-elicits} best matches  suited for studying consistency.
 % There are a few possible definitions of indirect elicitation, but this is the most applicable for our setting because when we consider set-valued properties, we do not have that \emph{all} optimal predictions for $\Gamma$ must be linked back to \emph{all} optimal predictions for $\gamma$.
@@ -1008,7 +1014,7 @@ In light of our $d$-flats framework, the result is nearly immediate, as the proo
   Letting $F = \zeros{V(r,\cdot)}$, we therefore have an arbitrary $k$-flat containing $p$.
   The proof then proceeds to construct some $p'\in F$ with $\mode(p') \neq u$.
   Corollary~\ref{cor:Pcodim-flat-elic-relint-prop} now gives $\conscvx(\mode) \geq \eliccvx(\mode) \geq k+1$.
-  \raft{NOTE: the set $\P$ is not convex.  Take two univariance Gaussians centered at 0 and 1: they are each in $\P$ but their mixture is not.}
+  \btw{NOTE: the set $\P$ is not convex.  Take two univariance Gaussians centered at 0 and 1: they are each in $\P$ but their mixture is not.}
   As $k$ was arbitrary, the result follows.
 \end{proof}
 
@@ -1045,11 +1051,11 @@ More broadly, we would like to characterize $\conscvx$ and $\eliccvx$ and develo
 %One might be able to further tighten these bounds by property elicitation by studying monotonicity and adjacency of level sets.
 %In discrete predictions, these bounds might also be tightened if the equivalence of convex consistency dimension and embedding dimension of~\citet{finocchiaro2020embedding} is shown; the current embedding dimension bounds are not tight either, but additional structure is imposed by considering the embedding framework.
 
-\bigskip
-\paragraph{Broader impacts via influence on downstream research.}
-\raft{Recommend cutting for camera-ready.  Ultimately we just say ``beats me'' at the end, and the rest is not really about broader impacts :-]}
-\jessiet{You're not wrong...}
-Since our work is theoretical, it is impossible to forecast downstream applications of this work and their social impact.
+% \bigskip
+% \paragraph{Broader impacts via influence on downstream research.}
+% \raft{Recommend cutting for camera-ready.  Ultimately we just say ``beats me'' at the end, and the rest is not really about broader impacts :-]}
+% \jessiet{You're not wrong...}
+% Since our work is theoretical, it is impossible to forecast downstream applications of this work and their social impact.
 %This paper takes a step toward an impactful general program: to understand and design \emph{useful} (i.e. convex, consistent, calibrated, etc.) surrogate losses of low dimensionality.
 %The theory in this paper may help practitioners in a number of ways.
 %Understanding how to design consistent convex surrogates for different target losses and properties we wish to learn, and when this is impossible, can lead to understanding the tradeoffs that are often made in the current ad-hoc design of surrogates.
@@ -1059,77 +1065,13 @@ Since our work is theoretical, it is impossible to forecast downstream applicati
 
 \begin{ack}
   We thank Adam Bloniarz and Nishant Mehta for several key suggestions and insights.
-  This material is based upon work supported by the National Science Foundation under Grant Nos.\ IIS-2045347 and 2040434. \jessie{confirm GRFP number}
+  This material is based upon work supported by the National Science Foundation under Grant Nos.\ IIS-2045347 and 2040434. \jessie{confirm GRFP number}\raf{I think it's usually stated differently for GRFPs, since it's not really a grant application, right?}
 \end{ack}
 
 
 \bibliographystyle{plainnat}
 \bibliography{diss,extra}
 
-\newpage
-\raf{Similarly, recommend cutting the checklist.  Bo and I did for our paper.}
-\section*{Checklist}
-
-\begin{enumerate}
-	
-	\item For all authors...
-	\begin{enumerate}
-		\item Do the main claims made in the abstract and introduction accurately reflect the paper's contributions and scope?
-		\answerYes{}
-		\item Did you describe the limitations of your work?
-		\answerYes{}
-		\item Did you discuss any potential negative societal impacts of your work?
-		\answerYes{} \textbf{See discussion in the Introduction; it is hard to forecast impacts of theoretical work, but we try to explain some impacts.}
-		\item Have you read the ethics review guidelines and ensured that your paper conforms to them?
-		\answerYes{}
-	\end{enumerate}
-	
-	\item If you are including theoretical results...
-	\begin{enumerate}
-		\item Did you state the full set of assumptions of all theoretical results?
-		\answerYes{}\textbf{Sometimes details are deferred to Appendix, but we make an effort to explicitly state when that happens.}
-		\item Did you include complete proofs of all theoretical results?
-		\answerYes{}\textbf{Sometimes proofs are deferred to Appendix, but we make an effort to explicitly state when that happens.}
-	\end{enumerate}
-	
-	\item If you ran experiments...
-	\begin{enumerate}
-		\item Did you include the code, data, and instructions needed to reproduce the main experimental results (either in the supplemental material or as a URL)?
-		\answerNA{}
-		\item Did you specify all the training details (e.g., data splits, hyperparameters, how they were chosen)?
-		\answerNA{}
-		\item Did you report error bars (e.g., with respect to the random seed after running experiments multiple times)?
-		\answerNA{}
-		\item Did you include the total amount of compute and the type of resources used (e.g., type of GPUs, internal cluster, or cloud provider)?
-		\answerNA{}
-	\end{enumerate}
-	
-	\item If you are using existing assets (e.g., code, data, models) or curating/releasing new assets...
-	\begin{enumerate}
-		\item If your work uses existing assets, did you cite the creators?
-		\answerNA{}
-		\item Did you mention the license of the assets?
-		\answerNA{}
-		\item Did you include any new assets either in the supplemental material or as a URL?
-		\answerNA{}
-		\item Did you discuss whether and how consent was obtained from people whose data you're using/curating?
-		\answerNA{}
-		\item Did you discuss whether the data you are using/curating contains personally identifiable information or offensive content?
-		\answerNA{}
-	\end{enumerate}
-	
-	\item If you used crowdsourcing or conducted research with human subjects...
-	\begin{enumerate}
-		\item Did you include the full text of instructions given to participants and screenshots, if applicable?
-		\answerNA{}
-		\item Did you describe any potential participant risks, with links to Institutional Review Board (IRB) approvals, if applicable?
-		\answerNA{}
-		\item Did you include the estimated hourly wage paid to participants and the total amount spent on participant compensation?
-		\answerNA{}
-	\end{enumerate}
-	
-\end{enumerate}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \appendix
 \section{Consistency Implies Indirect Elicitation}\label{sec:consis-implies-indir}
@@ -1201,7 +1143,7 @@ Intuitively, consistency of a surrogate $L$ with respect to $\ell$ and $\gamma$ 
 We formalize this by letting $\propdis$ be the $\ell$-regret, yielding Lemma~\ref{lem:consistent-loss-implies-prop}.
 %If $\gamma$ is a property elicited by a target loss $\ell$, then taking $\propdis$ to be the $\ell$-regret makes the two definitions are equivalent, as stated in Lemma~\ref{lem:consistent-loss-implies-prop}, proven in Appendix~\ref{app:misc-omitted-proofs}.% for the appropriate choice of $\propdis$.
 
-
+\raf{Important: I think we need to move this lemma up to \S~\ref{sec:informal-consis-implies-indir}.  Probably using this exact same statement.  Related: do we define $R_\ell$ anywhere?  Not in this section, unless I missed it...}
 \begin{restatable}{lemma}{consistentlossimpliesprop}\label{lem:consistent-loss-implies-prop}
 	Let a convex $\P \subseteq \simplex$ be given.
 	%\jessiet{Defer to appendix?  Thoughts?}\raft{Let's keep it but move the proof.}
