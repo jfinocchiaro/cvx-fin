@@ -1109,13 +1109,18 @@ First, given a target loss $\ell$, we say $L$ is consistent if optimizing $L$ an
 Second, given a target property $\gamma$, such as the $\alpha$-quantile, we say $L$ is consistent if optimizing $L$ implies approaching, in some sense, the correct statistic $\gamma(D_x)$ of the conditional distributions $D_x = \Pr[Y|X=x]$ (Definition~\ref{def:consistent-prop}).
 We then observe that Definition~\ref{def:consistent-ell} is subsumed by Definition~\ref{def:consistent-prop}, and use this to show consistency implies $L$ indirectly elicits $\prop{\ell}$ or $\gamma$ respectively.
 
+\begin{condition}[Covers]
+	A set $\D \subseteq \Delta(\X \times \Y)$ \emph{covers} a convex set $\P \subseteq \simplex$ if, for all $p \in \P$, there exists $D \in \D$ and $x \in \X$ such that $D$ has a point mass on $x$ and $p = D_x$.
+\end{condition}
+
 \begin{definition}[Consistent: loss]\label{def:consistent-ell}
 	A loss $L \in \L$ and link $(L,\psi)$ are \emph{$\D$-consistent} for a set $\D$ of distributions over $\X \times \Y$ with respect to a target loss $\ell$ if, for all $D \in \D$ and all sequences of measurable hypothesis functions $\{f_m : \X \to \R\}$,
 	\begin{align*}
 	\E_D L(f_m(X), Y) \to \inf_f \E_D L(f(X), Y) &\implies \E_D \ell((\psi \circ f_m)(X), Y) \to \inf_f \E_D \ell((\psi \circ f)(X), Y)~.~
 	\end{align*}
 	% Given a set $\P \subseteq \simplex$, if for all distributions $p \in \P$, there exists a $D \in \D$ and $x \in \X$ such that $D$ has a point mass on $x$ and $p = D_x$, then we simply say $(L,\psi)$ is consistent.
-	For a given convex set $\P \subseteq \simplex$, we simply say $(L,\psi)$ is \emph{consistent} if it is $\D$-consistent for some $\D$ satisfying the following: for all $p \in \P$, there exists $D \in \D$ and $x \in \X$ such that $D$ has a point mass on $x$ and $p = D_x$.
+	For a given convex set $\P \subseteq \simplex$, we simply say $(L,\psi)$ is \emph{consistent} if it is $\D$-consistent for some $\D$ covering $\P$.
+	%satisfying the following: for all $p \in \P$, there exists $D \in \D$ and $x \in \X$ such that $D$ has a point mass on $x$ and $p = D_x$.
 	%\raft{Touched up to clarify the quantification over $\D$ \jessie{What I was trying to say, but better.}}
 \end{definition}
 
@@ -1140,7 +1145,8 @@ In particular we should have $\propdis(r,p) = 0 \iff r \in \gamma(p)$.
 	\E_{D} L(f_m(X), Y) \to \inf_f \E_{D} L( f(X), Y) \implies \E_X \propdis(\psi \circ f_m(X), D_X) \to 0~.~
 	\end{equation}
 	% where $D_x = \Pr[Y|X=x]$.
-	We simply say $(L,\psi)$ is \emph{$\propdis$-consistent} if it is $(\propdis,\D)$-consistent for some $\D$ satisfying the following: for all $p \in \P$, there exists $D \in \D$ and $x \in \X$ such that $D$ has a point mass on $x$ and $p = D_x$.
+	We simply say $(L,\psi)$ is \emph{$\propdis$-consistent} if it is $(\propdis,\D)$-consistent for some $\D$ covering $\P$.
+	%satisfying the following: for all $p \in \P$, there exists $D \in \D$ and $x \in \X$ such that $D$ has a point mass on $x$ and $p = D_x$.
 	Additionally, we say $(L,\psi)$ is \emph{consistent} if there is a $\propdis$ such that $(L,\psi)$ is $\propdis$-consistent.
 	% Suppose there is a set $\D$ such that, for all $p \in \P$, there is a $D \in \D$ with a point mass on some $x \in \X$ such that $p = D_x$ and a $\propdis$ satisfying the requirements above.
 	% In this case, if $(L,\psi)$ are $(\propdis,\D)$-consistent, we simply say the pair is consistent with respect to $\gamma$.
@@ -1157,10 +1163,17 @@ Intuitively, consistency of a surrogate $L$ with respect to $\ell$ and $\gamma$ 
 We formalize this by letting $\propdis$ be the $\ell$-regret, $R_\ell := \E_p \ell(r,Y) - \min_{r'}\E_p \ell(r',Y)$, yielding Lemma~\ref{lem:consistent-loss-implies-prop}.
 %If $\gamma$ is a property elicited by a target loss $\ell$, then taking $\propdis$ to be the $\ell$-regret makes the two definitions are equivalent, as stated in Lemma~\ref{lem:consistent-loss-implies-prop}, proven in Appendix~\ref{app:misc-omitted-proofs}.% for the appropriate choice of $\propdis$.
 
-\raf{Important: I think we need to move this lemma up to \S~\ref{sec:informal-consis-implies-indir}.  Probably using this exact same statement.  Related: do we define $R_\ell$ anywhere?  Not in this section, unless I missed it...}
-\jessie{Good catch; I think we removed it from COLT to NeurIPS or vice versa}
+%\raf{Important: I think we need to move this lemma up to \S~\ref{sec:informal-consis-implies-indir}.  Probably using this exact same statement.  Related: do we define $R_\ell$ anywhere?  Not in this section, unless I missed it...}
+%\jessie{Good catch; I think we removed it from COLT to NeurIPS or vice versa}
 
-\consistentlossimpliesprop*
+\begin{restatable}{lemma}{consistentlossimpliesprop}\label{lem:consistent-loss-implies-prop}
+	Let a convex $\P \subseteq \simplex$ be given.
+	Given a surrogate loss $L \in \L$, link $\psi$, and target loss $\ell$, set
+	$\mu(r,p) := \E_p \ell(r,Y) - \min_{r'}\E_p \ell(r',Y)$ as the excess risk of $\ell$, $R_\ell$.
+	Then there is a $\D$ covering $\P$ such that
+	$(L, \psi)$ is $\D$-consistent with respect to $\ell$ if and only if $(L,\psi)$ is $(\propdis, \D)$-consistent with respect to $\gamma := \prop{\ell}$. 
+	%	\btw{Note: don't actually need $\gamma$ nonempty here.}
+\end{restatable}
 \begin{proof}
 	First, observe that $\propdis(r,p) = 0 \iff \exploss{\ell}{r}{p} = \inf_{r' \in \R} \exploss{\ell}{r'}{p} \iff r \in \gamma(p)$.
 	Now suppose $(L, \psi)$ are consistent with respect to $\ell$, and take any sequence $\{f_m\}$ of measurable hypotheses.
