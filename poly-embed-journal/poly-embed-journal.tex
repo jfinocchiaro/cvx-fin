@@ -1218,7 +1218,7 @@ $\psi(u)$ which returns the $k$ largest elements of $u$ (breaking ties arbitrari
 In \S~\ref{sec:poly-loss-embed}, we discussed the connection between embeddings and polyhedral losses; a natural next question is to understand if polyhedral losses are necessary to embed a discrete loss --- the answer is negative, as we show with a counterexample in Figure~\ref{fig:modified-hinge}.
 Here, we further study the structure of embeddings, showing instead a more general necessary condition for embedding: discrete losses must be embedded by a function with polyhedral Bayes risk, which have finite minimum representative sets (Lemma~\ref{lem:X}).
 For intuition, we show in \S~\ref{subsec:match-BR} that the embedding condition simplifies to matching Bayes risks (Proposition~\ref{prop:embed-bayes-risks}).
-Since surrogates with polyhedral Bayes risk have finite minimum representative sets, we introduce and study the notion of a trimmed loss studying loss values at minimum representative sets (Definition~\ref{def:trim-loss}), and connect this to both tight embeddings and non-redundancy from property elicitation (Proposition~\ref{prop:embed-iff-trims-equal}).
+Since surrogates with polyhedral Bayes risk have finite minimum representative sets, we introduce and study the notion of a trimmed loss, studying loss values at minimum representative sets (Definition~\ref{def:trim-loss}), and connect this to both tight embeddings and non-redundancy from property elicitation (Proposition~\ref{prop:embed-iff-trims-equal}).
  
 
 %\raf{Add somewhere: initially explored by~\citet{wang2020weston} under the name \emph{embedding cardinality} }
@@ -1263,6 +1263,7 @@ For example, a modified hinge loss $L(r)_y = \max(r^2-1,1-ry)$ as shown in Figur
 % \end{proof}
 
 We now present our main structural result in Lemma~\ref{lem:X}, which will lay the foundation for the rest of this section.
+The proof is in \S~\ref{subsec:lem-X-proof}.
 Lemma~\ref{lem:X} observes that (minimizable) losses $L$ with polyhedral Bayes risk have finite representative sets, and derives equivalent conditions on the level sets of the property elicited by $L$ and tight embeddings.
 %\raf{TODO: Brief description of the result}\jessie{Attempted}
 
@@ -1318,6 +1319,8 @@ Lemma~\ref{lem:X} leads to another appealing equivalent condition to our embeddi
 \end{proposition}
 \begin{proof}
   Define $\Gamma = \prop{L}$ and $\gamma = \prop{\ell}$.
+  
+  $\implies$
   Suppose $L$ embeds $\ell$, so we have some $\Sc\subseteq \R$ which is representative for $\ell$ and an embedding $\varphi:\Sc\to\reals^d$; take $\U := \varphi(\Sc)$.
   Since $\Sc$ is representative for $\ell$, by embedding condition (ii) we have $\{\gamma_s \mid s\in\Sc\} = \{\Gamma_u \mid u\in\U\}$, so $\U$ is representative for $L$.
   % for all $p\in\simplex$ we have some $r \in \Sc \cap \gamma(p)$ and thus we have $\varphi(r) \in \U \cap \Gamma(p)$.
@@ -1328,6 +1331,7 @@ Lemma~\ref{lem:X} leads to another appealing equivalent condition to our embeddi
     \risk{\ell}(p) = \risk{\ell|_\Sc}(p) = \min_{r \in \Sc}\inprod{p}{\ell(r)} = \min_{r \in \Sc}\inprod{p}{L(\varphi(r))} = \min_{u \in \U}\inprod{p}{L(u)} = \risk{L|_\U}(p) = \risk{L}(p)~.
   \end{equation*}
   
+  $\impliedby$
 	For the reverse implication, assume $\risk{L} = \risk{\ell}$, which are polyhedral functions as $\ell$ is discrete.
   From Lemma~\ref{lem:X}(\ref{item:X-min-V}), we have some set $\V\subseteq\reals^\Y_+$ and minimum representative sets $\R^* \subseteq \R$ and $\U^* \subseteq \U$, for $\ell$ and $L$ respectively, such that $\ell(\R^*) = \V = L(\U^*)$.
   %\jessiet{This is a different $\Sc$ than the first paragraph, right? The first $\Sc$ is representative for $\ell$.}\raft{They are both quantified separately, so not linked; are you saying it's confusing to use $\Sc$ here though because its role is slightly different?}\jessiet{Yes... attempting to clarify.}
@@ -1356,8 +1360,8 @@ Moreover, their result relies the Bayes risk of the surrogate being strictly con
 
 Central to the structural results in Lemma~\ref{lem:X} is the existence of a canonical set of loss vectors $\V$ which match the loss vectors of any minimum representative set.
 This fact may seem surprising when one considers that losses may have many mimimum representative sets.
-For example, consider hinge loss with a spurious extra dimension, i.e., $L:\reals^2\to\reals^\Y$, $L(r)_y = \max(0,1-r_1y)$ for $\Y = \{-1,+1\}$.
-Here the minimum representative sets are $\{(-1,a),(1,b)\}$ for any $a,b\in\reals$. 
+For example, consider hinge loss with a spurious extra dimension, i.e., $L:\reals^2\to\reals^\Y$, $L((r_1, r_2))_y = \max(0,1-r_1y)$ for $\Y = \{-1,+1\}$.
+Here the minimum representative sets are $\{(-1,a),(1,b)\}$ \jessie{I'm having a hard time parsing that, but maybe it's just me?} for any $a,b\in\reals$. 
 Lemma~\ref{lem:X}(\ref{item:X-min-V}) states that, while the minimum representative set is not unique, its loss vectors are.
 
 Motivated by this observation, let us define the ``trim'' of a loss to be this unique set $\V$ of loss vectors induced by any minimum representative set, which again is well-defined by Lemma~\ref{lem:X}(\ref{item:X-min-V}).
@@ -1516,31 +1520,33 @@ This allows us to think about the structure of properties elicited by losses wit
 \begin{proof}
   Let $L$ be a fixed loss eliciting $\Gamma$, so that in particular $\risk L$ is fixed.
   By definition of elicitable properties, $L$ is minimizable.
-  In each case, we will show that $\risk L$ is polyhedral, and thus Lemma~\ref{lem:X} will give us the set $\Theta$ of full-dimensional level sets of $\Gamma$, uniquely determined by $\risk L$.
+  In each case, we will show that $\risk L$ is polyhedral (or equivalently, that $L$ has a finite representative set), and thus Lemma~\ref{lem:X} will give us the set $\Theta$ of full-dimensional level sets of $\Gamma$, uniquely determined by $\risk L$.
   We will prove $1 \Rightarrow 2 \Rightarrow 3 \Rightarrow 4 \Rightarrow 1$, and in each case show that the relevant set of level sets is equal to $\Theta$, giving the result.
 
   $1 \Rightarrow 2$:
   Let $\Sc$ be the representative set for $\gamma$ and $\varphi:\Sc\to\reals^d$ the embedding.
-  Since $\Sc$ is finite, $\varphi(\Sc)$ is a finite representative set for $\Gamma$ (and $L$).
+  Since $\Sc$ is finite, $\varphi(\Sc)$ is a finite representative set for $\Gamma$ (and $L$; thus, $\risk L$ is polyhedral).
   Corollary~\ref{cor:trim-prop-red} now gives $\trimred(\Gamma) = \Theta$, which is finite, showing Case 2.
 
   $2 \Rightarrow 3$:
-  If $\trimred(\Gamma)$ is finite, then in particular we have a finite set of reports $\Sc \subseteq \reals^d\setminus\red(\Gamma)$ such that $\trimred(\Gamma) = \{\Gamma_s \mid s\in\Sc\}$.
+  If $\trimred(\Gamma)$ is finite, then in particular we have a finite set of reports $\Sc \subseteq \reals^d$ such that $\trimred(\Gamma) = \{\Gamma_s \mid s\in\Sc\}$.
   As $\Gamma$ is elicitable, $\reals^d$ is representative for $\Gamma$.
   By definition of $\trimred$, we have $\simplex = \cup_{r\in\reals^d} \Gamma_r = \cup \trimred(\Gamma) = \cup_{s\in\Sc} \Gamma_s$, and therefore $\Sc$ is representative for $\Gamma$ and for $L$.
+  As $\Sc$ is finite, we have $\risk L$ polyhedral.
   %\jessiet{I'm a bit confused by this- how do we get $\cup_{\reals^d}\Gamma_r \subseteq \cup \trimred(\Gamma)$?}\raft{Each level set on the left is contained in one on the right}
   From Lemma~\ref{lem:X}(\ref{item:X-rep-contain-min}), we have some minimum representative set $\U\subseteq\Sc$ for $L$ and $\Gamma$, implying statement 3.
   Moreover, Lemma~\ref{lem:X}(\ref{item:X-min-Theta},\ref{item:X-full-dim}) gives $\{\Gamma_u \mid u\in\U\} = \Theta$.
-  %\jessie{My understanding: we have a representative set $\R$, but don't know if it's finite.  However, we have $\Sc$ that [nonredundantly] generates trim, which is finite by assumption, and need to show that's representative.  Once we have $\Sc$ a finite representative set, we can apply Lemma X to say it also contains a finite \emph{minimum} rep set.}
 
   $3 \Rightarrow 4$:
-  Let $\U$ be a finite minimum representative set.
+  Let $\U$ be a finite minimum representative set for $\Gamma$.
+  Then $\risk L = \risk{L|_\U}$ is polyhedral.
   Lemma~\ref{lem:X}(\ref{item:X-min-Theta},\ref{item:X-full-dim}) once again gives $\{\Gamma_u \mid u\in\U\} = \Theta$.
   We simply let $\hat\Theta = \Theta$, giving statement 4 as $\U$ is representative.
 
   $4 \Rightarrow 1$:
   Let $\Sc\subseteq\R$ such that $\{\Gamma_s \mid s\in\Sc\} = \hat \Theta$.
   Then $\Sc$ is representative for $\Gamma$ and $L$, as $\cup\hat\Theta = \simplex$.
+  Again, this yields a finite representative set for $L$.
   Lemma~\ref{lem:loss-restrict} now states that $L$ embeds $L|_\Sc$, so $\Gamma$ embeds $\gamma := \Gamma|_\Sc$, giving Case 1.
   Finally, Corollary~\ref{cor:trim-prop-red} gives $\trimred(\gamma) = \Theta$.
   %
@@ -1581,12 +1587,12 @@ We will use the fact that refinement is transitive: if $\Gamma$ refines $\Gamma'
 
 It is straightforward to verify that consistency, and therefore calibration, implies indirect elicitation~\citep{finocchiaro2021unifying,agarwal2015consistent,steinwart2008support}.
 Indirect elicitation may appear much weaker than calibration, since in particular it does not depend on the loss except through the property it elicits, and thus only depends on the exact minimizers of the loss.
-Surprisingly, for polyhedral surrogates, we show the converse: indirect elicitation implies calibration, and therefore consistency.
+Surprisingly, for minimizable polyhedral surrogates, we show the converse: indirect elicitation implies calibration, and therefore consistency.
 
-A useful lemma is that for polyhedral losses, indirect elicitation must always pass through an embedding.
+A useful lemma is that for minimizable polyhedral losses, indirect elicitation must always pass through an embedding.
 This result holds more generally whenever $L$ has a finite representative set, as in \S~\ref{sec:min-rep-sets}.
 \begin{lemma}\label{lem:ie-iff-embeds-refinement}
-  Let $L$ be a polyhedral loss.
+  Let $L$ be a minimizable polyhedral loss.
   Then $L$ indirectly elicits a property $\gamma$ if and only if $L$ tightly embeds a discrete loss $\ell$ such that $\prop \ell$ refines $\gamma$.
 \end{lemma}
 \begin{proof}
@@ -1604,7 +1610,7 @@ This result holds more generally whenever $L$ has a finite representative set, a
 
 
 \begin{theorem}\label{thm:poly-ie-implies-consistent}
-	Let $L$ be a polyhedral loss which indirectly elicits a finite property $\gamma$.
+	Let $L$ be a minimizable polyhedral loss which indirectly elicits a finite property $\gamma$.
   For any loss $\ell$ eliciting $\gamma$, there exists a link $\psi$ such that $(L, \psi)$ is calibrated (and consistent) with respect to $\ell$.
 \end{theorem}
 \begin{proof}
@@ -2448,7 +2454,7 @@ The next lemma shows that if a subset of $\U$ intersect, then their correspondin
 	break C.1.1 into its own subsection - make sure everything is completely self-contained with general functions}
 \subsection{Definitions and preliminaries}
 \begin{definition}[Closed halfspace]
-	For any $(w,b) \in \reals^d \times \reals$, let $H_{(w,b)}^+ := \{ x \in \reals^d \mid \inprod{x}{w} \geq b\}$ be the closed halfspace defined by $(w,b)$.
+	For any $(w,b) \in \reals^d \times \reals$, let $H_{(w,b)}^+ := \{ x \in \reals^d \mid \inprod{x}{w} \geq b\}$ be the closed halfspace defined by $(w,b)$. 
 \end{definition}
 \begin{definition}[Hyperplane]
 	For any $(w,b)\in\reals^d \times \reals$, let $H_{(w,b)} := \{ x \in \reals^d \mid \inprod{x}{w} = b\}$ be the hyperplane generated by $(w,b)$.
@@ -2459,6 +2465,7 @@ Observe that the hyperplane $H_{(w,b)}$ is the boundary of $H^+_{(w,b)}$.
 	\btw{Def from Ziegler page 28}
 	A \emph{polyhedron} $P$ is an intersection of a finite set of closed halfspaces $\H = \{H^+_{(w_i,b_i)}\}_{i=1}^k$ presented in the form $P = \cap \H$.
 \end{definition}
+Observe that by the halfspace representation, a polyhedron need not be bounded.
 
 %\raf{Maybe add def supporting hyperplane; cor of face def is that nonempty face iff supporting hyperplane}
 \jessiet{Revisit: definition of hyperplanes is not oriented}
@@ -2480,7 +2487,7 @@ Observe that the hyperplane $H_{(w,b)}$ is the boundary of $H^+_{(w,b)}$.
   \end{equation*}
   for any valid halfspace $H^+_{(w,b)}$.
   The dimension of a face $F$ is the dimension of its affine hull $\dim(F) := \dim(\affhull(F))$.
-  A face $F$ with $\dim(F) = \dim(P) - 1$ is called a facet.
+  A face $F$ with $\dim(F) = \dim(\affhull(P)) - 1$ is called a facet.
 \end{definition}
 
 \begin{claim}
@@ -2496,19 +2503,25 @@ Observe that the hyperplane $H_{(w,b)}$ is the boundary of $H^+_{(w,b)}$.
   Given a $d$-dimensional polyhedron $P \subseteq \reals^d$, 
   (i) there is a unique finite set of closed halfspaces $\H^*$ such that $P = \cap \H^*$, 
   (ii) for all finite sets of closed halfspaces $\H$ such that $P = \cap \H$, we have $\H^* \subseteq \H$, and
-  (iii) $\{H\cap P \mid H^+ \in \H^*\}$ is the set of facets of $P$.
+  (iii) $\{H_{(w,b)}\cap P \mid H^+_{(w,b)} \in \H^*\}$ is the set of facets of $P$.
 \end{theorem}
 \begin{proof}
 	Since $P$ is $d$-dimensional in $\reals^d$, it therefore has nonempty interior.	
-	\citet[Proposition 4.5(i)]{gallier2008notes} can then be applied to yield the existence of a unique finite set of closed halfspaces $\H^*$ uniquely determining $P$. (i)
+	\citet[Proposition 4.5(i)]{gallier2008notes} can then be applied to yield the existence of a unique finite set of closed halfspaces $\H^*$ uniquely determining $P$, allowing us to conclude (i).
 	Additionally, (iii) is shown by~\citep[Proposition 4.5(ii)]{gallier2008notes}.
 	
 	It is just left to show (ii).
-	Suppose for contradiction that there was a set of closed halfspaces $\H$ such that $P = \cap \H$, but there was a $H^+_{(w,b)} \in \H^* \setminus \H$, and therefore $\H^* \not \subseteq \H$.
-	By (i), we know that $H_{(w,b)}$ uniquely determines a facet of $P$.
-	A contradiction then emerges if there is no set of $\H' := \{H^+_{(w_i, b_i)}\}_{i=1}^l \subseteq \H \setminus \H^*$ such that $\cap \H' = H_{(w,b)}$.
-	As halfspaces are uniquely determined, this is only true if some $H^+_{(w_i,b_i)} \in \H'$ is precisely equal to $H^+_{(w,b)}$, contradicting the assumption that $\H^* \not \subseteq \H$.
-	\jessiet{This is super hand-wavy, and not nearly as precise as I'd like, but it's a first pass.}
+	%Suppose for contradiction that there was a set of closed halfspaces $\H$ such that $P = \cap \H$, but there was a $H^+_{(w,b)} \in \H^* \setminus \H$, and therefore $\H^* \not \subseteq \H$.
+	By (i), we know that each $H_{(w,b)} \in \H^*$ uniquely determines a facet of $P$.
+	Thus, $F_{(w,b)}$ is a facet of $P$, and is of dimension $d-1$.
+	This implies the facet $F_{(w,b)}$ can be defined by $d$ affinely independent points (contained in $P$), whose affine hull is $H_{(w,b)}$.
+	As halfspaces are uniquely determined, so is the facet $F_{(w,b)} = P \cap H_{(w,b)}$.
+	As polyhedron are uniquely determined by their facets (by Minkowski's uniqueness theorem), we must have $H_{(w,b)} \in \H^*$. 
+	\jessiet{This is not as precise as I'd like... but also I think it follows more immediately from Minkowski's uniqueness theorem}
+	
+	%A contradiction then emerges if there is no set of $\H' := \{H^+_{(w_i, b_i)}\}_{i=1}^l \subseteq \H \setminus \H^*$ such that $\cap \H' = H_{(w,b)}$.
+	%As halfspaces are uniquely determined, this is only true if some $H^+_{(w_i,b_i)} \in \H'$ is precisely equal to $H^+_{(w,b)}$, contradicting the assumption that $\H^* \not \subseteq \H$.
+	
   \jessiet{\url{https://arxiv.org/abs/0805.0292} Prop 4.5? Ziegler Lectures on Polytopes Theorem 2.15 (7) also kind of close to this, but on polytopes not polyhedron.}
 \end{proof}
 
@@ -2525,7 +2538,7 @@ Similarly, we let $H_v := H_{(v,-1)}$ for $v \in \reals^\Y_+$ and define $H_y :=
 
 %Finally, we define the face generated by $v \in \V$ with $F_v := H_v \cap G$ for any $v\in\V$.
 Finally, given a set $\V \subseteq \reals^d$, we let $\H_{\V} = \{H_v^+ \mid v\in\V\}$ denote the set of halfspaces generated by $\V$, $\H_\Y = \{H_y^+ \mid y\in\Y\}$.
-If $\V$ is understood from context, we may denote $\H := \H_\V \cup\H_\Y$.
+If $\V$ and $\Y$ are understood from context, we may denote $\H := \H_\V \cup\H_\Y$.
 
 
 \subsection{Constructing a unique minimum set of facets from a finitely generated polyhedron}\label{appsubsec:phase1}
@@ -2578,6 +2591,7 @@ We proceed with some observations about facets and dimension of $G$.
   Since $g_\V$ is nonnegative on $\reals_+^\Y$, $G$ therefore contains $\{(x,c) \mid x\in\reals^\Y_+, c \leq 0\}$, which is $(|\Y| + 1)$-dimensional.
 \end{proof}
 
+This result, in conjunction with Theorem~\ref{thm:polyhedron-uniquely-gen-facets} yields a unique set of halfspaces $\H^*$ generating $\hyp(g_\V)$.
 
 \begin{lemma}\label{lem:G-unique-facets-Hstar}
   Given a finite set $\V \subset \reals^\Y_+$, define $\H = \H_\V \cup \H_\Y$ and $G := \hyp(g_\V)$.
@@ -2591,7 +2605,7 @@ We proceed with some observations about facets and dimension of $G$.
 We can also show that the set $\H_\Y$ is contained in $\H^*$ so that we can separate the facets generated by $\H^*$ into a partition of vertical and non-vertical facets of $G$.
 
 \begin{lemma}\label{lem:HY-subset-Hstar}
-  Given a finite set $\V \subset \reals^\Y_+$, consider the unique set $\H^* \subseteq (\H_\V \cup \H_\Y)$ such that $\hyp(g_\V) = \H^*$.
+  Given a finite set $\V \subset \reals^\Y_+$, consider the unique set of facet-defining halfspaces $\H^* \subseteq (\H_\V \cup \H_\Y)$ such that $\hyp(g_\V) = \H^*$.
   Then $\H_\Y \subseteq \H^*$.
 \end{lemma}
 \begin{proof}
@@ -2601,7 +2615,7 @@ We can also show that the set $\H_\Y$ is contained in $\H^*$ so that we can sepa
 \end{proof}
 
 \begin{corollary}\label{cor:unique-set-loss-vectors-defining-facets}
-  Suppose we are given a finite set $\V \subset \reals^\Y_+$, and consider the smallest unique set $\H^*$ such that $\hyp(g_\V) =: G = \cap \H^*$.
+  Suppose we are given a finite set $\V \subset \reals^\Y_+$, and consider the smallest (in cardinality) unique set $\H^*$ such that $\hyp(g_\V) =: G = \cap \H^*$.
   There is a unique finite set $\V^* \subseteq \reals^\Y_+$ such that $\H^* = \H_\Y \cup \H_{\V^*}$.
   Moreover, $F_v$ is a facet of $G$ for each $v\in\V^*$.
 \end{corollary}
@@ -2620,20 +2634,20 @@ We can also show that the set $\H_\Y$ is contained in $\H^*$ so that we can sepa
 
 
 \begin{corollary}\label{cor:anything-gen-G-subset-Hstar}
-  Let $\V' \subset \reals^\Y_+$ be a finite set such that $\H := \H_\Y \cup \H_{\V'}$ satisfies $\hyp(g_\V') = \cap \H$, and take $\V^*$ the unique set such that $\H^* = \H_\Y \cup \H_{\V^*}$.  
-  Then $\V^* \subseteq \V'$.
+  Let $\V \subset \reals^\Y_+$ be a finite set such that $\H := \H_\Y \cup \H_{\V}$ satisfies $\hyp(g_{\V}) = \cap \H$, and take $\V^*$ the unique set such that $\H^* = \H_\Y \cup \H_{\V^*}$.  
+  Then $\V^* \subseteq \V$.
 \end{corollary}
 \begin{proof}
   $\H_\Y \cup \H_{\V^*} = \H^*$ by Corollary~\ref{cor:unique-set-loss-vectors-defining-facets}, and $\H^* \subseteq \H = \H_\Y \cup \H_{\V'}$ by Lemma~\ref{lem:HY-subset-Hstar}, ergo $\V^* \subseteq \V'$.
 \end{proof}
 
 We now show that we can equivalently construct $g_\V$ through the unique finite set $\V^*$ instead of the given set of vectors $\V$.
-\begin{claim}\label{claim:g-gen-by-Vstar}
-	Given a finite set $\V$, consider the minimum set $\V^* \subseteq \V$ such that $\hyp(g_\V) = \hyp(g_{\V^*})$.
+\begin{lemma}\label{claim:g-gen-by-Vstar}
+	Given a finite set $\V$, consider the smallest (in cardinality) set $\V^* \subseteq \V$ such that $\hyp(g_\V) = \hyp(g_{\V^*})$.
   $g_\V(x) = \min_{v \in \V^*}\inprod{v}{x} - \delta(x \mid \reals_+^\Y) = g_{\V^*}(x)$
-\end{claim}
+\end{lemma}
 \begin{proof}
-  $\hyp(g_\V) = \cap \H = \cap \H^* = \cap (\H_\Y \cup \H_{\V^*}) = \{(x,c) \in \reals_+^\Y \times \reals \mid \inprod{v^*}{x} \geq c$ for all $v^* \in \V^* \}$ where the first equality follows as $\H^* \subseteq \H$.
+  $\hyp(g_\V) = \cap (\H_\Y \cup \H_\V)= \cap \H^* = \cap (\H_\Y \cup \H_{\V^*}) = \{(x,c) \in \reals_+^\Y \times \reals \mid \inprod{v^*}{x} \geq c$ for all $v^* \in \V^* \}$ where the first equality follows as $\H^* \subseteq \H$.
   Since $G$ is the hypograph of $g_\V$, this means $g_\V$ can be written as 
   $g_\V(x) = \min_{v \in \V^*}\inprod{v}{x} - \delta(x \mid \reals^\Y_+) = g_{\V^*}(x)$. 
 \end{proof}
@@ -2658,7 +2672,7 @@ Now let $\H = \H_\Y \cup \H_{\V}$; again, this may be infinitely generated.
 	\begin{align*}
 	(x,c) \in \hyp(g_\V)
 	&\iff g_\V(x) \geq c & \text{ Definition of hypograph}\\
-	&\iff \risk L_+(x) \geq c & \text{ as $g=\risk L_+$}\\
+	&\iff \risk L_+(x) \geq c & \text{ As $g_\V=\risk L_+$}\\
 	&\iff \inprod{v}{x} \geq c \,\, \forall v \in \V & \text{By def of $\risk L_+$ as the infimum over $v \in \V$ of}\\
 	& & \text{the inner product with $x$ and minimizable.} \\
 	&\iff (x,c) \in H^+_{v} \,\, \forall v \in L(\R) & \text{By definition of each halfspace}\\
@@ -2669,7 +2683,8 @@ Now let $\H = \H_\Y \cup \H_{\V}$; again, this may be infinitely generated.
 \end{proof}
 
 %\raf{Need to use minimizable}
-If follows that $\hyp(g_\V)$ is a polyhedron, and we can apply Theorem~\ref{thm:polyhedron-uniquely-gen-facets} to conclude that $\hyp(g_\V)$ has a unique minimum halfspace representation $\cap \H^*$, where $\H^* = \H_\Y \cup \H_{\V^*}$ for the unique finite set $\V^*$.
+If follows that $\hyp(g_\V)$ is a polyhedron, and $d+1$-dimensional as $\{(x,c) \mid x \in \reals^\Y_+, c \leq 0\} \subseteq \hyp(g_\V)$.
+Thus, we can apply Theorem~\ref{thm:polyhedron-uniquely-gen-facets} to conclude that $\hyp(g_\V)$ has a unique minimum halfspace representation $\cap \H^*$, where $\H^* = \H_\Y \cup \H_{\V^*}$ for the unique finite set $\V^*$.
 Moreover, we have $g_\V = g_{\V^*}$, as $\H^*$ is the unique minimum halfspace representation for $\hyp(g_\V)$.
 
 \jessiet{Commented out claim that has no label, so is not being explicitly used later, please double check that we don't use it.  The proof has some forward refs}
@@ -2688,14 +2703,14 @@ Moreover, we have $g_\V = g_{\V^*}$, as $\H^*$ is the unique minimum halfspace r
 %\end{proof}
 
 \begin{corollary}\label{cor:finite-rep-set}
-	Given a minimizable loss $L : \R \times \Y \to \reals$ with polyhedral extended Bayes risk $\risk L_+$, take $L(\R) = \V$ and $\V^*$ to be the unique minimum set such that $\hyp(g_{\V}) = \cap (\H_\Y \cup \H_{\V^*})$.
+	Given a minimizable loss $L : \R \times \Y \to \reals$ with polyhedral extended Bayes risk $\risk L_+$, take $L(\R) = \V$ and $\V^*$ to be the unique smallest (in cardinality) set such that $\hyp(g_{\V}) = \cap (\H_\Y \cup \H_{\V^*})$.
 	There is a finite set $\R^* \subseteq \R$ such that $L(\R^*) = \V^*$ (without duplicates).
 \end{corollary}
 
 
 \subsection{Projecting from $\reals^d_+$ to $\reals^\Y_+$}\label{subsec:project-pi}
-Throughout this section, suppose that we are given a finite set $\V$ such that $\hyp(g_\V)$is a polyhedron. 
-Moreover, we denote the unique finite set $\V^* \subseteq \V$ such that $g_\V = g_{\V^*}$.
+Throughout this section, suppose that we are given a finite set $\V$ such that $\hyp(g_\V)$ is a polyhedron. 
+Moreover, we denote the unique smallest (in cardinality; finite) set $\V^* \subseteq \V$ such that $g_\V = g_{\V^*}$.
 
 We now consider projections from $\reals^\Y_+ \times \reals$ onto the positive orthant $\reals^\Y_+$.
 
@@ -2708,10 +2723,10 @@ We now consider projections from $\reals^\Y_+ \times \reals$ onto the positive o
 	%   Argue $G \subseteq H^+_{v^*}$ by definition.
 	%   Argue support: $g(x) = \inprod{v^*}{x}$.  WTS $(x,g(x)) \in G$.  Already have $(x,g(x)) \in H_{v^*}$.}
 	%
-	By Claim~\ref{claim:g-gen-by-Vstar} and Corollary~\ref{cor:finite-rep-set}, we know that $g_\V(x) = g_{\V^*}(x) = \min_{v \in \V^*}\inprod{v}{x}$.
+	By Claim~\ref{claim:g-gen-by-Vstar} and Corollary~\ref{cor:finite-rep-set}\jessiet{Confirm we can use these refs}, we know that $g_\V(x) = g_{\V^*}(x) = \min_{v \in \V^*}\inprod{v}{x}$.
 	In particular, consider the normal $v^* \in \argmin_{v \in \V^*}\inprod{v}{x}$; we claim that $H_{v^*}$ supports $G$ at $(x,g(x))$.
 	First, $G \subseteq H^+_{v^*}$ by definition of $G$ as the intersection of halfspaces including $H^+_{v^*}$.
-	Thus, it us just left to show that $(x, \inprod{v^*}{x}) \in H_{v^*} \cap G$.
+	Thus, it is just left to show that $(x, \inprod{v^*}{x}) \in H_{v^*} \cap G$.
 	$H_{v^*} = \{(x,c) \mid \inprod{v^*}{x} = c\}$.
 	By definition of $g$, we have $(x,g(x)) = \inprod{v^*}{x}$, so $(x,g(x)) \in H_{v^*}$.
 	Moreover, $(x,g(x)) \in G = \{(x,c) \mid g(x) \geq c\}$ trivially since $g(x) \geq g(x)$.
@@ -2726,7 +2741,7 @@ This projected faces generated by $\V^*$ covers the nonnegative orthant.
 Moreover, the projection $\pi$ preserves dimension of faces.
 
 \begin{claim}\label{claim:pi-preserves-dim}
-	For all $v\in\reals^\Y_+$, $\dim(\pi(F_v)) = \dim(F_v)$.
+	For all $v\in\reals^\Y_+$, $\dim(F_v) = \dim(\pi(F_v))$.
 \end{claim}
 \begin{proof}
 	\jessiet{Can use a careful check}
@@ -2738,7 +2753,7 @@ Moreover, the projection $\pi$ preserves dimension of faces.
 	Let $a_1 + \ldots + a_{\Y+1} = 0$, such that $\sum_i a_i \pi(z_i) = 0$.
 	We want to conclude that we must have $a_i = 0$ for all $i$, meaning they are affinely independent.
 	
-	Observe $z_i = (x_i, \inprod{v}{x_i})$ for all $i$; therefore, if $z_i \in F_v$ (e.g., $F_v$ supports $G$ at $x, \inprod{v}{x})$), then we also have $z_i \in H_v$.
+	Observe $z_i = (x_i, \inprod{v}{x_i})$ for all $i$; therefore, if $z_i \in F_v$ (e.g., $F_v$ supports $\hyp(g_\V)$ at $(x, \inprod{v}{x})$), then we also have $z_i \in H_v$.
 	So $0 = \sum_i a_i \pi(z_i) = \sum_i a_i x_i$.
 	Moreover, the sum $\sum_i a_i z_i = \sum_i a_i (x_i, \inprod{v}{x_i}) = (\sum_i a_i x_i, \inprod{v}{\sum_i a_i x_i}) = (\vec 0,0) = \vec 0$.
 	Thus, since $a_i = 0$ for all $i$, the set $\{z_i\}$ is affinely independent and the dimensions of the affine hulls are therefore equal.
@@ -2770,9 +2785,9 @@ Since we preserve the dimension of these projected spaces, we can now study equi
 \end{lemma}
 \begin{proof}
 	\begin{align*}
-	(1) (x,g(x)) \in F_v
-	&\iff (x,g(x)) \in \{(x',c) \in G \mid \inprod{v}{x'} = c\} & \\
-	&\iff  \inprod{v}{x} = g(x) & (2)\\
+	(1) \quad \quad (x,g(x)) \in F_v
+	&\iff (x,g_\V(x)) \in \{(x',c) \in \hyp(g_\V) \mid \inprod{v}{x'} = c\} & \\
+	&\iff  \inprod{v}{x} = g_\V(x) & (2)\\
 	&\iff \inprod{v}{x} = \min_{v' \in \V}\inprod{v'}{x} & \\
 	&\iff v \in \argmin_{v' \in \V}\inprod{v'}{x} & (3)
 	\end{align*}
@@ -2782,12 +2797,12 @@ Since we preserve the dimension of these projected spaces, we can now study equi
 	For the reverse implication, consider some $x \in \pi(F_v)$.
 	There must be a $c \in \reals$ so that $(x,c) \in F_v$.
 	Expanding, this is actually saying $(x,c) \in \{(x',c') \in \hyp(g_\V) \mid \inprod{v}{x'} = c\}$.
-	In particular, this is true when $c = \inprod{v}{x}$, which defines a face of $G$ at $x$ if any only if $\inprod{v}{x} = g_\V(x)$.
+	In particular, this is true when $c = \inprod{v}{x}$, which defines a face of $\hyp(g_\V)$ at $x$ if any only if $\inprod{v}{x} = g_\V(x)$.
 	Therefore, we have $(x, g_\V(x)) \in F_v$.
 \end{proof}
 
 
-Now we can observe a set of normals generating facets whose projections cover $\reals^\Y_+$ if and only if the set contains $\V^*$.
+Now we can observe a set of normals $\V'$ generating faces whose projections cover $\reals^\Y_+$ if and only if the set contains $\V^*$.
 This will translate to a set being representative for a loss if and only if it contains a finite minimum representative set (in settings where one exists.)
 %\raf{For Lemma X: NTS $\cup_{v\in\V} \pi(F_v) = \reals^\Y_+ \implies \V^* \subseteq \V$.}
 %\raf{If $G = \cap( \H_\Y \cup \H_\V)$...}
@@ -2799,17 +2814,18 @@ This will translate to a set being representative for a loss if and only if it c
 	We would like to show
 	$\cup_{v\in\V'} \pi(F_v) = \reals^\Y_+ \iff \cap(\H_\Y \cup \H_{\V'}) = \hyp(g_\V) := G$ then apply Corollary~\ref{cor:anything-gen-G-subset-Hstar}.
 	
-	Suppose $\cup_{v\in\V'} \pi(F_v) = \reals^\Y_+$.
-	Take any $x\in\reals^\Y_+$.
+	
+	%Take any $x\in\reals^\Y_+$.
 	%\raf{Argue that we have $\cap(\H_\Y \cup \H_{\V'}) \subseteq G$}
 	%\raf{Another approach: assume $v^* \in \V^* \setminus \V'$.  Take $z = (x,g(x)) \in \relint(F_{v^*})$.  Argue that $x \not\in \cup_{v\in\V'} \pi(F_v)$.}
 	
 	$\implies$ 
-	Fix any $x \in \reals^\Y_+$.
+	Suppose $\cup_{v\in\V'} \pi(F_v) = \reals^\Y_+$.
+	Fix $x \in \reals^\Y_+$.
 	Since $\V' \subseteq \V$, and $G = \cap (\H_\Y \cup \H_\V)$, we immediately have $G \subseteq (\H_\Y \cup \H_{\V'})$.
 	Therefore, we just need to show the other direction of inclusion.
 	%  \raf{Need to add logic: know $G \subseteq \cap(\H_\Y \cup \cap \H_{\V'})$, so only need to show $\cap(\H_\Y \cup \cap \H_{\V'}) \subseteq G$}
-	$(x,c) \in \cap \H_\Y$ for all $c \in \reals$ by Claim~\ref{claim:x-nonneg-orthant-iff-intersection-HY}, so it is left to show that $(x,c) \in \cap \H_{\V'}$, yielding the desired result.
+	$(x,c) \in \cap \H_\Y$ for all $c \in \reals$ by Claim~\ref{claim:x-nonneg-orthant-iff-intersection-HY}, so it is left to show that $(x,c) \in \cap \H_{\V'}$, which yields the desired result.
 	First, $(x,c) \in \cap \H_{\V'} \implies (x,c) \in H^+_{v'}$ for all $v' \in \V'$.
 	This implies $c \leq \inprod{v'}{x}$ for all $v' \in \V'$.
 	By Lemma~\ref{lem:projected-faces-iff-support-iff-argmin}, there exists a $v' \in \V'$ such that $(x,g(x)) \in F_{v'}$, and $\inprod{v'}{x} = g(x)$.
@@ -2827,7 +2843,7 @@ This will translate to a set being representative for a loss if and only if it c
 	
 \end{proof}
 
-For the set $\V^*$, we have each of these projected facets being full-dimensional in the projected space as well.
+For the set of normals $\V^*$ generating facets of $\hyp(g_\V)$, we have each of these projected facets being full-dimensional in the projected space as well.
 \begin{claim}\label{claim:projected-Vstar-faces-full-dim}
 	For all $v \in \V^*$, $\pi(F_v)$ is full dimensional in $\reals_+^\Y$.
 	\btw{$\Lambda$ is exactly the set of FDLS; Will lead to $\Theta$ are exactly the full dimensional level sets over simplex (6).}
@@ -2846,7 +2862,7 @@ Denote $\Lambda := \{\pi(F_v) \mid v \in \V^*\}$ as the set of projected facets 
 \begin{claim}\label{claim:Vprime-projected-faces-cover-iffprojected-faces-subsets}
 	Suppose we are given a minimizable loss $L$ will polyhedral extended Bayes risk $\risk{L}_+(x) := \inf_{r \in \R} \inprod{x}{L(r)}$.
 	Take $\R' \subseteq \R$ with $\V' := L(\R')$. \jessiet{Added this in since I re-organized subsections, but I don't think we want this notation isolated to this claim.}
-	For $\V' \subseteq \V := L(\R)$, we have $\cup_{v \in \V'} \pi(F_v) = \reals_+^\Y \iff \Lambda \subseteq \{ \pi(F_v) \mid v \in L(\R') \}$.
+	For $\V' \subseteq \V := L(\R)$, we have $\cup_{v \in \V'} \pi(F_v) = \reals_+^\Y \iff \Lambda \subseteq \{ \pi(F_v) \mid v \in \V'\}$.
 	\btw{$1$-homogeneous version of rep iff $\Theta$ subset of level sets generated by $\R'$.}
 \end{claim}
 \begin{proof}
@@ -2855,9 +2871,9 @@ Denote $\Lambda := \{\pi(F_v) \mid v \in \V^*\}$ as the set of projected facets 
 	Explicitly, for all $v \in \V^*$ we also have $v \in \V'$, so, $\pi(F_v) \in \Lambda \cap \{\pi(F_v) \mid v \in \V'\} = \Lambda$.
 	
 	$\impliedby$
-	If $\Lambda \subseteq \{ \pi(F_v) \mid v \in L(\R') \}$, then $\cup \Lambda \subseteq \cup_{v \in \V'} \pi(F_v)$.
-	By Corollary~\ref{cor:projected-Vstar-faces-cover-pos-orthant}, we have $\cup \Lambda = \reals_+^\Y$, so $\reals_+^\Y \subseteq \cup_{v \in \V'} \pi(F_v)$.
-	The other direction of subset inequality following from $G$ being finite only on $\reals_+^\Y$.	
+	If $\Lambda \subseteq \{ \pi(F_v) \mid v \in L(\R') \}$, then $\cup_{\lambda \in \Lambda} \lambda \subseteq \cup_{v \in \V'} \pi(F_v)$.
+	By Corollary~\ref{cor:projected-Vstar-faces-cover-pos-orthant}, we have $\cup_{\lambda \in \Lambda} \lambda = \reals_+^\Y$, so $\reals_+^\Y \subseteq \cup_{v \in \V'} \pi(F_v)$.
+	The other direction of subset inequality following from $\hyp(g_\V)$ being finite only on $\reals_+^\Y$.	
 \end{proof}
 
 Given a loss $L$ with $\risk L_+$ polyhedral and $\V = L(\R)$, take $v = L(r)$ for any $r \in \R$.
@@ -2868,7 +2884,7 @@ As $H_{v}^+ \in \H$, it supports $\hyp(g_\V)$ or it is redundant in $\H$ (or bot
 \end{claim}
 \begin{proof}
 	Since $H_v$ supports $G$, we know that $G \subseteq H_v^+$ and $F_v$ is not empty.
-	Since $H^+_v$ is valid, we have $F_v = F_{(v,-1)}$ is a face by definition.
+	Moreover, $H^+_v$ is valid, and we have $F_v = F_{(v,-1)}$ is a face of $P$ by definition.
 	
 	% subset of facet
 	Moreover, the faces of $G$ are all convex polyhedra.
@@ -2930,7 +2946,7 @@ Now, we can conclude that projected facets generated by $\V$ contain all other p
 
 \subsection{Translating to properties: projecting from $\reals^\Y_+$ to $\simplex$}\label{subsec:project-f}
 
-Let $f_\V:\reals^\Y\to\reals_+\cup\{-\infty\}$ be a polyhedral concave function with $\dom(f_\V) = \simplex$.
+Let $f_\V:\reals^\Y\to\reals_+\cup\{-\infty\}$ be a polyhedral concave function with $\dom(f_\V) = \simplex$.% such that $f_\V(x) = g_\V(x)$ for all $x \in \simplex$.
 \begin{claim}
 	We may write $f_\V(p) = \min_{v\in\V} \inprod{p}{v} + \delta(p \mid \simplex)$ for some finite set $\V \subset \reals^\Y_+$. %\raf{show you can do this using the $h$ and $\delta$ representation from Rockafellar -- argue that because $p\in\simplex$ we can write $\inprod{p}{b_i}-\beta_i = \inprod{p}{b_i-\beta_i\ones}$.}
 \end{claim}
@@ -2945,10 +2961,11 @@ Let $f_\V:\reals^\Y\to\reals_+\cup\{-\infty\}$ be a polyhedral concave function 
 		 &= \min(\inprod{p}{b_1 - \beta_1 \ones}, \ldots, \inprod{p}{b_k - \beta_k \ones}) - \delta(p \mid \simplex)~.~
 	\end{align*}
 \end{proof}
+
 This allows us to project $g_\V$ from $\reals^\Y_+$ to the simplex $\simplex$.
-\begin{corollary}\label{cor:f-matches-g-on-simplex}
-  For all concave $f_\V : \reals^\Y_+ \to \reals_+ \cup \{-\infty\}$ with $\dom(f_\V) = \simplex$, there is a polyhedral concave function $g_\V : \reals^\Y_+ \to \reals_+$ with $\dom(g_\V) = \reals^\Y_+$ so that $f_\V(p) = g_\V(p)$ for all $p \in \simplex$.
-\end{corollary}
+\begin{lemma}\label{cor:f-matches-g-on-simplex}
+  For all polyhedral concave $f_\V : \reals^\Y_+ \to \reals_+ \cup \{-\infty\}$ with $\dom(f_\V) = \simplex$, there is a polyhedral concave function $g_\V : \reals^\Y_+ \to \reals_+$ with $\dom(g_\V) = \reals^\Y_+$ so that $f_\V(p) = g_\V(p)$ for all $p \in \simplex$.
+\end{lemma}
 Given the function $f_\V$, we consider $g_\V$ to be its extension and $L$ such that $\risk L_+ = g_\V$ so that we may use the tools in \S~\ref{appsubsec:phase1} and~\ref{appsubsec:phase2} to draw conclusions about the property $\Gamma := \prop{L}$ defined on the simplex.
 
 Define the function $\theta(v) = \{p \in \simplex \mid \inprod{v}{p} = f_\V(p)\}$ as the level sets of the loss vector $v \in \V$, and the set $\Theta := \{\theta(v) \mid v \in \V^*\}$ to be the set of (minimal) level sets uniquely defined by the loss vectors.
@@ -3004,7 +3021,7 @@ Moreover, we can interchangably write the level set in terms of the loss's minim
 Now that we have translated from $\reals^d_+$ to $\reals^\Y_+$ in \S~\ref{subsec:project-pi} and from $\reals^\Y_+$ to $\simplex$ in \S~\ref{subsec:project-f}, we can take the final steps to prove Lemma~\ref{lem:X}.
 \begin{lemma}\label{lem:g-1-homog}
 	Suppose we have the sets $\V$ and the finite set $\V^* \subseteq \V$ such that $g_\V = g_{\V^*}$.
-	Then $g_{V^*}(x) = \min_{v \in \V^*}\inprod{v}{x}$ is $1$-homogeneous.
+	Then $g_{\V^*}(x) = \min_{v \in \V^*}\inprod{v}{x}$ is $1$-homogeneous.
 \end{lemma}
 \begin{proof}
 	If $x \not \in \reals^\Y_+$, then $c g(x) = -\infty = g(cx)$ for any $c > 0$.
@@ -3112,8 +3129,7 @@ Moreover, let $\R^*$ be the finite set of reports given by Corollary~\ref{cor:fi
 \end{lemma}
 \begin{proof}
   Take $v = L(r)$.
-  It suffices to show there is a $v^* \in \V$ such that $\theta(v) \subseteq \theta(v^*)$ by their equality in Claim~\ref{claim:level-set-is-projected-face}.
-
+  %It suffices to show there is a $v^* \in \V$ such that $\theta(v) \subseteq \theta(v^*)$ by their equality in Claim~\ref{claim:level-set-is-projected-face}.
   By Corollary~\ref{cor:exists-vstar-projected-face-subset}, there is a $v^* \in \V^* \subseteq \V$ such that $\pi(F_v) \subseteq \pi(F_{v^*})$.
   Therefore, $\pi(F_v) \cap \simplex \subseteq \pi(F_{v^*})\cap \simplex$.  
   We know $\theta(v) = \pi(F_v) \cap \simplex$ and similarly for $\theta(v^*)$ by Claim~\ref{claim:level-set-is-projected-face}.
@@ -3123,15 +3139,18 @@ Moreover, let $\R^*$ be the finite set of reports given by Corollary~\ref{cor:fi
   % We must then have $\pi(F_v) \cap \simplex = \Gamma_r \subseteq \pi(F_{v^*}) \cap \simplex = \theta(v^*)$.
 \end{proof}
 
+
+\begin{proof}[Proofof Lemma~\ref{lem:X}]
 Now this brings us to Lemma~\ref{lem:X}.
 The framework in this appendix cues up this proof: any loss $L$ satisfying the assumptions of Lemma~\ref{lem:X} has some $g_{L(\R)} = \risk{L}_+$ as in this section that we can work with. 
-For such a $g_\V$, Lemma~\ref{lem:lemX1-rep-iff-subset-vectors} is exactly statement \eqref{item:X-rep-V}.
+For such a $g_{L(\R)}$, Lemma~\ref{lem:lemX1-rep-iff-subset-vectors} is exactly statement \eqref{item:X-rep-V}.
 This immediately implies statement~\eqref{item:X-min-V}.
 Moreover, Lemma~\ref{lem:lemX-3-rep-iff-FDLS-subsets} is exactly statement~\eqref{item:X-rep-Theta}, and again statement~\eqref{item:X-min-Theta} immediately follows.
 Statement~\eqref{item:X-rep-contain-min} is a corollary of the existence of a finite representative set, as shown in Corollary~\ref{cor:finite-rep-set}.
 Again, Statement~\eqref{item:X-full-dim} is exactly Lemma~\ref{lem:fdls-exactly-theta}.
 Statement~\eqref{item:X-redundant} is exactly Lemma~\ref{lem:any-levelset-contained-in-minlevelset}.
 Finally, Statement~\eqref{item:X-tight-embed} follows as a corollary of statement~\eqref{item:X-min-V} and Corollary~\ref{cor:tight-embed-min-rep}.
+\end{proof}
 
 
 \end{document}
