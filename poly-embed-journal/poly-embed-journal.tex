@@ -114,6 +114,8 @@
 \newcommand{\ones}{\mathbbm{1}}
 \DeclarePairedDelimiter\ceil{\lceil}{\rceil}
 
+\newcommand{\regret}[3]{R_{#1}(#2,#3)}
+
 \newcommand{\Ind}[1]{\ones\{#1\}}
 
 \newcommand{\hinge}{L_{\mathrm{hinge}}}
@@ -248,7 +250,7 @@ Our proofs give explicit constructions for the surrogate (\S~\ref{sec:poly-loss-
 \end{restatable}
 
 \begin{restatable}{theorem}{linkinformal}\label{thm:link-main}
-  Given any polyhedral loss $L$, let $\ell$ be the discrete loss it embeds. There exists a link function $\psi$ such that $(L,\psi)$ is calibrated with respect to $\ell$.
+  Given any polyhedral loss $L$, let $\ell$ be a discrete loss it embeds. There exists a link function $\psi$ such that $(L,\psi)$ is calibrated with respect to $\ell$.
 \end{restatable}
 
 To better understand existing polyhedral surrogates, we provide tools to find the discrete losses they embed (Proposition~\ref{prop:representative-embeds-restriction}).
@@ -710,35 +712,14 @@ In this section, we prove Theorem~\ref{thm:link-main}, restated below, which giv
   Similarly, we say $\psi$ is $\epsilon$-separated with respect to $L$ and $\ell$ if it is $\epsilon$-separated with respect to $\prop{L}$ and $\prop{\ell}$.
 \end{definition}
 
-\begin{theorem}
+\raf{Equivalence blah blah blah... proof appears in Appendix~\ref{sec:equiv-sep-calib}.}
+\begin{restatable}{theorem}{calibratedseparated}
   Let polyhedral surrogate $L:\reals^d \to \reals^\Y_+$, discrete loss $\ell:\R\to\reals^\Y_+$, and link $\psi:\reals^d\to\R$ be given.
   Then $(L,\psi)$ is calibrated with respect to $\ell$ if and only if
   $\psi$ is $\epsilon$-separated with respect to $L$ and $\ell$ for some
   $\epsilon>0$.
-\end{theorem}
-\begin{proof}
-  \raf{Notes to self}
-  Probably in the appendix.
-  Combine two rates results: Lemma 6 (calibrated $\implies$ separated), and Lemma 7 ($\impliedby$)
+\end{restatable}
 
-  \raf{Here's the argument that Lemma 7 gives calibration}
-  
-  Lemma 7 says: for all $p$, there exists $H_{L,p} \geq 0$ such that
-  \[ R_{\ell}(\psi(u),p) \leq \frac{C_{\ell} H_{L,p}}{\epsilon} R_L(u,p) , \]
-  where $C_\ell \doteq \max_{u,p} R_\ell(u,p) \geq 0$ and $\epsilon > 0$ is the separation.
-  If $H_{L,p} = 0$, then for all $u\in\reals^d$ we have $R_\ell(\psi(u),p) = 0$, so calibration for this $p$ is trivial.
-  (Incidentally, we must also have $\Gamma(p) = \reals^d$ by Lemma 5 (the Hoffman constant lemma), since every $u\in\reals^d$ would have $d_\infty(u,\Gamma(p)) = 0$ and $\Gamma(p)$ is closed.)
-  Similarly, if $C_\ell = 0$, then $R_\ell(r,p) = 0$ for all $r\in\R$, so again $R_\ell(\psi(u),p) = 0$ for all $u\in\reals^d$.
-
-  Now the interesting case: $C_\ell > 0$ and $H_{L,p} > 0$.
-  Let $C'_{\ell,p} \doteq \min_{r \notin \gamma(p)} R_\ell(r,p) > 0$.
-  (If the min were not defined because $\gamma(p) = \R)$, we would have $C_\ell = 0$.)
-  Then for all $u$ such that $\psi(u) \notin \gamma(p)$, we have $R_\ell(\psi(u),p) \geq C'_{\ell,p}$.
-  Rearranging, we have
-  \[ \psi(u) \notin \gamma(p) \implies R_L(u,p) \geq \frac{C'_{\ell,p} \epsilon}{C_\ell H_{L,p}} > 0~.\]
-  Thus, $\inf_{u : \psi(u) \notin \gamma(p)} \inprod{L(u)}{p} > \risk{L}(p)$.
-  Since the above holds for all $p\in\simplex$, $\psi$ is calibrated.
-\end{proof}
 
 \raf{Now turn Definition~\ref{def:eps-thick-link} into a construction, and the theorem says:}
 
@@ -2269,27 +2250,133 @@ The next lemma shows that if a subset of $\U$ intersect, then their correspondin
 \end{proof}
 
 \section{Equivalence of Separation and Calibration for Polyhedral Surrogates}
+\label{sec:equiv-sep-calib}
 
-\begin{theorem} \label{thm:app-eps-thick-sep}
-  For small enough $\epsilon$, the $\epsilon$-thickened link $\psi$ (Definition \ref{def:eps-thick-link}) satisfies that, for all $p$, there exists $\delta > 0$ such that, for all $u \in \R'$,
-    \[ L(u;p) - \inf_{u^* \in \R'} L(u^*;p) \geq \delta \left[ \ell(\psi(u);p) - \min_{r^* \in \R} \ell(r^*;p) \right] . \]
-\end{theorem}
+We first show one direction: any calibrated link from a polyhedral surrogate to a discrete target must be $\epsilon$-separated.
+The proof follows a similar argument to that of~\citet[Lemma 6]{tewari2007consistency}.
+\begin{lemma}\label{lemma:calibrated-eps-sep}
+  Let polyhedral surrogate $L:\reals^d \to \reals^\Y_+$, discrete loss $\ell:\R\to\reals^\Y_+$, and link $\psi:\reals^d\to\R$ be given such that $(L,\psi)$ is calibrated with respect to $\ell$.
+  Then there exists $\epsilon>0$ such that $\psi$ is $\epsilon$-separated with respect to   $\prop{L}$ and $\prop{\ell}$.
+\end{lemma}
 \begin{proof}
-  We take the $\epsilon$ thickened link, which is well-defined by Theorem \ref{thm:small-eps-thick}.
-  Fix $p$ and let $U = \Gamma(p)$.
-  The left-hand side is nonnegative, so it suffices to prove the result for all $u$ such that the right side is strictly positive, i.e. for all $u$ such that $\psi(u) \not\in \gamma(p)$.
-  By definition of the $\epsilon$-thickened link, we must have $d(U,u) \geq \epsilon$.
-  By Lemma \ref{lemma:distance-loss}, we have $L(u;p) - \inf_{u^*} L(u^*;p) \geq C$ where $C = c\epsilon$ for some $c > 0$.
-  This holds for all $u$.
-  Meanwhile,
-    \[ \ell(\psi(u);p) - \min_{r^*} \ell(r^*;p) \leq \max_{r \in \R} \ell(r;p) - \min_{r^* \in \R} \ell(r^*;p) =: D, \]
-  for some constant $D$.
-  This also holds for all $u$.
-  Set $\delta = \frac{C}{D}$ to complete the proof.
+  Let $\Gamma := \prop{L}$ and $\gamma := \prop{\ell}$.
+  Suppose that $\psi$ is not $\epsilon$-separated for any $\epsilon>0$.
+  Then letting $\epsilon_i := 1/i$ we have sequences $\{p_i\}_i \subset \simplex$ and  $\{u_i\}_i \subset \reals^d$ such that for all $i\in\mathbb N$ we have both $\psi(u_i) \notin \gamma(p_i)$ and $d_\infty(u_i,\Gamma(p_i)) \leq \epsilon_i$.
+  First, observe that there are only finitely many values for $\gamma(p_i)$ and $\Gamma(p_i)$, as $\R$ is finite and $L$ is polyhedral (from Lemma~\ref{lem:polyhedral-range-gamma}).
+  Thus, there must be some $p\in\simplex$ and some infinite subsequence indexed by $j\in J \subseteq \mathbb N$ where
+  for all $j\in J$, we have $\psi(u_j) \notin \gamma(p)$ and $\Gamma(p_j) = \Gamma(p)$.
+
+  Next, observe that, as $L$ is polyhedral, the expected loss $\inprod{p}{L(u)}$ is $\beta$-Lipschitz in $\|\cdot\|_\infty$ for some $\beta>0$.
+  \raft{Could write $\beta$ explicitly; it's in my notes}
+  Thus, for all $j\in J$, we have
+  \begin{align*}
+    d_\infty(u_i,\Gamma(p)) \leq \epsilon_j
+    &\implies \exists u^*\in\Gamma(p) \|u_j-u^*\|_\infty \leq \epsilon_j
+    \\
+    &\implies \left| \inprod{p}{L(u_j)} - \inprod{p}{L(u^*)} \right| \leq \beta\epsilon_j
+    \\
+    &\implies \left| \inprod{p}{L(u_j)} - \risk{L}(p) \right| \leq \beta\epsilon_j~.
+  \end{align*}
+  Finally, for this $p$, we have
+  \begin{align*}
+    \inf_{u:\psi(u)\notin\gamma(p)} \inprod{p}{L(u)}
+    \leq
+    \inf_{j\in J} \inprod{p}{L(u_j)}
+    =
+    \risk{L}(p)~,
+  \end{align*}
+  contradicting the calibration of $\psi$.
 \end{proof}
 
-\begin{proof}[Proof of Theorem \ref{thm:link-main}]
-  The two claims are Theorems \ref{thm:small-eps-thick} and \ref{thm:app-eps-thick-sep}.
+For the other direction, we will make use of Hoffman constants for systems of linear inequalities.
+See \citet{zalinescu2003sharp} for a modern treatment.
+\begin{theorem}[Hoffman constant \cite{hoffman1952approximate}]
+  \label{thm:hoffman}
+  Given a matrix $A\in\reals^{m\times n}$, there exists some smallest $H(A)\geq 0$, called the \emph{Hoffman constant} (with respect to $\|\cdot\|_\infty$), such that for all $b\in\reals^m$ and all $x\in\reals^n$,
+  \begin{equation}
+    \label{eq:hoffman}
+    d_\infty(x,S(A,b)) \leq H(A) \|(A x - b)_+\|_\infty~,
+  \end{equation}
+  where $S(A,b) = \{x\in\reals^n \mid A x \leq b\}$ and $(u)_+ := \max(u,0)$ component-wise.
+\end{theorem}
+
+\begin{lemma}\label{lemma:hoffman-polyhedral}
+  Let $L: \reals^d \to \reals_+^{\Y}$ be a polyhedral loss with $\Gamma = \prop{L}$.
+  Then for any fixed $p$, there exists some smallest constant $H_{L,p} \geq 0$ such that $d_{\infty}(u,\Gamma(p)) \leq H_{L,p} R_L(u,p)$ for all $u \in \reals^d$.
+\end{lemma}
+\begin{proof}
+  Since $L$ is polyhedral, there exist $a_1,\ldots,a_m \in \reals^d$ and $c\in\reals^m$ such that we may write $\inprod{p}{L(u)} = \max_{1\leq j\leq m} a_j \cdot u + c_j$.
+  Let $A \in \reals^{m\times d}$ be the matrix with rows $a_j$, and let $b = \risk{L}(p)\ones - c$, where $\ones\in\reals^m$ is the all-ones vector.
+  Then we have
+  \begin{align*}
+    S(A,b)
+    &:= \{u\in\reals^d \mid A u \leq b\}
+    \\
+    &= \{u\in\reals^d \mid A u + c \leq \risk{L}(p)\ones\}
+    \\
+    &= \{u\in\reals^d \mid \forall i\, (A u + c)_i \leq \risk{L}(p)\}
+    \\
+    &= \{u\in\reals^d \mid \max_i \;(A u + c)_i \leq \risk{L}(p)\}
+    \\
+    &= \{u\in\reals^d \mid \inprod{p}{L(u)} \leq \risk{L}(p)\}
+    \\
+    & = \Gamma(p)~.
+  \end{align*}
+  Similarly, we have $\max_i\; (A u - b)_i = \inprod{p}{L(u)} - \risk{L}(p) = \regret{L}{u}{p} \geq 0$.
+  Thus,
+  \begin{align*}
+    \|(Au - b)_+\|_\infty
+    &= \max_i\; ((Au - b)_+)_i
+    \\
+    &= \max((Au - b)_1,\ldots,(Au - b)_m, 0)
+    \\
+    &= \max(\max_i\; (Au - b)_i, \, 0)
+    \\
+    &= \max_i\; (Au - b)_i
+    % \\
+    % &= \inprod{p}{L(u)} - \risk{L}(p)
+    \\
+    &= \regret{L}{u}{p}~.
+  \end{align*}
+  Now applying Theorem~\ref{thm:hoffman}, we have
+  \begin{align*}
+    d_\infty(u,\Gamma(p))
+    &=    d_\infty(u,S(A,b))
+    \\
+    &\leq H(A) \|(Au-b)_+\|_\infty
+    \\
+    &= H(A) \regret{L}{u}{p}~.\qedhere
+  \end{align*}
+\end{proof}
+
+
+\calibratedseparated*
+\begin{proof}
+  Let $\gamma=\prop{\ell}$ and $\Gamma=\prop{L}$.
+  From Lemma~\ref{lemma:calibrated-eps-sep}, calibration implies $\epsilon$-separation.
+  For the converse, suppose $\psi$ is $\epsilon$-separated with respect to $L$ and $\ell$.
+  Fix $p\in\simplex$.
+  To show calibration, it suffices to find a positive lower bound for $R_L(u,p)$ that holds for all $u\in\reals^d$ with $\psi(u) \notin \gamma(p)$.
+  
+  Applying the definition of $\epsilon$-separated and Lemma~\ref{lemma:hoffman-polyhedral}, $\psi(u) \notin \gamma(p)$ implies
+  \begin{align*}
+    \epsilon &<    d_{\infty}(u,\Gamma(p)) \leq H_{L,p} R_L(u,p) .
+  \end{align*}
+  Let $C_{\ell} = \max_{r,p} R_{\ell}(r,p)$.
+  Then $R_{\ell}(\psi(u),p) \leq C_{\ell} \leq \frac{C_{\ell} H_{L,p}}{\epsilon} R_L(u,p)$.
+
+  If $H_{L,p} = 0$, then for all $u\in\reals^d$ we have $R_\ell(\psi(u),p) = 0$, so calibration for this $p$ is trivial.
+  \raft{In fact, we must also have $\Gamma(p) = \reals^d$ by Lemma~\ref{lemma:hoffman-polyhedral}, since every $u\in\reals^d$ would have $d_\infty(u,\Gamma(p)) = 0$ and $\Gamma(p)$ is closed.}
+  Similarly, if $C_\ell = 0$, then $R_\ell(r,p) = 0$ for all $r\in\R$, so again $R_\ell(\psi(u),p) = 0$ for all $u\in\reals^d$.
+
+  Now assume $C_\ell > 0$ and $H_{L,p} > 0$.
+  Let $C'_{\ell,p} \doteq \min_{r \notin \gamma(p)} R_\ell(r,p) > 0$.
+  (As we assume $C_\ell > 0$, we must have $\gamma(p) \neq \R$, so the minimum is attained.)
+  Then for all $u$ such that $\psi(u) \notin \gamma(p)$, we have $R_\ell(\psi(u),p) \geq C'_{\ell,p}$.
+  Rearranging, we have
+  \[ \psi(u) \notin \gamma(p) \implies R_L(u,p) \geq \frac{C'_{\ell,p} \epsilon}{C_\ell H_{L,p}} > 0~.\]
+  Thus, $\inf_{u : \psi(u) \notin \gamma(p)} \inprod{L(u)}{p} > \risk{L}(p)$.
+  Since the above holds for all $p\in\simplex$, $\psi$ is calibrated.
 \end{proof}
 
 %\section{Omitted Proofs}\label{app:omitted-proofs}
