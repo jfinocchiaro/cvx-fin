@@ -104,7 +104,7 @@
 \newcommand{\strip}{\mathrm{strip}}
 \newcommand{\trim}{\mathrm{trim}}
 \newcommand{\red}{\mathrm{red}}
-\newcommand{\trimred}{\mathrm{trim}_\red}
+\newcommand{\trimred}{\mathrm{trim}}
 \newcommand{\trimcover}{\mathrm{trim}}
 \newcommand{\fplc}{finite-piecewise-linear and convex\xspace} %xspace for use in text
 \newcommand{\conv}{\mathrm{conv}}
@@ -376,10 +376,11 @@ In this case we say 0-1 loss \emph{elicits} the mode, as we formalize below.
   \begin{equation}
     \forall p\in\simplex,\;\;\;\Gamma(p) = \argmin_{r \in \R} \inprod{p}{L(r)}~.
   \end{equation}
-  As $L$ elicits a unique property, we write $\prop{L}$ to refer to the property elicited by a loss $L$.
+  If $L$ elicits a property, it is unique and we write $\prop{L}$ to refer to the property elicited by a loss $L$.
 \end{definition}
 
-
+Observe that we have defined a property $\Gamma$ to be nonempty, so if the minimum of $\inprod{p}{L(\cdot)}$ is not defined for some $p \in \simplex$, then $L$ does not elicit a property.
+We say that a loss $L$ is \emph{minimizable} if the infimum of $\inprod{p}{L(\cdot)}$ is attained for all $p \in \simplex$.
 We will typically denote general properties and losses with $\Gamma$ and $L$, respectively.
 For surrogate losses and properties, we will typically take $\R = \reals^d$.
 For discrete target losses and properties, we will take $\R$ to be any finite set, and use lowercase notation $\ell$ and $\gamma$, respectively.
@@ -449,7 +450,7 @@ Because of this redundancy, we will only require an embedding map to be defined 
   Let $\Gamma:\simplex\toto\R$.
   We say $\Sc \subseteq \R$ is \emph{representative for $\Gamma$} if we have $\Gamma(p) \cap \Sc \neq \emptyset$ for all $p\in \simplex$.
   We further say $\Sc$ is a \emph{minimum representative set} if it has the smallest cardinality among all representative sets.
-  Given a loss $L:\R\to\reals^\Y_+$, we say $\Sc$ is a (minimum) representative set for $L$ if it is a (minimum) representative set for $\prop L$.
+  Given a minimizable loss $L:\R\to\reals^\Y_+$, we say $\Sc$ is a (minimum) representative set for $L$ if it is a (minimum) representative set for $\prop L$.
   % We say $\Sc \subseteq \R$ is \emph{representative for $L$} if we have $\prop{L}(p) \cap \Sc \neq \emptyset$ for all $p\in \simplex$.
   % We further say $\Sc$ is a \emph{minimum representative set} if it has the smallest cardinality among all representative sets.
 \end{definition}
@@ -466,7 +467,7 @@ Because of this redundancy, we will only require an embedding map to be defined 
 We now define an embedding.
 In addition to matching loss values, as described above, we require the original reports to be optimal exactly when the corresponding embedded points are optimal.
 \begin{definition}[Embedding]\label{def:loss-embed}
-  A loss $L:\reals^d\to\reals^\Y$ \emph{embeds} a loss $\ell:\R\to\reals^\Y$ if there exists a representative set $\Sc$ for $\ell$ and an injective embedding $\varphi:\Sc\to\reals^d$ such that
+  A minimizable loss $L:\reals^d\to\reals^\Y_+$ \emph{embeds} a loss $\ell:\R\to\reals^\Y_+$ if there exists a representative set $\Sc$ for $\ell$ and an injective embedding $\varphi:\Sc\to\reals^d$ such that
   (i) for all $r\in\Sc$ we have $L(\varphi(r)) = \ell(r)$, and (ii) for all $p\in\simplex,r\in\Sc$ we have
   % \begin{equation}\label{eq:embed-loss}
   %   r \in \argmin_{r'\in\R} \inprod{p}{\ell(r')} \iff \varphi(r) \in \argmin_{u\in\reals^d} \inprod{p}{L(u)}~.
@@ -529,7 +530,8 @@ By results in \S~\ref{subsec:match-BR}, one could also show that $\hinge$ embeds
 %	\caption{Bayes risk of the logistic loss.}
 %	\label{fig:logistic-br}
 \end{minipage}
-\caption{Bayes risks of 0-1, hinge, and logistic losses, respectively, in binary classification setting. \raf{Add detail}.}
+\caption{Bayes risks $L : p \mapsto \inf_u \inprod{p}{L(u)}$ of 0-1, hinge, and logistic losses, respectively, in binary classification setting. Here, the value $x$ on the horizontal axis yields $p = (1-x, x)$ as the respective probabilities $(Pr[Y=-1], Pr[Y=1])$.
+	Observe that the Bayes risks of 0-1 and hinge loss are both piecewise lienar and concave, while the Bayes risk of logistic loss is also concave, but not piecewise linear.  \raf{Add detail}\jessie{better?}}
 \label{fig:bayes-risks-01}
 \end{figure}
 
@@ -600,7 +602,7 @@ We will use these observations throughout.
 
 Lemma~\ref{lem:loss-restrict} leads to the following useful tool for finding embeddings.
 \begin{proposition}\label{prop:representative-embeds-restriction}
-  Let surrogate loss $L:\reals^d \to \reals^\Y_+$ be given.
+  Let a minimizable surrogate loss $L:\reals^d \to \reals^\Y_+$ be given.
   If $L$ has a finite representative set $\U \subseteq \reals^d$, then $L$ embeds the discrete loss $L|_\U$.
 \end{proposition}
 \begin{proof}
@@ -620,10 +622,11 @@ See \S~\ref{app:power-diagrams} for the full proof.
 
 \begin{restatable}{lemma}{polyhedralrangegamma}
 	\label{lem:polyhedral-range-gamma}
-	Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss, and let $\Gamma = \prop{L}$.
+	Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss; then $L$ is minimizable and elicits a property $\Gamma := \prop{L}$.
 	Then the range of $\Gamma$, given by $\Gamma(\simplex) = \{\Gamma(p) \subseteq \reals^d : p\in\simplex\}$, is a finite set of closed polyhedra.
 \end{restatable}
 \begin{proof}[Sketch]
+	We know that $L$ is minimizable from~\citet[Corollary 19.3.1]{rockafellar1997convex} as $L$ is bounded from below.
 	With $\Y$ finite, there are only finitely many supporting sets over $\simplex$.
 	For $p \in \simplex$, the power diagram induced by projecting the epigraph of expected loss onto $\reals^d$ is the same for any $p$ of the same support (Lemma~\ref{lem:polyhedral-pd-same}).
 	Moreover, we have $\Gamma(p)$ being exactly one of the faces of the projected epigraph since the hyperplane $u \mapsto (u, \inprod{p}{L(u)})$ supports the epigraph of the expected loss at exactly the property value; moreover, since the loss is polyhedral the supporting hyperplane must support on a face of the epigraph.
@@ -1436,7 +1439,7 @@ The result follows immediately from the definition of $\trim$.
 
 \begin{corollary}\label{cor:trim-loss-red}
   Let $L : \R \to \reals^\Y_+$ have a finite representative set.
-  Then $\trimcover(L) = L(\R \setminus \red(L))$
+  Then $\trimcover(L) = L(\R \setminus \red(L))$.
   % $\{L(r) \mid r \notin \red(\Gamma)\}$.
   % \in \R,\; \forall r'\in\R,\; \Gamma_r = \Gamma_{r'} \textnormal{ or } \Gamma_r \not\subseteq \Gamma_{r'}\}$
   % $\mid u \in \R \textrm{ s.t. } \neg\exists u'\in\R,u'\neq u,\, \Gamma_u \subsetneq \Gamma_{u'}\}$
@@ -1444,7 +1447,7 @@ The result follows immediately from the definition of $\trim$.
 
 
 
-\subsubsection{A property elicitation perspective on trimmed losses}
+\subsection{A property elicitation perspective on trimmed losses}
 
 We conclude this section with a similar structural result about the properties embedded by another property.
 We say a property $\Gamma:\simplex\toto\reals^d$ embeds a finite property $\gamma:\simplex\toto\R$ if condition (ii) of Definition~\ref{def:loss-embed} holds.
@@ -1793,6 +1796,9 @@ We now include the full proof of Lemma~\ref{lem:polyhedral-range-gamma}.
 
 \polyhedralrangegamma*
 \begin{proof}
+	First, observe that $L: \reals^d \to \reals^\Y_+$ is finite and bounded from below (by $\vec 0$), and thus its infimum is finite. 
+	Therefore, we can apply \citet[Corollary 19.3.1]{rockafellar1997convex} to conclude that its infimum is attained for all $p \in \simplex$ and is therefore minimizable; thus, elicits a property.
+	
 	For all $p$, let $P(p)$ be the epigraph of the convex function $u\mapsto \inprod{p}{L(u)}$.
 	From Lemma~\ref{lem:polyhedral-pd-same}, we have that the power diagram $D_\Y$ induced by the projection of $P(p)$ onto $\reals^d$ is the same for any $p\in\inter(\simplex)$.
 	Let $\F_\Y$ be the set of faces of $D_\Y$, which by the above are the set of faces of $P(p)$ projected onto $\reals^d$ for any $p\in\inter(\simplex)$.
@@ -2979,7 +2985,7 @@ As $H_{v}^+ \in \H$, it supports $\hyp(g_\V)$ or it is redundant in $\H$ (or bot
 	For any $v \in \V$, the face $F_{v} \subseteq F_{v^*}$ for some $v^* \in \V^*$. %must be a subset of one of the $\V^*$ facets $F_{v^*}$ (as opposed to the vertical ones)
 \end{claim}
 \begin{proof}
-	As $\hyp(g_{\V^*})$ is polyhedral, each of its faces are convex polytopes, and is also a face of some facet of $\hyp(g_{\V^*})$; these facets are defined by $\V^*$ and $\Y$ (Corollary 6).
+	As $\hyp(g_{\V^*})$ is polyhedral, each of its faces are convex polyhedra, and is also a face of some facet of $\hyp(g_{\V^*})$; these facets are defined by $\V^*$ and $\Y$ (Corollary 6).
 	
 	It then suffices to show that if $F_v$ is a face of the facet $F_y$ for some $y\in \Y$, then it must also be a face of $F_{v^*}$ for a $v \in \V^*$; equivalently, $F_v$ is not a facet, and thus $F_v \neq F_y$.
 	Recall from the definition of a face that $F_v = G \cap H_{(v,-1)}$ and $F_y = G \cap H_{(e_y, 0)}$.
