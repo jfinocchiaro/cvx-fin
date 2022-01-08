@@ -146,38 +146,40 @@
 %\title{Convex Surrogates via Polyhedral Losses}
 \author{%
  Jessie Finocchiaro \\
- \texttt{jefi8453@colorado.edu}\\
- CU Boulder
+ \texttt{jefi8453@colorado.edu}
  \and
  Rafael Frongillo\\
- \texttt{raf@colorado.edu}\\
- CU Boulder
+ \texttt{raf@colorado.edu}
  \and
  Bo Waggoner\\
- \texttt{bwag@colorado.edu}\\
- CU Boulder
+ \texttt{bwag@colorado.edu}
 }
-
+\date{%                          % nice hack
+  % \vspace*{-5pt}
+  University of Colorado Boulder
+  \\[15pt]
+  \today
+}
 \begin{document}
 
 \maketitle
 
 \begin{abstract}
 We formalize and study the natural approach of designing convex surrogate loss functions via embeddings, for problems such as classification, ranking, or structured prediction. 
-In this approach, one embeds each of the finitely many predictions (e.g. classes) as a point in $\reals^d$, assigns the original loss values to these points, and ``convexifies'' the loss in some way to obtain a surrogate.
+In this approach, one embeds each of the finitely many predictions (e.g.\ rankings) as a point in $\reals^d$, assigns the original loss values to these points, and ``convexifies'' the loss in some way to obtain a surrogate.
 We establish a strong connection between this approach and polyhedral (piecewise-linear convex) surrogate losses.
 Given any polyhedral loss $L$, we give a construction of a link function through which $L$ is a consistent surrogate for the loss it embeds.
 Conversely, we show how to construct a consistent polyhedral surrogate for any given discrete loss.
 Our framework yields succinct proofs of consistency or inconsistency of various polyhedral surrogates in the literature, and for inconsistent surrogates, it further reveals the discrete losses for which these surrogates are consistent.
-We show some additional structure of embeddings, such as a reducing embedding to matching Bayes risks.
-Finally, we show that when restricting to polyhedral surrogates, indirect property elicitation is equivalent to consistent.
+\raft{For journal submission: mention the applications (or just that we discuss them) briefly in prev sentence.}
+We show some additional structure of embeddings, such as the equivalence of embedding and matching Bayes risks, and the equivalence of various notions of non-redudancy.
+Using these results, we establish that indirect elicitation, a necessary condition for consistency, is also sufficient when working with polyhedral surrogates.
 % The framework can generally be applied to finite prediction tasks, and is demonstrated on examples including high-confidence classification, structured prediction, ordered partitions, and top-$k$ prediction.
-\raft{Note to self: revisit abstract}
 \end{abstract}
 
-%\begin{keywords}%
-%  property elicitation, proper scoring rules, surrogate loss functions, embeddings
-%\end{keywords}
+\begin{keywords}%
+ property elicitation, proper scoring rules, surrogate loss functions, embeddings
+\end{keywords}
 
 \section{Introduction}\label{sec:intro}
 
@@ -315,15 +317,13 @@ Let $\simplex = \{p\in\reals^{\Y}_+ \mid \|p\|_1 = 1\}$ be the set of probabilit
 We will primarily focus on conditional distributions $p\in\simplex$ over labels, abstracting away the feature space $\X$; see \S~\ref{subsec:calibration-links} for a discussion of the joint distribution over $\X\times\Y$.
 % While supervised algorithms learn hypothesis functions $h:\X \to \R$ that minimize expected loss over data representations and labels, one can abstract away the hypothesis function for simplicity and reason about generic reports.
 % We first discuss this conditional setting, with just labels $\Y$ and no features $\X$, and show in \S~\ref{subsec:calibration-links} how these notions relate to the usual $\X\times\Y$ setting considering features.
-\botodo{I don't expect the previous sentence to make sense to most readers. Suggest we add some explanation or detail -- or defer this comment to a bit later.}
-\jessiet{Better?}
 \raft{Tried to condense; old version commented out.}
 
 A generic loss function, denoted $L:\R\to\reals^\Y_+$, maps a report (prediction) $r$ from a set $\R$ to the vector of loss values $L(r) = (L(r)_y)_{y\in\Y}$ for each possible outcome $y\in\Y$.
 We write the corresponding expected loss when $Y \sim p$ as $\inprod{p}{L(r)}$.
 The \emph{Bayes risk} of a loss $L:\R\to\reals^\Y_+$ is the function $\risk{L}:\simplex\to\reals_+$ given by $\risk{L}(p) := \inf_{r\in\R} \inprod{p}{L(r)}$.
 When restricting the domain of a loss $L$ from $\R$ to $\R'$, we write $L|_{\R'}$.
-\raft{We got some feedback from Anish and others that the way we write generic losses was confusing.  I tried to rewrite this paragraph to emphasize that we use $L$ for generic losses, including surrogates, and $\ell$ for discrete losses, where we assume $\R$ is a finite set.  That way the idea that $\R$ is always finite is perhaps dispelled.}
+\btw{RF: We got some feedback from Anish and others that the way we write generic losses was confusing.  I tried to rewrite this paragraph to emphasize that we use $L$ for generic losses, including surrogates, and $\ell$ for discrete losses, where we assume $\R$ is a finite set.  That way the idea that $\R$ is always finite is perhaps dispelled.}
 
 We assume that a given discrete prediction problem, such as classification, is given in the form of a discrete \emph{target loss} where $\R$ is a finite set.
 We will denote target losses by $\ell:\R\to\reals^\Y_+$; when $\ell$ is written we assume $\R$ is a finite set.
@@ -376,19 +376,16 @@ In this case we say 0-1 loss \emph{elicits} the mode, as we formalize below.
   \begin{equation}
     \forall p\in\simplex,\;\;\;\Gamma(p) = \argmin_{r \in \R} \inprod{p}{L(r)}~.
   \end{equation}
-  If $L$ elicits a property, it is unique and we write $\prop{L}$ to refer to the property elicited by a loss $L$.
+  If $L$ elicits a property, it is unique and we denote it $\prop{L}$.
 \end{definition}
-
-Observe that we have defined a property $\Gamma$ to be nonempty, so if the minimum of $\inprod{p}{L(\cdot)}$ is not defined for some $p \in \simplex$, then $L$ does not elicit a property.
+Since we have defined a property $\Gamma$ to be nonempty, if the minimum of expected loss $\inprod{p}{L(\cdot)}$ is not attained for some $p \in \simplex$, then $L$ does not elicit a property.
 We say that a loss $L$ is \emph{minimizable} if the infimum of $\inprod{p}{L(\cdot)}$ is attained for all $p \in \simplex$.
+
 We will typically denote general properties and losses with $\Gamma$ and $L$, respectively.
 For surrogate losses and properties, we will typically take $\R = \reals^d$.
-For discrete target losses and properties, we will take $\R$ to be any finite set, and use lowercase notation $\ell$ and $\gamma$, respectively.
+For discrete target losses and properties, we will take $\R$ to be any finite set, and use lowercase notation $\gamma$ and $\ell$, respectively.
 Any property $\gamma:\simplex\toto\R$ for a finite set $\R$ is called a \emph{finite property}.
-\raft{Rewrote to (hopefully) make our notational conventions clearer \jessie{Re-arranged slightly to match the re-write of loss notation, but feel free to undo if more confusing. - 16 Sept 21}}
 
-% Often we will work with two properties simultaneously, a finite property $\gamma:\simplex\toto\R$, and its embedded version $\Gamma:\simplex\toto\reals^d$.
-% In this case, we write the embedded reports as $u\in\reals^d$, reserving $r\in\R$ for the finite property.
 
 \subsection{Calibration and Links}
 \label{subsec:calibration-links}
@@ -530,8 +527,8 @@ By results in \S~\ref{subsec:match-BR}, one could also show that $\hinge$ embeds
 %	\caption{Bayes risk of the logistic loss.}
 %	\label{fig:logistic-br}
 \end{minipage}
-\caption{Bayes risks $L : p \mapsto \inf_u \inprod{p}{L(u)}$ of 0-1, hinge, and logistic losses, respectively, in binary classification setting. Here, the value $x$ on the horizontal axis yields $p = (1-x, x)$ as the respective probabilities $(Pr[Y=-1], Pr[Y=1])$.
-	Observe that the Bayes risks of 0-1 and hinge loss are both piecewise lienar and concave, while the Bayes risk of logistic loss is also concave, but not piecewise linear.  \raf{Add detail}\jessie{better?}}
+\caption{Bayes risks $L : p \mapsto \inf_u \inprod{p}{L(u)}$ of 0-1, hinge, and logistic losses, respectively, plotted as a function of $p_1 = Pr[Y=1]$.
+	Observe that the Bayes risks of 0-1 and hinge loss are both piecewise lienar and concave, while the Bayes risk of logistic loss is also concave, but not piecewise linear.  \raf{Add detail}\jessie{better?}\raf{Take a step back and ask: what point do we (want to) make with this figure? Seems a shame not to mention the Bayes risk matching of the first two and how that relates to embedding.}}
 \label{fig:bayes-risks-01}
 \end{figure}
 
@@ -1194,11 +1191,11 @@ $\psi(u)$ which returns the $k$ largest elements of $u$ (breaking ties arbitrari
 \section{Additional Structure of Embeddings}
 \label{sec:min-rep-sets}
 
-\jessie{Attempted brief overview}
-In \S~\ref{sec:poly-loss-embed}, we discussed the connection between embeddings and polyhedral losses; a natural next question is to understand if polyhedral losses are necessary to embed a discrete loss --- the answer is negative, as we show with a counterexample in Figure~\ref{fig:modified-hinge}.
-Here, we further study the structure of embeddings, showing instead a more general necessary condition for embedding: discrete losses must be embedded by a function with polyhedral Bayes risk, which have finite minimum representative sets (Lemma~\ref{lem:X}).
-For intuition, we show in \S~\ref{subsec:match-BR} that the embedding condition simplifies to matching Bayes risks (Proposition~\ref{prop:embed-bayes-risks}).
-Since surrogates with polyhedral Bayes risk have finite minimum representative sets, we introduce and study the notion of a trimmed loss, studying loss values at minimum representative sets (Definition~\ref{def:trim-loss}), and connect this to both tight embeddings and non-redundancy from property elicitation (Proposition~\ref{prop:embed-iff-trims-equal}).
+We have shown in \S~\ref{sec:poly-loss-embed} a tight connection between embeddings and polyhedral losses.
+Here we go beyond polyhedral losses, showing a more general necessary condition for an embedding: a surrogate embeds a discrete loss if and only if it has a polyhedral Bayes risk, or equivalently, a finite representative sets (Lemma~\ref{lem:X}).n
+This result implies that the embedding condition simplifies to matching Bayes risks (Proposition~\ref{prop:embed-bayes-risks}).
+It also reveals some deeper structure of embeddings, even down to the geometry of the underlying property, and the equivalence of various notions of non-redundant predictions.
+In particular, we study a natural notion of a ``trimed'' loss function (Definition~\ref{def:trim-loss}), and connect this definition to both tight embeddings and non-redundancy from property elicitation (Proposition~\ref{prop:embed-iff-trims-equal}).
  
 
 %\raf{Add somewhere: initially explored by~\citet{wang2020weston} under the name \emph{embedding cardinality} }
@@ -1206,11 +1203,12 @@ Since surrogates with polyhedral Bayes risk have finite minimum representative s
 
 \subsection{Structure of polyhedral Bayes risks}
 
-While we have focused on polyhedral losses thus far, many of our results about embeddings extend to losses with polyhedral Bayes risks.
+While we have focused on polyhedral losses thus far, many of our results about embeddings extend to losses with polyhedral Bayes risks, a weaker condition.
 (We say a concave function is polyhedral if its negation is a polyhedral convex function.)
-To see that this is a weaker condition, recall that Theorem~\ref{thm:poly-embeds-discrete} constructs a finite representative set $\Sc$ for any polyhedral loss $L$, and thus $\risk{L} = \risk{L|_\Sc}$ by Lemma~\ref{lem:loss-restrict}, which is polyhedral.
-The condition of polyhedral Bayes risk is strictly weaker than polyhedral surrogates, in that the Bayes risk may be polyhedral even if the loss itself is not.
-For example, a modified hinge loss $L(r)_y = \max(r^2-1,1-ry)$ as shown in Figure~\ref{fig:modified-hinge}, which matches hinge loss on the interval $[-1,1]$ but is smooth outside the interval $[-2,2]$, still embeds twice 0-1 loss.
+To see that every polyhedral loss has a polyhedral Bayes risk, recall that Theorem~\ref{thm:poly-embeds-discrete} constructs a finite representative set $\Sc$ for any polyhedral loss $L$, and thus $\risk{L} = \risk{L|_\Sc}$ by Lemma~\ref{lem:loss-restrict}, which is polyhedral.
+The condition is strictly weaker: a Bayes risk may be polyhedral even if the loss itself is not.
+For example, a modified hinge loss $L(r)_y = \max(r^2-1,1-ry)$
+as shown in Figure~\ref{fig:modified-hinge}, which matches hinge loss on the interval $[-1,1]$ but is strictly convex outside the interval $[-2,2]$, still embeds twice 0-1 loss.
 
 \begin{figure}
 	\begin{minipage}{0.47\linewidth}
@@ -1247,7 +1245,7 @@ The proof is in \S~\ref{subsec:lem-X-proof}.
 Lemma~\ref{lem:X} observes that (minimizable) losses $L$ with polyhedral Bayes risk have finite representative sets, and derives equivalent conditions on the level sets of the property elicited by $L$ and tight embeddings.
 %\raf{TODO: Brief description of the result}\jessie{Attempted}
 
-\begin{restatable}{lemma}{lemmaX}[\jessie{Lemma X}]\label{lem:X}
+\begin{restatable}{lemma}{lemmaX}\label{lem:X}
   Let $L: \R \to \reals^\Y_+$ be a minimizable loss with a polyhedral Bayes risk $\risk L$.
   Then $L$ has a finite representative set.
   Furthermore, letting $\Gamma = \prop{L}$, there exist finite sets
@@ -1358,7 +1356,6 @@ Using this notion of trimming a loss, we can again recast our embedding conditio
   Furthermore, $L$ tightly embeds $\ell$ if and only if $\ell$ is injective and $\trimcover(L) = \ell(\R)$.
 \end{proposition}
 \begin{proof}
-  \raft{This is sort of a ``clever'' proof, probably not in a good way.  Something that used Lemma X more directly would probably be better than using Bayes risk matching.  But if correct I think it's not bad. \jessie{It's a little subtle in parts, but checks out to me.  Feel free to \# burn}}
   As $L$ has a finite representative set, it is minimizable.
   Proposition~\ref{prop:embed-bayes-risks} gives $L$ embeds $\ell$ if and only if $\risk L = \risk \ell$.
   If $\risk L = \risk \ell$, Lemma~\ref{lem:X}(\ref{item:X-min-V}) gives $\trim(L) = \trim(\ell)$.
@@ -1412,7 +1409,7 @@ Similarly, for minimizable $L$, let $\red(L) := \red(\prop L)$.
   Let $L : \R \to \reals^\Y_+$ have a finite representative set.
   Let $\R'$ be the union of all minimum representative sets for $L$.
   Then $\R' = \R \setminus \red(L)$.
-  \raft{I was a bit surprised how involved this proof ended up being.  Quite possibly there is a faster way, though at the same time, I do like how the proof shows something stronger.  Old version is in before-reorg-sec-3.tex.\jessie{It doesn't feel that involved as a reader, though maybe I'm not clear what you mean by ``involved''}}
+  \btw{Quite possibly there is a faster proof, though I do like how the proof shows something stronger.  Old version is in before-reorg-sec-3.tex.}
 \end{proposition}
 
 \begin{proof}
@@ -1445,7 +1442,8 @@ The result follows immediately from the definition of $\trim$.
   % $\mid u \in \R \textrm{ s.t. } \neg\exists u'\in\R,u'\neq u,\, \Gamma_u \subsetneq \Gamma_{u'}\}$
 \end{corollary}
 
-
+This result motivates the analogous definition for properties, $\trimred(\Gamma) := \{\Gamma_r \mid r \in \R\setminus\red(\Gamma)\}$.
+We leverage this definition next, to study embeddings at the property level.
 
 \subsection{A property elicitation perspective on trimmed losses}
 
@@ -1455,19 +1453,14 @@ In other words, $\Gamma$ embeds $\gamma$ if we have some representative set $\Sc
 % The definitions of representative sets and embeddings naturally extend to properties.
 % We say a set 
 % As we define embeddings from one loss to another, one can define embeddings from one property to another, where essentially condition (i) is relaxed; see \S~\ref{app:embed-props} for a precise definition.
-Furthermore, when working with properties, it is more natural to define ``trim'' to remove any level sets which are strictly redundant.
-Precisely, we define $\trimred(\Gamma) := \{\Gamma_r \mid r \in \R\setminus\red(\Gamma)\}$.
-\jessie{We're using $\trimred$ for properties and $\trim$ for losses... do we want to consolidate notation or keep it separate?}
-%\R \textrm{ s.t. } \neg\exists r'\in\R,r'\neq r,\, \Gamma_r \subsetneq \Gamma_{r'}\}~.\]
 
-With these definitions, we now state a structural result for embeddable properties, and the properties that embed them.
+Roughly, our result is as follows.
 First, if $\Gamma$ embeds $\gamma$ and $\gamma$ is non-redundant, the level sets of $\Gamma$ must all be redundant relative to $\gamma$.
 In other words, $\Gamma$ is exactly the property $\gamma$ up to relabelling reports, just with other reports filling in the gaps between the embedded reports of $\gamma$.
 When working with convex losses, these extra reports often arise in the convex hull of the embedded reports.
 In this sense, we can regard embedding as only a slight departure from direct elicitation: if a loss $L$ elicits $\Gamma$ which embeds $\gamma$, we can almost think of $L$ as eliciting $\gamma$ itself.
 Finally, we have an important converse: if $\Gamma$ has finitely many full-dimensional level sets, or equivalently, if $\trimred(\Gamma)$ is finite, then $\Gamma$ must embed some finite elicitable property with those same level sets.
-
-We will make use of another corollary of Proposition~\ref{prop:embed-iff-trims-equal}, stated for properties.
+The statements about level sets make use of another corollary of Proposition~\ref{prop:embed-iff-trims-equal}, stated for properties.
 \begin{corollary}\label{cor:trim-prop-red}
   Let $\Gamma : \simplex \toto \R$ be an elicitable property with a finite representative set.
   Then $\trimred(\Gamma)$ is the set of full-dimensional level sets of $\Gamma$.
@@ -1478,9 +1471,6 @@ We will make use of another corollary of Proposition~\ref{prop:embed-iff-trims-e
   From Proposition~\ref{prop:tfae-min-rep-nonredundant}, we have $r \in \R\setminus \red(\Gamma)$ if and only if $r$ is an element of some minimum representative set.
   As $\Gamma$ has at least one minimum representative set, we conclude $\trimred(\Gamma) = \{\Gamma_r \mid r\in \R\setminus\red(\Gamma)\} = \Theta$.  
 \end{proof}
-
-%\jessie{Adding in small motivation of Prop 6}
-This allows us to think about the structure of properties elicited by losses with finite representative sets in the following equivalent ways through $\trimred(\Gamma)$.
 
 \begin{proposition}\label{prop:embed-trim}
   Let $\Gamma:\simplex\toto\reals^d$ be an elicitable property.
@@ -1544,8 +1534,9 @@ This allows us to think about the structure of properties elicited by losses wit
   % Finally, Lemma~\ref{lem:X}(\ref{item:X-redundant}) gives $\trimred(\gamma) = \Theta$.
 \end{proof}
 
-\btw{JOURNAL: cool to point out that when $L$ is polyhedral, $\prop{L}$ has a finite range (this result) and so does its (multivalued map) inverse (trim result)! \jessie{Think this is a bit outdated.  at least pre lemma X.  Feel free to burn}}
-
+As a final observation, recall that a property $\Gamma$ elicited by a polyhedral loss has a finite range, in the sense that there are only finitely many optimal sets $\Gamma(p)$ for $p\in\simplex$ (Lemma~\ref{lem:polyhedral-range-gamma}).
+Proposition~\ref{prop:embed-trim} shows the dual statement: there are only finitely many level sets $\Gamma_u$ for $u\in\reals^d$.
+In other words, both $\Gamma$ and $\Gamma^{-1}$ have a finite range as multivalued maps.
 
 \section{Polyhedral Indirect Elicitation Implies Consistency}
 \label{sec:poly-ie-consistency}
@@ -1625,7 +1616,10 @@ Theorem~\ref{thm:poly-ie-implies-consistent} gives a somewhat surprising result:
 
 \section{Conclusions} \label{sec:conclusion}
 
-\raft{Didn't love the way any of the recaps sounded, and I also remember that some journals forbid recaps anyway, so commented out for now.  Instead I left a probably-too-terse recap, which we could expand slightly.}
+\raft{Didn't love the way any of the recaps sounded, and I also remember that some journals forbid recaps anyway, so commented out for now.  Instead I left a probably-too-terse recap (edit: also commented out just below), which we could expand slightly.}
+% We have established a tight connection between polyhedral losses and embeddings.
+% As detailed in \S~\ref{sec:applications}, this connection sheds light on the design and analysis of polyhedral surrogates throughout the machine learning literature.
+
 % This paper formalizes an intuitive way to design convex surrogate losses for finite prediction problems, by embedding the reports into $\reals^d$.
 % We establish a close relationship between such embeddings and polyhedral surrogates (Theorem~\ref{thm:embed-poly-main}), showing both that every polyhedral loss embeds a discrete loss and that every discrete loss is embedded by some polyhedral loss.
 % We then construct a calibrated link function from any polyhedral loss to the discrete loss it embeds, giving consistency for all such losses (Theorem~\ref{thm:link-main}).
@@ -1638,9 +1632,6 @@ Theorem~\ref{thm:poly-ie-implies-consistent} gives a somewhat surprising result:
 % In \S~\ref{sec:applications}, this tool is applied to a variety of examples, including high-confidence classification, stuctured prediction, ordered partitions, and top-$k$ prediction.
 % Finally, when restricting to polyhedral surrogate losses, we use embeddings to show that indirect property elicitation is equivalent to consistency in \S~\ref{sec:poly-ie-consistency}.
 
-We have established a tight connection between polyhedral losses and embeddings.
-As detailed in \S~\ref{sec:applications}, this connection sheds light on the design and analysis of polyhedral surrogates throughout the machine learning literature.
-
 Several directions for future work remain.
 % it is not clear whether one can further restrict embeddings to surrogates given by the convex envelope of embedded points.
 We show in Theorem~\ref{thm:poly-ie-implies-consistent} that indirect elicitation is equivalent to consistency when restricting to the class of polyhedral surrogates; we would like to identify other classes of surrogates for which this equivalence holds.
@@ -1648,7 +1639,7 @@ It would also be interesting to explore embeddings through the lens of superpred
 Finally, it is important for applications to understand the minimum prediction dimension $d$ of a consistent convex surrogate $L:\reals^d\to \reals^\Y_+$ for a given target problem, also called its elicitation complexity.
 One approach to this question is to first understand the minimum $d$ for which an embedding $L$ exists, a study initiated by \citet{finocchiaro2020embedding}, and then relate this dimension to polyhedral, or general convex, elicitation complexity.
 
-\raf{Notes on future work and conjectures}
+\raf{Notes on future work and conjectures -- CUT FOR ARXIV}
 \begin{itemize}\small
 \setlength \itemsep{0.1em}
 \item %\raf{This is false I believe, from BEP surrogate $n=4$ and large (small?) $\alpha$ -- you can add a little curvature between the spokes and it still embeds.  Maybe we can rephrase / reformulate.}
@@ -1722,13 +1713,10 @@ A natural question is to posit if an embedding my be polyhedral on the convex hu
 
 
 \subsection*{Acknowledgements}
-We thank Arpit Agarwal and Peter Bartlett for many early discussions, which led to several important insights.
-% to a proof of %\raf{1-d reduction} among other insights.
-% Additionally, we thank Arpit Agarwal for early insights and bringing out attention to the abstain property.
-We thank Eric Balkanski for help with a lemma about submodular functions, Stephen Becker for his insights about finding a constant rate of separation in proving $\epsilon$-thickenings are calibrated.
- %Lemma~\ref{lem:bar-f}\jessie{We don't have the Lov\'asz hinge appendix here?}.
+We thank Arpit Agarwal and Peter Bartlett for many early discussions and insights,
+Stephen Becker for a reference to Hoffman constants,
+and Nishant Mehta, Enrique Nueve, and Anish Thilagar for other suggestions.\raft{others?}
 This material is based upon work supported by the National Science Foundation under Grants No.\ 1657598 and No.\ DGE 1650115.
-\raf{Nishant, anyone else now?}
 \newpage
 \bibliographystyle{plainnat}
 \bibliography{diss,extra}
@@ -2253,6 +2241,10 @@ The next lemma shows that if a subset of $\U$ intersect, then their correspondin
 
 \section{Equivalence of Separation and Calibration for Polyhedral Surrogates}
 \label{sec:equiv-sep-calib}
+
+Throughout we will work with the two \emph{regret} functions:
+the \emph{surrogate regret} $R_L(u,p) = \inprod{p}{L(u)} - \risk{L}(p)$, and similarly the \emph{target regret} $R_{\ell}(r,p) = \inprod{p}{\ell(r)} - \risk{\ell}(p)$.
+In fact, the results in this section can be extended to surrogate regret bounds; see \citet{frongillo2021surrogate}.
 
 We first show one direction: any calibrated link from a polyhedral surrogate to a discrete target must be $\epsilon$-separated.
 The proof follows a similar argument to that of~\citet[Lemma 6]{tewari2007consistency}.
