@@ -137,6 +137,7 @@
 \newtheorem{claim}{Claim}
 
 \newtheorem{definition}{Definition}
+\newtheorem{construction}{Construction}
 \newtheorem{remark}{Remark}
 \newtheorem{assumption}{Assumption}
 
@@ -691,7 +692,7 @@ Recent work~\citep{ramaswamy2016convex,finocchiaro2020embedding,finocchiaro2021u
 We have now seen the tight relationship between polyhedral losses and embeddings; in particular, every polyhedral loss embeds some discrete loss.
 The embedding itself tells us how to link the embedded points back to the discrete reports (map $\varphi(r)$ to $r$).
 But it is not clear how to extend this to yield a full link function $\psi: \reals^d \to \R$, and whether such a $\psi$ can lead to consistency.
-In this section, we prove Theorem~\ref{thm:link-main}, restated below, which gives a construction to generate calibrated links for \emph{any} polyhedral loss.
+In this section, we prove Theorem~\ref{thm:link-main}, restated below, which gives a construction to generate calibrated links for \emph{any} polyhedral surrogate.
 
 \linkinformal*
 % \begin{theorem}\label{thm:eps-thick-calibrated}
@@ -700,7 +701,13 @@ In this section, we prove Theorem~\ref{thm:link-main}, restated below, which giv
 % %Then for small enough $\epsilon > 0$, the $\epsilon$-thickened link $\psi$ is well-defined and, furthermore, is a calibrated link from $L$ to $\ell$.
 % \end{theorem}
 
-\raf{Update 10/13/2021\hrule}
+Theorem \ref{thm:link-main} will follow immediately from Theorems \ref{thm:calibrated-separated} and \ref{thm:thickened-separated}, as discussed below.
+The key idea is to show that calibration is equivalent to a geometric feature of a link function $\psi$, which we call \emph{separation}.
+Recall that for indirect elicitation, any point $u \in \Gamma(p)$ must link to a point $\psi(u) \in \gamma(p)$.
+(In terms of losses, $u$ minimizing expected $L$-loss implies that $\psi(u)$ minimizes expected $\ell$-loss, with respect to $p$.)
+The idea of separation is that points $u'$ in the neighborhood of $u$ must also link to $\psi(u)$.
+Furthermore, there must be a lower bound $\epsilon$ on the size of any such neighborhood.
+
 \begin{definition}[Separated Link]\label{def:sep-link}
   Let properties $\Gamma:\simplex\toto\reals^d$ and $\gamma:\simplex\toto\R$ be given.
   We say a link $\psi:\reals^d\to\R$
@@ -709,28 +716,52 @@ In this section, we prove Theorem~\ref{thm:link-main}, restated below, which giv
 \end{definition}
 
 \raf{Equivalence blah blah blah... proof appears in Appendix~\ref{sec:equiv-sep-calib}.}
-\begin{restatable}{theorem}{calibratedseparated}
+\begin{restatable}{theorem}{calibratedseparated} \label{thm:calibrated-separated}
   Let polyhedral surrogate $L:\reals^d \to \reals^\Y_+$, discrete loss $\ell:\R\to\reals^\Y_+$, and link $\psi:\reals^d\to\R$ be given.
   Then $(L,\psi)$ is calibrated with respect to $\ell$ if and only if
   $\psi$ is $\epsilon$-separated with respect to $L$ and $\ell$ for some
   $\epsilon>0$.
 \end{restatable}
 
+To prove Theorem \ref{thm:link-main}, it now suffices to show that for any polyhedral $L$ embedding some $\ell$, there exists a \emph{separated} link $\psi$ with respect to $L$ and $\ell$.
+The following construction produces one.
+Below, we sketch an intuition for Construction \ref{const:eps-thick-link} and for the proof of Theorem \ref{thm:thickened-separated} together.
 
-\raf{Now turn Definition~\ref{def:eps-thick-link} into a construction, and the theorem says:}
+\begin{construction}[$\epsilon$-thickened link] \label{const:eps-thick-link}
+  First, define $\U = \{\Gamma(p) : p \in \simplex\}$ and, for each $U \in \U$, let $R_U = \{r \in \R : \varphi(r) \in U\}$, the reports whose embedding points are in $U$.
+  Given a polyhedral $L$ that embeds some $\ell$, an $\epsilon > 0$, and a norm $\|\cdot\|$, the \emph{$\epsilon$-thickened link} $\psi$ is constructed as follows.
+  First, initialize $\Psi: \reals^d \toto \R$ by setting $\Psi(u) = \R$ for all $u$.
+  Then for each $U \in \U$, for all points $u$ such that $\inf_{u^* \in U} \|u^*-u\| < \epsilon$, update $\Psi(u) = \Psi(u) \cap R_U$.
+  Finally, define $\psi(u) \in \Psi(u)$, breaking ties arbitrarily.
+  If $\Psi(u)$ became empty, then leave $\psi(u)$ undefined.
+\end{construction}
 
-\begin{theorem}
+\begin{theorem} \label{thm:thickened-separated}
   Let polyhedral surrogate $L:\reals^d \to \reals^\Y_+$ embed the discrete loss $\ell:\R\to\reals^\Y_+$.
-  Then for all $\epsilon>0$ sufficiently small, the construction in Definition~\ref{def:eps-thick-link} yields an $\epsilon$-separated link with respect to $L$ and $\ell$.
+  Then there exists $\epsilon_0 > 0$ such that, for all $0 < \epsilon \leq \epsilon_0$, Construction~\ref{const:eps-thick-link} yields an $\epsilon$-separated link with respect to $L$ and $\ell$.
 \end{theorem}
 
-\raf{Something like this, somewhere...}
+
+\paragraph{A converse to Theorem \ref{thm:thickened-separated}.}
+Perhaps surprisingly, one can also show that \emph{every} calibrated link from a polyhedral surrogate to a discrete loss is produced by Construction \ref{const:eps-thick-link}, for some tiebreaking rule.
+The proof appears in \bo{TODO}.
+
 \begin{proposition}
   Let polyhedral surrogate $L:\reals^d \to \reals^\Y_+$ and discrete loss $\ell:\R\to\reals^\Y_+$ be given.
-  Then for every calibrated link $\psi$, there exists $\epsilon>0$ such that the construction in Definition~\ref{def:eps-thick-link} yields $\psi$.
+  Then for every calibrated link $\psi$, there exists $\epsilon>0$ such that Construction~\ref{const:eps-thick-link} yields $\psi$.
 \end{proposition}
 
-Then Theorem 5 (constructive linear regret bound) from the rates paper, which essentially depends only on Lemmas 6 and 7 anyway!
+\paragraph{Regret transfer rates of calibrated polyhedral surrogates.}
+Recall that the goal of surrogate regret minimization is to learn a hypothesis $h$ that minimizes expected surrogate loss, then output the hypothesis $\psi \circ h$ that (hopefully) minimizes expected target loss.
+Consistency is a minimal requirement: it implies that when surrogate regret\footnote{Regret in this context is the difference between the expected loss of a hypothesis and the expected loss of the Bayes optimal hypothesis that minimizes expected loss. We refer the reader to \cite{frongillo2021surrogate} for a formal definition.} of $h$ converges to zero, so does target regret of $\psi \circ h$.
+A natural question is whether \emph{fast} convergence in surrogate regret implies fast convergence in target regret.
+The recent paper \cite{frongillo2021surrogate} shows that, for polyhedral surrogates, this is always the case.
+\begin{theorem}[\cite{frongillo2021surrogate}, Theorem 1]
+  Let $(L,\psi)$ be a polyhedral surrogate that is consistent for a discrete loss $\ell$.
+  Then there exists $c > 0$ such that, for all hypotheses $h$, $\text{Regret}_{\ell}(\psi \circ h) \leq c \cdot \text{Regret}_L(h)$.
+\end{theorem}
+
+% [Raf:] Then Theorem 5 (constructive linear regret bound) from the rates paper, which essentially depends only on Lemmas 6 and 7 anyway!
 
 \raf{10/13/2021 \hrule}
 
@@ -760,14 +791,6 @@ We use $\Psi(u)$ to denote the remaining legal choices for $\psi(u)$.
 After repeating for each optimal report set, we will claim that there exists a small enough $\epsilon > 0$ so that the construction is successful, i.e. $\Psi(u)$ is nonempty for all $u$.
 %A key step in the following definition will be to narrow down a ``link envelope'' $\Psi$ where $\Psi(u)$ denotes the legal or valid choices for $\psi(u)$.
 
-\begin{definition}[$\epsilon$-thickened link] \label{def:eps-thick-link}
-  First, define $\U = \{\Gamma(p) : p \in \simplex\}$ and, for each $U \in \U$, let $R_U = \{r \in \R : \varphi(r) \in U\}$, the reports whose embedding points are in $U$.
-  Given a polyhedral $L$ that embeds some $\ell$, an $\epsilon > 0$, and a norm $\|\cdot\|$, the \emph{$\epsilon$-thickened link} $\psi$ is constructed as follows.
-  First, initialize $\Psi: \reals^d \toto \R$ by setting $\Psi(u) = \R$ for all $u$.
-  Then for each $U \in \U$, for all points $u$ such that $\inf_{u^* \in U} \|u^*-u\| < \epsilon$, update $\Psi(u) = \Psi(u) \cap R_U$.
-  Finally, define $\psi(u) \in \Psi(u)$, breaking ties arbitrarily.
-  If $\Psi(u)$ became empty, then leave $\psi(u)$ undefined.
-\end{definition}
 A key point is that, by Lemma~\ref{lem:polyhedral-range-gamma}, there are only finitely many sets of the form $U = \Gamma(p)$.
 We then show, along the lines discussed above, that for a small enough choice of $\epsilon > 0$, if the thickenings of $U$ and $U'$ overlap at some $u$, then the corresponding report sets $R_U, R_{U'}$ also overlap; this implies $\Psi(u)$ is nonempty.
 Given a well-defined thickened link $\psi$, calibration is almost immediate because, given $p$, any report $u$ linking to a suboptimal $r = \psi(u)$ satisfies $\inf_{u^* \in \Gamma(p)} \|u^* - u\| \geq \epsilon$.
@@ -778,7 +801,7 @@ Given a well-defined thickened link $\psi$, calibration is almost immediate beca
 
 
 
-Note that the construction given above in Definition~\ref{def:eps-thick-link} is not necessarily computationally efficient as the number of labels $n$ grows.
+Note that the construction given above in Construction~\ref{const:eps-thick-link} is not necessarily computationally efficient as the number of labels $n$ grows.
 In practice this potential inefficiency is not typically a concern, as the family of losses typically has some closed form expression in terms of $n$, and thus the construction can proceed at the symbolic level.
 We illustrate this formulaic approach in \S~\ref{sec:abstain}.
 % \proposedadd{In general, we are not overly concerned with the computational complexity of computing the surrogate and link, since these calculations only need to be computed once.  They are generally derived mathematically, rather than computationally.  These symbolic calculations typically tend to be straightforward, but can sometimes be tricky.}
@@ -787,7 +810,7 @@ We illustrate this formulaic approach in \S~\ref{sec:abstain}.
 \raf{Bo, I wonder if we should state the following observation (perhaps a bit more formally) here, that you can use $\Psi$ to verify that a given \emph{proposed} link is calibrated.  A seemingly minor point, but one which saved us a ton of work in top-$k$!}
 
 Applying the $\epsilon$-thickened link construction additionally enables one to verify the consistency of a proposed link.
-For a given $\epsilon$ and norm $\|\cdot\|$, suppose one follows the routine of Definition~\ref{def:eps-thick-link} until the last step in which values for the link are selected.
+For a given $\epsilon$ and norm $\|\cdot\|$, suppose one follows the routine of Construction~\ref{const:eps-thick-link} until the last step in which values for the link are selected.
 Once possible choices for this $\epsilon$-thickened set-valued function are available, we can see if the proposed link aligns with these possible choices: if so, then the proposed link is calibrated.
 
 
@@ -887,7 +910,7 @@ It would be interesting to compare the two links in practice.
 \begin{minipage}{0.32\linewidth}
 \includegraphics[width=\linewidth]{tikz/abstain-link-l1.pdf}
 \end{minipage}\hfill
-\caption{Constructing links for the abstain surrogate $L_{1/2}$ with $d=2$. The embedding is shown in bold labeled by the corresponding reports. (L) The link envelope $\Psi$ resulting from Theorem~\ref{thm:eps-thick-calibrated} using $\|\cdot\|_\infty$ and $\epsilon = 1/2$, and a possible link $\psi$ which matches eq.~\eqref{eq:abstain-link} from~\cite{ramaswamy2018consistent}.  (M) An illustration of the thickened sets from Definition~\ref{def:eps-thick-link} for two sets $U \in \U$, using $\|\cdot\|_1$ and $\epsilon = 1$. (R) The $\Psi$ and $\psi$ from Theorem~\ref{thm:eps-thick-calibrated} using $\|\cdot\|_1$ and $\epsilon = 1$.}
+\caption{Constructing links for the abstain surrogate $L_{1/2}$ with $d=2$. The embedding is shown in bold labeled by the corresponding reports. (L) The link envelope $\Psi$ resulting from Theorem~\ref{thm:eps-thick-calibrated} using $\|\cdot\|_\infty$ and $\epsilon = 1/2$, and a possible link $\psi$ which matches eq.~\eqref{eq:abstain-link} from~\cite{ramaswamy2018consistent}.  (M) An illustration of the thickened sets from Construction~\ref{const:eps-thick-link} for two sets $U \in \U$, using $\|\cdot\|_1$ and $\epsilon = 1$. (R) The $\Psi$ and $\psi$ from Theorem~\ref{thm:eps-thick-calibrated} using $\|\cdot\|_1$ and $\epsilon = 1$.}
 \label{fig:abstain-links}
 \end{center}
 \end{figure}
@@ -2228,7 +2251,7 @@ The next lemma shows that if a subset of $\U$ intersect, then their correspondin
 \end{proof}
 
 \begin{theorem} \label{thm:small-eps-thick}
-  For all small enough $\epsilon$, the epsilon-thickened link $\psi$ (Definition \ref{def:eps-thick-link}) is a well-defined link function from $\R'$ to $\R$, i.e. $\psi(u) \neq \bot$ for all $u$.
+  For all small enough $\epsilon$, the epsilon-thickened link $\psi$ (Construction \ref{const:eps-thick-link}) is a well-defined link function from $\R'$ to $\R$, i.e. $\psi(u) \neq \bot$ for all $u$.
 \end{theorem}
 \begin{proof}
   Fix a small enough $\epsilon$ as promised by Corollary \ref{cor:thick-intersect}.
