@@ -702,10 +702,12 @@ In this section, we prove Theorem~\ref{thm:link-main}, restated below, which giv
 % \end{theorem}
 
 Theorem \ref{thm:link-main} will follow immediately from Theorems \ref{thm:calibrated-separated} and \ref{thm:thickened-separated}, as discussed below.
-The key idea is to show that calibration is equivalent to a geometric feature of a link function $\psi$, which we call \emph{separation}.
-Recall that for indirect elicitation, any point $u \in \Gamma(p)$ must link to a point $\psi(u) \in \gamma(p)$.
+Their full proofs appear in Appendix \ref{sec:equiv-sep-calib}.
+
+Theorem \ref{thm:calibrated-separated} will show that calibration is equivalent to a geometric feature, which we call \emph{separation}, of a link function $\psi$.
+Recall that for indirect elicitation, any point $u \in \Gamma(p)$ must link to a report $\psi(u) \in \gamma(p)$.
 (In terms of losses, $u$ minimizing expected $L$-loss implies that $\psi(u)$ minimizes expected $\ell$-loss, with respect to $p$.)
-The idea of separation is that points $u'$ in the neighborhood of $u$ must also link to $\psi(u)$.
+The idea of separation is that points in the neighborhood of $u$ must also link to to a report in $\gamma(p)$.
 Furthermore, there must be a lower bound $\epsilon$ on the size of any such neighborhood.
 
 \begin{definition}[Separated Link]\label{def:sep-link}
@@ -715,7 +717,7 @@ Furthermore, there must be a lower bound $\epsilon$ on the size of any such neig
   Similarly, we say $\psi$ is $\epsilon$-separated with respect to $L$ and $\ell$ if it is $\epsilon$-separated with respect to $\prop{L}$ and $\prop{\ell}$.
 \end{definition}
 
-\raf{Equivalence blah blah blah... proof appears in Appendix~\ref{sec:equiv-sep-calib}.}
+%\raf{Equivalence blah blah blah... proof appears in Appendix~\ref{sec:equiv-sep-calib}.}
 \begin{restatable}{theorem}{calibratedseparated} \label{thm:calibrated-separated}
   Let polyhedral surrogate $L:\reals^d \to \reals^\Y_+$, discrete loss $\ell:\R\to\reals^\Y_+$, and link $\psi:\reals^d\to\R$ be given.
   Then $(L,\psi)$ is calibrated with respect to $\ell$ if and only if
@@ -724,95 +726,124 @@ Furthermore, there must be a lower bound $\epsilon$ on the size of any such neig
 \end{restatable}
 
 To prove Theorem \ref{thm:link-main}, it now suffices to show that for any polyhedral $L$ embedding some $\ell$, there exists a \emph{separated} link $\psi$ with respect to $L$ and $\ell$.
-The following construction produces one.
-Below, we sketch an intuition for Construction \ref{const:eps-thick-link} and for the proof of Theorem \ref{thm:thickened-separated} together.
-
-\begin{construction}[$\epsilon$-thickened link] \label{const:eps-thick-link}
-  First, define $\U = \{\Gamma(p) : p \in \simplex\}$ and, for each $U \in \U$, let $R_U = \{r \in \R : \varphi(r) \in U\}$, the reports whose embedding points are in $U$.
-  Given a polyhedral $L$ that embeds some $\ell$, an $\epsilon > 0$, and a norm $\|\cdot\|$, the \emph{$\epsilon$-thickened link} $\psi$ is constructed as follows.
-  First, initialize $\Psi: \reals^d \toto \R$ by setting $\Psi(u) = \R$ for all $u$.
-  Then for each $U \in \U$, for all points $u$ such that $\inf_{u^* \in U} \|u^*-u\| < \epsilon$, update $\Psi(u) = \Psi(u) \cap R_U$.
-  Finally, define $\psi(u) \in \Psi(u)$, breaking ties arbitrarily.
-  If $\Psi(u)$ became empty, then leave $\psi(u)$ undefined.
-\end{construction}
+This is given by Construction ~\ref{const:eps-thick-link} below.
 
 \begin{theorem} \label{thm:thickened-separated}
   Let polyhedral surrogate $L:\reals^d \to \reals^\Y_+$ embed the discrete loss $\ell:\R\to\reals^\Y_+$.
   Then there exists $\epsilon_0 > 0$ such that, for all $0 < \epsilon \leq \epsilon_0$, Construction~\ref{const:eps-thick-link} yields an $\epsilon$-separated link with respect to $L$ and $\ell$.
 \end{theorem}
 
+To set the stage for Construction \ref{const:eps-thick-link}, we sketch the two main steps in proving Theorem \ref{thm:thickened-separated}: \emph{(a)} showing that one can produce a link $\psi$ such that $(L,\psi)$ indirectly elicits $\ell$; \emph{(b)} ``thickening'' $\psi$ such that it is separated.
 
-\paragraph{A converse to Theorem \ref{thm:thickened-separated}.}
-Perhaps surprisingly, one can also show that \emph{every} calibrated link from a polyhedral surrogate to a discrete loss is produced by Construction \ref{const:eps-thick-link}, for some tiebreaking rule.
-The proof appears in \bo{TODO}.
-
-\begin{proposition}
-  Let polyhedral surrogate $L:\reals^d \to \reals^\Y_+$ and discrete loss $\ell:\R\to\reals^\Y_+$ be given.
-  Then for every calibrated link $\psi$, there exists $\epsilon>0$ such that Construction~\ref{const:eps-thick-link} yields $\psi$.
-\end{proposition}
-
-\paragraph{Regret transfer rates of calibrated polyhedral surrogates.}
-Recall that the goal of surrogate regret minimization is to learn a hypothesis $h$ that minimizes expected surrogate loss, then output the hypothesis $\psi \circ h$ that (hopefully) minimizes expected target loss.
-Consistency is a minimal requirement: it implies that when surrogate regret\footnote{Regret in this context is the difference between the expected loss of a hypothesis and the expected loss of the Bayes optimal hypothesis that minimizes expected loss. We refer the reader to \cite{frongillo2021surrogate} for a formal definition.} of $h$ converges to zero, so does target regret of $\psi \circ h$.
-A natural question is whether \emph{fast} convergence in surrogate regret implies fast convergence in target regret.
-The recent paper \cite{frongillo2021surrogate} shows that, for polyhedral surrogates, this is always the case.
-\begin{theorem}[\cite{frongillo2021surrogate}, Theorem 1]
-  Let $(L,\psi)$ be a polyhedral surrogate that is consistent for a discrete loss $\ell$.
-  Then there exists $c > 0$ such that, for all hypotheses $h$, $\text{Regret}_{\ell}(\psi \circ h) \leq c \cdot \text{Regret}_L(h)$.
-\end{theorem}
-
-% [Raf:] Then Theorem 5 (constructive linear regret bound) from the rates paper, which essentially depends only on Lemmas 6 and 7 anyway!
-
-\raf{10/13/2021 \hrule}
-
-\bigskip
-
-\raf{I liked the new version in general.  The only thing I was suggest is that for a journal version we could add a bit more detail right here, in the proof sketch.  For example, maybe a high-level overview right at this spot would help, since when you launch into step 1, it's not clear how many steps will follow.  And after step 2, there is a definition, and more discussion after.  All the pieces are great; maybe just a splash of overview and organization can help the reader orient as they go through it.}
-
-At a high level, the proof has three main steps.
-The first step is to show indirect elicitation: we give a link $\psi: \reals^d \to \R$ such that exactly minimizing expected surrogate loss $L$, followed by applying $\psi$, always exactly minimizes expected original loss $\ell$.
+For \emph{(a)}, begin by linking each embedding point back to its original report.
+Now we must determine $\psi(u)$ for non-embedding points.
 %Symbolically, if $u^* \in \argmin_u \inprod{p}{L(u)} = \Gamma(p)$, then $\psi(u^*) \in \argmin_r \inprod{p}{\ell(r)} = \gamma(p)$.
-For this step, the challenge is that for a generic $u \in \reals^d$, not an embedding point, we may have $u \in \Gamma(p) \cap \Gamma(p')$.
-Because $u$ minimizes expected loss for both $p$ and $p'$, this \raf{suggest adding a noun here} imposes the requirement on the link that $\psi(u) \in \gamma(p) \cap \gamma(p')$.
+The challenge is that we may have $u \in \Gamma(p) \cap \Gamma(p')$.
+Because $u$ minimizes expected surrogate loss for both $p$ and $p'$, we must have $\psi(u) \in \gamma(p) \cap \gamma(p')$.
 It is not \emph{a priori} clear that these sets even have a nonempty intersection.
-We use elicitation results, discussed in \S~\ref{sec:min-rep-sets}, to show that for each $u \in \reals^d$ there exists $r \in \R$ such that $\Gamma_u \subseteq \gamma_r$, i.e. if $p$ satisfies $u \in \Gamma(p)$ then it satisfies $r \in \gamma(p)$.
+We use elicitation results, discussed in \S~\ref{sec:min-rep-sets}, to show that for each $u \in \reals^d$ there exists $r \in \R$ such that $\Gamma_u \subseteq \gamma_r$, i.e. any $p$ satisfying $u \in \Gamma(p)$ also satisfies $r \in \gamma(p)$.
 This implies that if $u \in \Gamma(p) \cap \Gamma(p')$, then $r \in \gamma(p) \cap \gamma(p')$, so we may safely choose $\psi(u) = r$.
 
-%Associating each $U$ with $R_U \subseteq \R$, the set of reports whose embedding points are in $U$, we enforce that all points in $U$ link to some report in $R_U$.
-%(As a special case, embedding points must link to their corresponding reports.)
-%Proving that these choices are well-defined uses a chain of arguments involving the Bayes risk, ultimately showing that if $u$ lies in multiple such sets $U$, the corresponding report sets $R_U$ all intersect at some $r =: \psi(u)$.
+For \emph{(b)}, we show that this link can be ``thickened'' by some positive $\epsilon$, as described next.
+Consider an optimal report set, i.e. set of the form $U = \Gamma(p) = \argmin_u \inprod{p}{L(u)}$.
+By indirect elicitation, $\psi$ is already correct on $U$.
+Now, we ``thicken'' $U$ to obtain $U_{\epsilon} = \{u : \|u - U\| \leq \epsilon\}$.
+Then we require that all points in $U_{\epsilon}$ are linked to some element of $\gamma(p) = \argmin_r \inprod{p}{\ell(r)}$.
+For $\epsilon > 0$, this directly implies calibration.
 
-The second step is to ensure calibration: we should modify this link so that even approximately-optimal points $u$ link to optimal reports $r$.
-We do so by ``thickening'' the link by $\epsilon$ as described next.
-Informally, we take each optimal report set, i.e. some $U = \Gamma(p) = \argmin_u \inprod{p}{L(u)}$, and thicken it by adding all points within distance $\epsilon$.
+However, it is not clear that this linking is possible because a point $u$ may be in multiple thickened sets $U_{\epsilon}, U'_{\epsilon}$, etc.
+We use $\Psi(u)$ to denote the remaining legal choices for $\psi(u)$ after imposing the requirements for each such set.
+The key claim is that, for small enough $\epsilon > 0$, $\Psi(u)$ is nonempty: there exists at least one legal report to link to.
+This claim (Lemma \ref{lemma:thick-empty}) follows because each $U$ is a closed convex set.
+If all of their thickenings $U_{\epsilon}$ intersect, then so do the $U$ sets themselves, in which case indirect elicitation implies that there exists a legal choice.
+It is also important that, by Lemma~\ref{lem:polyhedral-range-gamma}, there are only finitely many sets of the form $U = \Gamma(p)$.
+This yields a single uniform smallest $\epsilon$ such that the key claim is true for all $u \in \reals^d$.
+%Given a well-defined thickened link $\psi$, calibration is almost immediate because, given $p$, any report $u$ linking to a suboptimal $r = \psi(u)$ satisfies $\inf_{u^* \in \Gamma(p)} \|u^* - u\| \geq \epsilon$.
 
-Finally, we impose a requirement that all points in this thickened set are linked to some element of $\gamma(p) = \argmin_r \inprod{p}{\ell(r)}$.
-We use $\Psi(u)$ to denote the remaining legal choices for $\psi(u)$.
-After repeating for each optimal report set, we will claim that there exists a small enough $\epsilon > 0$ so that the construction is successful, i.e. $\Psi(u)$ is nonempty for all $u$.
-%A key step in the following definition will be to narrow down a ``link envelope'' $\Psi$ where $\Psi(u)$ denotes the legal or valid choices for $\psi(u)$.
+Given the above proof sketch, the following construction is relatively straightforward.
+We initialize the link using the embedding points and optimal report sets, then use $\Psi$ to narrow down to only legal choices; we then pick from $\psi(u)$ from $\Psi(u)$ arbitrarily.
+Theorem \ref{thm:thickened-separated} implies that, for all small enough $\epsilon$, the resulting link $\psi$ is well-defined at all points.
+\begin{construction}[$\epsilon$-thickened link] \label{const:eps-thick-link}
+  Given a polyhedral $L$ that embeds some $\ell$, an $\epsilon > 0$, and a norm $\|\cdot\|$, the \emph{$\epsilon$-thickened link} $\psi$ is constructed as follows.
+  First, define $\U = \{\Gamma(p) : p \in \simplex\}$.
+  For each $U \in \U$, let $R_U = \{r \in \R : \varphi(r) \in U\}$, the reports whose embedding points are in $U$.
+  First, initialize $\Psi: \reals^d \toto \R$ by setting $\Psi(u) = \R$ for all $u$.
+  Then for each $U \in \U$, for all points $u$ such that $\inf_{u^* \in U} \|u^*-u\| < \epsilon$, update $\Psi(u) = \Psi(u) \cap R_U$.
+  Finally, define $\psi(u) \in \Psi(u)$, breaking ties arbitrarily.
+  If $\Psi(u)$ became empty, then leave $\psi(u)$ undefined.
+\end{construction}
 
-A key point is that, by Lemma~\ref{lem:polyhedral-range-gamma}, there are only finitely many sets of the form $U = \Gamma(p)$.
-We then show, along the lines discussed above, that for a small enough choice of $\epsilon > 0$, if the thickenings of $U$ and $U'$ overlap at some $u$, then the corresponding report sets $R_U, R_{U'}$ also overlap; this implies $\Psi(u)$ is nonempty.
-Given a well-defined thickened link $\psi$, calibration is almost immediate because, given $p$, any report $u$ linking to a suboptimal $r = \psi(u)$ satisfies $\inf_{u^* \in \Gamma(p)} \|u^* - u\| \geq \epsilon$.
-  We then show that the minimal gradient of the expected loss along any direction away from $U$ is lower-bounded, giving a constant excess expected loss at $u$.
-
-\btw{FUTURE: we should comment in the discussion section that we probably can show that *any* loss embedding $\ell$ must be polyhedral-ish, meaning polyhedral except for stuff that is never optimal.  This theorem would then not need the ``polyhedral'' part. This is related to the ``convex envelope conjucture'', that if $L$ embeds $\ell$ via $\varphi$, you can just take the loss $L'$ such that $L_y$ is the convex envelope of points $\{(\varphi(r),L(r)_y)\}_{r\in\R}$.}
-\btw{FUTURE: This prop and theorem give an excellent reason to focus on embeddings, since other techniques do not necessarily give you separated links for free.  Since we know we get them for free, we can just focus on the property, and study elicitation complexity; we know if we have a link at all it can be taken to be separated.  [[Is this true?]]}
-
-
-
-Note that the construction given above in Construction~\ref{const:eps-thick-link} is not necessarily computationally efficient as the number of labels $n$ grows.
+\paragraph{Remarks.}
+Construction~\ref{const:eps-thick-link} is not necessarily computationally efficient as the number of labels $n$ grows.
 In practice this potential inefficiency is not typically a concern, as the family of losses typically has some closed form expression in terms of $n$, and thus the construction can proceed at the symbolic level.
 We illustrate this formulaic approach in \S~\ref{sec:abstain}.
 % \proposedadd{In general, we are not overly concerned with the computational complexity of computing the surrogate and link, since these calculations only need to be computed once.  They are generally derived mathematically, rather than computationally.  These symbolic calculations typically tend to be straightforward, but can sometimes be tricky.}
 
-
 \raf{Bo, I wonder if we should state the following observation (perhaps a bit more formally) here, that you can use $\Psi$ to verify that a given \emph{proposed} link is calibrated.  A seemingly minor point, but one which saved us a ton of work in top-$k$!}
+\bo{I think I'm happy with how you wrote it below. I'm not super clear on how efficient this verification algorithm is? Especially versus just computing a new link?}
 
 Applying the $\epsilon$-thickened link construction additionally enables one to verify the consistency of a proposed link.
 For a given $\epsilon$ and norm $\|\cdot\|$, suppose one follows the routine of Construction~\ref{const:eps-thick-link} until the last step in which values for the link are selected.
 Once possible choices for this $\epsilon$-thickened set-valued function are available, we can see if the proposed link aligns with these possible choices: if so, then the proposed link is calibrated.
 
+
+\bo{Should we comment on computing the $\epsilon$?}
+
+
+
+
+\botodo{Commented out Proposition: converse, that every calibrated link from a polyhedral surrogate can be produced by our construction.}
+%\paragraph{A converse to Theorem \ref{thm:thickened-separated}.}
+%Perhaps surprisingly, one can also show that \emph{every} calibrated link from a polyhedral surrogate to a discrete loss is produced by Construction \ref{const:eps-thick-link}, for some tiebreaking rule.
+%The proof appears in \bo{TODO}.
+%
+%\begin{proposition}
+%  Let polyhedral surrogate $L:\reals^d \to \reals^\Y_+$ and discrete loss $\ell:\R\to\reals^\Y_+$ be given.
+%  Then for every calibrated link $\psi$, there exists $\epsilon>0$ such that Construction~\ref{const:eps-thick-link} yields $\psi$.
+%\end{proposition}
+
+\paragraph{Regret transfer rates of calibrated polyhedral surrogates.}
+Recall that the goal of surrogate regret minimization is to learn a hypothesis $h$ that minimizes expected surrogate loss, then output hypothesis $\psi \circ h$, which hopefully minimizes expected target loss.
+Consistency is a minimal requirement: when surrogate regret\footnote{Regret in this context is the difference between the expected loss of a hypothesis and the expected loss of the Bayes optimal hypothesis that minimizes expected loss. We refer the reader to \cite{frongillo2021surrogate} for a formal definition.} of $h$ converges to zero, i.e. $\text{Regret}_L(h) \to 0$, so does target regret of $\psi \circ h$, i.e. $\text{Regret}_{\ell}(\psi \circ h) \to 0$.
+A natural question is whether \emph{fast} convergence in surrogate regret implies fast convergence in target regret.
+A recent paper \cite{frongillo2021surrogate} shows that, for polyhedral surrogates, this is always the case.
+\begin{theorem}[\cite{frongillo2021surrogate}, Theorem 1]
+  Let $(L,\psi)$ be a polyhedral surrogate that is consistent for a discrete loss $\ell$.
+  Then there exists $c > 0$ such that, for all hypotheses $h$, $\text{Regret}_{\ell}(\psi \circ h) \leq c \cdot \text{Regret}_L(h)$.
+\end{theorem}
+
+%% Bo: superseded by proof sketch above, Jan 10, 2022
+%\raf{I liked the new version in general.  The only thing I was suggest is that for a journal version we could add a bit more detail right here, in the proof sketch.  For example, maybe a high-level overview right at this spot would help, since when you launch into step 1, it's not clear how many steps will follow.  And after step 2, there is a definition, and more discussion after.  All the pieces are great; maybe just a splash of overview and organization can help the reader orient as they go through it.}
+%
+%At a high level, the proof has three main steps.
+%The first step is to show indirect elicitation: we give a link $\psi: \reals^d \to \R$ such that exactly minimizing expected surrogate loss $L$, followed by applying $\psi$, always exactly minimizes expected original loss $\ell$.
+%%Symbolically, if $u^* \in \argmin_u \inprod{p}{L(u)} = \Gamma(p)$, then $\psi(u^*) \in \argmin_r \inprod{p}{\ell(r)} = \gamma(p)$.
+%For this step, the challenge is that for a generic $u \in \reals^d$, not an embedding point, we may have $u \in \Gamma(p) \cap \Gamma(p')$.
+%Because $u$ minimizes expected loss for both $p$ and $p'$, this \raf{suggest adding a noun here} imposes the requirement on the link that $\psi(u) \in \gamma(p) \cap \gamma(p')$.
+%It is not \emph{a priori} clear that these sets even have a nonempty intersection.
+%We use elicitation results, discussed in \S~\ref{sec:min-rep-sets}, to show that for each $u \in \reals^d$ there exists $r \in \R$ such that $\Gamma_u \subseteq \gamma_r$, i.e. if $p$ satisfies $u \in \Gamma(p)$ then it satisfies $r \in \gamma(p)$.
+%This implies that if $u \in \Gamma(p) \cap \Gamma(p')$, then $r \in \gamma(p) \cap \gamma(p')$, so we may safely choose $\psi(u) = r$.
+%
+%%Associating each $U$ with $R_U \subseteq \R$, the set of reports whose embedding points are in $U$, we enforce that all points in $U$ link to some report in $R_U$.
+%%(As a special case, embedding points must link to their corresponding reports.)
+%%Proving that these choices are well-defined uses a chain of arguments involving the Bayes risk, ultimately showing that if $u$ lies in multiple such sets $U$, the corresponding report sets $R_U$ all intersect at some $r =: \psi(u)$.
+%
+%The second step is to ensure calibration: we should modify this link so that even approximately-optimal points $u$ link to optimal reports $r$.
+%We do so by ``thickening'' the link by $\epsilon$ as described next.
+%Informally, we take each optimal report set, i.e. some $U = \Gamma(p) = \argmin_u \inprod{p}{L(u)}$, and thicken it by adding all points within distance $\epsilon$.
+%
+%Finally, we impose a requirement that all points in this thickened set are linked to some element of $\gamma(p) = \argmin_r \inprod{p}{\ell(r)}$.
+%We use $\Psi(u)$ to denote the remaining legal choices for $\psi(u)$.
+%After repeating for each optimal report set, we will claim that there exists a small enough $\epsilon > 0$ so that the construction is successful, i.e. $\Psi(u)$ is nonempty for all $u$.
+%%A key step in the following definition will be to narrow down a ``link envelope'' $\Psi$ where $\Psi(u)$ denotes the legal or valid choices for $\psi(u)$.
+%
+%A key point is that, by Lemma~\ref{lem:polyhedral-range-gamma}, there are only finitely many sets of the form $U = \Gamma(p)$.
+%We then show, along the lines discussed above, that for a small enough choice of $\epsilon > 0$, if the thickenings of $U$ and $U'$ overlap at some $u$, then the corresponding report sets $R_U, R_{U'}$ also overlap; this implies $\Psi(u)$ is nonempty.
+%Given a well-defined thickened link $\psi$, calibration is almost immediate because, given $p$, any report $u$ linking to a suboptimal $r = \psi(u)$ satisfies $\inf_{u^* \in \Gamma(p)} \|u^* - u\| \geq \epsilon$.
+%  We then show that the minimal gradient of the expected loss along any direction away from $U$ is lower-bounded, giving a constant excess expected loss at $u$.
+
+\btw{FUTURE: we should comment in the discussion section that we probably can show that *any* loss embedding $\ell$ must be polyhedral-ish, meaning polyhedral except for stuff that is never optimal.  This theorem would then not need the ``polyhedral'' part. This is related to the ``convex envelope conjucture'', that if $L$ embeds $\ell$ via $\varphi$, you can just take the loss $L'$ such that $L_y$ is the convex envelope of points $\{(\varphi(r),L(r)_y)\}_{r\in\R}$.}
+\btw{FUTURE: This prop and theorem give an excellent reason to focus on embeddings, since other techniques do not necessarily give you separated links for free.  Since we know we get them for free, we can just focus on the property, and study elicitation complexity; we know if we have a link at all it can be taken to be separated.  [[Is this true?]]}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
