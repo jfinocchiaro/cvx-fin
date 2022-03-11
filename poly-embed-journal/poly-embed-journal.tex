@@ -715,7 +715,8 @@ Furthermore, there must be a uniform lower bound $\epsilon$ on the size of any s
 \begin{definition}[Separated Link]\label{def:sep-link}
   Let properties $\Gamma:\simplex\toto\reals^d$ and $\gamma:\simplex\toto\R$ be given.
   We say a link $\psi:\reals^d\to\R$
-  is \emph{$\epsilon$-separated with respect to $\Gamma$ and $\gamma$} if for all $u\in\reals^d$ with $\psi(u)\notin\gamma(p)$, we have $d_\infty(u,\Gamma(p)) > \epsilon$, where $d_\infty(u,A) \doteq \inf_{a\in A} \|u-a\|_\infty$.
+  is \emph{$\epsilon$-separated with respect to $\Gamma$ and $\gamma$} if for all $u\in\reals^d$ with $\psi(u)\notin\gamma(p)$, we have $d_\infty(u,\Gamma(p)) \geq \epsilon$, where $d_\infty(u,A) \doteq \inf_{a\in A} \|u-a\|_\infty$.%
+  \footnote{\citet{frongillo2021surrogate} define $\epsilon$-separation with a strict inequality $d_\infty(u,\Gamma(p)) > \epsilon$; we adopt a weak inequality as it is more convenient in examples. \raf{I felt we should write something to this effect here, but I don't love my attempt..}}
   Similarly, we say $\psi$ is $\epsilon$-separated with respect to $L$ and $\ell$ if it is $\epsilon$-separated with respect to $\prop{L}$ and $\prop{\ell}$.
 \end{definition}
 
@@ -757,7 +758,7 @@ For $\epsilon > 0$, this directly implies separation.
 However, it is not clear that this linking is possible because a point $u$ may be in multiple thickened sets $U_{\epsilon}, U'_{\epsilon}$, etc.
 Therefore, we need to take each possible collection $U,U'$, etc. and thicken their intersection in an analogous way.
 
-Given $u \in U \cap U' \cap \dots$, we use $\Psi(u)$ to denote the remaining legal choices for $\psi(u)$ after imposing the requirements for each such set $U,U'$, etc.
+Given $u \in U \cap U' \cap \dots$, we define a \emph{link envelope} $\Psi(u)$ which encodes the remaining legal choices for $\psi(u)$ after imposing the requirements for each such set $U,U'$, etc.
 The key claim is that, for small enough $\epsilon > 0$, $\Psi(u)$ is nonempty: at least one legal value for $\psi(u)$ remains.
 This claim follows from a geometric result (Lemma \ref{lemma:thick-empty}) that, for all small enough $\epsilon$, a subset of thickenings $U_{\epsilon}$ intersect if and only if the $U$ sets themselves intersect.
 When they do intersect, indirect elicitation implies that there exists a legal choice of link for the intersection of the thickenings.
@@ -772,7 +773,7 @@ Theorem \ref{thm:thickened-separated} implies that, for all small enough $\epsil
   Given a polyhedral $L$ that embeds some $\ell$, an $\epsilon > 0$, and a norm $\|\cdot\|$, the \emph{$\epsilon$-thickened link} $\psi$ is constructed as follows.
   First, define $\U = \{\Gamma(p) : p \in \simplex\}$.
   For each $U \in \U$, let $R_U = \{r \in \R : \varphi(r) \in U\}$, the reports whose embedding points are in $U$.
-  First, initialize $\Psi: \reals^d \toto \R$ by setting $\Psi(u) = \R$ for all $u$.
+  First, initialize the \emph{link envelope} $\Psi: \reals^d \toto \R$ by setting $\Psi(u) = \R$ for all $u$.
   Then for each $U \in \U$, for all points $u$ such that $\inf_{u^* \in U} \|u^*-u\| < \epsilon$, update $\Psi(u) = \Psi(u) \cap R_U$.
   Finally, define $\psi(u) \in \Psi(u)$, breaking ties arbitrarily.
   If $\Psi(u)$ became empty, then leave $\psi(u)$ undefined.
@@ -796,15 +797,16 @@ If so, then the proposed link $\psi^*$ is calibrated.
 \bo{Should we comment on computing the $\epsilon$?}
 \raf{Don't recall what we have to say... but this would be a great spot to do so.  Or at least make the point that the regret bounds (below) get better the higher $\epsilon$ is.}
 
-\bo{Add for journal submission: converse, that every calibrated link from a polyhedral surrogate can be produced by our construction.}
-%\paragraph{A converse to Theorem \ref{thm:thickened-separated}.}
-%Perhaps surprisingly, one can also show that \emph{every} calibrated link from a polyhedral surrogate to a discrete loss is produced by Construction \ref{const:eps-thick-link}, for some tiebreaking rule.
-%The proof appears in \bo{TODO}.
-%
-%\begin{proposition}
-%  Let polyhedral surrogate $L:\reals^d \to \reals^\Y_+$ and discrete loss $\ell:\R\to\reals^\Y_+$ be given.
-%  Then for every calibrated link $\psi$, there exists $\epsilon>0$ such that Construction~\ref{const:eps-thick-link} yields $\psi$.
-%\end{proposition}
+\paragraph{A converse to Theorem \ref{thm:thickened-separated}.}
+\raf{Started but did not finish; in particular, did not prove the proposition.  I'd suggest taking the last paragraph of the proof of Theorem~\ref{thm:thickened-separated} and making that one direction of the proof of this proposition, and then using the proposition to prove the theorem.}
+Perhaps surprisingly, one can also show that \emph{every} calibrated link from a polyhedral surrogate to a discrete loss is produced by Construction \ref{const:eps-thick-link}.
+This result follows from the fact, stated now, that Construction~\ref{const:eps-thick-link} with $\|\cdot\|_\infty$ is exactly enforcing $\epsilon$-separation; from Theorem~\ref{thm:calibrated-separated}, every calibrated link is therefore yielded by the construction for some sufficiently small $\epsilon$.
+
+\begin{proposition}
+  Let polyhedral surrogate $L:\reals^d \to \reals^\Y_+$ and discrete loss $\ell:\R\to\reals^\Y_+$ be given.
+  Let $\epsilon>0$ be given, and let $\Psi$ be the link envelope from Construction~\ref{const:eps-thick-link} for $\epsilon$ and $\|\cdot\|_\infty$.
+  Then $\psi$ is $\epsilon$-separated if and only if $\psi(u) \in \Psi(u)$ for all $u\in\reals^d$.
+\end{proposition}
 
 \paragraph{Regret transfer rates of calibrated polyhedral surrogates.}
 Recall that the goal of surrogate regret minimization is to learn a hypothesis $h$ that minimizes expected surrogate loss, then output hypothesis $\psi \circ h$, which hopefully minimizes expected target loss.
@@ -2006,7 +2008,7 @@ The proof follows a similar argument to that of~\citet[Lemma 6]{tewari2007consis
 \begin{proof}
   Let $\Gamma := \prop{L}$ and $\gamma := \prop{\ell}$.
   Suppose that $\psi$ is not $\epsilon$-separated for any $\epsilon>0$.
-  Then letting $\epsilon_i := 1/i$ we have sequences $\{p_i\}_i \subset \simplex$ and  $\{u_i\}_i \subset \reals^d$ such that for all $i\in\mathbb N$ we have both $\psi(u_i) \notin \gamma(p_i)$ and $d_\infty(u_i,\Gamma(p_i)) \leq \epsilon_i$.
+  Then letting $\epsilon_i := 1/i$ we have sequences $\{p_i\}_i \subset \simplex$ and  $\{u_i\}_i \subset \reals^d$ such that for all $i\in\mathbb N$ we have both $\psi(u_i) \notin \gamma(p_i)$ and $d_\infty(u_i,\Gamma(p_i)) < \epsilon_i$.
   First, observe that there are only finitely many values for $\gamma(p_i)$ and $\Gamma(p_i)$, as $\R$ is finite and $L$ is polyhedral (from Lemma~\ref{lem:polyhedral-range-gamma}).
   Thus, there must be some $p\in\simplex$ and some infinite subsequence indexed by $j\in J \subseteq \mathbb N$ where
   for all $j\in J$, we have $\psi(u_j) \notin \gamma(p)$ and $\Gamma(p_j) = \Gamma(p)$.
@@ -2015,12 +2017,12 @@ The proof follows a similar argument to that of~\citet[Lemma 6]{tewari2007consis
   \raft{Could write $\beta$ explicitly; it's in my notes}
   Thus, for all $j\in J$, we have
   \begin{align*}
-    d_\infty(u_i,\Gamma(p)) \leq \epsilon_j
-    &\implies \exists u^*\in\Gamma(p) \|u_j-u^*\|_\infty \leq \epsilon_j
+    d_\infty(u_i,\Gamma(p)) < \epsilon_j
+    &\implies \exists u^*\in\Gamma(p)\; \|u_j-u^*\|_\infty < \epsilon_j
     \\
-    &\implies \left| \inprod{p}{L(u_j)} - \inprod{p}{L(u^*)} \right| \leq \beta\epsilon_j
+    &\implies \left| \inprod{p}{L(u_j)} - \inprod{p}{L(u^*)} \right| < \beta\epsilon_j
     \\
-    &\implies \left| \inprod{p}{L(u_j)} - \risk{L}(p) \right| \leq \beta\epsilon_j~.
+    &\implies \left| \inprod{p}{L(u_j)} - \risk{L}(p) \right| < \beta\epsilon_j~.
   \end{align*}
   Finally, for this $p$, we have
   \begin{align*}
@@ -2106,7 +2108,7 @@ We are now ready to prove Theorem \ref{thm:calibrated-separated} as desired.
   
   Applying the definition of $\epsilon$-separated and Lemma~\ref{lemma:hoffman-polyhedral}, $\psi(u) \notin \gamma(p)$ implies
   \begin{align*}
-    \epsilon &<    d_{\infty}(u,\Gamma(p)) \leq H_{L,p} R_L(u,p) .
+    \epsilon &\leq    d_{\infty}(u,\Gamma(p)) \leq H_{L,p} R_L(u,p) \implies 1 \leq \frac{H_{L,p}}{\epsilon} R_L(u,p)~.
   \end{align*}
   Let $C_{\ell} = \max_{r,p} R_{\ell}(r,p)$.
   Then $R_{\ell}(\psi(u),p) \leq C_{\ell} \leq \frac{C_{\ell} H_{L,p}}{\epsilon} R_L(u,p)$.
