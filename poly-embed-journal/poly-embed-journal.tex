@@ -732,6 +732,12 @@ Furthermore, there must be a uniform lower bound $\epsilon$ on the size of any s
 To prove Theorem \ref{thm:link-main}, it now suffices to show that for any polyhedral $L$ embedding some $\ell$, there exists a \emph{separated} link $\psi$ with respect to $L$ and $\ell$.
 This is given by Construction ~\ref{const:eps-thick-link} below.
 
+\restatehack{
+  \begin{theorem}
+    \label{thm:calibrated-separated}
+    \label{thm:thickened-separated}
+  \end{theorem}}
+
 \begin{restatable}{theorem}{thickenedseparated} \label{thm:thickened-separated}
   Let polyhedral surrogate $L:\reals^d \to \reals^\Y_+$ embed the discrete loss $\ell:\R\to\reals^\Y_+$.
   Then there exists $\epsilon_0 > 0$ such that, for all $0 < \epsilon \leq \epsilon_0$, Construction~\ref{const:eps-thick-link} yields an $\epsilon$-separated link with respect to $L$ and $\ell$.
@@ -924,27 +930,27 @@ Thinking of the abstain loss $\ell^{1/2}$ as a binary structured prediction prob
 \newcommand{\abs}{\mathrm{abs}}
 
 Many structured prediction settings can be thought of as making multiple predictions at once, with a loss function that jointly measures error based on the relationship between these predictions~\cite{hazan2010direct, gao2011consistency, osokin2017structured}.
-In the case of $k$ binary predictions, these settings are typically formalized by taking the predictions and outcomes to be $\pm 1$ vectors, so $\R=\Y=\{-1,1\}^k$.
-One then defines a joint loss function in terms of the misprediction or disagreement set $\dis(r,y) = \{i \in [k] \mid r_i \neq y_i\}$, meaning we may write $\ell^f(r)_y = f(\dis(r,y))$ for some set function $f:2^{[k]}\to\reals$.
+In the case of $k$ binary predictions, these settings are typically formalized by taking the predictions and outcomes to be $\R=\Y=\{-1,1\}^k$, with the $i$th coordinate giving the result for the $i$th binary prediction.
+A natural family of losses are those which are functions of the misprediction or disagreement set $\dis(r,y) = \{i \in [k] \mid r_i \neq y_i\}$, meaning we may write $\ell^f(r)_y = f(\dis(r,y))$ for some set function $f:2^{[k]}\to\reals$.
 For example, Hamming loss is given by $f(S) = |S|$.
 In an effort to provide a general convex surrogate for these settings when $f$ is a submodular function, Yu and Blaschko~\cite{yu2018lovasz} introduce the \emph{Lov\'asz hinge} surrogate $L^f:\reals^k\to\reals^\Y_+$ which leverages the well-known convex Lov\'asz extension of submodular functions.
-While the authors provide theoretical justification and experiments, consistency of the Lov\'asz hinge is left open.
+While the authors provide theoretical justification and experiments, they leave open whether the Lov\'asz hinge actually is consistent for $\ell^f$.
 
 \citet{ourlovaszpaper} use our embedding framework to resolve the consistency of $L^f$, showing that it is inconsistent with respect to $\ell^f$ outside of the trivial case where $f$ is modular (e.g., $f$ is a weighted Hamming loss).
 Moreover, they show what $L^f$ embeds: a variant $\ellabs$ of $\ell^f$ where one is allowed to abstain on a set of indices $S \subseteq [k]$, which they call the \emph{structured abstain problem}.
-To derive $\ellabs$, they show that the set $\V = \{-1,0,1\}^k$ is representative for $L^f$, and use our Proposition~\ref{prop:representative-embeds-restriction} to show that $L^f$ embeds $\ellabs := L^f|_{\V}$.
+To derive $\ellabs$, they show that the set $\V = \{-1,0,1\}^k$ is representative for $L^f$, and use Proposition~\ref{prop:representative-embeds-restriction} to show that $L^f$ embeds $\ellabs := L^f|_{\V}$.
 Letting $\abs(v) = \{i\in[k] \mid v_i = 0\}$ denote the ``abstain'' set, we may write $\ellabs : \V \to \reals^\Y_+$ as
 \begin{equation}
 	\ellabs(v)_y = f(\dis(v,y) \setminus \abs(v)) + f(\dis(v,y))~.
 \end{equation}
 (Observe that $\abs(v,y) \subseteq \dis(v,y)$, since $y\in\{-1,1\}^k$.)
 %They go on to show that the embedding is tight, for $f$ strictly submodular and strictly monotone, if one first disallows $v$ with $|\abs(v)| = 1$.
-Thus, the Lov\'asz hinge is consistent with respect to the structured abstain loss $\ellabs$.
+By Theorem~\ref{thm:link-main}, then, the Lov\'asz hinge is consistent with respect to the structured abstain loss $\ellabs$ for some link function.
 
-\jessie{new: added a bit about links. not sure how I feel about it yet.}
-Since $L^f$ embeds $\ellabs$, Theorem~\ref{thm:link-main} implies that, for each submodular and increasing $f : 2^{[k]} \to \reals_+$, there exists a link $\psi^f$ such that $(L^f, \psi^f)$ is calibrated with respect to $\ellabs$.
-Perhaps surprisingly, \citeauthor{ourlovaszpaper} find two links $\psi^*$ and $\psi^\diamond$ such that $(L^f, \psi^*)$ and $(L^f, \psi^\diamond)$ are both calibrated with respect to $\ellabs$, regardless of $f$.
-These links are visualized for $k = 2$ in Figure~\ref{fig:lovasz-links}.
+As the authors show, however, actually determining this link function is nontrivial.
+Simple threshold links like for the BEP surrogate in \S~\ref{sec:abstain} are not calibrated, thus casting doubt that a trial-and-error approach for finding the link would be successful.
+Instead, they leverage our thickened link construction (Construction~\ref{const:eps-thick-link}) to derive two links $\psi^*$ and $\psi^\diamond$, which have somewhat intricate geometric structure (Figure~\ref{fig:lovasz-links}).
+Perhaps surprisingly, they prove that both $(L^f, \psi^*)$ and $(L^f, \psi^\diamond)$ are simultaneously calibrated with respect to $\ellabs$ for \emph{any} submodular and increasing $f$.
 
 \begin{figure}
 	\begin{center}
@@ -954,7 +960,7 @@ These links are visualized for $k = 2$ in Figure~\ref{fig:lovasz-links}.
 		\begin{minipage}{0.48\linewidth}
 			\includegraphics[width=\linewidth]{tikz/lovasz-link-psi-diamond.pdf}
 		\end{minipage}\hfill
-		\caption{Links $\psi^*$ and $\psi^\diamond$ such that $(L^f, \psi^*)$ and $\psi^\diamond$ are calibrated with respect to $\ellabs$ for all suitable $f$. Points in the dark green regions link to $\vec 0$; points in light green link to a permutation of $(0,\pm 1)$, and points in yellow regions link to $(\pm 1, \pm 1)$.\jessie{Not sure how to phrase this?  Would we just be better off explicitly labeling things?}}
+		\caption{Links $\psi^*$ and $\psi^\diamond$ such that $(L^f, \psi^*)$ and $\psi^\diamond$ are calibrated with respect to $\ellabs$ for all suitable $f$. Points in the dark green regions link to $\vec 0$; points in light green link to a permutation of $(0,\pm 1)$, and points in yellow regions link to $(\pm 1, \pm 1)$.\jessie{Not sure how to phrase this?  Would we just be better off explicitly labeling things?}\raf{Agreed that it's a little unclear, but not sure labeling would be better... let's discuss next call}}
 		\label{fig:lovasz-links}
 	\end{center}
 \end{figure}
