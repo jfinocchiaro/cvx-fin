@@ -776,10 +776,6 @@ Theorem \ref{thm:thickened-separated} implies that, for all small enough $\epsil
 Construction~\ref{const:eps-thick-link} is not necessarily computationally efficient as the number of labels $n$ grows.
 In practice this potential inefficiency is not typically a concern, as the family of losses typically has some closed form expression in terms of $n$, and thus the construction can proceed at the symbolic level.
 We illustrate this formulaic approach in \S~\ref{sec:abstain}.
-% \proposedadd{In general, we are not overly concerned with the computational complexity of computing the surrogate and link, since these calculations only need to be computed once.  They are generally derived mathematically, rather than computationally.  These symbolic calculations typically tend to be straightforward, but can sometimes be tricky.}
-
-\raf{Bo, I wonder if we should state the following observation (perhaps a bit more formally) here, that you can use $\Psi$ to verify that a given \emph{proposed} link is calibrated.  A seemingly minor point, but one which saved us a ton of work in top-$k$!}
-\bo{I think I'm happy with how you wrote it below. I'm not super clear on how efficient this verification algorithm is? Especially versus just computing a new link?}
 
 Applying the $\epsilon$-thickened link construction additionally enables one to verify the consistency of a proposed link $\psi^*$.
 For a given $\epsilon$ and norm $\|\cdot\|$, suppose one follows the routine of Construction~\ref{const:eps-thick-link} until the last step in which values for the link $\psi$ are selected.
@@ -802,20 +798,35 @@ This result follows from the fact, stated now, that Construction~\ref{const:eps-
   Then $\psi$ is $\epsilon$-separated if and only if $\psi(u) \in \Psi(u)$ for all $u\in\reals^d$.
 \end{proposition}
 
-\paragraph{Regret transfer rates of calibrated polyhedral surrogates.}
-Recall that the goal of surrogate regret minimization is to learn a hypothesis $h$ that minimizes expected surrogate loss, then output hypothesis $\psi \circ h$, which hopefully minimizes expected target loss.
-Consistency is a minimal requirement: when surrogate regret\footnote{Regret in this context is the difference between the expected loss of a hypothesis and the expected loss of the Bayes optimal hypothesis that minimizes expected loss. We refer the reader to \cite{frongillo2021surrogate} for a formal definition.} of $h$ converges to zero, i.e. $\text{Regret}_L(h) \to 0$, so does target regret of $\psi \circ h$, i.e. $\text{Regret}_{\ell}(\psi \circ h) \to 0$.
-A natural question is whether \emph{fast} convergence in surrogate regret implies fast convergence in target regret.
-A recent paper \cite{frongillo2021surrogate} shows that, for polyhedral surrogates, this is always the case.
-\begin{theorem}[\cite{frongillo2021surrogate}, Theorem 1]
-  Let $(L,\psi)$ be a polyhedral surrogate that is consistent for a discrete loss $\ell$.
-  Then there exists $c > 0$ such that, for all hypotheses $h$, $\text{Regret}_{\ell}(\psi \circ h) \leq c \cdot \text{Regret}_L(h)$.
+\subsection{Surrogate regret bounds}\label{subsec:regret-bounds}
+Recall that the goal of surrogate risk minimization is to learn a hypothesis $h$ that minimizes expected surrogate loss, then output hypothesis $\psi \circ h$, which hopefully minimizes expected target loss.
+One may formalize this statement in terms of \emph{regret}, as follows.
+Fix a data distribution $\D$.
+The \emph{surrogate regret} of $h$, and the \emph{target regret} of the implied hypothesis $\psi \circ h$, are given by
+\begin{align*}
+  R_L(h;\D) &= \E_{(X,Y)\sim\D} L(h(X))_Y - \inf_{h':\X\to\reals^d} \E_{(X,Y)\sim\D} L(h'(X))_Y~,
+  \\
+  R_\ell(\psi\circ h;\D) &= \E_{(X,Y)\sim\D} \ell(\psi(h(X)))_Y - \inf_{h':\X\to\R} \E_{(X,Y)\sim\D} \ell(h'(X))_Y~,
+\end{align*}
+respectively,
+% $R_L(h;\D) = \E_{(X,Y)\sim\D} L(h(X))_Y - \inf_{h':\X\to\reals^d} \E_{(X,Y)\sim\D} L(h'(X))_Y$,
+where the infimum is taken over all measurable functions.
+(One may equivalently assume the Bayes optimal hypothesis is in the function class.)
+% Given $h$, the \emph{target regret} of the implied hypothesis $\psi \circ h$ is $R_\ell(\psi\circ h;\D) = \E_{(X,Y)\sim\D} \ell(\psi(h(X)))_Y - \inf_{h':\X\to\R} \E_{(X,Y)\sim\D} \ell(h'(X))_Y$.
+In these terms, then, consistency means that if the surrogate regret of $h$ converges to zero, then the target regret of $\psi \circ h$ does as well; in other words, $R_L(h;\D) \to 0$ implies $R_{\ell}(\psi \circ h;\D) \to 0$.
+
+Consistency is therefore a minimal requirement; in general, we are also interested in the \emph{rate} at which the target regret diminishes, as a function of the number of data points $n$.
+Surrogate regret bounds are useful in answering this question, in that they show how a surrogate rate translates to a target rate.
+We show that, for any polyhedral surrogate, the transfer is linear: if surrogate regret diminishes at a rate of $O(f(n))$, then the target rate is also $O(f(n))$.
+In particular, \emph{fast} convergence in surrogate regret implies fast convergence in target regret.
+\begin{theorem}
+  Let $(L,\psi)$ be consistent for a discrete loss $\ell$, and $L$ polyhedral.
+  Then there exists $c > 0$ such that, for all hypotheses $h$ and data distributions $\D$, we have $R_{\ell}(\psi \circ h;\D) \leq c \cdot R_L(h;\D)$.
 \end{theorem}
-
-
-
-\btw{FUTURE: we should comment in the discussion section that we probably can show that *any* loss embedding $\ell$ must be polyhedral-ish, meaning polyhedral except for stuff that is never optimal.  This theorem would then not need the ``polyhedral'' part. This is related to the ``convex envelope conjucture'', that if $L$ embeds $\ell$ via $\varphi$, you can just take the loss $L'$ such that $L_y$ is the convex envelope of points $\{(\varphi(r),L(r)_y)\}_{r\in\R}$.}
-\btw{FUTURE: This prop and theorem give an excellent reason to focus on embeddings, since other techniques do not necessarily give you separated links for free.  Since we know we get them for free, we can just focus on the property, and study elicitation complexity; we know if we have a link at all it can be taken to be separated.  [[Is this true?]]}
+In the proof (Appendix~\ref{app:regret-bounds}), we further show that the constant $c$ can be decomposed in terms of three constants, which depend on $L$, $\psi$, and $\ell$, respectively.
+Specifically, we may write $c = C_\ell H_L / \epsilon_\psi$, where $H_L$ is the Hoffman constant for $L$, $\epsilon_\psi$ the separation of $\psi$, and $C_\ell$ the maximum loss gap of $\ell$.
+See Appendix~\ref{app:regret-bounds} for details.
+We also refer the reader to \citet{frongillo2021surrogate} for a discussion on how to further tighten this result, as well as a quadratic lower bound on the rate transfer for sufficiently non-polyhedral surrogates.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1200,8 +1211,7 @@ as shown in Figure~\ref{fig:modified-hinge}, which matches hinge loss on the int
 % 	$\Sc$ is representative for $L$, so Lemma~\ref{lem:loss-restrict} gives us $\risk{L} = \risk{L|_{\Sc}}$, which is polyhedral as $\Sc$ is finite.
 % \end{proof}
 
-We now present our main structural result in Lemma~\ref{lem:X}, which will lay the foundation for the rest of this section.
-The proof is in \S~\ref{subsec:lem-X-proof}.
+We now present our main structural result in Lemma~\ref{lem:X}, proved in \S~\ref{app:polyhedra}, which will lay the foundation for the rest of this section.
 Lemma~\ref{lem:X} observes that (minimizable) losses $L$ with polyhedral Bayes risk have finite representative sets, and derives equivalent conditions on the level sets of the property elicited by $L$ and tight embeddings.
 %\raf{TODO: Brief description of the result}\jessie{Attempted}
 
@@ -1632,6 +1642,11 @@ A natural question is to posit if an embedding my be polyhedral on the convex hu
 
 \item
   ...
+
+  \btw{FUTURE: we should comment in the discussion section that we probably can show that *any* loss embedding $\ell$ must be polyhedral-ish, meaning polyhedral except for stuff that is never optimal.  This theorem would then not need the ``polyhedral'' part. This is related to the ``convex envelope conjucture'', that if $L$ embeds $\ell$ via $\varphi$, you can just take the loss $L'$ such that $L_y$ is the convex envelope of points $\{(\varphi(r),L(r)_y)\}_{r\in\R}$.}
+\btw{FUTURE: Link construction gives an excellent reason to focus on embeddings, since other techniques do not necessarily give you separated links for free.  Since we know we get them for free, we can just focus on the property, and study elicitation complexity; we know if we have a link at all it can be taken to be separated.  [[Is this true?]]}
+
+
 \end{itemize}
 
 %%%% Pre-neurips
@@ -2357,13 +2372,10 @@ We are now ready to prove Theorem \ref{thm:calibrated-separated} as desired.
 
 \section{Surrogate Regret Bounds} \label{app:regret-bounds}
 
-The following is a direct result of Jensen's inequality, using that $R_L(h;\D) = \E_X R_L(h(X),p_X)$ where $p_X$ is the conditional distribution on $Y$ given $X$.
+The following is a direct result of Jensen's inequality, using the fact that $R_L(h;\D) = \E_X R_L(h(X),p_X)$ where $p_X$ is the conditional distribution on $Y$ given $X$.
 \begin{observation} \label{obs:transfer}
   If $(L,\psi)$ guarantee a conditional regret transfer of $\zeta$ for $\ell$, and $\zeta$ is concave, then $(L,\psi)$ guarantee a regret transfer of $\zeta$ for $\ell$.
 \end{observation}
-
-
-\raf{TODO: definition mismatch for indirectly elicits (link specified or not?).  Suggestion: use ``refines'' only, since $\epsilon$-separation already implies the correct link.}
 
 \begin{lemma}\label{lemma:linear-on-levelset}
   Suppose $(L,\psi)$ indirectly elicits $\ell$ and let $\Gamma = \prop{L}$.
@@ -2378,25 +2390,6 @@ The following is a direct result of Jensen's inequality, using that $R_L(h;\D) =
   Next, by Definitions~\ref{def:refines} and~\ref{def:indirectly-elicits}, there exists $r^*$ such that $\Gamma_{u^*} \subseteq \gamma_{r^*}$.
   By the same argument, for fixed $r$, $R_{\ell}(r,p) = \inprod{p}{\ell(r) - \ell(r^*)}$, a linear function of $p$ on $\gamma_{r^*}$ and thus on $\Gamma_{u^*}$.
 \end{proof}
-
-\begin{lemma}\label{lemma:polyhedral-finite}
-  If $L: \reals^d \to \reals_+^{\Y}$ is polyhedral, then $\Gamma = \prop{L}$ has a finite set of level sets that union to $\simplex$.
-  Moreover, these level sets are polytopes.
-\end{lemma}
-\begin{proof}
-  This statement can be deduced from the embedding framework of \cite{finocchiaro2019embedding}.
-  In particular, Lemma 5 of \cite{finocchiaro2019embedding} states that if $L$ is polyhedral, then its Bayes risk $\risk{L}$ is concave polyhedral, i.e. is the pointwise minimum of a finite set of affine functions.
-  \botodo{This next step could use more justification.}
-  It follows that there exists a finite set $U \subset \reals^d$ such that
-  \begin{equation} \label{eqn:bayes-risk-if-poly}
-    \risk{L}(p) = \min_{u \in \reals^d} \inprod{p}{L(u)} = \min_{u \in U} \inprod{p}{L(u)} ~.
-  \end{equation}
-  We claim the level sets of $U$ witness the claim.
-  First, it is known (e.g. from theory of power diagrams, \cite{aurenhammer1987criterion}) that if $\risk{L}$ is a polyhedral function represented as (\ref{eqn:bayes-risk-if-poly}) and $u \in U$, then $\Gamma_u = \{p \in \simplex: \inprod{p}{L(u)} = \risk{L}(p)\}$ is a polytope.
-  Finally, suppose for contradiction that there exists $p \in \simplex$, $p \not\in \cup_{u \in U} \Gamma_u$.
-  Then there must be some $u' \not\in U$ with $p \in \Gamma_{u'}$, implying that $\inprod{p}{L(u')} > \max_{u \in U} \inprod{p}{L(u)}$, contradicting (\ref{eqn:bayes-risk-if-poly}).
-\end{proof}
-
 
 \begin{lemma}\label{lemma:separated-constant-p}
   Let $\ell: \R \to \reals_+^{\Y}$ be a discrete target loss, $L: \reals^d \to \reals_+^{\Y}$ be a polyhedral surrogate loss, and $\psi: \reals^d \to \R$ a link function.
@@ -2414,20 +2407,19 @@ The following is a direct result of Jensen's inequality, using that $R_L(h;\D) =
 \end{proof}
 
 \begin{theorem}\label{thm:separated-constant}
-  Let $\ell: \R \to \reals_+^{\Y}$ be a discrete target loss, $L: \reals^d \to \reals_+^{\Y}$ be a polyhedral surrogate loss, and $\psi: \reals^d \to \R$ a link function.
+  Let $\ell: \R \to \reals_+^{\Y}$ be discrete, $L: \reals^d \to \reals_+^{\Y}$ polyhedral, and $\psi: \reals^d \to \R$.
   If $(L,\psi)$ are consistent for $\ell$, then
     \[ (\forall h,\D) \quad R_{\ell}(\psi \circ h ; \D) \leq \frac{C_{\ell} H_L}{\epsilon_{\psi}} R_L(h ; \D) ~. \]
 \end{theorem}
 \begin{proof}
-  By Lemma~\ref{lemma:calibrated-eps-sep}, $\psi$ is separated and $\epsilon_{\psi}$ well-defined.
-
-  \raf{Inserted from nonconstructive proof:}
-  By Lemma~\ref{lemma:polyhedral-finite}, the polyhedral loss $L$ has a finite set $U \subset \reals^d$ of predictions such that (a) for each $u \in U$, the level set $\Gamma_u$ is a polytope, and (b) $\cup_{u \in U} \Gamma_u = \simplex$.
-  Let $\mathcal{Q}_u \subset \simplex$ be the finite set of vertices of the polytope $\Gamma_u$, and define the finite set $\mathcal{Q} = \cup_{u \in U} \mathcal{Q}_u$.
+  Let $\Gamma = \prop{L}$.
+  From Lemma~\ref{lem:X}, there is a finite set $U \subset \reals^d$ of predictions such that (a) for each $u \in U$, the level set $\Gamma_u$ is a polytope (see e.g.\ Lemma~\label{lem:level-set-is-projected-face}), and (b) $\cup_{u \in U} \Gamma_u = \simplex$.
+  For each $u\in U$ let $\mathcal{Q}_u \subset \simplex$ be the finite set of vertices of the polytope $\Gamma_u$, and define the finite set $\mathcal{Q} = \cup_{u \in U} \mathcal{Q}_u$.
   
-  By Lemma~\ref{lemma:separated-constant-p}, for each $p \in \mathcal{Q}$, $R_{\ell}(\psi(u),p) \leq \frac{C_{\ell} H_L}{\epsilon_{\psi}} R_L(u,p)$ for all $u$.
+  By Lemma~\ref{lemma:calibrated-eps-sep}, $\psi$ is separated and $\epsilon_{\psi}$ well-defined.
+  By Lemma~\ref{lemma:separated-constant-p}, for each $p \in \mathcal{Q}$, $R_{\ell}(\psi(u),p) \leq \frac{C_{\ell} H_L}{\epsilon_{\psi}} R_L(u,p)$ for all $u\in\reals^d$.
   Now consider a general $p \in \simplex$, which is in some full-dimensional polytope level set $\Gamma_u$.
-  Write $p = \sum_{q \in \mathcal{Q}_u} \beta(q) q$ for some probability distribution $\beta$.
+  Write $p = \sum_{q \in \mathcal{Q}_u} \beta(q) q$ for some convex combination $\beta \in \Delta_{\mathcal Q_u}$.
   By Lemma~\ref{lemma:linear-on-levelset}, $R_L$ and $R_{\ell}$ are linear in the second argument on $\Gamma_u$, so for any $u'\in\reals^d$,
   \begin{align*}
     R_{\ell}(\psi(u'),p)
@@ -2436,6 +2428,9 @@ The following is a direct result of Jensen's inequality, using that $R_L(h;\D) =
     &\leq \frac{C_{\ell} H_L}{\epsilon_{\psi}} \sum_{q \in \mathcal{Q}_u} \beta(q) R_L(u', q)  \\
     &\leq \frac{C_{\ell} H_L}{\epsilon_{\psi}} R_L(u', p) .
   \end{align*}
+
+  \raf{Replace this last line (and preamble above) with a direct calculation -- don't need the observation, since we are actually linear!}
+
   By Observation~\ref{obs:transfer}, this conditional regret transfer implies a full regret transfer, with the same constant.
 \end{proof}
 
@@ -2609,7 +2604,9 @@ Theorem \ref{thm:thickened-separated}, which we restate here, is now almost imme
 \end{proof}
 
 \section{General characteristics of polyhedra}
+\label{app:polyhedra}
 \subsection{Definitions and preliminaries}
+\label{app:polyhedra:defs}
 \begin{definition}[Closed halfspace]
   A closed halfspace is a set of the form $H_{(w,b)}^+ := \{ x \in \reals^d \mid \inprod{x}{w} \geq b\}$ for any $(w,b) \in \reals^d \times \reals$.
   % Similarly let $H_{(w,b)}^- := \{ x \in \reals^d \mid \inprod{x}{w} \leq b\}$.
@@ -2733,7 +2730,7 @@ Finally, given a set $\V \subseteq \reals^d$, we let $\H_{\V} = \{H_v^+ \mid v\i
 If $\V$ and $\Y$ are understood from context, we may denote $\H := \H_\V \cup\H_\Y$.
 
 
-\subsection{Finitely generated polyhedron}\label{appsubsec:phase1}
+\subsection{Finitely generated polyhedra}\label{appsubsec:phase1}
 Throughout, we will work with a (minimizable) function $g_\V$ generated by a set $\V \subseteq \reals^\Y_+$ of the following form.
 
 \begin{definition}\label{def:g-finite}
@@ -3424,8 +3421,8 @@ Moreover, let $\R^*$ be the finite set of reports given by Claim~\ref{claim:fini
 
 
 
-Now this brings us to Lemma~\ref{lem:X}.
-The framework in this appendix cues up this proof: any loss $L$ satisfying the assumptions of Lemma~\ref{lem:X} has some $g_{L(\R)} = \risk{L}_+$ as in this section that we can work with. 
+We are now ready to apply the above to prove Lemma~\ref{lem:X}.
+In particular, any loss $L$ satisfying the assumptions of Lemma~\ref{lem:X} has some $g_{L(\R)} = \risk{L}_+$ as in this section. 
 
 
 \lemmaX*
