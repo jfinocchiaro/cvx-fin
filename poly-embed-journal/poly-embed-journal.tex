@@ -149,6 +149,7 @@
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
+\newtheorem{observation}{Observation}
 \newtheorem{proposition}{Proposition}
 \newtheorem{corollary}{Corollary}
 \newtheorem{conjecture}{Conjecture}
@@ -1509,6 +1510,7 @@ Intuitively, a loss $L$ indirectly elicits a property $\gamma$ if we can compute
 To formalize the condition, we use the notion of a property refining another from~\citet{frongillo2014general}.
 
 \begin{definition}[Refines]
+  \label{def:refines}
 	Let $\Gamma:\simplex \toto \R$ and $\Gamma':\simplex\toto \R'$.
 	Then $\Gamma$ \emph{refines} $\Gamma'$ if for all $r \in \R$, there exists $r' \in \R'$ such that $\Gamma_{r} \subseteq \Gamma'_{r'}$.
 \end{definition}
@@ -1516,6 +1518,7 @@ Equivalently, $\Gamma$ refines $\Gamma'$ if there is some ``link'' function $\ps
 We will use the fact that refinement is transitive: if $\Gamma$ refines $\Gamma'$ and $\Gamma'$ refines $\Gamma''$, then $\Gamma$ refines $\Gamma''$.
 
 \begin{definition}[Indirectly elicits]
+  \label{def:indirectly-elicits}
   A loss $L$ \emph{indirectly elicits} a property $\gamma$ if $\prop L$ refines $\gamma$.
 \end{definition}
 
@@ -1674,7 +1677,7 @@ A natural question is to posit if an embedding my be polyhedral on the convex hu
 We thank Arpit Agarwal and Peter Bartlett for many early discussions and insights,
 Stephen Becker for a reference to Hoffman constants,
 and Nishant Mehta, Enrique Nueve, and Anish Thilagar for other suggestions.\raft{others?}
-This material is based upon work supported by the National Science Foundation under Grants No.\ 1657598 and No.\ DGE 1650115.
+This materialf is based upon work supported by the National Science Foundation under Grant Nos.\ CCF-1657598, IIS-2045347, and DGE-1650115.
 \newpage
 \bibliographystyle{plainnat}
 \bibliography{diss,extra}
@@ -2354,6 +2357,91 @@ We are now ready to prove Theorem \ref{thm:calibrated-separated} as desired.
 %   Therefore, full-dimensional level sets of an elicitable property must be in the trim operation of the same property.
 % \end{proof}
 
+
+
+\section{Surrogate Regret Bounds} \label{app:regret-bounds}
+
+The following is a direct result of Jensen's inequality, using that $R_L(h;\D) = \E_X R_L(h(X),p_X)$ where $p_X$ is the conditional distribution on $Y$ given $X$.
+\begin{observation} \label{obs:transfer}
+  If $(L,\psi)$ guarantee a conditional regret transfer of $\zeta$ for $\ell$, and $\zeta$ is concave, then $(L,\psi)$ guarantee a regret transfer of $\zeta$ for $\ell$.
+\end{observation}
+
+
+\raf{TODO: definition mismatch for indirectly elicits (link specified or not?).  Suggestion: use ``refines'' only, since $\epsilon$-separation already implies the correct link.}
+
+\begin{lemma}\label{lemma:linear-on-levelset}
+  Suppose $(L,\psi)$ indirectly elicits $\ell$ and let $\Gamma = \prop{L}$.
+  Then for any fixed $u,u^* \in \reals^d$ and $r \in \R$, the functions $R_L(u,\cdot)$ and $R_{\ell}(r,\cdot)$ are linear in their second arguments on $\Gamma_{u^*}$.
+\end{lemma}
+\begin{proof}
+  Let $u^* \in \reals^d$ and $p \in \Gamma_{u^*}$.
+  By definition, for all $p \in \Gamma_{u^*}$, $\risk{L}(p) = \inprod{p}{L(u^*)}$.
+  So for fixed $u$,
+    \[ R_L(u,p) = \inprod{p}{L(u)} - \inprod{p}{L(u^*)} = \inprod{p}{L(u) - L(u^*)} , \]
+  a linear function of $p$ on $\Gamma_{u^*}$.
+  Next, by Definitions~\ref{def:refines} and~\ref{def:indirectly-elicits}, there exists $r^*$ such that $\Gamma_{u^*} \subseteq \gamma_{r^*}$.
+  By the same argument, for fixed $r$, $R_{\ell}(r,p) = \inprod{p}{\ell(r) - \ell(r^*)}$, a linear function of $p$ on $\gamma_{r^*}$ and thus on $\Gamma_{u^*}$.
+\end{proof}
+
+\begin{lemma}\label{lemma:polyhedral-finite}
+  If $L: \reals^d \to \reals_+^{\Y}$ is polyhedral, then $\Gamma = \prop{L}$ has a finite set of level sets that union to $\simplex$.
+  Moreover, these level sets are polytopes.
+\end{lemma}
+\begin{proof}
+  This statement can be deduced from the embedding framework of \cite{finocchiaro2019embedding}.
+  In particular, Lemma 5 of \cite{finocchiaro2019embedding} states that if $L$ is polyhedral, then its Bayes risk $\risk{L}$ is concave polyhedral, i.e. is the pointwise minimum of a finite set of affine functions.
+  \botodo{This next step could use more justification.}
+  It follows that there exists a finite set $U \subset \reals^d$ such that
+  \begin{equation} \label{eqn:bayes-risk-if-poly}
+    \risk{L}(p) = \min_{u \in \reals^d} \inprod{p}{L(u)} = \min_{u \in U} \inprod{p}{L(u)} ~.
+  \end{equation}
+  We claim the level sets of $U$ witness the claim.
+  First, it is known (e.g. from theory of power diagrams, \cite{aurenhammer1987criterion}) that if $\risk{L}$ is a polyhedral function represented as (\ref{eqn:bayes-risk-if-poly}) and $u \in U$, then $\Gamma_u = \{p \in \simplex: \inprod{p}{L(u)} = \risk{L}(p)\}$ is a polytope.
+  Finally, suppose for contradiction that there exists $p \in \simplex$, $p \not\in \cup_{u \in U} \Gamma_u$.
+  Then there must be some $u' \not\in U$ with $p \in \Gamma_{u'}$, implying that $\inprod{p}{L(u')} > \max_{u \in U} \inprod{p}{L(u)}$, contradicting (\ref{eqn:bayes-risk-if-poly}).
+\end{proof}
+
+
+\begin{lemma}\label{lemma:separated-constant-p}
+  Let $\ell: \R \to \reals_+^{\Y}$ be a discrete target loss, $L: \reals^d \to \reals_+^{\Y}$ be a polyhedral surrogate loss, and $\psi: \reals^d \to \R$ a link function.
+  If $(L,\psi)$ indirectly elicit $\ell$ and $\psi$ is $\epsilon$-separated, then for all $u$ and $p$,
+    \[ R_{\ell}(\psi(u),p) \leq \frac{C_{\ell} H_{L,p}}{\epsilon} R_L(u,p) . \]
+\end{lemma}
+\begin{proof}
+  If $\psi(u) \in \gamma(p)$, then $R_{\ell}(u,p) = 0$ and we are done.
+  Otherwise, applying the definition of $\epsilon$-separated and Lemma~\ref{lemma:hoffman-polyhedral},
+  \begin{align*}
+    \epsilon &<    d_{\infty}(u,\Gamma(p))  \\
+             &\leq H_{L,p} R_L(u,p) .
+  \end{align*}
+  So $R_{\ell}(\psi(u),p) \leq C_{\ell} \leq \frac{C_{\ell} H_{L,p}}{\epsilon} R_L(u,p)$.
+\end{proof}
+
+\begin{theorem}\label{thm:separated-constant}
+  Let $\ell: \R \to \reals_+^{\Y}$ be a discrete target loss, $L: \reals^d \to \reals_+^{\Y}$ be a polyhedral surrogate loss, and $\psi: \reals^d \to \R$ a link function.
+  If $(L,\psi)$ are consistent for $\ell$, then
+    \[ (\forall h,\D) \quad R_{\ell}(\psi \circ h ; \D) \leq \frac{C_{\ell} H_L}{\epsilon_{\psi}} R_L(h ; \D) ~. \]
+\end{theorem}
+\begin{proof}
+  By Lemma~\ref{lemma:calibrated-eps-sep}, $\psi$ is separated and $\epsilon_{\psi}$ well-defined.
+
+  \raf{Inserted from nonconstructive proof:}
+  By Lemma~\ref{lemma:polyhedral-finite}, the polyhedral loss $L$ has a finite set $U \subset \reals^d$ of predictions such that (a) for each $u \in U$, the level set $\Gamma_u$ is a polytope, and (b) $\cup_{u \in U} \Gamma_u = \simplex$.
+  Let $\mathcal{Q}_u \subset \simplex$ be the finite set of vertices of the polytope $\Gamma_u$, and define the finite set $\mathcal{Q} = \cup_{u \in U} \mathcal{Q}_u$.
+  
+  By Lemma~\ref{lemma:separated-constant-p}, for each $p \in \mathcal{Q}$, $R_{\ell}(\psi(u),p) \leq \frac{C_{\ell} H_L}{\epsilon_{\psi}} R_L(u,p)$ for all $u$.
+  Now consider a general $p \in \simplex$, which is in some full-dimensional polytope level set $\Gamma_u$.
+  Write $p = \sum_{q \in \mathcal{Q}_u} \beta(q) q$ for some probability distribution $\beta$.
+  By Lemma~\ref{lemma:linear-on-levelset}, $R_L$ and $R_{\ell}$ are linear in the second argument on $\Gamma_u$, so for any $u'\in\reals^d$,
+  \begin{align*}
+    R_{\ell}(\psi(u'),p)
+    &=    \sum_{q \in \mathcal{Q}_u} \beta(q) R_{\ell}(\psi(u'), q)  \\
+    &\leq \sum_{q \in \mathcal{Q}_u} \beta(q) \frac{C_{\ell} H_{L,p}}{\epsilon_{\psi}} R_L(u', q)  \\
+    &\leq \frac{C_{\ell} H_L}{\epsilon_{\psi}} \sum_{q \in \mathcal{Q}_u} \beta(q) R_L(u', q)  \\
+    &\leq \frac{C_{\ell} H_L}{\epsilon_{\psi}} R_L(u', p) .
+  \end{align*}
+  By Observation~\ref{obs:transfer}, this conditional regret transfer implies a full regret transfer, with the same constant.
+\end{proof}
 
 
 
