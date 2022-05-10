@@ -44,7 +44,7 @@
 
 \tikzstyle{cell}=[dashed,thick]
 \tikzstyle{simplex}=[thick]
-\newcommand{\tikzfigscale}{2.2}
+\newcommand{\tikzfigscale}{2.5}
 \newcommand{\placefiglabel}[1]{\node at (1.1,0,1.5) {#1};}
 \usetikzlibrary{arrows}
 \usetikzlibrary{shapes}
@@ -408,14 +408,12 @@ Roughly, a surrogate and link are calibrated if the best possible expected loss 
 
 \begin{definition}
   \label{def:calibrated}
-  \jessiet{Need to be careful on use of $\gamma$.}
-  \raft{Replace with prop[ell] or maybe define gamma}
   Let discrete loss $\ell:\R\to\reals^\Y_+$, proposed surrogate $L:\reals^d\to\reals^\Y_+$, and link function $\psi:\reals^d\to\R$ be given.
   We say $(L,\psi)$ is \emph{calibrated} with respect to $\ell$ if
 for all $p \in \simplex$,
   \begin{equation}
     \label{eq:calibrated}
-  \inf_{u \in \reals^d : \psi(u) \not\in \gamma(p)} \inprod{p}{L(u)} > \inf_{u \in \reals^d} \inprod{p}{L(u)}~.
+  \inf_{u \in \reals^d : \psi(u) \not\in \prop{\ell}(p)} \inprod{p}{L(u)} > \inf_{u \in \reals^d} \inprod{p}{L(u)}~.
   \end{equation}
   If $(L, \psi)$ is calibrated with respect to $\ell$, we call $\psi$ a \emph{calibrated link.}
 \end{definition}
@@ -695,7 +693,7 @@ Theorem \ref{thm:link-main} will follow immediately from Theorems \ref{thm:calib
 Their full proofs appear in \S~\ref{sec:equiv-sep-calib} and \ref{app:sep-link-exists} respectively.
 
 Theorem \ref{thm:calibrated-separated} shows that calibration is equivalent to a geometric condition, which we call \emph{separation}, of a link function $\psi$.
-Recall that for indirect elicitation, any point $u \in \Gamma(p)$ must link to a report $\psi(u) \in \gamma(p)$. \jessiet{We don't introduce indirect elicitation.  How do we want to address? - May 3, 22}
+Recall that for indirect elicitation, any point $u \in \Gamma(p)$ must link to a report $\psi(u) \in \gamma(p)$. 
 (In terms of losses, $u$ minimizing expected $L$-loss implies that $\psi(u)$ minimizes expected $\ell$-loss, with respect to $p$.)
 The idea of separation is that points in the neighborhood of $u$ must also link to to a report in $\gamma(p)$.
 Furthermore, there must be a uniform lower bound $\epsilon$ on the size of any such neighborhood.
@@ -741,7 +739,7 @@ Because $u$ minimizes expected surrogate loss for both $p$ and $p'$, the link mu
 It is not even clear \emph{a priori} that these sets intersect.
 We use the definition of embedding and elicitation results, discussed in \S~\ref{sec:min-rep-sets}, to show that for each such $u$ there exists $r \in \R$ such that $\Gamma_u \subseteq \gamma_r$, i.e. any $p$ satisfying $u \in \Gamma(p)$ also satisfies $r \in \gamma(p)$.
 This implies that if $u \in \Gamma(p) \cap \Gamma(p')$, then there exists $r \in \gamma(p) \cap \gamma(p')$, so we may safely choose $\psi(u) = r$.
-\jessiet{We write earlier that embedding is a special case of indirect elicitation, so a reader might be confused why (a) is not immediate.  I think this paragraph is saying that it is, but tries to provide intuition for why, right? - May 3, 22}
+
 
 For \emph{(b)}, we show that this link can be ``thickened'' by some positive $\epsilon$, as described next.
 For any $p \in \simplex$, consider the optimal surrogate report set, i.e.\ set of the form $U = \Gamma(p) = \argmin_u \inprod{p}{L(u)}$.
@@ -862,15 +860,17 @@ Second, identify the vertices of these polyhedral regions.%
 Third, conclude that the union of these vertices, $\Sc\subset\reals^d$, is a finite representative set for $L$.
 % ~\citep[Statement 3.1.7]{grunbaum2013convex}.
 Now $L$ embeds $L|_\Sc$ from Proposition~\ref{prop:representative-embeds-restriction}.
-From here one can further remove redundant reports until one arrives at a tight embedding if desired.
+From here one can further remove redundant reports until arriving at a tight embedding if desired.
 Once the embedded discrete loss is known, the behavior of the surrogate becomes more clear: what problem it is solving, and for which restrictions on label distributions is it consistent for the original problem.
 
 %% giving intuition for new figure
+\raf{Follow-up paragraph on prev sentence using abstain as an example} \jessie{Attempted}
 For example, \citet{ramaswamy2018consistent} propose the BEP surrogate, which embeds the discrete abstain loss (\S~\ref{sec:abstain}).
 With the abstain loss in hand, it is easy to verify that the abstain-optimal report for any $p$ such that $\max_y p_y < 1/2$ is to ``abstain'' from predicting.
-When juxtaposed with multiclass classification in Figure~\ref{fig:abstain-intuition-inconsistent}, one can observe that the BEP surrogate does not indirectly elicit, and therefore does not embed, the mode.
+When juxtaposed with multiclass classification in Figure~\ref{fig:abstain-intuition-inconsistent}, one can observe that the BEP surrogate does not indirectly elicit the mode, as the level set $\prop{L^{BEP}}_{\vec 0} = \prop{\ell^{\mathrm{abs}}}_\bot \not \subseteq \mode_r$ for any $r$. \jessie{Notation}
+As embedding is a special form of indirect elicitaion, we additionally know the BEP surrogate does not embed the mode.
 The intuition described by Figure~\ref{fig:abstain-intuition-inconsistent} additionally gives a procedure to validate inconsistency with respect to a target task.
-\raf{Follow-up paragraph on prev sentence using abstain as an example}
+
 
 \begin{figure}
 	\begin{minipage}{0.4\linewidth}
@@ -885,15 +885,20 @@ The intuition described by Figure~\ref{fig:abstain-intuition-inconsistent} addit
 	\end{minipage}
 \end{figure}
 
-%% also interesting to use Sec 4 to verify proposed canonical links
-\raft{Rework so emphasis is more on the general construction and less on testing a given link}
+%% also interesting to use Sec 4 for ``whole'' picture
+\raft{Rework so emphasis is more on the general construction and less on testing a given link. \jessie{Attempted; old version in comments}}
 With an embedding in hand, Construction~\ref{const:eps-thick-link} provides a calibrated link function.
-Yet for some target problems, the search for consistent surrogates has been restricted to those accommodating a particular canonical link function, such as $k$ largest coordinates of the surrogate report in top-$k$ classification (\S~\ref{sec:top-k}).
-Interestingly, our construction is also useful in this situation, where one wishes to verify the consistence of a given proposed link $\psi$. 
-Recall that Construction~\ref{const:eps-thick-link} produces a set-valued link envelope $\Psi$, which yields the possible values any $\epsilon$-separated link $\psi$ could map to.
-If the given $\psi$ is indeed consistent, then it is $\epsilon$-separated for sufficiently small $\epsilon$, so one can always construct such a $\Psi$ and verify that $\psi(u) \in \Psi(u)$ for all $u\in\reals^d$.
-More generally, while such canonical link functions may be intuitive for a given problem, our results suggest that researchers should consider setting them aside and instead let Construction~\ref{const:eps-thick-link} determine the link.
-See \S~\ref{sec:lovasz-hinge} for a somewhat intricate example.
+% adding - May 10, 22
+While the literature often ``guesses'' and verifies the calibration of propose links, Construction~\ref{const:eps-thick-link} removes the guesswork from the equation.
+This is beneficial in when the most intuitive link functions are not calibrated and no known calibrated link is known; see \S~\ref{sec:lovasz-hinge} for a somewhat intricate example.
+Moreover, as Construction~\ref{const:eps-thick-link} fully characterizes the set of possible calibrated link functions for a polyhedral embedding via the link envelope $\Psi$, one can also use $\Psi$ in Construction~\ref{const:eps-thick-link} to verify the calibration of proposed links, demonstrated in \S~\ref{sec:top-k}.
+%% previous version - May 10 22
+%Yet for some target problems, the search for consistent surrogates has been restricted to those accommodating a particular canonical link function, such as $k$ largest coordinates of the surrogate report in top-$k$ classification (\S~\ref{sec:top-k}).
+%Interestingly, our construction is also useful in this situation, where one wishes to verify the consistence of a given proposed link $\psi$. 
+%Recall that Construction~\ref{const:eps-thick-link} produces a set-valued link envelope $\Psi$, which yields the possible values any $\epsilon$-separated link $\psi$ could map to.
+%If the given $\psi$ is indeed consistent, then it is $\epsilon$-separated for sufficiently small $\epsilon$, so one can always construct such a $\Psi$ and verify that $\psi(u) \in \Psi(u)$ for all $u\in\reals^d$.
+%More generally, while such canonical link functions may be intuitive for a given problem, our results suggest that researchers should consider setting them aside and instead let Construction~\ref{const:eps-thick-link} determine the link.
+%See \S~\ref{sec:lovasz-hinge} for a somewhat intricate example.
 
 
 
