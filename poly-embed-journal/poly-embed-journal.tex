@@ -421,23 +421,18 @@ It is well-known in finite-outcome settings that calibration is equivalent to \e
 Suppose we have the feature space $\X$ and label space $\Y$.
 %For any data distribution $D \in \Delta(\X \times \Y)$, let $L^*$ be the best possible expected (over $D$) $L$-loss achieved by any hypothesis $H:\X\to\reals^d$, and $\ell^*$ the best expected $\ell$-loss for any hypothesis $h:\X\to\R$, respectively.
 We say a surrogate and link pair $(L,\psi)$ is consistent with respect to $\ell$ if, for all data distributions $D \in \Delta(\X \times \Y)$, and all sequences of surrogate hypotheses $H_1,H_2,\ldots$ whose $L$-loss limits to the optimal surrogate loss $L^*$ (in expectation over $D$), the $\ell$-loss of the sequence $\psi\circ H_1,\psi \circ H_2, \ldots$ limits to the optimal target loss $\ell^*$.
-\bo{edited above slightly. I believe a technical definition of consistency would have a ``for all $\D$'', but we can probably skip that.}\jessie{Tried to make sure it had this technical correctness.}
-\raf{Tried to clarify/correct the quantifiers.  OLD VERSION:
-Let $L^*$ be the best possible expected $L$-loss achieved by any hypothesis $H:\X\to\reals^d$, and $\ell^*$ the best expected $\ell$-loss for any hypothesis $h:\X\to\R$, respectively.
-If $(L,\psi)$ is consistent, then for any sequence of surrogate hypotheses $H_1,H_2,\ldots$ whose $L$-loss limits to $L^*$, the $\ell$-loss of $\psi\circ H_1,\psi \circ H_2, \ldots$ limits to $\ell^*$ for all data distributions $D \in \Delta(\X \times \Y)$.}
-%
 As Definition~\ref{def:calibrated} does not involve the feature space $\X$, we will drop it for the remainder of the paper.
-\jessiet{Commented out the following sentence as it was repetitive from earlier discussion. - Mar 24 22}
 
 
 Like the use of a surrogate and link pair in the calibration definition, one can also extend the earlier definition of property elicitation to \emph{indirect (property) elicitation}, in which one applies a link to an elicited property to obtain a related property of interest.
 \begin{definition}\label{def:indirect-elic}
-	A loss $L : \reals^d \to \reals^\Y_+$  and surrogate $\psi : \reals^d \to \R$ pair $(L, \psi)$ indirectly elicits a property $\gamma : \simplex \toto \R$ if $L$ elicits a property $\Gamma : \simplex \toto \reals^d$ such that, for all $u \in \reals^d$, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$.
+	Let minimizable loss $L : \reals^d \to \reals^\Y_+$ and link $\psi : \reals^d \to \R$ be given.
+  The pair $(L, \psi)$ indirectly elicits a property $\gamma : \simplex \toto \R$ if for all $u \in \reals^d$, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$, where $\Gamma = \prop{L}$.
 	Moreover, we say $L$ indirectly elicits $\gamma$ if such a $\psi$ exists.
 \end{definition}
 
 At times, the elicitation literature studies indirect elicitation through the notion of one property ``refining'' another~\citep{frongillo2015elicitation}, where a property $\Gamma: \simplex \toto \R$ refines $\Gamma': \simplex \toto \R'$ if, for all $r \in \R$, there exists an $r' \in \R'$ such that $\Gamma_r \subseteq \Gamma'_{r'}$.
-From the definition of refinement, it is almost immediate to observe that a loss $L$ indirectly elicits a property $\gamma$ if $\prop L$ refines $\gamma$.
+In particular, a loss $L$ indirectly elicits a property $\gamma$ if and only if $\prop L$ refines $\gamma$.
 
 
 
@@ -861,16 +856,10 @@ Third, conclude that the union of these vertices, $\Sc\subset\reals^d$, is a fin
 % ~\citep[Statement 3.1.7]{grunbaum2013convex}.
 Now $L$ embeds $L|_\Sc$ from Proposition~\ref{prop:representative-embeds-restriction}.
 From here one can further remove redundant reports until arriving at a tight embedding if desired.
-Once the embedded discrete loss is known, the behavior of the surrogate becomes more clear: what problem it is solving, and for which restrictions on label distributions is it consistent for the original problem.
 
-%% giving intuition for new figure
-\raf{Follow-up paragraph on prev sentence using abstain as an example} \jessie{Attempted}
-For example, \citet{ramaswamy2018consistent} propose the BEP surrogate, which embeds the discrete abstain loss (\S~\ref{sec:abstain}).
-With the abstain loss in hand, it is easy to verify that the abstain-optimal report for any $p$ such that $\max_y p_y < 1/2$ is to ``abstain'' from predicting.
-When juxtaposed with multiclass classification in Figure~\ref{fig:abstain-intuition-inconsistent}, one can observe that the BEP surrogate does not indirectly elicit the mode, as the level set $\prop{L^{BEP}}_{\vec 0} = \prop{\ell^{\mathrm{abs}}}_\bot \not \subseteq \mode_r$ for any $r$. \jessie{Notation}
-As embedding is a special form of indirect elicitaion, we additionally know the BEP surrogate does not embed the mode.
-The intuition described by Figure~\ref{fig:abstain-intuition-inconsistent} additionally gives a procedure to validate inconsistency with respect to a target task.
-
+Once the embedded discrete loss is known, the behavior of the surrogate becomes more clear: what problem it is solving, and for which restrictions on label distributions is it consistent for the original problem $\ell$.
+In particular, any level set of the embedded property $\hat\gamma$ which spans multiple level sets of the target property $\gamma=\prop{\ell}$ will lead to inconsistency for $\ell$ (Figure~\ref{fig:abstain-intuition-inconsistent}).
+To obtain consistency with respect to a desired target, therefore, it suffices to restrict to the union of level sets of $\hat\gamma$ which are each fully contained in some level set of $\gamma$.
 
 \begin{figure}
 	\begin{minipage}{0.4\linewidth}
@@ -940,6 +929,14 @@ and they go on to establish linear surrogate regret bounds for $(L^{1/2},\psi^{1
 Using our framework, one can show that $L^{1/2}$ embeds (2 times) $\ell^{1/2}$, with the embedding given by $\varphi$ above where we define $\varphi(\bot) = 0 \in \reals^d$.
 (Following the general procedure outlined above, the regions where $L^{1/2}$ is affine all have vertices in the set $\{-1,1\}^d \cup \{0\}$, meaning it is representative, and $L^{1/2}$ restricted to that set is precisely $2\ell^{1/2} \circ \varphi^{-1}$.)
 %In light of our framework, we can see that $L^{1/2}$ is an excellent example of an embedding, where $\varphi(y) = B(y)$ and $\varphi(\bot) = 0 \in \reals^d$.
+
+\raf{MOVED}%% giving intuition for new figure
+With the abstain loss in hand, it is easy to verify that the abstain-optimal report for any $p$ such that $\max_y p_y < 1/2$ is to ``abstain'' from predicting.
+When juxtaposed with multiclass classification in Figure~\ref{fig:abstain-intuition-inconsistent}, one can observe that the BEP surrogate does not indirectly elicit the mode, as the level set $\prop{L^{BEP}}_{\vec 0} = \prop{\ell^{\mathrm{abs}}}_\bot \not \subseteq \mode_r$ for any $r$. \jessie{Notation}
+As embedding is a special form of indirect elicitaion, we additionally know the BEP surrogate does not embed the mode.
+The intuition described by Figure~\ref{fig:abstain-intuition-inconsistent} additionally gives a procedure to validate inconsistency with respect to a target task.
+
+
 Moreover, as we illustrate in Figure~\ref{fig:abstain-links}(L), the link $\psi^{\epsilon}$ proposed by \citeauthor{ramaswamy2018consistent} can be recovered from Construction~\ref{const:eps-thick-link} by choosing the norm $\|\cdot\|_\infty$ for any sufficiently small choice of $\epsilon > 0$.
 % and choosing $\psi^{1/2}(u) = \bot$ for all $u$ such that $\bot \in \Psi(u)$. 
 %(For all $u$ such that $\bot \not \in \Psi(u)$, there is only one choice to link, e.g., $|\Psi(u)| = 1$.)
@@ -1286,7 +1283,6 @@ In particular, the implications of Lemma~\ref{lem:X} follow whenever $L$ has a f
 
 
 Lemma~\ref{lem:X} leads to another appealing equivalent condition to our embedding condition in Definition~\ref{def:loss-embed}: a surrogate embeds a discrete loss if and only if their Bayes risks match.
-\jessiet{Would it be fair to write about how this could give a quick emprical test of embedding by comparing Bayes risks at a few sampled distributions?}
 
 
 \begin{proposition}\label{prop:embed-bayes-risks}
@@ -1336,8 +1332,6 @@ Proposition~\ref{prop:embed-bayes-risks} broadens this general insight to any di
 Moreover, their result relies the Bayes risk of the surrogate being strictly concave, whereas polyhedral Bayes risks are never strictly concave.
 
 \subsection{Trimming a loss}
-\jessiet{Should this subsection be merged with the one below?}
-\jessiet{Ordering suggestion: non-redundancy, trimming, (cor relating non-redundancy and trim), trimming related to properties.}
 
 Central to the structural results in Lemma~\ref{lem:X} is the existence of a canonical set of loss vectors $\V$ which match the loss vectors of any minimum representative set.
 This fact may seem surprising when one considers that losses may have many mimimum representative sets.
@@ -1369,6 +1363,7 @@ Using this notion of trimming a loss, we can again recast our embedding conditio
   The second statement also follows directly from Lemma~\ref{lem:X}(\ref{item:X-tight-embed}).
 \end{proof}
 
+\raf{Short parag on why we care about trim}
 
 \subsection{Minimum representative sets and non-redundancy}
 
@@ -1569,11 +1564,12 @@ Indirect elicitation may appear much weaker than calibration, since in particula
 Surprisingly, for minimizable polyhedral surrogates, we show the converse: indirect elicitation implies calibration, and therefore consistency.
 
 %% first step to show iff: indirect polyhedral elicitation passes through embedding.
+\raf{Jessie: sync up refines vs indirect elic; use the latter unless it's really awkward}
 A useful lemma is that for minimizable polyhedral losses, indirect elicitation must always pass through an embedding.
 This result holds more generally whenever $L$ has a finite representative set, as in \S~\ref{sec:min-rep-sets}.
 \begin{lemma}\label{lem:ie-iff-embeds-refinement}
   Let $L$ be a minimizable polyhedral loss.
-  Then $L$ indirectly elicits a property $\gamma$ if and only if $L$ tightly embeds a discrete loss $\ell$ such that $\prop \ell$ refines $\gamma$.
+  Then $L$ indirectly elicits a property $\gamma$ if and only if $L$ tightly embeds a discrete loss $\ell$ that indirectly elicits $\gamma$.
 \end{lemma}
 \begin{proof}
   Let $L:\reals^d\to\reals^\Y_+$ be polyhedral, and $\Gamma = \prop L$.
