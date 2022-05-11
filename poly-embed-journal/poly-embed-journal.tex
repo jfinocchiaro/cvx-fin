@@ -867,9 +867,10 @@ To obtain consistency with respect to a desired target, therefore, it suffices t
 \end{minipage}
 \hfill
 \begin{minipage}{0.55\linewidth}
-	\caption{Example demonstrating the BEP surrogate $L^{BEP}$ (\S~\ref{sec:abstain}) is not calibrated for multiclass classification, eliciting the mode.
-	The level sets of $\prop{L^{BEP}}$ are given in solid black lines, while the level sets of the mode are given in dashed blue lines.
-	To demonstrate non-calibration, one can pick distributions $p, p'$ in the center cell (blue) such that $\vec 0 = \prop{L^{BEP}}(p) = \prop{L^{BEP}}(p')$, but $\mode(p) \neq \mode(p')$.  In this case, it is unclear how one should define $\psi(\vec 0)$, since it will not link to the mode for either $p$ or $p'$.  Thus, there is no calibrated link for the mode if the entire center cell is viable \jessie{word choice?}.  Instead, one may recover calibration by restricting to a subset of $\simplex$.}
+	\caption{Example demonstrating the BEP surrogate $L$ (\S~\ref{sec:abstain}) is not calibrated for multiclass classification, eliciting the mode.
+	The level sets of $\Gamma := \prop{L}$ are given in solid black lines, while the level sets of $\mode$ are given in dashed blue lines.
+	To demonstrate non-calibration, one can pick distributions $p, p'$ in the center cell (blue) such that $\vec 0 = \Gamma(p) = \Gamma(p')$, but $\mode(p) \neq \mode(p')$.  In this case, it is unclear how one should define $\psi(\vec 0)$, since it will not link to the mode for either $p$ or $p'$.  Thus, there is no calibrated link for the mode without distributional assumptions.
+	}
 	\label{fig:abstain-intuition-inconsistent}
 	\end{minipage}
 \end{figure}
@@ -895,7 +896,7 @@ Moreover, as Construction~\ref{const:eps-thick-link} fully characterizes the set
 \label{sec:abstain}
 
 Several authors consider a variant of multiclass classification, with the addition of an \emph{abstain} option~\citep{bartlett2008classification,ramaswamy2018consistent,madras2018predict,elyaniv2010foundations,cortes2016learning}.
-\raf{Proposal: define $\ell$ for $1/2$, $L$ for BEP, $\psi^\infty$ for their link (bake in 1/2), $\psi^1$ for ours}
+%\raf{Proposal: define $\ell$ for $1/2$, $L$ for BEP, $\psi^\infty$ for their link (bake in 1/2), $\psi^1$ for ours \jessie{Burn}}
 \citet{ramaswamy2018consistent} study the loss $\ell: [n] \cup \{\bot\} \to \reals^\Y_+$ defined by $\ell(r)_y = 0$ if $r=y$, $1/2$ if $r = \bot$, and 1 otherwise.
 The report $\bot$ corresponds to ``abstaining'' for a constant loss regardless of outcome $y$. 
 \citeauthor{ramaswamy2018consistent} provide a polyhedral surrogate $L$, which they call the \emph{binary encoded predictions (BEP)} surrogate, and link $\psi^\infty$ which are calibrated for $\ell$.
@@ -906,31 +907,29 @@ L(u)_y = \max_{j \in [d]} \left(1 - \varphi(y)_j u_j\right)_+~,
 where $\varphi:[n]\to\{-1,1\}^d$ is an injection.%
 \footnote{To translate our notation to that of \citet{ramaswamy2018consistent}, take $B = -\varphi$.}
 % embeds outcomes to corners of the $\pm 1$ hypercube, and the abstain report $\bot$ to the origin.
-Observe that $L$ is exactly hinge loss when $n=2$ and thus $d=1$. \jessiet{Remove this sentence?  or new paragraph below?}
+Observe that $L$ is exactly hinge loss when $n=2$ and thus $d=1$. 
 The authors show that the link $\psi^{\infty}$ is calibrated, where
 \begin{equation}\label{eq:abstain-link}
   \psi^{\infty}(u) = \begin{cases}
-	\bot & \min_{i \in [d]} |u_i| \leq \epsilon\\
+	\bot & \min_{i \in [d]} |u_i| \leq 1/2\\ %prev: \epsilon\\
 	\varphi^{-1}(\sgn(u)) &\text{otherwise}
   \end{cases}~,
 \end{equation}
-and they go on to establish linear surrogate regret bounds for $(L^{1/2},\psi^{1/2})$.
+and they go on to establish linear surrogate regret bounds for $(L,\psi^{\infty})$.
 
-Using our framework, one can show that $L^{1/2}$ embeds (2 times) $\ell^{1/2}$, with the embedding given by $\varphi$ above where we define $\varphi(\bot) = 0 \in \reals^d$.
-(Following the general procedure outlined above, the regions where $L^{1/2}$ is affine all have vertices in the set $\{-1,1\}^d \cup \{0\}$, meaning it is representative, and $L^{1/2}$ restricted to that set is precisely $2\ell^{1/2} \circ \varphi^{-1}$.)
+Using our framework, one can show that $L$ (eliciting $\Gamma$) embeds (2 times) $\ell$ (eliciting $\hat \gamma$), with the embedding given by $\varphi$ above where we define $\varphi(\bot) = 0 \in \reals^d$.
+(Following the general procedure outlined above, the regions where $L$ is affine all have vertices in the set $\{-1,1\}^d \cup \{0\}$, meaning it is representative, and $L$ restricted to that set is precisely $2\ell \circ \varphi^{-1}$.)
 %In light of our framework, we can see that $L^{1/2}$ is an excellent example of an embedding, where $\varphi(y) = B(y)$ and $\varphi(\bot) = 0 \in \reals^d$.
 
-\raf{MOVED}%% giving intuition for new figure
-With the abstain loss in hand, it is easy to verify that the abstain-optimal report for any $p$ such that $\max_y p_y < 1/2$ is to ``abstain'' from predicting.
-When juxtaposed with multiclass classification in Figure~\ref{fig:abstain-intuition-inconsistent}, one can observe that the BEP surrogate does not indirectly elicit the mode, as the level set $\prop{L^{BEP}}_{\vec 0} = \prop{\ell^{\mathrm{abs}}}_\bot \not \subseteq \mode_r$ for any $r$. \jessie{Notation}
+%% giving intuition for abstain figure: how to use fig to find consistency restrictions
+With the abstain loss $\ell$ in hand, it is straightforward to verify that the $\ell$-optimal report for any $p$ such that $\max_y p_y < 1/2$ is to ``abstain'' from predicting by reporting $\bot$.
+When juxtaposed with multiclass classification in Figure~\ref{fig:abstain-intuition-inconsistent}, one can observe that the BEP surrogate $L$ does not indirectly elicit the mode, as the level set $\Gamma_{\vec 0} = \hat \gamma_\bot$ by embedding and one can observe $\prop{\ell}_\bot \not \subseteq \mode_r$ for any $r$. 
 As embedding is a special form of indirect elicitaion, we additionally know the BEP surrogate does not embed the mode.
 The intuition described by Figure~\ref{fig:abstain-intuition-inconsistent} additionally gives a procedure to validate inconsistency with respect to a target task.
 
 
-Moreover, as we illustrate in Figure~\ref{fig:abstain-links}(L), the link $\psi^{\epsilon}$ proposed by \citeauthor{ramaswamy2018consistent} can be recovered from Construction~\ref{const:eps-thick-link} by choosing the norm $\|\cdot\|_\infty$ for any sufficiently small choice of $\epsilon > 0$.
-% and choosing $\psi^{1/2}(u) = \bot$ for all $u$ such that $\bot \in \Psi(u)$. 
-%(For all $u$ such that $\bot \not \in \Psi(u)$, there is only one choice to link, e.g., $|\Psi(u)| = 1$.)
-Hence, our framework could have simplified the process of finding $\psi^{1/2}$, and the corresponding proof of consistency and surrogate regret bounds (\S~\ref{subsec:regret-bounds}\raft{check whether our bounds match}).
+Moreover, as we illustrate in Figure~\ref{fig:abstain-links}(L), the link $\psi^{\infty}$ proposed by \citeauthor{ramaswamy2018consistent} can be recovered from Construction~\ref{const:eps-thick-link} by choosing the norm $\|\cdot\|_\infty$ for any sufficiently small choice of $\epsilon > 0$.
+Hence, our framework could have simplified the process of finding $\psi^\infty$, and the corresponding proof of consistency and surrogate regret bounds (\S~\ref{subsec:regret-bounds}\raft{check whether our bounds match}).
 To illustrate this point further, we give an alternate link $\psi^1$ corresponding to $\|\cdot\|_1$ and $\epsilon=1$, shown in Figure~\ref{fig:abstain-links}(R),
 \begin{equation}\label{eq:abstain-link-1}
   \psi^1(u) = \begin{cases}
@@ -957,7 +956,7 @@ Aside from its simplicity, one possible advantage of $\psi^1$ is that it assigns
 \begin{minipage}{0.32\linewidth}
 \includegraphics[width=\linewidth]{tikz/abstain-link-l1.pdf}
 \end{minipage}\hfill
-\caption{Constructing links for the abstain surrogate $L^{1/2}$ with $d=2$. The embedding is shown in bold labeled by the corresponding reports. (L) The link envelope $\Psi$ resulting from Construction~\ref{const:eps-thick-link} using $\|\cdot\|_\infty$ and $\epsilon = 1/2$, and a possible link $\psi$ which matches eq.~\eqref{eq:abstain-link} from~\cite{ramaswamy2018consistent}.  (M) An illustration of the thickened sets from Construction~\ref{const:eps-thick-link} for two sets $U, U' \in \U$, using $\|\cdot\|_1$ and $\epsilon = 1$. (R) The $\Psi$ and $\psi$ from Construction~\ref{const:eps-thick-link} using $\|\cdot\|_1$ and $\epsilon = 1$.}
+\caption{Constructing links for the abstain surrogate $L$ with $d=2$. The embedding is shown in bold labeled by the corresponding reports. (L) The link envelope $\Psi$ resulting from Construction~\ref{const:eps-thick-link} using $\|\cdot\|_\infty$ and $\epsilon = 1/2$, and a possible link $\psi$ which matches eq.~\eqref{eq:abstain-link} from~\cite{ramaswamy2018consistent}.  (M) An illustration of the thickened sets from Construction~\ref{const:eps-thick-link} for two sets $U, U' \in \U$, using $\|\cdot\|_1$ and $\epsilon = 1$. (R) The $\Psi$ and $\psi$ from Construction~\ref{const:eps-thick-link} using $\|\cdot\|_1$ and $\epsilon = 1$.}
 \label{fig:abstain-links}
 \end{center}
 \end{figure}
@@ -1000,13 +999,18 @@ Thus, both $(L^f, \psi^*)$ and $(L^f, \psi^\diamond)$ are simultaneously calibra
 
 \begin{figure}
 	\begin{center}
-		\begin{minipage}{0.48\linewidth}
+		\begin{minipage}{0.32\linewidth}
 			\includegraphics[width=\linewidth]{tikz/lovasz-link-psi-star.pdf}
 		\end{minipage}\hfill
-		\begin{minipage}{0.48\linewidth}
+		\begin{minipage}{0.32\linewidth}
 			\includegraphics[width=\linewidth]{tikz/lovasz-link-psi-diamond.pdf}
 		\end{minipage}\hfill
-		\caption{Links $\psi^*$ and $\psi^\diamond$ such that $(L^f, \psi^*)$ and $\psi^\diamond$ are calibrated with respect to $\ellabs$ for all suitable $f$. Points in the dark green regions link to $\vec 0$; points in light green link to a permutation of $(0,\pm 1)$, and points in yellow regions link to $(\pm 1, \pm 1)$.\jessie{Not sure how to phrase this?  Would we just be better off explicitly labeling things?}\raf{Agreed that it's a little unclear, but not sure labeling would be better... let's discuss next call}}
+		\begin{minipage}{0.32\linewidth}
+		\includegraphics[width=\linewidth]{tikz/lovasz-link-envelope.pdf}
+		\end{minipage}\hfill
+		\caption{Links $\psi^*$ (L) and $\psi^\diamond$ (M) such that $(L^f, \psi^*)$ and $\psi^\diamond$ are calibrated with respect to $\ellabs$ for all suitable $f$. Points in each region link to the embedding point contained in the region. Both are constructed via the link envelope $\Psi$ (R), which yields possible choices for calibrated links.\jessie{New, simpler, caption.  Clear enough?}
+			}
+			%Points in the dark green regions link to $\vec 0$; points in light green link to a permutation of $(0,\pm 1)$, and points in yellow regions link to $(\pm 1, \pm 1)$.\jessie{Not sure how to phrase this?  Would we just be better off explicitly labeling things?}\raf{Agreed that it's a little unclear, but not sure labeling would be better... let's discuss next call}}
 		\label{fig:lovasz-links}
 	\end{center}
 \end{figure}
@@ -1524,7 +1528,7 @@ As a final observation, recall that a property $\Gamma$ elicited by a polyhedral
 Proposition~\ref{prop:embed-trim} shows the inverse\jessiet{word choice?} statement: there are only finitely many level sets $\Gamma_u$ for $u\in\reals^d$.
 In other words, both $\Gamma$ and $\Gamma^{-1}$ have a finite range as multivalued maps.
 
-\section{Polyhedral Indirect Elicitation Implies Consistency}
+\section{Polyhedral Indirect Elicitation Implies Consistency\jessie{Calibration?}}
 \label{sec:poly-ie-consistency}
 
 %While it is well-known that indirect property elicitation is a necessary condition for consistency~\citep{finocchiaro2021unifying}, we proceed to show that indirect elicitation is also a \emph{sufficient} condition for consistency when restricting to polyhedral losses.
@@ -1554,6 +1558,7 @@ Surprisingly, for minimizable polyhedral surrogates, we show the converse: indir
 \raf{Jessie: sync up refines vs indirect elic; use the latter unless it's really awkward}
 A useful lemma is that for minimizable polyhedral losses, indirect elicitation must always pass through an embedding.
 This result holds more generally whenever $L$ has a finite representative set, as in \S~\ref{sec:min-rep-sets}.
+With this result, we can show that if a surrogate indirectly elicits a target property, then it is also calibrated with respect to any loss eliciting the target property.
 \begin{lemma}\label{lem:ie-iff-embeds-refinement}
   Let $L$ be a minimizable polyhedral loss.
   Then $L$ indirectly elicits a property $\gamma$ if and only if $L$ tightly embeds a discrete loss $\ell$ that indirectly elicits $\gamma$.
@@ -1561,12 +1566,13 @@ This result holds more generally whenever $L$ has a finite representative set, a
 \begin{proof}
   Let $L:\reals^d\to\reals^\Y_+$ be polyhedral, and $\Gamma = \prop L$.
   Then $L$ tightly embeds a discrete loss from Lemma~\ref{lem:X}(\ref{item:X-tight-embed}).
-  Furthermore, Lemma~\ref{lem:X}(\ref{item:X-min-Theta},\ref{item:X-redundant},\ref{item:X-tight-embed}) implies that $\prop L$ refines $\prop \ell$ for any discrete loss $\ell$ that $L$ tightly embeds.
+  Furthermore, Lemma~\ref{lem:X}(\ref{item:X-min-Theta},\ref{item:X-redundant},\ref{item:X-tight-embed}) implies that $L$ (eliciting $\Gamma$) indirectly elicits $\prop \ell$ (eliciting $\hat \gamma$) for any discrete loss $\ell$ that $L$ tightly embeds.
+  (To construct a link, construct $\hat \psi: u \mapsto r$ such that $\Gamma_u \subseteq \hat \gamma_r$ for all $u \in \reals^d$.)
 
-  We claim that, for any property $\gamma$, and any loss $\ell$ that $L$ tightly embeds, $\prop L$ refines $\gamma$ if and only if $\prop \ell$ refines $\gamma$.
-  If $\prop \ell$ refines $\gamma$, then $\prop L$ refines $\gamma$ by transitivity.
-  For the other direction, Lemma~\ref{lem:X}(\ref{item:X-min-Theta},\ref{item:X-tight-embed}) shows that the level sets of $\prop \ell$ are contained in the set $\{\Gamma_u \mid u\in\reals^d\}$.
-  Thus, if $\prop L$ refines $\gamma$, then in particular $\prop \ell$ refines $\gamma$.
+  We claim that, for any property $\gamma$, and any loss $\ell$ that $L$ tightly embeds, $L$ indirectly elicits $\gamma$ if and only if $\ell$ indirectly elicits $\gamma$.
+  If $\ell$ indirectly elicits $\gamma$ via the link $\psi$, then $L$ indirectly elicits $\gamma$ by transitivity of subset inclusion, as $\Gamma_u \subseteq \hat \gamma_{\hat \psi(u)} \subseteq \gamma_{\psi \circ \hat \psi(u)}$ for all $u \in \reals^d$.
+  For the other direction, Lemma~\ref{lem:X}(\ref{item:X-min-Theta},\ref{item:X-tight-embed}) shows that the level sets of $\hat \gamma$ are contained in the set $\{\Gamma_u \mid u\in\reals^d\}$.
+  Thus, if $L$ indirectly elicits $\gamma$, then in particular $\ell$ indirectly elicits $\gamma$.
   The result now follows immediately from the claim.
 \end{proof}
 
@@ -1579,21 +1585,22 @@ This result holds more generally whenever $L$ has a finite representative set, a
 \begin{proof}
   %\raft{Jessie: well done with this proof!  There were a bunch of type check problems where you got the links confused but the overall thread was there.}
 	Let $L:\reals^d \to \reals^\Y_+$ be a polyhedral loss indirectly eliciting $\gamma: \simplex \toto \R$, and let $\ell$ be a discrete loss eliciting $\gamma$.
-  By Lemma~\ref{lem:ie-iff-embeds-refinement}, $L$ tightly embeds a discrete loss $\ell^\emb:\R^\emb\to\reals^\Y_+$ such that $\gamma^\emb := \prop{\ell^\emb}$ refines $\gamma$.
-  From refinement, we can define a function $\psi^\R: \R^\emb \to \R$ such that for all $r\in\R^\emb$ and $p\in\simplex$ we have $r\in\gamma^\emb(p) \implies \psi^\R(r) \in \gamma(p)$. 
-  Finally, Theorem~\ref{thm:link-main} gives a link function $\psi^\emb : \reals^d \to \R^\emb$ such that $(L,\psi^\emb)$ is calibrated with respect to $\ell^\emb$.
+  By Lemma~\ref{lem:ie-iff-embeds-refinement}, $L$ tightly embeds a discrete loss $\ell^\emb:\R^\emb\to\reals^\Y_+$ such that $\ell^\emb$ (directly) elicits $\gamma^\emb$ and indirectly elicits $\gamma$.
+  By indirect elicitation, there exists a function $\psi^\R: \R^\emb \to \R$ such that for all $r\in\R^\emb$ and $p\in\simplex$ we have $r\in\gamma^\emb(p) \implies \psi^\R(r) \in \gamma(p)$. 
+  %From refinement, we can define a function $\psi^\R: \R^\emb \to \R$ such that for all $r\in\R^\emb$ and $p\in\simplex$ we have $r\in\gamma^\emb(p) \implies \psi^\R(r) \in \gamma(p)$. 
+  Moreover, Theorem~\ref{thm:link-main} gives a link function $\psi^\emb : \reals^d \to \R^\emb$ such that $(L,\psi^\emb)$ is calibrated with respect to $\ell^\emb$.
 
 	
   Consider $\psi := \psi^\R \circ \psi^\emb$ and fix $p\in\simplex$.
-	For any $u\in\reals^d$, if $\psi^\emb(u) \in \gamma^\emb(p)$, then $\psi(u) = \psi^\R(\psi^\emb(u)) \in \gamma(p)$ by definition of $\psi$ and $\psi^\R$.
+	For any $u\in\reals^d$, if $\psi^\emb(u) \in \gamma^\emb(p)$, then $\psi(u) = \psi^\R(\psi^\emb(u)) \in \gamma(p)$ by definition of $\psi^\emb$ and $\psi^\R$.
   Contrapositively\raft{You heard me},
   $\psi(u) \notin \gamma(p) \implies \psi^\emb(u) \notin \gamma^\emb(p)$.
   Thus, we have
-  \begin{equation}
+  \begin{equation*}
     \label{eq:link-set-inclusion}
     \{u\in\reals^d \mid \psi(u) \not \in \gamma(p) \} \subseteq \{u\in\reals^d \mid \psi^\emb(u) \not \in \gamma^\emb(p) \}~.
-  \end{equation}
-  Combining eq.~\eqref{eq:link-set-inclusion} with the fact that $(L,\psi^\emb)$ is calibrated with respect to $\ell^\emb$, we have
+  \end{equation*}
+  Combined with the fact that $(L,\psi^\emb)$ is calibrated with respect to $\ell^\emb$, we have
 	\begin{align*}
 \inf_{u\in\reals^d : \psi(u) \not \in \gamma(p)} \inprod{p}{L(u)} \geq	\inf_{u\in\reals^d : \psi^\emb(u) \not \in \gamma^\emb(p)} \inprod{p}{L(u)} > \inf_{u\in\reals^d}\inprod{p}{L(u)}~,
 	\end{align*}
@@ -1803,304 +1810,9 @@ We now include the full proof of Lemma~\ref{lem:polyhedral-range-gamma}.
 \end{proof}
 
 
-%\section{Embedding properties}\label{app:embed-props}
-%\jessie{Do we use this anymore?}
-%
-%While Definition~\ref{def:loss-embed} gives the notion of one \emph{loss} embedding another, we now define the notion of one \emph{property} embedding another.
-%\begin{definition}\label{def:prop-embed}
-%	A property $\Gamma : \simplex \toto \reals^d$ embeds a property $\gamma:\simplex \toto \R$ if there exists some injective embedding $\varphi:\R \to \reals^d$ such that for all $p \in \simplex$ and $r \in \R$, we have $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p)$.
-%\end{definition}
-%
-%By condition (ii.) of Definition~\ref{def:loss-embed}, we then have $L$ embedding $\ell$ implies $\prop{L}$ embeds $\prop{\ell}$.
-%
-%This also prompts us to think about redundancy in properties.
-%\begin{definition}[Non-redundant property]\label{def:nonredundant-prop}
-%	A property $\Gamma:\simplex \toto \R$ is \emph{redundant} if there are reports $r, r' \in \R$ such that $\Gamma_r \subseteq \Gamma_{r'}$, and \emph{non-redundant} otherwise.
-%\end{definition}
-%
-%
-%%It is often convenient to work directly with properties and set aside the losses which elicit them.
-%%To this end, we say a property to embeds another if eq.~\eqref{eq:embed-loss} holds.
-%%We begin with the notion of redundancy.
-%%\begin{definition}[Finite property, non-redundant]
-%%  A property $\gamma:\simplex\toto\R$ is \emph{redundant} if for some $r,r'\in\R$ with $r \neq r'$, we have $\gamma_r \subseteq \gamma_{r'}$, and \emph{non-redundant} otherwise.
-%%  $\gamma$ is \emph{finite} if it is non-redundant and $\R$ is a finite set.
-%%\end{definition}
-%
-%%With the terminology of properties in hand, we can restate our definition of embedding.
-%%First, we formalize the notion of embedding properties.
-%%\begin{definition}
-%%  A property $\Gamma : \simplex \toto \reals^d$ \emph{embeds} a property $\gamma : \simplex \toto \R$ if there exists some injective embdedding $\varphi:\R\to\reals^d$ such that for all $p\in\simplex,r\in\R$ we have $r \in \gamma(p) \iff \varphi(r) \in \Gamma(p)$.
-%%  Similarly, we say a loss $L:\reals^d\to\reals^\Y$ embeds $\gamma$ if $\prop{L}$ embeds $\gamma$.
-%%\end{definition}
-%%We can now see that a surrogate $L:\reals^d\to\reals^\Y$ embeds $\ell:\R\to\reals^\Y$ if and only if $\prop{L}$ embeds $\prop{\ell}$ via $\varphi$ and for all $r\in\R$ we have $L(\varphi(r)) = \ell(r)$.
-%
-%When working with convex losses which are not strictly convex, one quickly encounters redundant properties: if $\inprod{p}{L(\cdot)}$ is minimized by a point where $p\cdot L$ is flat, then there will be an uncountable set of reports which also minimize the loss.
-%As results in property elicitation typically assume non-redundant properties (e.g.~\cite{frongillo2014general,frongillo2015elicitation}), it is useful to consider a transformation which removes redundant level sets.
-%We capture this transformation as the trim operator presented below.
-%
-%\begin{definition}\label{def:trim-prop-nonred}
-%  Given an elicitable property $\Gamma:\simplex \toto\R$, we define $\trimred(\Gamma) = \{\Gamma_u \mid \neg \exists u' \neq u$ s.t. $\Gamma_u \subsetneq \Gamma_{'u}\}$.
-%  %$\trimcover(\Gamma) = \{\Gamma_u : u \in \U \}$ as the set of maximal level sets of $\Gamma$ for any minimum representative set $\U \subseteq \R$.
-%\end{definition}
-%
-%\begin{definition}\label{def:trim-prop-cover}
-%	Given an elicitable property $\Gamma:\simplex \toto\R$, we define $\trimcover(\Gamma) = \{\Gamma_u : u \in \U \}$ as the set of maximal level sets of $\Gamma$ for any minimum representative set $\U \subseteq \R$.
-%\end{definition}
-%
-%The following corollary follows from Corollary~\ref{cor:trim-loss-condition}.
-%\begin{corollary}
-%	Let $\Gamma$ be an elicitable property with a finite minimum representative set.
-%	$\trimcover(\Gamma) = \trimred(\Gamma)$.
-%\end{corollary}
-%
-%\btw{RF: Note for later: should be able to show that the union of trim is the simplex.\jessie{This is part of the proposition statement 2 now.}}
-%Take note that the unlabeled property $\trim(\Gamma)$ is non-redundant, meaning that for any $\theta \in \trim(\Gamma)$, there is no level set $\theta' \in \trim(\Gamma)$ such that $\theta \subset \theta'$.
-
-
-\iffalse
-\hrule
-\bigskip
-\jessie{Add results (subsection?) relating trim and positive normal sets.  From here until the hrule}
-\subsection{Relation to Positive Normal Sets}
-
-\proposedadd{The concept of $\trim$ is closely related to the \emph{positive normal set} of Ramaswamy et al.~\cite{ramaswamy2016convex}.
-However, they define positive normal sets in terms of the loss vector, agnostic to the report yielding such a loss vector.
-In constructing the $\trim$ of a property, we yield the positive normal sets of the loss eliciting such a property, without the attachment to loss vectors.
-This allows us to frame necessary and sufficient conditions for constructing a calibrated surrogate in terms of finite properties.}
-
-
-\begin{definition}
-	Let $L:\reals^d \to \reals^n_+$, and define $\Sc_L := \conv(L(\reals^d))$ as in~\cite[Definition 8]{ramaswamy2016convex}.
-	For $z \in \Sc_L$, we define the \emph{positive normal set} of $L$ at $z$ as
-	\begin{equation}
-	\N^L(z) = \left\{ p \in \simplex: \inprod{p}{z} = \inf_{z' \in \Sc_L} \inprod{p}{z} \right\}~.~
-	\end{equation}
-\end{definition}
-
-\begin{conjecture}
-	For $L$ convex and $p \in \simplex$, we have $\inf_{z' \in \Sc_L} \inprod{p}{z'} = \inf_{z' \in L(\reals^d)}\inprod{p}{z'}$.
-\end{conjecture}
-\begin{proof}
-	First, we have $\inf_{z' \in \Sc_L} \inprod{p}{z'} \leq \inf_{z' \in L(\reals^d)}\inprod{p}{z'}$ since $L(\reals^d) \subseteq \Sc_L$.
-	
-	Now, we want to show $\inf_{z' \in \Sc_L} \inprod{p}{z'} \geq \inf_{z' \in L(\reals^d)}\inprod{p}{z'}$.
-	Consider that for all $z \in \Sc_L$, we have $z \in \inter(\Sc_L) \implies z \not \in \arginf_{z' \in \Sc_L}\inprod{p}{z'}$, where $\partial \Sc_L$ is the boundary of $\Sc_L$.
-	Therefore, we have $\inf_{z' \in \Sc_L}\inprod{p}{z'} = \inf_{z' \in \partial\Sc_L}\inprod{p}{z'}$.
-	
-	If we can then show $L(\reals^d) \supseteq \partial \Sc_L$, then we have $\inf_{z' \in \Sc_L} \inprod{p}{z'} \geq \inf_{z' \in L(\reals^d)}\inprod{p}{z'}$.
-
-	\jessie{??? Not sure why this should be true, so it probably isn't, but I can't think of a counterexample.}
-\end{proof}
-
-\begin{proposition}
-	Consider the loss $L:\reals^d \to \reals^n_+$ and $\Gamma := \prop{L}$ nondegenerate.
-	Fix a finite set of $\{z_i\}_{i=1}^k$ so that each $z_i \in \Sc_L$ and $\cup_{z_i} \N^L(z_i) = \simplex$.
-	Then $\N^L(\mathcal{Z}) = \{\N^L(z_i)\}_{i=1}^k = \trim(\Gamma)$.
-\end{proposition}
-\begin{proof}
-  \jessie{still a conjecture.}
-  Take $\theta \in \N^L(\mathcal{Z})$.
-  For all $p \in \theta$, we then have 
-  \begin{align*}
-  p \in \theta \iff \inprod{p}{z} &= \inf_{z' \in \Sc_L} \inprod{p}{z'}\\
-  &= \inf_{z' \in L(\reals^d)} \inprod{p}{z'}\\
-  &= \inf_{u \in \reals^d} \inprod{p}{L(u)}\\
-  &= \inf_{u\in \reals^d} \E_p L(u, Y)\\
-  &\iff p \in \Gamma_u~.~
-  \end{align*}
-  \jessie{Not quite... we have $\inf_{z' \in \Sc_L} \inprod{p}{z'} \leq \inf_{z' \in L(\reals^d)} \inprod{p}{z'}$, by $L(\reals^d) \subseteq \Sc_L$, but we need the fact that $\N^L(z) = \emptyset$ for all $z \in \inter(\Sc_L)$ or something similar for the first to second lines of equality.  Otherwise we just have $\Gamma_u \subseteq \N^L(z)$.  i.e. we need Conjecture 1.
-  }
-  Since this is true for all $p \in \theta$, we have $\theta = \Gamma_u$.
-  As this is true for a finite set of $\mathcal{Z}$ whose positive normal sets union to the simplex, we have $\N^L(\mathcal{Z}) = \trim(\prop{L})$.
-\end{proof}
-
-\begin{corollary}
-	\jessie{The necessary and sufficient conditions for calibrated surrogates from Ramaswamy \cite{ramaswamy2016convex}, but in terms of the unlabeled property.}
-\end{corollary}
-\hrule
-
-Before we state the Proposition needed to prove many of the statements in Section~\ref{sec:poly-loss-embed}, we will need to general lemmas about properties and their losses.
-The first follows from standard results relating finite properties to power diagrams (see Theorem~\ref{thm:aurenhammer}), and its proof is omitted.
-The second is closely related to the trim operator: it states that if some subset of the reports are always represented among the minimizers of a loss, then one may remove all other reports and elicit the same property (with those other reports removed).
-
-\begin{lemma}\label{lem:finite-full-dim}
-  Let $\gamma$ be a finite (non-redundant) property elicited by a loss $L$.
-  Then the negative Bayes risk $G$ of $L$ is polyhedral, and the level sets of $\gamma$ are the projections of the facets of the epigraph of $G$ onto $\simplex$, and thus form a power diagram.
-  In particular, the level sets of $\gamma$ are full-dimensional in $\simplex$ (i.e.,\ of dimension $n-1$).
-\end{lemma}
-
-\begin{lemma}\label{lem:loss-restrict}
-  Let $L$ elicit $\Gamma:\simplex\toto\R_1$, and let $\R_2\subseteq\R_1$ such that $\Gamma(p) \cap \R_2 \neq \emptyset$ for all $p\in\simplex$.
-  Then $L|_{\R_2}$ ($L$ restricted to $\R_2$) elicits $\gamma:\simplex\toto\R_2$ defined by $\gamma(p) = \Gamma(p)\cap \R_2$.
-  Moreover, the Bayes risks of $L$ and $L|_{\R_2}$ are the same.
-\end{lemma}
-\begin{proof}
-  Let $p\in\simplex$ be fixed throughout.
-  First let $r \in \gamma(p) = \Gamma(p) \cap \R_2$.
-  Then $r \in \Gamma(p) = \argmin_{u\in\R_1} \inprod{p}{L(u)}$, so as $r\in\R_2$ we have in particular $r \in \argmin_{u\in\R_2} \inprod{p}{L(u)}$.
-  For the other direction, suppose $r \in \argmin_{u\in\R_2} \inprod{p}{L(u)}$.
-  By our assumption, we must have some $r^* \in \Gamma(p) \cap \R_2$.
-  On the one hand, $r^*\in\Gamma(p) = \argmin_{u\in\R_1} \inprod{p}{L(u)}$.
-  On the other, as $r^* \in \R_2$, we certainly have $r^* \in \argmin_{u\in\R_2} \inprod{p}{L(u)}$.
-  But now we must have $\inprod{p}{L(r)} = \inprod{p}{L(r^*)}$, and thus $r \in \argmin_{u\in\R_1} \inprod{p}{L(u)} = \Gamma(p)$ as well.
-  We now see $r \in \Gamma(p) \cap \R_2$.
-  Finally, the equality of the Bayes risks $\min_{u\in\R_1} \inprod{p}{L(u)} = \min_{u\in\R_2} \inprod{p}{L(u)}$ follows immediately by the above, as $\emptyset \neq \Gamma(p)\cap\R_2 \subseteq \Gamma(p)$ for all $p\in\simplex$.
-\end{proof}
-
-We now state a useful result for proving the existence of an embedding loss, which shows remarkable structure of embeddable properties, and the properties that embed them.
-First, we conclude that any embeddable property must be elicitable.
-We also conclude that if $\Gamma$ embeds $\gamma$, the level sets of $\Gamma$ must all be redundant relative to $\gamma$.
-In other words, $\Gamma$ is exactly the property $\gamma$, just with other reports filling in the gaps between the embedded reports of $\gamma$.
-(When working with convex losses, these extra reports are typically the convex hull of the embedded reports.)
-In this sense, we can regard embedding as a minor departure from direct elicitation: if a loss $L$ elicits $\Gamma$ which embeds $\gamma$, we can think of $L$ as essentially eliciting $\gamma$ itself.
-Finally, we have an important converse: if $\Gamma$ has finitely many full-dimensional level sets, or if $\trim(\Gamma)$ is finite, then $\Gamma$ must embed some finite elicitable property with those same level sets.
 
 
 
-
-
-\jessie{Added from COLT-19 but not discussed in COLT-20}
-
-\begin{definition}
-	We say a link $\psi:\reals^d \to \R$ is \emph{calibrated from $\Gamma$ to $\gamma$} if there is a calibrated link from $L$ to $\ell$, where $\Gamma := \prop{L}$ and $\gamma:= \prop{\ell}$.
-\end{definition}
-
-\begin{proposition}
-	Let $L$ elicit $\Gamma:\simplex \toto \reals^d$ which embeds a finite property $\gamma$.
-	Then there is a calibrated link from $\Gamma$ to $\gamma$.
-\end{proposition}
-\begin{proof}
-	Let $\gamma: \simplex \toto \R$.
-	Proposition~\ref{prop:embed-trim} gives us that $\trim(\Gamma) = \{\gamma_r : r \in \R\}$.
-	We conclude that for any $u \in \reals^d$, there is a calibrated link from $\Gamma$ to $\gamma$.\jessie{Added definition for calibrated link for properties above.}
-\end{proof}
-\jessie{Not sure what we want to say about calibrated links, if anything.}
-
-\subsection{Refining properties}
-
-\begin{definition}
-	Let $\Gamma:\simplex \toto \R$ and $\Gamma':\simplex\toto \R'$.
-	Then $\Gamma'$ \emph{refines} $\Gamma$ if for all $r' \in \R'$, we have $\Gamma'_{r'} \subseteq \Gamma_r$ for some $r \in \R$.
-	That is, the cells of $\Gamma'$ are all contained in the cells of $\Gamma$.
-\end{definition}
-
-\begin{theorem}
-	Every polyhedral loss embeds a finite elicitable property.
-	Moreover, a polyhedral loss $L$ indirectly elicits a finite elicitable property $\gamma$ if and only if $\gamma$ is finite and $L$ embeds a property which refines $\gamma$.
-\end{theorem}
-\begin{proof}
-	Let $L:\reals^d\to\reals^\Y_+$ be a polyhedral loss.
-	For all $p$, let $P(p)$ be the epigraph of the convex function $u\mapsto \inprod{p}{L(u)}$.
-	From Lemma~\ref{lem:polyhedral-pd-same}, we have that the power diagram induced by the projection of $P(p)$ onto $\reals^d$ is constant whenever $p\in\inter(\simplex)$.
-	Let $q\in\inter\simplex$ be the uniform distribution on $\Y$, and $V_\Y$ be the set of vertices of $P(q)$ projected onto $\reals^d$.
-	By the above, this set is the same had we replaced $q$ by any $p\in\inter\simplex$.
-	
-	Now let $\Gamma := \Gamma[L]$.
-	We claim for all $p\in\inter(\simplex)$, that $\Gamma(p) \cap V_\Y \neq \emptyset$.
-	To see this, let $u \in \Gamma(p)$, and $u' = (u,\inprod{p}{L(u)}) \in P(p)$.
-	The optimality of $u$ is equivalent to $u$ being contained in the face exposed by the normal $(0,\ldots,0,-1)\in\reals^{d+1}$, which is a face of $P(p)$.
-	Let $v'\in\reals^{d+1}$ be a vertex on such a face, and $v\in V_\Y$ its projection onto $\reals^d$.
-	Then $v$ is also optimal, and therefore $v\in\Gamma(p)$.
-	
-	Now consider $\Y'\subset \Y$.
-	Applying the above argument on distributions $p$ with support exactly $\Y'$, we have a similar guarantee: a finite set $V_{\Y'}$ such that $\Gamma(p) \cap V_{\Y'} \neq \emptyset$ for all $p$ with support exactly $\Y'$.
-	(When $\Y' = \{y\}$ is a singleton, we simply take the projected vertices of $L(\cdot)_y$.)
-	
-	Thus, taking $V = \bigcup_{\Y'\subseteq\Y} V_{\Y'}$, we have for all $p\in\simplex$ that $\Gamma(p) \cap V \neq \emptyset$.
-	This implies that $\trim(\Gamma) \subseteq \{\Gamma_v : v\in V\}$, which is finite, so Proposition~\ref{prop:embed-trim} now gives the conclusion.
-	\jessiet{Do we need to show the preimage of $\Gamma$ is $V$?}
-	
-	\raft{I might be delusional, but this second part ended up being much slicker than I'd thought, by essentially chaining definitions and maps.  Please check!}
-	For the second part, let $\gamma':\simplex\toto\R'$ be the finite elicitable property embedded by $L$, with embedding $\varphi:\R'\to\reals^d$, and let $\psi$ be a calibrated link to a non-redundant elicitable property $\gamma:\simplex\toto\R$.
-	Then letting $\psi' = (\psi \circ \varphi):\R'\to\R$, we see that $\psi'$ is a calibrated link from $\gamma'$ to $\gamma$:
-	for all $r'\in\R'$, we have $\gamma'_{r'} = \prop{L}_{\varphi(r')} \subseteq \gamma_{\psi(\varphi(r'))}$.
-	In particular, $\gamma'$ refines $\gamma$, and as $\gamma'$ is finite, $\gamma$ must be finite.
-\end{proof}
-
-\jessie{Other results on refined properties? Assuming we don't want the embedding dimension conjecture brought up on 02.03.2020 in here.}
-\begin{conjecture}
-	Let $\gamma'$ be a refinement of $\gamma$.
-	Then a loss $\ell$ embedding for $\gamma'$ also embeds $\gamma$. \jessie{Not quite.  I think something similar is true, but we need more assumptions. See below for a related statement though.}
-\end{conjecture}
-
-\begin{proposition}
-	Take $\prop{\ell} =: \gamma : \simplex \toto \R$ and $\prop{\ell'} =:\gamma' : \simplex \toto \R'$.
-	If $\gamma'$ refines $\gamma$ and $L'$ is calibrated with respect to  the discrete loss $\ell'$, then there exists a link $\psi$ so that $(L', \psi)$ is calibrated with respect to $\ell$.
-\end{proposition}
-\begin{proof}
-	Let us construct the link $\psi$ such that, for all $r' \in \R'$ consider $r \in \R$ so that $\gamma'_{r'} \subseteq \gamma_r$.
-	Define $\psi$ so that $\psi'(u) = r' \implies \psi(u) = r$.
-	
-	To see this link and surrogate are calibrated with respect to $\ell$, consider that for any fixed $p \in \simplex$, $\{u \in \reals^d : \psi(u) \not \in \gamma(p)\} \subseteq \{u \in \reals^d : \psi'(u) \not \in \gamma'(p)\}$, which in turn implies that the infimum over the first term of the expected loss is at least the infimum over the second term, which is strictly greater than the Bayes Risk of $L'$ at $p$ by calibration of $(L', \psi')$.
-	
-	\jessiet{Probably need to be more thorough on the subset argument.}
-	That is, 
-	\begin{align*}
-		\{u \in \reals^d : \psi(u) \not \in \gamma(p)\} &\subseteq \{u \in \reals^d : \psi'(u) \not \in \gamma'(p)\}\\
-		\implies
-		\inf_{u \in \reals^d : \psi(u) \not \in \gamma(p)} \inprod{p}{L'(u)} &\geq \inf_{u \in \reals^d : \psi'(u) \not \in \gamma'(p)} \inprod{p}{L'(u)} > \inf_u \inprod{p}{L'(u)}\\
-		\implies 		\inf_{u \in \reals^d : \psi(u) \not \in \gamma(p)} \inprod{p}{L'(u)} &> \inf_u \inprod{p}{L'(u)}~.~
-	\end{align*}
-	Thus, as $p$ is arbitrary, we observe $(L', \psi)$ is calibrated with respect to $\ell$.
-\end{proof}
-
-\begin{conjecture}
-	Let $\gamma'$ refine $\gamma = \prop{\ell}$ and $L'$ embeds $\gamma'$ by the injection $\varphi'$.
-	Define $\phi : \R \to \R'$ such that $\phi(r) = r' \implies \gamma'_{r'} \subseteq \gamma_r$.
-	Let $\varphi:\R \to \reals^d = \phi \circ \varphi'$
-	Then $(-\risk{L'|_{\varphi(R)}})^*$ embeds $\ell$.
-\end{conjecture}
-\fi
-
-%\section{Polyhedral losses}\label{app:polyhedral-losses}
-
-
-%\raft{The following statement is true I believe, but low priority: ``An elicitable property $\Gamma:\simplex\toto\reals$ is convex elicitable (elicited by a convex $L : \reals \to \reals^\Y$) if and only if it is monotone.''  Start of the proof commented out.  Just need to show that $b$ is the upper limit of $a$ and $a$ the lower of $b$; should follow from elicitability of $\Gamma$.}
-%\begin{lemma}\label{lem:prop-L-monotone}
-%  For any convex $L : \reals \to \reals^\Y_+$, the property $\prop{L}$ is monotone.
-%\end{lemma}
-%\begin{proof}
-%  If $L$ is convex and elicits $\Gamma$, let $a,b$ be defined by $a(r)_y = \partial_- L(r)_y$ and $b(r) = \partial_+ L(r)_y$, that is, the left and right derivatives of $L(\cdot)_y$ at $r$, respectively.
-%  Then $\partial L(r)_y = [a(r)_y,b(r)_y]$.
-%  We now have $r \in \prop{L}(p) \iff 0 \in \partial \inprod{p}{L(r)} \iff \inprod{a(r)}{p} \leq 0 \leq \inprod{b(r)}{p}$, showing the first condition.
-%  The second condition follows as the subgradients of $L$ are monotone functions (see e.g.~\citet[Theorem 24.1]{rockafellar1997convex}).
-%  % Conversely, given such an $a,b$, we appeal to~\citet[Theorem 24.2]{rockafellar1997convex}, which gives us that $L(u)_y := \int_0^u a(u)_y$ is convex, and
-%\end{proof}
-
-%\newcommand{\Pbar}{\overline P}
-%\begin{lemma}\label{lem:pbar}
-%  Let $\gamma:\simplex\toto\R$ be a finite elicitable property, and suppose there is a calibrated link $\psi$ from an elicitable $\Gamma$ to $\gamma$.
-%  For each $r\in\R$, define $P_r = \bigcup_{u\in\psi^{-1}(r)} \Gamma_u \subseteq \simplex$, and let $\Pbar_r$ denote the closure of the convex hull of $P_r$.
-%  Then $\gamma_r = \Pbar_r$ for all $r\in\R$.
-%\end{lemma}
-%\begin{proof}
-%  As $P_r \subseteq \gamma_r$ by the definition of calibration, and $\gamma_r$ is closed and convex, we must have $\Pbar_r \subseteq \gamma_r$.
-%  Furthermore, again by calibration of $\psi$, we must have $\bigcup_{r\in\R} P_r = \bigcup_{u\in\reals} \Gamma_u = \simplex$, and thus $\bigcup_{r\in\R} \Pbar_r = \simplex$ as well.
-%  Suppose for a contradiction that $\gamma_r \neq \Pbar_r$ for some $r\in\R$.
-%  From Lemma~\ref{lem:finite-full-dim}, $\gamma_r$ has nonempty interior, so we must have some $p\in\inter\gamma_r \setminus \Pbar_r$.
-%  But as $\bigcup_{r'\in\R} \Pbar_{r'} = \simplex$, we then have some $r'\neq r$ with $p\in\Pbar_{r'} \subseteq \gamma_{r'}$.
-%  By Theorem~\ref{thm:aurenhammer}, the level sets of $\gamma$ form a power diagram, and in particular a cell complex, so we have contradicted point (ii) of Definition~\ref{def:cell-complex}: the relative interiors of the faces must not be disjoint.
-%  Hence, for all $r\in\R$ we have $\gamma_r = \Pbar_r$.
-%\end{proof}
-
-
-
-%\begin{proof}[Proof of Theorem~\ref{thm:polyhedral-embed-prop}]
-%  Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss, and $\Gamma = \prop{L}$.
-%  By Lemma~\ref{lem:polyhedral-range-gamma}, $\U = \Gamma(\simplex)$ is finite.
-%  For any $U \in \U$, let $\Gamma_U = \{p\in\simplex | \Gamma(p) = U\}$, which is nonempty by definition.
-%  Observe that for any $p\in\simplex$ and $u\in\reals^d$, we have $p \in \Gamma_u \iff u \in \Gamma(p) \iff U = \Gamma(p) \land u \in U \iff p\in\Gamma_U \land u \in U$.
-%  Thus, we have for all $u\in\reals^d$ that $\Gamma_u = \cup\{\Gamma_U | U\in\U,u\in U\}$.
-%  Now $\trim(\Gamma)$ is finite because the powerset of $\U$ is finite, and we apply Proposition~\ref{prop:embed-trim}.
-%
-%%
-%%  \raf{I might be delusional, but this second part ended up being much slicker than I'd thought, by essentially chaining definitions and maps.  Please check!}
-%%  For the second part, let $\gamma':\simplex\toto\R'$ be the finite elicitable property embedded by $L$, with embedding $\varphi:\R'\to\reals^d$, and let $\psi$ be a calibrated link to a non-redundant elicitable property $\gamma:\simplex\toto\R$.
-%%  Then letting $\psi' = (\psi \circ \varphi):\R'\to\R$, we see that $\psi'$ is a calibrated link from $\gamma'$ to $\gamma$:
-%%  for all $r'\in\R'$, we have $\gamma'_{r'} = \prop{L}_{\varphi(r')} \subseteq \gamma_{\psi(\varphi(r'))}$.
-%%  In particular, $\gamma'$ refines $\gamma$, and as $\gamma'$ is finite, $\gamma$ must be finite.
-%\end{proof}
 
 \section{Equivalence of Separation and Calibration for Polyhedral Surrogates}
 \label{sec:equiv-sep-calib}
