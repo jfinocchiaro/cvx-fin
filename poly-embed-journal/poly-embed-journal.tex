@@ -672,16 +672,19 @@ We then apply a result we will prove in \S~\ref{sec:min-rep-sets}: a minimizable
 
 
 
-\section{Consistency via Separated Links \raf{revisit title?}}
+\section{Consistency and Linear Regret Transfer via Separated Links \raf{revisit title? \bo{revisited...}}}
 \label{sec:calibration}
 
-We have now seen the tight relationship between polyhedral losses and embeddings; in particular, every polyhedral loss embeds some discrete loss.
+We have seen that every polyhedral loss embeds some discrete loss.
 The embedding itself tells us how to link the embedded points back to the discrete reports (map $\varphi(r)$ to $r$).
 But it is not clear how to extend this to yield a full link function $\psi: \reals^d \to \R$, and whether such a $\psi$ can lead to consistency.
 In this section, we prove Theorem~\ref{thm:link-main}, restated below, which gives a construction to generate calibrated links for \emph{any} polyhedral surrogate.
-\raf{We then go on to prove surrogate regret bounds...}
+Recalling that calibration is equivalent to consistency for discrete targets, this shows that an embedding can always be extended to yield consistency.\botodo{added the last sentence -- I think we sometimes talk about consistency and calibration interchangeably but should be clear why}
 
-\subsection{Consistency}
+The key idea is showing calibration equivalent to \emph{$\epsilon$-separation}, a lower bound on the distance between points in $\reals^d$ that link to optimal reports for $\ell$ and points that link to non-optimal reports.
+We also show how this characterization also leads to linear \emph{regret transfer} or \emph{surrogate regret} bounds.
+
+\subsection{Calibration}
 \linkinformal*
 % \begin{theorem}\label{thm:eps-thick-calibrated}
 %   Let $L$ be polyhedral and $\ell$ the discrete loss it embeds from Theorem~\ref{thm:poly-embeds-discrete}.
@@ -691,10 +694,11 @@ In this section, we prove Theorem~\ref{thm:link-main}, restated below, which giv
 
 Theorem \ref{thm:link-main} will follow immediately from Theorems \ref{thm:calibrated-separated} and \ref{thm:thickened-separated}, as discussed below.
 Their full proofs appear in \S~\ref{sec:equiv-sep-calib} and \ref{app:sep-link-exists} respectively.
+Theorem \ref{thm:calibrated-separated} shows that calibration is equivalent to $\epsilon$-separation; Theorem \ref{thm:thickened-separated} constructs separated links.
 
 \subsubsection{Separation}
 
-Theorem \ref{thm:calibrated-separated} shows that calibration is equivalent to a geometric condition, which we call \emph{separation}, of a link function $\psi$.
+%Theorem \ref{thm:calibrated-separated} shows that calibration is equivalent to a geometric condition, which we call \emph{separation}, of a link function $\psi$.
 Recall that for indirect elicitation, any point $u \in \Gamma(p)$ must link to a report $\psi(u) \in \gamma(p)$. 
 (In terms of losses, $u$ minimizing expected $L$-loss implies that $\psi(u)$ minimizes expected $\ell$-loss, with respect to $p$.)
 The idea of separation is that points in the neighborhood of $u$ must also link to to a report in $\gamma(p)$.
@@ -704,7 +708,7 @@ Furthermore, there must be a uniform lower bound $\epsilon$ on the size of any s
   Let properties $\Gamma:\simplex\toto\reals^d$ and $\gamma:\simplex\toto\R$ be given.
   We say a link $\psi:\reals^d\to\R$
   is \emph{$\epsilon$-separated with respect to $\Gamma$ and $\gamma$} if for all $u\in\reals^d$ with $\psi(u)\notin\gamma(p)$, we have $d_\infty(u,\Gamma(p)) \geq \epsilon$, where $d_\infty(u,A) \doteq \inf_{a\in A} \|u-a\|_\infty$.%
-  \footnote{\citet{frongillo2021surrogate} define $\epsilon$-separation with a strict inequality $d_\infty(u,\Gamma(p)) > \epsilon$; we adopt a weak inequality as it is more convenient in examples. \raf{I felt we should write something to this effect here, but I don't love my attempt..}}
+  \footnote{\citet{frongillo2021surrogate} define $\epsilon$-separation with a strict inequality $d_\infty(u,\Gamma(p)) > \epsilon$; we adopt a weak inequality as it is more convenient in examples. \raf{I felt we should write something to this effect here, but I don't love my attempt..\bo{I think this is fine}}}
   Similarly, we say $\psi$ is $\epsilon$-separated with respect to $L$ and $\ell$ if it is $\epsilon$-separated with respect to $\prop{L}$ and $\prop{\ell}$.
 \end{definition}
 
@@ -714,12 +718,18 @@ Furthermore, there must be a uniform lower bound $\epsilon$ on the size of any s
   $\psi$ is $\epsilon$-separated with respect to $L$ and $\ell$ for some
   $\epsilon>0$.
 \end{restatable}
-\bo{Say anything about proof of above theorem?}
-\raf{We definitely should for the journal submission!  Punt for now.}
+\botodo{Added proof ideas}
+Intuitively, a separated link is calibrated because of two facts.
+First, a polyhedral $L$ has only a finite number of ``optimal report sets'' $\{\Gamma(p) ~:~ p \in \simplex\}$.
+Second for a given $p$, the expected loss for a suboptimal point scales with the distance from the optimal set $\Gamma(p)$ at some minimum linear rate $\alpha > 0$; this is related to \emph{Hoffman constants}.
+Combining with the first fact gives a universal minimum constant $\alpha$.
+Combining this with $\epsilon$-separation implies that any point linking to a suboptimal report has expected loss at least $\alpha \cdot \epsilon > 0$.
+On the other hand, if a link is not separated, then the same two facts imply that a sequence of suboptimal points that get arbitrarily close to an optimal report set also have expected loss arbitrarily close to optimal, which implies that the link is not calibrated.
 
 \subsubsection{Constructuon}
 To prove Theorem \ref{thm:link-main}, it now suffices to show that for any polyhedral $L$ embedding some $\ell$, there exists a \emph{separated} link $\psi$ with respect to $L$ and $\ell$.
-Such separated link is given by Construction~\ref{const:eps-thick-link} below.
+Construction~\ref{const:eps-thick-link}, discussed next, ``thickens'' a given embedding to produce a link.
+Theorem \ref{thm:thickened-separated} states that, for a small enough choice of $\epsilon$, that link is separated.
 
 \restatehack{
   \begin{theorem}
@@ -751,10 +761,10 @@ Now, we ``thicken'' $U$ to obtain $U_{\epsilon} = \{u : \|u - U\| \leq \epsilon\
 Then we require that all points in $U_{\epsilon}$ are linked to some element of $\gamma(p) = \argmin_r \inprod{p}{\ell(r)}$.
 For $\epsilon > 0$, this directly implies separation.
 
-However, it is not clear that this linking is possible because a point $u$ may be in multiple thickened sets $U_{\epsilon}, U'_{\epsilon}$, etc.
-Therefore, we need to take each possible collection $U,U'$, etc. and thicken their intersection in an analogous way.
+However, it is not clear that this linking is possible because a point $u$ may be in the intersection of several thickened sets $U_{\epsilon}, U'_{\epsilon}$, etc. corresponding to $\Gamma(p), \Gamma(p')$, etc.
+Therefore, we need to take each possible collection $U,U'$, etc., show that their intersection (if nonempty) contains a legal choice for the link, then thicken their intersection in an analogous way.
 
-Given $u \in U_\epsilon \cap U'_\epsilon \cap \dots$, we define a \emph{link envelope} $\Psi(u)$ which encodes the remaining legal choices for $\psi(u)$ after imposing the requirements for each such set $U_\epsilon,U'_\epsilon$, etc.
+To do so, given $u \in U_\epsilon \cap U'_\epsilon \cap \dots$, we define a \emph{link envelope} $\Psi(u)$ which encodes the remaining legal choices for $\psi(u)$ after imposing the requirements for each such set $U_\epsilon,U'_\epsilon$, etc.
 The key claim is that, for small enough $\epsilon > 0$, $\Psi(u)$ is nonempty: at least one permitted value for $\psi(u)$ remains.
 This claim follows from a geometric result (Lemma \ref{lemma:thick-empty}) that, for all small enough $\epsilon$, a subset of thickenings $U_{\epsilon}$ intersect if and only if the $U$ sets themselves intersect.
 When they do intersect, indirect elicitation implies that there exists a permitted choice of link for the intersection of the thickenings.
@@ -782,7 +792,7 @@ This result follows from the fact, stated now, that Construction~\ref{const:eps-
 
 \begin{proposition}
   Let polyhedral surrogate $L:\reals^d \to \reals^\Y_+$ and discrete loss $\ell:\R\to\reals^\Y_+$ be given.
-  Let $\epsilon>0$ be given, and let $\Psi$ be the link envelope from Construction~\ref{const:eps-thick-link} for $\epsilon$ and $\|\cdot\|_\infty$.
+  Let $\epsilon>0$ be given, and let $\Psi$ be the link envelope from Construction~\ref{const:eps-thick-link}$(L,\ell,\epsilon,\|\cdot\|_\infty)$.
   Then $\psi$ is $\epsilon$-separated if and only if $\psi(u) \in \Psi(u)$ for all $u\in\reals^d$.
 \end{proposition}
 \begin{proof}
@@ -793,7 +803,7 @@ This result follows from the fact, stated now, that Construction~\ref{const:eps-
 \end{proof}
 
 \begin{corollary}
-  A link $\psi$ is calibrated for a given discrete target $\ell$ and polyhedral surrogate $L$ if and only if there exists $\epsilon$ such that $\psi$ is produced by Construction \ref{const:eps-thick-link}$(L,\ell,\epsilon,\|\cdot\|_{\infty})$.
+  A link $\psi$ is calibrated for a given discrete target $\ell$ and polyhedral surrogate $L$ if and only if there exists $\epsilon$ such that $\psi$ is produced by Construction \ref{const:eps-thick-link}$(L,\ell,\epsilon,\|\cdot\|_{\infty})$ for some choice of tiebreakers.
 \end{corollary}
 
 \paragraph{Remarks.}
@@ -801,6 +811,7 @@ Applying Construction \ref{const:eps-thick-link} enables one to verify the consi
 For a given $\epsilon$ and norm $\|\cdot\|$, suppose one follows the routine of Construction~\ref{const:eps-thick-link} until the last step in which values for the link $\psi$ are selected.
 Instead, we can simply test whether the proposed link values are contained in the valid choices, i.e., if $\psi^*(u) \in \Psi(u)$ for all $u\in\reals^d$.
 If so, then the proposed link $\psi^*$ is calibrated.
+\botodo{In general, how do we deal with the $\epsilon$? How do we know what $\epsilon$ to test? I guess we can gradually shrink it and see...}
 See \S~\ref{sec:top-k} for an illustration of this test.
 On the other hand, if $\psi^*$ cannot possibly be produced from Construction \ref{const:eps-thick-link}, then it cannot be a calibrated link.
 This can be shown, for example, if there exists a point $u$ where $\Psi(u)$ is empty for all $\epsilon > 0$.\botodo{Is this a reasonable possibility?}
@@ -810,33 +821,36 @@ In practice this potential inefficiency is not typically a concern, as the famil
 We illustrate this formulaic approach in \S~\ref{sec:abstain}.
 
 
-\botodo{Should we comment on computing the $\epsilon$?}
-\raft{Don't recall what we have to say... but this would be a great spot to do so.  Or at least make the point that the regret bounds (below) get better the higher $\epsilon$ is.}
-\botodo{Not sure if we have anything useful to say}
+%\botodo{Should we comment on computing the $\epsilon$?}
+%\raft{Don't recall what we have to say... but this would be a great spot to do so.  Or at least make the point that the regret bounds (below) get better the higher $\epsilon$ is.}
+\botodo{Not sure if we have anything useful to say on computing $\epsilon$}
 
 
 
 \subsection{Surrogate regret bounds}\label{subsec:regret-bounds}
-Recall that the goal of surrogate risk minimization is to learn a hypothesis $h$ that minimizes expected surrogate loss, then output hypothesis $\psi \circ h$, which hopefully minimizes expected target loss.
-One may formalize this statement in terms of \emph{regret}, as follows.
+Recall that the approach of surrogate risk minimization is to learn a hypothesis $h$ that minimizes expected surrogate loss, then output hypothesis $\psi \circ h$, which hopefully minimizes expected target loss.
+We would like surrogates where a bound on surrogate loss of $h$ immediately implies a bound on target loss of $\psi \circ h$.
+One can formalize this problem in terms of \emph{regret}, as follows.
 Fix a data distribution $\D$.
-The \emph{surrogate regret} of $h$, and the \emph{target regret} of the implied hypothesis $\psi \circ h$, are given by
+The \emph{surrogate regret} $R_L$ of $h$ and the \emph{target regret} $R_{\ell}$ of the implied hypothesis $\psi \circ h$, are given by
 \begin{align*}
   R_L(h;\D) &= \E_{(X,Y)\sim\D} L(h(X))_Y - \inf_{h':\X\to\reals^d} \E_{(X,Y)\sim\D} L(h'(X))_Y~,
   \\
-  R_\ell(\psi\circ h;\D) &= \E_{(X,Y)\sim\D} \ell(\psi(h(X)))_Y - \inf_{h':\X\to\R} \E_{(X,Y)\sim\D} \ell(h'(X))_Y~,
+  R_\ell(\psi\circ h;\D) &= \E_{(X,Y)\sim\D} \ell(\psi(h(X)))_Y - \inf_{g':\X\to\R} \E_{(X,Y)\sim\D} \ell(g'(X))_Y~,
 \end{align*}
-respectively,
 % $R_L(h;\D) = \E_{(X,Y)\sim\D} L(h(X))_Y - \inf_{h':\X\to\reals^d} \E_{(X,Y)\sim\D} L(h'(X))_Y$,
 where the infimum is taken over all measurable functions.
-(One may equivalently assume the Bayes optimal hypothesis is in the function class.)
+The infimum represents the risk of the Bayes optimal hypothesis, so regret can be viewed as \emph{excess risk} under the assumption that the learner's hypothesis class contains the Bayes optimal.
+%(One may equivalently assume the Bayes optimal hypothesis is in the function class.)
 % Given $h$, the \emph{target regret} of the implied hypothesis $\psi \circ h$ is $R_\ell(\psi\circ h;\D) = \E_{(X,Y)\sim\D} \ell(\psi(h(X)))_Y - \inf_{h':\X\to\R} \E_{(X,Y)\sim\D} \ell(h'(X))_Y$.
-In these terms, then, consistency means that if the surrogate regret of $h$ converges to zero, then the target regret of $\psi \circ h$ does as well; in other words, $R_L(h;\D) \to 0$ implies $R_{\ell}(\psi \circ h;\D) \to 0$.
 
+Consistency means that if the surrogate regret of $h$ converges to zero, then the target regret of $\psi \circ h$ does as well; in other words, $R_L(h;\D) \to 0$ implies $R_{\ell}(\psi \circ h;\D) \to 0$.
 Consistency is therefore a minimal requirement; in general, we are also interested in the \emph{rate} at which the target regret diminishes, as a function of the number of data points $n$.
-Surrogate regret bounds are useful in answering this question, in that they show how a surrogate rate translates to a target rate.
+A \emph{regret transfer bound}, also called a \emph{surrogate regret bound}, gives a guarantee on the relationship between the rates of convergence of $R_L$ and $R_{\ell}$.
+For example, a surrogate with a fast rate of convegence $R_L \to 0$ as $n \to \infty$ is not very useful if we nevertheless have a slow rate $R_{\ell} \to 0$.
+
 We show that, for any polyhedral surrogate, the transfer is linear: if surrogate regret diminishes at a rate of $O(f(n))$, then the target rate is also $O(f(n))$.
-In particular, \emph{fast} convergence in surrogate regret implies fast convergence in target regret.
+In particular, fast convergence in surrogate regret implies fast convergence in target regret.
 \begin{theorem}
   Let $(L,\psi)$ be consistent for a discrete loss $\ell$, and $L$ polyhedral.
   Then there exists $c > 0$ such that, for all hypotheses $h$ and data distributions $\D$, we have $R_{\ell}(\psi \circ h;\D) \leq c \cdot R_L(h;\D)$.
