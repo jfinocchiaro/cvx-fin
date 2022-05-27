@@ -749,10 +749,10 @@ Furthermore, there must be a uniform lower bound $\epsilon$ on the size of any s
 \raft{Nice! Updated to clarify surrogate vs target}
 Intuitively, a separated link is calibrated because of two facts.
 First, Lemma~\ref{lem:polyhedral-range-gamma} states that a polyhedral surrogate has only a finite number of ``optimal report sets'' $\{\Gamma(p) : p \in \simplex\}$.
-Second for a given $p$, the expected surrogate loss for a suboptimal point scales with the distance from the optimal set $\Gamma(p)$ at some minimum linear rate $\alpha > 0$; this rate is related to \emph{Hoffman constants}.
+Second, for a given $p$, the expected surrogate loss for a suboptimal point scales with the distance from the optimal set $\Gamma(p)$ at some minimum linear rate $\alpha > 0$; this rate is related to \emph{Hoffman constants}.
 Combining with the first fact gives a universal minimum constant $\alpha$ for all $p$.
 Now bringing in $\epsilon$-separation, any surrogate report linking to a suboptimal target report has expected surrogate loss at least $\alpha \cdot \epsilon > 0$.
-On the other hand, if a link is not separated, then the same two facts imply that a sequence of surrogate reports that get arbitrarily close to an optimal report set while linking to a suboptimal target report; this sequence has expected loss approaching optimal, violating calibration.
+On the other hand, if a link is not separated, then the same two facts imply that, for a sequence of surrogate reports that get arbitrarily close to an optimal report set while linking to a suboptimal target report, this sequence has expected loss approaching optimal, violating calibration.
 
 \subsubsection{Construction}
 To prove Theorem \ref{thm:link-main}, it now suffices to show that for any polyhedral $L$ embedding some $\ell$, there exists a \emph{separated} link $\psi$ with respect to $L$ and $\ell$.
@@ -804,11 +804,11 @@ Given the above proof sketch, the following construction is relatively straightf
 We initialize the link using the embedding points and optimal report sets, then adjust $\Psi$ to narrow down to only legal choices; we then pick from $\psi(u)$ from $\Psi(u)$ arbitrarily.
 Theorem \ref{thm:thickened-separated} implies that, for all small enough $\epsilon$, the resulting link $\psi$ is well-defined at all points.
 \begin{construction}[$\epsilon$-thickened link] \label{const:eps-thick-link}
-  Given a polyhedral $L$ that embeds some $\ell$, an $\epsilon > 0$, and a norm $\|\cdot\|$, the \emph{$\epsilon$-thickened link} $\psi$ is constructed as follows.
-  First, define $\U = \{\Gamma(p) : p \in \simplex\}$.
+  Given a polyhedral $L$ that embeds some $\ell$ via the embedding $\varphi: \Sc \to \reals^d$ for a representative set $\Sc$; and given an $\epsilon > 0$ and a norm $\|\cdot\|$, the \emph{$\epsilon$-thickened link} $\psi$ is constructed as follows.
+  Define $\U = \{\Gamma(p) : p \in \simplex\}$.
   % For each $U \in \U$, let $R_U = \{r \in \R : \varphi(r) \in U\}$, the reports whose embedding points are in $U$. \jessiet{Move this sentence below link envelope definition?}
-  First, initialize the \emph{link envelope} $\Psi: \reals^d \toto \R$ by setting $\Psi(u) = \R$ for all $u$.
-  Then for each $U \in \U$, for all points $u$ such that $\inf_{u^* \in U} \|u^*-u\| < \epsilon$, update $\Psi(u) = \Psi(u) \cap R_U$, where $R_U = \{r \in \R : \varphi(r) \in U\}$ is the set of target reports that embed into $U$.
+  First, initialize the \emph{link envelope} $\Psi: \reals^d \to 2^{\Sc}$ by setting $\Psi(u) = \Sc$ for all $u$.\botodo{$\Psi$ maps to $2^{\Sc}$ because $\Psi(u) = \emptyset$ sometimes}
+  Then for each $U \in \U$, for all points $u$ such that $\inf_{u^* \in U} \|u^*-u\| < \epsilon$, update $\Psi(u) = \Psi(u) \cap R_U$, where $R_U = \{r \in \Sc : \varphi(r) \in U\}$ is the set of target reports that embed into $U$.
   Finally, define $\psi(u) \in \Psi(u)$, breaking ties arbitrarily.
   If $\Psi(u)$ became empty, then leave $\psi(u)$ undefined.
 \end{construction}
@@ -825,10 +825,11 @@ From Theorem~\ref{thm:calibrated-separated}, every calibrated link $\psi$ is the
 \end{proposition}
 \begin{proof}
   For $u\in\reals^d$, let $P_u$ consist of all $p\in\simplex$ such that $d_{\infty}(u,\Gamma(p)) < \epsilon$.
-  By definition, $\Psi(u) = \cap_{p \in P_u} R_p$ where $R_p = \{r \in \R : \varphi(r) \in \Gamma(p)\}$, the set of reports that embed into $\Gamma(p)$.
-  By definition of embedding, $R_p = \gamma(p)$.
-  By definition of separation, a link $\psi$ is $\epsilon$-separated if and only if, for all $u$, $\psi(u) \in \cap_{p \in P_u} \gamma(p) = \Psi(u)$.
-\raft{Looks great/close, but I got lost with the ``if and only if, then'' \bo{updated, how about now?}\raf{That part is great now, but I'm worried about $R_p = \gamma(p)$ and wonder if we should step through that slower. Actually maybe this is an issue with the construction itself: I think you only want to work with the representative set from the definition of embedding, right?}}
+  By definition, $\Psi(u) = \cap_{p \in P_u} R_p$ where $R_p = \{r \in \Sc : \varphi(r) \in \Gamma(p)\}$, the set of reports that embed into $\Gamma(p)$.
+  By definition of embedding, $R_p = \{r \in \Sc : r \in \gamma(p)\} = \gamma(p) \cap \Sc$.
+  By definition of separation, a link $\psi$ is $\epsilon$-separated if and only if, for all $u$, $\psi(u) \in \cap_{p \in P_u} \left(\gamma(p) \cap \Sc\right) = \Psi(u)$.
+\bo{There is one problem here. For points that are not within $\epsilon$ of any optimal set, can a separated link map them to $\R \setminus \Sc$? If so, we need to slightly modify the argument.}
+%\raft{Looks great/close, but I got lost with the ``if and only if, then'' \bo{updated, how about now?}\raf{That part is great now, but I'm worried about $R_p = \gamma(p)$ and wonder if we should step through that slower. Actually maybe this is an issue with the construction itself: I think you only want to work with the representative set from the definition of embedding, right?}}
 \end{proof}
 
 \begin{corollary}
