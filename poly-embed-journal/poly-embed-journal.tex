@@ -81,6 +81,11 @@
 
 \newcommand{\cell}{\mathrm{cell}}
 
+\newcommand{\BEP}{L_{\text{\tiny BEP}}}
+\newcommand{\LWW}{L_{\text{\tiny WW}}}
+\newcommand{\ellabstain}{\ell_{\text{abs}}}
+\newcommand{\ellOP}{\ell_{\text{\tiny OP}}}
+
 \newcommand{\abstain}[1]{\mathrm{abstain}_{#1}}
 \newcommand{\mode}{\mathrm{mode}}
 
@@ -100,7 +105,6 @@
 \newcommand{\I}{\mathcal{I}}
 \renewcommand{\L}{\mathcal{L}}
 \newcommand{\N}{\mathcal{N}}
-\newcommand{\OP}{\mathcal{OP}}
 \renewcommand{\P}{\mathcal{P}}
 \newcommand{\R}{\mathcal{R}}
 \newcommand{\Sc}{\mathcal{S}}
@@ -642,7 +646,7 @@ While polyhedral surrogates do not directly elicit finite properties, as their r
 
 From Lemma~\ref{lem:polyhedral-range-gamma}, one can simply select a point from each of the finitely many optimal sets to obtain a finite representative set.
 % This observation lets us apply results about finite representative sets to understand the structure of polyhedral surrogates and the losses they embed.
-Plugging this finite representative set into Lemma~\ref{lem:loss-restrict} then yields an embedding.
+Plugging this finite representative set into Proposition~\ref{prop:representative-embeds-restriction} then yields an embedding.
 
 
 \begin{theorem}\label{thm:poly-embeds-discrete}
@@ -794,7 +798,7 @@ Therefore, we need to take each possible collection $U,U'$, etc., show that thei
 
 To do so, given $u \in U_\epsilon \cap U'_\epsilon \cap \dots$, we define a \emph{link envelope} $\Psi(u)$ which encodes the remaining legal choices for $\psi(u)$ after imposing the requirements for each such set $U_\epsilon,U'_\epsilon$, etc.
 The key claim is that, for small enough $\epsilon > 0$, $\Psi(u)$ is nonempty: at least one permitted value for $\psi(u)$ remains.
-This claim follows from a geometric result (Lemma \ref{lemma:thick-empty}) that, for all small enough $\epsilon$, a subset of thickenings $U_{\epsilon}$ intersect if and only if the $U$ sets themselves intersect.
+This claim follows from a geometric result (Lemma~\ref{lemma:thick-empty}) that, for all small enough $\epsilon$, a subset of thickenings $U_{\epsilon}$ intersect if and only if the $U$ sets themselves intersect.
 When they do intersect, indirect elicitation implies that there exists a permitted choice of link for the intersection of the thickenings.
 It is also important that, by Lemma~\ref{lem:polyhedral-range-gamma}, polyhedral surrogates only have finitely many sets of the form $U = \Gamma(p)$.
 Together, these observations yield a single uniform smallest $\epsilon$ such that the key claim is true for all $u \in \reals^d$.
@@ -896,7 +900,7 @@ Our results give a framework to construct consistent polyhedral surrogates and l
 Below, we illustrate the power of this framework with specific examples from the literature.
 To warm up, we study the abstain surrogate given by~\citet{ramaswamy2018consistent}, which is an embedding, and show how to rederive their link function and surrogate regret bounds (\S~\ref{sec:abstain}). 
 We then give three examples of subsequent works that use our framework, in the context of structured binary classification (\S~\ref{sec:lovasz-hinge}), multiclass classification (\S~\ref{sec:winge}), and top-$k$ classification (\S~\ref{sec:top-k}).
-In all cases, our framework illuminates the behavior of inconsistent surrogates by revealing the discrete losses they embed, i.e., the true targets for which they are consistent.
+In each of these latter three examples, our framework illuminates the behavior of inconsistent surrogates by revealing the discrete losses they embed, i.e., the true targets for which they are consistent.
 In structured binary classification and top-$k$ classification, our framework also gives new consistent surrogates and link functions which appear challenging to derive otherwise.
 
 %% how to apply the embedding framework
@@ -912,15 +916,15 @@ In structured binary classification and top-$k$ classification, our framework al
 % A key step in Construction~\ref{const:eps-thick-link} is constructing the set-valued link candidate function $\Psi$, which yields the possible values any $\epsilon$-separated link $\psi$ could map to; this in turn provides a tool to verify the calibration of a proposed link (\S~\ref{sec:abstain}, \ref{sec:top-k}) or construct new calibrated links(\S~\ref{sec:lovasz-hinge}).
 
 \subsection{Applying the embedding framework}
-When using our framework to study the (in)consistency of an existing surrogate $L:\reals^d \to \reals^\Y_+$, often the first step is determining the loss it embeds.
-To this end, we suggest the following general approach.
+When using our framework to study the consistency or inconsistency of an existing surrogate $L:\reals^d \to \reals^\Y_+$, often the first step is determining the loss it embeds.
+To do so, we suggest the following general approach.
 First, for each $y\in\Y$, divide $\reals^d$ into a finite number of polyhedral regions on which $L(\cdot)_y$ is an affine function.
 Second, identify the vertices of these polyhedral regions.%
-\footnote{In some cases, these regions do not have vertices, such as the top-$k$ surrogates which are invariant in the all-ones direction; here one can restrict to a subspace, or otherwise select among equivalent reports.}
+\footnote{In some cases, these regions do not have vertices, such as the top-$k$ surrogates in \S~\ref{sec:top-k} which are invariant in the all-ones direction; here one can restrict to a subspace, or otherwise select among equivalent reports.}
 Third, conclude that the union of these vertices, $\Sc\subset\reals^d$, is a finite representative set for $L$.
 % ~\citep[Statement 3.1.7]{grunbaum2013convex}.
 Now $L$ embeds $L|_\Sc$ from Proposition~\ref{prop:representative-embeds-restriction}.
-From here one can further remove redundant reports until arriving at a tight embedding if desired, or re-label embedded reports to cotextualize the problem; call this embedded loss $\hat \ell$.
+From here one can further remove redundant reports until arriving at a tight embedding if desired, or re-label embedded reports to a more intuitive form; call this resulting embedded loss $\hat \ell$.
 
 Once the embedded discrete loss $\hat\ell$ is known, the behavior of the surrogate $L$ becomes more clear.
 In particular, we learn what problem $L$ is actually solving, as captured by $\hat\ell$.
@@ -929,18 +933,20 @@ Any level set of the embedded property $\hat\gamma = \prop{\hat\ell}$ which span
 To obtain consistency with respect to a desired target, therefore, it suffices to restrict to the union of level sets of $\hat\gamma$ which are each fully contained in some level set of $\gamma$.
 
 \begin{figure}
-	\begin{minipage}{0.3\linewidth}
+	\begin{minipage}{0.29\linewidth}
     \input{tikz/abstain-intuition}
 \end{minipage}
-\begin{minipage}{0.7\linewidth}
-	\caption{The BEP surrogate $L$ (\S~\ref{sec:abstain}) is not calibrated for multiclass classification, eliciting the mode.
-	The level sets of $\Gamma := \prop{L}$ are given in solid black lines, while the level sets of $\mode$ are given in dashed blue lines.
-	To demonstrate non-calibration, one can pick distributions $p, p'$ in the relative interior of the abstain cell (blue) but in different cells of the mode.
-  These distributions will satisfy $\Gamma(p) = \Gamma(p')$ but $\mode(p) \neq \mode(p')$.
-  In this case, fixing $u\in\Gamma(p)$, it is impossible to define $\psi(u)$ to satisfy calibration, as $\psi(u)$ cannot be equal to $\mode(p)$ and $\mode(p')$ simultaneously.
-  In particular, even though $u$ is $L$-optimal for both $p$ and $p'$, it will be $\ell$-suboptimal for at least one, violating calibration.
-  We may impose restrictions on the conditional label distributions to remove the blue cell, however, and thus satisfy calibration.
-  For this example, the BEP surrogate is classification-calibrated if one restricts to the set of distributions where at least one label $y\in\Y$ has probability $p_y \geq \tfrac 1 2$.
+\begin{minipage}{0.71\linewidth}
+	\caption{Using an embedding to show inconsistency.
+    Let $L$ be a surrogate and $\ell$ a desired target; here $L=\BEP$ (\S~\ref{sec:abstain}) and $\ell$ is 0-1 loss for multiclass classification.
+    Let $\Gamma = \prop{L}$ and $\gamma = \prop{\ell}$ be the properties elicited by these losses; here $\gamma = \mode$, as 0-1 loss elicits the mode.
+    The level sets of $\Gamma$ are given in solid black lines, and those of $\gamma$ in dashed blue lines.
+    To exhibit non-calibration, take distributions $p, p'$ in the relative interior of the blue cell $\Gamma_u$ (here $u=0$ for $\BEP$) but in different cells of $\gamma$.
+    These distributions will satisfy $\Gamma(p) = \Gamma(p')$ but $\gamma(p) \neq \gamma(p')$.
+    Hence, it is impossible to define $\psi(u)$ to satisfy calibration, as $\psi(u)$ cannot be equal to $\gamma(p)$ and $\gamma(p')$ simultaneously.
+    In particular, even though $u$ is $L$-optimal for both $p$ and $p'$, it will be $\ell$-suboptimal for at least one, violating calibration.
+    We may impose restrictions on the conditional label distributions to remove the blue cell, however, and thus satisfy calibration.
+    For this example, the $\BEP$ is classification-calibrated if one restricts to the set of distributions where at least one label $y\in\Y$ has probability $p_y \geq \tfrac 1 2$.
 	}
 	\label{fig:abstain-intuition-inconsistent}
 	\end{minipage}
@@ -949,7 +955,8 @@ To obtain consistency with respect to a desired target, therefore, it suffices t
 With an embedding in hand, Construction~\ref{const:eps-thick-link} provides a calibrated link function from $L$ to $\hat\ell$.
 This construction is especially beneficial in cases where the most intuitive link functions are not calibrated, and no known calibrated link is known; see \S~\ref{sec:lovasz-hinge} for a somewhat intricate example.
 Surrogate regret bounds then follow from Theorem~\ref{thm:linear-regret-bound}, as we illustrate in \S~\ref{sec:abstain}.
-In particular, our results give novel surrogate regret bounds for several applications (\S~\ref{sec:lovasz-hinge},~\ref{sec:winge},~\ref{sec:top-k}).\jessiet{This sentence sounds like we're going to give the bounds, but we decided against that, right?}
+In particular, our results imply the existence of linear regret transfer bounds bounds for several applications where no such bounds were known (\S~\ref{sec:lovasz-hinge},~\ref{sec:winge},~\ref{sec:top-k}).\jessiet{This sentence sounds like we're going to give the bounds, but we decided against that, right?}
+\raft{Yeah... rephrased.  Better?}
 
 Finally, our link construction can even be useful in cases where the search for consistent surrogates has been restricted to those accommodating a particular canonical link function $\psi$.
 For example, one typically uses the sign link for binary classification, and the argmax link (the $k$ largest coordinates) for top-$k$ classification (\S~\ref{sec:top-k}).
@@ -964,18 +971,16 @@ More generally, however, while such canonical link functions may be intuitive fo
 \label{sec:abstain}
 
 Several authors consider a variant of multiclass classification, with the addition of an \emph{abstain} option~\citep{bartlett2008classification,ramaswamy2018consistent,madras2018predict,elyaniv2010foundations,cortes2016learning}.
-%\raf{Proposal: define $\ell$ for $1/2$, $L$ for BEP, $\psi^\infty$ for their link (bake in 1/2), $\psi^1$ for ours \jessie{Burn}}
-\citet{ramaswamy2018consistent} study the loss $\ell: \Y \cup \{\bot\} \to \reals^\Y_+$ defined by $\ell(r)_y = 0$ if $r=y$, $1/2$ if $r = \bot$, and 1 otherwise.
-The report $\bot$ corresponds to ``abstaining'' for a constant loss regardless of outcome $y$. 
-\citeauthor{ramaswamy2018consistent} provide a polyhedral surrogate $L$, which they call the \emph{binary encoded predictions (BEP)} surrogate, and link $\psi^\infty$ which is calibrated for $\ell$.
-Letting $d = \ceil{\log_2 |\Y|}$, their surrogate $L : \reals^d \to \reals^\Y_+$ is given by
+\citet{ramaswamy2018consistent} study the loss $\ellabstain: \Y \cup \{\bot\} \to \reals^\Y_+$ defined by $\ellabstain(r)_y = 0$ if $r=y$, $1/2$ if $r = \bot$, and 1 otherwise.
+The report $\bot$ corresponds to ``abstaining'' to predict, in exchange for a constant loss regardless of outcome $y$. 
+\citeauthor{ramaswamy2018consistent} give the polyhedral \emph{binary encoded predictions (BEP)} surrogate $\BEP$, and the link $\psi^\infty$ which they show is calibrated for $\ellabstain$.
+Letting $d = \ceil{\log_2 |\Y|}$, their surrogate $\BEP : \reals^d \to \reals^\Y_+$ is given by
 \begin{equation}\label{eq:abstain-surrogate}
-L(u)_y = \max_{j \in [d]} \left(1 - \varphi(y)_j u_j\right)_+~,
+\BEP(u)_y = \max_{j \in [d]} \left(1 - \varphi(y)_j u_j\right)_+~,
 \end{equation}
 where $\varphi:\Y\to\{-1,1\}^d$ is an injection.%
 \footnote{To translate our notation to that of \citet{ramaswamy2018consistent}, take $B = -\varphi$.}
-% embeds outcomes to corners of the $\pm 1$ hypercube, and the abstain report $\bot$ to the origin.
-Observe that $L$ is exactly hinge loss when $|\Y|=2$ and thus $d=1$. 
+Observe that $\BEP$ is exactly hinge loss when $|\Y|=2$ and thus $d=1$. 
 The authors show that the link $\psi^{\infty}$ is calibrated, where
 \begin{equation}\label{eq:abstain-link}
   \psi^{\infty}(u) = \begin{cases}
@@ -983,20 +988,21 @@ The authors show that the link $\psi^{\infty}$ is calibrated, where
 	\varphi^{-1}(\sgn(u)) &\text{otherwise}
   \end{cases}~,
 \end{equation}
-and they go on to establish linear surrogate regret bounds for $(L,\psi^{\infty})$.
+and they go on to establish linear surrogate regret bounds for $(\BEP,\psi^{\infty})$.
 
-Using our framework, one can show that $L$ (eliciting $\Gamma$) embeds (2 times) $\ell$ (eliciting $\hat \gamma$), with the embedding given by $\varphi$ above where we define $\varphi(\bot) = 0 \in \reals^d$.
-(Following the general procedure outlined above, the regions where $L$ is affine all have vertices in the set $\{-1,1\}^d \cup \{0\}$, meaning it is representative, and $L$ restricted to that set is precisely $2\ell \circ \varphi^{-1}$.)
-%In light of our framework, we can see that $L^{1/2}$ is an excellent example of an embedding, where $\varphi(y) = B(y)$ and $\varphi(\bot) = 0 \in \reals^d$.
+Using our framework, one can show that $\BEP$ embeds (2 times) $\ellabstain$, with the embedding given by $\varphi$ above where we define $\varphi(\bot) = 0 \in \reals^d$.
+(Following the general procedure outlined above, the regions where $\BEP$ is affine all have vertices in the set $\{-1,1\}^d \cup \{0\}$, meaning it is representative, and $\BEP$ restricted to that set is precisely $2\ellabstain \circ \varphi^{-1}$.)
 
 %% giving intuition for abstain figure: how to use fig to find consistency restrictions
-With the abstain loss $\ell$ in hand, it is straightforward to verify that the $\ell$-optimal report for any $p$ such that $\max_y p_y < 1/2$ is to ``abstain'' from predicting by reporting $\bot$.
-When juxtaposed with multiclass classification in Figure~\ref{fig:abstain-intuition-inconsistent}, one can observe that the BEP surrogate $L$ does not indirectly elicit the mode, as the level sets $\Gamma_{\vec 0} = \hat \gamma_\bot$ are equal by the definition of embedding, yet one can observe $\prop{\ell}_\bot \not \subseteq \mode_r$ for any $r$. 
-As embedding is a special form of indirect elicitation, we additionally know the BEP surrogate does not embed the mode.
-The intuition described by Figure~\ref{fig:abstain-intuition-inconsistent} additionally gives a procedure to validate (in)consistency with respect to a target task.
+As an illustration, one can use the fact that $\BEP$ embeds $\ellabstain$ to verify that $\BEP$ is inconsistent for multiclass classification, i.e., with respect to 0-1 loss.
+In particular, since the abstain report $\bot$ is $\ellabs$-optimal whenever $\max_{y\in\Y} p_y \leq 1/2$, by the definition of embedding, the origin $0\in\reals^d$ is $\BEP$-optimal for the same distributions.
+Recalling that 0-1 loss elicits the mode, one can now find two distributions with different modes but for which $0$ is $\BEP$-optimal, violating calibration (Figure~\ref{fig:abstain-intuition-inconsistent}).
+\raft{I simplified this paragraph to reduce redundancy, and rewrote much of the figure caption so it's clearer how it applies more generally.  See what you think!}
+% , one can observe that the BEP surrogate $\BEP$ does not indirectly elicit the mode, as the level sets $\Gamma_{\vec 0} = \hat \gamma_\bot$ are equal by the definition of embedding, yet one can observe $\prop{\ellabstain}_\bot \not \subseteq \mode_r$ for any $r$. 
+% As embedding is a special form of indirect elicitation, we additionally know the BEP surrogate does not embed the mode.
+% The intuition described by Figure~\ref{fig:abstain-intuition-inconsistent} additionally gives a procedure to validate (in)consistency with respect to a target task.
 
-
-Moreover, as we illustrate in Figure~\ref{fig:abstain-links}(L), the link $\psi^{\infty}$ proposed by \citeauthor{ramaswamy2018consistent} can be recovered from Construction~\ref{const:eps-thick-link} by choosing the norm $\|\cdot\|_\infty$ for any sufficiently small choice of $\epsilon > 0$.
+Moreover, as we illustrate in Figure~\ref{fig:abstain-links}(L), the link $\psi^{\infty}$ proposed by \citeauthor{ramaswamy2018consistent} can be recovered from Construction~\ref{const:eps-thick-link} by choosing the norm $\|\cdot\|_\infty$ and $\epsilon=1/2$ (or smaller).
 Hence, our framework could have simplified the process of finding $\psi^\infty$, and the corresponding proof of consistency.
 It also could have simplified the derivation of surrogate regret bounds (\S~\ref{subsec:regret-bounds}); we show how to recover the tight bound of \citeauthor{ramaswamy2018consistent} for the BEP surrogate in \S~\ref{sec:regret-tighter-bounds}.
 
@@ -1009,11 +1015,8 @@ given by
 	\varphi^{-1}(\sgn(u)) &\text{otherwise}
   \end{cases}~.
 \end{equation}
-This link is the result of Construction~\ref{const:eps-thick-link} for norm $\|\cdot\|_1$ and the choice $\epsilon=1$, which proves calibration of $(L,\psi^1)$ with respect to $\ell$.
+This link is the result of Construction~\ref{const:eps-thick-link} for norm $\|\cdot\|_1$ and the choice $\epsilon=1$, which proves calibration of $(\BEP,\psi^1)$ with respect to $\ellabstain$.
 Aside from its simplicity, one possible advantage of $\psi^1$ is that it assigns $\bot$ to much less of the surrogate space $\reals^d$.
-
-% Thinking of the abstain loss $\ell^{1/2}$ as a binary structured prediction problem, \citeauthor{ourlovaszpaper} observe that the BEP surrogate $L^{1/2}$ in eq.~\eqref{eq:abstain-surrogate} is one example of a Lov\'asz hinge introduced in \S~\ref{sec:lovasz-hinge}.
-% , and that $\psi^{1/2}$ in eq.~\eqref{eq:abstain-link} is an example of a calibrated link given by Construction~\ref{const:eps-thick-link} for the embedded loss.
 
 
 
@@ -1028,7 +1031,8 @@ Aside from its simplicity, one possible advantage of $\psi^1$ is that it assigns
 \begin{minipage}{0.32\linewidth}
 \includegraphics[width=\linewidth]{tikz/abstain-link-l1.pdf}
 \end{minipage}\hfill
-\caption{Constructing links for the abstain surrogate $L$ with $d=2$. The embedding is shown in bold labeled by the corresponding reports. (L) The link envelope $\Psi$ resulting from Construction~\ref{const:eps-thick-link} using $\|\cdot\|_\infty$ and $\epsilon = 1/2$, and a possible link $\psi$ which matches eq.~\eqref{eq:abstain-link} from~\cite{ramaswamy2018consistent}.  (M) An illustration of the thickened sets from Construction~\ref{const:eps-thick-link} for two sets $U, U' \in \U$, using $\|\cdot\|_1$ and $\epsilon = 1$. (R) The $\Psi$ and $\psi$ from Construction~\ref{const:eps-thick-link} using $\|\cdot\|_1$ and $\epsilon = 1$.}
+\caption{Designing links for $\BEP$ with $d=2$ using Construction~\ref{const:eps-thick-link}. The embedding is shown in bold labeled by the corresponding reports. (L) The link envelope $\Psi$ resulting from Construction~\ref{const:eps-thick-link} using $\|\cdot\|_\infty$ and $\epsilon = 1/2$, and a possible link $\psi$ which matches eq.~\eqref{eq:abstain-link} from~\cite{ramaswamy2018consistent}.  (M) An illustration of the thickened sets for two sets $U, U' \in \U$, using $\|\cdot\|_1$ and $\epsilon = 1$. (R) The envelope $\Psi$ and link $\psi$ %from Construction~\ref{const:eps-thick-link}
+  using $\|\cdot\|_1$ and $\epsilon = 1$.}
 \label{fig:abstain-links}
 \end{center}
 \end{figure}
@@ -1046,14 +1050,14 @@ In the case of $k$ binary predictions, these settings are typically formalized b
 A natural family of losses are those which are functions of the misprediction or disagreement set $\dis(r,y) = \{i \in [k] \mid r_i \neq y_i\}$, meaning we may write $\ell^f(r)_y = f(\dis(r,y))$ for some set function $f:2^{[k]}\to\reals$.
 For example, Hamming loss is given by $f(S) = |S|$.
 In an effort to provide a general convex surrogate for these settings when $f$ is a submodular function, Yu and Blaschko~\cite{yu2018lovasz} introduce the \emph{Lov\'asz hinge} surrogate $L^f:\reals^k\to\reals^\Y_+$ which leverages the well-known convex Lov\'asz extension of submodular functions.
-While the authors provide theoretical justification and experiments, they leave open whether the Lov\'asz hinge actually is consistent for $\ell^f$.
+While the authors provide theoretical justification and experiments, they leave open whether the Lov\'asz hinge is actually consistent for $\ell^f$.
 
 %% lovasz paper closes the gap, answering inconsistency wrt \ell^f by showing that L^f embeds structured abstain
-\citet{ourlovaszpaper} use our embedding framework to resolve the consistency of $L^f$, showing that it is inconsistent with respect to $\ell^f$ outside of the trivial case where $f$ is modular, and thus $\ell^f$ is a weighted Hamming loss.
+\citet{ourlovaszpaper} use our embedding framework to resolve the consistency of $L^f$, showing that it is inconsistent with respect to $\ell^f$ outside of the trivial case where $f$ is modular (in which case $\ell^f$ is a weighted Hamming loss).
 Moreover, they show that $L^f$ embeds a variant $\ellabs$ of $\ell^f$ where one is allowed to abstain on a set of indices $A \subseteq [k]$, which they call the \emph{structured abstain problem}.
-The inclusion of abstain options is natural when observing that the BEP surrogate $L^{1/2}$ from \S~\ref{sec:abstain} coincides with $L^f$ for the function $f(S) = \ones\{S \neq \emptyset\}$, so the multiclass abstain problem is a special case of the Lov\'asz hinge.
+The inclusion of abstain options is natural when observing that the BEP surrogate $\BEP$ from multiclass classification with an abtain option \S~\ref{sec:abstain} is the special case of $L^f$ where $f(S) = \ones\{S \neq \emptyset\}$.
 
-To derive $\ellabs$, the authors show that the set $\V = \{-1,0,1\}^k$ is representative for $L^f$, for any choice of $f$.
+To derive the discrete loss $\ellabs$ that $L^f$ embeds, the authors show that the set $\V = \{-1,0,1\}^k$ is representative for $L^f$, for any choice of $f$.
 From Proposition~\ref{prop:representative-embeds-restriction}, they conclude that $L^f$ embeds $\ellabs := L^f|_{\V}$.
 Letting $\abs(v) = \{i\in[k] \mid v_i = 0\}$ denote the ``abstain'' set, we may write $\ellabs : \V \to \reals^\Y_+$ as
 \begin{equation}
@@ -1063,9 +1067,9 @@ Letting $\abs(v) = \{i\in[k] \mid v_i = 0\}$ denote the ``abstain'' set, we may 
 %They go on to show that the embedding is tight, for $f$ strictly submodular and strictly monotone, if one first disallows $v$ with $|\abs(v)| = 1$.
 By Theorem~\ref{thm:link-main}, then, there is a link function such that the Lov\'asz hinge is consistent with respect to the structured abstain loss $\ellabs$.
 
-Actually determining this link function is nontrivial.
+The authors show that actually determining a calibrated link function in this case is nontrivial.
 Simple threshold links like for the BEP surrogate in \S~\ref{sec:abstain} are not always calibrated, thus casting doubt that a trial-and-error approach for finding the link would be successful.
-Instead, they leverage our thickened link construction (Construction~\ref{const:eps-thick-link}) to derive two links $\psi^*$ and $\psi^\diamond$, which have somewhat intricate geometric structure (Figure~\ref{fig:lovasz-links}).
+Instead, \citeauthor{ourlovaszpaper} leverage our thickened link construction (Construction~\ref{const:eps-thick-link}) to derive two links $\psi^*$ and $\psi^\diamond$, which have somewhat intricate geometric structure (Figure~\ref{fig:lovasz-links}).
 Perhaps surprisingly, by deriving the link envelope $\Psi$ which is contained in the envelopes for $L^f$ for all submodular and increasing $f$, they prove that $\psi^*(u) \subseteq \Psi(u)$ and $\psi^\diamond(u) \subseteq \Psi(u)$ for all $u \in \reals^d$.
 Thus, both $(L^f, \psi^*)$ and $(L^f, \psi^\diamond)$ are simultaneously calibrated with respect to $\ellabs$ for all such $f$.
 
@@ -1080,7 +1084,7 @@ Thus, both $(L^f, \psi^*)$ and $(L^f, \psi^\diamond)$ are simultaneously calibra
 		\begin{minipage}{0.32\linewidth}
 		\includegraphics[width=\linewidth]{tikz/lovasz-link-envelope.pdf}
 		\end{minipage}\hfill
-		\caption{Links $\psi^*$ and $\psi^\diamond$ such that $(L^f, \psi^*)$ and $\psi^\diamond$ are calibrated with respect to $\ellabs$ for all suitable $f$. Points in each region link to the embedding point contained in the region. Both are constructed via the link envelope $\Psi$ from Construction~\ref{const:eps-thick-link}, which yields possible choices for calibrated links.\raf{Labels are still a tad small, probably because the actual size of the image (before shrinking) is larger.  Also, to match Figure~\ref{fig:abstain-links}, we can use commas instead of ``OR'', which should give us some more space too.  (Besides, it's really ``AND'' in the sense that both are in $\Psi(\cdot)$...)}
+		\caption{Links $\psi^*$ and $\psi^\diamond$ such that $(L^f, \psi^*)$ and $\psi^\diamond$ are calibrated with respect to $\ellabs$ for all suitable $f$. Points in each region link to the embedding point contained in the region. Both are constructed via the link envelope $\Psi$ from Construction~\ref{const:eps-thick-link}, which yields possible choices for calibrated links.\raf{Almost there!  First $u_2$ is still small, and same for the coordinate labels in the third figure.  The lines in the first two are also much thicker compared to the third and to Figure~\ref{fig:abstain-links}.}
 			}
 			%Points in the dark green regions link to $\vec 0$; points in light green link to a permutation of $(0,\pm 1)$, and points in yellow regions link to $(\pm 1, \pm 1)$.\jessie{Not sure how to phrase this?  Would we just be better off explicitly labeling things?}\raf{Agreed that it's a little unclear, but not sure labeling would be better... let's discuss next call}}
 		\label{fig:lovasz-links}
@@ -1092,39 +1096,41 @@ Thus, both $(L^f, \psi^*)$ and $(L^f, \psi^\diamond)$ are simultaneously calibra
 As the hinge loss is one of the most common surrogates for binary support vector machines (SVMs), original extensions to the multiclass setting included a one-vs-all reduction to the binary problem via hinge loss, generating ${n \choose 2}$ hyperplanes for $n$ labels.
 Proposing a more efficient solution, \citet{weston1999support} give an alternate surrogate for multiclass SVM prediction, defined as follows for predictions $u \in \reals^n$,
 \begin{equation}\label{eq:ww-hinge}
-L^{WW}(u)_y = \sum_{i \in \Y : i \neq y} (1 - (u_y - u_i))_+~,~
+\LWW(u)_y = \sum_{i \in \Y : i \neq y} (1 - (u_y - u_i))_+~.
 \end{equation}
-which was later shown to be inconsistent with respect to 0-1 loss~\citep{tewari2007consistency,liu2007fisher}.
+This surrogate $\LWW$ was later shown to be inconsistent with respect to 0-1 loss~\citep{tewari2007consistency,liu2007fisher}.\raft{FYI: changed notation to match the style of our other surrogates.  Not sure I care enough to change the top-$k$ ones though...}
 
-\citet{wang2020weston} use the embedding framework to show that the Weston--Watkins hinge embeds the \emph{ordered partition} loss, and in turn, recover the result of inconsistency with respect to 0-1 loss.
+\citet{wang2020weston} use our embedding framework to show that the Weston--Watkins hinge embeds the \emph{ordered partition} loss $\ellOP$, as defined below.
+In turn, they recover the result of inconsistency with respect to 0-1 loss.
 %An ordered partition on $[n] := \{1, \ldots, n\}$ can be defined by a nested sequence of tuples
 %Let $T = \{T_1, \ldots, T_k\}$
-The report space for this discrete loss can be defined in terms of nested subsets of $[n] := \{1, \ldots, n\}$, as follows.%
+The report space for $\ellOP$ can be defined in terms of nested subsets of $[n] := \{1, \ldots, n\}$, as follows.%
 \footnote{To recover the partition of~\citet{wang2020weston}, one can define $S_i = T_i \setminus T_{i-1}$.}
 \begin{align*}
 \T = \{ (T_0,\ldots,T_s) \mid s \geq 1, \emptyset = T_0 \subsetneq T_1 \subsetneq \ldots \subsetneq T_s = [n]\}~.
 \end{align*}
 \noindent
-The ordered partition target loss $\ell^{\OP} : \T \to \reals^\Y_+$ embedded by Weston-Watkins hinge is then defined
+The ordered partition target loss $\ellOP : \T \to \reals^\Y_+$ is then defined
 \begin{align*}
-\ell^\OP(T)_y &= \sum_{i=1}^{s} \left(|T_{i}| \cdot \Ind{y \not \in T_{i-1}} \right) -1~.~
+\ellOP(T)_y &= \sum_{i=1}^{s} \left(|T_{i}| \cdot \Ind{y \not \in T_{i-1}} \right) -1~.~
 \end{align*}
 \noindent
-The ordered partition loss can be interpreted as a variation of 0-1 loss incorporating varying confidence in different outcomes: reports are a nested sequence of sets, and the punishment for the outcome $y$ is the cardinality of the first set containing $y$, plus the cardinality of all earlier sets.
-%\citet{wang2020weston} show that $L^{WW}$ embeds $\ell^\OP$, with the embedding $\varphi : \T \to \reals^n$ given by $\varphi(T)_j = -(i-1)$ for all $j \in T_i \setminus T_{i-1}$.
-%%\citeauthor{wang2020weston} then apply Theorem~\ref{thm:link-main} to conclude that there exists a link function $\psi$ such that $(L^{WW},\psi)$ is calibrated with respect to $\ell^\OP$; however, they do not construct the link. 
+The loss $\ellOP$ can be interpreted as a variation of 0-1 loss incorporating confidence: reports are a nested sequence of sets, and the penalty upon seeing label $y$ is the cardinality of the first set containing $y$, plus the cardinality of all earlier sets.
+%\citet{wang2020weston} show that $\LWW$ embeds $\ellOP$, with the embedding $\varphi : \T \to \reals^n$ given by $\varphi(T)_j = -(i-1)$ for all $j \in T_i \setminus T_{i-1}$.
+%%\citeauthor{wang2020weston} then apply Theorem~\ref{thm:link-main} to conclude that there exists a link function $\psi$ such that $(\LWW,\psi)$ is calibrated with respect to $\ellOP$; however, they do not construct the link. 
 
 
-\raf{See if we can simplify / combine these paragraphs given the new 5.1}\jessie{Attempted}
 %% one might make distributional assumptions to regain consistency with geometric drawing
-Upon showing that $L^{WW}$ embeds $\ell^\OP$, \citeauthor{wang2020weston} to characterize $\prop{\ell^\OP}$ and use it to give sufficient distributions assumptions over labels in $\P \subseteq \simplex$ such that $L^{WW}$ and the canonical argmax link $\psi(u) : u \mapsto r \in \argmax_y \inprod{e_y}{u}$ are calibrated with respect to 0-1 loss on $\P \subseteq \simplex$ (i.e., that eq.~\ref{eq:calibrated} holds for all $p \in \P$).
-%Sufficient constraints to recover consistency are characterized by comparing $\prop{\ell^\OP}$ and $\mode$: the property for which Weston--Watkins was originally proposed.
-Like Figure~\ref{fig:abstain-intuition-inconsistent}, Figure~\ref{fig:ordered-partition} gives the level sets $\gamma_T =\{p \in \simplex \mid T \in \prop{\ell^\OP}(p)\}$ for each $T \in \T$\jessie{notation} juxtaposed with the level sets of the mode.
+Upon showing that $\LWW$ embeds $\ellOP$, \citeauthor{wang2020weston} then characterize $\prop{\ellOP}$.
+In the same manner as Figure~\ref{fig:abstain-intuition-inconsistent}, knowledge of the level sets of $\prop{\ellOP}$ gives a set of label distribution $\P \subseteq \simplex$ such that $\LWW$ and the canonical link $\psi(u) : u \mapsto r \in \argmax_y \inprod{e_y}{u}$ are calibrated with respect to 0-1 loss on $\P \subseteq \simplex$ (i.e., that eq.~\ref{eq:calibrated} holds for all $p \in \P$).
+%Sufficient constraints to recover consistency are characterized by comparing $\prop{\ellOP}$ and $\mode$: the property for which Weston--Watkins was originally proposed.
+See Figure~\ref{fig:ordered-partition} for an illustration.
+% gives the level sets $\gamma_T =\{p \in \simplex \mid T \in \prop{\ellOP}(p)\}$ for each $T \in \T$\jessie{notation} juxtaposed with the level sets of the mode.
 %$\mode_r = \{p \in \simplex \mid r \in \mode(p)\}$ for each $r \in \Y$.
-%Since each distribution in a cell of $\prop{\ell^\OP}$ corresponds to the same optimal report $T$, the choice of where to link that report must be constant.
-%Thus, if a cell of $\prop{\ell^\OP}$ is fully contained in a cell of $\mode$, then the corresponding $\prop{\ell^\OP}$ value can be mapped to the corresponding $\mode$ value.
-%Conversely, if the relative interior of a cell of $\prop{\ell^\OP}$ corresponding to $T$ spans multiple mode cells, it becomes unclear to which report the set $T$ should be linked.
-To recover consistency on $\P \subseteq \simplex$, it suffices that $\P$ excludes the cells colored in blue in Figure~\ref{fig:ordered-partition}.
+%Since each distribution in a cell of $\prop{\ellOP}$ corresponds to the same optimal report $T$, the choice of where to link that report must be constant.
+%Thus, if a cell of $\prop{\ellOP}$ is fully contained in a cell of $\mode$, then the corresponding $\prop{\ellOP}$ value can be mapped to the corresponding $\mode$ value.
+%Conversely, if the relative interior of a cell of $\prop{\ellOP}$ corresponding to $T$ spans multiple mode cells, it becomes unclear to which report the set $T$ should be linked.
+% To recover consistency on $\P \subseteq \simplex$, it suffices that $\P$ excludes the cells colored in blue in Figure~\ref{fig:ordered-partition}.
 
 
 \begin{figure}[H]
@@ -1134,11 +1140,11 @@ To recover consistency on $\P \subseteq \simplex$, it suffices that $\P$ exclude
 	\end{minipage}
 	\hfill
 	\begin{minipage}{0.5\linewidth}
-		\caption{Level sets of $\prop{\ell^\OP}$ (solid lines)
-			%the property elicited by the ordered partition loss and embedded by $L^{WW}$, 
+		\caption{Level sets of $\prop{\ellOP}$ (solid lines)
+			%the property elicited by the ordered partition loss and embedded by $\LWW$, 
 			juxtaposed against the level sets of $\mode$ (dashed lines).
-%		The level sets of the mode (for which $L^{WW}$ is proposed as a surrogate) are given by the cells formed by the dashed blue lines.
-      For the same reason as in Figure~\ref{fig:abstain-intuition-inconsistent}, the level sets of $\prop{\ell^\OP}$ whose relative interiors span multiple cells of the mode, colored blue, cannot be properly linked to the mode.
+%		The level sets of the mode (for which $\LWW$ is proposed as a surrogate) are given by the cells formed by the dashed blue lines.
+      For the same reason as in Figure~\ref{fig:abstain-intuition-inconsistent}, the level sets of $\prop{\ellOP}$ whose relative interiors span multiple cells of the mode, colored blue, cannot be properly linked to the mode.
       These offending cells correspond to reports whose highest partition has more than one element, where in the white cells, the ``highest'' element of the partition is well-defined.}
 		\label{fig:ordered-partition}
 	\end{minipage}
