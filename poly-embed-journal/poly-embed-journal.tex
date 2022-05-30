@@ -917,6 +917,8 @@ In structured binary classification and top-$k$ classification, our framework al
 % A key step in Construction~\ref{const:eps-thick-link} is constructing the set-valued link candidate function $\Psi$, which yields the possible values any $\epsilon$-separated link $\psi$ could map to; this in turn provides a tool to verify the calibration of a proposed link (\S~\ref{sec:abstain}, \ref{sec:top-k}) or construct new calibrated links(\S~\ref{sec:lovasz-hinge}).
 
 \subsection{Applying the embedding framework}
+\label{sec:apply-embedd-fram}
+
 When using our framework to study the consistency or inconsistency of an existing surrogate $L:\reals^d \to \reals^\Y_+$, often the first step is determining the loss it embeds.
 To do so, we suggest the following general approach.
 First, for each $y\in\Y$, divide $\reals^d$ into a finite number of polyhedral regions on which $L(\cdot)_y$ is an affine function.
@@ -1056,9 +1058,9 @@ While the authors provide theoretical justification and experiments, they leave 
 %% lovasz paper closes the gap, answering inconsistency wrt \ell^f by showing that L^f embeds structured abstain
 \citet{ourlovaszpaper} use our embedding framework to resolve the consistency of $L^f$, showing that it is inconsistent with respect to $\ell^f$ outside of the trivial case where $f$ is modular (in which case $\ell^f$ is a weighted Hamming loss).
 Moreover, they show that $L^f$ embeds a variant $\ellabs$ of $\ell^f$ where one is allowed to abstain on a set of indices $A \subseteq [k]$, which they call the \emph{structured abstain problem}.
-The inclusion of abstain options is natural when observing that the BEP surrogate $\BEP$ from multiclass classification with an abtain option \S~\ref{sec:abstain} is the special case of $L^f$ where $f(S) = \ones\{S \neq \emptyset\}$.
+The inclusion of abstain options is natural when observing that the BEP surrogate $\BEP$, for multiclass classification with an abtain option (\S~\ref{sec:abstain}), is the special case of $L^f$ where $f(S) = \ones\{S \neq \emptyset\}$.
 
-To derive the discrete loss $\ellabs$ that $L^f$ embeds, the authors show that the set $\V = \{-1,0,1\}^k$ is representative for $L^f$, for any choice of $f$.
+To derive the discrete loss $\ellabs$ that $L^f$ embeds, the authors follow an approach similar to \S~\ref{sec:apply-embedd-fram} to show that the set $\V = \{-1,0,1\}^k$ is representative for $L^f$, for any choice of $f$.
 From Proposition~\ref{prop:representative-embeds-restriction}, they conclude that $L^f$ embeds $\ellabs := L^f|_{\V}$.
 Letting $\abs(v) = \{i\in[k] \mid v_i = 0\}$ denote the ``abstain'' set, we may write $\ellabs : \V \to \reals^\Y_+$ as
 \begin{equation}
@@ -1068,9 +1070,9 @@ Letting $\abs(v) = \{i\in[k] \mid v_i = 0\}$ denote the ``abstain'' set, we may 
 %They go on to show that the embedding is tight, for $f$ strictly submodular and strictly monotone, if one first disallows $v$ with $|\abs(v)| = 1$.
 By Theorem~\ref{thm:link-main}, then, there is a link function such that the Lov\'asz hinge is consistent with respect to the structured abstain loss $\ellabs$.
 
-The authors show that actually determining a calibrated link function in this case is nontrivial.
+As \citeauthor{ourlovaszpaper} observe, actually determining a calibrated link function in this case is nontrivial.
 Simple threshold links like for the BEP surrogate in \S~\ref{sec:abstain} are not always calibrated, thus casting doubt that a trial-and-error approach for finding the link would be successful.
-Instead, \citeauthor{ourlovaszpaper} leverage our thickened link construction (Construction~\ref{const:eps-thick-link}) to derive two links $\psi^*$ and $\psi^\diamond$, which have somewhat intricate geometric structure (Figure~\ref{fig:lovasz-links}).
+Instead, the authors leverage our thickened link construction (Construction~\ref{const:eps-thick-link}) to derive two links $\psi^*$ and $\psi^\diamond$, which have somewhat intricate geometric structure (Figure~\ref{fig:lovasz-links}).
 Perhaps surprisingly, by deriving the link envelope $\Psi$ which is contained in the envelopes for $L^f$ for all submodular and increasing $f$, they prove that $\psi^*(u) \subseteq \Psi(u)$ and $\psi^\diamond(u) \subseteq \Psi(u)$ for all $u \in \reals^d$.
 Thus, both $(L^f, \psi^*)$ and $(L^f, \psi^\diamond)$ are simultaneously calibrated with respect to $\ellabs$ for all such $f$.
 
@@ -1123,7 +1125,9 @@ The loss $\ellOP$ can be interpreted as a variation of 0-1 loss incorporating co
 
 %% one might make distributional assumptions to regain consistency with geometric drawing
 Upon showing that $\LWW$ embeds $\ellOP$, \citeauthor{wang2020weston} then characterize $\prop{\ellOP}$.
-In the same manner as Figure~\ref{fig:abstain-intuition-inconsistent}, knowledge of the level sets of $\prop{\ellOP}$ gives a set of label distribution $\P \subseteq \simplex$ such that $\LWW$ and the canonical link $\psi(u) : u \mapsto r \in \argmax_y \inprod{e_y}{u}$ are calibrated with respect to 0-1 loss on $\P \subseteq \simplex$ (i.e., that eq.~\ref{eq:calibrated} holds for all $p \in \P$).
+In the same manner as Figure~\ref{fig:abstain-intuition-inconsistent}, knowledge of the level sets of $\prop{\ellOP}$ clarifies which label distributions are the source of inconsistency for classification.
+Removing these distributions gives a set $\P \subseteq \simplex$
+such that $\LWW$ and the canonical link $\psi(u) : u \mapsto r \in \argmax_y \inprod{e_y}{u}$ are calibrated with respect to 0-1 loss on $\P \subseteq \simplex$ (i.e., such that eq.~\eqref{eq:calibrated} holds for all $p \in \P$).
 %Sufficient constraints to recover consistency are characterized by comparing $\prop{\ellOP}$ and $\mode$: the property for which Weston--Watkins was originally proposed.
 See Figure~\ref{fig:ordered-partition} for an illustration.
 % gives the level sets $\gamma_T =\{p \in \simplex \mid T \in \prop{\ellOP}(p)\}$ for each $T \in \T$\jessie{notation} juxtaposed with the level sets of the mode.
@@ -1134,7 +1138,7 @@ See Figure~\ref{fig:ordered-partition} for an illustration.
 % To recover consistency on $\P \subseteq \simplex$, it suffices that $\P$ excludes the cells colored in blue in Figure~\ref{fig:ordered-partition}.
 
 
-\begin{figure}[H]
+\begin{figure}[t]
 	\begin{minipage}{0.47\linewidth}
 		\centering
 		\includegraphics[width=0.9\linewidth]{tikz/ordered-partition}
@@ -1167,7 +1171,8 @@ See Figure~\ref{fig:ordered-partition} for an illustration.
 % ~\citep{frongillo2021surrogate}.\jessiet{right?}
 % \citet{yang2018consistency} propose a piecewise linear surrogate that is calibrated for top-$k$ classification, but is not convex, generally making optimization more difficult.
 % Now consider the class of polyhedral surrogates whose calibration for top-$k$ prediction is unknown~\citep{yang2018consistency,lapin2016loss,lapin2018analysis}: Theorem~\ref{thm:poly-embeds-discrete} says that every polyhedral surrogate embeds some discrete loss, and Theorem~\ref{thm:embed-poly-main} states that embedding implies calibration by some link for this discrete loss; thus, we can use embedding to analyze the (non)calibration of existing polyhedral surrogates with respect to top-$k$ by comparing the embedded losses to top-$k$.
-In settings like object recognition and information retrieval, the top-$k$ classification problem arises in which one predicts a set $S$ of $k$ labels, and given the true label $y$, receives loss $\elltopk(S)_y = \ones\{y\notin S\}$~\citep{lapin2015top, lapin2016loss, lapin2018analysis,yang2018consistency,berrada2018smooth,rastegari2011scalable,reddi2019stochastic}.
+In settings like object recognition and information retrieval, it is natural to predict a set $S$ of labels.
+In top-$k$ classification, one requires $|S|=k$, and given the true label $y$, the target loss is $\elltopk(S)_y = \ones\{y\notin S\}$~\citep{lapin2015top, lapin2016loss, lapin2018analysis,yang2018consistency,berrada2018smooth,rastegari2011scalable,reddi2019stochastic}.
 In the literature on surrogates for top-$k$ classification, one goal has been to find a surrogate satisfying the following three desiderata: convexity, consistency, and piecewise linear (``hinge-like'') structure.
 \citet{yang2018consistency} show that a number of previously proposed polyhedral losses, i.e., those which are convex and hinge-like, are inconsistent.
 They further suggest that perhaps no surrogate could satisfy all three properties.
@@ -1181,8 +1186,9 @@ They further suggest that perhaps no surrogate could satisfy all three propertie
 % None of the studied surrogates embed top-$k$ but use the properties elicited by the embedded losses to characterize (tighter\jessiet{not sure how to say this.  better bounds than YK gave, which was just the abstain cell for all the surrogates}) sufficient assumptions on the data distribution in order be calibrated with respect to top-$k$, fixing the canonical argmax link $\psi^k$.
 %\jessiet{do we want to drop the table here or nah?}\raft{Yeah I'd say we should try it; it's at least helpful when discussing the constraints on the conditional label distributions, and besides, it's nice to have a figure for each section.  Sentence commented out below could be useful in the caption.}
 % \citeauthor{finocchiaro2022consistenttopk} consider the polyhedral surrogates proposed by \citet[Table 1, cf. $\psi_2, \psi_3, \psi_4$]{yang2018consistency} and evaluate \emph{which discrete losses these surrogates embed}, if not top-$k$.
-Each of the examined surrogates embeds a discrete loss which can be viewed as a variant of the top-$k$ problem, allowing the algorithm to express varying levels of ``confidence'' on the top $k$ labels or report less than $k$ labels.
-The data distributions for which these optimal reports differ from the optimal top-$k$ reports are shown in Table~\ref{tab:loss-slices} with $n=4$ and $k \in \{2,3\}$.
+Each of the examined surrogates embeds a discrete loss which can be viewed as a variant of the top-$k$ problem, allowing the algorithm to express varying levels of ``confidence'' on the top $k$ labels or report fewer than $k$ labels.
+The label distributions for which these optimal reports differ from the optimal top-$k$ reports are shown in Table~\ref{tab:loss-slices} with $n=4$ and $k \in \{2,3\}$.
+(Recall $n=|\Y|$, the number of labels.)
 
 \begin{table*}
 	\centering
@@ -1204,16 +1210,17 @@ The data distributions for which these optimal reports differ from the optimal t
 	\label{tab:loss-slices}
 \end{table*}
 
-For example, consider one of the surrogates, $\Li {4}(u)_y = \left(1 - u_y + \frac 1 k \sum_{i=1}^k (u_{\setminus y})_{[i]}\right)_+$, where $u_{[i]}$ denotes the $i$th largest element of $u \in \reals^n$ and $n$ is the total number of labels;
-the authors show that $\Li{4}$ embeds $\ell^{(4)}(T)_y = \tfrac {k+1} {k+1-|T|} \ones\{y\notin T\}$, where $T$ is a set of at most $k$ labels.
+For example, one of the surrogates is $\Li {4}(u)_y = \left(1 - u_y + \frac 1 k \sum_{i=1}^k (u_{\setminus y})_{[i]}\right)_+$, where $u_{[i]}$ denotes the $i$th largest element of $u \in \reals^n$.
+The authors show that $\Li{4}$ embeds $\ell^{(4)}(T)_y = \tfrac {k+1} {k+1-|T|} \ones\{y\notin T\}$, where $T$ is a set of at most $k$ labels.
 These embedded losses may therefore be useful in top-$k$ settings where choosing smaller sets may have some benefit, such as a search engine that can use unused space for advertisements.
-Using the losses each proposed surrogate embeds, \citeauthor{finocchiaro2022consistenttopk} go on to derive constraints on the label distributions under which the proposed surrogates are actually consistent for top-$k$ classification which subsume previous constraints~\citep{yang2018consistency}.
+Using the losses each proposed surrogate embeds, the authors go on to derive constraints on the label distributions under which the proposed surrogates are actually consistent for top-$k$ classification which subsume previous constraints~\citep{yang2018consistency}.
+\raft{I did not understand what ``which subsume previous constraints'' meant.  Do we mean the constraints are tighter than the previous constraints of YK?}
 
 Beyond analyzing the previously proposed surrogates, \citeauthor{finocchiaro2022consistenttopk} also use our framework to derive the first consistent polyhedral surrogate for $\elltopk$,
 \begin{align}\label{eq:topk-embedding}
 L^k(u)_y &= \max \left(u_{[1]}, \max_{m \in \{k+1, \ldots, n\}} \left[ 1 - \frac k m + \frac 1 m \sum_{i=1}^m u_{[i]}\right] \right)- u_y~.
 \end{align}
-That is, they show that indeed a surrogate exists satisfying convexity, consistency, and hinge-like structure.
+That is, they show that a hinge-like surrogate does exist which is both convex and consistent.
 In light of our framework, this fact is unsurprising: Theorems~\ref{thm:embed-poly-main} and~\ref{thm:link-main} imply that \emph{every} discrete loss has a consistent polyhedral surrogate.
 This new surrogate $L^k$ is given directly by the construction from the proof of Theorem~\ref{thm:discrete-loss-poly-embeddable} and applying Theorem~\ref{thm:link-main} to obtain consistency.
 While Theorem~\ref{thm:link-main} guarantees the existence of some consistent link function, the authors further ask whether the canonical argmax link function $\psi^k$, which returns the $k$ largest elements of $u$, is calibrated.
