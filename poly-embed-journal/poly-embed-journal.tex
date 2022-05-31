@@ -455,12 +455,21 @@ Like the use of a surrogate and link pair in the calibration definition, one can
 	Moreover, we say $L$ indirectly elicits $\gamma$ if such a $\psi$ exists.
 \end{definition}
 
+\raft{Added this paragraph since we needed it in \S~\ref{sec:poly-ie-consistency}}
+Indirect elicitation is a weaker condition than calibration~\citep{steinwart2008support,agarwal2015consistent,finocchiaro2021unifying}; we briefly sketch the argument.
+Suppose $L$ is minimizable and $(L,\psi)$ is calibrated with respect to $\ell$, and set $\Gamma=\prop{L}$ and $\gamma=\prop{\ell}$.
+Let $u\in\reals^d$ and $p\in\Gamma_u$.
+From eq.~\eqref{eq:calibrated}, if $\psi(u) \notin \gamma(p)$, then we would have $u\notin\Gamma(p)$, a contradiction to $p\in\Gamma_u$.
+Thus, $\psi(u) \in \gamma(p)$, so $p\in\gamma_{\psi(u)}$.
+In fact, indirect elicitation is strictly weaker; take hinge loss with the link $\psi(u) = -1$ for $u < 1$ and $\psi(u) = 1$ for $u\geq 1$.
+
 At times, the elicitation literature studies indirect elicitation through the notion of one property ``refining'' another~\citep{frongillo2015elicitation}, where a property $\Gamma: \simplex \toto \R$ refines $\Gamma': \simplex \toto \R'$ if, for all $r \in \R$, there exists an $r' \in \R'$ such that $\Gamma_r \subseteq \Gamma'_{r'}$.
 In particular, a loss $L$ indirectly elicits a property $\gamma$ if and only if $\prop L$ refines $\gamma$.
 
 
 
 \subsection{Embedding}
+\label{sec:embedding}
 
 %Several consistent convex surrogates in the literature can be thought of as \emph{embeddings} of the target loss $\ell$, wherein one maps the discrete reports of $\ell$ to a vector space, and finds a convex loss which agrees with the original loss.
 %A key notion to define an embedding is that of a \emph{representative set}: a set of reports $\Sc$ such that, for all label distributions, at least one report $r\in\Sc$ minimizes expected loss.
@@ -1630,42 +1639,53 @@ In other words, both $\Gamma$ and $\Gamma^{-1}$ have a finite range as multivalu
 
 
 %% context for section: for polyhedral losses, indirect elicitation iff consistent
-It is straightforward to verify that consistency, and therefore calibration, implies indirect elicitation~\citep{finocchiaro2021unifying,agarwal2015consistent,steinwart2008support}.
-Indirect elicitation may appear much weaker than calibration, since in particular it does not depend on the loss except through the property it elicits, and thus only depends on the exact minimizers of the loss.
-Surprisingly, for minimizable polyhedral surrogates, we show the converse: indirect elicitation implies calibration, and therefore consistency.
+As we have observed, consistency, and therefore calibration, implies indirect elicitation (\S~\ref{subsec:calibration-links}).
+In general, indirect elicitation is weaker than calibration, since it only depends on the loss through the property it elicits, i.e., its exact minimizers.
+Surprisingly, for polyhedral surrogates, we show the converse: indirect elicitation implies calibration, and therefore consistency.
+
+One technical detail is that the link function may have to change.
+That is, we will show that if $(L,\psi)$ indirectly elicits $\prop{\ell}$, then there exists some potentially different link $\psi'$ such that $(L,\psi')$ is calibrated with respect to $\ell$.
+To see why this change may be necessary, consider again the example from \S~\ref{subsec:calibration-links}:
+hinge loss with the link $\psi(u) = -1$ for $u < 1$ and $\psi(u) = 1$ for $u\geq 1$.
+Here indirect elicitation is achieved, since we have $\psi((-\infty,-1]) = \{-1\}$ and $\psi([1,\infty)) = \{1\}$, but the link is not $\epsilon$-separated for any $\epsilon>0$.
+In general, it is not clear whether one can always adjust the link in this case to achieve separation, and therefore calibration.
+Fortunately, for polyhedral surrogates, our embedding framework shows that one can always design a separated link from Construction~\ref{const:eps-thick-link}.
+
+
 
 %% first step to show iff: indirect polyhedral elicitation passes through embedding.
-\raf{Jessie: sync up refines vs indirect elic; use the latter unless it's really awkward \jessie{burn}}
-A useful lemma is that for minimizable polyhedral losses, indirect elicitation must always pass through an embedding.
+A important step is to show that, for polyhedral surrogates, indirect elicitation must always pass through an embedding.
+That is, if $L$ indirectly elicits $\gamma$, then there is some loss $\ell$ which $L$ embeds, such that $\ell$ indirectly elicits $\gamma$.
 This result holds more generally whenever $L$ has a finite representative set, as in \S~\ref{sec:min-rep-sets}.
-With this result, we can show that if a surrogate indirectly elicits a target property, then it is also calibrated with respect to any loss eliciting the target property.
 \begin{lemma}\label{lem:ie-iff-embeds-refinement}
-  Let $L$ be a minimizable polyhedral loss.
+  Let $L:\reals^d\to\reals^\Y_+$ be polyhedral.
   Then $L$ indirectly elicits a property $\gamma$ if and only if $L$ tightly embeds a discrete loss $\ell$ that indirectly elicits $\gamma$.
 \end{lemma}
 \begin{proof}
-  Let $L:\reals^d\to\reals^\Y_+$ be polyhedral, and $\Gamma = \prop L$.
-  Then $L$ tightly embeds a discrete loss from Lemma~\ref{lem:X}(\ref{item:X-tight-embed}).
-  Furthermore, Lemma~\ref{lem:X}(\ref{item:X-min-Theta},\ref{item:X-redundant},\ref{item:X-tight-embed}) implies that $L$ (eliciting $\Gamma$) indirectly elicits $\prop \ell$ (eliciting $\hat \gamma$) for any discrete loss $\ell$ that $L$ tightly embeds.
-  (To construct a link, construct $\hat \psi: u \mapsto r$ such that $\Gamma_u \subseteq \hat \gamma_r$ for all $u \in \reals^d$.)
+  \raft{Clarified this proof in a bunch of places because of the refinement to indirect elicitation changes; worth a double-check}
+  Let $\Gamma = \prop L$.
+From Lemma~\ref{lem:X}(\ref{item:X-tight-embed}), $L$ tightly embeds a discrete loss.
+  Furthermore, Lemma~\ref{lem:X}(\ref{item:X-min-Theta},\ref{item:X-redundant},\ref{item:X-tight-embed}) implies that $L$ indirectly elicits $\hat\gamma := \prop \ell$ for any discrete loss $\ell$ that $L$ tightly embeds.
+  The link is any function $\hat\psi: u \mapsto r$ such that $\Gamma_u \subseteq \hat\gamma_r$ for all $u \in \reals^d$.
 
-  We claim that, for any property $\gamma$, and any loss $\ell$ that $L$ tightly embeds, $L$ indirectly elicits $\gamma$ if and only if $\ell$ indirectly elicits $\gamma$.
-  If $\ell$ indirectly elicits $\gamma$ via the link $\psi$, then $L$ indirectly elicits $\gamma$ by transitivity of subset inclusion, as $\Gamma_u \subseteq \hat \gamma_{\hat \psi(u)} \subseteq \gamma_{\psi \circ \hat \psi(u)}$ for all $u \in \reals^d$.
-  For the other direction, Lemma~\ref{lem:X}(\ref{item:X-min-Theta},\ref{item:X-tight-embed}) shows that the level sets of $\hat \gamma$ are contained in the set $\{\Gamma_u \mid u\in\reals^d\}$.
-  Thus, if $L$ indirectly elicits $\gamma$, then in particular $\ell$ indirectly elicits $\gamma$.
-  The result now follows immediately from the claim.
+  We will prove the stronger statement that, for any property $\gamma$, and any loss $\ell:\R\to\reals^\Y_+$ that $L$ tightly embeds, $L$ indirectly elicits $\gamma$ if and only if $\ell$ indirectly elicits $\gamma$.
+  If $\ell$ indirectly elicits $\gamma$ via the link $\psi$, then $L$ indirectly elicits $\gamma$ by transitivity of subset inclusion, as $\Gamma_u \subseteq \hat\gamma_{\hat\psi(u)} \subseteq \gamma_{\psi \circ \hat\psi(u)}$ for all $u \in \reals^d$.
+  Conversely, suppose $L$ indirectly elicits $\gamma$ via the link $\psi$.
+  As $L$ tightly embeds $\ell$, from Lemma~\ref{lem:X}(\ref{item:X-min-Theta},\ref{item:X-tight-embed}), the level sets of $\hat \gamma$ are contained in the set $\{\Gamma_u \mid u\in\reals^d\}$.
+  Letting the map $\hat\psi:\R\to\reals^d$ exhibit this contaiment, we have $\hat\gamma_r = \Gamma_{\hat\psi(r)} \subseteq \gamma_{\psi \circ \hat\psi (r)}$ for all $r\in\R$.
 \end{proof}
 
-
+With Lemma~\ref{lem:ie-iff-embeds-refinement}, we can show the main result of this section: if a polyhedral surrogate indirectly elicits $\prop{\ell}$, then it is also calibrated with respect to $\ell$ for some choice of link function.
 
 \begin{theorem}\label{thm:poly-ie-implies-consistent}
-	Let $L$ be a minimizable polyhedral loss which indirectly elicits a finite property $\gamma$.
+	Let $L:\reals^d \to \reals^\Y_+$ be a polyhedral loss which indirectly elicits a finite property $\gamma$.
   For any loss $\ell$ eliciting $\gamma$, there exists a link $\psi$ such that $(L, \psi)$ is calibrated (and consistent) with respect to $\ell$.
 \end{theorem}
 \begin{proof}
-	Let $L:\reals^d \to \reals^\Y_+$ be a polyhedral loss indirectly eliciting $\gamma: \simplex \toto \R$, and let $\ell$ be a discrete loss eliciting $\gamma$.
-  By Lemma~\ref{lem:ie-iff-embeds-refinement}, $L$ tightly embeds a discrete loss $\ell^\emb:\R^\emb\to\reals^\Y_+$ such that $\ell^\emb$ (directly) elicits $\gamma^\emb$ and indirectly elicits $\gamma$.
-  By indirect elicitation, there exists a function $\psi^\R: \R^\emb \to \R$ such that for all $r\in\R^\emb$ and $p\in\simplex$ we have $r\in\gamma^\emb(p) \implies \psi^\R(r) \in \gamma(p)$. 
+  Let $\R$ be the range of $\gamma$, so that $\gamma: \simplex \toto \R$, and let $\ell$ elicit $\gamma$.
+  By Lemma~\ref{lem:ie-iff-embeds-refinement}, $L$ tightly embeds a discrete loss $\ell^\emb:\R^\emb\to\reals^\Y_+$ such that $\ell^\emb$ indirectly elicits $\gamma$; let $\psi^\R: \R^\emb \to \R$ be the corresponding link function.
+  Let $\gamma^\emb := \prop{\ell^\emb}$ be the property that $\ell^\emb$ directly elicits.
+  Then for all $r\in\R^\emb$ and $p\in\simplex$ we have $r\in\gamma^\emb(p) \implies \psi^\R(r) \in \gamma(p)$. 
   %From refinement, we can define a function $\psi^\R: \R^\emb \to \R$ such that for all $r\in\R^\emb$ and $p\in\simplex$ we have $r\in\gamma^\emb(p) \implies \psi^\R(r) \in \gamma(p)$. 
   Moreover, Theorem~\ref{thm:link-main} gives a link function $\psi^\emb : \reals^d \to \R^\emb$ such that $(L,\psi^\emb)$ is calibrated with respect to $\ell^\emb$.
 
