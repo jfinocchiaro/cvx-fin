@@ -220,18 +220,12 @@ After learning a surrogate hypothesis, a link function then translates back to t
 To ensure the surrogate and link properly correspond to the target problem, the surrogate must be \emph{consistent}, meaning that minimizing the surrogate loss over enough data will also minimize the target loss.
 
 %% designing convex and consistent surrogates is often ad hoc.  often inefficient or not consistent (the gap)
-\jessiet{I almost feel like this paragraph should be in reverse order: convex consistent studied, design often ad-hoc, for example top-k, also prediction dimension.  But also we might want to punt on prediction dimension for later.  Shifting; old version in comments.}
-%A growing body of work seeks to design and analyze consistent convex surrogates for particular target loss functions.
-%For example, motivated by structured prediction and other large-label domains, recent work has sought surrogates with low prediction dimension, meaning the dimension of the range of the surrogate hypothesis~\citep{frongillo2015elicitation, ramaswamy2016convex}.
-%Yet in some cases these bounds are far from tight, such as for \emph{abstain loss} (classification with an abstain option)~\citep{bartlett2008classification,yuan2010classification,ramaswamy2016convex,ramaswamy2018consistent,zhang2018reject}.
-%In other settings, such as top-$k$ classification, there are many proposed ``hinge-like'' surrogates which are piecewise linear and convex (henceforth, \emph{polyhedral}), which were later proved to be inconsistent~\cite{yang2018consistency}.
-%Generally speaking, surrogate design has been ad-hoc, with few tools to construct consistent convex surrogates, and even sparser understanding of what types of surrogates are possible.
 While a growing body of work seeks to design and analyze consistent convex surrogates for particular target loss functions, to date much of this work has been ad-hoc.
-We lack general tools to methodically construct consistent convex surrogates, much less an understanding of which surrogates will be consistent.
+We lack general tools to systematicall construct consistent convex surrogates, much less an understanding of the full class of consistent surrogates.
 For example, in multiclass and top-$k$ classification, several proposed surrogates were proposed and adopted but later proved to be inconsistent~\cite{yang2018consistency}\raft{need a good ref for multiclass; I'm thinking WW and others}.
-This state of affairs is even more dire for structured prediction, where in addition to convexity and consistency, one requires a low \emph{prediction dimension} (the dimension of the surrogate prediction space) as the label set can grow exponentially large.
+This state of affairs is even more dire for structured prediction, where in addition to convexity and consistency, one often requires a low \emph{prediction dimension} (the dimension of the surrogate prediction space) as the label set can grow exponentially large.
 Clever constructions like the binary-encoded predictions (BEP) surrogate for multiclass classification with an abstain option~\cite{ramaswamy2018consistent}, which achieves logarithmic prediction dimension, are the exception rather than the rule.
-In all of these settings, we lack a unifying framework that moves from a given target problem to a convex consistent surrogate and link.
+In all of these settings, we lack a unifying framework that moves from a given target problem to a convex consistent surrogate and link function.
 
 
 %% we introduce embeddings (the hero narrative)
@@ -239,56 +233,36 @@ To address this shortcoming, we introduce a new framework motivated by a particu
 Specifically, we say a convex surrogate $L$ embeds a discrete target loss $\ell$ if there is an injective embedding from the discrete reports (predictions) to $\reals^d$ such that (i) the original loss values are recovered, and (ii) a report is $\ell$-optimal if and only if the embedded report is $L$-optimal.
 Common examples of this general construction include hinge loss as a surrogate for 0-1 loss and the BEP surrogate mentioned above~\citep{ramaswamy2018consistent}.
 
-%% what we prove / what we do (our research question)
-We prove that such an embedding scheme is intimately related to the class of \emph{polyhedral} loss functions, i.e., those that are piecewise-linear and convex.
-In particular, every discrete loss is embedded by a polyhedral surrogate.
-Moreover, such an embedding gives rise to calibrated link function, and is therefore consistent with respect to the target loss.
-
-
-\restatehack{
-  \begin{theorem}
-    \label{thm:embed-poly-main}
-    \label{thm:link-main}
-  \end{theorem}}
-
+Using this framework, we give several constructive results to design new consistent surrogates, as well as a suite of tools to analyze existing surrogates.
+As a first step, in \S~\ref{sec:poly-loss-embed}, we show that such an embedding scheme is intimately related to the class of \emph{polyhedral} loss functions, i.e., those that are piecewise-linear and convex.
 \begin{restatable}{theorem}{embedpolyinformal}\label{thm:embed-poly-main}
   Every discrete loss $\ell$ is embedded by some polyhedral loss $L$, and every polyhedral loss $L$ embeds some discrete loss $\ell$.
-\end{restatable}
+\end{restatable}%\vskip-5pt
+\noindent
+Crucially, we go on in \S~\ref{sec:calibration} to show that an embedding gives rise to a calibrated link function, and is therefore consistent with respect to the target loss.
 \begin{restatable}{theorem}{linkinformal}\label{thm:link-main}
   Given any polyhedral loss $L$, let $\ell$ be a discrete loss it embeds. There exists a link function $\psi$ such that $(L,\psi)$ is calibrated with respect to $\ell$.
 \end{restatable}
+\noindent
+Beyond consistency, we show in \S~\ref{subsec:regret-bounds} that any polyhedral surrogate achieves a linear surrogate regret bound, which allows one to translate generalization bounds from the surrogate to the target.
+Our results are constructive: given a discrete target loss, we show how to define a surrogate and construct a calibrated link, and given a polyhedral surrogate, we show how to find a target loss that it embeds.
 
-
-\raf{ADD: Beyond consistency, we show that any polyhedral surrogate achieves a linear surrogate regret bound, which allows one to translate generalization bounds from the surrogate to the target (\S~\ref{subsec:regret-bounds}).}
-
-%% walking through results for the rest of the intro.  there are just a lot, so multiple paragraphs.
-\raft{Probably should reorg next 3 or 4 paragraphs -- maybe introduce bullets or something?  Need to give an effective roadmap.  Or keep the existing flow but clarify the themes of each paragraph (tools, intuition, deeper structural results, takeaways). \jessie{Attempted.  Burn?}}
-\paragraph{Contributions}
-Our proofs give explicit constructions for the surrogate (\S~\ref{sec:poly-loss-embed}) and link (\S~\ref{sec:calibration}) embedding a given discrete loss.
-Conversely, given an existing polyhedral surrogate, we provide tools to find the discrete losses they embed (Proposition~\ref{prop:representative-embeds-restriction}), which may or may not be the desired target.
-\jessiet{Do we want the rest of this paragraph?  it kind of walks through the rest of the paper, but also doesn't?  this is just results for polyhedral losses, followed by a paragraph of intuition, then comes back to the rest of the results, which feels a little funky?}
-In short, if one can identify a finite \emph{representative set} $\Sc$ of reports for a surrogate $L$, meaning one that always contains an $L$-optimal report, then $L$ embeds the loss $L|_\Sc$ ($L$ restricted to $\Sc$).
-We illustrate all of these tools with several examples (\S~\ref{sec:applications}).
-
-%% deeper structural results
-We also provide several observations beyond what is needed to prove our main results, which we view as conceptual contributions (\S~\ref{sec:min-rep-sets},~\ref{sec:poly-ie-consistency}).
-Using tools from property elicitation, we show an equivalence between minumum representative sets and ``non-redundancy'', wherein no report is dominated by another.
-We further show that, while the minimum representative set is not always unique, the loss values associated with it are unique, giving rise to a natural ``trim'' operation on losses.
-Finally, we show that when restricting to the class of polyhedral surrogates, indirect elicitation is both necessary and sufficient for consistency (Theorem~\ref{thm:poly-ie-implies-consistent}).
-
+We demonstrate the constructiveness of our framework in \S~\ref{sec:applications} with several applications, many of which are subsequent to our work.
+In addition to constructing new surrogates, we illustrate the power of our framework to analyze previously proposed polyhedral surrogates.
+For example, while we know that the inconsistent top-$k$ polyhedral surrogates mentioned above do not solve top-$k$ classification, our framework illuminates the problem they \emph{do} solve, and what restrictions on the underlying distribution would render them top-$k$ consistent (\S~\ref{sec:top-k}).
 
 %% intuition for the relationship between polyhedral surrogates and discrete target losses
-\paragraph{Intuition for polyhedral embeddings}
-\jessiet{Do we need this paragraph? or do we want to move it later?}
-Underpinning our results are several observations which formalize the idea that polyhedral losses ``behave like'' discrete losses.
-For example, polyhedral losses have a finite number of optimal sets (the set of reports which minimize the expected loss for some conditional label distribution).
-As a result, by selecting a report from each set, one arrives at a finite representative set, which gives an embedding.
-For the converse, we prove that a surrogate loss embeds a target if and only if their Bayes risks match (Proposition~\ref{prop:embed-bayes-risks}), and use the fact that discrete losses and polyhedral losses both have polyhedral Bayes risks.
+Underpinning our results are several observations, outlined in \S~\ref{sec:min-rep-sets}, which formalize the idea that polyhedral losses ``behave like'' discrete losses.
+In particular, any polyhedral loss $L$ has a finite \emph{representative set} $\Sc$ of reports, such that for all distributions, some report in $\Sc$ is $L$-optimal.
+We show that $L$ embeds the discrete loss $\ell = L|_\Sc$ given by restricting $L$ to just the reports in $\Sc$.
+To go from a discrete loss to a polyhedral one, we prove that the conditions of an embedding are equivalent to matching Bayes risks (Proposition~\ref{prop:embed-bayes-risks}), and use the fact that discrete losses and polyhedral losses both have polyhedral Bayes risks.
 
+Finally, we also provide several observations beyond what is needed to prove our main results, which we view as conceptual contributions (\S~\ref{sec:min-rep-sets},~\ref{sec:poly-ie-consistency}).
+Using tools from property elicitation, we show an equivalence between minimum representative sets (those of minimum cardinality) and ``non-redundancy'', wherein no report is dominated by another.
+We further show that, while the minimum representative set is not always unique, the loss values associated with it are unique, giving rise to a natural ``trim'' operation on losses.
+The paper concludes with an interesting observation (Theorem~\ref{thm:poly-ie-implies-consistent}): while indirect property elicitation is generally a strictly weaker condition than consistency, the two are equivalent when restricting to the class of polyhedral surrogates.
 
-%% why are our results important
-\paragraph{Takeaways}
-We view our contributions as both conceptual and practical.
+Taken together, we view our contributions as both conceptual and practical.
 We uncover the remarkable structure of polyhedral surrogates, deepening our understanding of the relationship between surrogate and discrete target losses.
 This structure leads to a powerful new framework to design and analyze surrogate losses.
 As we illustrate with several examples, this framework has already been applied to solve open questions by designing new surrogates, to uncover the behavior of existing surrogates, and to construct link functions in complex structured problems.
