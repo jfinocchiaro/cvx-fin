@@ -271,24 +271,6 @@ We conclude with several exciting directions for future work.
 
 
 
-\paragraph{Related works.}
-
-%% connect elicitation to consistency; embedding is a special case of elicitation, but often not focused on convex elicitaiton
-We study consistency through the necessary condition of \emph{indirect property elicitation}~\citep{finocchiaro2021unifying,frongillo2015elicitation}.
-\citet{agarwal2015consistent} were the first to formally connect property elicitation to consistency, though their results generally do not apply to discrete prediction tasks.
-The notion of embedding introduced in \S~\ref{sec:setting} is a special case of indirect property elicitation.
-While property elicitation has an extensive literature by now~\citep{savage1971elicitation,osband1985information-eliciting,lambert2008eliciting,gneiting2011making,steinwart2014elicitation,frongillo2015vector-valued,fissler2016higher,lambert2018elicitation}, these works are mostly concerned with point estimation problems, instead of the more general statistics elicited by polyhedral embeddings. 
-
-\raft{Perhaps move or cut}
-\jessiet{I'm in favor of cutting}
-%% most literature for convex surrogates focuses on smooth surrogates, but there is good reason to study polyhedral surrogates
-The literature on convex surrogates focuses mainly on smooth surrogate losses~\citep{crammer2001algorithmic,bartlett2006convexity,bartlett2008classification, duchi2018multiclass, williamson2016composite, reid2010composite,menon2019multilabel,zhang2020convex,bao2020calibrated}.
-In practice, minimizing such surrogates often corresponds to learning the entire underlying data distribution and compute the desired target task with the full distribution in hand.
-However, \citet[Section 1.2]{ramaswamy2018consistent} contend that optimizing nonsmooth losses may enable reduction of the prediction dimension while maintaining consistency relative to smooth losses, improving downstream efficiency of the learning algorithm.
-This sentiment is echoed by~\citet{lapin2016loss}, who suggests that learning the target problem of interest, rather than the entire underlying data distribution can improve performance in limited data settings.
-This intuition is supported by~\citet{frongillo2021surrogate}, who show that polyhedral surrogates in general have better surrogate regret bounds than smooth surrogates. \jessiet{This connection correct?}
-%Nevertheless, nonsmooth losses, such as the polyhedral losses we consider, have been proposed and studied for a variety of classification-like problems~\citep{yang2018consistency,yu2018lovasz,lapin2015top}.
-
 
 
 \section{Setting}
@@ -340,13 +322,13 @@ A convex function $f:\reals^d\to\reals$ is \emph{polyhedral} if its epigraph is 
 \begin{definition}[Polyhedral loss]
   A loss $L: \reals^d \to \reals^{\Y}_+$ is \emph{polyhedral} if $L(u)_y$ is a polyhedral function of $u$ for each $y\in\Y$.
 \end{definition}
-%
+\noindent
 In the example above, hinge loss is polyhedral, whereas logistic loss is not.
 
 \subsection{Property Elicitation}
 \label{sec:property-elicitation}
 
-We will frequently appeal to concepts and results from property elicitation.
+We will frequently appeal to concepts and results from property elicitation~\citep{savage1971elicitation,osband1985information-eliciting,lambert2008eliciting,gneiting2011making,steinwart2014elicitation,frongillo2015vector-valued,lambert2018elicitation}.
 Here one studies \emph{properties}, maps from label distributions to reports, and asks when a property characterizes the reports that exactly minimize a loss.
 In our case, this map will at times be set-valued, meaning a single distribution could yield multiple optimal reports.
 For example, when $p=(1/2,1/2)$, both $r=1$ and $r=-1$ optimize 0-1 loss.
@@ -429,19 +411,21 @@ Like the use of a surrogate and link pair in the calibration definition, one can
 \begin{definition}\label{def:indirect-elic}
 	Let minimizable loss $L : \reals^d \to \reals^\Y_+$ and link $\psi : \reals^d \to \R$ be given.
   The pair $(L, \psi)$ indirectly elicits a property $\gamma : \simplex \toto \R$ if for all $u \in \reals^d$, we have $\Gamma_u \subseteq \gamma_{\psi(u)}$, where $\Gamma = \prop{L}$.
-	Moreover, we say $L$ indirectly elicits $\gamma$ if such a $\psi$ exists.
+	Moreover, we say $L$ indirectly elicits $\gamma$ if such a $\psi$ exists, i.e., if for all $u\in\reals^d$ there exists $r\in\R$ such that $\Gamma_u \subseteq \gamma_r$.%
+  \footnote{The elicitation literature often refers to this latter condition as one property ``refining'' another~\citep{frongillo2015elicitation}.}
 \end{definition}
 
-\raft{Added this paragraph since we needed it in \S~\ref{sec:poly-ie-consistency}}
+\btw{Added this paragraph since we needed it in \S~\ref{sec:poly-ie-consistency}}
 Indirect elicitation is a weaker condition than calibration~\citep{steinwart2008support,agarwal2015consistent,finocchiaro2021unifying}; we briefly sketch the argument.
 Suppose $L$ is minimizable and $(L,\psi)$ is calibrated with respect to $\ell$, and set $\Gamma=\prop{L}$ and $\gamma=\prop{\ell}$.
 Let $u\in\reals^d$ and $p\in\Gamma_u$.
 From eq.~\eqref{eq:calibrated}, if $\psi(u) \notin \gamma(p)$, then we would have $u\notin\Gamma(p)$, a contradiction to $p\in\Gamma_u$.
 Thus, $\psi(u) \in \gamma(p)$, so $p\in\gamma_{\psi(u)}$.
 In fact, indirect elicitation is strictly weaker; take hinge loss with the link $\psi(u) = -1$ for $u < 1$ and $\psi(u) = 1$ for $u\geq 1$.
+\citet{agarwal2015consistent} were the first to formally connect property elicitation to calibration, though their results generally do not apply to discrete prediction tasks.
 
-At times, the elicitation literature studies indirect elicitation through the notion of one property ``refining'' another~\citep{frongillo2015elicitation}, where a property $\Gamma: \simplex \toto \R$ refines $\Gamma': \simplex \toto \R'$ if, for all $r \in \R$, there exists an $r' \in \R'$ such that $\Gamma_r \subseteq \Gamma'_{r'}$.
-In particular, a loss $L$ indirectly elicits a property $\gamma$ if and only if $\prop L$ refines $\gamma$.
+% At times, the elicitation literature studies indirect elicitation through the notion of one property ``refining'' another~\citep{frongillo2015elicitation}, where a property $\Gamma: \simplex \toto \R$ refines $\Gamma': \simplex \toto \R'$ if, for all $r \in \R$, there exists an $r' \in \R'$ such that $\Gamma_r \subseteq \Gamma'_{r'}$.
+% In particular, a loss $L$ indirectly elicits a property $\gamma$ if and only if $\prop L$ refines $\gamma$.
 
 
 
@@ -1645,7 +1629,7 @@ From Lemma~\ref{lem:X}(\ref{item:X-tight-embed}), $L$ tightly embeds a discrete 
   The link is any function $\hat\psi: u \mapsto r$ such that $\Gamma_u \subseteq \hat\gamma_r$ for all $u \in \reals^d$.
 
   We will prove the stronger statement that, for any property $\gamma$, and any loss $\ell:\R\to\reals^\Y_+$ that $L$ tightly embeds, $L$ indirectly elicits $\gamma$ if and only if $\ell$ indirectly elicits $\gamma$.
-  If $\ell$ indirectly elicits $\gamma$ via the link $\psi$, then $L$ indirectly elicits $\gamma$ by transitivity of subset inclusion, as \jessiet{first subset is an equality, right?} $\Gamma_u \subseteq \hat\gamma_{\hat\psi(u)} \subseteq \gamma_{\psi \circ \hat\psi(u)}$ for all $u \in \reals^d$.
+  If $\ell$ indirectly elicits $\gamma$ via the link $\psi$, then $L$ indirectly elicits $\gamma$ by transitivity of subset inclusion, as \jessiet{first subset is an equality, right?}\raft{don't think so} $\Gamma_u \subseteq \hat\gamma_{\hat\psi(u)} \subseteq \gamma_{\psi \circ \hat\psi(u)}$ for all $u \in \reals^d$.
   Conversely, suppose $L$ indirectly elicits $\gamma$ via the link $\psi$.
   As $L$ tightly embeds $\ell$, from Lemma~\ref{lem:X}(\ref{item:X-min-Theta},\ref{item:X-tight-embed}), the level sets of $\hat \gamma$ are contained in the set $\{\Gamma_u \mid u\in\reals^d\}$.
   Letting the map $\hat\psi:\R\to\reals^d$ exhibit this contaiment, we have $\hat\gamma_r = \Gamma_{\hat\psi(r)} \subseteq \gamma_{\psi \circ \hat\psi (r)}$ for all $r\in\R$.
@@ -1688,77 +1672,107 @@ Theorem~\ref{thm:poly-ie-implies-consistent} gives a somewhat surprising result:
 
 
 
-\section{Conclusions} \label{sec:conclusion}
-In this work, we introduce the embeddings framework to obtain convex and consistent surrogates for discrete prediction tasks show construct a link function such that the embedding surrogate and constructed link pair are consistent for the target task.  
-We show that a convex surrogate embedding a target loss via the introduced framework is equivalent to the surrogate and target loss having matching Bayes risks and that their ``trimmed'' forms are equal as well.
-Finally, we show examples from the literature which demonstrate the broad applicability of our framework, ranging from high-confidence classification to structured prediction and others. \jessiet{Sentence on surrogate regret bounds?}
+\section{Conclusion} \label{sec:conclusion}
 
-\paragraph{Implications and Applications}
+In this work, we introduce an embedding framework to design and analyze consistent convex and surrogates for discrete prediction tasks.
+Our results are constructive; as we outline in \S~\ref{sec:applications}, they can be fruitfully applied to a range of tasks, from designing new surrogates and link functions to understanding the consistency or inconsistency of existing surrogates.
+Beyond these tools, our results shed light on fundamental questions about the design of consistent surrogates.
 
-As we illustrate in \S~\ref{sec:applications},
+Perhaps the most pressing open direction is simply to apply our framework to prediction problems of interest.
+We hope that the discussion in \S~\ref{sec:apply-embedd-fram}, and the detailed examples in subsequent works, serve as useful guidelines for doing so.
+A particularly promising domain to apply our framework is structured prediction, where relatively few consistent surrogates are known.
+Indeed, our framework has already been applied to submodular structured problems (\S~\ref{sec:lovasz-hinge}) and to max-margin losses\raft{Cite the two Nowak Rudi Bach papers; 2nd one came out now: \url{https://proceedings.mlr.press/v151/nowak22a.html}}.
 
-Finally, while we work through applications of the framework to different target losses, we can imagine more target losses for which the embedding framework might be useful, such as multilabel learning, ranking, and (multiclass) structured prediction problems.
-Understanding the application of embeddings to these settings, as well as the empirical performance of algorithms optimizing embeddings remains to demonstrate the empirical use of the framework. \jessiet{I don't like this sentence}
+Beyond applying our fromework, we see several interesting directions for theoretical research.
+Below we outline several such directions.
 
 
-\paragraph{Open directions}
-\jessie{Dimensionality, geometry of losses, more applications}
-Finally, several open theoretical directions remain.
+
+
+
+\paragraph{Convex envelope}
+
+We motivated the idea of an embedding as a way to ``convexify'' a discrete loss.
+It is not clear, however, how embeddings relate to the convex envelope operation.
+For example, suppose $L:\reals^d\to\reals^\Y_+$ embeds $\ell:\R\to\reals^\Y_+$ via the embedding $\varphi:\R\to\reals^d$, and consider the (polyhedral) surrogate $L':\reals^d\to\reals^\Y_+$ given by $L'_y = (L_y + \ones_{\varphi(\R)})^{**}$, where here $\ones$ denotes the convex indicator and $(\cdot)^{**}$ the biconjugate.
+When it the case that $L'$ also embeds $\ell$?
+Conversely, we would like to know when the construction in Theorem~\ref{thm:discrete-loss-poly-embeddable} can be viewed as a convex envelope, and therefore a true ``embed and convexify'' approach.
+
+\raf{Could add superprediction stuff here}
+
+
+\paragraph{Polyhedral vs.\ smooth surrogates}
+  \raf{Show that polyhedral losses are ``more efficient'' in a statistical sense?
+  We know target rates are likely the same (or not far off) for smooth vs non-smooth, so difficulty of the learning problem may break the tie.
+  See references recommended by Peter Bartlett.}
+
+%% most literature for convex surrogates focuses on smooth surrogates, but there is good reason to study polyhedral surrogates
+\raf{Moved}
+The literature on convex surrogates focuses mainly on smooth surrogate losses~\citep{crammer2001algorithmic,bartlett2006convexity,bartlett2008classification, duchi2018multiclass, williamson2016composite, reid2010composite,menon2019multilabel,zhang2020convex,bao2020calibrated}.
+In practice, minimizing such surrogates often corresponds to learning the entire underlying data distribution and compute the desired target task with the full distribution in hand.
+However, \citet[Section 1.2]{ramaswamy2018consistent} contend that optimizing nonsmooth losses may enable reduction of the prediction dimension while maintaining consistency relative to smooth losses, improving downstream efficiency of the learning algorithm.
+This sentiment is echoed by~\citet{lapin2016loss}, who suggests that learning the target problem of interest, rather than the entire underlying data distribution can improve performance in limited data settings.
+This intuition is supported by~\citet{frongillo2021surrogate}, who show that polyhedral surrogates in general have better surrogate regret bounds than smooth surrogates. \jessiet{This connection correct?}
+%Nevertheless, nonsmooth losses, such as the polyhedral losses we consider, have been proposed and studied for a variety of classification-like problems~\citep{yang2018consistency,yu2018lovasz,lapin2015top}.
+
+\paragraph{Prediction dimension}
+
+\raf{Take A:}
+
+While Theorem~\ref{thm:discrete-loss-poly-embeddable} constructs a consistent surrogate for any discrete loss, in some settings, such as structured prediction and information retrieval, the prediction dimension $d = n := |\Y|$ (e.g., $d$ such that $L : \reals^d \to \reals^\Y_+$) can be prohibitively large.%
+\footnote{One can always reduce to $d=n-1$ in Theorem~\ref{thm:discrete-loss-poly-embeddable} via a linear transformation from $\reals^n$ to $\reals^{n-1}$ which is injective on $\simplex$; redefining the surrogate appropriately, the Bayes risks will still match.}
+Recent work~\citep{ramaswamy2016convex,finocchiaro2020embedding,finocchiaro2021unifying} yield characterizations for bounding the prediction dimension $d$ for consistent convex surrogates and embeddings.
+
+\citet{finocchiaro2020embedding} introduce and present lower bounds for the notion of \emph{embedding dimension} of a target loss $\ell$: the minimum prediction dimension $d$ such that a polyhedral surrogate $L:\reals^d\to \reals^\Y_+$ embeds $\ell$.
+ However, it is unclear if convex consistency dimension restricting to polyhedral losses, embedding dimension, or unrestricted convex consistency dimension are equal for all target losses.
+
+
+\raf{Take B:}
+
 First, while \citet{finocchiaro2020embedding} introduce preliminary lower bounds on embedding dimension (e.g., the lowest $d \in \mathbb{Z}$ such that $L : \reals^d \to \reals_+^\Y$ embeds $\ell$) based on optimality conditions that they derive, it is unclear if these bounds are tight or if they can be improved by leveraging information about adjacent level sets of an embedded property.
 Moreover, the relationship between embedding dimension and other notions of prediction dimension (e.g., convex calibration dimension, convex elicitation complexity) remains to be understood in dimensions greater than $1$.
 
-Since polyhedral surrogates have a finite trimmed loss, it is an open line of work to relate embeddings to the geometry of losses~\citep{williamson2014geometry} through superprediction sets, as these sets encapsulate loss vectors that are dominated by elements of $\trim(L)$.
+\raf{Take C:}
+
+Finally, it is important for applications to understand the minimum prediction dimension $d$ of a consistent convex surrogate $L:\reals^d\to \reals^\Y_+$ for a given target problem, also called its elicitation complexity.
+One approach to this question is to first understand the minimum $d$ for which an embedding $L$ exists, a study initiated by \citet{finocchiaro2020embedding}, and then relate this dimension to polyhedral, or general convex, elicitation complexity.
 
 
 
-%\raft{Didn't love the way any of the recaps sounded, and I also remember that some journals forbid recaps anyway, so commented out for now.  Instead I left a probably-too-terse recap (edit: also commented out just below), which we could expand slightly.}
-%
-%Several directions for future work remain.
-%We show in Theorem~\ref{thm:poly-ie-implies-consistent} that indirect elicitation is equivalent to consistency when restricting to the class of polyhedral surrogates; we would like to identify other classes of surrogates for which this equivalence holds.
-%It would also be interesting to explore embeddings through the lens of superprediction sets~\citep{williamson2014geometry}.
-%Finally, it is important for applications to understand the minimum prediction dimension $d$ of a consistent convex surrogate $L:\reals^d\to \reals^\Y_+$ for a given target problem, also called its elicitation complexity.
-%One approach to this question is to first understand the minimum $d$ for which an embedding $L$ exists, a study initiated by \citet{finocchiaro2020embedding}, and then relate this dimension to polyhedral, or general convex, elicitation complexity.
-%
-%\raf{Notes on future work and conjectures -- CUT FOR ARXIV}
-%\begin{itemize}\small
-%\setlength \itemsep{0.1em}
-%\item \btw{Modified from a conjecture Raf thought was false. Old version in comments - J, 15 Sept 21}
-%While the modified hinge example in Figure~\ref{fig:modified-hinge} shows that not every embedding must necessarily be polyhedral, this curvature is added on a set that is never uniquely optimal.
-%A natural question is to posit if an embedding my be polyhedral on the convex hull of the embedded reports; we conjecture negatively, though some conditions on linearity seem necessary.
-%\jessie{Do we still want this?  Maybe we rephrase now as characterizing the class of losses with polyhedral Bayes risks, or is knowing polyhedral Bayes risks sufficient?}
-%
-%
-%\item 
-%  Since discrete losses have a finite set of reports, and in turn, minimizers, any surrogate embedding the discrete loss must also have a finite set of unique minimizers.
-%  This is in turn related to another conjecture about the ``convex envelope'' of embeddings: if $L$ embeds $\ell$ by the embedding $\varphi$, the (polyhedral) surrogate $L'$ such that $L'_y$ is the convex envelope of $\{(\varphi(r),L(r)_y)\}_{r\in\R}$ also embeds $\ell$.
-%  \jessie{What is the significance of this conjecture? Slash I guess how does the convex envelope construction differ from the convex conjugate construction?}
-%
-%\item
-%  Since polyhedral surrogates have a finite trimmed loss, it is an open line of work to relate embeddings to the to geometry of losses~\citep{williamson2014geometry} through superprediction sets, as these sets encapsulate losses that are dominated by elements of $\trim(L)$. \jessie{In paragraph above}
-%  
-%\item
-%  In \S~\ref{sec:poly-ie-consistency}, we show that indirect elicitation is equivalent to consistency when restricting to the class of polyhedral surrogates.
-%  It remains a line of future work to characterize other settings in which indirect elicitation and consistency are equivalent. \jessie{In paragraph above}
-%
-%\item Prediction dimension in general:
-%
-%While Theorem~\ref{thm:discrete-loss-poly-embeddable} constructs a consistent surrogate for any discrete loss, in some settings, such as structured prediction and information retrieval, the prediction dimension $d = n := |\Y|$ (e.g., $d$ such that $L : \reals^d \to \reals^\Y_+$) can be prohibitively large.%
-%\footnote{One can always reduce to $d=n-1$ in Theorem~\ref{thm:discrete-loss-poly-embeddable} via a linear transformation from $\reals^n$ to $\reals^{n-1}$ which is injective on $\simplex$; redefining the surrogate appropriately, the Bayes risks will still match.}
-%Recent work~\citep{ramaswamy2016convex,finocchiaro2020embedding,finocchiaro2021unifying} yield characterizations for bounding the prediction dimension $d$ for consistent convex surrogates and embeddings.
-%
-%  
-%\item
-%  \citet{finocchiaro2020embedding} introduce and present lower bounds for the notion of \emph{embedding dimension} of a target loss $\ell$: the minimum prediction dimension $d$ such that a polyhedral surrogate $L:\reals^d\to \reals^\Y_+$ embeds $\ell$.
-%  However, it is unclear if convex consistency dimension restricting to polyhedral losses, embedding dimension, or unrestricted convex consistency dimension are equal for all target losses. \jessie{Also above}
-%
-%\item
-%  ...
-%
-%  \btw{FUTURE: we should comment in the discussion section that we probably can show that *any* loss embedding $\ell$ must be polyhedral-ish, meaning polyhedral except for stuff that is never optimal.  This theorem would then not need the ``polyhedral'' part. This is related to the ``convex envelope conjucture'', that if $L$ embeds $\ell$ via $\varphi$, you can just take the loss $L'$ such that $L_y$ is the convex envelope of points $\{(\varphi(r),L(r)_y)\}_{r\in\R}$.}
-%\btw{FUTURE: Link construction gives an excellent reason to focus on embeddings, since other techniques do not necessarily give you separated links for free.  Since we know we get them for free, we can just focus on the property, and study elicitation complexity; we know if we have a link at all it can be taken to be separated.  [[Is this true?]]}
-%
-%
-%\end{itemize}
+\begin{itemize}\small
+\setlength \itemsep{0.1em}
+\item
+  \textbf{Whether/when embeddings must be polyhedral -- difference between poly Bayes risks and poly loss} \raf{Meh, not sure this is that interesting now that we know poly Bayes risk is the real characterization}
+  
+While the modified hinge example in Figure~\ref{fig:modified-hinge} shows that not every embedding must necessarily be polyhedral, this curvature is added on a set that is never uniquely optimal.
+A natural question is to posit if an embedding my be polyhedral on the convex hull of the embedded reports; we conjecture negatively, though some conditions on linearity seem necessary.
+\jessie{Do we still want this?  Maybe we rephrase now as characterizing the class of losses with polyhedral Bayes risks, or is knowing polyhedral Bayes risks sufficient?}
+
+
+\item
+  \textbf{Geometry of losses}
+  
+ Since polyhedral surrogates have a finite trimmed loss, it is an open line of work to relate embeddings to the to geometry of losses~\citep{williamson2014geometry} through superprediction sets, as these sets encapsulate losses that are dominated by elements of $\trim(L)$. \jessie{In paragraph above}
+ 
+\item
+  \textbf{Indirect elicitation $\iff$ consistency}
+
+  In \S~\ref{sec:poly-ie-consistency}, we show that indirect elicitation is equivalent to consistency when restricting to the class of polyhedral surrogates.
+ It remains a line of future work to characterize other settings in which indirect elicitation and consistency are equivalent. \jessie{In paragraph above}
+
+\raf{Moved:} We show in Theorem~\ref{thm:poly-ie-implies-consistent} that indirect elicitation is equivalent to consistency when restricting to the class of polyhedral surrogates; we would like to identify other classes of surrogates for which this equivalence holds.
+
+ 
+
+\item MOVED
+  
+  Link construction gives an excellent reason to focus on embeddings, since other techniques do not necessarily give you separated links for free.  Since we know we get them for free, we can just focus on the property, and study elicitation complexity; we know if we have a link at all it can be taken to be separated.  [[Is this true?]]
+  \raf{6/1/2022: this seems like a useful observation to make at some point; probably more about polyhedral losses than embeddings per se}
+
+
+
+
+\end{itemize}
 
 
 \subsection*{Acknowledgements}
@@ -2310,6 +2324,34 @@ The next lemma shows that if a subset of $\U$ intersect, then their correspondin
   By definition of embedding, $p \in \gamma_r \implies \varphi(r) \in \Gamma(p) = U$, so $r \in R_U$.
 \end{proof}
 Lemma \ref{lemma:calibrated-pos} implies that there exists a $\psi$ such that $(L,\psi)$ indirectly elicits $\ell$: for each $u$, let $\U' = \{U\in\U : u \in U\}$ be the optimal sets that contain it; choose $r$ from the nonempty set $\cap_{U \in\U'} R_U$; and set $\psi(u) = r$.
+
+\raf{ALTERNATIVE...}
+
+Let $\gamma = \prop\ell$.
+For all $U \in \U$, let $R_U = \{r: \Gamma_U \subseteq \gamma_r\}$, where $\Gamma_U = \{p\in\simplex : U = \Gamma(p)\}$.
+\begin{lemma}
+  If $L$ embeds $\ell$, then $L$ indirectly elicits $\gamma$.
+\end{lemma}
+\begin{proof}
+  From Proposition \ref{prop:embed-trim}, we have $\trim(\gamma) = \trim(\Gamma) =: \Theta$.
+  By definition of trim, for any $u\in\reals^d$, we have some $\theta \in \Theta$ such that $\Gamma_u \subseteq \theta$.
+  Since $\trim(\gamma) = \Theta$, we have some $r\in\R$ such that $\theta = \gamma_r$, giving $\Gamma_u \subseteq \gamma_r$.
+\end{proof}
+\begin{lemma}
+  Suppose $L$ indirectly elicits $\gamma$.
+  If $\cap_{U\in\U'} U \neq \emptyset$ then $\cap_{U\in\U'} R_U \neq \emptyset$.
+\end{lemma}
+\begin{proof}
+  Observe that, as $\U$ is the range of $\Gamma$, we have for all $u\in\reals^d$ that $\Gamma_u = \cup_{U \ni u} \Gamma_U$.
+  Suppose $\cap_{U\in\U'} U \neq \emptyset$, and let $u \in \cap_{U\in\U'} U$.
+  As $u\in U$ for all $U\in\U'$, we have $\Gamma_U \subseteq \Gamma_u$ for all $U\in\U'$.
+  By indirect elicitation, there exists some $r\in\R$ such that $\Gamma_u \subseteq \gamma_r$.
+  Thus, for all $U\in\U'$, we have $\Gamma_U \subseteq \gamma_r$ and thus $r\in R_U$.
+  We conclude $\cap_{U\in\U'} R_U \neq \emptyset$.
+\end{proof}
+
+\raf{...END ALTERNATIVE}
+
 
 The main problem now is to prove a ``thickened'' analogue of Lemma \ref{lemma:calibrated-pos} that extends this link to points $u$ that are up to $\epsilon$ far from an optimal set $U$.
 Namely, Lemma \ref{lemma:thick-empty} will show that if $\epsilon$ is small enough, then the $\epsilon$-thickenings of all $U \in \U'$ intersect if and only if the $U$ sets themselves intersect.
