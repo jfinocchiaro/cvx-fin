@@ -735,30 +735,28 @@ See \S~\ref{app:sep-link-exists} for the proof.
   Then there exists $\epsilon_0 > 0$ such that, for all $0 < \epsilon \leq \epsilon_0$, Construction~\ref{const:eps-thick-link} yields an $\epsilon$-separated link with respect to $L$ and $\ell$.
 \end{restatable}
 
-To set the stage for Construction \ref{const:eps-thick-link}, we sketch the two main steps in proving Theorem \ref{thm:thickened-separated}: (i) showing that one can produce a link $\psi$ such that $(L,\psi)$ indirectly elicits $\ell$; (ii) ``thickening'' $\psi$ such that it is separated.
+To set the stage for Construction \ref{const:eps-thick-link}, we sketch the two main steps in proving Theorem \ref{thm:thickened-separated}: (i) showing that one can define a link $\psi$ on all possible optimal points of $L$; (ii) ``thickening'' $\psi$ so that it is separated.
 
-For (i), begin by linking each embedding point back to its original report.
-Now we must determine $\psi(u)$ for non-embedding points.
-%Symbolically, if $u^* \in \argmin_u \inprod{p}{L(u)} = \Gamma(p)$, then $\psi(u^*) \in \argmin_r \inprod{p}{\ell(r)} = \gamma(p)$.
-The challenge is that we may have $u \in \Gamma(p) \cap \Gamma(p')$ for two distinct distributions $p,p'\in\simplex$.
-Because $u$ minimizes expected surrogate loss for both $p$ and $p'$, the link must satisfy $\psi(u) \in \gamma(p) \cap \gamma(p')$.
-It is not even clear \emph{a priori} that these sets intersect.
-Indirect elicitation implies that they do;
-we use the definition of embedding and elicitation results, discussed in \S~\ref{sec:min-rep-sets}, to show that $L$ must indirectly elicit $\ell$, giving a value of $\psi(u)$ for non-embedding points.
-In particular, for each such $u$ there exists $r \in \R$ such that any $p$ satisfying $u \in \Gamma(p)$ also satisfies $r \in \gamma(p)$.
-Thus if $u \in \Gamma(p) \cap \Gamma(p')$, then there exists $r \in \gamma(p) \cap \gamma(p')$, so we may safely choose $\psi(u) = r$.
-
-\begin{lemma}\label{lem:embed-implies-indirect-elic}
-  Let polyhedral loss $L$ embed some discrete loss $\ell$.
-  Then $L$ indirectly elicits $\prop\ell$.
+For (i), given the embedding $\varphi: \Sc\to\reals^d$, begin by linking each embedding point back to its original report, so that $\psi(\varphi(r)) = r$.
+Now we wish to determine $\psi(u)$ for non-embedding points $u\in\reals^d$ which optimize $L$ for some distribution.
+Let $\Gamma = \prop L$ and define $\U = \{\Gamma(p) \mid p\in\simplex\}$ to be the ``range'' of $\Gamma$, i.e., all possible optimal sets.
+For each $U\in\U$, we can define $R_U = \{ r\in\Sc \mid \varphi(r) \in U\}$ to be the set of target reports which, by definition of embedding, are $\ell$-optimal when $U$ is $L$-optimal.
+We would like to restrict $\psi(U) \subseteq R_U$, so that optimal surrogate reports are mapped to optimal target reports.
+The challenge is that we could have a point $u\in U\cap U'$ for two optimal sets $U,U'\in\U$, and \emph{a priori}, it could be that $R_U \cap R_{U'} = \emptyset$.
+The first step of the proof is to show that this scenario cannot arise.
+\begin{lemma}\label{lem:intersection-property-embedding}
+  % Let polyhedral loss $L$ embed some discrete loss $\ell$.
+  Let $\U'\subseteq\U$.  Then $\cap_{U\in\U'} U \neq \emptyset$ implies $\cap_{U\in\U'} R_u \neq \emptyset$.
 \end{lemma}
-
+\noindent
+Thus, for any $u\in\cup\U$, we have a nonempty set of valid choices for $\psi(u)$.
+(The statement of Lemma~\ref{lem:intersection-property-embedding} may appear similar to indirect elicitation; in fact the two conditions are equivalent, as we discuss in \S~\ref{sec:poly-ie-consistency}.)
 
 For (ii), we show that this link can be ``thickened'' by some positive $\epsilon$, as described next.
-For any $p \in \simplex$, consider the optimal surrogate report set, i.e.\ set of the form $U = \Gamma(p) = \argmin_u \inprod{p}{L(u)}$.
-By indirect elicitation, $\psi$ is already correct on $U$.
+Let $U\in\U$.
+By the above, $\psi$ is already correct on $U$.
 Now, we ``thicken'' $U$ to obtain $U_{\epsilon} = \{u : \|u - U\| \leq \epsilon\}$.
-Then we require that all points in $U_{\epsilon}$ are linked to some element of $\gamma(p) = \argmin_r \inprod{p}{\ell(r)}$.
+Then we require that all points in $U_{\epsilon}$ are linked to some element of $R_U$.
 For $\epsilon > 0$, this condition directly implies separation.
 
 It is not clear that this linking is possible, however, because a point $u$ may be in the intersection of several thickened sets $U_{\epsilon}, U'_{\epsilon}$, etc., corresponding to $\Gamma(p), \Gamma(p')$, etc.
@@ -767,8 +765,8 @@ Therefore, we need to take each possible collection $U,U'$, etc., show that thei
 To do so, given $u \in U_\epsilon \cap U'_\epsilon \cap \dots$, we define a \emph{link envelope} $\Psi(u)$ which encodes the remaining legal choices for $\psi(u)$ after imposing the requirements for each such set $U_\epsilon,U'_\epsilon$, etc.
 The key claim is that, for small enough $\epsilon > 0$, $\Psi(u)$ is nonempty: at least one permitted value for $\psi(u)$ remains.
 This claim follows from a geometric result (Lemma~\ref{lem:thick-empty}) that, for all small enough $\epsilon$, a subset of thickenings $U_{\epsilon}$ intersect if and only if the $U$ sets themselves intersect.
-When they do intersect, indirect elicitation implies that there exists a permitted choice of link for the intersection of the thickenings.
-It is also important that, by Lemma~\ref{lem:polyhedral-range-gamma}, polyhedral surrogates only have finitely many sets of the form $U = \Gamma(p)$.
+When they do intersect, Lemma~\ref{lem:intersection-property-embedding} implies that there exists a permitted choice of link for the intersection of the thickenings.
+It is crucial that, by Lemma~\ref{lem:polyhedral-range-gamma}, polyhedral surrogates only have finitely many sets of the form $U = \Gamma(p)$.
 Together, these observations yield a single uniform smallest $\epsilon$ such that the key claim is true for all $u \in \reals^d$.
 %Given a well-defined thickened link $\psi$, calibration is almost immediate because, given $p$, any report $u$ linking to a suboptimal $r = \psi(u)$ satisfies $\inf_{u^* \in \Gamma(p)} \|u^* - u\| \geq \epsilon$.
 
@@ -784,32 +782,10 @@ Theorem \ref{thm:thickened-separated} implies that, for all small enough $\epsil
   Finally, define $\psi(u) \in \Psi(u)$, breaking ties arbitrarily.
   If $\Psi(u)$ became empty, then leave $\psi(u)$ undefined.
 \end{construction}
+In \S~\ref{sec:poly-ie-consistency} we generalize this construction beyond embeddings, where we only require that $L$ indirectly elicits $\prop\ell$.
+There we will see that, perhaps surprisingly, this construction recovers every possible calibrated link.
 
-\subsubsection{A converse to Theorem \ref{thm:thickened-separated}}
-Perhaps surprisingly, one can also show that \emph{every} calibrated link from a polyhedral surrogate to a discrete loss is produced by Construction \ref{const:eps-thick-link}.
-This result follows from the fact, stated now, that Construction~\ref{const:eps-thick-link} with $\|\cdot\|_\infty$ is exactly enforcing $\epsilon$-separation.
-From Theorem~\ref{thm:calibrated-separated}, every calibrated link $\psi$ is therefore output by the construction for some sufficiently small $\epsilon$, in the sense that $\psi$ is one of the valid choices within the link envelope.
-
-\begin{proposition}\label{prop:link-converse}
-  Let polyhedral surrogate $L:\reals^d \to \reals^\Y_+$ and discrete loss $\ell:\R\to\reals^\Y_+$ be given.
-  Let $\epsilon>0$ be given, and let $\Psi$ be the link envelope from Construction~\ref{const:eps-thick-link} for $L,\ell,\epsilon,\|\cdot\|_\infty$.
-  Then $\psi$ is $\epsilon$-separated if and only if $\psi(u) \in \Psi(u)$ for all $u\in\reals^d$.
-\end{proposition}
-\begin{proof}
-  For $u\in\reals^d$, let $P_u$ consist of all $p\in\simplex$ such that $d_{\infty}(u,\Gamma(p)) < \epsilon$.
-  By definition, $\Psi(u) = \cap_{p \in P_u} R_p$ where $R_p = \{r \in \Sc : \varphi(r) \in \Gamma(p)\}$, the set of reports that embed into $\Gamma(p)$.
-  By definition of embedding, $R_p = \{r \in \Sc : r \in \gamma(p)\} = \gamma(p) \cap \Sc$.
-  By definition of separation, a link $\psi$ is $\epsilon$-separated if and only if, for all $u$, $\psi(u) \in \cap_{p \in P_u} \left(\gamma(p) \cap \Sc\right) = \Psi(u)$.
-\bo{There is one problem here. For points that are not within $\epsilon$ of any optimal set, can a separated link map them to $\R \setminus \Sc$? If so, we need to slightly modify the argument.}
-%\raft{Looks great/close, but I got lost with the ``if and only if, then'' \bo{updated, how about now?}\raf{That part is great now, but I'm worried about $R_p = \gamma(p)$ and wonder if we should step through that slower. Actually maybe this is an issue with the construction itself: I think you only want to work with the representative set from the definition of embedding, right?}}
-\end{proof}
-
-\begin{corollary}
-  A link $\psi$ is calibrated for a given discrete target $\ell$ and polyhedral surrogate $L$ if and only if there exists $\epsilon$ such that $\psi$ is produced by Construction \ref{const:eps-thick-link} for $L,\ell,\epsilon,\|\cdot\|_{\infty}$.
-\end{corollary}
-
-\subsubsection{Remarks}
-Applying Construction \ref{const:eps-thick-link} enables one to verify the consistency of a proposed link $\psi^*$.
+Applying Construction \ref{const:eps-thick-link} also enables one to verify the consistency of a given proposed link $\psi^*$.
 For a given $\epsilon$ and norm $\|\cdot\|$, suppose one follows the routine of Construction~\ref{const:eps-thick-link} until the last step in which values for the link $\psi$ are selected.
 Instead, we can simply test whether the proposed link values are contained in the valid choices, i.e., if $\psi^*(u) \in \Psi(u)$ for all $u\in\reals^d$.
 If so, then the proposed link $\psi^*$ is calibrated.
@@ -1611,6 +1587,33 @@ In other words, both $\Gamma$ and $\Gamma^{-1}$ have a finite range as multivalu
 
 
 \raf{\hrule}
+
+Perhaps surprisingly, one can also show that \emph{every} calibrated link from a polyhedral surrogate to a discrete loss is produced by Construction \ref{const:eps-thick-link}.
+This result follows from the fact, stated now, that Construction~\ref{const:eps-thick-link} with $\|\cdot\|_\infty$ is exactly enforcing $\epsilon$-separation.
+From Theorem~\ref{thm:calibrated-separated}, every calibrated link $\psi$ is therefore output by the construction for some sufficiently small $\epsilon$, in the sense that $\psi$ is one of the valid choices within the link envelope.
+
+\begin{proposition}\label{prop:link-converse}
+  Let polyhedral surrogate $L:\reals^d \to \reals^\Y_+$ and discrete loss $\ell:\R\to\reals^\Y_+$ be given.
+  Let $\epsilon>0$ be given, and let $\Psi$ be the link envelope from Construction~\ref{const:eps-thick-link} for $L,\ell,\epsilon,\|\cdot\|_\infty$.
+  Then $\psi$ is $\epsilon$-separated if and only if $\psi(u) \in \Psi(u)$ for all $u\in\reals^d$.
+\end{proposition}
+\begin{proof}
+  For $u\in\reals^d$, let $P_u$ consist of all $p\in\simplex$ such that $d_{\infty}(u,\Gamma(p)) < \epsilon$.
+  By definition, $\Psi(u) = \cap_{p \in P_u} R_p$ where $R_p = \{r \in \Sc : \varphi(r) \in \Gamma(p)\}$, the set of reports that embed into $\Gamma(p)$.
+  By definition of embedding, $R_p = \{r \in \Sc : r \in \gamma(p)\} = \gamma(p) \cap \Sc$.
+  By definition of separation, a link $\psi$ is $\epsilon$-separated if and only if, for all $u$, $\psi(u) \in \cap_{p \in P_u} \left(\gamma(p) \cap \Sc\right) = \Psi(u)$.
+\bo{There is one problem here. For points that are not within $\epsilon$ of any optimal set, can a separated link map them to $\R \setminus \Sc$? If so, we need to slightly modify the argument.}
+%\raft{Looks great/close, but I got lost with the ``if and only if, then'' \bo{updated, how about now?}\raf{That part is great now, but I'm worried about $R_p = \gamma(p)$ and wonder if we should step through that slower. Actually maybe this is an issue with the construction itself: I think you only want to work with the representative set from the definition of embedding, right?}}
+\end{proof}
+
+\begin{corollary}
+  A link $\psi$ is calibrated for a given discrete target $\ell$ and polyhedral surrogate $L$ if and only if there exists $\epsilon$ such that $\psi$ is produced by Construction \ref{const:eps-thick-link} for $L,\ell,\epsilon,\|\cdot\|_{\infty}$.
+\end{corollary}
+
+
+\raf{\hrule}
+
+
 
 
 
