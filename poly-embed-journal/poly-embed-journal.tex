@@ -91,7 +91,7 @@
 
 \newcommand{\simplex}{\Delta_\Y}
 
-\newcommand{\Li}[1]{L_{(#1)}}
+\newcommand{\Li}[1]{L^{(#1)}}
 \newcommand{\Ri}[1]{\R^{(#1)}}
 \newcommand{\elli}[1]{\ell^{(#1)}}
 
@@ -256,7 +256,7 @@ For example, while we know that the inconsistent top-$k$ polyhedral surrogates m
 Underpinning our results are several observations, outlined in \S~\ref{sec:min-rep-sets}, which formalize the idea that polyhedral losses ``behave like'' discrete losses.
 In particular, any polyhedral loss $L$ has a finite \emph{representative set} $\Sc$ of reports, such that for all distributions, some report in $\Sc$ is $L$-optimal.
 We show that $L$ embeds the discrete loss $\ell = L|_\Sc$ given by restricting $L$ to just the reports in $\Sc$.
-To go from a discrete loss to a polyhedral one, we prove that the conditions of an embedding are equivalent to matching Bayes risks (Proposition~\ref{prop:embed-bayes-risks}), and use the fact that discrete losses and polyhedral losses both have polyhedral Bayes risks.
+To go from a discrete loss to a polyhedral surrogate, we prove that the conditions of an embedding are equivalent to matching Bayes risks (Proposition~\ref{prop:embed-bayes-risks}), and use the fact that discrete losses and polyhedral losses both have polyhedral Bayes risks.
 
 Finally, we also provide several observations beyond what is needed to prove our main results, which we view as conceptual contributions (\S~\ref{sec:min-rep-sets},~\ref{sec:poly-ie-consistency}).
 Using tools from property elicitation, we show an equivalence between minimum representative sets (those of minimum cardinality) and ``non-redundancy'', wherein no report is dominated by another.
@@ -461,7 +461,7 @@ Because of this redundancy, we will only require an embedding map to be defined 
 %In fact, we show in \S~\ref{sec:min-rep-sets} that they are equivalent in our setting.
 
 We now define an embedding, which is a special case of indirect property elicitation.
-(This fact is non-trivial; see Lemma~\ref{lem:embed-implies-indirect-elic}.)\jessiet{Flag; empty reference now}
+(This fact is non-trivial; see Lemma~\ref{lem:embedding-implies-indirect-elic}.)
 In addition to matching loss values, as described above, we require the original reports to be $\ell$-optimal exactly when the corresponding embedded points are $L$-optimal.
 \begin{definition}[Embedding]\label{def:loss-embed}
   A minimizable loss $L:\reals^d\to\reals^\Y_+$ \emph{embeds} a loss $\ell:\R\to\reals^\Y_+$ if there exists a representative set $\Sc$ for $\ell$ and an injective embedding $\varphi:\Sc\to\reals^d$ such that
@@ -540,13 +540,7 @@ Using the strong connection between embeddings and polyhedral surrogates in \S~\
 
 While our notion of embedding is sufficient for calibration (and therefore consistency), it is worth noting that an embedding is not \emph{necessary} for these conditions.  
 For example, while logistic loss does not embed 0-1 loss, logistic loss and the sign link are still consistent for 0-1 loss.
-However, we show in \S~\ref{sec:poly-ie-consistency} that (minimizable) polyhedral indirect elicitation implies the existence of a calibrated link, and we leverage the fact that every polyhedral surrogate embeds a discrete loss as an intermediary step in the proof.
-%However, when restricting to (minimizable) polyhedral surrogates, embedding is necessary and sufficient for calibration, which we show in \S~\ref{sec:poly-ie-consistency}.
-\raft{In what sense is this last sentence true?  That section is saying $L$ indirectly elicits $\ell$ $\implies$ $L$ (with some link, maybe a different one) is consistent for $\ell$.  Agreed it would be nice to say something about that here.}
-\jessiet{Thanks for catching that-- updated the sentence to be accurate, but I'm not actually sure if we want it here.  Feel free to delete if there isn't a smooth was to fit it in.}
-\raft{TODO: Loop back}
-
-
+When working with polyhedral surrogates, however, embeddings are necessary for calibration in a strong sense, as we discuss in \S~\ref{sec:poly-ie-consistency}: if a polyhedral surrogate $L$ has a calibrated link to some target $\ell$, then $L$ must embed some discrete target $\hat\ell$ which can then be linked to $\ell$.
 
 
 
@@ -668,7 +662,7 @@ In the proof, we apply a result we will prove in \S~\ref{sec:min-rep-sets}: a mi
 
 The proof of Theorem~\ref{thm:discrete-loss-poly-embeddable} uses a construction via convex conjugate duality similar to many constructions in the literature. 
 %(e.g.\ \cite{duchi2018multiclass,abernethy2013efficient,frongillo2014general}).
-For example, the literature on minimax optimization in supervised learning settings \citep{asif2015adversarial,farnia2016minimax,fathony2016adversarial} poses a minimax optimization problem of the expected loss matrix over both players' strategies, which becomes a convex relaxation of the discrete optimization problem\raft{We said ``poses the construction in Theorem~\ref{thm:discrete-loss-poly-embeddable}'' -- is it exactly the same?  We just have to say how it relates, like ``when viewing X as Y, one arrives at the same construction'', or maybe one is a special case of the other.}.
+For example, the literature on minimax optimization in supervised learning settings \citep{asif2015adversarial,farnia2016minimax,fathony2016adversarial} poses a minimax optimization problem of the expected loss matrix over both players' strategies, which becomes a convex relaxation of the discrete optimization problem\raft{We said ``poses the construction in Theorem~\ref{thm:discrete-loss-poly-embeddable}'' -- is it exactly the same?  We just have to say how it relates, like ``when viewing X as Y, one arrives at the same construction'', or maybe one is a special case of the other.}\raf{Update 6/12/2022: looks like this sentence changed, but now isn't tied to Theorem~\ref{thm:discrete-loss-poly-embeddable}...}.
 \citet{reid2012convexity} construct a canonical link function for proper losses with differentiable Bayes risks; the link maps a report $p\in\simplex$ to the gradient of the Bayes risk at $p$, which uses the same duality as above.
 \citet[Proposition 3]{duchi2018multiclass} give essentially the same construction as ours, but only comment on the calibration of surrogates under such constructions for multiclass classification tasks given by strictly concave losses, excluding polyhedral surrogates.
 Finally, a similar construction also appears in the design of prediction markets \cite{abernethy2013efficient} and in connections between proper losses and mechanism design \cite{frongillo2014general}.
@@ -683,8 +677,9 @@ But it is not clear how to extend this to yield a full link function $\psi: \rea
 In this section, we prove Theorem~\ref{thm:link-main}, restated below, via a construction to generate calibrated links for \emph{any} polyhedral surrogate.
 Recalling that calibration is equivalent to consistency for discrete targets, this result implies that an embedding always yields consistency.
 
-The key idea behind our construction is a restatement of calibration\jessiet{for a calibrated link vs calibrated surrogate-link pair?} equivalent for discrete prediction problems, to a condition we call \emph{separation}.
-Roughly, a link is $\epsilon$-separated if the distance between any point in $\reals^d$ that links to an $\ell$-optimal report, and any point that links to a non-optimal report, is at least $\epsilon$.
+The key idea behind our construction is the notion of \emph{separation}, a condition which is equivalent to calibration for discrete prediction problems.
+Roughly, given a surrogate $L$ and discrete target $\ell$, a link is $\epsilon$-separated if the distance between any $L$-optimal point in $\reals^d$, and any point that links to an $\ell$-suboptimal report, is at least $\epsilon$.
+\raft{Changed; previous statement was not correct I think: ``Roughly, a link is $\epsilon$-separated if the distance between any point in $\reals^d$ that links to an $\ell$-optimal report, and any point that links to a non-optimal report, is at least $\epsilon$.''}
 We also show how this characterization also leads to linear \emph{regret transfer} or \emph{surrogate regret} bounds.
 
 \subsection{Separation}
@@ -726,7 +721,7 @@ See \S~\ref{sec:equiv-sep-calib} for the proof.
     \label{thm:thickened-separated}
   \end{theorem}}
 
-To prove Theorem \ref{thm:link-main}, \jessie{which states that embedding implies calibration}, we now show how to construct a calibrated link from an embedding.
+To prove Theorem \ref{thm:link-main}, that embedding implies calibration, we now show how to construct a calibrated link from an embedding.
 In light of Theorem~\ref{thm:calibrated-separated}, it now suffices to show that for any polyhedral $L$ embedding some $\ell$, there exists a \emph{separated} link $\psi$ with respect to $L$ and $\ell$.
 Construction~\ref{const:eps-thick-link}, discussed next, ``thickens'' a given embedding to produce a link.
 Theorem \ref{thm:thickened-separated} states that, for a small enough choice of $\epsilon$, that link is separated.
@@ -747,9 +742,8 @@ The challenge is that we could have a point $u\in U\cap U'$ for two optimal sets
 The first step of the proof is to show that this scenario cannot arise.
 \begin{equation}
   \label{eq:intersection-property-embedding}
-  \forall \U'\subseteq\U, \; \cap_{U\in\U'} U \neq \emptyset \implies \cap_{U\in\U'} R_u \neq \emptyset~.
+  \forall \U'\subseteq\U, \; \cap_{U\in\U'} U \neq \emptyset \implies \cap_{U\in\U'} R_U \neq \emptyset~.
 \end{equation}
-\jessiet{typo? $R_U$?}
 \noindent
 Thus, for any $u\in\cup\U$, we have a nonempty set of valid choices for $\psi(u)$.
 (Eq.~\eqref{eq:intersection-property-embedding} may appear similar to indirect elicitation; in fact the two conditions are equivalent, as we discuss in \S~\ref{sec:poly-ie-consistency}.)
@@ -881,18 +875,18 @@ Any level set of the embedded property $\hat\gamma = \prop{\hat\ell}$ which span
 To obtain consistency with respect to a desired target, therefore, it suffices to restrict to the union of level sets of $\hat\gamma$ which are each fully contained in some level set of $\gamma$.
 
 \begin{figure}
-	\begin{minipage}{0.29\linewidth}
+	\begin{minipage}{0.28\linewidth}
     \input{tikz/abstain-intuition}
 \end{minipage}
-\begin{minipage}{0.71\linewidth}
+\begin{minipage}{0.72\linewidth}
 	\caption{Using an embedding to show inconsistency.
-    Let $L$ be a surrogate and $\ell$ a desired target; here $L=\BEP$ (\S~\ref{sec:abstain}) and $\ell$ is 0-1 loss for multiclass classification.
-    Let $\Gamma = \prop{L}$ and $\gamma = \prop{\ell}$ be the properties elicited by these losses; here $\gamma = \mode$, as 0-1 loss elicits the mode.
-    The level sets of $\Gamma$ are given in solid black lines, and those of $\gamma$ in dashed blue lines.
-    To exhibit non-calibration, take distributions $p, p'$ in the relative interior of the blue cell $\Gamma_u$ (here $u=0$ for $\BEP$) but in different cells of $\gamma$.
-    These distributions will satisfy $\Gamma(p) = \Gamma(p')$ but $\gamma(p) \neq \gamma(p')$.
-    Hence, it is impossible to define $\psi(u)$ to satisfy calibration, as $\psi(u)$ cannot be equal to $\gamma(p)$ and $\gamma(p')$ simultaneously.
-    In particular, even though $u$ is $L$-optimal for both $p$ and $p'$, it will be $\ell$-suboptimal for at least one, violating calibration.
+    Let $L$ be a surrogate embedding $\ell$, and let $\ell$ be a desired target; here $L=\BEP$, $\hat\ell = \ellabstain$ (\S~\ref{sec:abstain}) and $\ell$ is 0-1 loss for multiclass classification.
+    Let $\Gamma = \prop{L}$, $\hat\gamma = \prop{\hat\ell}$, and $\gamma = \prop{\ell}$ be the properties elicited by these losses; here $\gamma = \mode$, as 0-1 loss elicits the mode.
+    The level sets of $\hat\gamma$ are given in solid black lines, and those of $\gamma$ in dashed blue lines.
+    To exhibit non-calibration, take distributions $p, p'$ in the relative interior of the blue cell $\gamma_{\hat r}$ (here $\hat r=\bot$ for $\ellabstain$) but in different cells of $\gamma$.
+    These distributions will satisfy $\hat\gamma(p) = \hat\gamma(p')$, and thus $\Gamma(p) = \Gamma(p')$ by definition of embedding, but $\gamma(p) \cap \gamma(p') = \emptyset$.
+    Taking $u\in\Gamma(p)=\Gamma(p')$, it is impossible to define $\psi(u)$ to satisfy calibration, as $\psi(u)$ cannot be in $\gamma(p)$ and $\gamma(p')$ simultaneously.
+    In particular, even though $u$ is $L$-optimal for both $p$ and $p'$, $\psi(u)$ will be $\ell$-suboptimal for at least one, violating calibration.
     We may impose restrictions on the conditional label distributions to remove the blue cell, however, and thus satisfy calibration.
     For this example, the $\BEP$ is classification-calibrated if one restricts to the set of distributions where at least one label $y\in\Y$ has probability $p_y \geq \tfrac 1 2$.
 	}
@@ -946,6 +940,7 @@ In particular, since the abstain report $\bot$ is $\ellabstain$-optimal whenever
 Recalling that 0-1 loss elicits the mode, one can now find two distributions with different modes but for which $0$ is $\BEP$-optimal, violating calibration (Figure~\ref{fig:abstain-intuition-inconsistent}).
 \raft{I simplified this paragraph to reduce redundancy, and rewrote much of the figure caption so it's clearer how it applies more generally.  See what you think!}
 \jessiet{I really like the caption now, but in the caption we're comparing $\prop{L}$ to $\prop{\ell}$ and in the paragraph we mention $\prop{\hat \ell}$, where $\hat \ell$ is the embedded loss.  I kinda like working through $\prop{\hat\ell}$ since it justifies this framework a bit more, but also the drawings look the exact same for $\BEP$ and $\ellabstain$...}
+\raft{Good call -- that was the whole point after all!  I updated to include the embedded property.}
 % , one can observe that the BEP surrogate $\BEP$ does not indirectly elicit the mode, as the level sets $\Gamma_{\vec 0} = \hat \gamma_\bot$ are equal by the definition of embedding, yet one can observe $\prop{\ellabstain}_\bot \not \subseteq \mode_r$ for any $r$. 
 % As embedding is a special form of indirect elicitation, we additionally know the BEP surrogate does not embed the mode.
 % The intuition described by Figure~\ref{fig:abstain-intuition-inconsistent} additionally gives a procedure to validate (in)consistency with respect to a target task.
@@ -1046,7 +1041,7 @@ Proposing a more efficient solution, \citet{weston1999support} give an alternate
 \begin{equation}\label{eq:ww-hinge}
 \LWW(u)_y = \sum_{i \in \Y : i \neq y} (1 - (u_y - u_i))_+~.
 \end{equation}
-This surrogate $\LWW$ was later shown to be inconsistent with respect to 0-1 loss~\citep{tewari2007consistency,liu2007fisher}.\raft{FYI: changed notation to match the style of our other surrogates.  Not sure I care enough to change the top-$k$ ones though... \jessie{Changed the macro for top-$k$... was that what you meant?}}
+This surrogate $\LWW$ was later shown to be inconsistent with respect to 0-1 loss~\citep{tewari2007consistency,liu2007fisher}.
 
 \citet{wang2020weston} use our embedding framework to show that the Weston--Watkins hinge embeds the \emph{ordered partition} loss $\ellOP$, as defined below.
 In turn, they recover the result of inconsistency with respect to 0-1 loss.
@@ -1158,8 +1153,7 @@ The label distributions for which these optimal reports differ from the optimal 
 For example, one of the surrogates is $\Li {4}(u)_y = \left(1 - u_y + \frac 1 k \sum_{i=1}^k (u_{\setminus y})_{[i]}\right)_+$, where $u_{[i]}$ denotes the $i$th largest element of $u \in \reals^n$.
 The authors show that $\Li{4}$ embeds $\ell^{(4)}(T)_y = \tfrac {k+1} {k+1-|T|} \ones\{y\notin T\}$, where $T$ is a set of at most $k$ labels.
 These embedded losses may therefore be useful in top-$k$ settings where choosing smaller sets may have some benefit, such as a search engine that can use unused space for advertisements.
-Using the losses each proposed surrogate embeds, the authors go on to derive constraints on the label distributions under which the proposed surrogates are actually consistent for top-$k$ classification which are tighter than previous constraints~\citep{yang2018consistency}.
-\raft{I did not understand what ``which subsume previous constraints'' meant.  Do we mean the constraints are tighter than the previous constraints of YK? \jessie{Exactly; burn}}
+Using the losses each proposed surrogate embeds, using the same technique from Figure~\ref{fig:abstain-intuition-inconsistent}, the authors go on to derive constraints on the label distributions under which the proposed surrogates are actually consistent for top-$k$ classification; these constraints are tighter than previous constraints~\citep{yang2018consistency}.
 
 Beyond analyzing the previously proposed surrogates, \citeauthor{finocchiaro2022consistenttopk} also use our framework to derive the first consistent polyhedral surrogate for $\elltopk$,
 \begin{align}\label{eq:topk-embedding}
@@ -1665,7 +1659,7 @@ From Lemma~\ref{lem:X}(\ref{item:X-tight-embed}), $L$ tightly embeds a discrete 
 	
   Consider $\psi := \psi^\R \circ \hat\psi$ and fix $p\in\simplex$.
 	For any $u\in\reals^d$, if $\hat\psi(u) \in \hat\gamma(p)$, then $\psi(u) = \psi^\R\circ \hat\psi(u) \in \gamma(p)$ by definition of $\hat\psi$ and $\psi^\R$.
-  Contrapositively\raft{You heard me},
+  Contrapositively\btw{You heard me},
   $\psi(u) \notin \gamma(p) \implies \hat\psi(u) \notin \hat\gamma(p)$.
   Thus, we have
   \begin{equation*}
@@ -1909,7 +1903,7 @@ The proof follows a similar argument to that of~\citet[Lemma 6]{tewari2007consis
   for all $j\in J$, we have $\psi(u_j) \notin \gamma(p)$ and $\Gamma(p_j) = \Gamma(p)$.
 
   Next, observe that, as $L$ is polyhedral, the expected loss $\inprod{p}{L(u)}$ is $\beta$-Lipschitz in $\|\cdot\|_\infty$ for some $\beta>0$.
-  \raft{Could write $\beta$ explicitly; it's in my notes}
+  \btw{RF: Could write $\beta$ explicitly; it's in my notes}
   Thus, for all $j\in J$, we have
   \begin{align*}
     d_\infty(u_i,\Gamma(p)) < \epsilon_j
@@ -2669,19 +2663,16 @@ To find this set, we must first establish when a halfspace representation is irr
 
 	It remains to show (iii).
 	Let $\H$ be a finite set of closed halfspaces such that $P = \cap \H$.
-	It suffices to show that, (a) for each facet $F$ of $P$, there is an $H^+ \in \H$ such that $F = H\cap P$, and (b) if $F$ is a facet of $P$ and $H,H'$ are hyperplanes with $F = H \cap P = H' \cap P$, then it must be the case that $H = H'$.
-	For (a), \citet[Proposition 3.17]{gallier2008notes} observes that, for all $x \in \partial P$, there exists some hyperplane $\hat H$ such that $\hat H$ supports $P$ at $x$.
-	Moreover, the hyperplanes defining facets are unique, as noted in the last sentence of the proof of \citep[Proposition 4.5]{gallier2008notes}.
+  As noted in the last sentence of the proof of \citep[Proposition 4.5]{gallier2008notes},
+  the hyperplanes defining facets are unique:
+  if $F$ is a facet of $P$ and $H,H'$ are hyperplanes with $F = H \cap P = H' \cap P$, then it must be the case that $H = H'$.
+	It therefore suffices to show that, for each facet $F$ of $P$, there is an $H^+ \in \H$ such that $F = H\cap P$.
+  \citet[Proposition 3.17]{gallier2008notes} observes that, for all $x \in \partial P$, there exists some hyperplane $\hat H$ such that $\hat H$ supports $P$ at $x$.
 	Since $x \in \relint(F)$ is in exactly one face of $F$, namely $F$ itself, there must be a unique $H^+ \in \H$ such that $F = H \cap P$.
-	For (b), consider that if $F$ is a facet of $P$, which is $d$-dimensional, its affine hull is a hyperplane in $\reals^d$.
-	As hyperplanes are uniquely defined, it must be the case that $H = H'$.
 %  Let $\H$ be a finite set of closed halfspaces such that $P = \cap \H$.
 %  By (ii), each $H^+ \in \H^*$  determines a facet of $P$.
 %  If $H^+ \not \in \H$, then $\cap \H \neq P$ as convex polytopes are uniquely determined by their facets (cf.~\citep[pg. 455]{schneider2014convex})\raft{This citation is doing the heavy lifting---what exactly does it say?}, a contradiction.
 %  Therefore, we must have $H^+ \in \H$ as well.
-
-		
-
 \end{proof}
 
 \subsection{Specializing to $\reals^\Y \times \reals$}\label{appsubsec:notation}
@@ -2702,7 +2693,7 @@ Throughout, we will work with a concave function $g_\V$ generated by a set $\V \
 %Intuitively, one can think of $g_\V$ as a Bayes risk, where $\V$ is the report set, and the input acts like a label distribution.
 
 \begin{definition}\label{def:g-finite}
-  Given a set $\V \subseteq \reals^\Y_+$, define the function $g_\V : \reals^\Y \to \reals_+ \cup \{-\infty\}$\raft{added $-\infty$ and changed the domain, since the definition implies that $x$ could be outside of $\reals^\Y_+$, as otherwise you wouldn't need the indicator} by
+  Given a set $\V \subseteq \reals^\Y_+$, define the function $g_\V : \reals^\Y \to \reals_+ \cup \{-\infty\}$ by
   \begin{align*}
     g_\V(x) = \inf_{v\in\V} \inprod{x}{v} - \delta(x \mid \reals_+^\Y)~. % = \min_{v\in\V} \inprod{x}{v} - \delta(x \mid \reals_+^\Y)~.~
   \end{align*}
@@ -2751,26 +2742,28 @@ Observe that $L(\R)$ and $\H_{L(\R)}$ may be infinite sets.
 	(x,c) \in \hyp(g_{L(\R)})
 	&\iff g_{L(\R)}(x) \geq c & \text{definition of hypograph}\\
 	&\iff \risk L_+(x) \geq c & \text{$g_{L(\R)}=\risk L_+$}\\
-    &\iff \inprod{v}{x} \geq c \,\, \forall v \in {L(\R)} & \text{definition of $\risk L_+$, minimizability} \\
+    &\iff \inprod{v}{x} \geq c \,\, \forall v \in {L(\R)} & \text{definition of $\risk L_+$} \\
     % as the infimum % over $v \in {L(\R)}$ of}\\
     % & & \text{the inner product with $x$ and minimizable;} \\
 	&\iff (x,c) \in H^+_{v} \,\, \forall v \in {L(\R)} & \text{definition of $H^+_v$}\\
 	&\iff (x,c) \in \cap \H_{L(\R)} & 
 	\end{align*}
 	Combining the two equalities, we have $\hyp(g_{L(\R)}) = \cap (\H_\Y \cup \H_{L(\R)})$.
-	The existence of a finite $\V \subseteq {L(\R)}$ follows as $\risk L_+$ polyhedral implies $\hyp(\risk L_+)$ is a polyhedron, which has a finite representation by definition. 
-	Now, to construct a finite $\V \subseteq L(\R)$ such that $g_\V = g_{L(\R)}$, iterate over each of the (finitely many) faces of $g_{L(\R)}$.
+	% The existence of a finite $\V \subseteq {L(\R)}$ follows as $\risk L_+$ polyhedral implies $\hyp(\risk L_+)$ is a polyhedron, which has a finite representation by definition. 
+
+	We now construct a finite $\V \subseteq L(\R)$ such that $g_\V = g_{L(\R)}$.
+  Since $\hyp(g_{L(\R)}) = \hyp(\risk L_+)$ is a polyhedron, we mae iterate over each of the (finitely many) faces of $\hyp(g_{L(\R)})$.
 	For each face $F^{(i)}$ consider $x^{(i)} \in \relint(F^{(i)})$.
 	There is some $v^{(i)} \in L(\R)$ such that $H_{v^{(i)}}$ supports $\hyp(g_{L(\R)})$ at $x^{(i)}$~\citep[Proposition 3.17]{gallier2008notes}.
 	Then $\V = \{v^{(i)}\}_i \subseteq L(\R)$ and is finite by construction.
 	To show that $g_{L(\R)} = g_\V$, we equivalently show their hypographs are equal.
-	Let $\H_\V := \{H^+_{v}\}_{v \in \V}$.
-	Observe that we can write $\hyp(g_{L(\R)}) = \cap (\H_{L(\R)} \cup \H_\Y)$, and $\hyp(g_\V) = \cap(\H_\V \cup \H_\Y)$.
+	% Let $\H_\V := \{H^+_{v}\}_{v \in \V}$.
+	% Observe that we can write $\hyp(g_{L(\R)}) = \cap (\H_{L(\R)} \cup \H_\Y)$, and $\hyp(g_\V) = \cap(\H_\V \cup \H_\Y)$.
 	Since each $H^+_{v^{(i)}}$ is a valid halfspace for $\hyp(g_{L(\R)})$, we immediately have $\hyp(g_{L(\R)}) \subseteq \hyp(g_{\V})$.
 	To observe the reverse inequality, consider that $\V$ was constructed via the faces of $\hyp(g_{L(\R)})$, which includes the facets.
 	As $x^{(i)}$ on the relative interior of a facet must be defined by a unique supporting hyperplane $v^{(i)}$, we have the set $\H_\V$ must be a superset of the set of hyperplanes defining the facets of $\hyp(g_{L(\R)})$.
 	Therefore, $g_{\V} \subseteq g_{L(\R)}$, and thus the two are equal.
-	\jessiet{Added construction on how to get all the faces.}
+	\raft{We have to slow down here I think.  How do we know $v^{(i)} \in L(\R)$ and that a supporting hyperplane takes the form $H_{v^{(i)}}$?  Also, recall that the whole point of iterating over faces was that we haven't shown the existence of facets yet.  I'm thinking we may want to refactor after all, to show the existence of facets first.}
 	%Finally, $\hyp(\risk L_+) = \hyp(g_{L(\R)}) = \hyp(g_{\V})$ if and only if $\risk L_+ = g_{L(\R)} = g_{\V}$. 
 \end{proof}
 
@@ -2817,17 +2810,17 @@ We now use the above result about the unique irredundant halfspace decomposition
   Suppose we are given a finite set $\V \subset \reals^\Y_+$, and consider the unique irredundant set $\H^*$ given by Lemma~\ref{lem:G-unique-facets-Hstar}. %such that $\hyp(g_\V) = \cap \H^*$.
   Then
   (i) There is a unique finite set $\V^* \subseteq \reals^\Y_+$ such that $\H^* = \H_\Y \cup \H_{\V^*}$.
-  (ii) $F_v$ is a facet of $\hyp(g_\V)$ for each $v\in\V^*$.\raft{Is $F_v$ defined?  Looks like it got cut (we were going to move it to this subsec maybe) define in line}
+  (ii) $F_v := H_v \cap \hyp(g_{\V})$ is a facet of $\hyp(g_\V)$ for each $v\in\V^*$.
   (iii) $\V^* \subseteq \V$.
   (iv) $g_\V(x) = \min_{v \in \V^*}\inprod{v}{x} - \delta(x \mid \reals_+^\Y) = g_{\V^*}(x)$.
 \end{corollary}
 \begin{proof}
 %  \raf{Argue that all facets of $G$ are an $H_y \cap G$ or some $H_v \cap G$.  Thus, we can define $\V^*$ by $\H_\Y \cup \H_{\V^*} = \H^*$.  (I.e., $\H^* \setminus \H_\Y = \H_{\V^*}$ for some $\V^*$.)}
 %
-  (i) Since $\hyp(g_\V)$ is full-dimensional, the facets of $\hyp(g_\V)$ are uniquely determined by the hyperplanes $H$ such that $H = \partial H^+$ and $H^+ \in \H^*$\raft{was ``$\H^* = \{H^+\}$''} by Lemma~\ref{lem:G-unique-facets-Hstar}.
+  (i) Since $\hyp(g_\V)$ is full-dimensional, the facets of $\hyp(g_\V)$ are uniquely determined by the hyperplanes $H$ such that $H = \partial H^+$ and $H^+ \in \H^*$ by Lemma~\ref{lem:G-unique-facets-Hstar}.
   Any facet must then be some intersection of an $H_y \cap \hyp(g_\V)$ or $H_v \cap \hyp(g_\V)$.
   Since $\H_\Y \subseteq \H^*$ by Lemma~\ref{lem:G-unique-facets-Hstar}, take $\H_{\V^*} := \H^* \setminus \H_{\Y}$, and $\V^*$ the unique set generating $\H_{\V^*}$.
-  (ii) Moreover, $H_v \in \H_{\V^*} \subseteq \H^*$ generates the facet $F_v$ of $\hyp(g_\V)$ by Lemma~\ref{lem:G-unique-facets-Hstar}.
+  (ii) Moreover, $H_v \in \H_{\V^*} \subseteq \H^*$ generates the facet $F_v = H_v \cap \hyp(g_{\V})$ of $\hyp(g_\V)$ by Lemma~\ref{lem:G-unique-facets-Hstar}.
 %
 %  The moreover follows immediately since $\H_{\V^*} \subseteq \H^*$ and every $H^+ \in \H^*$ defines a facet by Lemma~\ref{lem:G-unique-facets-Hstar}.
   (iii)  $\H_\Y \cup \H_{\V^*} = \H^*$ by (i), and $\H^* \subseteq \H = \H_\Y \cup \H_{\V}$ by Lemma~\ref{lem:G-unique-facets-Hstar}, ergo $\V^* \subseteq \V$.
@@ -2943,18 +2936,19 @@ Moreover, the projection $\pi$ preserves dimension of faces.
 \end{claim}
 \begin{proof}
 	\jessiet{Can use a careful check}
+  \raft{FYI, some of the steps were out of order I think}
 	\btw{See \url{http://homepages.cae.wisc.edu/~linderot/classes/ie418/lecture11.pdf} for def of AI}
 	%\jessie{just need to argue that you never needed $c$ (i.e., $c$ was always just $g(x)$).  Maybe: take an affine basis, project, and show it's an affine basis.}
 	Recall from Definition~\ref{def:face} that the dimension of a polytope to be the dimension of its affine hull.
 	Suppose we are given $|\Y|+1$ affinely independent vectors $z_i$ in $F_v$. 
-	We claim their projections $\{\pi(z_i)\}$ are affinely independent.
-	Let $a_1 + \ldots + a_{|\Y|+1} = 0$, such that $\sum_i a_i \pi(z_i) = 0$.
-	We want to conclude that we must have $a_i = 0$ for all $i$, meaning they are affinely independent.
-	
-	Observe $z_i = (x_i, \inprod{v}{x_i})$ for all $i$; therefore, if $z_i \in F_v$ (e.g., $F_v$ supports $\hyp(g_\V)=\hyp(g_{\V^*})$ at $(x, \inprod{v}{x})$), then we also have $z_i \in H_v$.
-	So $0 = \sum_i a_i \pi(z_i) = \sum_i a_i x_i$.
-	Moreover, the sum $\sum_i a_i z_i = \sum_i a_i (x_i, \inprod{v}{x_i}) = (\sum_i a_i x_i, \inprod{v}{\sum_i a_i x_i}) = (\vec 0,0) = \vec 0$.
-	Thus, since $a_i = 0$ for all $i$, the set $\{z_i\}$ is affinely independent and the dimensions of the affine hulls are therefore equal.
+	We will show that their projections $\{\pi(z_i)\}_i$ are affinely independent, giving the result.
+
+	Let $a_1 + \ldots + a_{|\Y|+1} = 0$, such that $\sum_i a_i \pi(z_i) = 0$.	
+	As $z_i \in F_v \subseteq H_v$, we have some $\{x_i\}_i$ such that $z_i = (x_i, \inprod{v}{x_i})$ for all $i$.
+  By assumption, then, $0 = \sum_i a_i \pi(z_i) = \sum_i a_i x_i$.
+	Thus, $\sum_i a_i z_i = \sum_i a_i (x_i, \inprod{v}{x_i}) = (\sum_i a_i x_i, \inprod{v}{\sum_i a_i x_i}) = (0,0) = 0 \in \reals^{|\Y|+1}$.
+  By affine independence of the $z_i$, we conclude $a_i = 0$ for all $i$.
+  Thus, the set $\{\pi(z_i)\}_i$ is affinely independent.
 \end{proof}
 
 
