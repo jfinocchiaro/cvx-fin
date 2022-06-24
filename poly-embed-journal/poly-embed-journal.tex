@@ -222,7 +222,7 @@ To ensure the surrogate and link properly correspond to the target problem, the 
 %% designing convex and consistent surrogates is often ad hoc.  often inefficient or not consistent (the gap)
 While a growing body of work seeks to design and analyze consistent convex surrogates for particular target loss functions, to date much of this work has been ad-hoc.
 We lack general tools to systematically construct consistent convex surrogates, much less an understanding of the full class of consistent surrogates.
-For example, in multiclass and top-$k$ classification, several proposed surrogates were proposed and adopted but later proved to be inconsistent~\cite{yang2018consistency}\raft{TODO: ref for multiclass; I'm thinking WW and others}\jessiet{Probably Crammer-Singer and One-vs-All as well?}\raft{Yep, let's add those}.
+For example, in multiclass and top-$k$ classification, several proposed surrogates were proposed and adopted but later proved to be inconsistent~\cite{yang2018consistency,crammer2001algorithmic,rifkin2004defense}.
 This state of affairs is even more dire for structured prediction, where in addition to convexity and consistency, one often requires a low \emph{prediction dimension} (the dimension of the surrogate prediction space) as the label set can grow exponentially large.
 Clever constructions like the binary-encoded predictions (BEP) surrogate for multiclass classification with an abstain option~\cite{ramaswamy2018consistent}, which achieves logarithmic prediction dimension, are the exception rather than the rule.
 In all of these settings, we lack a unifying framework that moves from a given target problem to a convex consistent surrogate and link function.
@@ -667,7 +667,7 @@ In the proof, we apply a result we will prove in \S~\ref{sec:min-rep-sets}: a mi
 
 The proof of Theorem~\ref{thm:discrete-loss-poly-embeddable} uses a construction via convex conjugate duality similar to many constructions in the literature. 
 %(e.g.\ \cite{duchi2018multiclass,abernethy2013efficient,frongillo2014general}).
-For example, the literature on minimax optimization in supervised learning settings \citep{asif2015adversarial,farnia2016minimax,fathony2016adversarial} poses a minimax optimization problem of the expected loss matrix over both players' strategies, which becomes a convex relaxation of the discrete optimization problem\raft{TODO: We said ``poses the construction in Theorem~\ref{thm:discrete-loss-poly-embeddable}'' -- is it exactly the same?  We just have to say how it relates, like ``when viewing X as Y, one arrives at the same construction'', or maybe one is a special case of the other.}\raf{TODO: Update 6/12/2022: looks like this sentence changed, but now isn't tied to Theorem~\ref{thm:discrete-loss-poly-embeddable}...}.
+For example, the literature on minimax optimization in supervised learning settings \citep{asif2015adversarial,farnia2016minimax,fathony2016adversarial} poses a minimax optimization problem of the expected loss matrix over both players' strategies, which becomes a convex relaxation of the discrete optimization problem\raft{TODO: We said ``poses the construction in Theorem~\ref{thm:discrete-loss-poly-embeddable}'' -- is it exactly the same?  We just have to say how it relates, like ``when viewing X as Y, one arrives at the same construction'', or maybe one is a special case of the other.}\raf{TODO: Update 6/12/2022: looks like this sentence changed, but now isn't tied to Theorem~\ref{thm:discrete-loss-poly-embeddable}...}\jessie{If I understand the papers correctly, the cited works take a loss matrix (often for adversarial classification or prediction) and use the dual to obtain a consistent surrogate for the task, so it's just a specific application of this construction.}
 \citet{reid2012convexity} construct a canonical link function for proper losses with differentiable Bayes risks; the link maps a report $p\in\simplex$ to the gradient of the Bayes risk at $p$, which uses the same duality as above.
 \citet[Proposition 3]{duchi2018multiclass} give essentially the same construction as ours, but only comment on the calibration of surrogates under such constructions for multiclass classification tasks given by strictly concave losses, excluding polyhedral surrogates.
 Finally, a similar construction also appears in the design of prediction markets \cite{abernethy2013efficient} and in connections between proper losses and mechanism design \cite{frongillo2014general}.
@@ -798,8 +798,8 @@ This impossibility can be shown, for example, if there exists a point $u$ where 
 Construction~\ref{const:eps-thick-link} is not necessarily computationally efficient as the number of labels $n$ grows.
 In practice this potential inefficiency is not typically a concern, as the family of losses typically has some closed form expression in terms of $n$, and thus the construction can proceed at the symbolic level.
 We illustrate this formulaic approach in \S~\ref{sec:abstain}.
-\jessiet{I'm a little confused by (the intention of) this paragraph, but could just be me.}
-\raft{Yeah, we could cut it, but given that we wrote it in response to a reviewer back in the day, I think it's fine to keep too. \#burn}
+%\jessiet{I'm a little confused by (the intention of) this paragraph, but could just be me.}
+%\raft{Yeah, we could cut it, but given that we wrote it in response to a reviewer back in the day, I think it's fine to keep too. \#burn}
 
 \subsection{Surrogate regret bounds}\label{subsec:regret-bounds}
 Recall that the approach of surrogate risk minimization is to learn a hypothesis $h$ that minimizes expected surrogate loss, then output hypothesis $\psi \circ h$, which hopefully minimizes expected target loss.
@@ -888,7 +888,7 @@ To obtain consistency with respect to a desired target, therefore, it suffices t
     Let $L$ be a surrogate embedding $\ell$, and let $\ell$ be a desired target; here $L=\BEP$, $\hat\ell = \ellabstain$ (\S~\ref{sec:abstain}) and $\ell$ is 0-1 loss for multiclass classification.
     Let $\Gamma = \prop{L}$, $\hat\gamma = \prop{\hat\ell}$, and $\gamma = \prop{\ell}$ be the properties elicited by these losses; here $\gamma = \mode$, as 0-1 loss elicits the mode.
     The level sets of $\hat\gamma$ are given in solid black lines, and those of $\gamma$ in dashed blue lines.
-    To exhibit non-calibration, take distributions $p, p'$ in the relative interior of the blue cell $\gamma_{\hat r}$ (here $\hat r=\bot$ for $\ellabstain$) but in different cells of $\gamma$.
+    To exhibit non-calibration, take distributions $p, p'$ in the relative interior of the blue cell $\hat \gamma_{\hat r}$ (here $\hat r=\bot$ for $\ellabstain$) but in different cells of $\gamma$.
     These distributions will satisfy $\hat\gamma(p) = \hat\gamma(p')$, and thus $\Gamma(p) = \Gamma(p')$ by definition of embedding, but $\gamma(p) \cap \gamma(p') = \emptyset$.
     Taking $u\in\Gamma(p)=\Gamma(p')$, it is impossible to define $\psi(u)$ to satisfy calibration, as $\psi(u)$ cannot be in $\gamma(p)$ and $\gamma(p')$ simultaneously.
     In particular, even though $u$ is $L$-optimal for both $p$ and $p'$, $\psi(u)$ will be $\ell$-suboptimal for at least one, violating calibration.
@@ -943,7 +943,6 @@ Using our framework, one can show that $\BEP$ embeds (2 times) $\ellabstain$, wi
 As an illustration, one can use the fact that $\BEP$ embeds $\ellabstain$ to verify that $\BEP$ is inconsistent for multiclass classification, i.e., with respect to 0-1 loss.
 In particular, since the abstain report $\bot$ is $\ellabstain$-optimal whenever $\max_{y\in\Y} p_y \leq 1/2$, by the definition of embedding, the origin $0\in\reals^d$ is $\BEP$-optimal for the same distributions.
 Recalling that 0-1 loss elicits the mode, one can now find two distributions with different modes but for which $0$ is $\BEP$-optimal, violating calibration (Figure~\ref{fig:abstain-intuition-inconsistent}).
-\jessiet{I really like the caption now, but in the caption we're comparing $\prop{L}$ to $\prop{\ell}$ and in the paragraph we mention $\prop{\hat \ell}$, where $\hat \ell$ is the embedded loss.  I kinda like working through $\prop{\hat\ell}$ since it justifies this framework a bit more, but also the drawings look the exact same for $\BEP$ and $\ellabstain$... \raf{Good call -- that was the whole point after all!  I updated to include the embedded property. \#burn if it looks good.}}
 % , one can observe that the BEP surrogate $\BEP$ does not indirectly elicit the mode, as the level sets $\Gamma_{\vec 0} = \hat \gamma_\bot$ are equal by the definition of embedding, yet one can observe $\prop{\ellabstain}_\bot \not \subseteq \mode_r$ for any $r$. 
 % As embedding is a special form of indirect elicitation, we additionally know the BEP surrogate does not embed the mode.
 % The intuition described by Figure~\ref{fig:abstain-intuition-inconsistent} additionally gives a procedure to validate (in)consistency with respect to a target task.
@@ -1715,7 +1714,7 @@ One reason this approach may be fruitful is that embeddings have much more struc
 Yet from \S~\ref{sec:poly-ie-consistency} and similar observations, it may well be that the lowest possible prediction dimension is achieved by an embedding.
 
 In previous work, we introduce and present some bounds for embedding dimension
-based on optimality conditions \citep{finocchiaro2020embedding}\raft{Thoughts on using 1st person plural here for previous work?  It is the same authors, and same broader project... I think it's less awkward this way, but I'm okay with 3rd person too}.
+based on optimality conditions \citep{finocchiaro2020embedding}\raft{Thoughts on using 1st person plural here for previous work?  It is the same authors, and same broader project... I think it's less awkward this way, but I'm okay with 3rd person too}\jessie{So long as we're submitting to a single-blind venue, I'm fine with it.}.
 We show in particular that a target loss has embedding dimension $1$ if and only if it hase convex elicitation complexity $1$, underscoring the possibility that these numbers may always be the same.
 It is unclear if these bounds are tight or if they can be improved by leveraging information about adjacent level sets of an embedded property.
 Moreover, beyond the fact that the embedding dimension upper bounds convex elicitation complexity, it remains to understand the relationship between these two quantities in dimensions greater than~$1$.
@@ -2550,7 +2549,7 @@ In this section, we give a careful treatment of the results on convex polyhedra 
 \label{app:polyhedra:defs}
 
 We begin with general definitions of polyhedra.
-See also \raf{TODO: cite Ziegler} and \citet{gallier2008notes}.
+See also \citet{ziegler1993lectures} and \citet{gallier2008notes}.
 
 
 \begin{definition}[Closed halfspace]
@@ -3086,7 +3085,7 @@ Given a finite set $\V^* \subset \reals^\Y_+$, we denote $\Lambda_{S} := \{\pi(F
 \btw{Lemmatta for Lemma showing (7) in Lemma \ref{lem:X}}
 \begin{claim}\label{claim:vface-subset-some-vstar-face}
 	Consider $L, \V^*$ satisfying Assumption~\ref{assum:V-star-exists-infinite}.
-	For any $v \in L(\R)$, the face $F_{v} \subseteq F_{v^*}$ for some $v^* \in \V^*$. \jessiet{Need to clarify that face of $\hyp(g_\V)$?} %must be a subset of one of the $\V^*$ facets $F_{v^*}$ (as opposed to the vertical ones)
+	For any $v \in L(\R)$, the face $F_{v} \subseteq F_{v^*}$ for some $v^* \in \V^*$. %must be a subset of one of the $\V^*$ facets $F_{v^*}$ (as opposed to the vertical ones)
 \end{claim}
 \begin{proof}
 	\jessie{I'm not sure if this is clear, but this is a new approach to the proof that I generally like better. I can clarify if the wording is not clear though. Old version in comments}
