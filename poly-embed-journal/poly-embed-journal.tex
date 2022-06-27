@@ -667,7 +667,11 @@ In the proof, we apply a result we will prove in \S~\ref{sec:min-rep-sets}: a mi
 
 The proof of Theorem~\ref{thm:discrete-loss-poly-embeddable} uses a construction via convex conjugate duality similar to many constructions in the literature. 
 %(e.g.\ \cite{duchi2018multiclass,abernethy2013efficient,frongillo2014general}).
-For example, the literature on minimax optimization in supervised learning settings \citep{asif2015adversarial,farnia2016minimax,fathony2016adversarial} poses a minimax optimization problem of the expected loss matrix over both players' strategies, which becomes a convex relaxation of the discrete optimization problem\raft{TODO: We said ``poses the construction in Theorem~\ref{thm:discrete-loss-poly-embeddable}'' -- is it exactly the same?  We just have to say how it relates, like ``when viewing X as Y, one arrives at the same construction'', or maybe one is a special case of the other.}\raf{TODO: Update 6/12/2022: looks like this sentence changed, but now isn't tied to Theorem~\ref{thm:discrete-loss-poly-embeddable}...}\jessie{If I understand the papers correctly, the cited works take a loss matrix (often for adversarial classification or prediction) and use the dual to obtain a consistent surrogate for the task, so it's just a specific application of this construction.}
+For example, the literature on adversarial prediction yields a special use case of this construction~\citep{asif2015adversarial,farnia2016minimax,fathony2016adversarial,fathony2018consistent}.
+The equality of the constructions comes when one observes that $-\risk \ell$ is a maximum of affine functions, and the conjugate takes the infimum (which is always attained) so $C = (-\risk \ell)^*$ used in the proof of Theorem~\ref{thm:discrete-loss-poly-embeddable} lines up with their min-max objective.  
+\raft{TODO: We said ``poses the construction in Theorem~\ref{thm:discrete-loss-poly-embeddable}'' -- is it exactly the same?  We just have to say how it relates, like ``when viewing X as Y, one arrives at the same construction'', or maybe one is a special case of the other.}\raf{TODO: Update 6/12/2022: looks like this sentence changed, but now isn't tied to Theorem~\ref{thm:discrete-loss-poly-embeddable}...}
+%\jessie{If I understand the papers correctly, the cited works take a loss matrix (often for adversarial classification or prediction) and use the dual to obtain a consistent surrogate for the task, so it's just a specific application of this construction.}
+
 \citet{reid2012convexity} construct a canonical link function for proper losses with differentiable Bayes risks; the link maps a report $p\in\simplex$ to the gradient of the Bayes risk at $p$, which uses the same duality as above.
 \citet[Proposition 3]{duchi2018multiclass} give essentially the same construction as ours, but only comment on the calibration of surrogates under such constructions for multiclass classification tasks given by strictly concave losses, excluding polyhedral surrogates.
 Finally, a similar construction also appears in the design of prediction markets \cite{abernethy2013efficient} and in connections between proper losses and mechanism design \cite{frongillo2014general}.
@@ -2577,8 +2581,9 @@ Thus, for any halfspace $H^+$, we have that $H^+$ is one of the two closed halfs
 Observe that by the halfspace representation, a polyhedron need not be bounded.
 
 
-\begin{definition}[Valid, supports]
-	A halfspace $H^+$ is \emph{valid} for $P$ if $P \subseteq H^+$.
+\begin{definition}[Supports]
+	%A halfspace $H^+$ is \emph{valid} for $P$ if $P \subseteq H^+$.
+	\jessiet{Removed valid as it doesn't come up later.  \# burn}
 	A hyperplane $H$ \emph{supports} the polyhedron $P$ if 
 	% (i) $P \subseteq H^+$ for a halfspace $H^+$ corresponding to $H$
 	(i) $P \subseteq H^+$ for a halfspace $H^+$ with $H = \partial H^+$, and
@@ -2624,6 +2629,7 @@ To find this set, we must first establish when a halfspace representation is irr
 \begin{definition}[Irredundant; adapted from {\citet{gallier2008notes}}]\label{def:irredundant}
 	Let $P = \cap \H$ for a finite set of closed halfspaces $\H$ be a polyhedron.
 	We say that $\cap \H$ is an \emph{irredundant decomposition} for $P$ (and $\H$ is irredundant for $P$) if $P$ cannot be expressed as $P = \cap \H'$ for some set of closed halfspaces $\H'$ such that $|\H'| < |\H|$, and redundant otherwise.
+	Moreover, we call $\H$ irredundant for $P$ if $\cap \H$ is an irredundant decomposition of $P$.
 \end{definition}
 
 \citet{gallier2008notes} shows that every $d$-dimensional polyhedron $P \subseteq \reals^d$ has a unique and irredundant halfspace representation $\H^*$, and each $H^+ \in \H^*$ generates a facet of $P$.
@@ -2652,7 +2658,7 @@ To find this set, we must first establish when a halfspace representation is irr
   if $F$ is a facet of $P$ and $H,H'$ are hyperplanes with $F = H \cap P = H' \cap P$, then it must be the case that $H = H'$.
 	It therefore suffices to show that, for each facet $F$ of $P$, there is an $H^+ \in \H$ such that $F = H\cap P$.
   \citet[Proposition 3.17]{gallier2008notes} observes that, for all $x \in \partial P$, there exists some hyperplane $\hat H$ such that $\hat H$ supports $P$ at $x$.
-	Since $x \in \relint(F)$ is in exactly one face of $F$, namely $F$ itself, there must be a unique $H^+ \in \H$ such that $F = H \cap P$.
+	Since $x \in \relint(F)$ is in exactly one face of $P$, namely $F$, there must be a unique $H^+ \in \H$ such that $F = H \cap P$.
 %  Let $\H$ be a finite set of closed halfspaces such that $P = \cap \H$.
 %  By (ii), each $H^+ \in \H^*$  determines a facet of $P$.
 %  If $H^+ \not \in \H$, then $\cap \H \neq P$ as convex polytopes are uniquely determined by their facets (cf.~\citep[pg. 455]{schneider2014convex})\raft{This citation is doing the heavy lifting---what exactly does it say?}, a contradiction.
@@ -2703,7 +2709,8 @@ A first observation is that the region generated by the intersection of the $H^+
 \end{proof}
 
 
-\subsection{Extended Bayes risks as polyhedra}\label{appsubsec:phase2}
+\subsection{Hypographs of extended Bayes risks}\label{appsubsec:phase2}
+\jessie{Remove subsection and merge with above?}
 
 We now apply this polyhedral perspective to the Bayes risk of a loss function, extended to ``unnormalized distributions'', i.e., all of $\reals^\Y_+$.
 Given a minimizable loss function $L : \R \to \reals^\Y_+$, define the $1$-homogeneous extension of its Bayes risk as
@@ -2771,12 +2778,13 @@ Observe that $L(\R)$ and $\H_{L(\R)}$ may be infinite sets.
 	First, we need to show that $\hyp(g_{L(\R)})$ is full-dimensional.
 	Since $g_{L(\R)}$ is nonnegative on $\reals_+^\Y$, $\hyp(g_{L(\R)})$ therefore contains $\{(x,c) \mid x\in\reals^\Y_+, c \leq 0\}$, which is $(|\Y| + 1)$-dimensional.
 	
-  Since $\hyp(g_{L(\R)})$ is full-dimensional, take $\H^*$ to be the unique irredundant and finite set of closed halfspaces such that $\hyp(g_{L(\R)}) = \H^*$ from Theorem~\ref{thm:polyhedron-uniquely-gen-facets}(i).
-  Now, $\hyp(g_{L(\R)}) \cap H$ being a facet follows immediately from Theorem~\ref{thm:polyhedron-uniquely-gen-facets}(ii) and (iii).
+  Since $\hyp(g_{L(\R)})$ is full-dimensional, take $\H^*$ to be the unique irredundant and finite set of closed halfspaces such that $\hyp(g_{L(\R)}) = \cap \H^*$ from Theorem~\ref{thm:polyhedron-uniquely-gen-facets}(i).
+  Now, $\hyp(g_{L(\R)}) \cap H$ for any $H \in \H^*$ being a facet follows immediately from Theorem~\ref{thm:polyhedron-uniquely-gen-facets}(ii) and (iii).
   
-  To see $\H_\Y \subseteq \H^*$, if there was a $y \in \Y$ such that $H^+_y = \{(x,c) \mid x_y \geq 0\}$ was not in $\H^*$, then we would either have some $c_1 > 0$ such that $\{(x,c) \mid x_y \geq c_1\} \in \H^*$, or we have a point $x$ such that $x_y < 0$ but $g_{L(\R)}(x) > -\infty$.
-  The first cannot happen as $g_{L(\R)}$ is concave and finite (namely, nonnegative) at $x = e_y$.
-  The second cannot occur as $g_{L(\R)}$ is only finite on $\reals^\Y_+$ by construction with the convex indicator. \raft{TODO: Couldn't follow this last line, since $\delta$ can be $\infty$\jessie{does it help that it's minus the convex indicator?} 6/20/2022: still don't get it, sorry :-)... \jessie{Yeah I changed the sentence entirely.  better? \# burn}}. 
+  To see $\H_\Y \subseteq \H^*$, if there was a $y \in \Y$ such that $H^+_y = \{(x,c) \mid x_y \geq 0\}$ was not in $\H^*$, it is either because it is redundant or $H^+_y \not \subseteq \hyp(g_{L(\R)})$.
+  In the first case, there must be some $\epsilon > 0$ such that $\{(x,c) \mid x_y \geq \epsilon\} \in \H^*$, which cannot happen as $g_{L(\R)}$ is concave and finite (namely, nonnegative) at $x = e_y$.
+  In the second case, we have a point $x \not \in \reals^\Y_+$ with $g_{L(\R)}(x) > -\infty$.
+  This contradicts the fact that $g_{L(\R)}$ is only finite on $\reals^\Y_+$ by construction with the convex indicator. \raft{TODO: Couldn't follow this last line, since $\delta$ can be $\infty$\jessie{does it help that it's minus the convex indicator?} 6/20/2022: still don't get it, sorry :-)... \jessie{Yeah I changed the sentence entirely.  better? \# burn}}. 
 \end{proof}
 
 %We now show that the set $\H_\Y$ is contained in $\H^*$ so that we can separate the facets generated by $\H^*$ into a partition of vertical and non-vertical facets of $\hyp(g_\V)$.
@@ -2798,7 +2806,7 @@ We now use the above result about the unique irredundant halfspace decomposition
   Then
   (i) there is a unique finite set $\V^* \subseteq \reals^\Y_+$ such that $\H^* = \H_\Y \cup \H_{\V^*}$.
   (ii) $F_v := H_v \cap \hyp(g_{L(\R)})$ is a facet of $\hyp(g_{L(\R)})$ for each $v\in\V^*$.
-  (iv) $g_{L(\R)}(x) = \min_{v \in \V^*}\inprod{v}{x} - \delta(x \mid \reals_+^\Y) = g_{\V^*}(x)$.
+  (iii) $g_{L(\R)}(x) = \min_{v \in \V^*}\inprod{v}{x} - \delta(x \mid \reals_+^\Y) = g_{\V^*}(x)$.
 \end{corollary}
 \begin{proof}
 %  \raf{Argue that all facets of $G$ are an $H_y \cap G$ or some $H_v \cap G$.  Thus, we can define $\V^*$ by $\H_\Y \cup \H_{\V^*} = \H^*$.  (I.e., $\H^* \setminus \H_\Y = \H_{\V^*}$ for some $\V^*$.)}
@@ -2806,13 +2814,14 @@ We now use the above result about the unique irredundant halfspace decomposition
   (i) Since $\hyp(g_{L(\R)})$ is full-dimensional, the facets of $\hyp(g_{L(\R)})$ are uniquely determined by the hyperplanes $H$ such that $H = \partial H^+$ and $H^+ \in \H^*$ by Lemma~\ref{lem:G-unique-facets-Hstar}.
   Any facet must then be some intersection of an $H_y \cap \hyp(g_{L(\R)})$ or $H_v \cap \hyp(g_{L(\R)})$.
   Since $\H_\Y \subseteq \H^*$ by Lemma~\ref{lem:G-unique-facets-Hstar}, take $\H_{\V^*} := \H^* \setminus \H_{\Y}$, and $\V^*$ the unique set generating $\H_{\V^*}$.
-  (ii) Moreover, $H_v \in \H_{\V^*} \subseteq \H^*$ generates the facet $F_v = H_v \cap \hyp(g_{\V})$ of $\hyp(g_{L(\R)})$ by Lemma~\ref{lem:G-unique-facets-Hstar}.
+  (ii) Moreover, $H_v \in \H_{\V^*} \subseteq \H^*$ generates the facet $F_v = H_v \cap \hyp(g_{L(\R)})$ of $\hyp(g_{L(\R)})$ by Lemma~\ref{lem:G-unique-facets-Hstar}.
 %
 %  The moreover follows immediately since $\H_{\V^*} \subseteq \H^*$ and every $H^+ \in \H^*$ defines a facet by Lemma~\ref{lem:G-unique-facets-Hstar}.
-  (iii)  $\H_\Y \cup \H_{\V^*} = \H^*$ by (i), and $\H^* \subseteq \H = \H_\Y \cup \H_{\V}$ by Lemma~\ref{lem:G-unique-facets-Hstar}, ergo $\V^* \subseteq \V$.
-  (iv)   The result holds if $\hyp(g_{L(\R)}) = \hyp(g_{\V^*})$.
-  By construction, $\hyp(g_{L(\R)}) = \cap (\H_\Y \cup \H_\V)= \cap \H^* = \cap (\H_\Y \cup \H_{\V^*}) = \{(x,c) \in \reals_+^\Y \times \reals \mid \inprod{v^*}{x} \geq c$ for all $v^* \in \V^* \}$ where the first equality follows as $\H^* \subseteq \H$.
-  Thus $g_{L(\R)}$ can be written as $g_{L(\R)}(x) = \min_{v \in \V^*}\inprod{v}{x} - \delta(x \mid \reals^\Y_+) = g_{\V^*}(x)$. 
+%  (iii)  $\H_\Y \cup \H_{\V^*} = \H^*$ by (i), and $\H^* \subseteq \H = \H_\Y \cup \H_{\V}$ by Lemma~\ref{lem:G-unique-facets-Hstar}, ergo $\V^* \subseteq \V$.
+  (iii)   The result holds if $\hyp(g_{L(\R)}) = \hyp(g_{\V^*})$.
+  By construction, $\hyp(g_{L(\R)}) = \cap \H^* = \cap (\H_\Y \cup \H_{\V^*}) = \{(x,c) \in \reals_+^\Y \times \reals \mid \inprod{v^*}{x} \geq c$ for all $v^* \in \V^* \} = \hyp(g_{\V^*})$.
+  The result follows from equality of the hypographs.
+  %Thus $g_{L(\R)}$ can be written as $g_{L(\R)}(x) = \min_{v \in \V^*}\inprod{v}{x} - \delta(x \mid \reals^\Y_+) = g_{\V^*}(x)$. 
 \end{proof}
 
 
@@ -2840,7 +2849,7 @@ The above establishes our primary assumption for the rest of this section.
 \begin{assumption}\label{assum:V-star-exists-infinite}
 	$L : \R \to \reals^\Y_+$ is a minimizable loss function such that $\risk L_+ = g_{L(\R)}$ is polyhedral.
 	%$\V \subseteq L(\R)$ is a finite set such that $g_\V = g_{L(\R)}$.
-	$\V^* \subseteq L(\R)$ is the unique finite set such that $g_{L(\R)} = g_{\V^*}$ and $\hyp(g_{L(\R)}) = \hyp(g_{\V^*}) = \cap(\H_{\V^*} \cup \H_\Y)$, and $\H_{\V^*} \cup \H_\Y$ is irredundant.
+	$\V^* \subseteq L(\R)$ is the unique finite set such that $g_{L(\R)} = g_{\V^*}$ and $\hyp(g_{L(\R)}) = \hyp(g_{\V^*}) = \cap(\H_{\V^*} \cup \H_\Y)$, the last of which is irredundant.
 \end{assumption}
 
 \begin{proposition}\label{prop:poly-risk-assumption-satisfied}
@@ -2849,7 +2858,7 @@ The above establishes our primary assumption for the rest of this section.
 \begin{proof}
 	%Given $L$ with polyhedral $\risk L_+$, Claim~\ref{claim:gV-equals-riskL} gives a finite set $\V \subseteq L(\R)$ such that $g_{L(\R)} = g_\V$. 
 	Consider the unique $\V^* \subseteq L(\R)$ that is given in Corollary~\ref{cor:unique-set-loss-vectors-defining-facets} such that $g_{L(\R)} = g_{\V^*}$.
-	Finally, by construction in Lemma~\ref{lem:G-unique-facets-Hstar}, we additionally have $\H^* = \H_\Y \cup \H_{\V^*}$, and $\H^*$ is irredundant.
+	Finally, by construction in Lemma~\ref{lem:G-unique-facets-Hstar}, we additionally have $\H^* = \H_\Y \cup \H_{\V^*}$, and $\cap \H^*$ is irredundant.
 %	WTS
 %	(i) $\V^* \subseteq L(\R)$ -- done
 %	(ii) $\V^*$ unique and smallest
@@ -2900,7 +2909,7 @@ The above establishes our primary assumption for the rest of this section.
 
 \subsection{Extended Bayes risk to extended level sets: projecting from $\reals^d_+$ to $\reals^\Y_+$}\label{subsec:project-pi}
 
-When the set $\V^*$ is clear, we denote the faces of $\hyp(g_{\V^*})$ by $F_v := H_v \cap \hyp(g_{\V^*})$.
+When the loss $L$ is clear, we denote the faces of $\hyp(g_{L(\R)})$ by $F_v := H_v \cap \hyp(g_{L(\R)})$.
 We now define the projection $\pi:\reals^\Y\times \reals \to \reals^\Y, (x,c) \mapsto x$.
 
 
@@ -2910,7 +2919,7 @@ As a first step, the extended level sets generated by $\V^*$ cover the nonnegati
 \begin{corollary}\label{cor:projected-Vstar-faces-cover-pos-orthant}
 	Consider $L, \V^*$ satisfying Assumption~\ref{assum:V-star-exists-infinite}.
 	%For each $v \in \V^*$, let $F_v = F_v^{\hyp(g_{\V^*})}= H_v \cap \hyp(g_{\V^*})$. \jessiet{redundant?}
-	Then $\cup_{v\in\V^*} \pi(F_v^{\hyp(g_{\V^*})}) = \reals^\Y_+$.
+	Then $\cup_{v\in\V^*} \pi(F_v) = \reals^\Y_+$.
 \end{corollary}
 
 Moreover, the projection $\pi$ preserves dimension of faces.
@@ -2918,7 +2927,7 @@ Moreover, the projection $\pi$ preserves dimension of faces.
 \begin{claim}\label{claim:pi-preserves-dim}
 	Consider $L, \V^*$ satisfying Assumption~\ref{assum:V-star-exists-infinite}. %, let $F_v = H_v \cap \hyp(g_\V)$.
 %	For all $v \in L(\R)$, define $F_v$ as the face of $g_{L(\R)}=g_{\V^*}$ generated by $H_v$.
-	Then $\dim(F_v^{\hyp(g_{\V^*})}) = \dim(\pi(F_v^{\hyp(g_{\V^*})}))$.
+	Then $\dim(F_v) = \dim(\pi(F_v))$.
 \end{claim}
 \begin{proof}
 	\jessiet{Can use a careful check}
@@ -2945,16 +2954,15 @@ Given $L, \V^*$ satisfying Assumption~\ref{assum:V-star-exists-infinite}, fix $x
 	For any $v \in L(\R)$, the following are equivalent: 
 	
 	
-	(1) $(x,g_{\V^*}(x)) \in F_v^{\hyp(g_{\V^*})}$; % H_v \cap \hyp(g_\V)$
+	(1) $(x,g_{\V^*}(x)) \in F_v$; % H_v \cap \hyp(g_\V)$
 	
 	(2) $\inprod{v}{x}= g_{\V^*}(x)$;
 	
 	(3) $v \in \argmin_{v' \in L(\R)} \inprod{v'}{x}$; and
 	
-	(4) $x \in \pi(F_v^{\hyp(g_{\V^*})})$~.
+	(4) $x \in \pi(F_v)$~.
 \end{lemma}
 \begin{proof}
-	For $v \in L(\R)$, define $F_v := F_v^{\hyp(g_{L(\R)})}$.
 	\begin{align*}
 	(1) \quad \quad (x,g_{\V^*}(x)) \in F_v
 	&\iff (x,g_{\V^*}(x)) \in \{(x',c) \in \hyp(g_{\V^*}) \mid \inprod{v}{x'} = c\} & \\
@@ -2980,7 +2988,7 @@ Given $L, \V^*$ satisfying Assumption~\ref{assum:V-star-exists-infinite}, fix $x
 	\btw{$\Lambda$ is exactly the set of FDLS; Will lead to $\Theta_{\V^*}$ are exactly the full dimensional level sets over simplex (6).}
 \end{claim}
 \begin{proof}
-	By Corollary~\ref{cor:unique-set-loss-vectors-defining-facets}, $F_v$ is a facet of $\hyp(g_{\V^*})$ in $\reals^d_+$, meaning it is $(d - 1)$-dimensional.
+	By Corollary~\ref{cor:unique-set-loss-vectors-defining-facets}, $F_v$ is a facet of $\hyp(g_{L(\R)})$ in $\reals^d_+$, meaning it is $(d - 1)$-dimensional.
 	Moreover, Claim~\ref{claim:pi-preserves-dim} states that the dimension of $F_v$ is preserved for each $v \in \V^*$.
 	Thus, $d-1 = |\Y| = \dim(F_v) = \dim(\pi(F_v))$.
 \end{proof}
@@ -3060,8 +3068,8 @@ Given a finite set $\V^* \subset \reals^\Y_+$, we denote $\Lambda_{S} := \{\pi(F
 	%$\pi(F_v) \in \Lambda \cap \{\pi(F_v) \mid v \in \V'\} = \Lambda$.
 	
 	$\impliedby$
-	If $\{\pi(F_v) \mid v \in \V^*\} \subseteq \{ \pi(F_v) \mid v \in L(\R') \}$, then $\cup \{\pi(F_v) \mid v \in \V^*\} \subseteq \cup_{v \in \V'} \pi(F_v)$.
-	By Corollary~\ref{cor:projected-Vstar-faces-cover-pos-orthant}, we have $\cup \{\pi(F_v) \mid v \in \V^*\} = \reals_+^\Y$, so $\reals_+^\Y \subseteq \cup_{v \in \V'} \pi(F_v)$.
+	If $\Lambda_{\V^*} \subseteq \Lambda_{\V'}$, then $\cup_{v^* \in \V^*} \pi(F_{v^*}) \subseteq \cup_{v \in \V'} \pi(F_v)$.
+	By Corollary~\ref{cor:projected-Vstar-faces-cover-pos-orthant}, we have $\cup_{v^* \in \V^*} \pi(F_{v^*}) = \reals_+^\Y$, so $\reals_+^\Y \subseteq \cup_{v \in \V'} \pi(F_v)$.
 	The other direction of subset inequality following from $\hyp(g_{\V^*})$ being finite only on $\reals_+^\Y$.	
 \end{proof}
 
@@ -3083,49 +3091,53 @@ Given a finite set $\V^* \subset \reals^\Y_+$, we denote $\Lambda_{S} := \{\pi(F
 %\end{proof}
 
 
-\btw{Lemmatta for Lemma showing (7) in Lemma \ref{lem:X}}
-\begin{claim}\label{claim:vface-subset-some-vstar-face}
-	Consider $L, \V^*$ satisfying Assumption~\ref{assum:V-star-exists-infinite}.
-	For any $v \in L(\R)$, the face $F_{v} \subseteq F_{v^*}$ for some $v^* \in \V^*$. %must be a subset of one of the $\V^*$ facets $F_{v^*}$ (as opposed to the vertical ones)
-\end{claim}
-\begin{proof}
-	\jessie{I'm not sure if this is clear, but this is a new approach to the proof that I generally like better. I can clarify if the wording is not clear though. Old version in comments}
-	As $\hyp(g_{\V^*})$ is a polyhedron, each of its faces are convex polyhedra, and is also a face of some facet of $\hyp(g_{\V^*})$; these facets are defined by $\V^*$ and $\Y$ via Corollary~\ref{cor:unique-set-loss-vectors-defining-facets}.
-	
-	It then suffices to show, for $v \in L(\R)$ that if $F_v := H_v \cap \hyp(g_{\V^*})$ is a face of the facet $F_y := H_y \cap \hyp(g_{\V^*})$ for some $y\in \Y$, then it must also be a face of $F_{v^*}$ for a $v^* \in \V^*$; it suffices to show $F_v$ is not a facet, and thus $F_v \neq F_y$.
-	Recall from the definition of a face that $F_v = \hyp(g_{\V^*}) \cap H_v$ and $F_y = \hyp(g_{\V^*}) \cap H_y$.
-	As facets of a polyhedron are (uniquely) determined by hyperplanes and $F_y$ is a facet, then if $F_v$ is a facet we must have $v \in \V^*$, and $\V^*$ is constructed so that $\H_{\V^*} \cap \H_\Y = \emptyset$.
-	Thus, $F_v \neq F_y$ by unique determination of facets.
-	If $F_v$ is not a facet of $\hyp(g_{\V^*})$, then $F_v \neq F_y$ is immediate as $F_y$ is a facet of $\hyp(g_{\V^*})$. 
-	In both cases, we have $F_v \neq F_y$, and the result follows.
-
-	
-	%Commented out 7 Jan 2022
-%	\jessiet{Can use a careful read}
-%	$\{F_{v^*}\}_{v^* \in \V^*}$ is exactly the set of facets of $\hyp(g_{\V^*})$ on $\reals_+^d$ by Theorem~\ref{thm:polyhedron-uniquely-gen-facets}.
-%	Any $k$-face is contained in a facet by Claim~\ref{claim:faces-contained-in-facets}.
-%	Since $\H = \cap (\H_{\V^*} \cup \H_\Y)$, we are done if $F_v$ is contained in a face of $\H_{\V^*}$ and need to consider the case where $F_v \in \H_\Y$.
+%\btw{Lemmatta for Lemma showing (7) in Lemma \ref{lem:X}}
+%\begin{claim}\label{claim:vface-subset-some-vstar-face}
+%	Consider $L, \V^*$ satisfying Assumption~\ref{assum:V-star-exists-infinite}.
+%	For any $v \in L(\R)$, $F_{v} \subseteq F_{v^*}$ for some $v^* \in \V^*$. %must be a subset of one of the $\V^*$ facets $F_{v^*}$ (as opposed to the vertical ones)
+%\end{claim}
+%\begin{proof}
+%	By Theorem~\ref{thm:polyhedron-uniquely-gen-facets} (ii), every $F_{v^*}$ is a facet of $\hyp(g_{L(\R)})$.
+%	Moreover, every face of a convex polyhedron is contained in a facet.
+%% Commented out June 27 2022
+%%	Since $\hyp(g_{\V^*})$ is a polyhedron, each of its faces are convex polyhedra, and is also a face of some facet of $\hyp(g_{\V^*})$; these facets are defined by $\V^*$ and $\Y$ via Corollary~\ref{cor:unique-set-loss-vectors-defining-facets}.
+%%	
+%%	It then suffices to show, for $v \in L(\R)$ that if $F_v$ is a face of the facet $F_y$ for some $y\in \Y$, then it must also be a face of $F_{v^*}$ for a $v^* \in \V^*$; it suffices to show $F_v$ is not a facet, and thus $F_v \neq F_y$.
+%%	Recall from the definition of a face that $F_v = \hyp(g_{L(\R)}) \cap H_v$ and $F_y = \hyp(g_{L(\R)}) \cap H_y$.
+%%	As facets of a polyhedron are (uniquely) determined by hyperplanes and $F_y$ is a facet, then if $F_v$ is a facet we must have $v \in \V^*$, and $\V^*$ is constructed so that $\H_{\V^*} \cap \H_\Y = \emptyset$.
+%%	Thus, $F_v \neq F_y$ by unique determination of facets.
+%%	If $F_v$ is not a facet of $\hyp(g_{\V^*})$, then $F_v \neq F_y$ is immediate as $F_y$ is a facet of $\hyp(g_{\V^*})$. 
+%%	In both cases, we have $F_v \neq F_y$, and the result follows.
+%
 %	
-%	If $F_v$ is a subset of a vertical facet $F_y$, we would have $F_v = H_v \cap G \subseteq H_y \cap G$ for some $y \in \Y$.
-%	Expanding, this is $\{(x,g(x)) \mid \inprod{v}{x} = g(x)\} \subseteq \{(x,g(x)) \mid x_y = 0 \}$.
-%	While this can happen, it must be on the boundary of $\reals_+^d$, and must be at the intersection of $H_y$ and some other $H_{v^*}$ for $v^* \in \V^*$, since $g$ is continuous on $\reals^\Y_{+}$, and determined by $\V^*$ on $\reals^\Y_{++}$.
-%	\jessiet{Justification: $g$ is continuous on $\reals_+^\Y$, and there has to be a unique $v^*$ on $\reals^\Y_{++}$. More hand-wavy than I'd like}
-\end{proof}
+%	%Commented out 7 Jan 2022
+%%	\jessiet{Can use a careful read}
+%%	$\{F_{v^*}\}_{v^* \in \V^*}$ is exactly the set of facets of $\hyp(g_{\V^*})$ on $\reals_+^d$ by Theorem~\ref{thm:polyhedron-uniquely-gen-facets}.
+%%	Any $k$-face is contained in a facet by Claim~\ref{claim:faces-contained-in-facets}.
+%%	Since $\H = \cap (\H_{\V^*} \cup \H_\Y)$, we are done if $F_v$ is contained in a face of $\H_{\V^*}$ and need to consider the case where $F_v \in \H_\Y$.
+%%	
+%%	If $F_v$ is a subset of a vertical facet $F_y$, we would have $F_v = H_v \cap G \subseteq H_y \cap G$ for some $y \in \Y$.
+%%	Expanding, this is $\{(x,g(x)) \mid \inprod{v}{x} = g(x)\} \subseteq \{(x,g(x)) \mid x_y = 0 \}$.
+%%	While this can happen, it must be on the boundary of $\reals_+^d$, and must be at the intersection of $H_y$ and some other $H_{v^*}$ for $v^* \in \V^*$, since $g$ is continuous on $\reals^\Y_{+}$, and determined by $\V^*$ on $\reals^\Y_{++}$.
+%%	\jessiet{Justification: $g$ is continuous on $\reals_+^\Y$, and there has to be a unique $v^*$ on $\reals^\Y_{++}$. More hand-wavy than I'd like}
+%\end{proof}
 
-\begin{corollary}\label{cor:projected-faces-subset-projected-facet}
-	Consider $L, \V^*$ satisfying Assumption~\ref{assum:V-star-exists-infinite}, and $F_v := H_v \cap \hyp(g_{\V^*})$ be a face of $\hyp(g_{\V^*})$.
-	For $v \in L(\R),v^* \in \V^*$ such that $F_v \subseteq F_{v^*}$, $\pi(F_{v}) \subseteq \pi(F_{v^*})$. 
-\end{corollary}
+%\begin{corollary}\label{cor:projected-faces-subset-projected-facet}
+%	Consider $L, \V^*$ satisfying Assumption~\ref{assum:V-star-exists-infinite}. %, and $F_v := H_v \cap \hyp(g_{\V^*})$ be a face of $\hyp(g_{\V^*})$.
+%	For $v \in L(\R),v^* \in \V^*$ such that $F_v \subseteq F_{v^*}$, $\pi(F_{v}) \subseteq \pi(F_{v^*})$. 
+%\end{corollary}
 
 Now, we can conclude that projected facets generated by $L(\R)$ contain all other projected faces of $\hyp(g_{\V^*})$.
 \begin{corollary}\label{cor:exists-vstar-projected-face-subset}
+	\jessiet{BTW- removed previous statements that were separate and just put the proofs in here. burn if okay}
 	Consider $L, \V^*$ satisfying Assumption~\ref{assum:V-star-exists-infinite}.
-	For $v \in L(\R)$, let $F_v := H_v \cap \hyp(g_{\V^*})$ be a face of $\hyp(g_{\V^*})$. 
 	For any $v \in L(\R)$, there is a $v^* \in \V^*$ such that $\pi(F_v) \subseteq \pi(F_{v^*})$.
 	\btw{shows (7) on $\reals^\Y_+$}
 \end{corollary}
 \begin{proof}
-	This is exactly Claim~\ref{claim:vface-subset-some-vstar-face} and Corollary~\ref{cor:projected-faces-subset-projected-facet} chained together.
+	First, observe that $F_v \subseteq F_{v^*}$ as $F_{v^*}$ is a facet by construction of $\V^*$ and Theorem~\ref{thm:polyhedron-uniquely-gen-facets} (ii).
+	As each face of a polyhedron is contained in a facet, we have $F_v \subseteq F_{v^*}$.
+	Moreover, $\pi(F_v) \subseteq \pi(F_{v^*})$ follows immediately as a corollary.
 \end{proof}
 
 
@@ -3170,7 +3182,7 @@ Now, we define the function $\theta(v) = \{p \in \simplex \mid \inprod{v}{p} = f
 
 \begin{claim}\label{claim:theta-is-pi-cap-simplex}
   Consider $L, \V^*$ as in Assumption~\ref{assum:V-star-exists-infinite}.
-  For all $v \in \V^*$, consider the face $F_v$ of $\hyp(g_{\V^*})$.
+  For all $v \in \V^*$, consider the face $F_v$ of $\hyp(g_{L(\R)})$.
   Then $\theta(v) = \pi(F_v) \cap \simplex$.
 \end{claim}
 \begin{proof}
@@ -3188,7 +3200,7 @@ Now, we define the function $\theta(v) = \{p \in \simplex \mid \inprod{v}{p} = f
 \end{proof}
 
 
-\subsection{Moving from $\simplex$ to $\reals^\Y_+$}
+\subsection{Moving back from $\simplex$ to $\reals^\Y_+$}
 Now that we have translated from $\reals^d_+$ to $\reals^\Y_+$ in \S~\ref{subsec:project-pi} and from $\reals^\Y_+$ to $\simplex$ in \S~\ref{subsec:project-f}, we take some final steps to prove Lemma~\ref{lem:X} by showing equivalences from $\simplex$ to $\reals^\Y_+$.
 \begin{lemma}\label{lem:level-set-is-projected-face}
   Consider $L, \V^*$ satisfying Assumption~\ref{assum:V-star-exists-infinite}.
@@ -3243,7 +3255,7 @@ Every minimizable loss $L$ elicits a unique property $\Gamma := \prop{L}$, and w
 	&= \{p' \in \simplex \mid r \in \argmin_{r' \in \R} \inprod{L(r')}{p'} \} & \text {Definition of level set} \\
 	&= \{p' \in \simplex \mid v \in \argmin_{v' \in L(\R)} \inprod{v'}{p'} \} &  \\
 	&= \{p' \in \simplex \mid \inprod{v}{p'} = \min_{v' \in L(\R)} \inprod{v'}{p'} \} & \text {$L$ minimizable} \\
-	&= \{p' \in \simplex \mid \inprod{v}{p'} = g_{\V^*}(p') \} & \text {Assumption~\ref{assum:V-star-exists-infinite}: $g_{L(\R)} = g_{\V^*}$} \\
+	&= \{p' \in \simplex \mid \inprod{v}{p'} = g_{\V^*}(p') \} & \text {Assumption~\ref{assum:V-star-exists-infinite}} \\
 	&= \{p' \in \simplex \mid c \inprod{v}{p'} = c g_{\V^*}(p') \} &  \\
 	&= \{p' \in \simplex \mid  \inprod{v}{cp'} = g_{\V^*}(cp') \} & \text {Lemma~\ref{lem:g-1-homog}} \\
 	\implies cp
@@ -3253,16 +3265,16 @@ Every minimizable loss $L$ elicits a unique property $\Gamma := \prop{L}$, and w
 
 \begin{lemma}\label{lem:extended-levelset-equals-projected-face}
 	Consider $L : \R \to \reals^\Y_+, \V^*$ satisfying Assumption~\ref{assum:V-star-exists-infinite}.
-	For any $v \in L(\R)$, define the face $F_v$ of $\hyp(g_{\V^*})$.
+	%For any $v \in L(\R)$, define the face $F_v$ of $\hyp(g_{\V^*})$.
 	For any $r\in \R$ with $v = L(r)$, $\bar \Gamma_r = \pi(F_v)$.  
 \end{lemma}
 \begin{proof}
 	\begin{align*}
 	\bar \Gamma_r
 	&= \{x \in \reals^\Y_+ \mid \inprod{L(r)}{x} = \risk L_+(x)\} & \text{Definition of $\bar \Gamma_r$}\\
-	&= \{x \in \reals^\Y_+ \mid \inprod{L(r)}{x} = g_{L(\R)}(x)\} & \text{Assumption~\ref{assum:V-star-exists-infinite}: $\risk L_+(x) = g_{\V^*}(x)$}\\
+	&= \{x \in \reals^\Y_+ \mid \inprod{L(r)}{x} = g_{L(\R)}(x)\} & \text{Assumption~\ref{assum:V-star-exists-infinite}}\\
 	&= \{x \in \reals^\Y_+ \mid \inprod{v}{x} = g_{L(\R)}(x)\} & \text{$v = L(r)$}\\
-	&= \pi(F_v) & \text{Since $F_v = \{(x,g_{\V^*}(x)) \mid \inprod{v}{x} = g_{\V^*}(x)\}$}\\
+	&= \pi(F_v) & \text{Since $F_v = \{(x,g_{L(\R)}(x)) \mid \inprod{v}{x} = g_{L(\R)}(x)\}$}\\
 	\end{align*}
 \end{proof}
 
@@ -3278,7 +3290,7 @@ Every minimizable loss $L$ elicits a unique property $\Gamma := \prop{L}$, and w
 	This proof follows from three lemmas: first, we observe that $g_{\V^*}$ is $1$-homogeneous via Lemma~\ref{lem:g-1-homog}.
 	Then we extend the notion of a level set $\Gamma_r$ to the nonnegative orthant $\bar \Gamma_r$, and show that any scalar transformation of a distribution in the level set is contained in the same (extended) level set via Lemma~\ref{lem:levelset-to-extended-levelset}.
 	Finally, we show the extended level set is exactly the projection $\pi(F_v)$ in Lemma~\ref{lem:extended-levelset-equals-projected-face}.
-	As a corollary, we chain the results to observe $\cup_{r \in \R'} \Gamma_r = \simplex \implies \cup_{r \in \R'} \bar \Gamma_r = \reals_+^\Y = \cup_{v \in L(\R')}\pi(F_v) = \reals^\Y_+$, yielding the forward implication.
+	As a corollary, we chain the results to observe $\cup_{r \in \R'} \Gamma_r = \simplex \implies \cup_{r \in \R'} \bar \Gamma_r = \reals_+^\Y \implies \cup_{v \in L(\R')}\pi(F_v) = \reals^\Y_+$, yielding the forward implication.
 	
 	
 	$\impliedby$
@@ -3302,21 +3314,22 @@ We now proceed with a few final lemmas that ultimately yield the proof of Lemma~
 	Chain Claim~\ref{claim:projected-faces-cover-RY-iff-representative} and Claim~\ref{claim:Vprime-projected-faces-cover-iff-Vstar-subset-Vprime} to yield the result.
 \end{proof}
 
+Define $\Theta_{S} := \{\theta(v) \mid v \in S\}$; it follows that $\Theta_{\V^*}$ is exactly the set of level sets of the property elicited by $L$.
+
 \begin{lemma}\label{lem:lemX-3-rep-iff-FDLS-subsets}
 	\btw{(3)}
 	Consider $L : \R \to \reals^\Y_+, \V^*$ satisfying Assumption~\ref{assum:V-star-exists-infinite}.
-	A finite set $\R' \subseteq \R$ with $\V' = L(\R')$ is representative if and only if $\Theta_{\V^*} \subseteq \{\theta(v) \mid v \in \V'\}$.
+	A finite set $\R' \subseteq \R$ with $\V' = L(\R')$ is representative if and only if $\Theta_{\V^*} \subseteq \Theta_{\V'}$.
 \end{lemma}
 \begin{proof}
 	Chain Claim~\ref{claim:projected-faces-cover-RY-iff-representative} and Claim~\ref{claim:Vprime-projected-faces-cover-iffprojected-faces-subsets} to yield the result.
 \end{proof}
 
-Define $\Theta_{S} := \{\theta(v) \mid v \in S\}$; it follows that $\Theta_{\V^*}$ is exactly the set of level sets of the property elicited by $L$.
-Moreover, let $\R^*$ be a set such that $\V^* := L(\R^*)$.
+With $L, \V^*$ satisfying Assumption~\ref{assum:V-star-exists-infinite}, we additionally let $\R^*$ be a set such that $\V^* := L(\R^*)$.
+Such a set exists as $\V^* \subseteq L(\R)$ in Assumption~\ref{assum:V-star-exists-infinite}, though it is not necessarily unique.
 
 \begin{corollary}
 	Consider $L, \V^*$ satisfying Assumption~\ref{assum:V-star-exists-infinite}, and $\R^*$ such that $\V^* = L(\R^*)$. 
-	(Such a set exists as $\V^* \subseteq L(\R)$ in Assumption~\ref{assum:V-star-exists-infinite}.)
 	Moreover, suppose $L$ elicits $\Gamma$.
 	$\Theta_{\V^*} = \{\Gamma_r \mid r \in \R^*\}$.
 \end{corollary}
@@ -3364,11 +3377,12 @@ In particular, any loss $L$ satisfying the assumptions of Lemma~\ref{lem:X} has 
 \begin{proof}
 	%\jessiet{Get to Assumption~\ref{assum:V-star-exists-infinite} quickly}
 %As in this appendix, we consider $\V = L(\R)$ such that $g_\V = \risk L_+$.
-Since $\risk L$ is polyhedral and concave there exists a $\V$ such that $\risk L = f_\V$ by Claim~\ref{claim:f-min-affine}.
+Since $\risk L$ is polyhedral and concave there exists a finite set $\V$ such that $\risk L = f_\V$ by Claim~\ref{claim:f-min-affine}.
 \jessie{I think what follows skips some details}
-Moreover, $g_{\V}$ is generated by a finite set, so is $g_{\V} = \risk L_+$ is also polyhedral and concave, and $f_\V = g_\V$ on $\simplex$.
-Therefore, there exists a finite set $\V$ such that $L$ and $\V$ satisfy Assumption~\ref{assum:V-star-exists-infinite} by Proposition~\ref{prop:poly-risk-assumption-satisfied}.
-Given the form of $\risk L$ written as a pointwise max of finitely many affine functions (which are loss vectors) in $\V$, the loss $L$ has a finite representative set. 
+Moreover as $\V$ is finite, $g_{\V} = \risk L_+$ (by $1$-homogeneity following from the form of $g_{\V}$) is also polyhedral and concave, and $f_\V = g_\V$ on $\simplex$.
+Therefore, there is a $\V^* \subseteq \V$ such that $L$ and $\V^*$ satisfy Assumption~\ref{assum:V-star-exists-infinite} by Proposition~\ref{prop:poly-risk-assumption-satisfied}.
+Moreover, any set $\R$ such that $\V^* = L(\R)$ is a finite representative set for $L$, and such a set must exist by the existence and construction of $\V^*$.
+%Given the form of $\risk L$ written as a pointwise max of finitely many affine functions (which are loss vectors) in $\V$, the loss $L$ has a finite representative set. 
 %Moreover, by Claim~\ref{claim:gV-and-fV}, $g_\V = f_\V$ on the simplex. 
 
 % for a finite set $\V$ by Claim~\ref{claim:f-min-affine}.
@@ -3379,7 +3393,7 @@ Given the form of $\risk L$ written as a pointwise max of finitely many affine f
 %First, observe that $\R^*$ is representative for $L$ as a corollary of Claim~\ref{claim:projected-faces-cover-RY-iff-representative}.
 %Moreover, consider the following set of level sets of $f_{\V^*}$, $\Theta_{\V^*} = \{\theta(v) \mid v \in \V^*\}$.
 
-Now that we have the preliminaries of $L, \V$ satisfying Assumption~\ref{assum:V-star-exists-infinite}, consider the itemized statements.
+Now that we have the preliminaries of $L, \V^*$ satisfying Assumption~\ref{assum:V-star-exists-infinite}, consider the itemized statements.
 Lemma~\ref{lem:lemX1-rep-iff-subset-vectors} is exactly statement \eqref{item:X-rep-V}.
 This immediately implies statement~\eqref{item:X-min-V}.
 Moreover, Lemma~\ref{lem:lemX-3-rep-iff-FDLS-subsets} is exactly statement~\eqref{item:X-rep-Theta}, and again statement~\eqref{item:X-min-Theta} immediately follows.
