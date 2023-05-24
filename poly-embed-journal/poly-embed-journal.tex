@@ -357,7 +357,7 @@ In the example above, hinge loss is polyhedral, whereas logistic loss is not.
 \label{sec:property-elicitation}
 
 We will frequently appeal to concepts and results from property elicitation~\citep{savage1971elicitation,osband1985information-eliciting,lambert2008eliciting,gneiting2011making,steinwart2014elicitation,frongillo2015vector-valued,lambert2018elicitation}.
-Here one studies \emph{properties}, maps from label distributions to reports, and asks when a property characterizes the reports that exactly minimize a loss.
+Here one studies \emph{properties}, maps from (conditional) label distributions to reports, and asks when a property characterizes the reports that exactly minimize a loss.
 In our case, this map will at times be set-valued, meaning a single distribution could yield multiple optimal reports.
 For example, when $p=(1/2,1/2)$, both $r=1$ and $r=-1$ optimize 0-1 loss.
 We will use double arrow notation to denote a (non-empty) set-valued map, so that $\Gamma: \simplex \toto \R$ is shorthand for $\Gamma: \simplex \to 2^{\R} \setminus \{\emptyset\}$, where $2^\R$ denotes the power set of $\R$.
@@ -431,7 +431,7 @@ for all $p \in \simplex$,
 It is well-known in finite-outcome settings that calibration is equivalent to \emph{consistency}, in the following sense (cf.~\citep{bartlett2006convexity,zhang2004statistical,agarwal2015consistent}).
 Suppose we have the feature space $\X$ and label space $\Y$.
 %For any data distribution $D \in \Delta(\X \times \Y)$, let $L^*$ be the best possible expected (over $D$) $L$-loss achieved by any hypothesis $H:\X\to\reals^d$, and $\ell^*$ the best expected $\ell$-loss for any hypothesis $h:\X\to\R$, respectively.
-We say a surrogate and link pair $(L,\psi)$ is consistent with respect to $\ell$ if, for all data distributions $D \in \Delta(\X \times \Y)$, and all sequences of surrogate hypotheses $H_1,H_2,\ldots$ whose $L$-loss limits to the optimal surrogate loss $L^*$ (in expectation over $D$), the $\ell$-loss of the sequence $\psi\circ H_1,\psi \circ H_2, \ldots$ limits to the optimal target loss $\ell^*$.
+We say a surrogate and link pair $(L,\psi)$ is consistent with respect to $\ell$ if, for all data distributions $D \in \Delta(\X \times \Y)$, and all sequences of surrogate hypotheses $h_1,h_2,\ldots$ whose $L$-loss limits to the optimal surrogate loss $L^*$ (in expectation over $D$), the $\ell$-loss of the sequence $\psi\circ h_1,\psi \circ h_2, \ldots$ limits to the optimal target loss $\ell^*$.
 As Definition~\ref{def:calibrated} does not involve the feature space $\X$, we will drop it for the remainder of the paper.
 
 
@@ -468,7 +468,7 @@ This approach captures several consistent surrogates in the literature (e.g.,~\c
 
 An important subtlety is that it is not always necessary to map \emph{all} target reports to $\reals^d$.
 It is often convenient to allow $\ell$ to have reports that are ``redundant'' in some sense. (We explore redundancy further in \S~\ref{sec:min-rep-sets}; see also \citet{wang2020weston}.)
-Because of this redundancy, we will only require an embedding map to be defined on a \emph{representative set}: a set of reports $\Sc$ such that, for all label distributions, at least one report $r\in\Sc$ minimizes expected loss.
+Because of this redundancy, we will only require an embedding map to be defined on a \emph{representative set}: a set of reports $\Sc$ such that, for all (conditional) label distributions, at least one report $r\in\Sc$ minimizes the conditional expected loss.
 \begin{definition}[Representative set]
   Let $\Gamma:\simplex\toto\R$.
   We say $\Sc \subseteq \R$ is \emph{representative for $\Gamma$} if we have $\Gamma(p) \cap \Sc \neq \emptyset$ for all $p\in \simplex$.
@@ -507,7 +507,7 @@ As we discuss following Proposition~\ref{prop:representative-embeds-restriction}
 \end{definition}
 
 To illustrate the idea of embedding, let us closely examine hinge loss as a surrogate for 0-1 loss in binary classification.
-Recall that we have $\R = \Y = \{-1, +1\}$, with $\hinge(u)_y = (1 - uy)_+$ and $\ellzo(r)_y := \Ind{r\neq y}$, typically with link function $\psi(u) = \sgn(u)$.
+Recall that we have $\R = \Y = \{-1, +1\}$, with $\hinge(u)_y = (1 - uy)_+$ and $\ellzo(r)_y := \Ind{r\neq y}$, typically with link function $\psi(u) = \sgn(u)$, where $\sgn(0) = 1$ without loss of generality.
 We will see that hinge loss embeds (2 times) 0-1 loss, via the identity embedding $\varphi(r) = r$.
 For condition (i), it is straightforward to check that $\hinge(\varphi(r))_y = \hinge(r)_y = 2 \Ind{r \neq y} = 2\ellzo(r)_y$ for all $r,y\in\{-1,1\}$.
 % First, consider that
@@ -563,7 +563,7 @@ By results in \S~\ref{subsec:match-BR}, one could also show that $\hinge$ embeds
 \end{figure}
 
 %% embedding yields calibration
-In this particular example, it is known $(\hinge,\sgn)$ is calibrated with respect to 0-1 loss.
+In this particular example, it is known $(\hinge,\sgn)$ is calibrated with respect to 0-1 loss~\citep[Example 4]{bartlett2006convexity}.
 Beyond this simple case, however, it is not clear whether an embedding will always yield a calibrated link.
 Indeed, while it is intuitively clear that embedded points should link back to their original reports, via $\psi(\varphi(r)) = r$, how to map the remaining values is far from obvious.
 Using the strong connection between embeddings and polyhedral surrogates in \S~\ref{sec:poly-loss-embed}, we give a construction to map the remaining values in \S~\ref{sec:calibration}, showing that embeddings from polyhedral surrogates always yield calibration.
@@ -638,8 +638,8 @@ While polyhedral surrogates do not directly elicit finite properties, as their r
 	As $L$ is bounded from below, $L$ is minimizable from~\citet[Corollary 19.3.1]{rockafellar1997convex} .
 	With $\Y$ finite, there are only finitely many supporting sets over $\simplex$.
 	For $p \in \simplex$, the power diagram induced by projecting the epigraph of expected loss onto $\reals^d$ is the same for any $p$ of the same support (Lemma~\ref{lem:polyhedral-pd-same}).
-	Moreover, we have $\Gamma(p)$ being exactly one of the faces of the projected epigraph since the hyperplane $u \mapsto (u, \inprod{p}{L(u)})$ supports the epigraph of the expected loss at exactly the property value; moreover, since the loss is polyhedral the supporting hyperplane must support on a face of the epigraph.
-	Since this epigraph has finitely many faces (as it is polyhedral), the range of $\Gamma$ is then (a subset) of elements of a finitely generated (finite supports) set of finite elements (finite faces).
+	Moreover, we have $\Gamma(p)$ is exactly one of the faces of the projected epigraph since the hyperplane $u \mapsto (u, \inprod{p}{L(u)})$ supports the epigraph of the expected loss at exactly the property value; moreover, since the loss is polyhedral the supporting hyperplane must support a face of the epigraph.
+	Since this epigraph has finitely many faces as it is polyhedral, the range of $\Gamma$ is then a subset of elements of a finitely generated (finite supports) set of finite elements (finite faces).
 	Moreover, each element of $\Gamma(\simplex)$ is a closed polyhedron since it corresponds exactly to a closed face of a polyhedral set.
 \end{proof}
 
@@ -653,7 +653,7 @@ Plugging this finite representative set into Proposition~\ref{prop:representativ
 \end{theorem}
 \begin{proof}
   Let $L:\reals^d\to\reals_+^\Y$ be a polyhedral loss, and $\Gamma = \prop{L}$.
-  By Lemma~\ref{lem:polyhedral-range-gamma}, $\Gamma(\simplex)$ is finite set. 
+  By Lemma~\ref{lem:polyhedral-range-gamma}, $\Gamma(\simplex)$ is a finite set. 
   For each $U\in \Gamma(\simplex)$, select $u_U \in U$, and let $\Sc = \{u_U : U \in\Gamma(\simplex)\}$, which is again finite.
   For any $p\in\simplex$ then, let $U = \Gamma(p)$.
   We have $U \in \Gamma(\simplex)$ by definition, and thus some $u_U \in \Sc$; in particular, $u_U \in U = \Gamma(p)$.
@@ -702,7 +702,7 @@ For example, the min-max objective in the literature on adversarial prediction~\
 %\jessie{If I understand the papers correctly, the cited works take a loss matrix (often for adversarial classification or prediction) and use the dual to obtain a consistent surrogate for the task, so it's just a specific application of this construction.}
 \citet{reid2012convexity} construct a canonical link function for proper losses with differentiable Bayes risks; the link maps a report $p\in\simplex$ to the gradient of the Bayes risk at $p$, which uses the same duality as above.
 \citet[Proposition 3]{duchi2018multiclass} give essentially the same construction as ours, but only comment on the calibration of surrogates under such constructions for multiclass classification tasks given by strictly concave losses, excluding polyhedral surrogates.
-Finally, a similar construction also appears in the design of prediction markets \cite{abernethy2013efficient} and in connections between proper losses and mechanism design \cite{frongillo2014general}.
+Finally, a similar construction also appears in the design of prediction markets \citep{abernethy2013efficient} and in connections between proper losses and mechanism design \citep{frongillo2014general}.
 
 
 \section{Consistency and Linear Regret Transfer via Separated Links}
@@ -748,7 +748,7 @@ First, Lemma~\ref{lem:polyhedral-range-gamma} states that a polyhedral surrogate
 Second, for a given $p$, the expected surrogate loss for a suboptimal point scales with the distance from the optimal set $\Gamma(p)$ at some minimum linear rate $\alpha > 0$; this rate is related to \emph{Hoffman constants}.
 Combining with the first fact gives a universal minimum constant $\alpha$ for all $p$.
 Now bringing in $\epsilon$-separation, any surrogate report linking to a suboptimal target report has expected surrogate loss at least $\alpha \cdot \epsilon > 0$.
-On the other hand, if a link is not separated, then the same two facts imply that, for a sequence of surrogate reports that get arbitrarily close to an optimal report set while linking to a suboptimal target report, this sequence has expected loss approaching optimal, violating calibration.
+On the other hand, if a link is not separated, then the same two facts imply that, for a sequence of surrogate reports that get arbitrarily close to an optimal report set while linking to a suboptimal target report, this sequence has conditional expected loss approaching optimal, violating calibration.
 See \S~\ref{sec:equiv-sep-calib} for the proof.
 
 \subsection{Consistency}
@@ -907,7 +907,7 @@ From here one can further remove redundant reports until arriving at a tight emb
 
 Once the embedded discrete loss $\hat\ell$ is known, the behavior of the surrogate $L$ becomes more clear.
 In particular, we learn what problem $L$ is actually solving, as captured by $\hat\ell$.
-If this problem $\hat\ell$ is not the desired target problem $\ell$, we can still derive restrictions on label distributions (e.g., $\P \subseteq \simplex$) for which $L$ is $\P$-calibrated for $\ell$.
+If this problem $\hat\ell$ is not the desired target problem $\ell$, we can still derive restrictions on conditional distributions (e.g., $\P \subseteq \simplex$) for which $L$ is $\P$-calibrated for $\ell$.
 Any level set of the embedded property $\hat\gamma = \prop{\hat\ell}$ which spans multiple level sets of the target property $\gamma=\prop{\ell}$ will lead to inconsistency for $\ell$ (Figure~\ref{fig:abstain-intuition-inconsistent}).
 To obtain consistency with respect to a desired target, therefore, it suffices to restrict to the union of level sets of $\hat\gamma$ which are each fully contained in some level set of $\gamma$.
 
@@ -924,7 +924,7 @@ To obtain consistency with respect to a desired target, therefore, it suffices t
     These distributions will satisfy $\hat\gamma(p) = \hat\gamma(p')$, and thus $\Gamma(p) = \Gamma(p')$ by definition of embedding, but $\gamma(p) \cap \gamma(p') = \emptyset$.
     Taking $u\in\Gamma(p)=\Gamma(p')$, it is impossible to define $\psi(u)$ to satisfy calibration, as $\psi(u)$ cannot be in $\gamma(p)$ and $\gamma(p')$ simultaneously.
     In particular, even though $u$ is $L$-optimal for both $p$ and $p'$, $\psi(u)$ will be $\ell$-suboptimal for at least one, violating calibration.
-    We may impose restrictions on the conditional label distributions to remove the blue cell, however, and thus satisfy calibration.
+    We may impose restrictions on the conditional distributions to remove the blue cell, however, and thus satisfy calibration.
     For this example, the $\BEP$ is classification-calibrated if one restricts to the set of distributions where at least one label $y\in\Y$ has probability $p_y \geq \tfrac 1 2$.
 	}
 	\label{fig:abstain-intuition-inconsistent}
@@ -948,7 +948,7 @@ More generally, however, while such canonical link functions may be intuitive fo
 \subsection{Consistency of abstain surrogate and link construction}
 \label{sec:abstain}
 
-Several authors consider a variant of multiclass classification, with the addition of an \emph{abstain} option~\citep{bartlett2008classification,ramaswamy2018consistent,madras2018predict,elyaniv2010foundations,cortes2016learning}.
+Several authors consider a variant of binary and multiclass classification, with the addition of an \emph{abstain} option~\citep{bartlett2008classification,ramaswamy2018consistent,madras2018predict,elyaniv2010foundations,cortes2016learning}.
 \citet{ramaswamy2018consistent} study the loss $\ellabstain: \Y \cup \{\bot\} \to \reals^\Y_+$ defined by $\ellabstain(r)_y = 0$ if $r=y$, $1/2$ if $r = \bot$, and 1 otherwise.
 The report $\bot$ corresponds to ``abstaining'' to predict, in exchange for a constant loss regardless of outcome $y$. 
 \citeauthor{ramaswamy2018consistent} give the polyhedral \emph{binary encoded predictions (BEP)} surrogate $\BEP$, and the link $\psi^\infty$ which they show is calibrated for $\ellabstain$.
@@ -1026,7 +1026,7 @@ Many structured prediction settings can be thought of as making multiple predict
 In the case of $k$ binary predictions, these settings are typically formalized by taking the predictions and outcomes to be $\R=\Y=\{-1,1\}^k$, with the $i$th coordinate giving the result for the $i$th binary prediction.
 A natural family of losses are those which are functions of the misprediction or disagreement set $\dis(r,y) = \{i \in [k] \mid r_i \neq y_i\}$, meaning we may write $\ell^f(r)_y = f(\dis(r,y))$ for some set function $f:2^{[k]}\to\reals$.
 For example, Hamming loss is given by $f(S) = |S|$.
-In an effort to provide a general convex surrogate for these settings when $f$ is a submodular function, Yu and Blaschko~\cite{yu2018lovasz} introduce the \emph{Lov\'asz hinge} surrogate $L^f:\reals^k\to\reals^\Y_+$ which leverages the well-known convex Lov\'asz extension of submodular functions.
+In an effort to provide a general convex surrogate for these settings when $f$ is a submodular function,~\citet{yu2018lovasz} introduce the \emph{Lov\'asz hinge} surrogate $L^f:\reals^k\to\reals^\Y_+$ which leverages the well-known convex Lov\'asz extension of submodular functions.
 While the authors provide theoretical justification and experiments, they leave open whether the Lov\'asz hinge is actually consistent for $\ell^f$.
 
 %% lovasz paper closes the gap, answering inconsistency wrt \ell^f by showing that L^f embeds structured abstain
@@ -1099,7 +1099,7 @@ The loss $\ellOP$ can be interpreted as a variation of 0-1 loss incorporating co
 
 %% one might make distributional assumptions to regain consistency with geometric drawing
 Upon showing that $\LWW$ embeds $\ellOP$, \citeauthor{wang2020weston} then characterize $\prop{\ellOP}$.
-In the same manner as Figure~\ref{fig:abstain-intuition-inconsistent}, knowledge of the level sets of $\prop{\ellOP}$ clarifies which label distributions are the source of inconsistency for classification.
+In the same manner as Figure~\ref{fig:abstain-intuition-inconsistent}, knowledge of the level sets of $\prop{\ellOP}$ clarifies which conditional distributions are the source of inconsistency for classification.
 Removing these distributions gives a set $\P \subseteq \simplex$
 such that $\LWW$ and the canonical link $\psi(u) : u \mapsto r \in \argmax_y \inprod{e_y}{u}$ are calibrated with respect to 0-1 loss on $\P \subseteq \simplex$ (i.e., such that eq.~\eqref{eq:calibrated} holds for all $p \in \P$).
 %Sufficient constraints to recover consistency are characterized by comparing $\prop{\ellOP}$ and $\mode$: the property for which Weston--Watkins was originally proposed.
@@ -1161,7 +1161,7 @@ They further suggest that perhaps no surrogate could satisfy all three propertie
 %\jessiet{do we want to drop the table here or nah?}\raft{Yeah I'd say we should try it; it's at least helpful when discussing the constraints on the conditional label distributions, and besides, it's nice to have a figure for each section.  Sentence commented out below could be useful in the caption.}
 % \citeauthor{finocchiaro2022consistenttopk} consider the polyhedral surrogates proposed by \citet[Table 1, cf. $\psi_2, \psi_3, \psi_4$]{yang2018consistency} and evaluate \emph{which discrete losses these surrogates embed}, if not top-$k$.
 Each of the examined surrogates embeds a discrete loss which can be viewed as a variant of the top-$k$ problem, allowing the algorithm to express varying levels of ``confidence'' on the top $k$ labels or report fewer than $k$ labels.
-The label distributions for which these optimal reports differ from the optimal top-$k$ reports are shown in Table~\ref{tab:loss-slices} with $n=4$ and $k \in \{2,3\}$.
+The conditional distributions for which these optimal reports differ from the optimal top-$k$ reports are shown in Table~\ref{tab:loss-slices} with $n=4$ and $k \in \{2,3\}$.
 (Recall $n=|\Y|$, the number of labels.)
 
 \begin{table*}
@@ -1187,7 +1187,7 @@ The label distributions for which these optimal reports differ from the optimal 
 For example, one of the surrogates is $\Li {4}(u)_y = \left(1 - u_y + \frac 1 k \sum_{i=1}^k (u_{\setminus y})_{[i]}\right)_+$, where $u_{[i]}$ denotes the $i$th largest element of $u \in \reals^n$.
 The authors show that $\Li{4}$ embeds $\ell^{(4)}(T)_y = \tfrac {k+1} {k+1-|T|} \ones\{y\notin T\}$, where $T$ is a set of at most $k$ labels.
 These embedded losses may therefore be useful in top-$k$ settings where choosing smaller sets may have some benefit, such as a search engine that can use unused space for advertisements.
-Using the losses each proposed surrogate embeds, using the same technique from Figure~\ref{fig:abstain-intuition-inconsistent}, the authors go on to derive constraints on the label distributions under which the proposed surrogates are actually consistent for top-$k$ classification; these constraints are tighter than previous constraints~\citep{yang2018consistency}.
+Using the losses each proposed surrogate embeds, using the same technique from Figure~\ref{fig:abstain-intuition-inconsistent}, the authors go on to derive constraints on the conditional distributions under which the proposed surrogates are actually consistent for top-$k$ classification; these constraints are tighter than previous constraints~\citep{yang2018consistency}.
 
 Beyond analyzing the previously proposed surrogates, \citeauthor{finocchiaro2022consistenttopk} also use our framework to derive the first consistent polyhedral surrogate for $\elltopk$,
 \begin{align}\label{eq:topk-embedding}
@@ -1755,7 +1755,7 @@ Moreover, beyond the fact that the embedding dimension upper bounds convex elici
 \paragraph{Indirect elicitation as a condition for consistency}
 
 It is well-known that statistical consistency is equivalent to calibration (Definition~\ref{def:calibrated}) for discrete target problems.
-As calibration is a much easier condition to work with, and in particular, only involves the conditional label distributions, the bulk of work on consistency of learning algorithms for discrete target problems uses calibration.
+As calibration is a much easier condition to work with, and in particular, only involves the conditional distributions, the bulk of work on consistency of learning algorithms for discrete target problems uses calibration.
 It is easy to verify that calibration in turn implies indirect elicitation, meaning that exact minimizers of the surrogate loss are linked to exact minimizers of the target.
 In \S~\ref{sec:poly-ie-consistency}, we show that indirect elicitation is actually \emph{equivalent} to calibration, and therefore consistency, when restricting to the class of polyhedral surrogates.
 As indirect elicitation is even simpler of a condition than calibration, an important line of future work is to identify other classes of surrogates for which this equivalence holds.
