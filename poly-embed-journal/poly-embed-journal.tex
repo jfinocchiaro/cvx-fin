@@ -309,7 +309,7 @@ For discrete prediction problems like classification, the given (discrete) loss 
 Therefore, many machine learning algorithms instead minimize a surrogate loss function with better optimization qualities, such as convexity.
 To ensure that this surrogate loss successfully addresses the original target problem, one needs to establish statistical consistency, a minimal requirement that is a prerequisite for generalization bounds.
 Consistency roughly says that, in the limit as one obtains more and more data, the learned hypothesis approaches the best possible.
-Consistency depends crucially on the choice of link function that maps surrogate reports (predictions) to target reports.
+Consistency depends crucially on the choice of link function that maps surrogate reports (predictions) to target reports; see the discussion following Definition~\ref{def:indirect-elic}.
 
 In this section, we introduce notation and concepts related to consistency that we use throughout.
 Consistency is often a difficult condition to work with directly, but in finite prediction settings, it is equivalent the simpler notion of \emph{calibration} (Definition~\ref{def:calibrated}) which depends solely on the conditional distribution over the labels~\citep{bartlett2006convexity,tewari2007consistency,ramaswamy2016convex}.
@@ -417,7 +417,8 @@ Roughly, a surrogate and link are calibrated if the best possible expected loss 
 
 \begin{definition}
   \label{def:calibrated}
-  Let discrete loss $\ell:\R\to\reals^\Y_+$, proposed surrogate $L:\reals^d\to\reals^\Y_+$, and link function $\psi:\reals^d\to\R$ be given.
+  Let discrete loss $\ell:\R\to\reals^\Y_+$, proposed surrogate $L:\reals^d\to\reals^\Y_+$, and function $\psi:\reals^d\to\R$ be given.
+  In this context, $\psi$ is called a \emph{link function}.
   We say $(L,\psi)$ is \emph{calibrated} with respect to $\ell$ if
 for all $p \in \simplex$,
   \begin{equation}
@@ -450,6 +451,7 @@ Let $u\in\reals^d$ and $p\in\Gamma_u$.
 From eq.~\eqref{eq:calibrated}, if $\psi(u) \notin \gamma(p)$, then we would have $u\notin\Gamma(p)$, a contradiction to $p\in\Gamma_u$.
 Thus, $\psi(u) \in \gamma(p)$, so $p\in\gamma_{\psi(u)}$.
 In fact, indirect elicitation is strictly weaker; take hinge loss with the link $\psi(u) = -1$ for $u < 1$ and $\psi(u) = 1$ for $u\geq 1$.
+\raf{Explain why this choice of link is not calibrated}
 \citet{agarwal2015consistent} were the first to formally connect property elicitation to calibration, though their results generally do not apply to discrete prediction tasks.
 
 % At times, the elicitation literature studies indirect elicitation through the notion of one property ``refining'' another~\citep{frongillo2015elicitation}, where a property $\Gamma: \simplex \toto \R$ refines $\Gamma': \simplex \toto \R'$ if, for all $r \in \R$, there exists an $r' \in \R'$ such that $\Gamma_r \subseteq \Gamma'_{r'}$.
@@ -663,9 +665,6 @@ Plugging this finite representative set into Proposition~\ref{prop:representativ
 
 We now turn to the reverse direction: which discrete losses are embedded by some polyhedral loss?
 Perhaps surprisingly, we show in Theorem~\ref{thm:discrete-loss-poly-embeddable} that \emph{every} discrete loss is embeddable by a polyhedral surrogate.
-Combining this result with Theorem~\ref{thm:poly-embeds-discrete} establishes Theorem~\ref{thm:embed-poly-main}.
-Further combining with Theorem~\ref{thm:link-main}, proved in the following section, this construction gives a calibrated polyhedral surrogate for every discrete target loss.
-
 In the proof, we apply a result we will prove in \S~\ref{sec:min-rep-sets}: a minimizable surrogate embeds a discrete loss if and only if their Bayes risks match (Proposition~\ref{prop:embed-bayes-risks}).
 
 \begin{theorem}\label{thm:discrete-loss-poly-embeddable}
@@ -693,6 +692,10 @@ In the proof, we apply a result we will prove in \S~\ref{sec:min-rep-sets}: a mi
   Letting $\delta_y\in\simplex$ be the point distribution on outcome $y\in\Y$, we have for all $u\in\reals^n$, $L(u)_y \geq \inf_{u'\in\reals^n} L(u')_y = \risk{L}(\delta_y) = \risk{\ell}(\delta_y) \geq 0$, where the final inequality follows from the nonnegativity of $\ell$.
 \end{proof}
 
+Combining this result with Theorem~\ref{thm:poly-embeds-discrete} establishes Theorem~\ref{thm:embed-poly-main}.
+Further combining with Theorem~\ref{thm:link-main}, proved in the following section, this construction gives a calibrated polyhedral surrogate for every discrete target loss.
+
+\raf{Restate Thm 1 and give a short proof, either in text since it's SO simple, or formal proof environment}
 
 The proof of Theorem~\ref{thm:discrete-loss-poly-embeddable} uses a construction via convex conjugate duality similar to many constructions in the literature. 
 %(e.g.\ \cite{duchi2018multiclass,abernethy2013efficient,frongillo2014general}).
@@ -768,6 +771,8 @@ See \S~\ref{app:sep-link-exists} for the proof.
   Let polyhedral surrogate $L:\reals^d \to \reals^\Y_+$ embed the discrete loss $\ell:\R\to\reals^\Y_+$.
   Then there exists $\epsilon_0 > 0$ such that, for all $0 < \epsilon \leq \epsilon_0$, Construction~\ref{const:eps-thick-link} for $L,\ell,\epsilon,\|\cdot\|$ produces a nonempty set of links, all of which are $\epsilon$-separated with respect to $L$ and $\ell$.
 \end{restatable}
+
+\raf{Restate theorem 2 and give formal proof (probably two lines) with no additional filler text}
 
 To set the stage for Construction \ref{const:eps-thick-link}, we sketch the two main steps in proving Theorem \ref{thm:thickened-separated}: (i) showing that one can define a link $\psi$ on all possible optimal points of $L$; (ii) ``thickening'' $\psi$ so that it is separated.
 
