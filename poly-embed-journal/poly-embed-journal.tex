@@ -706,7 +706,10 @@ In the proof, we apply a result we will prove in \S~\ref{sec:min-rep-sets}: a mi
 Combining this result with Theorem~\ref{thm:poly-embeds-discrete} establishes Theorem~\ref{thm:embed-poly-main}.
 Further combining with Theorem~\ref{thm:link-main}, proved in the following section, this construction gives a calibrated polyhedral surrogate for every discrete target loss.
 
-\raf{Restate Thm 1 and give a short proof, either in text since it's SO simple, or formal proof environment}
+\reviewer{Restated Thm 1 and gave a short proof}
+\embedpolyinformal*
+For a proof, observe that Theorem~\ref{thm:discrete-loss-poly-embeddable} proves the first part of the statement, and Theorem~\ref{thm:poly-embeds-discrete} shows the second.
+
 
 The proof of Theorem~\ref{thm:discrete-loss-poly-embeddable} uses a construction via convex conjugate duality similar to many constructions in the literature. 
 %(e.g.\ \cite{duchi2018multiclass,abernethy2013efficient,frongillo2014general}).
@@ -783,7 +786,12 @@ See \S~\ref{app:sep-link-exists} for the proof.
   Then there exists $\epsilon_0 > 0$ such that, for all $0 < \epsilon \leq \epsilon_0$, Construction~\ref{const:eps-thick-link} for $L,\ell,\epsilon,\|\cdot\|$ produces a nonempty set of links, all of which are $\epsilon$-separated with respect to $L$ and $\ell$.
 \end{restatable}
 
-\raf{Restate theorem 2 and give formal proof (probably two lines) with no additional filler text}
+\reviewer{Restated theorem 2 and gave formal proof}
+\linkinformal*
+\begin{proof}
+	By Theorem~\ref{thm:thickened-separated}, we know that if $L$ embeds $\ell$, then there exists an $\epsilon$ such that Construction~\ref{const:eps-thick-link} provides at least one $\epsilon$-separated link $\psi$ with respect to $L$ and $\ell$.
+	Moreover, by Theorem~\ref{thm:calibrated-separated}, since $\psi$ is $\epsilon$-separated for $L$ and $\ell$, the pair $(L,\psi)$ is calibrated with respect to $\ell$.
+\end{proof}
 
 To set the stage for Construction \ref{const:eps-thick-link}, we sketch the two main steps in proving Theorem \ref{thm:thickened-separated}: (i) showing that one can define a link $\psi$ on all possible optimal points of $L$; (ii) ``thickening'' $\psi$ so that it is separated.
 
@@ -1216,8 +1224,6 @@ While Theorem~\ref{thm:link-main} guarantees the existence of some consistent li
 They indeed confirm its consistency using our framework, showing that $\psi^k$ is $\epsilon$-separated for $L^k$ and $\elltopk$, for any $\epsilon \leq \frac 1 {2n}$ \citep[Theorem 4.4]{finocchiaro2022consistenttopk}.
 % confirms that indeed $(L^k,\psi^k)$ is calibrated with respect to $\elltopk$ for this link $\psi^k$, by showing that $\psi^k$ is an $\epsilon$-separated link for $\elltopk$ with any $\epsilon \leq \frac 1 {2n}$ via the construction of the link envelope $\Psi$ in Construction~\ref{const:eps-thick-link}.
 
-\reviewer{Discussion of polyhedral surrogate for $0-1$ loss}
-
 
 % See Figure~\ref{fig:top-k} for the properties elicited by the embedded losses for previous surrogates~\citep{lapin2016loss,yang2018consistency}, and how they compare to $\prop{\elltopk}$ with $n = 3$ and $k = 2$.
 %%In order to verify calibration of the canonical link they verify, for all $u \in \reals^n$, the proposed $\psi(u) \in \Psi(u)$, and thus yields an $\epsilon$-separated link.
@@ -1243,7 +1249,14 @@ They indeed confirm its consistency using our framework, showing that $\psi^k$ i
 
 
 
-\raf{TODO: add paragraph on multiclass case, where $k=1$!}
+\reviewer{Paragraph on multiclass case, using top-$k$ with $k=1$}
+Observe that while the Weston-Watkins hinge loss was originally designed as a surrogate for $0-1$ loss in multiclass settings, there is no link such that $(L^{WW}, \psi)$ is consistent with respect to $\ell^{0-1}$. 
+However, we can construct a polyhedral surrogate and use the canonical argmax link for $\ell^{0-1}$ by simply using the $L^k$ surrogate with $k=1$. 
+The $L^k$ surrogate simplifies to 
+\begin{align*}
+	L^1(u)_y &= \left(\max_m \frac{m-1}{m} + \frac 1 m \sum_{i=1}^m u_{[i]} \right) - u_y~.
+\end{align*}
+\jessie{Does this simplify further? I don't think so}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -1316,18 +1329,23 @@ See \S~\ref{app:polyhedra} for ommitted proofs.
   \end{enumerate}
 \end{restatable}
 
-As a finite representative set implies a polyhedral Bayes risk by Lemma~\ref{lem:loss-restrict}, Lemma~\ref{lem:X} shows that polyhedral Bayes risks are equivalent to having finite representative sets, which in turn gives an embedding by
+\reviewer{Forward ref}
+Lemma~\ref{lem:X} now allows us to observe the relationship between embeddings, finite representative sets and polyhedral Bayes risks; we expand on this relationship in Propositions~\ref{prop:embed-bayes-risks} and \ref{prop:embed-iff-trims-equal}.
+%As a finite representative set implies a polyhedral Bayes risk by Lemma~\ref{lem:loss-restrict}, Lemma~\ref{lem:X} shows that polyhedral Bayes risks are equivalent to having finite representative sets, which in turn gives an embedding by
 Proposition~\ref{prop:representative-embeds-restriction}.
 \begin{corollary}\label{cor:poly-risk-fin-rep}
-  The following are equivalent for any minimizable loss $L:\R\to\reals^\Y_+$.
+  The following are equivalent for any minimizable loss $L:\reals^d\to\reals^\Y_+$.
   \begin{enumerate}
   \item $\risk{L}$ is polyhedral.
   \item $L$ has a finite representative set.
   \item $L$ embeds a discrete loss.
   \end{enumerate}
 \end{corollary}
+\reviewer{Adding formal proof.}
 \begin{proof}
-	If $\risk L$ is polyhedral
+	If $\risk L$ is polyhedral, then Lemma~\ref{lem:X} implies that $L$ has a finite representative set.
+	Moreover, if $L$ has a finite representative set $\Sc$, then Proposition~\ref{prop:representative-embeds-restriction} implies that $L$ embeds $L|_{\Sc}$, which is finite.
+	Lemma~\ref{lem:loss-restrict} additionally implies that $\risk L = \risk{L|_{\Sc}}$, which is polyhedral as the pointwise supremum of a finite set of affine functions.
 \end{proof}
 
 From Corollary~\ref{cor:poly-risk-fin-rep}, $L$ having a finite representative set is an equivalent condition to $L$ being minimizable and $\risk{L}$ being polyhedral.
@@ -1829,6 +1847,23 @@ This material is based upon work supported by the National Science Foundation un
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \appendix
 
+\section{Consistency}\label{app:consistency}
+Definitions of consistency tend to vary slightly within the literature; in general, the spirit of consistency definitions boil down to ``approaching the optimal hypothesis in surrogate space implies approaching the optimal hypothesis in the target space'' upon applying the link function.
+\citet[Theorem 1]{bartlett2006convexity} shows that ``classification calibration'' is equivalent to this notion of consistency.
+The equivalence (when the hypothesis class is the set of all measurable functions) between consistency and calibration is what allows one to abstract away the features $\X$ and simply consider conditional distributions.
+
+For the purposes of this work, we consider the following definition of consistency, which aligns with the literature~\citep{bartlett2006convexity,agarwal2015consistent,ramaswamy2016convex}.
+
+\begin{definition}[Consistency]
+	Given a loss $L : \reals^d \to \reals^\Y_+$ and link $\psi : \reals^d \to \R$, the pair $(L, \psi)$ is \emph{consistent} with respect to a target loss $\ell : \R \to \reals^\Y_+$ if, for all $D \in \Delta(X \times \Y)$ and all sequences of measurable functions $\{f_m : \X \to \reals\}$, we have
+	\begin{align*}
+		\E_{(X,Y) \sim D} L(f_m(X), Y) \to \inf_f  \E_{(X,Y) \sim D} L(f(X), Y) &\implies \E_{(X,Y) \sim D} \ell(\psi \circ f_m(X), Y) \to \inf_f  \E_{(X,Y) \sim D} \ell(\psi \circ f(X), Y)~.
+	\end{align*}
+\end{definition}
+
+When the hypothesis class $\H$ is not the set of measurable functions, $\H$-calibration and $\H$-consistency are not necessarily equivalent~\citep{long2013consistency,zhang2020bayes}.
+
+
 \section{Power diagrams}\label{app:power-diagrams}
 We begin with several definitions from Aurenhammer~\cite{aurenhammer1987power}.
 \begin{definition}\label{def:cell-complex}
@@ -1852,7 +1887,7 @@ The following result from~\citet{aurenhammer1987power} therefore immediately app
 We also make use of the same structure for the loss itself; in particular, one can consider the epigraph of a polyhedral convex function on $\reals^d$ and the projection down to $\reals^d$.
 In either case, we refer to the resulting power diagram as being \emph{induced} by the convex function.
 
-\begin{theorem}[Aurenhammer~\cite{aurenhammer1987power}]\label{thm:aurenhammer}
+\begin{theorem}[Aurenhammer~\citep{aurenhammer1987power}]\label{thm:aurenhammer}
 	A cell complex is affinely equivalent to a convex polyhedron if and only if it is a power diagram.
 \end{theorem}
 
