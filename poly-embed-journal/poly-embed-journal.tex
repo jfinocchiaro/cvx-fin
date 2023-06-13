@@ -63,7 +63,7 @@
 \newcommand{\raft}[1]{\mytodo{green!20!white}{RF: #1}}
 \newcommand{\jessie}[1]{\mynote{teal}{[JF: #1]}}
 \newcommand{\jessiet}[1]{\mytodo{teal!20!white}{JF: #1}}
-\newcommand{\proposedadd}[1]{\mynote{orange}{#1}}
+\newcommand{\proposedadd}[1]{\mynote{orange}{#1}} % RF: I always read this as "propose dadd"
 \newcommand{\reviewerone}[1]{\reviewerresponse{orange!20!white}{R1: #1}}
 \newcommand{\reviewertwo}[1]{\reviewerresponse{blue!20!white}{R2: #1}}
 \newcommand{\reviewerthree}[1]{\reviewerresponse{green!20!white}{R3: #1}}
@@ -792,8 +792,8 @@ See \S~\ref{app:sep-link-exists} for the proof.
 \reviewerone{Restated theorem 2 and gave formal proof}
 \linkinformal*
 \begin{proof}
-	By Theorem~\ref{thm:thickened-separated}, we know that if $L$ embeds $\ell$, then there exists an $\epsilon$ such that Construction~\ref{const:eps-thick-link} provides at least one $\epsilon$-separated link $\psi$ with respect to $L$ and $\ell$.
-	Moreover, by Theorem~\ref{thm:calibrated-separated}, since $\psi$ is $\epsilon$-separated for $L$ and $\ell$, the pair $(L,\psi)$ is calibrated with respect to $\ell$.
+	From Theorem~\ref{thm:thickened-separated}, since $L$ embeds $\ell$, there exists $\epsilon>0$ such that Construction~\ref{const:eps-thick-link} yields a link $\psi$ which is $\epsilon$-separated with respect to $L$ and $\ell$.
+	By Theorem~\ref{thm:calibrated-separated}, since $\psi$ is $\epsilon$-separated for $L$ and $\ell$, the pair $(L,\psi)$ is calibrated with respect to $\ell$.
 \end{proof}
 
 To set the stage for Construction \ref{const:eps-thick-link}, we sketch the two main steps in proving Theorem \ref{thm:thickened-separated}: (i) showing that one can define a link $\psi$ on all possible optimal points of $L$; (ii) ``thickening'' $\psi$ so that it is separated.
@@ -852,6 +852,7 @@ Instead, we can simply test whether the proposed link values are contained in th
 If so, then the proposed link $\psi^*$ is calibrated.
 See \S~\ref{sec:top-k} for an illustration of this test.
 On the other hand, if $\psi^*$ cannot be produced from Construction \ref{const:eps-thick-link}, then it cannot be a calibrated link.
+\reviewertwo{D}
 This impossibility can be shown, for example, if there exists a point $u$ where $\Psi(u)$ is empty for all $\epsilon > 0$.
 
 Construction~\ref{const:eps-thick-link} is not necessarily computationally efficient as the number of labels $n$ grows.
@@ -1253,13 +1254,12 @@ They indeed confirm its consistency using our framework, showing that $\psi^k$ i
 
 
 \reviewertwo{Comment 3}
-Observe that while the Weston-Watkins hinge loss was originally designed as a surrogate for $0-1$ loss in multiclass settings, there is no link such that $(L^{WW}, \psi)$ is consistent with respect to $\ell^{0-1}$. 
-However, we can construct a polyhedral surrogate and use the canonical argmax link for $\ell^{0-1}$ by simply using the $L^k$ surrogate with $k=1$. 
-The $L^k$ surrogate simplifies to 
+\raft{I made some wording edits here.  One general point though is to be careful when adding to the paper at this stage, since the notation was actually slightly off from what we had been doing, e.g.\ ``$0-1$ loss'' instead of ``0-1 loss''  and $\ell^{0-1}$ instead of $\ellzo$.}
+Interestingly, by choosing $k=1$, one obtains what appears to be a novel surrogate for 0-1 loss in multiclass settings,
 \begin{align*}
-	L^1(u)_y &= \left(\max_m \frac{m-1}{m} + \frac 1 m \sum_{i=1}^m u_{[i]} \right) - u_y~.
+	L^1(u)_y &= \left(\max_{m\in\{1,\ldots,n\}} 1 - \frac{1}{m} + \frac 1 m \sum_{i=1}^m u_{[i]} \right) - u_y~.
 \end{align*}
-\jessie{Does this simplify further? I don't think so}
+In particular, this surrogate is consistent with respect to 0-1 loss using the canonical argmax link, while the Weston-Watkins hinge is not consistent for any link (\S~\ref{sec:winge}).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -1673,6 +1673,11 @@ In fact, we will further prove that our general construction recovers every poss
 The second proof highlights the central role that embeddings play when reasoning about polyhedral surrogates.
 Specifically, we will show that if a polyhedral surrogate indirectly elicits a finite property, the link function must ``pass through'' an embedding, giving calibration through Construction~\ref{const:eps-thick-link}.
 
+\mytodo{gray!20!white}{Cover: A}
+Finally, a third proof of Theorem~\ref{thm:poly-ie-implies-consistent} is implicit in \citet[Theorem 8]{ramaswamy2016convex}.
+The authors use an entirely different link construction involving the superprediction set of the surrogate loss.
+We discuss their result and how it relates to our work in \S~\ref{app:ccdim-construction}.
+
 \subsection{Generalizing the thickened link construction}
 
 Given that Construction~\ref{const:eps-thick-link} uses the embedding $\varphi:\Sc\to\reals^d$ in a crucial role, it is not immediately clear how to generalize the construction beyond embeddings.
@@ -1849,7 +1854,9 @@ Conversely, we would like to know when the construction in Theorem~\ref{thm:disc
 \subsection*{Acknowledgements}
 We thank Arpit Agarwal and Peter Bartlett for many early discussions and insights,
 Stephen Becker for a reference to Hoffman constants,
-and Nishant Mehta, Enrique Nueve, and Anish Thilagar for other suggestions.\raft{others?}
+and Nishant Mehta, Enrique Nueve, and Anish Thilagar for other suggestions.
+We thank Dhamma Kimpara for observations that led to \S~\ref{app:ccdim-construction}.
+\raft{others?}
 This material is based upon work supported by the National Science Foundation under Grant Nos.\ CCF-1657598, IIS-2045347, and DGE-1650115.
 
 
@@ -2639,6 +2646,33 @@ As Proposition~\ref{prop:general-eps-thick-produce} guarantees that Construction
 Theorem \ref{thm:thickened-separated} which we restate.
 (Note that the converse need not hold for Construction~\ref{const:eps-thick-link}, and indeed, that construction may miss some separated links which make use of reports outside $\Sc$.)
 \thickenedseparated*
+
+\section{Connection to \citet[Theorem 8]{ramaswamy2016convex}}
+\label{app:ccdim-construction}
+
+\citet{ramaswamy2016convex} give an impressive array of consistency results for general prediction tasks.
+Among them, in their Theorem 8, is a general sufficient condition for consistency.
+We restate their result here in our notation.
+
+\begin{theorem}[{\citet[Theorem 8]{ramaswamy2016convex}}]
+  Let $\ell : \R \to \reals^\Y_+$ for $\R$ finite, and $L:\reals^d\to\reals^\Y_+$.
+  Let $\gamma = \prop{\ell}$ and $\Gamma = \prop{L}$.
+  Suppose there exists a finite set $\Sc \subset \reals^d$ such that $\bigcup_{u\in\Sc} \Gamma_u = \simplex$ and for each $u\in\Sc$ there exists $r\in\R$ such that $\Gamma_u\subseteq\gamma_r$.
+  Then $L$ is calibrated with respect to $\ell$.
+\end{theorem}
+
+In other words, if there exists a finite representative set $\Sc \subset \reals^d$ for $L$ such that $L|_{\Sc}$ indirectly elicits $\gamma$, then $L$ is calibrated with respect to $\ell$.
+Of course, if $L$ indirectly elicits $\gamma$ and has a finite representative set, then this condition holds.
+Thus, not only does this result prove Theorem~\ref{thm:poly-ie-implies-consistent} for polyhedral surrogates, it also shows that the result extends to the setting of \S~\ref{sec:min-rep-sets}: surrogates with finite representative sets.
+
+The crux of their result, as in ours, in the construction of a link function exhibiting calibration.
+This construction is quite different from our Construction~\ref{const:eps-thick-link}, in that it operations in the loss vector space $\reals^\Y_+$ rather than the surrogate report space $\reals^d$.
+Specifically, it operates on the \emph{superprediction set} $L(\reals^d) + \reals^\Y_+$, where the $+$ here is Minkowski addition.
+An arbitrary element of the superprediction set is decomposed into a convex combination of elements of $L(\Sc)$, plus an element of $\reals^\Y_+$.
+This convex combination is then thresholded at $1/|\Sc|$, where the link function may output $r\in\R$ if the weight on any $u\in\Sc$ with $\Gamma_u \subseteq \gamma_r$ is at least $1/|\Sc|$.
+One can see that this construction does achieve separation, but does not necessarily align well with any norm in the surrogate report space.
+It would be interesting to further compare the two constructions.
+
 
 \section{Proving Lemma~\ref{lem:X}}
 \label{app:polyhedra}
