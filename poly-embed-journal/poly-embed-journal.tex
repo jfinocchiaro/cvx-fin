@@ -299,7 +299,8 @@ To go from a discrete loss to a polyhedral surrogate, we prove that the conditio
 Finally, we also provide several observations beyond what is needed to prove our main results, which we view as conceptual contributions (\S~\ref{sec:min-rep-sets},~\ref{sec:poly-ie-consistency}).
 Using tools from property elicitation, we show an equivalence between minimum representative sets (those of minimum cardinality) and ``non-redundancy'', wherein no report is dominated by another.
 We further show that, while a minimum representative set is not always unique, the loss values associated with it are unique, giving rise to a natural ``trim'' operation on losses.
-The paper concludes with an interesting observation (Theorem~\ref{thm:poly-ie-implies-consistent}): while indirect property elicitation is generally a strictly weaker condition than consistency, the two are equivalent when restricting to the class of polyhedral surrogates.
+The paper concludes with an interesting observation (Theorem~\ref{thm:poly-ie-implies-consistent}): while indirect property elicitation is generally a strictly weaker condition than consistency, the two are equivalent when restricting to the class of polyhedral surrogates.%
+\footnote{This result is also implicit in \citet[Theorem 8]{ramaswamy2016convex}; see \S~\ref{app:ccdim-construction}.}
 
 Taken together, we view our contributions as both conceptual and practical.
 We uncover the remarkable structure of polyhedral surrogates, deepening our understanding of the relationship between surrogate and discrete target losses.
@@ -474,9 +475,10 @@ In fact, indirect elicitation is strictly weaker; take hinge loss with the link 
 \reviewerone{A}
 \reviewerthree{A}
 While this pair indirectly elicits the mode, we can show it is not calibrated with respect to 0-1 loss. 
-Suppose $ p  = (0, 1)$ and consider the sequence $\{u_m\} = \{1 - \frac 1 {m+1}\}_{m=1}^\infty$, which limits to $1$, but $\psi(u_m) = -1$ for all $m$.
-Therefore, the infimum of hinge loss over reports not linking to $1$ approaches the infimum over all reports.
-\citet{agarwal2015consistent} were the first to formally connect property elicitation to calibration, though their results generally do not apply to discrete prediction tasks.
+Suppose $p = (0, 1) \in \simplex$ is the distribution putting all weight on $y=1$, and consider any sequence $u_m \to 1$ with $u_m < 1$ for all $m$.
+Then the loss approaches the Bayes optimal, $L(1)_1 = 0$, but $\psi(u_n) = -1$ for all $n$, violating calibration.
+\citet{agarwal2015consistent} were the first to formally connect property elicitation to calibration.
+
 
 % At times, the elicitation literature studies indirect elicitation through the notion of one property ``refining'' another~\citep{frongillo2015elicitation}, where a property $\Gamma: \simplex \toto \R$ refines $\Gamma': \simplex \toto \R'$ if, for all $r \in \R$, there exists an $r' \in \R'$ such that $\Gamma_r \subseteq \Gamma'_{r'}$.
 % In particular, a loss $L$ indirectly elicits a property $\gamma$ if and only if $\prop L$ refines $\gamma$.
@@ -796,6 +798,7 @@ In light of Theorem~\ref{thm:calibrated-separated}, it now suffices to show that
 Construction~\ref{const:eps-thick-link}, discussed next, ``thickens'' a given embedding to produce a link.
 Theorem \ref{thm:thickened-separated} states that, for a small enough choice of $\epsilon$, that link is separated.
 See \S~\ref{app:sep-link-exists} for the proof.
+We also discuss a more general construction in \S~\ref{sec:poly-ie-consistency}, and an alternate approach using results from \citet{ramaswamy2016convex} in \S~\ref{app:ccdim-construction}.\raft{Added}
 \begin{restatable}{theorem}{thickenedseparated} \label{thm:thickened-separated}
   Let polyhedral surrogate $L:\reals^d \to \reals^\Y_+$ embed the discrete loss $\ell:\R\to\reals^\Y_+$.
   Then there exists $\epsilon_0 > 0$ such that, for all $0 < \epsilon \leq \epsilon_0$, Construction~\ref{const:eps-thick-link} for $L,\ell,\epsilon,\|\cdot\|$ produces a nonempty set of links, all of which are $\epsilon$-separated with respect to $L$ and $\ell$.
@@ -1265,13 +1268,12 @@ They indeed confirm its consistency using our framework, showing that $\psi^k$ i
 
 
 \reviewertwo{C}
-\raft{I made some wording edits here.  One general point though is to be careful when adding to the paper at this stage, since the notation was actually slightly off from what we had been doing, e.g.\ ``$0-1$ loss'' instead of ``0-1 loss''  and $\ell^{0-1}$ instead of $\ellzo$.}
-\jessiet{Added a clause so te Weston-Watkins reference doesn't seem so random}
 Interestingly, by choosing $k=1$, one obtains what appears to be a novel surrogate for 0-1 loss in multiclass settings,
 \begin{align*}
 	L^1(u)_y &= \left(\max_{m\in\{1,\ldots,n\}} 1 - \frac{1}{m} + \frac 1 m \sum_{i=1}^m u_{[i]} \right) - u_y~.
 \end{align*}
-In particular, this surrogate is consistent with respect to 0-1 loss using the canonical argmax link, while the Weston-Watkins hinge is not consistent for any link (\S~\ref{sec:winge}), despite being proposed as a surrogate for 0-1 loss.
+In particular, this surrogate is consistent with respect to 0-1 loss using the canonical argmax link.
+By contrast, recall that the Weston-Watkins hinge is not consistent for any link (\S~\ref{sec:winge}), despite being proposed as a surrogate for 0-1 loss.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -2656,7 +2658,7 @@ Theorem \ref{thm:thickened-separated} which we restate.
 (Note that the converse need not hold for Construction~\ref{const:eps-thick-link}, and indeed, that construction may miss some separated links which make use of reports outside $\Sc$.)
 \thickenedseparated*
 
-\section{Connection to \citet[Theorem 8]{ramaswamy2016convex}}
+\section{Connection to Ramaswamy and Agarwal (2016)}
 \label{app:ccdim-construction}
 
 \citet{ramaswamy2016convex} give an impressive array of consistency results for general prediction tasks.
@@ -2675,11 +2677,11 @@ Of course, if $L$ indirectly elicits $\gamma$ and has a finite representative se
 Thus, not only does this result prove Theorem~\ref{thm:poly-ie-implies-consistent} for polyhedral surrogates, it also shows that the result extends to the setting of \S~\ref{sec:min-rep-sets}: surrogates with finite representative sets.
 
 The crux of their result, as in ours, in the construction of a link function exhibiting calibration.
-This construction is quite different from our Construction~\ref{const:eps-thick-link}, in that it operations in the loss vector space $\reals^\Y_+$ rather than the surrogate report space $\reals^d$.
+Their construction is quite different from our Construction~\ref{const:eps-thick-link}, in that it operations in the loss vector space $\reals^\Y_+$ rather than the surrogate report space $\reals^d$.
 Specifically, it operates on the \emph{superprediction set} $L(\reals^d) + \reals^\Y_+$, where the $+$ here is Minkowski addition.
 An arbitrary element of the superprediction set is decomposed into a convex combination of elements of $L(\Sc)$, plus an element of $\reals^\Y_+$.
 This convex combination is then thresholded at $1/|\Sc|$, where the link function may output $r\in\R$ if the weight on any $u\in\Sc$ with $\Gamma_u \subseteq \gamma_r$ is at least $1/|\Sc|$.
-One can see that this construction does achieve separation, but does not necessarily align well with any norm in the surrogate report space.
+One can see that this construction does achieve separation, but it is less explicitly aligned with any norm in the surrogate report space.
 It would be interesting to further compare the two constructions.
 
 
