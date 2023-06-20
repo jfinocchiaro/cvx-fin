@@ -1,5 +1,5 @@
 \documentclass[twoside,11pt]{article}
-\usepackage[natbib,preprint]{jmlr2e-hack} %% FIX BEFORE SUBMITTING
+\usepackage[natbib,preprint]{jmlr2e}
 \PassOptionsToPackage{numbers, compress, sort}{natbib}
 \usepackage[margin=1.1in]{geometry}
 
@@ -52,7 +52,7 @@
 \usetikzlibrary{shapes}
 
 \usetikzlibrary{calc}
-\newcommand{\Comments}{1}
+\newcommand{\Comments}{0}
 \newcommand{\CommentsR}{1}
 \newcommand{\mynote}[2]{\ifnum\Comments=1\textcolor{#1}{#2}\fi}
 \newcommand{\mytodo}[2]{\ifnum\Comments=1%
@@ -270,7 +270,7 @@ In all of these settings, we lack a unifying framework that moves from a given t
 
 %% we introduce embeddings (the hero narrative)
 To address this shortcoming, we introduce a new framework motivated by a particularly natural approach for finding convex surrogates, wherein one ``embeds'' a discrete loss.
-Specifically, we say a convex surrogate $L$ embeds a discrete target loss $\ell$ if there is an injective function, which we call an \emph{embedding}, from the discrete reports (predictions) to $\reals^d$ such that (i) the original loss values are recovered, and (ii) a report is $\ell$-optimal if and only if the embedded report is $L$-optimal.
+Specifically, we say a convex surrogate $L$ embeds a discrete target loss $\ell$ if there is an injective function, which we call an \emph{embedding}, from the target reports (predictions) to $\reals^d$ such that (i)~the surrogate loss values match the target at the embedded reports, and (ii)~a target report is $\ell$-optimal if and only if its embedded report is $L$-optimal.
 (See \S~\ref{sec:embedding}.)
 Common examples of this general construction include hinge loss as a surrogate for 0-1 loss and the BEP surrogate mentioned above~\citep{ramaswamy2018consistent}.
 
@@ -290,7 +290,7 @@ Our results are constructive: given a discrete target loss, we show how to defin
 
 We demonstrate the constructiveness of our framework in \S~\ref{sec:applications} with several applications, many of which are subsequent to our work.
 In addition to constructing new surrogates, we illustrate the power of our framework to analyze previously proposed polyhedral surrogates.
-For example, while we know that the inconsistent top-$k$ polyhedral surrogates mentioned above do not solve top-$k$ classification, our framework illuminates the problem they \emph{do} solve, and what restrictions on the underlying distribution would render them top-$k$ consistent (\S~\ref{sec:top-k}).
+For example, while we know that the inconsistent top-$k$ polyhedral surrogates mentioned above are not consistent for top-$k$ classification, our framework illuminates the problems for which they \emph{are} consistent; it also yields restrictions on the underlying distribution which would render these surrogates top-$k$ consistent (\S~\ref{sec:top-k}).
 
 %% intuition for the relationship between polyhedral surrogates and discrete target losses
 Underpinning our results are several observations, outlined in \S~\ref{sec:min-rep-sets}, which formalize the idea that polyhedral losses ``behave like'' discrete losses.
@@ -441,7 +441,7 @@ for all $p \in \simplex$,
 \end{definition}
 
 
-It is well-known in finite-outcome settings that calibration is equivalent to \emph{consistency}, as defined next (cf.~\citep{bartlett2006convexity,zhang2004statistical,agarwal2015consistent}).
+It is well-known in finite-outcome settings that calibration is equivalent to \emph{consistency}, as defined next (cf.~\citet{bartlett2006convexity,zhang2004statistical,agarwal2015consistent}).
 Let feature space $\X$ and label space $\Y$ be given.
 %For any data distribution $D \in \Delta(\X \times \Y)$, let $L^*$ be the best possible expected (over $D$) $L$-loss achieved by any hypothesis $H:\X\to\reals^d$, and $\ell^*$ the best expected $\ell$-loss for any hypothesis $h:\X\to\R$, respectively.
 Intuitively, a surrogate and link pair $(L,\psi)$ is consistent with respect to $\ell$ if, for all data distributions $\D \in \Delta(\X \times \Y)$, and all sequences of surrogate hypotheses $h_1,h_2,\ldots$ whose $L$-loss limits to the optimal surrogate loss $L^*$ (in expectation over $D$), the $\ell$-loss of the sequence the linked hypotheses limits to the optimal target loss $\ell^*$.
@@ -494,7 +494,7 @@ Then the loss approaches the Bayes optimal, $L(1)_1 = 0$, but $\psi(u_n) = -1$ f
 %A key notion to define an embedding is that of a \emph{representative set}: a set of reports $\Sc$ such that, for all label distributions, at least one report $r\in\Sc$ minimizes expected loss.
 We now formalize the sense in which a convex surrogate can \emph{embed} a target loss $\ell$.
 Here one maps each report (prediction) of $\ell$ to a point in $\reals^d$, then constructs a convex loss on $\reals^d$ that agrees with $\ell$ at these points.
-This approach captures several surrogates in the literature (e.g.,~\citep{ramaswamy2015hierarchical,ramaswamy2016convex,lapin2015top,wang2020weston}; see \S~\ref{sec:applications}).
+This approach captures several surrogates proposed in the literature (e.g.,~\citet{ramaswamy2015hierarchical,ramaswamy2016convex,lapin2015top,wang2020weston}; see \S~\ref{sec:applications}).
 
 An important subtlety is that it is not always necessary to map \emph{all} target reports to $\reals^d$.
 It is often convenient to allow $\ell$ to have reports that are ``redundant'' in some sense. (We explore redundancy further in \S~\ref{sec:min-rep-sets}; see also \citet{wang2020weston}.)
@@ -663,7 +663,7 @@ While polyhedral surrogates do not directly elicit finite properties, as their r
   Then $L$ is minimizable and elicits a property $\Gamma := \prop{L}$.
 	Moreover, the range of $\Gamma$, given by $\Gamma(\simplex) := \{\Gamma(p) \subseteq \reals^d : p\in\simplex\}$, is a finite set of closed polyhedra.
 \end{restatable}
-\begin{proof}[Proof sketch]
+\begin{proof}[Sketch]
 	See \S~\ref{app:power-diagrams} for the full proof.
 	As $L$ is bounded from below, $L$ is minimizable from~\citet[Corollary 19.3.1]{rockafellar1997convex} .
 	With $\Y$ finite, there are only finitely many supporting sets over $\simplex$.
@@ -721,12 +721,14 @@ In the proof, we apply a result we will prove in \S~\ref{sec:min-rep-sets}: a mi
   Letting $\delta_y\in\simplex$ be the point distribution on outcome $y\in\Y$, we have for all $u\in\reals^n$, $L(u)_y \geq \inf_{u'\in\reals^n} L(u')_y = \risk{L}(\delta_y) = \risk{\ell}(\delta_y) \geq 0$, where the final inequality follows from the nonnegativity of $\ell$.
 \end{proof}
 
-Combining this result with Theorem~\ref{thm:poly-embeds-discrete} establishes Theorem~\ref{thm:embed-poly-main}.
-
+Combining Theorems~\ref{thm:poly-embeds-discrete} and~\ref{thm:discrete-loss-poly-embeddable}, we have Theorem~\ref{thm:embed-poly-main}.
 
 \embedpolyinformal*
-For a proof, observe that Theorem~\ref{thm:discrete-loss-poly-embeddable} proves the first part of the statement, and Theorem~\ref{thm:poly-embeds-discrete} shows the second.
-Further combining with Theorem~\ref{thm:link-main}, proved in the following section, the surrogate construction in Theorem~\ref{thm:discrete-loss-poly-embeddable} yields a calibrated polyhedral surrogate for every discrete target loss.
+% \begin{proof}
+%   Theorem~\ref{thm:discrete-loss-poly-embeddable} proves the first part of the statement, and Theorem~\ref{thm:poly-embeds-discrete} shows the second.
+% Further combining with Theorem~\ref{thm:link-main}, proved in the following section, the surrogate construction in Theorem~\ref{thm:discrete-loss-poly-embeddable} yields a calibrated polyhedral surrogate for every discrete target loss.
+% \end{proof}
+
 
 
 The proof of Theorem~\ref{thm:discrete-loss-poly-embeddable} uses a construction via convex conjugate duality similar to many constructions in the literature. 
@@ -787,6 +789,7 @@ On the other hand, if a link is not separated, then the same two facts imply tha
 See \S~\ref{sec:equiv-sep-calib} for the proof.
 
 \subsection{Consistency}
+\label{subsec:link-consistency}
 
 \restatehack{
   \begin{theorem}
@@ -1087,7 +1090,7 @@ Letting $\abs(v) = \{i\in[k] \mid v_i = 0\}$ denote the ``abstain'' set, we may 
 %They go on to show that the embedding is tight, for $f$ strictly submodular and strictly monotone, if one first disallows $v$ with $|\abs(v)| = 1$.
 By Theorem~\ref{thm:link-main}, then, there is a link function such that the Lov\'asz hinge is consistent with respect to the structured abstain loss $\ellabs$.
 
-As \citeauthor{ourlovaszpaper} observe, actually determining a calibrated link function in this case is nontrivial.
+As \citeauthor{ourlovaszpaper} observe, actually deteriving a calibrated link function in this case is nontrivial.
 Simple threshold links like for the BEP surrogate in \S~\ref{sec:abstain} are not always calibrated, thus casting doubt that a trial-and-error approach for finding the link would be successful.
 Instead, the authors leverage our thickened link construction (Construction~\ref{const:eps-thick-link}) to derive two links $\psi^*$ and $\psi^\diamond$, which have somewhat intricate geometric structure (Figure~\ref{fig:lovasz-links}).
 Perhaps surprisingly, by deriving the link envelope $\Psi$ which is contained in the envelopes for $L^f$ for \emph{all} submodular and increasing $f$, they prove that $\psi^*(u) \subseteq \Psi(u)$ and $\psi^\diamond(u) \subseteq \Psi(u)$ for all $u \in \reals^d$.
@@ -1120,12 +1123,12 @@ Proposing a more efficient solution, \citet{weston1999support} give an alternate
 \end{equation}
 This surrogate $\LWW$ was later shown to be inconsistent with respect to 0-1 loss~\citep{tewari2007consistency,liu2007fisher}.
 
-\citet{wang2020weston} use our embedding framework to show that the Weston--Watkins hinge embeds the \emph{ordered partition} loss $\ellOP$, as defined below.
+\citet{wang2020weston} use our embedding framework to show that the Weston--Watkins hinge embeds an \emph{ordered partition} loss $\ellOP$, as defined below.
 In turn, they recover the result of inconsistency with respect to 0-1 loss.
 %An ordered partition on $[n] := \{1, \ldots, n\}$ can be defined by a nested sequence of tuples
 %Let $T = \{T_1, \ldots, T_k\}$
 The report space for $\ellOP$ can be defined in terms of nested subsets of $[n] := \{1, \ldots, n\}$, as follows.%
-\footnote{To recover the partition of~\citet{wang2020weston}, one can define $S_i = T_i \setminus T_{i-1}$.}
+\footnote{To recover the partition of~\citet{wang2020weston}, take $S_i = T_i \setminus T_{i-1}$.}
 \begin{align*}
 \T = \{ (T_0,\ldots,T_s) \mid s \geq 1, \emptyset = T_0 \subsetneq T_1 \subsetneq \ldots \subsetneq T_s = [n]\}~.
 \end{align*}
@@ -1691,6 +1694,7 @@ The authors use an entirely different link construction involving the superpredi
 We discuss their result and how it relates to our work in \S~\ref{app:ccdim-construction}.
 
 \subsection{Generalizing the thickened link construction}
+\label{sec:gener-thick-link}
 
 Given that Construction~\ref{const:eps-thick-link} uses the embedding $\varphi:\Sc\to\reals^d$ in a crucial role, it is not immediately clear how to generalize the construction beyond embeddings.
 Specifically, this crucial role is in the definition of $R_U$, the set of target reports which must be optimal whenever a given surrogate report set $U\subseteq\reals^d$ is optimal.
@@ -1790,7 +1794,7 @@ Below we outline several such directions.
 
 \paragraph{Prediction dimension}
 
-It can be important for applications to understand the minimum prediction dimension $d$ of a consistent convex surrogate $L:\reals^d\to \reals^\Y_+$ for a given target problem, also called its convex elicitation complexity~\cite{frongillo2021elicitation}.
+It can be important for applications to understand the minimum prediction dimension $d$ of a consistent convex surrogate $L:\reals^d\to \reals^\Y_+$ for a given target problem, also called its convex elicitation complexity~\citep{frongillo2021elicitation}.
 % The prediction dimension of a surrogate $L : \reals^d \to \reals^\Y_+$ is the $d$ in its definition: the dimension of the surrogate report space.
 Theorem~\ref{thm:discrete-loss-poly-embeddable} constructs a consistent surrogate for any discrete loss, with prediction dimension $d = n := |\Y|$.
 In some settings, such as structured prediction and information retrieval, a prediction dimension of $d=n$ can be prohibitively large.
@@ -1827,25 +1831,27 @@ We would like to verify this intuition, with specific cases or broad results com
 
 \paragraph{Indirect elicitation as a condition for consistency}
 
-It is well-known that statistical consistency is equivalent to calibration (Definition~\ref{def:calibrated}) for discrete target problems.
-As calibration is a much easier condition to work with, and in particular, only involves the conditional distributions, the bulk of work on consistency of learning algorithms for discrete target problems uses calibration.
+It is well-known that consistency is equivalent to calibration (Definition~\ref{def:calibrated}) for discrete target problems.
+As calibration is a much easier condition to work with, and in particular only involves the conditional distributions, calibration is the main tool in the literature on consistency for discrete target problems.
 It is easy to verify that calibration in turn implies indirect elicitation, meaning that exact minimizers of the surrogate loss are linked to exact minimizers of the target.
-In \S~\ref{sec:poly-ie-consistency}, we show that indirect elicitation is actually \emph{equivalent} to calibration, and therefore consistency, when restricting to the class of polyhedral surrogates.
-As indirect elicitation is even simpler of a condition than calibration, an important line of future work is to identify other classes of surrogates for which this equivalence holds.
+In \S~\ref{sec:poly-ie-consistency}, we show that, when restricting to the class of polyhedral surrogates, indirect elicitation is actually \emph{equivalent} to calibration, and therefore consistency.
+As indirect elicitation is an even simpler condition than calibration, an important line of future work is to identify other classes of surrogates for which this equivalence holds.
 
 
-\paragraph{Connections to $\H$-consistency and calibration}
+\paragraph{Extensions to $\H$-consistency}
 \reviewertwo{A}
-Throughout, we rely heavily on the fact that, when the hypothesis class $\H$ in question is the set of all measurable functions, then calibration is equivalent to consistency.
+Throughout, we rely heavily on the fact that calibration is equivalent to consistency when the hypothesis class $\H$ in question is the set of all measurable functions.
 % However, consistency is defined by considering the optimal hypothesis over the set of all measurable functions (see \S~\ref{app:consistency}).
 Calibration is no longer equivalent to consistency, however, when the hypothesis class $\H$ is restricted.
 Consistency in this case is called \emph{$\H$-consistency}.
-Calibration can fail to be sufficent for $\H$-consistency even in the realizable setting~\citep{long2013consistency,kuznetov2014multiclass,zhang2020bayes}.
-In work on $\H$-consistency, realizability assumptions often imply assumptions on the conditional distribution that exclude many of the regions causing inconsistency issues in \S~\ref{sec:applications}. \jessiet{Raf, I know you said something about the conditional distribution being a point mass, but I'm not sure I fully understand/buy the argument.}
-Under these assumptions (or others), it would be interesting to understand if polyhedral embedding still implies $\H$-consistency.
-Since $\H$-consistency is not equivalent to the corresponding analogue of calibration (c.f., \citep{awasthi2021calibration,awasthi2021finer}) it is unclear if our results can be immediately extended.
-\citet{awasthi2022hconsistency,awasthi2022multi} additionally study surrogate regret bounds for $\H$-consistent surrogates for adversarial classification and multi-class classification, though it is unclear how such bounds generalize to general finite prediction tasks.
-
+In classification, calibration can fail to be sufficent for $\H$-consistency even in the realizable setting~\citep{long2013consistency,kuznetov2014multiclass,awasthi2021calibration,awasthi2021finer}.
+Realizability and similar assumptions often rule out the conditional label distributions causing inconsistency issues in \S~\ref{sec:applications}.
+Under such assumptions, $\H$-consistency essentially reduces to an alignment of the surrogate hypothesis class and the target class $\H$, as mediated by the link function~\citep{zhang2020bayes}.
+We expect that our link construction (\S~\ref{subsec:link-consistency}) and characterization (\S~\ref{sec:gener-thick-link}) could help extend these results beyond classification when using polyhedral surrogates.
+Work has also begun to derive surrogate regret bounds for restricted classes $\H$, called \emph{$\H$-consistency bounds} \citep{awasthi2022hconsistency,awasthi2022multi}.
+% additionally study surrogate regret bounds for $\H$-consistent surrogates for adversarial classification and multi-class classification, though it is unclear how such bounds generalize to general finite prediction tasks.
+Here we expect that the linear surrogate regret bounds we derive (\S~\ref{subsec:regret-bounds})
+could be applied.
 
 \paragraph{Superprediction sets}
 
@@ -1868,8 +1874,8 @@ Conversely, we would like to know when the construction in Theorem~\ref{thm:disc
 \subsection*{Acknowledgements}
 We thank Arpit Agarwal and Peter Bartlett for many early discussions and insights,
 Stephen Becker for a reference to Hoffman constants,
-and Nishant Mehta, Enrique Nueve, and Anish Thilagar for other suggestions.
-We thank Dhamma Kimpara for observations that led to \S~\ref{app:ccdim-construction}.
+and Dhamma Kimpara for observations that led to \S~\ref{app:ccdim-construction}.
+We thank Drona Khurana, Nishant Mehta, Enrique Nueve, and Anish Thilagar for other suggestions.
 \raft{others?}
 This material is based upon work supported by the National Science Foundation under Grant Nos.\ CCF-1657598, IIS-2045347, and DGE-1650115.
 
@@ -2883,7 +2889,6 @@ Observe that $L(\R)$ and $\H_{L(\R)}$ may be infinite sets.
 	\end{align*}
 	Combining the two equalities, we have $\hyp(g_{L(\R)}) = \cap (\H_\Y \cup \H_{L(\R)})$.
 	% The existence of a finite $\V \subseteq {L(\R)}$ follows as $\risk L_+$ polyhedral implies $\hyp(\risk L_+)$ is a polyhedron, which has a finite representation by definition. 
-
 %	We now construct a finite $\V \subseteq L(\R)$ such that $g_\V = g_{L(\R)}$.
 %  Since $\hyp(g_{L(\R)}) = \hyp(\risk L_+)$ is a polyhedron, we mae iterate over each of the (finitely many) faces of $\hyp(g_{L(\R)})$.
 %	For each face $F^{(i)}$ consider $x^{(i)} \in \relint(F^{(i)})$.
@@ -3188,7 +3193,6 @@ This fact will translate to a set of reports being representative for a loss if 
 %	$\hyp(g_\V) = \cap (\H_\Y \cup \H_{\V'})$ if and only if $\hyp(g_\V) = \cap \H_{\V'}$ when restricting to $x \in \reals_+^\Y$.
 %	This implies that for all $x \in \reals_+^\Y$, there exists a $v' \in \V'$ such that $(x,g(x)) \in H_{v'} \cap \hyp(g_\V) = F_{v'} \implies x \in \pi(F_{v'})$.
 %	As this is true for all $x \in \reals_+^\Y$, we have $\cup_{v \in \V'} \pi(F_{v}) = \reals_+^\Y$.
-	
 \end{proof}
 
 
@@ -3385,7 +3389,6 @@ Now that we have translated from $\reals^d_+$ to $\reals^\Y_+$ in \S~\ref{subsec
 %    &\iff p \in \pi(F_v) \cap \simplex & \text{Definition of $\pi$, $F_v$}
 %  \end{align*}
 %  The result follows.
-   
 \end{proof}
 
 
@@ -3395,7 +3398,7 @@ Now that we have translated from $\reals^d_+$ to $\reals^\Y_+$ in \S~\ref{subsec
 \end{lemma}
 \begin{proof}
 	If $x \not \in \reals^\Y_+$, then $c g(x) = -\infty = g(cx)$ for any $c > 0$.
-	If $x \in \reals^\Y_+$, then we have $g(cx) = \min_{v \in \V^*}\inprod{v}{cx} = c \min_{v \in \V^*}\inprod{v}{x} = c g(x)$ for any $c > 0$ by linearity of the inner product.
+	If $x \in \reals^\Y_+$, then $g(cx) = \min_{v \in \V^*}\inprod{v}{cx} = c \min_{v \in \V^*}\inprod{v}{x} = c g(x)$ for any $c > 0$ by linearity of the inner product.
 \end{proof}
 
 
@@ -3432,7 +3435,7 @@ Every minimizable loss $L$ elicits a unique property $\Gamma := \prop{L}$, and w
 	&= \{x \in \reals^\Y_+ \mid \inprod{L(r)}{x} = \risk L_+(x)\} & \text{Definition of $\bar \Gamma_r$}\\
 	&= \{x \in \reals^\Y_+ \mid \inprod{L(r)}{x} = g_{L(\R)}(x)\} & \text{Assumption~\ref{assum:V-star-exists-infinite}}\\
 	&= \{x \in \reals^\Y_+ \mid \inprod{v}{x} = g_{L(\R)}(x)\} & \text{$v = L(r)$}\\
-	&= \pi(F_v) & \text{Since $F_v = \{(x,g_{L(\R)}(x)) \mid \inprod{v}{x} = g_{L(\R)}(x)\}$}\\
+	&= \pi(F_v) & \text{Since $F_v = \{(x,g_{L(\R)}(x)) \mid \inprod{v}{x} = g_{L(\R)}(x)\}$}
 	\end{align*}
 \end{proof}
 
@@ -3456,8 +3459,6 @@ Every minimizable loss $L$ elicits a unique property $\Gamma := \prop{L}$, and w
 	By the assumption, there is a $v \in \V'$ such that $p \in \pi(F_v)$.
 	By Lemma~\ref{lem:level-set-is-projected-face}, we have $p \in \pi(F_v) \cap \simplex = \Gamma_r$ for the $r \in \R'$ such that $v = L(r)$.
 	As this is true for all $p \in \simplex$, we have $\R'$ representative.
-	
-	
 \end{proof}
 
 \subsection{Proving Lemma~\ref{lem:X}}\label{subsec:lem-X-proof}
